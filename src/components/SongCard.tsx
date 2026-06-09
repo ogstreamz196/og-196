@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { Play, Pause, Loader2, Music2, Download, AlertCircle } from "lucide-react";
+import { Play, Pause, Loader2, Music2, Download, AlertCircle, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useSettings } from "@/hooks/use-settings";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -18,9 +19,13 @@ export interface Song {
 }
 
 export function SongCard({ song }: { song: Song }) {
+  const { data: settings } = useSettings();
+  const sampleSeconds = settings?.sample_seconds ?? 30;
+
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
   const [loadingUrl, setLoadingUrl] = useState(false);
+  const [progress, setProgress] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   async function ensureUrl() {
@@ -46,7 +51,7 @@ export function SongCard({ song }: { song: Song }) {
       el.pause();
       setPlaying(false);
     } else {
-      el.src = url;
+      if (el.src !== url) el.src = url;
       await el.play();
       setPlaying(true);
     }
@@ -60,6 +65,22 @@ export function SongCard({ song }: { song: Song }) {
     a.download = `${song.title || "song"}.mp3`;
     a.click();
   }
+
+  // Cap preview playback at sample_seconds
+  useEffect(() => {
+    const el = audioRef.current;
+    if (!el) return;
+    const onTime = () => {
+      setProgress(el.currentTime);
+      if (el.currentTime >= sampleSeconds) {
+        el.pause();
+        el.currentTime = 0;
+        setPlaying(false);
+      }
+    };
+    el.addEventListener("timeupdate", onTime);
+    return () => el.removeEventListener("timeupdate", onTime);
+  }, [sampleSeconds]);
 
   const isReady = song.status === "completed" && !!song.audio_path;
   const isFailed = song.status === "failed";
@@ -110,6 +131,21 @@ export function SongCard({ song }: { song: Song }) {
           )}
         </div>
 
+        {isReady && (
+          <div className="mt-2">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Lock className="h-3 w-3" />
+              <span>Preview limited to {sampleSeconds}s • Download for full track</span>
+            </div>
+            <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full bg-primary transition-all"
+                style={{ width: `${Math.min(100, (progress / sampleSeconds) * 100)}%` }}
+              />
+            </div>
+          </div>
+        )}
+
         <div className="mt-2 flex items-center justify-between">
           <span
             className={cn(
@@ -129,7 +165,7 @@ export function SongCard({ song }: { song: Song }) {
           </span>
           {isReady && (
             <Button size="sm" variant="ghost" onClick={download}>
-              <Download className="mr-2 h-3.5 w-3.5" /> Download
+              <Download className="mr-2 h-3.5 w-3.5" /> Download (free)
             </Button>
           )}
         </div>

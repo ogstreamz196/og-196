@@ -5,6 +5,7 @@ import { Sparkles, Loader2, Music2, Coins } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
+import { useSettings } from "@/hooks/use-settings";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { SongCard, type Song } from "@/components/SongCard";
 import { Button } from "@/components/ui/button";
@@ -15,8 +16,6 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { useEffect } from "react";
 
-const COIN_COST = 3;
-
 export const Route = createFileRoute("/_authenticated/")({
   component: HomePage,
 });
@@ -24,7 +23,11 @@ export const Route = createFileRoute("/_authenticated/")({
 function HomePage() {
   const { user } = useAuth();
   const { data: profile } = useProfile();
+  const { data: settings } = useSettings();
   const qc = useQueryClient();
+  const COIN_COST = settings?.coins_per_generation ?? 3;
+  const SONGS_PER_GEN = settings?.songs_per_generation ?? 2;
+  const SAMPLE_SECONDS = settings?.sample_seconds ?? 30;
   const [prompt, setPrompt] = useState("");
   const [style, setStyle] = useState("");
   const [title, setTitle] = useState("");
@@ -66,7 +69,7 @@ function HomePage() {
       return data;
     },
     onSuccess: () => {
-      toast.success("Song queued! It'll appear in your library when ready (30s – 2min).");
+      toast.success(`Queued! ${SONGS_PER_GEN} songs will appear in your library when ready (30s – 2min).`);
       setPrompt(""); setLyrics(""); setTitle("");
       qc.invalidateQueries({ queryKey: ["recent-songs"] });
       qc.invalidateQueries({ queryKey: ["profile"] });
@@ -151,7 +154,9 @@ function HomePage() {
             <div className="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-muted-foreground">
                 <Coins className="mr-1 inline h-3.5 w-3.5 text-coin" />
-                Costs <span className="font-semibold text-foreground">{COIN_COST} coins</span> per generation.
+                <span className="font-semibold text-foreground">{COIN_COST} coins</span> gets you{" "}
+                <span className="font-semibold text-foreground">{SONGS_PER_GEN} songs</span> with {SAMPLE_SECONDS}s previews.
+                Downloads are free.
               </p>
               <Button
                 size="lg"
@@ -162,7 +167,7 @@ function HomePage() {
                 {generate.isPending ? (
                   <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...</>
                 ) : (
-                  <><Sparkles className="mr-2 h-4 w-4" /> Generate Song ({COIN_COST} coins)</>
+                  <><Sparkles className="mr-2 h-4 w-4" /> Generate ({COIN_COST} coins)</>
                 )}
               </Button>
             </div>
