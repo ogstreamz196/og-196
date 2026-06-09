@@ -1,11 +1,14 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, ShieldCheck, RefreshCw, Lock, Unlock, Music2 } from "lucide-react";
+import { Loader2, ShieldCheck, RefreshCw, Lock, Unlock, Music2, Save, Coins } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRole } from "@/hooks/use-role";
+import { useSettings } from "@/hooks/use-settings";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -109,9 +112,12 @@ function BossPanel() {
           </div>
           <div>
             <h2 className="font-semibold">Admin controls</h2>
-            <p className="text-sm text-muted-foreground">Recent generations across all users. Unlock songs or retry failed jobs.</p>
+            <p className="text-sm text-muted-foreground">Pricing, recent generations, manual unlocks, and retries.</p>
           </div>
         </div>
+
+        <PricingControls />
+
 
         <div className="rounded-2xl border border-border bg-card shadow-card">
           {songsQuery.isLoading ? (
