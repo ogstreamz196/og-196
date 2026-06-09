@@ -84,6 +84,7 @@ export type Database = {
           suno_clip_id: string | null
           suno_task_id: string | null
           title: string | null
+          unlocked: boolean
           updated_at: string
           user_id: string
         }
@@ -102,6 +103,7 @@ export type Database = {
           suno_clip_id?: string | null
           suno_task_id?: string | null
           title?: string | null
+          unlocked?: boolean
           updated_at?: string
           user_id: string
         }
@@ -120,6 +122,7 @@ export type Database = {
           suno_clip_id?: string | null
           suno_task_id?: string | null
           title?: string | null
+          unlocked?: boolean
           updated_at?: string
           user_id?: string
         }

@@ -1,23 +1,28 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Home, Library, Coins as CoinsIcon, LogOut, Music2 } from "lucide-react";
+import { Home, Library, Coins as CoinsIcon, LogOut, Music2, ShieldCheck } from "lucide-react";
 import type { ReactNode } from "react";
 import { CoinBalance } from "./CoinBalance";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { useRole } from "@/hooks/use-role";
 import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 
-const navItems = [
+const baseNavItems = [
   { to: "/", label: "Home", icon: Home },
   { to: "/library", label: "My Library", icon: Library },
   { to: "/buy-coins", label: "Buy Coins", icon: CoinsIcon },
 ] as const;
 
+const bossItem = { to: "/boss", label: "Boss Panel", icon: ShieldCheck } as const;
+
 export function DashboardShell({ title, children }: { title: string; children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { isAdmin } = useRole();
   const qc = useQueryClient();
+  const navItems = isAdmin ? [...baseNavItems, bossItem] : [...baseNavItems];
 
   async function handleSignOut() {
     await qc.cancelQueries();
