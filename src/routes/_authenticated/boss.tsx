@@ -206,3 +206,68 @@ function BossPanel() {
     </DashboardShell>
   );
 }
+
+function PricingControls() {
+  const { data: settings } = useSettings();
+  const qc = useQueryClient();
+  const [coins, setCoins] = useState<string>("");
+  const [songs, setSongs] = useState<string>("");
+  const [sample, setSample] = useState<string>("");
+
+  useEffect(() => {
+    if (settings) {
+      setCoins(String(settings.coins_per_generation));
+      setSongs(String(settings.songs_per_generation));
+      setSample(String(settings.sample_seconds));
+    }
+  }, [settings]);
+
+  const save = useMutation({
+    mutationFn: async () => {
+      const updates = [
+        { key: "coins_per_generation", value: Number(coins) },
+        { key: "songs_per_generation", value: Number(songs) },
+        { key: "sample_seconds", value: Number(sample) },
+      ];
+      for (const u of updates) {
+        if (!Number.isFinite(u.value) || u.value < 0) throw new Error(`Invalid ${u.key}`);
+        const { error } = await supabase.from("app_settings").update({ value: u.value }).eq("key", u.key);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["app-settings"] });
+      toast.success("Pricing updated");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <div className="mb-6 rounded-2xl border border-border bg-card p-5 shadow-card">
+      <div className="mb-3 flex items-center gap-2">
+        <Coins className="h-4 w-4 text-coin" />
+        <h3 className="font-semibold">Pricing & limits</h3>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-3">
+        <div>
+          <Label htmlFor="coins">Coins per generation</Label>
+          <Input id="coins" type="number" min={0} value={coins} onChange={(e) => setCoins(e.target.value)} className="mt-2" />
+        </div>
+        <div>
+          <Label htmlFor="songs">Songs per generation</Label>
+          <Input id="songs" type="number" min={1} max={4} value={songs} onChange={(e) => setSongs(e.target.value)} className="mt-2" />
+        </div>
+        <div>
+          <Label htmlFor="sample">Sample length (seconds)</Label>
+          <Input id="sample" type="number" min={5} max={600} value={sample} onChange={(e) => setSample(e.target.value)} className="mt-2" />
+        </div>
+      </div>
+      <div className="mt-4 flex justify-end">
+        <Button onClick={() => save.mutate()} disabled={save.isPending}>
+          {save.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+          Save pricing
+        </Button>
+      </div>
+    </div>
+  );
+}
