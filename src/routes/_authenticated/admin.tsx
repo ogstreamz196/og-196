@@ -15,8 +15,8 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/_authenticated/boss")({
-  component: BossPanel,
+export const Route = createFileRoute("/_authenticated/admin")({
+  component: AdminPanel,
 });
 
 interface AdminSong {
@@ -30,7 +30,7 @@ interface AdminSong {
   created_at: string;
 }
 
-function BossPanel() {
+function AdminPanel() {
   const { isAdmin, isLoading: roleLoading } = useRole();
   const qc = useQueryClient();
 

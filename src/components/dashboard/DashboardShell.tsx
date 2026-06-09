@@ -1,5 +1,5 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Home, Library, Coins as CoinsIcon, LogOut, Music2, ShieldCheck } from "lucide-react";
+import { Sparkles, Library, Coins as CoinsIcon, LogOut, Music2, Settings, Search } from "lucide-react";
 import type { ReactNode } from "react";
 import { CoinBalance } from "./CoinBalance";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,14 +7,15 @@ import { useAuth } from "@/hooks/use-auth";
 import { useRole } from "@/hooks/use-role";
 import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
+import { Input } from "@/components/ui/input";
 
 const baseNavItems = [
-  { to: "/", label: "Home", icon: Home },
+  { to: "/", label: "Generate", icon: Sparkles },
   { to: "/library", label: "My Library", icon: Library },
   { to: "/buy-coins", label: "Buy Coins", icon: CoinsIcon },
 ] as const;
 
-const bossItem = { to: "/boss", label: "Boss Panel", icon: ShieldCheck } as const;
+const adminItem = { to: "/admin", label: "Admin Panel", icon: Settings } as const;
 
 export function DashboardShell({ title, children }: { title: string; children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -22,7 +23,7 @@ export function DashboardShell({ title, children }: { title: string; children: R
   const { user } = useAuth();
   const { isAdmin } = useRole();
   const qc = useQueryClient();
-  const navItems = isAdmin ? [...baseNavItems, bossItem] : [...baseNavItems];
+  const navItems = isAdmin ? [...baseNavItems, adminItem] : [...baseNavItems];
 
   async function handleSignOut() {
     await qc.cancelQueries();
@@ -80,8 +81,20 @@ export function DashboardShell({ title, children }: { title: string; children: R
 
       {/* Main */}
       <div className="flex flex-1 flex-col min-w-0">
-        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-border bg-background/80 px-4 backdrop-blur md:px-8">
-          <h1 className="text-lg font-semibold">{title}</h1>
+        <header className="sticky top-0 z-20 flex h-16 items-center gap-4 border-b border-border bg-background/80 px-4 backdrop-blur md:px-8">
+          <h1 className="shrink-0 text-lg font-semibold">{title}</h1>
+          <div className="relative ml-auto hidden max-w-sm flex-1 sm:block">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search songs..."
+              className="pl-9"
+              onChange={(e) => {
+                const v = e.target.value;
+                window.dispatchEvent(new CustomEvent("sonix:search", { detail: v }));
+              }}
+            />
+          </div>
           <CoinBalance />
         </header>
 
