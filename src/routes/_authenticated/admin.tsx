@@ -30,7 +30,7 @@ interface AdminSong {
   created_at: string;
 }
 
-function BossPanel() {
+function AdminPanel() {
   const { isAdmin, isLoading: roleLoading } = useRole();
   const qc = useQueryClient();
 
