@@ -208,7 +208,7 @@ function PortalPage() {
           <div>
             <Label>Style tags</Label>
             <div className="mt-2 flex flex-wrap gap-2">
-              {portal.style_tags.map((tag) => {
+              {portal.style_tags.map((tag: string) => {
                 const selected = selectedTags.includes(tag);
                 return (
                   <button
