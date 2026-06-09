@@ -59,6 +59,39 @@ export type Database = {
         }
         Relationships: []
       }
+      portals: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          language: string
+          name: string
+          slug: string
+          style_tags: string[]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          language: string
+          name: string
+          slug: string
+          style_tags?: string[]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          language?: string
+          name?: string
+          slug?: string
+          style_tags?: string[]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           coin_balance: number
@@ -96,6 +129,7 @@ export type Database = {
           error_message: string | null
           id: string
           lyrics: string | null
+          portal_id: string | null
           prompt: string
           status: string
           style: string | null
@@ -115,6 +149,7 @@ export type Database = {
           error_message?: string | null
           id?: string
           lyrics?: string | null
+          portal_id?: string | null
           prompt: string
           status?: string
           style?: string | null
@@ -134,6 +169,7 @@ export type Database = {
           error_message?: string | null
           id?: string
           lyrics?: string | null
+          portal_id?: string | null
           prompt?: string
           status?: string
           style?: string | null
@@ -144,7 +180,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "songs_portal_id_fkey"
+            columns: ["portal_id"]
+            isOneToOne: false
+            referencedRelation: "portals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
