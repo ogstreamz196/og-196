@@ -89,6 +89,7 @@ Deno.serve(async (req) => {
           title: clip.title ?? parentSong.title,
           status: "processing",
           suno_task_id: parentSong.suno_task_id,
+          portal_id: parentSong.portal_id ?? null,
         }).select("id").single();
         if (sibErr) throw sibErr;
         targetId = sib.id;
