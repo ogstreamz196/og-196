@@ -14,13 +14,126 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      coin_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          reference: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          reference?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          reference?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          coin_balance: number
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          coin_balance?: number
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          coin_balance?: number
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      songs: {
+        Row: {
+          audio_path: string | null
+          completed_at: string | null
+          cover_url: string | null
+          created_at: string
+          duration_seconds: number | null
+          error_message: string | null
+          id: string
+          lyrics: string | null
+          prompt: string
+          status: string
+          style: string | null
+          suno_clip_id: string | null
+          suno_task_id: string | null
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          audio_path?: string | null
+          completed_at?: string | null
+          cover_url?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          error_message?: string | null
+          id?: string
+          lyrics?: string | null
+          prompt: string
+          status?: string
+          style?: string | null
+          suno_clip_id?: string | null
+          suno_task_id?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          audio_path?: string | null
+          completed_at?: string | null
+          cover_url?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          error_message?: string | null
+          id?: string
+          lyrics?: string | null
+          prompt?: string
+          status?: string
+          style?: string | null
+          suno_clip_id?: string | null
+          suno_task_id?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      deduct_coins: {
+        Args: { p_amount: number; p_reference: string; p_user: string }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
