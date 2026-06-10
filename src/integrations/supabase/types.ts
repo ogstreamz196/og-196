@@ -288,6 +288,10 @@ export type Database = {
         }
         Returns: number
       }
+      set_og_bot_admin: {
+        Args: { admin_notes?: string; make_og: boolean; target_user_id: string }
+        Returns: boolean
+      }
       set_site_content: {
         Args: { p_key: string; p_value: string }
         Returns: string
@@ -302,7 +306,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "user" | "vip"
+      app_role: "admin" | "user" | "vip" | "og_bot"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -430,7 +434,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user", "vip"],
+      app_role: ["admin", "user", "vip", "og_bot"],
     },
   },
 } as const

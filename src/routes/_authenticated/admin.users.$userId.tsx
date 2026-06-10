@@ -2,7 +2,7 @@ import { createFileRoute, Navigate, Link, redirect } from "@tanstack/react-route
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Loader2, ShieldCheck, ArrowLeft, Crown, Coins, Plus, Minus, UserCog, Mail, Calendar, Fingerprint,
+  Loader2, ShieldCheck, ArrowLeft, Crown, Coins, Plus, Minus, UserCog, Mail, Calendar, Fingerprint, Bot,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRole } from "@/hooks/use-role";
@@ -11,7 +11,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { VipBadgeAction } from "@/components/admin/VipBadgeAction";
 import { UserAuditTrail } from "@/components/admin/UserAuditTrail";
 import { toast } from "sonner";
 
@@ -239,18 +238,31 @@ function UserSettingsPage() {
         <section className="rounded-2xl border border-border bg-card p-6 shadow-card space-y-4">
           <header>
             <h3 className="font-semibold">Roles & access</h3>
-            <p className="text-sm text-muted-foreground">Grant VIP perks and review role assignments.</p>
+            <p className="text-sm text-muted-foreground">Grant VIP perks, OG Bot access, and review role assignments.</p>
           </header>
-          <div className="flex items-center justify-between rounded-xl border border-border bg-background/40 p-4">
-            <div className="flex items-center gap-3">
-              <Crown className="h-5 w-5 text-amber-500" />
-              <div>
-                <Label className="text-sm font-medium">VIP member</Label>
-                <p className="text-xs text-muted-foreground">Unlocks premium tiers and bonus features.</p>
-              </div>
-            </div>
-            <VipBadgeAction userId={profile.id} />
-          </div>
+
+          <RoleToggleRow
+            icon={<Crown className="h-5 w-5 text-amber-500" />}
+            title="VIP member"
+            description="Unlocks premium tiers and bonus features."
+            checked={isVip}
+            userId={profile.id}
+            role="vip"
+            rpc="set_vip_admin"
+            paramKey="make_vip"
+          />
+
+          <RoleToggleRow
+            icon={<Bot className="h-5 w-5 text-primary" />}
+            title="OG Bot access"
+            description="Grants automated/bot privileges across the site."
+            checked={roles.includes("og_bot")}
+            userId={profile.id}
+            role="og_bot"
+            rpc="set_og_bot_admin"
+            paramKey="make_og"
+          />
+
           <div className="flex items-center justify-between rounded-xl border border-border bg-background/40 p-4 opacity-80">
             <div className="flex items-center gap-3">
               <ShieldCheck className="h-5 w-5 text-primary" />
@@ -261,6 +273,7 @@ function UserSettingsPage() {
             </div>
             <Switch checked={isAdminUser} disabled />
           </div>
+
           <div className="flex flex-wrap gap-1.5">
             {roles.length === 0 ? (
               <span className="text-xs text-muted-foreground">No extra roles</span>
@@ -269,7 +282,6 @@ function UserSettingsPage() {
                 {r}
               </span>
             ))}
-            {isVip && <span className="text-xs text-muted-foreground">· VIP toggle saves instantly</span>}
           </div>
         </section>
 
@@ -344,6 +356,68 @@ function InfoCard({ icon, label, value }: { icon: React.ReactNode; label: string
     <div className="rounded-2xl border border-border bg-card p-4">
       <div className="flex items-center gap-2 text-xs text-muted-foreground">{icon} {label}</div>
       <div className="mt-2 truncate text-base font-semibold">{value}</div>
+    </div>
+  );
+}
+
+interface RoleToggleRowProps {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  checked: boolean;
+  userId: string;
+  role: string;
+  rpc: "set_vip_admin" | "set_og_bot_admin";
+  paramKey: "make_vip" | "make_og";
+}
+
+function RoleToggleRow({ icon, title, description, checked, userId, role: _role, rpc, paramKey }: RoleToggleRowProps) {
+  const qc = useQueryClient();
+  const mut = useMutation({
+    mutationFn: async (next: boolean) => {
+      const args: Record<string, unknown> = {
+        target_user_id: userId,
+        admin_notes: "settings_page_toggle",
+      };
+      args[paramKey] = next;
+      const { error } = await supabase.rpc(rpc as never, args as never);
+      if (error) throw new Error(error.message);
+      return next;
+    },
+    onSuccess: (next) => {
+      toast.success(`${title} ${next ? "granted" : "revoked"}`);
+      qc.invalidateQueries({ queryKey: ["admin-user-roles", userId] });
+      qc.invalidateQueries({ queryKey: ["user-roles", userId] });
+      qc.invalidateQueries({ queryKey: ["admin-user-audit", userId] });
+      qc.invalidateQueries({ queryKey: ["admin-users-list"] });
+      qc.invalidateQueries({ queryKey: ["user-role"] });
+    },
+    onError: (e: Error) => {
+      const m = e.message.toLowerCase();
+      if (m.includes("unauthorized")) toast.error("Not allowed.");
+      else if (m.includes("target_not_found")) toast.error("User not found.");
+      else toast.error(e.message);
+    },
+  });
+
+  return (
+    <div className="flex items-center justify-between rounded-xl border border-border bg-background/40 p-4">
+      <div className="flex items-center gap-3">
+        {icon}
+        <div>
+          <Label className="text-sm font-medium">{title}</Label>
+          <p className="text-xs text-muted-foreground">{description}</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        {mut.isPending && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+        <Switch
+          checked={checked}
+          disabled={mut.isPending}
+          onCheckedChange={(v) => mut.mutate(v)}
+          aria-label={`Toggle ${title}`}
+        />
+      </div>
     </div>
   );
 }
