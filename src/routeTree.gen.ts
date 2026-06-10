@@ -19,6 +19,7 @@ import { Route as AuthenticatedMessengerRouteImport } from './routes/_authentica
 import { Route as AuthenticatedLibraryIndexRouteImport } from './routes/_authenticated/library.index'
 import { Route as AuthenticatedBuyCoinsIndexRouteImport } from './routes/_authenticated/buy-coins.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
+import { Route as ApiPublicOgBotChatRouteImport } from './routes/api/public/og-bot-chat'
 import { Route as AuthenticatedLibrarySongIdRouteImport } from './routes/_authenticated/library.$songId'
 import { Route as AuthenticatedBuyCoinsReturnRouteImport } from './routes/_authenticated/buy-coins.return'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
@@ -27,6 +28,7 @@ import { Route as AuthenticatedAdminOgPersonaRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminOgBotRouteImport } from './routes/_authenticated/admin.og-bot'
 import { Route as AuthenticatedAdminCreatePortalRouteImport } from './routes/_authenticated/admin.create-portal'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as ApiPublicOgBotWidgetEmbedJsRouteImport } from './routes/api/public/og-bot-widget-embed.js'
 import { Route as AuthenticatedAdminUsersUserIdRouteImport } from './routes/_authenticated/admin.users.$userId'
 
 const AuthRoute = AuthRouteImport.update({
@@ -80,6 +82,11 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicOgBotChatRoute = ApiPublicOgBotChatRouteImport.update({
+  id: '/api/public/og-bot-chat',
+  path: '/api/public/og-bot-chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedLibrarySongIdRoute =
   AuthenticatedLibrarySongIdRouteImport.update({
     id: '/library/$songId',
@@ -126,6 +133,12 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicOgBotWidgetEmbedJsRoute =
+  ApiPublicOgBotWidgetEmbedJsRouteImport.update({
+    id: '/api/public/og-bot-widget-embed/js',
+    path: '/api/public/og-bot-widget-embed/js',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedAdminUsersUserIdRoute =
   AuthenticatedAdminUsersUserIdRouteImport.update({
     id: '/$userId',
@@ -147,10 +160,12 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
   '/library/$songId': typeof AuthenticatedLibrarySongIdRoute
+  '/api/public/og-bot-chat': typeof ApiPublicOgBotChatRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/buy-coins/': typeof AuthenticatedBuyCoinsIndexRoute
   '/library/': typeof AuthenticatedLibraryIndexRoute
   '/admin/users/$userId': typeof AuthenticatedAdminUsersUserIdRoute
+  '/api/public/og-bot-widget-embed/js': typeof ApiPublicOgBotWidgetEmbedJsRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -167,10 +182,12 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
   '/library/$songId': typeof AuthenticatedLibrarySongIdRoute
+  '/api/public/og-bot-chat': typeof ApiPublicOgBotChatRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/buy-coins': typeof AuthenticatedBuyCoinsIndexRoute
   '/library': typeof AuthenticatedLibraryIndexRoute
   '/admin/users/$userId': typeof AuthenticatedAdminUsersUserIdRoute
+  '/api/public/og-bot-widget-embed/js': typeof ApiPublicOgBotWidgetEmbedJsRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
@@ -189,10 +206,12 @@ export interface FileRoutesById {
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/_authenticated/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
   '/_authenticated/library/$songId': typeof AuthenticatedLibrarySongIdRoute
+  '/api/public/og-bot-chat': typeof ApiPublicOgBotChatRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/buy-coins/': typeof AuthenticatedBuyCoinsIndexRoute
   '/_authenticated/library/': typeof AuthenticatedLibraryIndexRoute
   '/_authenticated/admin/users/$userId': typeof AuthenticatedAdminUsersUserIdRoute
+  '/api/public/og-bot-widget-embed/js': typeof ApiPublicOgBotWidgetEmbedJsRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
@@ -211,10 +230,12 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/buy-coins/return'
     | '/library/$songId'
+    | '/api/public/og-bot-chat'
     | '/admin/'
     | '/buy-coins/'
     | '/library/'
     | '/admin/users/$userId'
+    | '/api/public/og-bot-widget-embed/js'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -231,10 +252,12 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/buy-coins/return'
     | '/library/$songId'
+    | '/api/public/og-bot-chat'
     | '/admin'
     | '/buy-coins'
     | '/library'
     | '/admin/users/$userId'
+    | '/api/public/og-bot-widget-embed/js'
     | '/api/public/payments/webhook'
   id:
     | '__root__'
@@ -252,10 +275,12 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/users'
     | '/_authenticated/buy-coins/return'
     | '/_authenticated/library/$songId'
+    | '/api/public/og-bot-chat'
     | '/_authenticated/admin/'
     | '/_authenticated/buy-coins/'
     | '/_authenticated/library/'
     | '/_authenticated/admin/users/$userId'
+    | '/api/public/og-bot-widget-embed/js'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -263,6 +288,8 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   PortalSlugRoute: typeof PortalSlugRoute
+  ApiPublicOgBotChatRoute: typeof ApiPublicOgBotChatRoute
+  ApiPublicOgBotWidgetEmbedJsRoute: typeof ApiPublicOgBotWidgetEmbedJsRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
@@ -338,6 +365,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/og-bot-chat': {
+      id: '/api/public/og-bot-chat'
+      path: '/api/public/og-bot-chat'
+      fullPath: '/api/public/og-bot-chat'
+      preLoaderRoute: typeof ApiPublicOgBotChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/library/$songId': {
       id: '/_authenticated/library/$songId'
       path: '/library/$songId'
@@ -392,6 +426,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/payments/webhook'
       fullPath: '/api/public/payments/webhook'
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/og-bot-widget-embed/js': {
+      id: '/api/public/og-bot-widget-embed/js'
+      path: '/api/public/og-bot-widget-embed/js'
+      fullPath: '/api/public/og-bot-widget-embed/js'
+      preLoaderRoute: typeof ApiPublicOgBotWidgetEmbedJsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin/users/$userId': {
@@ -459,8 +500,20 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   PortalSlugRoute: PortalSlugRoute,
+  ApiPublicOgBotChatRoute: ApiPublicOgBotChatRoute,
+  ApiPublicOgBotWidgetEmbedJsRoute: ApiPublicOgBotWidgetEmbedJsRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
