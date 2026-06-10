@@ -61,7 +61,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Sonix — AI Music Generator" },
-      { name: "description", content: "Generate full songs from a prompt using AI. Powered by Suno." },
+      { name: "description", content: "Generate full songs from a prompt using AI. Powered by 0G-Streamz." },
       { name: "author", content: "Sonix" },
       { property: "og:title", content: "Sonix — AI Music Generator" },
       { property: "og:description", content: "Turn ideas into original songs in seconds." },
