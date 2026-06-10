@@ -161,7 +161,13 @@ function AdminPanel() {
                       <div className="truncate font-medium">{s.title || "Untitled"}</div>
                       <div className="truncate text-xs text-muted-foreground">{s.prompt}</div>
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{s.email ?? s.user_id.slice(0, 8)}</TableCell>
+                    <TableCell className="text-sm">
+                      <div className="text-muted-foreground">{s.email ?? s.user_id.slice(0, 8)}</div>
+                      <div className="mt-0.5 flex items-center gap-2 text-xs">
+                        <AdminEditableLabel userId={s.user_id} value={s.display_name} fallback="No label" />
+                        <AdminEditableBalance userId={s.user_id} value={s.coin_balance} />
+                      </div>
+                    </TableCell>
                     <TableCell>
                       <span className={cn(
                         "rounded-full px-2 py-0.5 text-xs font-medium",
