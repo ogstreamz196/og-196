@@ -258,6 +258,7 @@ export type Database = {
         Args: { admin_notes: string; amount: number; target_user_id: string }
         Returns: number
       }
+      purchase_vip: { Args: never; Returns: number }
       set_balance_admin: {
         Args: {
           admin_notes: string
@@ -266,9 +267,17 @@ export type Database = {
         }
         Returns: number
       }
+      set_vip_admin: {
+        Args: {
+          admin_notes?: string
+          make_vip: boolean
+          target_user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role: "admin" | "user" | "vip"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -396,7 +405,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
+      app_role: ["admin", "user", "vip"],
     },
   },
 } as const
