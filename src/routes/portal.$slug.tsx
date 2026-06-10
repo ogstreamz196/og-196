@@ -236,7 +236,9 @@ function PortalPage() {
           >
             {generateLyrics.isPending
               ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Writing in {portal.language}...</>
-              : <><Wand2 className="mr-2 h-4 w-4" /> Generate Lyrics (free)</>}
+              : lyrics
+                ? <><Wand2 className="mr-2 h-4 w-4" /> Regenerate Lyrics Draft (free)</>
+                : <><Wand2 className="mr-2 h-4 w-4" /> Generate Lyrics Draft (free)</>}
           </Button>
 
           {lyrics && (
