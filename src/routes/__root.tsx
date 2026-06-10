@@ -6,6 +6,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
@@ -89,6 +90,7 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
+  const bootstrapUser = useServerFn(ensureCurrentUserBootstrap);
 
   useEffect(() => {
     let active = true;
@@ -97,7 +99,7 @@ function RootComponent() {
       const { data } = await supabase.auth.getUser();
       if (!active || !data.user) return;
       try {
-        const result = await ensureCurrentUserBootstrap();
+        const result = await bootstrapUser();
         if (result.ensuredBossRole || result.ensuredUserRole || result.ensuredProfile) {
           await Promise.all([
             queryClient.invalidateQueries({ queryKey: ["user-role", data.user.id] }),
@@ -114,7 +116,7 @@ function RootComponent() {
     return () => {
       active = false;
     };
-  }, [queryClient, router]);
+  }, [bootstrapUser, queryClient, router]);
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
