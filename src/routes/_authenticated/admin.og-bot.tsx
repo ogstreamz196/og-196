@@ -493,7 +493,7 @@ function OgBotSettingsPage() {
             <span>
               {unlocked
                 ? `Tokens unlocked for ${Math.floor(unlockedSecondsLeft / 60)}m ${unlockedSecondsLeft % 60}s`
-                : "Tokens are masked. Re-enter your boss password to reveal or copy."}
+                : "Tokens are masked. Verify your Google identity to reveal or copy."}
             </span>
           </div>
           {unlocked ? (
