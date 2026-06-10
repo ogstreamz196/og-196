@@ -238,18 +238,31 @@ function UserSettingsPage() {
         <section className="rounded-2xl border border-border bg-card p-6 shadow-card space-y-4">
           <header>
             <h3 className="font-semibold">Roles & access</h3>
-            <p className="text-sm text-muted-foreground">Grant VIP perks and review role assignments.</p>
+            <p className="text-sm text-muted-foreground">Grant VIP perks, OG Bot access, and review role assignments.</p>
           </header>
-          <div className="flex items-center justify-between rounded-xl border border-border bg-background/40 p-4">
-            <div className="flex items-center gap-3">
-              <Crown className="h-5 w-5 text-amber-500" />
-              <div>
-                <Label className="text-sm font-medium">VIP member</Label>
-                <p className="text-xs text-muted-foreground">Unlocks premium tiers and bonus features.</p>
-              </div>
-            </div>
-            <VipBadgeAction userId={profile.id} />
-          </div>
+
+          <RoleToggleRow
+            icon={<Crown className="h-5 w-5 text-amber-500" />}
+            title="VIP member"
+            description="Unlocks premium tiers and bonus features."
+            checked={isVip}
+            userId={profile.id}
+            role="vip"
+            rpc="set_vip_admin"
+            paramKey="make_vip"
+          />
+
+          <RoleToggleRow
+            icon={<Bot className="h-5 w-5 text-primary" />}
+            title="OG Bot access"
+            description="Grants automated/bot privileges across the site."
+            checked={roles.includes("og_bot")}
+            userId={profile.id}
+            role="og_bot"
+            rpc="set_og_bot_admin"
+            paramKey="make_og"
+          />
+
           <div className="flex items-center justify-between rounded-xl border border-border bg-background/40 p-4 opacity-80">
             <div className="flex items-center gap-3">
               <ShieldCheck className="h-5 w-5 text-primary" />
@@ -260,6 +273,7 @@ function UserSettingsPage() {
             </div>
             <Switch checked={isAdminUser} disabled />
           </div>
+
           <div className="flex flex-wrap gap-1.5">
             {roles.length === 0 ? (
               <span className="text-xs text-muted-foreground">No extra roles</span>
@@ -268,7 +282,6 @@ function UserSettingsPage() {
                 {r}
               </span>
             ))}
-            {isVip && <span className="text-xs text-muted-foreground">· VIP toggle saves instantly</span>}
           </div>
         </section>
 
