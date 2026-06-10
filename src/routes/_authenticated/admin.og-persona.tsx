@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useSiteContent, useSetSiteContent } from "@/hooks/use-site-content";
+import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { toast } from "sonner";
 
 const DEFAULT_SCRIPT =
@@ -33,9 +34,10 @@ function OgPersonaPage() {
   const [script, setScript] = useState("");
   const [voice, setVoice] = useState("");
   const [dictionary, setDictionary] = useState("");
-  const [foulMouth, setFoulMouth] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [togglingFoul, setTogglingFoul] = useState(false);
+
+  const { foulMouth } = useFoulMouth();
+  const setFoulMouth = useSetFoulMouth();
 
   useEffect(() => {
     if (loadingContent) return;
@@ -44,24 +46,6 @@ function OgPersonaPage() {
     setDictionary(get("og_persona.dictionary", DEFAULT_DICTIONARY));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadingContent]);
-
-  // Load this user's saved foul-mouth preference from Supabase. Defaults to ON.
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const { data: u } = await supabase.auth.getUser();
-      const uid = u.user?.id;
-      if (!uid) return;
-      const { data } = await supabase
-        .from("user_preferences")
-        .select("foul_mouth")
-        .eq("user_id", uid)
-        .maybeSingle();
-      if (cancelled) return;
-      setFoulMouth(data?.foul_mouth ?? true);
-    })();
-    return () => { cancelled = true; };
-  }, []);
 
   if (isLoading) {
     return (
@@ -89,23 +73,11 @@ function OgPersonaPage() {
   }
 
   async function toggleFoul(next: boolean) {
-    setTogglingFoul(true);
-    const prev = foulMouth;
-    setFoulMouth(next);
     try {
-      const { data: u } = await supabase.auth.getUser();
-      const uid = u.user?.id;
-      if (!uid) throw new Error("Sign in required");
-      const { error } = await supabase
-        .from("user_preferences")
-        .upsert({ user_id: uid, foul_mouth: next }, { onConflict: "user_id" });
-      if (error) throw new Error(error.message);
+      await setFoulMouth.mutateAsync(next);
       toast.success(next ? "Foul mouth mode: ON 🤬" : "Foul mouth mode: OFF");
     } catch (e) {
-      setFoulMouth(prev);
       toast.error((e as Error).message);
-    } finally {
-      setTogglingFoul(false);
     }
   }
 
@@ -141,7 +113,7 @@ function OgPersonaPage() {
               </p>
             </div>
           </div>
-          <Switch checked={foulMouth} onCheckedChange={toggleFoul} disabled={togglingFoul} aria-label="Toggle foul mouth mode" />
+          <Switch checked={foulMouth} onCheckedChange={toggleFoul} disabled={setFoulMouth.isPending} aria-label="Toggle foul mouth mode" />
         </div>
 
         <div className="space-y-2">
