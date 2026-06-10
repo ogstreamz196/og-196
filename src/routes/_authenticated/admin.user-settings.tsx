@@ -196,12 +196,14 @@ function AdminUserSettingsPage() {
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="text-right tabular-nums">{p.coin_balance ?? 0}</TableCell>
+                        <TableCell className="text-right tabular-nums font-medium">{p.coin_balance ?? 0}</TableCell>
+                        <TableCell><AdjustCoinsCell userId={p.id} email={p.email ?? p.id} /></TableCell>
                         <TableCell className="text-xs text-muted-foreground">
                           {new Date(p.created_at).toLocaleDateString()}
                         </TableCell>
                         <TableCell className="font-mono text-[10px] text-muted-foreground">{p.id.slice(0, 8)}…</TableCell>
                       </TableRow>
+
                     );
                   })
                 )}
