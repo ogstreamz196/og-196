@@ -143,6 +143,9 @@ function OgBotSettingsPage() {
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
+  const [statusFilter, setStatusFilter] = useState<ExpiryStatus | "all">("all");
+  const [sortKey, setSortKey] = useState<SortKey>("created_desc");
+  const [expiryEditFor, setExpiryEditFor] = useState<TokenRow | null>(null);
 
   // Step-up auth state: tokens stay masked until the boss re-enters their
   // password. After success, reveal/copy is unlocked for REAUTH_TTL_MS.
