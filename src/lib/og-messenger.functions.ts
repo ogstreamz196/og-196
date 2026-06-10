@@ -14,13 +14,14 @@ const DEFAULT_DICTIONARY =
 
 export const chatOgBot = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { messages: OgChatMessage[] }) => {
+  .inputValidator((data: { messages: OgChatMessage[]; token?: string }) => {
     if (!data || !Array.isArray(data.messages)) throw new Error("messages required");
     const msgs = data.messages.slice(-20).map((m) => ({
       role: m.role === "assistant" ? "assistant" : "user",
       content: String(m.content ?? "").slice(0, 4000),
     }));
-    return { messages: msgs };
+    const token = typeof data.token === "string" ? data.token.trim().slice(0, 200) : "";
+    return { messages: msgs, token };
   })
   .handler(async ({ data, context }) => {
     const { supabase } = context;
