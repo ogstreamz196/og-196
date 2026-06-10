@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { verifyOgBotTokenInternal } from "@/lib/og-bot-tokens.functions";
 
 const DEFAULT_SCRIPT =
   "You are OG Bot, the in-house messenger and concierge for the Sonix AI music platform. " +
@@ -51,12 +50,18 @@ export const Route = createFileRoute("/api/public/og-bot-chat")({
           : [];
         if (messages.length === 0) return json({ error: "messages required" }, 400);
 
-        const verdict = await verifyOgBotTokenInternal(token);
-        if (!verdict.ok) {
-          const status =
-            verdict.reason === "revoked" || verdict.reason === "expired" ? 403 : 401;
-          return json({ error: `Forbidden: token ${verdict.reason}` }, status);
-        }
+        const { data: tokenRow, error: tokenErr } = await supabaseAdmin
+          .from("og_bot_tokens")
+          .select("user_id")
+          .eq("token", token)
+          .maybeSingle();
+        if (tokenErr) return json({ error: "Token lookup failed" }, 500);
+        if (!tokenRow) return json({ error: "Forbidden: invalid token" }, 403);
+
+        await supabaseAdmin
+          .from("og_bot_tokens")
+          .update({ last_used_at: new Date().toISOString() })
+          .eq("token", token);
 
         const { data: rows } = await supabaseAdmin
           .from("site_content")
