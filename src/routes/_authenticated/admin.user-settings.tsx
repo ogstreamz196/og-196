@@ -154,6 +154,7 @@ function AdminUserSettingsPage() {
                   <TableHead>Display name</TableHead>
                   <TableHead>Roles</TableHead>
                   <TableHead className="text-right">Coins</TableHead>
+                  <TableHead>Adjust coins</TableHead>
                   <TableHead>Joined</TableHead>
                   <TableHead>User ID</TableHead>
                 </TableRow>
@@ -161,16 +162,17 @@ function AdminUserSettingsPage() {
               <TableBody>
                 {profilesQ.isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="py-10 text-center">
+                    <TableCell colSpan={7} className="py-10 text-center">
                       <Loader2 className="mx-auto h-5 w-5 animate-spin text-muted-foreground" />
                     </TableCell>
                   </TableRow>
                 ) : filtered.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
+                    <TableCell colSpan={7} className="py-10 text-center text-sm text-muted-foreground">
                       No users match your search.
                     </TableCell>
                   </TableRow>
+
                 ) : (
                   filtered.map((p) => {
                     const roles = rolesByUser.get(p.id) ?? [];
