@@ -60,6 +60,7 @@ function OgPersonaPage() {
   if (!isAdmin) return <Navigate to="/" />;
 
   async function saveAll() {
+    setSaving(true);
     try {
       await Promise.all([
         setContent.mutateAsync({ key: "og_persona.script", value: script }),
@@ -69,6 +70,8 @@ function OgPersonaPage() {
       toast.success("OG Bot persona updated. New messages will use it instantly.");
     } catch (e) {
       toast.error((e as Error).message);
+    } finally {
+      setSaving(false);
     }
   }
 
