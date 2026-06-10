@@ -404,46 +404,85 @@ function PortalPage() {
             </div>
 
             <div>
-              <Label className="flex items-center gap-1.5">
-                <Music className="h-3.5 w-3.5 text-muted-foreground" /> Vocal mood
-              </Label>
-              <div className="mt-2 rounded-md border border-dashed border-border bg-background/40 px-3 py-2 text-xs text-muted-foreground">
-                Tip: add mood words (dreamy, gritty, uplifting) into the description above.
+              <div className="flex items-center justify-between gap-2">
+                <Label className="flex flex-wrap items-center gap-1.5">
+                  <Music className="h-3.5 w-3.5 text-muted-foreground" /> Vocal mood
+                  {selectedMoods.map((mood) => (
+                    <span
+                      key={mood}
+                      className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium text-white"
+                      style={{ backgroundColor: themeColor }}
+                    >
+                      {mood}
+                      <button type="button" onClick={() => unpickMood(mood)} aria-label={`Remove ${mood}`} className="opacity-80 hover:opacity-100">
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+                </Label>
+                <button
+                  type="button"
+                  onClick={refreshMoods}
+                  className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-[11px] text-muted-foreground hover:text-foreground"
+                  aria-label="Shuffle vocal moods"
+                >
+                  <RefreshCw className="h-3 w-3" /> Shuffle
+                </button>
+              </div>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {moodBatch.map((mood) => (
+                  <button
+                    key={mood}
+                    type="button"
+                    onClick={() => pickMood(mood)}
+                    className="rounded-full border border-border bg-background/40 px-3 py-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    {mood}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
 
           <div>
-            <Label className="flex items-center gap-1.5">
-              <Tags className="h-3.5 w-3.5 text-muted-foreground" /> Style tags
-              {selectedTags.length > 0 && (
-                <span className="ml-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
-                  {selectedTags.length} selected
-                </span>
-              )}
-            </Label>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {portal.style_tags.map((tag: string) => {
-                const selected = selectedTags.includes(tag);
-                return (
-                  <button
+            <div className="flex items-center justify-between gap-2">
+              <Label className="flex flex-wrap items-center gap-1.5">
+                <Tags className="h-3.5 w-3.5 text-muted-foreground" /> Style tags
+                {selectedTags.map((tag) => (
+                  <span
                     key={tag}
-                    type="button"
-                    onClick={() => toggleTag(tag)}
-                    className={cn(
-                      "rounded-full border px-3 py-1 text-xs transition-colors",
-                      selected
-                        ? "text-white"
-                        : "border-border text-muted-foreground hover:text-foreground",
-                    )}
-                    style={selected
-                      ? { backgroundColor: themeColor, borderColor: themeColor }
-                      : undefined}
+                    className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium text-white"
+                    style={{ backgroundColor: themeColor }}
                   >
                     {tag}
-                  </button>
-                );
-              })}
+                    <button type="button" onClick={() => unpickStyle(tag)} aria-label={`Remove ${tag}`} className="opacity-80 hover:opacity-100">
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+              </Label>
+              {(portal.style_tags?.length ?? 0) > VISIBLE_BATCH && (
+                <button
+                  type="button"
+                  onClick={refreshStyles}
+                  className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-[11px] text-muted-foreground hover:text-foreground"
+                  aria-label="Shuffle style tags"
+                >
+                  <RefreshCw className="h-3 w-3" /> Shuffle
+                </button>
+              )}
+            </div>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {styleBatch.map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => pickStyle(tag)}
+                  className="rounded-full border border-border bg-background/40 px-3 py-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  {tag}
+                </button>
+              ))}
             </div>
           </div>
 
