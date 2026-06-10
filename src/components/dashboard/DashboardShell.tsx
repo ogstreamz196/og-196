@@ -238,8 +238,8 @@ export function DashboardShell({ title, children }: { title: string; children: R
 
         {/* Mobile nav */}
         <nav className="flex gap-1 overflow-x-auto border-b border-border bg-sidebar/50 px-2 py-2 md:hidden">
-          {navItems.map((item) => {
-            const active = pathname === item.to;
+          {[...baseNavItems, ...(isAdmin ? adminItems : [])].map((item) => {
+            const active = isItemActive(item, pathname);
             const Icon = item.icon;
             return (
               <Link
