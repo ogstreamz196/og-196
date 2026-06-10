@@ -113,7 +113,7 @@ function OgPersonaPage() {
               </p>
             </div>
           </div>
-          <Switch checked={foulMouth} onCheckedChange={toggleFoul} disabled={togglingFoul} aria-label="Toggle foul mouth mode" />
+          <Switch checked={foulMouth} onCheckedChange={toggleFoul} disabled={setFoulMouth.isPending} aria-label="Toggle foul mouth mode" />
         </div>
 
         <div className="space-y-2">
