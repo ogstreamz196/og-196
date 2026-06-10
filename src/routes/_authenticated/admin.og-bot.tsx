@@ -246,7 +246,7 @@ function OgBotSettingsPage() {
         admin_notes: "boss_set_expiry_from_og_bot_panel",
       });
       if (error) throw new Error(error.message);
-      return data as string | null;
+      return (data as string | null) ?? null;
     },
     onSuccess: (newExpires, vars) => {
       toast.success(newExpires ? "Expiry updated" : "Expiry cleared");
