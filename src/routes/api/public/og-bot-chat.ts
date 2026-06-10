@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { verifyOgBotTokenInternal } from "@/lib/og-bot-tokens.functions";
 
 const DEFAULT_SCRIPT =
   "You are OG Bot, the in-house messenger and concierge for the Sonix AI music platform. " +
