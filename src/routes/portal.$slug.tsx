@@ -79,6 +79,8 @@ function PortalPage() {
   const [description, setDescription] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [lyrics, setLyrics] = useState("");
+  const [language, setLanguage] = useState<string>(portal.language || "English");
+
 
   // Maintenance gate — friendly screen, no generation possible
   if (portal.status === "maintenance") {
