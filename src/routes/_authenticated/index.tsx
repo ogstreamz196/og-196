@@ -93,7 +93,7 @@ function HomePage() {
           <div className="relative">
             <div className="inline-flex items-center gap-2 rounded-full border border-border bg-background/50 px-3 py-1 text-xs text-muted-foreground backdrop-blur">
               <Sparkles className="h-3 w-3 text-primary" />
-              Powered by Suno AI
+              Powered by 0G-Streamz
             </div>
             <h2 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl">
               {profile?.display_name ? <>Hey, <span className="text-gradient-brand">{profile.display_name}</span> — turn ideas into songs</> : <>Turn ideas into <span className="text-gradient-brand">original songs</span></>}
