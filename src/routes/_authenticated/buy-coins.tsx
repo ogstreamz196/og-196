@@ -8,7 +8,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { useRole } from "@/hooks/use-role";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
-import { COIN_PACKS, type CoinPack } from "@/lib/coin-packs";
+import { COIN_PACKS, CURRENCY_SYMBOL, type CoinPack } from "@/lib/coin-packs";
 import { StripeEmbeddedCheckoutInline } from "@/components/StripeEmbeddedCheckout";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { toast } from "sonner";
