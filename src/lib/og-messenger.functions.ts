@@ -32,18 +32,11 @@ export const chatOgBot = createServerFn({ method: "POST" })
     if (!data.token || !data.token.startsWith("ogb_")) {
       throw new Error("OG Bot token required. Paste your token to unlock chat.");
     }
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: tokenRow, error: tokenErr } = await supabaseAdmin
-      .from("og_bot_tokens")
-      .select("user_id")
-      .eq("token", data.token)
-      .maybeSingle();
-    if (tokenErr) throw new Error("Token lookup failed");
-    if (!tokenRow) throw new Error("Invalid OG Bot token. Ask the Boss for a fresh one.");
-    await supabaseAdmin
-      .from("og_bot_tokens")
-      .update({ last_used_at: new Date().toISOString() })
-      .eq("token", data.token);
+    const verdict = await verifyOgBotTokenInternal(data.token);
+    if (!verdict.ok) {
+      throw new Error(`Invalid OG Bot token (${verdict.reason}). Ask the Boss for a fresh one.`);
+    }
+
 
 
     const { data: rows } = await supabase
