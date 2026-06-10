@@ -272,6 +272,9 @@ function SettingsPage() {
         )}
 
 
+        {/* My OG Bot tokens — visible to anyone who has one issued */}
+        <MyOgBotTokensSection />
+
         {/* Session */}
         <section className="rounded-2xl border border-border bg-card p-6 shadow-card flex items-center justify-between">
           <div>
