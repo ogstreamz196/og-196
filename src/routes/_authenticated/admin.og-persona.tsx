@@ -40,6 +40,7 @@ function OgPersonaPage() {
   const [script, setScript] = useState("");
   const [voice, setVoice] = useState("");
   const [dictionary, setDictionary] = useState("");
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (loadingContent) return;
@@ -59,6 +60,7 @@ function OgPersonaPage() {
   if (!isAdmin) return <Navigate to="/" />;
 
   async function saveAll() {
+    setSaving(true);
     try {
       await Promise.all([
         setContent.mutateAsync({ key: "og_persona.script", value: script }),
@@ -68,6 +70,8 @@ function OgPersonaPage() {
       toast.success("OG Bot persona updated. New messages will use it instantly.");
     } catch (e) {
       toast.error((e as Error).message);
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -110,8 +114,8 @@ function OgPersonaPage() {
         </div>
 
         <div className="flex justify-end">
-          <Button onClick={saveAll} disabled={setContent.isPending}>
-            {setContent.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+          <Button onClick={saveAll} disabled={saving}>
+            {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
             Save persona
           </Button>
         </div>
