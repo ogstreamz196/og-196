@@ -127,6 +127,15 @@ function AdminPanel() {
               <ShieldCheck className="mr-2 h-4 w-4" /> Manage users
             </Button>
           </Link>
+          <Link to="/admin/og-bot">
+            <Button size="sm" variant="outline">OG Bot Tokens</Button>
+          </Link>
+          <Link to="/admin/og-persona">
+            <Button size="sm" variant="outline">OG Bot Persona</Button>
+          </Link>
+          <Link to="/admin/user-settings">
+            <Button size="sm" variant="outline">User Settings</Button>
+          </Link>
           <Link to="/admin/create-portal">
             <Button size="sm" className="bg-gradient-brand text-primary-foreground">
               <Music2 className="mr-2 h-4 w-4" /> New Portal

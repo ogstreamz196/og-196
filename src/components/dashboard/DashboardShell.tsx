@@ -32,6 +32,8 @@ const baseNavItems: NavItem[] = [
   { to: "/buy-coins", label: "Buy Coins", icon: CoinsIcon, match: ["/buy-coins"] },
 ];
 
+const bossNavItem: NavItem = { to: "/admin", label: "Boss Panel", icon: ShieldCheck, match: ["/admin"] };
+
 
 interface RecentSong {
   id: string;
@@ -154,57 +156,32 @@ export function DashboardShell({ title, children }: { title: string; children: R
         </Link>
 
         <nav className="mt-6 flex flex-col gap-1">
-          {baseNavItems.map((item) => {
+          {[...baseNavItems, ...(!roleLoading && isAdmin ? [bossNavItem] : [])].map((item) => {
             const active = isItemActive(item, pathname);
             const Icon = item.icon;
+            const isBoss = item.to === "/admin";
             return (
               <Link
                 key={item.to}
                 to={item.to}
                 className={cn(
                   "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                  isBoss && "mt-2 border border-primary/30 bg-gradient-brand-soft",
                   active
                     ? "bg-sidebar-accent text-sidebar-accent-foreground"
                     : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
                 )}
               >
-                <Icon className={cn("h-4 w-4", active && "text-primary")} />
+                <Icon className={cn("h-4 w-4", (active || isBoss) && "text-primary")} />
                 {item.label}
+                {isBoss && (
+                  <span className="ml-auto rounded-full bg-primary/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary">
+                    Boss
+                  </span>
+                )}
               </Link>
             );
           })}
-
-          {!roleLoading && isAdmin && (
-            <div className="mt-4 rounded-xl border border-primary/30 bg-gradient-brand-soft p-2">
-              <div className="mb-1 flex items-center gap-2 px-2 pt-1 text-[10px] font-semibold uppercase tracking-wider text-primary">
-                <ShieldCheck className="h-3 w-3" /> Boss controls
-              </div>
-              <p className="mb-2 px-2 text-[10px] leading-snug text-sidebar-foreground/60">
-                Manage users, assign VIP, mint coins, edit portals.
-              </p>
-              <div className="flex flex-col gap-0.5">
-                {adminItems.map((item) => {
-                  const active = isItemActive(item, pathname);
-                  const Icon = item.icon;
-                  return (
-                    <Link
-                      key={item.to}
-                      to={item.to}
-                      className={cn(
-                        "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                        active
-                          ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                          : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
-                      )}
-                    >
-                      <Icon className={cn("h-4 w-4", active && "text-primary")} />
-                      {item.label}
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          )}
         </nav>
 
         {user ? <RecentMedia userId={user.id} /> : <div className="flex-1" />}
@@ -263,7 +240,7 @@ export function DashboardShell({ title, children }: { title: string; children: R
 
         {/* Mobile nav */}
         <nav className="flex gap-1 overflow-x-auto border-b border-border bg-sidebar/50 px-2 py-2 md:hidden">
-          {[...baseNavItems, ...(!roleLoading && isAdmin ? adminItems : [])].map((item) => {
+          {[...baseNavItems, ...(!roleLoading && isAdmin ? [bossNavItem] : [])].map((item) => {
             const active = isItemActive(item, pathname);
             const Icon = item.icon;
             return (
