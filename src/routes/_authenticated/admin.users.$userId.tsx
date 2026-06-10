@@ -359,3 +359,65 @@ function InfoCard({ icon, label, value }: { icon: React.ReactNode; label: string
     </div>
   );
 }
+
+interface RoleToggleRowProps {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  checked: boolean;
+  userId: string;
+  role: string;
+  rpc: "set_vip_admin" | "set_og_bot_admin";
+  paramKey: "make_vip" | "make_og";
+}
+
+function RoleToggleRow({ icon, title, description, checked, userId, role: _role, rpc, paramKey }: RoleToggleRowProps) {
+  const qc = useQueryClient();
+  const mut = useMutation({
+    mutationFn: async (next: boolean) => {
+      const args: Record<string, unknown> = {
+        target_user_id: userId,
+        admin_notes: "settings_page_toggle",
+      };
+      args[paramKey] = next;
+      const { error } = await supabase.rpc(rpc as never, args as never);
+      if (error) throw new Error(error.message);
+      return next;
+    },
+    onSuccess: (next) => {
+      toast.success(`${title} ${next ? "granted" : "revoked"}`);
+      qc.invalidateQueries({ queryKey: ["admin-user-roles", userId] });
+      qc.invalidateQueries({ queryKey: ["user-roles", userId] });
+      qc.invalidateQueries({ queryKey: ["admin-user-audit", userId] });
+      qc.invalidateQueries({ queryKey: ["admin-users-list"] });
+      qc.invalidateQueries({ queryKey: ["user-role"] });
+    },
+    onError: (e: Error) => {
+      const m = e.message.toLowerCase();
+      if (m.includes("unauthorized")) toast.error("Not allowed.");
+      else if (m.includes("target_not_found")) toast.error("User not found.");
+      else toast.error(e.message);
+    },
+  });
+
+  return (
+    <div className="flex items-center justify-between rounded-xl border border-border bg-background/40 p-4">
+      <div className="flex items-center gap-3">
+        {icon}
+        <div>
+          <Label className="text-sm font-medium">{title}</Label>
+          <p className="text-xs text-muted-foreground">{description}</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        {mut.isPending && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+        <Switch
+          checked={checked}
+          disabled={mut.isPending}
+          onCheckedChange={(v) => mut.mutate(v)}
+          aria-label={`Toggle ${title}`}
+        />
+      </div>
+    </div>
+  );
+}
