@@ -37,7 +37,7 @@ function SettingsPage() {
     if (profile && !balanceDirty) setBalance(String(profile.coin_balance ?? 0));
   }, [profile?.coin_balance, balanceDirty]);
 
-  const isOgBot = roles.includes("og_bot");
+  const isOgBot = (roles as string[]).includes("og_bot");
 
   const saveName = useMutation({
     mutationFn: async () => {
