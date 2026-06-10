@@ -171,7 +171,11 @@ function PortalsPage() {
           <div className="rounded-2xl border border-dashed border-border bg-card/50 p-16 text-center">
             <Compass className="mx-auto h-10 w-10 text-muted-foreground" />
             <p className="mt-3 text-muted-foreground">
-              No portals yet. Check back soon — the boss is cooking new ones.
+              <EditableContent
+                contentKey="portals.empty"
+                defaultValue="No portals yet. Check back soon — the boss is cooking new ones."
+                multiline
+              />
             </p>
           </div>
         )}
