@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
+import { VipBadgeAction } from "@/components/admin/VipBadgeAction";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/user-settings")({
