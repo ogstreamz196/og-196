@@ -30,6 +30,11 @@ function loadThread(): OgChatMessage[] {
 export function OgChat({ compact = false }: { compact?: boolean }) {
   const [messages, setMessages] = useState<OgChatMessage[]>(() => loadThread());
   const [input, setInput] = useState("");
+  const [token, setToken] = useState<string>(() => {
+    if (typeof window === "undefined") return "";
+    return window.localStorage.getItem(TOKEN_KEY) ?? "";
+  });
+  const [tokenDraft, setTokenDraft] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const selfSyncRef = useRef(false);
   const chat = useServerFn(chatOgBot);
