@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Crown, Bot, ShieldCheck, Coins, Plus, Minus, LogOut, UserCog, Mail, Fingerprint, KeyRound, Search, UserPlus, Ban, RotateCcw, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Loader2, Crown, Bot, ShieldCheck, Coins, Plus, Minus, LogOut, UserCog, Mail, Fingerprint, KeyRound, Search, UserPlus, Ban, RotateCcw, AlertCircle, CheckCircle2, Copy, Eye } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
@@ -270,6 +271,9 @@ function SettingsPage() {
           </section>
         )}
 
+
+        {/* My OG Bot tokens — visible to anyone who has one issued */}
+        <MyOgBotTokensSection />
 
         {/* Session */}
         <section className="rounded-2xl border border-border bg-card p-6 shadow-card flex items-center justify-between">
@@ -817,5 +821,177 @@ function StatusPill({ status }: { status: "active" | "revoked" | "expired" }) {
     <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-500">
       <AlertCircle className="h-3 w-3" /> Expired
     </span>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// My OG Bot tokens — personal view (RLS scopes to current user)
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface MyTokenRow {
+  user_id: string;
+  token: string;
+  created_at: string | null;
+  updated_at: string | null;
+  expires_at: string | null;
+  revoked_at: string | null;
+  last_used_at: string | null;
+}
+
+function MyOgBotTokensSection() {
+  const { user } = useAuth();
+  const { roles } = useRole();
+
+  const myTokensQ = useQuery({
+    queryKey: ["settings-my-og-bot-tokens", user?.id],
+    enabled: !!user?.id,
+    queryFn: async (): Promise<MyTokenRow[]> => {
+      const { data, error } = await supabase
+        .from("og_bot_tokens")
+        .select("user_id, token, created_at, updated_at, expires_at, revoked_at, last_used_at")
+        .eq("user_id", user!.id)
+        .order("updated_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as MyTokenRow[];
+    },
+  });
+
+  const [viewing, setViewing] = useState<MyTokenRow | null>(null);
+  const [reveal, setReveal] = useState(false);
+
+  const rows = myTokensQ.data ?? [];
+  // Only show the section if the user actually has a token (keeps clutter down).
+  if (myTokensQ.isLoading) return null;
+  if (rows.length === 0) return null;
+
+  const now = Date.now();
+  const role = (roles as string[]).includes("og_bot") ? "og_bot" : "—";
+
+  async function copyToken(token: string) {
+    try {
+      await navigator.clipboard.writeText(token);
+      toast.success("Token copied to clipboard");
+    } catch {
+      toast.error("Could not copy — copy manually from details");
+    }
+  }
+
+  function maskTokenId(token: string) {
+    // Show prefix + last 4 so it's recognisable but not full-secret.
+    if (token.length <= 12) return token;
+    return `${token.slice(0, 8)}…${token.slice(-4)}`;
+  }
+
+  return (
+    <section className="rounded-2xl border border-border bg-card p-6 shadow-card">
+      <div className="mb-4 flex items-center gap-2">
+        <Bot className="h-4 w-4 text-primary" />
+        <div>
+          <h2 className="font-semibold">My OG Bot tokens</h2>
+          <p className="text-xs text-muted-foreground">Personal tokens issued to your account.</p>
+        </div>
+      </div>
+
+      <div className="overflow-hidden rounded-xl border border-border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[40%]">Token ID</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead>Expiry</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {rows.map((t) => {
+              const isRevoked = !!t.revoked_at;
+              const isExpired = !isRevoked && t.expires_at !== null && new Date(t.expires_at).getTime() < now;
+              const status: "active" | "revoked" | "expired" = isRevoked ? "revoked" : isExpired ? "expired" : "active";
+              return (
+                <TableRow key={t.user_id}>
+                  <TableCell className="font-mono text-xs">{maskTokenId(t.token)}</TableCell>
+                  <TableCell className="text-xs">{role}</TableCell>
+                  <TableCell className="text-xs">
+                    {t.expires_at ? new Date(t.expires_at).toLocaleDateString() : "Never"}
+                  </TableCell>
+                  <TableCell><StatusPill status={status} /></TableCell>
+                  <TableCell className="text-right">
+                    <div className="inline-flex items-center gap-1">
+                      <Button size="sm" variant="outline" onClick={() => copyToken(t.token)} title="Copy token">
+                        <Copy className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => { setReveal(false); setViewing(t); }}
+                        title="View details"
+                      >
+                        <Eye className="mr-1 h-3.5 w-3.5" /> Details
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
+
+      <Dialog open={!!viewing} onOpenChange={(o) => { if (!o) { setViewing(null); setReveal(false); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>OG Bot token details</DialogTitle>
+            <DialogDescription>Keep this secret — anyone with it can act as your bot.</DialogDescription>
+          </DialogHeader>
+          {viewing && (
+            <div className="space-y-3 text-sm">
+              <DetailRow label="Token ID" value={maskTokenId(viewing.token)} mono />
+              <DetailRow label="Role" value={role} />
+              <DetailRow label="Status" value={
+                viewing.revoked_at ? "Revoked"
+                : viewing.expires_at && new Date(viewing.expires_at).getTime() < now ? "Expired"
+                : "Active"
+              } />
+              <DetailRow label="Created" value={viewing.created_at ? new Date(viewing.created_at).toLocaleString() : "—"} />
+              <DetailRow label="Expires" value={viewing.expires_at ? new Date(viewing.expires_at).toLocaleString() : "Never"} />
+              <DetailRow label="Last used" value={viewing.last_used_at ? new Date(viewing.last_used_at).toLocaleString() : "Never"} />
+              {viewing.revoked_at && (
+                <DetailRow label="Revoked" value={new Date(viewing.revoked_at).toLocaleString()} />
+              )}
+
+              <div className="space-y-1.5">
+                <Label className="text-xs uppercase tracking-wider text-muted-foreground">Full token</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    readOnly
+                    value={reveal ? viewing.token : "•".repeat(Math.min(40, viewing.token.length))}
+                    className="font-mono text-xs"
+                  />
+                  <Button size="sm" variant="outline" onClick={() => setReveal((r) => !r)}>
+                    {reveal ? "Hide" : "Reveal"}
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => copyToken(viewing.token)}>
+                    <Copy className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setViewing(null); setReveal(false); }}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </section>
+  );
+}
+
+function DetailRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/30 px-3 py-2">
+      <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{label}</span>
+      <span className={`text-xs ${mono ? "font-mono" : ""}`}>{value}</span>
+    </div>
   );
 }
