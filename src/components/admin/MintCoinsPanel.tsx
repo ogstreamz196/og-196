@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Coins, Loader2, Plus, Minus, History, ChevronsUpDown, Check, User as UserIcon } from "lucide-react";
+import { Coins, Loader2, Plus, Minus, History, ChevronsUpDown, Check, User as UserIcon, Equal } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/command";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { UserAuditTrail } from "./UserAuditTrail";
 
 interface ProfileLite {
   id: string;
