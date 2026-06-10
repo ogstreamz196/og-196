@@ -111,10 +111,10 @@ Deno.serve(async (req) => {
       duration: c?.duration,
       clipId: c?.id || c?.clip_id,
     }))
-    .filter((c) => !!c.audioUrl);
+    .filter((c) => !!c.audioUrl && hostAllowed(c.audioUrl));
 
   if (clips.length === 0) {
-    console.log("No audio clips ready yet — intermediate callback");
+    console.log("No audio clips ready yet (or all rejected by host allow-list)");
     return new Response("waiting", { status: 200 });
   }
 
