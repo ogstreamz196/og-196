@@ -256,9 +256,12 @@ function PortalPage() {
                     className={cn(
                       "rounded-full border px-3 py-1 text-xs transition-colors",
                       selected
-                        ? "border-primary bg-primary/15 text-primary"
-                        : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground",
+                        ? "text-white"
+                        : "border-border text-muted-foreground hover:text-foreground",
                     )}
+                    style={selected
+                      ? { backgroundColor: themeColor, borderColor: themeColor }
+                      : undefined}
                   >
                     {tag}
                   </button>
