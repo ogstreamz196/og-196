@@ -110,7 +110,7 @@ function BuyCoinsPage() {
               )}
               <div className="text-sm font-medium text-muted-foreground">{t.label}</div>
               <div className="mt-2 flex items-baseline gap-1">
-                <span className="text-4xl font-bold">${(t.priceCents / 100).toFixed(0)}</span>
+                <span className="text-4xl font-bold">{CURRENCY_SYMBOL}{(t.priceCents / 100).toFixed(0)}</span>
               </div>
               <div className="mt-1 flex items-center gap-1.5 text-lg font-semibold text-coin">
                 <Coins className="h-4 w-4" /> {t.coins} coins
