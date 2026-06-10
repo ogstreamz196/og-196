@@ -1,12 +1,24 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Coins, Loader2, Plus, Minus, History } from "lucide-react";
+import { Coins, Loader2, Plus, Minus, History, ChevronsUpDown, Check, User as UserIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList,
+} from "@/components/ui/command";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+
+interface ProfileLite {
+  id: string;
+  email: string | null;
+  display_name: string | null;
+  coin_balance: number;
+}
 
 interface MintTx {
   id: string;
@@ -20,9 +32,23 @@ interface MintTx {
 
 export function MintCoinsPanel() {
   const qc = useQueryClient();
-  const [target, setTarget] = useState("");
+  const [open, setOpen] = useState(false);
+  const [selected, setSelected] = useState<ProfileLite | null>(null);
   const [amount, setAmount] = useState("100");
-  const [reason, setReason] = useState("");
+  const [notes, setNotes] = useState("");
+
+  const profilesQuery = useQuery({
+    queryKey: ["admin-profiles-search"],
+    queryFn: async (): Promise<ProfileLite[]> => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, email, display_name, coin_balance")
+        .order("email", { ascending: true })
+        .limit(500);
+      if (error) throw error;
+      return (data ?? []) as ProfileLite[];
+    },
+  });
 
   const recent = useQuery({
     queryKey: ["admin-mint-history"],
@@ -30,7 +56,7 @@ export function MintCoinsPanel() {
       const { data, error } = await supabase
         .from("coin_transactions")
         .select("id, user_id, amount, type, reference, created_at")
-        .in("type", ["mint", "admin_deduct"])
+        .in("type", ["admin_mint", "mint", "admin_deduct"])
         .order("created_at", { ascending: false })
         .limit(15);
       if (error) throw error;
@@ -46,82 +72,158 @@ export function MintCoinsPanel() {
 
   const mint = useMutation({
     mutationFn: async (signedAmount: number) => {
-      const v = target.trim();
-      if (!v) throw new Error("Enter a user email or ID");
+      if (!selected) throw new Error("Select a user first");
       if (!Number.isFinite(signedAmount) || signedAmount === 0)
         throw new Error("Amount must be a non-zero integer");
 
-      const looksLikeUuid = /^[0-9a-f-]{36}$/i.test(v);
-      const body: Record<string, unknown> = {
+      const { data, error } = await supabase.rpc("mint_coins_admin", {
+        target_user_id: selected.id,
         amount: Math.trunc(signedAmount),
-        reason: reason.trim() || "admin_mint",
-      };
-      if (looksLikeUuid) body.user_id = v;
-      else body.email = v;
-
-      const { data, error } = await supabase.functions.invoke("admin-mint-coins", { body });
+        admin_notes: notes.trim() || (signedAmount > 0 ? "admin_mint" : "admin_deduct"),
+      });
       if (error) throw new Error(error.message);
-      if (data?.error) throw new Error(data.error);
-      return data as { user_id: string; new_balance: number; amount: number };
+      return { newBalance: data as number, signedAmount };
     },
-    onSuccess: (data) => {
+    onSuccess: ({ newBalance, signedAmount }) => {
       toast.success(
-        `${data.amount > 0 ? "Awarded" : "Deducted"} ${Math.abs(data.amount)} coins · new balance ${data.new_balance}`,
+        `${signedAmount > 0 ? "Awarded" : "Deducted"} ${Math.abs(signedAmount)} coins · new balance ${newBalance}`,
       );
       qc.invalidateQueries({ queryKey: ["admin-mint-history"] });
+      qc.invalidateQueries({ queryKey: ["admin-profiles-search"] });
       qc.invalidateQueries({ queryKey: ["profile"] });
-      setReason("");
+      setNotes("");
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => {
+      const m = e.message.toLowerCase();
+      if (m.includes("unauthorized")) toast.error("You're not allowed to mint coins.");
+      else if (m.includes("target_not_found")) toast.error("User not found.");
+      else if (m.includes("amount_must_be_nonzero")) toast.error("Amount can't be zero.");
+      else if (m.includes("amount_out_of_range")) toast.error("Amount is out of range.");
+      else toast.error(e.message);
+    },
   });
 
   const numericAmount = Number(amount);
-  const disabled = mint.isPending || !target.trim() || !Number.isFinite(numericAmount) || numericAmount === 0;
+  const validAmount = Number.isFinite(numericAmount) && numericAmount !== 0;
+  const disabled = mint.isPending || !selected || !validAmount;
+
+  const sortedProfiles = useMemo(
+    () => (profilesQuery.data ?? []).slice().sort((a, b) =>
+      (a.email ?? "").localeCompare(b.email ?? "")),
+    [profilesQuery.data],
+  );
 
   return (
     <div className="mb-6 rounded-2xl border border-border bg-card p-5 shadow-card">
       <div className="mb-3 flex items-center gap-2">
         <Coins className="h-4 w-4 text-coin" />
-        <h3 className="font-semibold">Mint &amp; Award coins</h3>
+        <h3 className="font-semibold">Award &amp; Mint coins</h3>
         <span className="ml-auto text-xs text-muted-foreground">Admin-only · server-verified</span>
       </div>
+
       <div className="grid gap-4 sm:grid-cols-[1.4fr_0.7fr]">
         <div>
-          <Label htmlFor="mint-target">Target user (email or user ID)</Label>
-          <Input
-            id="mint-target"
-            value={target}
-            onChange={(e) => setTarget(e.target.value)}
-            placeholder="user@example.com"
-            className="mt-2"
-            maxLength={320}
-          />
+          <Label>User</Label>
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={open}
+                className="mt-2 w-full justify-between font-normal"
+              >
+                {selected ? (
+                  <span className="flex items-center gap-2 truncate">
+                    <UserIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    <span className="truncate">{selected.email ?? selected.id.slice(0, 8)}</span>
+                    <span className="ml-2 shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs">
+                      {selected.coin_balance} coins
+                    </span>
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground">Search users by email or name…</span>
+                )}
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+              <Command
+                filter={(value, search) => {
+                  if (!search) return 1;
+                  return value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0;
+                }}
+              >
+                <CommandInput placeholder="Search email or name…" />
+                <CommandList>
+                  {profilesQuery.isLoading ? (
+                    <div className="grid place-items-center p-4">
+                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : (
+                    <>
+                      <CommandEmpty>No users found.</CommandEmpty>
+                      <CommandGroup>
+                        {sortedProfiles.map((p) => {
+                          const label = `${p.email ?? ""} ${p.display_name ?? ""} ${p.id}`;
+                          return (
+                            <CommandItem
+                              key={p.id}
+                              value={label}
+                              onSelect={() => { setSelected(p); setOpen(false); }}
+                              className="flex items-center gap-2"
+                            >
+                              <Check className={cn(
+                                "h-4 w-4",
+                                selected?.id === p.id ? "opacity-100" : "opacity-0",
+                              )} />
+                              <div className="min-w-0 flex-1">
+                                <div className="truncate text-sm">{p.email ?? p.id.slice(0, 8)}</div>
+                                {p.display_name && (
+                                  <div className="truncate text-xs text-muted-foreground">{p.display_name}</div>
+                                )}
+                              </div>
+                              <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                                {p.coin_balance}
+                              </span>
+                            </CommandItem>
+                          );
+                        })}
+                      </CommandGroup>
+                    </>
+                  )}
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
         </div>
+
         <div>
           <Label htmlFor="mint-amount">Amount</Label>
           <Input
             id="mint-amount"
             type="number"
             min={1}
-            max={100000}
+            max={1000000}
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             className="mt-2"
           />
         </div>
       </div>
+
       <div className="mt-4">
-        <Label htmlFor="mint-reason">Reason (optional, shown in history)</Label>
+        <Label htmlFor="mint-notes">Admin notes (saved with the transaction)</Label>
         <Textarea
-          id="mint-reason"
+          id="mint-notes"
           rows={2}
-          value={reason}
-          onChange={(e) => setReason(e.target.value)}
-          placeholder="e.g. promo grant, refund for failed batch"
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder="e.g. promo grant, refund for failed batch, manual top-up"
           maxLength={200}
           className="mt-2 resize-none"
         />
       </div>
+
       <div className="mt-4 flex flex-wrap gap-2">
         <Button
           onClick={() => mint.mutate(Math.abs(numericAmount))}
@@ -164,7 +266,7 @@ export function MintCoinsPanel() {
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-muted-foreground">No mint activity yet.</p>
+          <p className="text-sm text-muted-foreground">No admin coin activity yet.</p>
         )}
       </div>
     </div>
