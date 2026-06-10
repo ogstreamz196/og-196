@@ -14,18 +14,36 @@ const DEFAULT_DICTIONARY =
 
 export const chatOgBot = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { messages: OgChatMessage[] }) => {
+  .inputValidator((data: { messages: OgChatMessage[]; token?: string }) => {
     if (!data || !Array.isArray(data.messages)) throw new Error("messages required");
     const msgs = data.messages.slice(-20).map((m) => ({
       role: m.role === "assistant" ? "assistant" : "user",
       content: String(m.content ?? "").slice(0, 4000),
     }));
-    return { messages: msgs };
+    const token = typeof data.token === "string" ? data.token.trim().slice(0, 200) : "";
+    return { messages: msgs, token };
   })
   .handler(async ({ data, context }) => {
     const { supabase } = context;
     const apiKey = process.env.LOVABLE_API_KEY;
     if (!apiKey) throw new Error("Missing LOVABLE_API_KEY");
+
+    if (!data.token || !data.token.startsWith("ogb_")) {
+      throw new Error("OG Bot token required. Paste your token to unlock chat.");
+    }
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: tokenRow, error: tokenErr } = await supabaseAdmin
+      .from("og_bot_tokens")
+      .select("user_id")
+      .eq("token", data.token)
+      .maybeSingle();
+    if (tokenErr) throw new Error("Token lookup failed");
+    if (!tokenRow) throw new Error("Invalid OG Bot token. Ask the Boss for a fresh one.");
+    await supabaseAdmin
+      .from("og_bot_tokens")
+      .update({ last_used_at: new Date().toISOString() })
+      .eq("token", data.token);
+
 
     const { data: rows } = await supabase
       .from("site_content")
