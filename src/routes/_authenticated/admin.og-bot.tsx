@@ -1,15 +1,22 @@
 import { createFileRoute, Navigate, Link, redirect } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Bot, Loader2, ShieldCheck, Copy, RotateCcw, Trash2, Search, ArrowLeft, Eye, EyeOff,
+  Bot, Loader2, ShieldCheck, Copy, RotateCcw, Trash2, Search, ArrowLeft, Eye, EyeOff, Lock, KeyRound,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRole } from "@/hooks/use-role";
+import { useAuth } from "@/hooks/use-auth";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
+
+// How long a successful re-auth keeps reveal/copy unlocked, in ms.
+const REAUTH_TTL_MS = 5 * 60 * 1000;
 
 export const Route = createFileRoute("/_authenticated/admin/og-bot")({
   beforeLoad: async () => {
