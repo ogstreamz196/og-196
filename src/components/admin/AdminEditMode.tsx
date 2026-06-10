@@ -249,17 +249,17 @@ export function AdminEditablePortalField({
 
   const mut = useMutation({
     mutationFn: async () => {
-      let payload: Record<string, unknown> = {};
+      let payload: { name?: string; custom_welcome_text?: string | null; coin_cost_per_generation?: number } = {};
       if (field === "coin_cost_per_generation") {
         const n = Number(draft);
         if (!Number.isFinite(n) || n < 0 || n > 10000) throw new Error("Cost must be 0–10000");
-        payload[field] = Math.trunc(n);
+        payload.coin_cost_per_generation = Math.trunc(n);
       } else if (field === "name") {
         const t = draft.trim();
         if (!t || t.length > 80) throw new Error("Name must be 1–80 chars");
-        payload[field] = t;
+        payload.name = t;
       } else {
-        payload[field] = draft.trim() === "" ? null : draft;
+        payload.custom_welcome_text = draft.trim() === "" ? null : draft;
       }
       const { error } = await supabase.from("portals").update(payload).eq("id", portalId);
       if (error) throw new Error(error.message);
