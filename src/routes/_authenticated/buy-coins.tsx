@@ -21,7 +21,30 @@ export const Route = createFileRoute("/_authenticated/buy-coins")({
 
 function BuyCoinsPage() {
   const { data: profile } = useProfile();
+  const { isVip, refetch: refetchRole } = useRole();
+  const qc = useQueryClient();
   const [selected, setSelected] = useState<CoinPack | null>(null);
+
+  const buyVip = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.rpc("purchase_vip");
+      if (error) throw new Error(error.message);
+      return data as number;
+    },
+    onSuccess: (newBalance) => {
+      toast.success(`Welcome to VIP! 👑 New balance: ${newBalance}`);
+      qc.invalidateQueries({ queryKey: ["profile"] });
+      qc.invalidateQueries({ queryKey: ["user-role"] });
+      refetchRole();
+    },
+    onError: (e: Error) => {
+      const m = e.message.toLowerCase();
+      if (m.includes("insufficient_coins"))
+        toast.error(`Not enough coins. You need ${VIP_COST}.`);
+      else if (m.includes("already_vip")) toast.error("You're already VIP.");
+      else toast.error(e.message);
+    },
+  });
 
   if (selected) {
     const returnUrl = `${window.location.origin}/buy-coins/return?session_id={CHECKOUT_SESSION_ID}&pack=${selected.bundleId}`;
