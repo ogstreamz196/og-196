@@ -60,13 +60,33 @@ function PortalPage() {
   const { data: profile } = useProfile();
   const { data: settings } = useSettings();
   const qc = useQueryClient();
-  const COIN_COST = settings?.coins_per_generation ?? 3;
+  // Portal coin override wins; fall back to global setting if unset.
+  const COIN_COST = portal.coin_cost_per_generation ?? settings?.coins_per_generation ?? 3;
   const SONGS_PER_GEN = settings?.songs_per_generation ?? 2;
+  const themeColor = portal.primary_color || "hsl(var(--primary))";
 
   const [songName, setSongName] = useState("");
   const [description, setDescription] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [lyrics, setLyrics] = useState("");
+
+  // Maintenance gate — friendly screen, no generation possible
+  if (portal.status === "maintenance") {
+    return (
+      <div className="grid min-h-screen place-items-center bg-background p-6 text-center">
+        <div className="max-w-md">
+          <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl" style={{ backgroundColor: themeColor }}>
+            <Wand2 className="h-7 w-7 text-white" />
+          </div>
+          <h1 className="mt-4 text-2xl font-bold">{portal.name} is paused</h1>
+          <p className="mt-2 text-muted-foreground">
+            This portal is in maintenance mode. Please check back shortly — generation will be available again soon.
+          </p>
+          <Link to="/" className="mt-6 inline-block text-primary underline">Back to home</Link>
+        </div>
+      </div>
+    );
+  }
 
   function toggleTag(tag: string) {
     setSelectedTags((p) => (p.includes(tag) ? p.filter((t) => t !== tag) : [...p, tag]));
