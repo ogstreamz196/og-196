@@ -224,3 +224,68 @@ function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string
     </div>
   );
 }
+
+function AdjustCoinsCell({ userId, email }: { userId: string; email: string }) {
+  const qc = useQueryClient();
+  const [amount, setAmount] = useState<string>("");
+
+  const adjust = useMutation({
+    mutationFn: async (delta: number) => {
+      if (!Number.isFinite(delta) || delta === 0) throw new Error("Enter a non-zero amount");
+      if (Math.abs(delta) > 100000) throw new Error("Max ±100,000 per adjustment");
+      const { data, error } = await supabase.rpc("mint_coins_admin", {
+        target_user_id: userId,
+        amount: delta,
+        admin_notes: `admin_adjust:${email}`,
+      });
+      if (error) throw new Error(error.message);
+      return data as number;
+    },
+    onSuccess: (newBalance, delta) => {
+      toast.success(`${delta > 0 ? "+" : ""}${delta} coins · new balance ${newBalance}`);
+      setAmount("");
+      qc.invalidateQueries({ queryKey: ["admin-user-settings-profiles"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const parsed = Number.parseInt(amount, 10);
+  const valid = Number.isFinite(parsed) && parsed > 0;
+
+  return (
+    <div className="flex items-center gap-1.5">
+      <Input
+        type="number"
+        min={1}
+        max={100000}
+        value={amount}
+        onChange={(e) => setAmount(e.target.value)}
+        placeholder="0"
+        className="h-8 w-20 text-sm"
+        disabled={adjust.isPending}
+      />
+      <Button
+        size="sm"
+        variant="outline"
+        className="h-8 px-2"
+        disabled={!valid || adjust.isPending}
+        onClick={() => adjust.mutate(parsed)}
+        title="Add coins"
+      >
+        <Plus className="h-3.5 w-3.5" />
+      </Button>
+      <Button
+        size="sm"
+        variant="outline"
+        className="h-8 px-2"
+        disabled={!valid || adjust.isPending}
+        onClick={() => adjust.mutate(-parsed)}
+        title="Subtract coins"
+      >
+        <Minus className="h-3.5 w-3.5" />
+      </Button>
+      {adjust.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
+    </div>
+  );
+}
+
