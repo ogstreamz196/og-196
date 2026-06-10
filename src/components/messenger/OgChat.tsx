@@ -68,6 +68,7 @@ export function OgChat({ compact = false }: { compact?: boolean }) {
     onSuccess: (res) => {
       setMessages((cur) => {
         const next = [...cur, { role: "assistant" as const, content: res.reply || "..." }];
+        selfSyncRef.current = true;
         window.dispatchEvent(new Event("og-messenger:sync"));
         return next;
       });
@@ -80,11 +81,16 @@ export function OgChat({ compact = false }: { compact?: boolean }) {
     },
   });
 
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+  }, [messages, m.isPending]);
+
   function send() {
     const text = input.trim();
     if (!text || m.isPending) return;
     const next = [...messages, { role: "user" as const, content: text }];
     setMessages(next);
+    selfSyncRef.current = true;
     window.dispatchEvent(new Event("og-messenger:sync"));
     setInput("");
     m.mutate(next);
