@@ -302,17 +302,32 @@ function OgBotSettingsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  // Grant a fresh OG Bot token to any user (creates the og_bot role +
-  // token row in one shot via set_og_bot_admin).
+  // Issue a fresh OG Bot token via the wizard: creates og_bot role + token
+  // (set_og_bot_admin), optionally sets expiry, and optionally grants VIP.
   const grant = useMutation({
-    mutationFn: async (targetUserId: string) => {
+    mutationFn: async (vars: { targetUserId: string; expiresAt: string | null; makeVip: boolean }) => {
       const { error } = await supabase.rpc("set_og_bot_admin", {
-        target_user_id: targetUserId,
+        target_user_id: vars.targetUserId,
         make_og: true,
-        admin_notes: "boss_grant_from_og_bot_panel",
+        admin_notes: "boss_issue_wizard",
       });
       if (error) throw new Error(error.message);
-      return targetUserId;
+      if (vars.expiresAt) {
+        const { error: e2 } = await (supabase.rpc as unknown as (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>)(
+          "set_og_bot_token_expiry",
+          { target_user_id: vars.targetUserId, new_expires_at: vars.expiresAt, admin_notes: "boss_issue_wizard" },
+        );
+        if (e2) throw new Error(e2.message);
+      }
+      if (vars.makeVip) {
+        const { error: e3 } = await supabase.rpc("set_vip_admin", {
+          target_user_id: vars.targetUserId,
+          make_vip: true,
+          admin_notes: "boss_issue_wizard",
+        });
+        if (e3) throw new Error(e3.message);
+      }
+      return vars.targetUserId;
     },
     onSuccess: () => {
       toast.success("OG Bot token issued");
@@ -417,9 +432,13 @@ function OgBotSettingsPage() {
         {/* Grant a new token */}
         <GrantTokenPanel
           existingUserIds={tokens.map((t) => t.user_id)}
-          onGrant={(id) => grant.mutate(id)}
+          onIssue={(vars) => grant.mutate(vars)}
           isPending={grant.isPending}
-          pendingId={typeof grant.variables === "string" ? grant.variables : null}
+          pendingId={
+            grant.variables && typeof grant.variables === "object"
+              ? (grant.variables as { targetUserId: string }).targetUserId
+              : null
+          }
         />
 
         {/* Stats */}
@@ -493,7 +512,7 @@ function OgBotSettingsPage() {
             <span>
               {unlocked
                 ? `Tokens unlocked for ${Math.floor(unlockedSecondsLeft / 60)}m ${unlockedSecondsLeft % 60}s`
-                : "Tokens are masked. Re-enter your boss password to reveal or copy."}
+                : "Tokens are masked. Verify your Google identity to reveal or copy."}
             </span>
           </div>
           {unlocked ? (
@@ -909,38 +928,34 @@ interface ReauthDialogProps {
 }
 
 function ReauthDialog({ open, email, intent, onCancel, onSuccess }: ReauthDialogProps) {
-  const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!open) {
-      setPassword("");
-      setSubmitting(false);
-    }
+    if (!open) setSubmitting(false);
   }, [open]);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleConfirm() {
     if (!email) {
       toast.error("No signed-in email found");
       return;
     }
-    if (!password) {
-      toast.error("Enter your boss password");
-      return;
-    }
     setSubmitting(true);
     try {
-      // Re-auth pattern: verify the boss password without disrupting the
-      // active session. signInWithPassword refreshes the same session.
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
-        toast.error("Incorrect password");
+      // Re-verify current session against Supabase Auth. Because sign-in is
+      // Google-only, "re-auth" is a fresh identity check — confirms the
+      // signed-in user is still the boss and the session is still valid.
+      const { data, error } = await supabase.auth.getUser();
+      if (error || !data.user) {
+        toast.error("Session expired — sign in again with Google");
+        return;
+      }
+      if ((data.user.email ?? "").toLowerCase() !== email.toLowerCase()) {
+        toast.error("Signed-in identity changed — refresh the page");
         return;
       }
       await onSuccess();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Re-auth failed");
+      toast.error(err instanceof Error ? err.message : "Verification failed");
     } finally {
       setSubmitting(false);
     }
@@ -948,49 +963,38 @@ function ReauthDialog({ open, email, intent, onCancel, onSuccess }: ReauthDialog
 
   const intentText =
     intent === "reveal"
-      ? "Confirm your password to reveal this OG Bot token."
+      ? "Confirm your Google identity to reveal this OG Bot token."
       : intent === "copy"
-      ? "Confirm your password to copy this OG Bot token to your clipboard."
-      : "Confirm your password to unlock OG Bot tokens for the next 5 minutes.";
+      ? "Confirm your Google identity to copy this OG Bot token to your clipboard."
+      : "Confirm your Google identity to unlock OG Bot tokens for the next 5 minutes.";
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onCancel(); }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <ShieldCheck className="h-4 w-4 text-primary" /> Boss re-auth required
+            <ShieldCheck className="h-4 w-4 text-primary" /> Boss identity check
           </DialogTitle>
           <DialogDescription>{intentText}</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">Signed in as</label>
+            <label className="text-xs font-medium text-muted-foreground">Signed in as (Google)</label>
             <Input value={email ?? ""} readOnly disabled className="font-mono text-xs" />
           </div>
-          <div className="space-y-1.5">
-            <label htmlFor="reauth-password" className="text-xs font-medium text-muted-foreground">
-              Boss password
-            </label>
-            <Input
-              id="reauth-password"
-              type="password"
-              autoComplete="current-password"
-              autoFocus
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-            />
-          </div>
-          <DialogFooter className="gap-2">
-            <Button type="button" variant="outline" onClick={onCancel} disabled={submitting}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={submitting || !password || !email}>
-              {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              <KeyRound className="mr-1.5 h-3.5 w-3.5" /> Unlock
-            </Button>
-          </DialogFooter>
-        </form>
+          <p className="text-xs text-muted-foreground">
+            One-click verify. We re-check your Google session with Supabase Auth — no password needed.
+          </p>
+        </div>
+        <DialogFooter className="gap-2">
+          <Button type="button" variant="outline" onClick={onCancel} disabled={submitting}>
+            Cancel
+          </Button>
+          <Button type="button" onClick={handleConfirm} disabled={submitting || !email}>
+            {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <KeyRound className="mr-1.5 h-3.5 w-3.5" /> Verify &amp; unlock
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
@@ -1040,9 +1044,15 @@ function BackendStatusPill({ data, loading, onRefresh }: BackendStatusPillProps)
   );
 }
 
+interface IssueVars {
+  targetUserId: string;
+  expiresAt: string | null;
+  makeVip: boolean;
+}
+
 interface GrantTokenPanelProps {
   existingUserIds: string[];
-  onGrant: (userId: string) => void;
+  onIssue: (vars: IssueVars) => void;
   isPending: boolean;
   pendingId: string | null;
 }
@@ -1053,8 +1063,9 @@ interface GrantableProfile {
   display_name: string | null;
 }
 
-function GrantTokenPanel({ existingUserIds, onGrant, isPending, pendingId }: GrantTokenPanelProps) {
+function GrantTokenPanel({ existingUserIds, onIssue, isPending, pendingId }: GrantTokenPanelProps) {
   const [query, setQuery] = useState("");
+  const [wizardFor, setWizardFor] = useState<GrantableProfile | null>(null);
   const term = query.trim();
 
   const candidatesQ = useQuery({
@@ -1078,6 +1089,13 @@ function GrantTokenPanel({ existingUserIds, onGrant, isPending, pendingId }: Gra
 
   const rows = candidatesQ.data ?? [];
 
+  // Close wizard once the mutation settles for this user.
+  useEffect(() => {
+    if (!isPending && wizardFor && pendingId === wizardFor.id) {
+      setWizardFor(null);
+    }
+  }, [isPending, pendingId, wizardFor]);
+
   return (
     <section className="rounded-2xl border border-border bg-card p-4 shadow-card space-y-3">
       <header className="flex items-center gap-2">
@@ -1085,8 +1103,10 @@ function GrantTokenPanel({ existingUserIds, onGrant, isPending, pendingId }: Gra
         <h3 className="text-sm font-semibold">Issue OG Bot token to a user</h3>
       </header>
       <p className="text-xs text-muted-foreground">
-        Search any user, then click Issue token. The backend mints an <code className="font-mono">ogb_…</code> token that
-        unlocks both the Bot Messenger and the Boss widget for that user.
+        Search any user, click <strong>Issue token</strong>, then pick an expiry and any extra
+        role grants in the wizard. The backend mints a fresh{" "}
+        <code className="font-mono">ogb_…</code> token that unlocks both the Bot Messenger and
+        the Boss widget for that user.
       </p>
       <div className="relative">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -1117,7 +1137,7 @@ function GrantTokenPanel({ existingUserIds, onGrant, isPending, pendingId }: Gra
               </div>
               <Button
                 size="sm"
-                onClick={() => onGrant(p.id)}
+                onClick={() => setWizardFor(p)}
                 disabled={isPending && pendingId === p.id}
               >
                 {isPending && pendingId === p.id ? (
@@ -1131,6 +1151,201 @@ function GrantTokenPanel({ existingUserIds, onGrant, isPending, pendingId }: Gra
           ))}
         </ul>
       )}
+
+      <IssueTokenWizard
+        profile={wizardFor}
+        submitting={isPending && pendingId === wizardFor?.id}
+        onCancel={() => setWizardFor(null)}
+        onConfirm={(expiresAt, makeVip) => {
+          if (!wizardFor) return;
+          onIssue({ targetUserId: wizardFor.id, expiresAt, makeVip });
+        }}
+      />
     </section>
+  );
+}
+
+type WizardPreset = "30d" | "90d" | "365d" | "never" | "custom";
+
+interface IssueTokenWizardProps {
+  profile: GrantableProfile | null;
+  submitting: boolean;
+  onCancel: () => void;
+  onConfirm: (expiresAt: string | null, makeVip: boolean) => void;
+}
+
+function IssueTokenWizard({ profile, submitting, onCancel, onConfirm }: IssueTokenWizardProps) {
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [preset, setPreset] = useState<WizardPreset>("90d");
+  const [customDate, setCustomDate] = useState("");
+  const [makeVip, setMakeVip] = useState(false);
+
+  useEffect(() => {
+    if (profile) {
+      setStep(1);
+      setPreset("90d");
+      setCustomDate("");
+      setMakeVip(false);
+    }
+  }, [profile?.id]);
+
+  if (!profile) return null;
+
+  const presetMs: Record<Exclude<WizardPreset, "never" | "custom">, number> = {
+    "30d": 30 * 86400_000,
+    "90d": 90 * 86400_000,
+    "365d": 365 * 86400_000,
+  };
+
+  function resolveExpiry(): string | null | "invalid" {
+    if (preset === "never") return null;
+    if (preset === "custom") {
+      if (!customDate) return "invalid";
+      return new Date(customDate).toISOString();
+    }
+    return new Date(Date.now() + presetMs[preset]).toISOString();
+  }
+
+  const expiryResolved = resolveExpiry();
+  const expiryLabel =
+    expiryResolved === "invalid"
+      ? "—"
+      : expiryResolved === null
+      ? "Never expires"
+      : new Date(expiryResolved).toLocaleString();
+
+  function submit() {
+    const exp = resolveExpiry();
+    if (exp === "invalid") {
+      toast.error("Pick a custom date and time");
+      return;
+    }
+    onConfirm(exp, makeVip);
+  }
+
+  return (
+    <Dialog open onOpenChange={(v) => { if (!v && !submitting) onCancel(); }}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <KeyRound className="h-4 w-4 text-primary" />
+            Issue OG Bot token · Step {step} of 3
+          </DialogTitle>
+          <DialogDescription>
+            {profile.display_name ?? profile.email ?? profile.id}
+          </DialogDescription>
+        </DialogHeader>
+
+        {step === 1 && (
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium">Choose expiry</h4>
+            <div className="space-y-2 text-sm">
+              {(["30d", "90d", "365d", "never", "custom"] as const).map((k) => (
+                <label key={k} className="flex items-center gap-2">
+                  <input type="radio" checked={preset === k} onChange={() => setPreset(k)} />
+                  <span>
+                    {k === "30d" && "Expires in 30 days"}
+                    {k === "90d" && "Expires in 90 days"}
+                    {k === "365d" && "Expires in 1 year"}
+                    {k === "never" && "No expiry (long-lived)"}
+                    {k === "custom" && "Custom date & time"}
+                  </span>
+                </label>
+              ))}
+              {preset === "custom" && (
+                <Input
+                  type="datetime-local"
+                  value={customDate}
+                  onChange={(e) => setCustomDate(e.target.value)}
+                  className="ml-6 w-[calc(100%-1.5rem)]"
+                />
+              )}
+            </div>
+          </div>
+        )}
+
+        {step === 2 && (
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium">Role grants</h4>
+            <p className="text-xs text-muted-foreground">
+              Every token automatically grants the <code className="font-mono">og_bot</code> role
+              (required for the token to work). Optionally also grant:
+            </p>
+            <label className="flex items-start gap-2 rounded-lg border border-border bg-background/40 p-3 text-sm">
+              <input
+                type="checkbox"
+                checked={makeVip}
+                onChange={(e) => setMakeVip(e.target.checked)}
+                className="mt-0.5"
+              />
+              <div>
+                <div className="font-medium">VIP role</div>
+                <div className="text-xs text-muted-foreground">
+                  Grants the user VIP perks alongside the bot token.
+                </div>
+              </div>
+            </label>
+            <p className="text-[11px] text-muted-foreground">
+              Admin role is intentionally not grantable from this wizard — manage admins from
+              Users.
+            </p>
+          </div>
+        )}
+
+        {step === 3 && (
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium">Review &amp; confirm</h4>
+            <div className="space-y-1 rounded-lg border border-border bg-background/40 p-3 text-sm">
+              <div className="flex justify-between gap-3">
+                <span className="text-muted-foreground">User</span>
+                <span className="truncate text-right">{profile.email ?? profile.id}</span>
+              </div>
+              <div className="flex justify-between gap-3">
+                <span className="text-muted-foreground">Expiry</span>
+                <span>{expiryLabel}</span>
+              </div>
+              <div className="flex justify-between gap-3">
+                <span className="text-muted-foreground">Roles granted</span>
+                <span>{makeVip ? "og_bot + vip" : "og_bot"}</span>
+              </div>
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              A fresh <code className="font-mono">ogb_…</code> token will be minted. If one
+              already existed it will be replaced.
+            </p>
+          </div>
+        )}
+
+        <DialogFooter className="gap-2">
+          <Button type="button" variant="outline" onClick={onCancel} disabled={submitting}>
+            Cancel
+          </Button>
+          {step > 1 && (
+            <Button type="button" variant="outline" onClick={() => setStep((s) => (s - 1) as 1 | 2 | 3)} disabled={submitting}>
+              Back
+            </Button>
+          )}
+          {step < 3 ? (
+            <Button
+              type="button"
+              onClick={() => {
+                if (step === 1 && preset === "custom" && !customDate) {
+                  toast.error("Pick a custom date and time");
+                  return;
+                }
+                setStep((s) => (s + 1) as 1 | 2 | 3);
+              }}
+            >
+              Next
+            </Button>
+          ) : (
+            <Button type="button" onClick={submit} disabled={submitting}>
+              {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Issue token
+            </Button>
+          )}
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
