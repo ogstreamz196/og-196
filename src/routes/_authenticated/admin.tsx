@@ -124,6 +124,10 @@ function AdminPanel() {
 
         <PricingControls />
 
+        <PortalManager />
+
+
+
 
         <div className="rounded-2xl border border-border bg-card shadow-card">
           {songsQuery.isLoading ? (
