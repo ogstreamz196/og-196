@@ -638,9 +638,147 @@ function OgBotSettingsPage() {
           }
         }}
       />
+
+      <ExpiryDialog
+        token={expiryEditFor}
+        profile={expiryEditFor ? profiles[expiryEditFor.user_id] ?? null : null}
+        submitting={setExpiry.isPending}
+        onCancel={() => setExpiryEditFor(null)}
+        onSave={(expiresAt) => {
+          if (!expiryEditFor) return;
+          setExpiry.mutate({ userId: expiryEditFor.user_id, expiresAt });
+        }}
+      />
     </DashboardShell>
   );
 }
+
+interface ExpiryDialogProps {
+  token: TokenRow | null;
+  profile: ProfileRow | null;
+  submitting: boolean;
+  onCancel: () => void;
+  onSave: (expiresAt: string | null) => void;
+}
+
+function ExpiryDialog({ token, profile, submitting, onCancel, onSave }: ExpiryDialogProps) {
+  const [mode, setMode] = useState<"never" | "datetime" | "preset">("never");
+  const [datetime, setDatetime] = useState<string>("");
+  const [preset, setPreset] = useState<"1d" | "7d" | "30d" | "90d" | "365d">("30d");
+
+  useEffect(() => {
+    if (!token) return;
+    if (token.expires_at) {
+      setMode("datetime");
+      // datetime-local input expects "YYYY-MM-DDTHH:mm" in local time
+      const d = new Date(token.expires_at);
+      const pad = (n: number) => String(n).padStart(2, "0");
+      setDatetime(
+        `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`,
+      );
+    } else {
+      setMode("never");
+      setDatetime("");
+    }
+    setPreset("30d");
+  }, [token?.user_id, token?.expires_at]);
+
+  if (!token) return null;
+
+  const presetMs: Record<typeof preset, number> = {
+    "1d": 86400_000,
+    "7d": 7 * 86400_000,
+    "30d": 30 * 86400_000,
+    "90d": 90 * 86400_000,
+    "365d": 365 * 86400_000,
+  };
+
+  function submit() {
+    if (mode === "never") {
+      onSave(null);
+      return;
+    }
+    if (mode === "preset") {
+      onSave(new Date(Date.now() + presetMs[preset]).toISOString());
+      return;
+    }
+    if (!datetime) {
+      toast.error("Pick a date and time");
+      return;
+    }
+    const iso = new Date(datetime).toISOString();
+    onSave(iso);
+  }
+
+  return (
+    <Dialog open onOpenChange={(v) => { if (!v) onCancel(); }}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <CalendarClock className="h-4 w-4 text-primary" /> Set token expiry
+          </DialogTitle>
+          <DialogDescription>
+            {profile?.display_name ?? profile?.email ?? token.user_id}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-sm">
+              <input type="radio" checked={mode === "never"} onChange={() => setMode("never")} />
+              <span>No expiry (token never expires)</span>
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input type="radio" checked={mode === "preset"} onChange={() => setMode("preset")} />
+              <span>Expire in…</span>
+              <select
+                disabled={mode !== "preset"}
+                value={preset}
+                onChange={(e) => setPreset(e.target.value as typeof preset)}
+                className="rounded-md border border-border bg-card px-2 py-1 text-xs disabled:opacity-50"
+              >
+                <option value="1d">1 day</option>
+                <option value="7d">7 days</option>
+                <option value="30d">30 days</option>
+                <option value="90d">90 days</option>
+                <option value="365d">1 year</option>
+              </select>
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input type="radio" checked={mode === "datetime"} onChange={() => setMode("datetime")} />
+              <span>Expire on a specific date</span>
+            </label>
+            {mode === "datetime" && (
+              <Input
+                type="datetime-local"
+                value={datetime}
+                onChange={(e) => setDatetime(e.target.value)}
+                className="ml-6 w-[calc(100%-1.5rem)]"
+              />
+            )}
+          </div>
+
+          {token.expires_at && (
+            <p className="text-xs text-muted-foreground">
+              Current expiry: {new Date(token.expires_at).toLocaleString()}
+            </p>
+          )}
+        </div>
+
+        <DialogFooter className="gap-2">
+          <Button type="button" variant="outline" onClick={onCancel} disabled={submitting}>
+            Cancel
+          </Button>
+          <Button type="button" onClick={submit} disabled={submitting}>
+            {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Save expiry
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 
 interface ReauthDialogProps {
   open: boolean;
