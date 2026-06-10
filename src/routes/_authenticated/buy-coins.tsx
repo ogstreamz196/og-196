@@ -1,13 +1,19 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Coins, Check, Sparkles, Loader2, ArrowLeft } from "lucide-react";
+import { Coins, Check, Sparkles, Loader2, ArrowLeft, Crown } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { useProfile } from "@/hooks/use-profile";
+import { useRole } from "@/hooks/use-role";
+import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { COIN_PACKS, type CoinPack } from "@/lib/coin-packs";
 import { StripeEmbeddedCheckoutInline } from "@/components/StripeEmbeddedCheckout";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+import { toast } from "sonner";
+
+const VIP_COST = 20;
 
 export const Route = createFileRoute("/_authenticated/buy-coins")({
   component: BuyCoinsPage,
