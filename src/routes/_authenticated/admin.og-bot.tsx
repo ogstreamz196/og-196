@@ -2,7 +2,7 @@ import { createFileRoute, Navigate, Link, redirect } from "@tanstack/react-route
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Bot, Loader2, ShieldCheck, Copy, RotateCcw, Trash2, Search, ArrowLeft, Eye, EyeOff, Lock, KeyRound,
+  Bot, Loader2, ShieldCheck, Copy, RotateCcw, Trash2, Search, ArrowLeft, Eye, EyeOff, Lock, KeyRound, Code2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRole } from "@/hooks/use-role";
@@ -17,6 +17,70 @@ import { toast } from "sonner";
 
 // How long a successful re-auth keeps reveal/copy unlocked, in ms.
 const REAUTH_TTL_MS = 5 * 60 * 1000;
+
+const EMBED_LOADER_URL = "https://ogstreamz.lovable.app/api/public/og-bot-widget-embed.js";
+
+function buildEmbedPrompt(token: string): string {
+  return `Embed the OG Bot widget into this project
+
+You are adding the OG Bot chat widget. The bot's brain — language, foul-mouth dictionary, voice, persona, intelligence, swear lexicon and all upgrade logic — lives only on the mother backend and is collectively called OG Bot Code. It is private. You do not see it, copy it, store it, or reimplement any of it here. The latest boss-approved version is inherited automatically within ~60 seconds of approval.
+
+1. Where to point — one backend, hardcoded
+
+Hardcode this loader URL. Do NOT make it configurable, do NOT proxy through your own backend, do NOT mirror it:
+
+${EMBED_LOADER_URL}
+
+The loader internally calls the mother's chat proxy on the same host. That call is the loader's business — don't reimplement, don't fetch from it, don't wrap it.
+
+2. The only code you write — one script tag
+
+Paste before </body> in index.html (or root layout). Token comes from Boss — request one, never invent one:
+
+<script
+  src="${EMBED_LOADER_URL}"
+  data-token="${token}"
+  data-title="OG Bot"
+  data-color="#f5c542"
+  defer
+></script>
+
+- data-token — issued by Boss. Treat as a secret.
+- data-title / data-color — cosmetic only. Voice, persona, swearing and dictionary are NOT configurable from this side.
+
+Optional React wrapper (still nothing more than the same script tag injected once):
+
+import { useEffect } from "react";
+export function OgBotWidget({ token }: { token: string }) {
+  useEffect(() => {
+    if ((window as any).__ogBotLoaded) return;
+    const s = document.createElement("script");
+    s.src = "${EMBED_LOADER_URL}";
+    s.async = true;
+    s.setAttribute("data-token", token);
+    document.body.appendChild(s);
+  }, [token]);
+  return null;
+}
+
+Keep the token out of committed source. Inject from a server secret.
+
+3. Hard rules — what NOT to do
+
+- ⛔ Do not implement any chat logic, system prompt, persona, swear lexicon, dictionary, voice settings, or foul-mouth toggle in this project.
+- ⛔ Do not create a chat API, edge function, server route, AI gateway call or model call here. The loader handles everything — you call no AI yourself.
+- ⛔ Do not store, log, fetch, mirror or cache any dictionary words, swear words, persona text, system prompts or model identifiers.
+- ⛔ Do not connect this project to the mother database. Do not paste any mother keys (service role, anon, JWT) anywhere. Do not write SQL against the mother schema.
+- ⛔ Do not add config UI for tone, language, voice or swearing — those toggles are Boss-only on the mother project.
+- ✅ Your job is one script tag pointed at the loader URL, with a token Boss gave you. Nothing more.
+
+4. Verify
+
+Click 💬 and send: "introduce yourself with maximum bite".
+- Sweary, sharp British reply → wired correctly, inheriting live OG Bot Code.
+- Polite / sanitised reply, or "Forbidden / Invalid token" toast → token wrong or this site's domain not whitelisted by Boss. Request a new token or domain approval. Do not fix this by editing anything here beyond the script tag.`;
+}
+
 
 export const Route = createFileRoute("/_authenticated/admin/og-bot")({
   beforeLoad: async () => {
@@ -367,6 +431,23 @@ function OgBotSettingsPage() {
                         title={unlocked ? "Copy token" : "Re-auth required to copy"}
                       >
                         {unlocked ? <Copy className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7"
+                        onClick={async () => {
+                          if (requireReauth("copy")) return;
+                          try {
+                            await navigator.clipboard.writeText(buildEmbedPrompt(t.token));
+                            toast.success("Embed prompt copied — paste into the other project");
+                          } catch {
+                            toast.error("Could not copy to clipboard");
+                          }
+                        }}
+                        title={unlocked ? "Copy embed prompt (with this token baked in)" : "Re-auth required to copy embed prompt"}
+                      >
+                        {unlocked ? <Code2 className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
                       </Button>
                     </div>
 
