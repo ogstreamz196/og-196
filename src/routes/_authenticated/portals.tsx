@@ -4,6 +4,7 @@ import { Loader2, Compass, Globe2, Coins, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { AdminEditablePortalField, useAdminEditMode } from "@/components/admin/AdminEditMode";
+import { EditableContent } from "@/components/admin/EditableContent";
 import { useRole } from "@/hooks/use-role";
 
 export const Route = createFileRoute("/_authenticated/portals")({
@@ -81,9 +82,15 @@ function PortalsPage() {
             <Compass className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <h2 className="text-xl font-semibold">Explore portals</h2>
+            <h2 className="text-xl font-semibold">
+              <EditableContent contentKey="portals.heading" defaultValue="Explore portals" />
+            </h2>
             <p className="text-sm text-muted-foreground">
-              Localized generators curated by the team. Pick one to start creating in its style.
+              <EditableContent
+                contentKey="portals.subtitle"
+                defaultValue="Localized generators curated by the team. Pick one to start creating in its style."
+                multiline
+              />
             </p>
             {editingActive && (
               <p className="mt-1 text-xs text-primary">

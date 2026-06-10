@@ -4,6 +4,7 @@ import { Coins, Check, Sparkles, Loader2, ArrowLeft, Crown } from "lucide-react"
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import { EditableContent } from "@/components/admin/EditableContent";
 import { useProfile } from "@/hooks/use-profile";
 import { useRole } from "@/hooks/use-role";
 import { supabase } from "@/integrations/supabase/client";
@@ -90,8 +91,12 @@ function BuyCoinsPage() {
               You have <span className="font-bold tabular-nums">{profile?.coin_balance ?? 0}</span> coins
             </span>
           </div>
-          <h2 className="mt-4 text-3xl font-bold">Top up your coins</h2>
-          <p className="mt-2 text-muted-foreground">3 coins per song. Coins never expire.</p>
+          <h2 className="mt-4 text-3xl font-bold">
+            <EditableContent contentKey="buyCoins.heading" defaultValue="Top up your coins" />
+          </h2>
+          <p className="mt-2 text-muted-foreground">
+            <EditableContent contentKey="buyCoins.subtitle" defaultValue="3 coins per song. Coins never expire." multiline />
+          </p>
         </div>
 
         <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
