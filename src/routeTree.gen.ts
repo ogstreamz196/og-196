@@ -17,6 +17,7 @@ import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedBuyCoinsRouteImport } from './routes/_authenticated/buy-coins'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedBuyCoinsReturnRouteImport } from './routes/_authenticated/buy-coins.return'
+import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedAdminCreatePortalRouteImport } from './routes/_authenticated/admin.create-portal'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
@@ -60,6 +61,11 @@ const AuthenticatedBuyCoinsReturnRoute =
     path: '/return',
     getParentRoute: () => AuthenticatedBuyCoinsRoute,
   } as any)
+const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAdminCreatePortalRoute =
   AuthenticatedAdminCreatePortalRouteImport.update({
     id: '/create-portal',
@@ -81,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/library': typeof AuthenticatedLibraryRoute
   '/portal/$slug': typeof PortalSlugRoute
   '/admin/create-portal': typeof AuthenticatedAdminCreatePortalRoute
+  '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -92,6 +99,7 @@ export interface FileRoutesByTo {
   '/portal/$slug': typeof PortalSlugRoute
   '/': typeof AuthenticatedIndexRoute
   '/admin/create-portal': typeof AuthenticatedAdminCreatePortalRoute
+  '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -105,6 +113,7 @@ export interface FileRoutesById {
   '/portal/$slug': typeof PortalSlugRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/admin/create-portal': typeof AuthenticatedAdminCreatePortalRoute
+  '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -118,6 +127,7 @@ export interface FileRouteTypes {
     | '/library'
     | '/portal/$slug'
     | '/admin/create-portal'
+    | '/admin/users'
     | '/buy-coins/return'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -129,6 +139,7 @@ export interface FileRouteTypes {
     | '/portal/$slug'
     | '/'
     | '/admin/create-portal'
+    | '/admin/users'
     | '/buy-coins/return'
     | '/api/public/payments/webhook'
   id:
@@ -141,6 +152,7 @@ export interface FileRouteTypes {
     | '/portal/$slug'
     | '/_authenticated/'
     | '/_authenticated/admin/create-portal'
+    | '/_authenticated/admin/users'
     | '/_authenticated/buy-coins/return'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
@@ -210,6 +222,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBuyCoinsReturnRouteImport
       parentRoute: typeof AuthenticatedBuyCoinsRoute
     }
+    '/_authenticated/admin/users': {
+      id: '/_authenticated/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/create-portal': {
       id: '/_authenticated/admin/create-portal'
       path: '/create-portal'
@@ -229,10 +248,12 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminCreatePortalRoute: typeof AuthenticatedAdminCreatePortalRoute
+  AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminCreatePortalRoute: AuthenticatedAdminCreatePortalRoute,
+  AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
 }
 
 const AuthenticatedAdminRouteWithChildren =
@@ -277,3 +298,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
