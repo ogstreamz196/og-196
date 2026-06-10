@@ -139,7 +139,7 @@ function CreatePortalWizard() {
 
             <div>
               <div className="flex items-center justify-between">
-                <Label>Preset style tags ({tags.length}/5)</Label>
+                <Label>Preset style tags ({tags.length}/6 · pick 4–6)</Label>
                 {tags.length > 0 && (
                   <button type="button" className="text-xs text-muted-foreground hover:text-foreground" onClick={() => setTags([])}>Clear</button>
                 )}
