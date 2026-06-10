@@ -4,6 +4,7 @@ import { Loader2, Compass, Globe2, Coins, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { AdminEditablePortalField, useAdminEditMode } from "@/components/admin/AdminEditMode";
+import { EditableContent } from "@/components/admin/EditableContent";
 import { useRole } from "@/hooks/use-role";
 
 export const Route = createFileRoute("/_authenticated/portals")({
