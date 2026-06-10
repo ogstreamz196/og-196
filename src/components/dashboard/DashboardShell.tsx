@@ -161,30 +161,35 @@ export function DashboardShell({ title, children }: { title: string; children: R
           })}
 
           {isAdmin && (
-            <>
-              <div className="mt-4 flex items-center gap-2 px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/40">
+            <div className="mt-4 rounded-xl border border-primary/30 bg-gradient-brand-soft p-2">
+              <div className="mb-1 flex items-center gap-2 px-2 pt-1 text-[10px] font-semibold uppercase tracking-wider text-primary">
                 <ShieldCheck className="h-3 w-3" /> Boss controls
               </div>
-              {adminItems.map((item) => {
-                const active = isItemActive(item, pathname);
-                const Icon = item.icon;
-                return (
-                  <Link
-                    key={item.to}
-                    to={item.to}
-                    className={cn(
-                      "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                      active
-                        ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                        : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
-                    )}
-                  >
-                    <Icon className={cn("h-4 w-4", active && "text-primary")} />
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </>
+              <p className="mb-2 px-2 text-[10px] leading-snug text-sidebar-foreground/60">
+                Manage users, assign VIP, mint coins, edit portals.
+              </p>
+              <div className="flex flex-col gap-0.5">
+                {adminItems.map((item) => {
+                  const active = isItemActive(item, pathname);
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.to}
+                      to={item.to}
+                      className={cn(
+                        "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                        active
+                          ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                          : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
+                      )}
+                    >
+                      <Icon className={cn("h-4 w-4", active && "text-primary")} />
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
           )}
         </nav>
 

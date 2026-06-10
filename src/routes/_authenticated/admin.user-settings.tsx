@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
+import { VipBadgeAction } from "@/components/admin/VipBadgeAction";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/user-settings")({
@@ -133,7 +134,10 @@ function AdminUserSettingsPage() {
           <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
             <div>
               <h2 className="text-lg font-semibold">All user settings</h2>
-              <p className="text-sm text-muted-foreground">Read-only view of each user's account profile.</p>
+              <p className="text-sm text-muted-foreground">
+                Read-only profile data. Flip "Edit mode" in the header to assign or revoke VIP,
+                rename users, and adjust coins inline.
+              </p>
             </div>
             <div className="relative w-full max-w-xs">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -181,19 +185,18 @@ function AdminUserSettingsPage() {
                         <TableCell className="font-medium">{p.email ?? "—"}</TableCell>
                         <TableCell>{p.display_name ?? "—"}</TableCell>
                         <TableCell>
-                          <div className="flex flex-wrap gap-1">
-                            {roles.length === 0 ? (
-                              <span className="text-xs text-muted-foreground">—</span>
-                            ) : (
-                              roles.map((r) => (
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <VipBadgeAction userId={p.id} />
+                            {roles
+                              .filter((r) => r !== "vip")
+                              .map((r) => (
                                 <span
                                   key={r}
                                   className="rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide"
                                 >
                                   {r}
                                 </span>
-                              ))
-                            )}
+                              ))}
                           </div>
                         </TableCell>
                         <TableCell className="text-right tabular-nums font-medium">{p.coin_balance ?? 0}</TableCell>
