@@ -24,6 +24,23 @@ const LANGUAGE_OPTIONS = [
   "Korean", "Vietnamese", "Thai", "Indonesian", "Filipino", "Swahili",
 ] as const;
 
+const VOCAL_MOOD_POOL = [
+  "dreamy", "gritty", "uplifting", "melancholic", "ethereal", "raspy",
+  "soulful", "haunting", "playful", "intimate", "powerful", "whispery",
+  "smooth", "raw", "angelic", "dark", "warm", "breathy", "anthemic",
+  "sultry", "mellow", "fierce", "tender", "confident", "vulnerable",
+  "hypnotic", "punchy", "airy", "sad", "euphoric", "hopeful", "nostalgic",
+  "moody", "bright", "edgy", "cinematic", "romantic", "rebellious",
+] as const;
+
+const VISIBLE_BATCH = 8;
+
+function pickBatch(pool: readonly string[], exclude: string[], size: number): string[] {
+  const available = pool.filter((p) => !exclude.includes(p));
+  const shuffled = [...available].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, Math.min(size, shuffled.length));
+}
+
 
 interface Portal {
   id: string;
