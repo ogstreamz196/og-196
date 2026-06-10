@@ -41,13 +41,16 @@ function OgPersonaPage() {
   const [script, setScript] = useState("");
   const [voice, setVoice] = useState("");
   const [dictionary, setDictionary] = useState("");
+  const [foulMouth, setFoulMouth] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [togglingFoul, setTogglingFoul] = useState(false);
 
   useEffect(() => {
     if (loadingContent) return;
     setScript(get("og_persona.script", DEFAULT_SCRIPT));
     setVoice(get("og_persona.voice", DEFAULT_VOICE));
     setDictionary(get("og_persona.dictionary", DEFAULT_DICTIONARY));
+    setFoulMouth(get("og_persona.foul_mouth", "false").toLowerCase() === "true");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadingContent]);
 
@@ -73,6 +76,21 @@ function OgPersonaPage() {
       toast.error((e as Error).message);
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function toggleFoul(next: boolean) {
+    setTogglingFoul(true);
+    const prev = foulMouth;
+    setFoulMouth(next);
+    try {
+      await setContent.mutateAsync({ key: "og_persona.foul_mouth", value: next ? "true" : "false" });
+      toast.success(next ? "Foul mouth mode: ON 🤬" : "Foul mouth mode: OFF");
+    } catch (e) {
+      setFoulMouth(prev);
+      toast.error((e as Error).message);
+    } finally {
+      setTogglingFoul(false);
     }
   }
 
