@@ -1,5 +1,5 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Sparkles, Library, Coins as CoinsIcon, LogOut, Music2, Settings, Search, Clock, Loader2, Compass } from "lucide-react";
+import { Library, Coins as CoinsIcon, LogOut, Music2, Settings, Search, Clock, Loader2, Compass, UserCog } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
 import { CoinBalance } from "./CoinBalance";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,11 +11,11 @@ import { Input } from "@/components/ui/input";
 import { AdminEditModeProvider, AdminEditModeToggle } from "@/components/admin/AdminEditMode";
 
 const baseNavItems = [
-  { to: "/", label: "Generate", icon: Sparkles },
   { to: "/portals", label: "Portals", icon: Compass },
   { to: "/library", label: "My Library", icon: Library },
   { to: "/buy-coins", label: "Buy Coins", icon: CoinsIcon },
 ] as const;
+
 
 interface RecentSong {
   id: string;
