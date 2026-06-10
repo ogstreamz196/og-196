@@ -1,12 +1,13 @@
 import { createFileRoute, Navigate, Link, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Bot, Loader2, Save, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Bot, Loader2, Save, ShieldCheck, Skull } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRole } from "@/hooks/use-role";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { useSiteContent, useSetSiteContent } from "@/hooks/use-site-content";
 import { toast } from "sonner";
 
