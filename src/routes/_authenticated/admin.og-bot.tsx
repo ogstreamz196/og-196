@@ -215,6 +215,40 @@ function OgBotSettingsPage() {
           />
         </div>
 
+        {/* Lock / unlock banner */}
+        <div className={
+          "flex flex-wrap items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-sm " +
+          (unlocked
+            ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+            : "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300")
+        }>
+          <div className="flex items-center gap-2">
+            {unlocked ? <KeyRound className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+            <span>
+              {unlocked
+                ? `Tokens unlocked for ${Math.floor(unlockedSecondsLeft / 60)}m ${unlockedSecondsLeft % 60}s`
+                : "Tokens are masked. Re-enter your boss password to reveal or copy."}
+            </span>
+          </div>
+          {unlocked ? (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setReauthedUntil(0);
+                setRevealed({});
+                toast.success("Tokens re-locked");
+              }}
+            >
+              <Lock className="mr-1.5 h-3.5 w-3.5" /> Lock now
+            </Button>
+          ) : (
+            <Button size="sm" onClick={() => { setPending(null); setShowReauth(true); }}>
+              <KeyRound className="mr-1.5 h-3.5 w-3.5" /> Unlock
+            </Button>
+          )}
+        </div>
+
         {/* Tokens list */}
         <section className="rounded-2xl border border-border bg-card shadow-card">
           <header className="flex items-center justify-between border-b border-border px-4 py-3">
