@@ -159,6 +159,20 @@ export function OgChat({ compact = false }: { compact?: boolean }) {
 
   return (
     <div className={cn("flex h-full flex-col", compact ? "" : "rounded-xl border border-border bg-card")}>
+      <div className="flex items-center justify-between border-b border-border/60 px-3 py-1.5 text-[10px] text-muted-foreground">
+        <span className="inline-flex items-center gap-1">
+          <KeyRound className="h-3 w-3 text-primary" />
+          Token ••••{token.slice(-4)}
+        </span>
+        <button
+          type="button"
+          onClick={clearToken}
+          className="inline-flex items-center gap-1 hover:text-foreground"
+          title="Clear OG Bot token"
+        >
+          <LogOut className="h-3 w-3" /> clear
+        </button>
+      </div>
       <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto p-4">
         {messages.length === 0 && (
           <div className="grid h-full place-items-center text-center">
