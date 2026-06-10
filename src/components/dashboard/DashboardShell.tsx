@@ -1,5 +1,5 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Sparkles, Library, Coins as CoinsIcon, LogOut, Music2, Settings, Search, Clock, Loader2 } from "lucide-react";
+import { Sparkles, Library, Coins as CoinsIcon, LogOut, Music2, Settings, Search, Clock, Loader2, Compass } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
 import { CoinBalance } from "./CoinBalance";
 import { supabase } from "@/integrations/supabase/client";
