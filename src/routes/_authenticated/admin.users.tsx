@@ -147,6 +147,9 @@ function AdminUsersPage() {
                     <TableCell className="text-right">
                       <AdminEditableBalance userId={u.id} value={u.coin_balance} />
                     </TableCell>
+                    <TableCell>
+                      <VipBadgeAction userId={u.id} />
+                    </TableCell>
                     <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
                       {new Date(u.created_at).toLocaleDateString()}
                     </TableCell>
