@@ -88,7 +88,14 @@ Deno.serve(async (req) => {
       return json({ error: "Insufficient coins", code: "insufficient_coins" }, 402);
     }
 
-    const callbackUrl = `${SUPABASE_URL}/functions/v1/suno-callback?song_id=${song.id}`;
+    const encoder = new TextEncoder();
+    const hmacKey = await crypto.subtle.importKey(
+      "raw", encoder.encode(SERVICE_ROLE),
+      { name: "HMAC", hash: "SHA-256" }, false, ["sign"],
+    );
+    const sigBuf = await crypto.subtle.sign("HMAC", hmacKey, encoder.encode(song.id));
+    const token = Array.from(new Uint8Array(sigBuf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+    const callbackUrl = `${SUPABASE_URL}/functions/v1/suno-callback?song_id=${song.id}&token=${token}`;
 
     let sunoRes: Response;
     try {
