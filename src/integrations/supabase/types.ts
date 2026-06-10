@@ -32,6 +32,42 @@ export type Database = {
         }
         Relationships: []
       }
+      boss_audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          category: string
+          created_at: string
+          id: string
+          metadata: Json
+          new_value: string | null
+          old_value: string | null
+          target_key: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          category: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          new_value?: string | null
+          old_value?: string | null
+          target_key: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          category?: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          new_value?: string | null
+          old_value?: string | null
+          target_key?: string
+        }
+        Relationships: []
+      }
       coin_transactions: {
         Row: {
           amount: number
