@@ -34,7 +34,6 @@ export function DashboardShell({ title, children }: { title: string; children: R
   }
 
   return (
-  return (
     <AdminEditModeProvider>
     <div className="flex min-h-screen w-full bg-background">
       {/* Sidebar */}
