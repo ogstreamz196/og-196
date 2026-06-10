@@ -25,8 +25,17 @@ Deno.serve(async (req) => {
   // Failure callback
   const callbackType = payload?.data?.callbackType || payload?.callbackType;
   if (callbackType === "error" || (payload?.code && payload.code !== 200)) {
-    const { data: setting } = await admin.from("app_settings").select("value").eq("key", "coins_per_generation").maybeSingle();
-    const refundAmt = typeof setting?.value === "number" ? setting.value : 3;
+    // Refund using portal override when applicable; fall back to global setting.
+    let refundAmt = 3;
+    if (parentSong.portal_id) {
+      const { data: portal } = await admin
+        .from("portals").select("coin_cost_per_generation").eq("id", parentSong.portal_id).maybeSingle();
+      if (typeof portal?.coin_cost_per_generation === "number") refundAmt = portal.coin_cost_per_generation;
+    } else {
+      const { data: setting } = await admin
+        .from("app_settings").select("value").eq("key", "coins_per_generation").maybeSingle();
+      if (typeof setting?.value === "number") refundAmt = setting.value;
+    }
     await admin.from("songs").update({
       status: "failed",
       error_message: payload?.msg || payload?.message || "Suno reported failure",
