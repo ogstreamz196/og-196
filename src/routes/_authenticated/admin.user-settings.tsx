@@ -1,7 +1,7 @@
-import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
+import { createFileRoute, Navigate, Link, redirect } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Loader2, ShieldCheck, Search, ArrowLeft, UserCog, Crown, Coins } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Loader2, ShieldCheck, Search, ArrowLeft, UserCog, Crown, Coins, Plus, Minus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRole } from "@/hooks/use-role";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
@@ -10,10 +10,24 @@ import { Button } from "@/components/ui/button";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/user-settings")({
+  // Strict server-side authorization: the user must be authenticated AND
+  // have the 'admin' role. The has_role() RPC is SECURITY DEFINER and runs
+  // against the caller's auth.uid(); failing the check redirects away.
+  beforeLoad: async () => {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) throw redirect({ to: "/auth" });
+    const { data: isAdmin, error } = await supabase.rpc("has_role", {
+      _user_id: userData.user.id,
+      _role: "admin",
+    });
+    if (error || !isAdmin) throw redirect({ to: "/" });
+  },
   component: AdminUserSettingsPage,
 });
+
 
 interface ProfileRow {
   id: string;
