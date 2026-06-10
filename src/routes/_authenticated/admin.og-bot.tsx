@@ -591,12 +591,16 @@ function OgBotSettingsPage() {
                       </Button>
                     </div>
 
-                    <div className="grid gap-1 text-[11px] text-muted-foreground sm:grid-cols-3">
+                    <div className="grid gap-1 text-[11px] text-muted-foreground sm:grid-cols-4">
                       <span>Created {new Date(t.created_at).toLocaleString()}</span>
                       <span>Updated {new Date(t.updated_at).toLocaleString()}</span>
                       <span>
                         Last used{" "}
                         {t.last_used_at ? new Date(t.last_used_at).toLocaleString() : "—"}
+                      </span>
+                      <span>
+                        Expires{" "}
+                        {t.expires_at ? new Date(t.expires_at).toLocaleString() : "never"}
                       </span>
                     </div>
                   </li>
