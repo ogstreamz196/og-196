@@ -1,5 +1,5 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Library, Coins as CoinsIcon, LogOut, Music2, Settings, Search, Clock, Loader2, Compass, UserCog } from "lucide-react";
+import { Library, Coins as CoinsIcon, LogOut, Music2, Settings, Search, Clock, Loader2, Compass, UserCog, LayoutDashboard, PlusSquare, ShieldCheck } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
 import { CoinBalance } from "./CoinBalance";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,11 +10,14 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { AdminEditModeProvider, AdminEditModeToggle } from "@/components/admin/AdminEditMode";
 
-const baseNavItems = [
-  { to: "/portals", label: "Portals", icon: Compass },
-  { to: "/library", label: "My Library", icon: Library },
-  { to: "/buy-coins", label: "Buy Coins", icon: CoinsIcon },
-] as const;
+type NavItem = { to: string; label: string; icon: typeof Library; match?: string[] };
+
+const baseNavItems: NavItem[] = [
+  { to: "/", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/portals", label: "Portals", icon: Compass, match: ["/portals", "/portal/"] },
+  { to: "/library", label: "My Library", icon: Library, match: ["/library"] },
+  { to: "/buy-coins", label: "Buy Coins", icon: CoinsIcon, match: ["/buy-coins"] },
+];
 
 
 interface RecentSong {
@@ -94,10 +97,20 @@ function RecentMedia({ userId }: { userId: string }) {
   );
 }
 
-const adminItems = [
-  { to: "/admin/user-settings", label: "User Settings", icon: UserCog },
-  { to: "/admin", label: "Admin Panel", icon: Settings },
-] as const;
+const adminItems: NavItem[] = [
+  { to: "/admin", label: "Boss Panel", icon: ShieldCheck, match: ["/admin"] },
+  { to: "/admin/user-settings", label: "User Settings", icon: UserCog, match: ["/admin/user-settings"] },
+  { to: "/admin/users", label: "Manage Users", icon: UserCog, match: ["/admin/users"] },
+  { to: "/admin/create-portal", label: "New Portal", icon: PlusSquare, match: ["/admin/create-portal"] },
+];
+
+function isItemActive(item: NavItem, pathname: string): boolean {
+  if (item.to === "/") return pathname === "/";
+  if (item.match) {
+    return item.match.some((m) => pathname === m || pathname.startsWith(m + "/") || pathname.startsWith(m));
+  }
+  return pathname === item.to;
+}
 
 export function DashboardShell({ title, children }: { title: string; children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -105,7 +118,6 @@ export function DashboardShell({ title, children }: { title: string; children: R
   const { user } = useAuth();
   const { isAdmin } = useRole();
   const qc = useQueryClient();
-  const navItems = isAdmin ? [...baseNavItems, ...adminItems] : [...baseNavItems];
 
 
   async function handleSignOut() {
@@ -128,8 +140,8 @@ export function DashboardShell({ title, children }: { title: string; children: R
         </Link>
 
         <nav className="mt-6 flex flex-col gap-1">
-          {navItems.map((item) => {
-            const active = pathname === item.to;
+          {baseNavItems.map((item) => {
+            const active = isItemActive(item, pathname);
             const Icon = item.icon;
             return (
               <Link
@@ -147,6 +159,33 @@ export function DashboardShell({ title, children }: { title: string; children: R
               </Link>
             );
           })}
+
+          {isAdmin && (
+            <>
+              <div className="mt-4 flex items-center gap-2 px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/40">
+                <ShieldCheck className="h-3 w-3" /> Boss controls
+              </div>
+              {adminItems.map((item) => {
+                const active = isItemActive(item, pathname);
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    className={cn(
+                      "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                      active
+                        ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                        : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+                    )}
+                  >
+                    <Icon className={cn("h-4 w-4", active && "text-primary")} />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </>
+          )}
         </nav>
 
         {user ? <RecentMedia userId={user.id} /> : <div className="flex-1" />}
@@ -199,8 +238,8 @@ export function DashboardShell({ title, children }: { title: string; children: R
 
         {/* Mobile nav */}
         <nav className="flex gap-1 overflow-x-auto border-b border-border bg-sidebar/50 px-2 py-2 md:hidden">
-          {navItems.map((item) => {
-            const active = pathname === item.to;
+          {[...baseNavItems, ...(isAdmin ? adminItems : [])].map((item) => {
+            const active = isItemActive(item, pathname);
             const Icon = item.icon;
             return (
               <Link
