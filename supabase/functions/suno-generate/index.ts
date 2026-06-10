@@ -43,6 +43,7 @@ Deno.serve(async (req) => {
     const lyrics = (body.lyrics ?? "").toString().trim() || null;
     const title = (body.title ?? "").toString().trim() || null;
     const instrumental = !!body.instrumental;
+    const portalId = body.portal_id ? String(body.portal_id) : null;
 
     if (!prompt && !lyrics) return json({ error: "Provide a prompt or lyrics" }, 400);
 
@@ -51,7 +52,7 @@ Deno.serve(async (req) => {
 
     const { data: song, error: songErr } = await admin
       .from("songs")
-      .insert({ user_id: user.id, prompt, style, lyrics, title, status: "pending" })
+      .insert({ user_id: user.id, prompt, style, lyrics, title, status: "pending", portal_id: portalId })
       .select()
       .single();
     if (songErr) return json({ error: songErr.message }, 500);

@@ -1,0 +1,306 @@
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Sparkles, Loader2, Music2, Coins, Wand2, LogIn } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
+import { useProfile } from "@/hooks/use-profile";
+import { useSettings } from "@/hooks/use-settings";
+import { SongCard, type Song } from "@/components/SongCard";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+
+interface Portal {
+  id: string;
+  slug: string;
+  name: string;
+  language: string;
+  style_tags: string[];
+}
+
+export const Route = createFileRoute("/portal/$slug")({
+  loader: async ({ params }) => {
+    const { data, error } = await supabase
+      .from("portals")
+      .select("id, slug, name, language, style_tags")
+      .eq("slug", params.slug)
+      .maybeSingle();
+    if (error) throw error;
+    if (!data) throw notFound();
+    return { portal: data as Portal };
+  },
+  component: PortalPage,
+  notFoundComponent: () => (
+    <div className="grid min-h-screen place-items-center bg-background p-6 text-center">
+      <div>
+        <h1 className="text-2xl font-bold">Portal not found</h1>
+        <p className="mt-2 text-muted-foreground">This portal doesn't exist or has been removed.</p>
+        <Link to="/" className="mt-4 inline-block text-primary underline">Go home</Link>
+      </div>
+    </div>
+  ),
+  errorComponent: () => (
+    <div className="grid min-h-screen place-items-center bg-background p-6 text-center">
+      <p className="text-destructive">Something went wrong loading this portal.</p>
+    </div>
+  ),
+});
+
+function PortalPage() {
+  const { portal } = Route.useLoaderData();
+  const { user } = useAuth();
+  const { data: profile } = useProfile();
+  const { data: settings } = useSettings();
+  const qc = useQueryClient();
+  const COIN_COST = settings?.coins_per_generation ?? 3;
+  const SONGS_PER_GEN = settings?.songs_per_generation ?? 2;
+
+  const [songName, setSongName] = useState("");
+  const [description, setDescription] = useState("");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [lyrics, setLyrics] = useState("");
+
+  function toggleTag(tag: string) {
+    setSelectedTags((p) => (p.includes(tag) ? p.filter((t) => t !== tag) : [...p, tag]));
+  }
+
+  const portalSongsQuery = useQuery({
+    queryKey: ["portal-songs", portal.id, user?.id],
+    enabled: !!user,
+    queryFn: async (): Promise<Song[]> => {
+      const { data, error } = await supabase
+        .from("songs")
+        .select("*")
+        .eq("portal_id", portal.id)
+        .order("created_at", { ascending: false })
+        .limit(6);
+      if (error) throw error;
+      return (data ?? []) as Song[];
+    },
+  });
+
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel(`portal-songs-${portal.id}`)
+      .on("postgres_changes",
+        { event: "*", schema: "public", table: "songs", filter: `user_id=eq.${user.id}` },
+        () => portalSongsQuery.refetch())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, portal.id]);
+
+  const generateLyrics = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke("generate-lyrics", {
+        body: {
+          songName,
+          description,
+          styleTags: selectedTags,
+          language: portal.language,
+        },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      return data.lyrics as string;
+    },
+    onSuccess: (text) => {
+      setLyrics(text);
+      toast.success(`Lyrics generated in ${portal.language}`);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const generateSongs = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke("suno-generate", {
+        body: {
+          prompt: description || songName,
+          style: selectedTags.join(", "),
+          title: songName,
+          lyrics,
+          portal_id: portal.id,
+        },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      return data;
+    },
+    onSuccess: () => {
+      toast.success(`Queued ${SONGS_PER_GEN} songs — they'll appear below shortly`);
+      qc.invalidateQueries({ queryKey: ["portal-songs"] });
+      qc.invalidateQueries({ queryKey: ["profile"] });
+    },
+    onError: (e: Error) => {
+      if (e.message.toLowerCase().includes("insufficient")) {
+        toast.error("Not enough coins — visit Buy Coins.");
+      } else {
+        toast.error(e.message || "Generation failed");
+      }
+    },
+  });
+
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-border bg-background/80 px-4 backdrop-blur md:px-8">
+        <Link to="/" className="flex items-center gap-2">
+          <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-brand shadow-glow">
+            <Music2 className="h-5 w-5 text-primary-foreground" />
+          </div>
+          <span className="text-lg font-bold tracking-tight">Sonix</span>
+        </Link>
+        {user ? (
+          <div className="flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-sm">
+            <Coins className="h-4 w-4 text-coin" />
+            <span className="font-semibold">{profile?.coin_balance ?? 0}</span>
+            <span className="text-muted-foreground">coins</span>
+          </div>
+        ) : (
+          <Link to="/auth">
+            <Button size="sm" variant="outline"><LogIn className="mr-2 h-4 w-4" /> Sign in</Button>
+          </Link>
+        )}
+      </header>
+
+      <main className="mx-auto max-w-4xl px-4 py-8 md:px-8 md:py-12">
+        <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-8 shadow-card bg-gradient-hero">
+          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-background/50 px-3 py-1 text-xs text-muted-foreground backdrop-blur">
+            <Wand2 className="h-3 w-3 text-primary" />
+            Portal · Lyrics in {portal.language}
+          </div>
+          <h1 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl">{portal.name}</h1>
+          <p className="mt-2 max-w-xl text-muted-foreground">
+            Write your song idea below, generate lyrics for free, then turn them into music.
+          </p>
+        </div>
+
+        <div className="mt-6 grid gap-4 rounded-2xl border border-border bg-card p-6 shadow-card">
+          <div>
+            <Label htmlFor="song-name">Song name</Label>
+            <Input
+              id="song-name"
+              value={songName}
+              onChange={(e) => setSongName(e.target.value)}
+              placeholder="My Brand New Song"
+              maxLength={200}
+              className="mt-2"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="description">Describe the lyrics</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="A love story set on a rainy night in the city..."
+              rows={3}
+              maxLength={1000}
+              className="mt-2 resize-none"
+            />
+          </div>
+
+          <div>
+            <Label>Style tags</Label>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {portal.style_tags.map((tag: string) => {
+                const selected = selectedTags.includes(tag);
+                return (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => toggleTag(tag)}
+                    className={cn(
+                      "rounded-full border px-3 py-1 text-xs transition-colors",
+                      selected
+                        ? "border-primary bg-primary/15 text-primary"
+                        : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground",
+                    )}
+                  >
+                    {tag}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <Button
+            variant="outline"
+            onClick={() => generateLyrics.mutate()}
+            disabled={generateLyrics.isPending || (!songName.trim() && !description.trim())}
+          >
+            {generateLyrics.isPending
+              ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Writing in {portal.language}...</>
+              : <><Wand2 className="mr-2 h-4 w-4" /> Generate Lyrics (free)</>}
+          </Button>
+
+          {lyrics && (
+            <div>
+              <Label htmlFor="lyrics">Lyrics ({portal.language})</Label>
+              <Textarea
+                id="lyrics"
+                value={lyrics}
+                onChange={(e) => setLyrics(e.target.value)}
+                rows={10}
+                className="mt-2 resize-none font-mono text-sm"
+              />
+            </div>
+          )}
+
+          <div className="border-t border-border pt-4">
+            {user ? (
+              <>
+                <Button
+                  size="lg"
+                  onClick={() => generateSongs.mutate()}
+                  disabled={generateSongs.isPending || !lyrics.trim() || (profile?.coin_balance ?? 0) < COIN_COST}
+                  className="w-full bg-gradient-brand text-primary-foreground shadow-glow hover:opacity-90"
+                >
+                  {generateSongs.isPending
+                    ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending to Suno...</>
+                    : <><Sparkles className="mr-2 h-4 w-4" /> Generate {SONGS_PER_GEN} Songs ({COIN_COST} coins)</>}
+                </Button>
+                {(profile?.coin_balance ?? 0) < COIN_COST && (
+                  <p className="mt-2 text-center text-sm text-destructive">
+                    You need {COIN_COST - (profile?.coin_balance ?? 0)} more coin(s).{" "}
+                    <Link to="/buy-coins" className="underline">Buy more</Link>.
+                  </p>
+                )}
+              </>
+            ) : (
+              <Link to="/auth">
+                <Button size="lg" className="w-full bg-gradient-brand text-primary-foreground">
+                  <LogIn className="mr-2 h-4 w-4" /> Sign in to generate songs
+                </Button>
+              </Link>
+            )}
+          </div>
+        </div>
+
+        {user && (
+          <div className="mt-10">
+            <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
+              <Music2 className="h-5 w-5 text-primary" /> Your tracks from this portal
+            </h2>
+            {portalSongsQuery.isLoading ? (
+              <div className="grid place-items-center py-12 text-muted-foreground"><Loader2 className="h-6 w-6 animate-spin" /></div>
+            ) : portalSongsQuery.data && portalSongsQuery.data.length > 0 ? (
+              <div className="grid gap-3">
+                {portalSongsQuery.data.map((s) => <SongCard key={s.id} song={s} />)}
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center text-muted-foreground">
+                Nothing yet — generate your first track above.
+              </div>
+            )}
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}

@@ -1,4 +1,4 @@
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2, ShieldCheck, RefreshCw, Lock, Unlock, Music2, Save, Coins } from "lucide-react";
@@ -106,14 +106,19 @@ function AdminPanel() {
   return (
     <DashboardShell title="Boss Panel">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-6 flex items-center gap-3 rounded-2xl border border-border bg-card p-4">
+        <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-card p-4">
           <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-brand">
             <ShieldCheck className="h-5 w-5 text-primary-foreground" />
           </div>
-          <div>
+          <div className="flex-1">
             <h2 className="font-semibold">Admin controls</h2>
-            <p className="text-sm text-muted-foreground">Pricing, recent generations, manual unlocks, and retries.</p>
+            <p className="text-sm text-muted-foreground">Pricing, portals, recent generations, manual unlocks, and retries.</p>
           </div>
+          <Link to="/admin/create-portal">
+            <Button size="sm" className="bg-gradient-brand text-primary-foreground">
+              <Music2 className="mr-2 h-4 w-4" /> New Portal
+            </Button>
+          </Link>
         </div>
 
         <PricingControls />

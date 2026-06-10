@@ -12,9 +12,11 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as PortalSlugRouteImport } from './routes/portal.$slug'
 import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated/library'
 import { Route as AuthenticatedBuyCoinsRouteImport } from './routes/_authenticated/buy-coins'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedAdminCreatePortalRouteImport } from './routes/_authenticated/admin.create-portal'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -29,6 +31,11 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const PortalSlugRoute = PortalSlugRouteImport.update({
+  id: '/portal/$slug',
+  path: '/portal/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedLibraryRoute = AuthenticatedLibraryRouteImport.update({
   id: '/library',
@@ -45,35 +52,61 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminCreatePortalRoute =
+  AuthenticatedAdminCreatePortalRouteImport.update({
+    id: '/create-portal',
+    path: '/create-portal',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/buy-coins': typeof AuthenticatedBuyCoinsRoute
   '/library': typeof AuthenticatedLibraryRoute
+  '/portal/$slug': typeof PortalSlugRoute
+  '/admin/create-portal': typeof AuthenticatedAdminCreatePortalRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/buy-coins': typeof AuthenticatedBuyCoinsRoute
   '/library': typeof AuthenticatedLibraryRoute
+  '/portal/$slug': typeof PortalSlugRoute
   '/': typeof AuthenticatedIndexRoute
+  '/admin/create-portal': typeof AuthenticatedAdminCreatePortalRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/buy-coins': typeof AuthenticatedBuyCoinsRoute
   '/_authenticated/library': typeof AuthenticatedLibraryRoute
+  '/portal/$slug': typeof PortalSlugRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/admin/create-portal': typeof AuthenticatedAdminCreatePortalRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/admin' | '/buy-coins' | '/library'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/admin'
+    | '/buy-coins'
+    | '/library'
+    | '/portal/$slug'
+    | '/admin/create-portal'
   fileRoutesByTo: FileRoutesByTo
-  to: '/auth' | '/admin' | '/buy-coins' | '/library' | '/'
+  to:
+    | '/auth'
+    | '/admin'
+    | '/buy-coins'
+    | '/library'
+    | '/portal/$slug'
+    | '/'
+    | '/admin/create-portal'
   id:
     | '__root__'
     | '/_authenticated'
@@ -81,12 +114,15 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/buy-coins'
     | '/_authenticated/library'
+    | '/portal/$slug'
     | '/_authenticated/'
+    | '/_authenticated/admin/create-portal'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  PortalSlugRoute: typeof PortalSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -112,6 +148,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/portal/$slug': {
+      id: '/portal/$slug'
+      path: '/portal/$slug'
+      fullPath: '/portal/$slug'
+      preLoaderRoute: typeof PortalSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/library': {
       id: '/_authenticated/library'
       path: '/library'
@@ -133,18 +176,36 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/create-portal': {
+      id: '/_authenticated/admin/create-portal'
+      path: '/create-portal'
+      fullPath: '/admin/create-portal'
+      preLoaderRoute: typeof AuthenticatedAdminCreatePortalRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
   }
 }
 
+interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminCreatePortalRoute: typeof AuthenticatedAdminCreatePortalRoute
+}
+
+const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminCreatePortalRoute: AuthenticatedAdminCreatePortalRoute,
+}
+
+const AuthenticatedAdminRouteWithChildren =
+  AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
+
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedBuyCoinsRoute: typeof AuthenticatedBuyCoinsRoute
   AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedBuyCoinsRoute: AuthenticatedBuyCoinsRoute,
   AuthenticatedLibraryRoute: AuthenticatedLibraryRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
@@ -156,6 +217,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  PortalSlugRoute: PortalSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
