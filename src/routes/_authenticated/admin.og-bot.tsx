@@ -3,8 +3,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
-  Bot, Loader2, ShieldCheck, Copy, RotateCcw, Trash2, Search, ArrowLeft, Eye, EyeOff, Lock, KeyRound, Code2, CalendarClock, UserPlus, Plug, RefreshCw, Flame, Undo2,
+  Bot, Loader2, ShieldCheck, Copy, RotateCcw, Trash2, Search, ArrowLeft, Eye, EyeOff, Lock, KeyRound, Code2, CalendarClock, UserPlus, Plug, RefreshCw, Flame, Undo2, Wand2, CheckCircle2,
 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useRole } from "@/hooks/use-role";
 import { useAuth } from "@/hooks/use-auth";
