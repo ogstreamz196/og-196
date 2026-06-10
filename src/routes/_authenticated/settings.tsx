@@ -257,6 +257,11 @@ function SettingsPage() {
             </div>
 
             <div className="space-y-2">
+              <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Unclaimed invite codes</p>
+              <IssueOgBotInvitePanel />
+            </div>
+
+            <div className="space-y-2">
               <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Active OG Bot tokens</p>
               <ManageOgBotTokensPanel />
             </div>
@@ -271,6 +276,9 @@ function SettingsPage() {
           </section>
         )}
 
+
+        {/* Redeem an invite — visible to anyone signed in */}
+        <RedeemOgBotInvitePanel />
 
         {/* My OG Bot tokens — visible to anyone who has one issued */}
         <MyOgBotTokensSection />
