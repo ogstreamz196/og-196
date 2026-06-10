@@ -299,7 +299,8 @@ function PortalPage() {
                   size="lg"
                   onClick={() => generateSongs.mutate()}
                   disabled={generateSongs.isPending || !lyrics.trim() || (profile?.coin_balance ?? 0) < COIN_COST}
-                  className="w-full bg-gradient-brand text-primary-foreground shadow-glow hover:opacity-90"
+                  className="w-full text-white shadow-glow hover:opacity-90"
+                  style={{ backgroundColor: themeColor }}
                 >
                   {generateSongs.isPending
                     ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending to Suno...</>
