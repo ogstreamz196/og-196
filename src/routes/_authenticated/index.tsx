@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
 import { useRole } from "@/hooks/use-role";
+import { useSettings } from "@/hooks/use-settings";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { EditableContent } from "@/components/admin/EditableContent";
 
@@ -27,6 +28,8 @@ function DashboardHome() {
   const { user } = useAuth();
   const { data: profile } = useProfile();
   const { isAdmin, isVip } = useRole();
+  const { data: settings } = useSettings();
+  const coinsPerGen = settings?.coins_per_generation ?? 3;
 
   const songCountQ = useQuery({
     queryKey: ["dash-song-count", user?.id],
@@ -109,7 +112,7 @@ function DashboardHome() {
             icon={<Coins className="h-5 w-5 text-coin" />}
             label="Coin balance"
             value={String(profile?.coin_balance ?? 0)}
-            sub="3 coins per generation"
+            sub={`${coinsPerGen} coins per generation`}
             cta="Buy more coins"
             highlight
           />
