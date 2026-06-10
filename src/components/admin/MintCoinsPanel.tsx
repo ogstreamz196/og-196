@@ -274,11 +274,24 @@ export function MintCoinsPanel() {
           <Minus className="mr-2 h-4 w-4" />
           Deduct {Math.abs(numericAmount || 0)}
         </Button>
+        <Button
+          variant="secondary"
+          onClick={() => setExact.mutate(Math.abs(numericAmount))}
+          disabled={setExact.isPending || !selected || !Number.isFinite(numericAmount) || numericAmount < 0}
+          title="Sets the balance to exactly this number (logs the delta)"
+        >
+          {setExact.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Equal className="mr-2 h-4 w-4" />}
+          Set to {Math.abs(numericAmount || 0)}
+        </Button>
       </div>
+
+      {selected && (
+        <UserAuditTrail userId={selected.id} email={selected.email} />
+      )}
 
       <div className="mt-6">
         <div className="mb-2 flex items-center gap-2 text-sm font-medium text-muted-foreground">
-          <History className="h-4 w-4" /> Recent admin changes
+          <History className="h-4 w-4" /> Recent admin changes (global)
         </div>
         {recent.isLoading ? (
           <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
@@ -305,3 +318,4 @@ export function MintCoinsPanel() {
     </div>
   );
 }
+
