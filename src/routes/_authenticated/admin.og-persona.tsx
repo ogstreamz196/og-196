@@ -1,4 +1,4 @@
-import { createFileRoute, Navigate, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Bot, Loader2, Save, ShieldCheck, Skull } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,15 +21,6 @@ const DEFAULT_DICTIONARY =
   "OG = original gangster / the boss; Sonix = the platform; coins = generation credits; portal = curated theme; VIP = paid tier; drop = release a song; cooked = generated; vibe = mood/style.";
 
 export const Route = createFileRoute("/_authenticated/admin/og-persona")({
-  beforeLoad: async () => {
-    const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) throw redirect({ to: "/auth" });
-    const { data: isAdmin } = await supabase.rpc("has_role", {
-      _user_id: userData.user.id,
-      _role: "admin",
-    });
-    if (!isAdmin) throw redirect({ to: "/" });
-  },
   component: OgPersonaPage,
 });
 

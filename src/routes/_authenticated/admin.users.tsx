@@ -1,4 +1,4 @@
-import { createFileRoute, Navigate, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -17,15 +17,6 @@ import { AdminEditModeToggle } from "@/components/admin/AdminEditMode";
 import { BulkReconcilePanel } from "@/components/admin/BulkReconcilePanel";
 
 export const Route = createFileRoute("/_authenticated/admin/users")({
-  beforeLoad: async () => {
-    const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) throw redirect({ to: "/auth" });
-    const { data: isAdmin, error } = await supabase.rpc("has_role", {
-      _user_id: userData.user.id,
-      _role: "admin",
-    });
-    if (error || !isAdmin) throw redirect({ to: "/" });
-  },
   component: AdminUsersPage,
 });
 

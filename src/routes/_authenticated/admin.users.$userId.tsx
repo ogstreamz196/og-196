@@ -1,4 +1,4 @@
-import { createFileRoute, Navigate, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -15,15 +15,6 @@ import { UserAuditTrail } from "@/components/admin/UserAuditTrail";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/users/$userId")({
-  beforeLoad: async () => {
-    const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) throw redirect({ to: "/auth" });
-    const { data: isAdmin, error } = await supabase.rpc("has_role", {
-      _user_id: userData.user.id,
-      _role: "admin",
-    });
-    if (error || !isAdmin) throw redirect({ to: "/" });
-  },
   component: UserSettingsPage,
 });
 
