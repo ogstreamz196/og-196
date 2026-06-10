@@ -48,13 +48,20 @@ Deno.serve(async (req) => {
     if (!prompt && !lyrics) return json({ error: "Provide a prompt or lyrics" }, 400);
 
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
-    const coinCost = await getSetting(admin, "coins_per_generation", 3);
+    let coinCost = await getSetting(admin, "coins_per_generation", 3);
 
     // If this generation came from a portal, force the hardcoded language into the Suno prompt
     let portalLanguage: string | null = null;
     if (portalId) {
-      const { data: p } = await admin.from("portals").select("language").eq("id", portalId).maybeSingle();
-      portalLanguage = p?.language ?? null;
+      const { data: p } = await admin
+        .from("portals")
+        .select("language, status, coin_cost_per_generation")
+        .eq("id", portalId)
+        .maybeSingle();
+      if (!p) return json({ error: "Portal not found" }, 404);
+      if (p.status === "maintenance") return json({ error: "Portal is in maintenance mode" }, 423);
+      portalLanguage = p.language ?? null;
+      if (typeof p.coin_cost_per_generation === "number") coinCost = p.coin_cost_per_generation;
     }
     const effectiveLyrics = lyrics && portalLanguage
       ? `[Language: ${portalLanguage}]\n${lyrics}`
