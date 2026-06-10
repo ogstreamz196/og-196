@@ -24,6 +24,7 @@ import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminUserSettingsRouteImport } from './routes/_authenticated/admin.user-settings'
 import { Route as AuthenticatedAdminCreatePortalRouteImport } from './routes/_authenticated/admin.create-portal'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as AuthenticatedAdminUsersUserIdRouteImport } from './routes/_authenticated/admin.users.$userId'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -104,6 +105,12 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedAdminUsersUserIdRoute =
+  AuthenticatedAdminUsersUserIdRouteImport.update({
+    id: '/$userId',
+    path: '/$userId',
+    getParentRoute: () => AuthenticatedAdminUsersRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -116,9 +123,10 @@ export interface FileRoutesByFullPath {
   '/portal/$slug': typeof PortalSlugRoute
   '/admin/create-portal': typeof AuthenticatedAdminCreatePortalRoute
   '/admin/user-settings': typeof AuthenticatedAdminUserSettingsRoute
-  '/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
   '/library/$songId': typeof AuthenticatedLibrarySongIdRoute
+  '/admin/users/$userId': typeof AuthenticatedAdminUsersUserIdRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -132,9 +140,10 @@ export interface FileRoutesByTo {
   '/': typeof AuthenticatedIndexRoute
   '/admin/create-portal': typeof AuthenticatedAdminCreatePortalRoute
   '/admin/user-settings': typeof AuthenticatedAdminUserSettingsRoute
-  '/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
   '/library/$songId': typeof AuthenticatedLibrarySongIdRoute
+  '/admin/users/$userId': typeof AuthenticatedAdminUsersUserIdRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
@@ -150,9 +159,10 @@ export interface FileRoutesById {
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/admin/create-portal': typeof AuthenticatedAdminCreatePortalRoute
   '/_authenticated/admin/user-settings': typeof AuthenticatedAdminUserSettingsRoute
-  '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/_authenticated/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
   '/_authenticated/library/$songId': typeof AuthenticatedLibrarySongIdRoute
+  '/_authenticated/admin/users/$userId': typeof AuthenticatedAdminUsersUserIdRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
@@ -171,6 +181,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/buy-coins/return'
     | '/library/$songId'
+    | '/admin/users/$userId'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -187,6 +198,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/buy-coins/return'
     | '/library/$songId'
+    | '/admin/users/$userId'
     | '/api/public/payments/webhook'
   id:
     | '__root__'
@@ -204,6 +216,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/users'
     | '/_authenticated/buy-coins/return'
     | '/_authenticated/library/$songId'
+    | '/_authenticated/admin/users/$userId'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -321,19 +334,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/users/$userId': {
+      id: '/_authenticated/admin/users/$userId'
+      path: '/$userId'
+      fullPath: '/admin/users/$userId'
+      preLoaderRoute: typeof AuthenticatedAdminUsersUserIdRouteImport
+      parentRoute: typeof AuthenticatedAdminUsersRoute
+    }
   }
 }
+
+interface AuthenticatedAdminUsersRouteChildren {
+  AuthenticatedAdminUsersUserIdRoute: typeof AuthenticatedAdminUsersUserIdRoute
+}
+
+const AuthenticatedAdminUsersRouteChildren: AuthenticatedAdminUsersRouteChildren =
+  {
+    AuthenticatedAdminUsersUserIdRoute: AuthenticatedAdminUsersUserIdRoute,
+  }
+
+const AuthenticatedAdminUsersRouteWithChildren =
+  AuthenticatedAdminUsersRoute._addFileChildren(
+    AuthenticatedAdminUsersRouteChildren,
+  )
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminCreatePortalRoute: typeof AuthenticatedAdminCreatePortalRoute
   AuthenticatedAdminUserSettingsRoute: typeof AuthenticatedAdminUserSettingsRoute
-  AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
+  AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRouteWithChildren
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminCreatePortalRoute: AuthenticatedAdminCreatePortalRoute,
   AuthenticatedAdminUserSettingsRoute: AuthenticatedAdminUserSettingsRoute,
-  AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
+  AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRouteWithChildren,
 }
 
 const AuthenticatedAdminRouteWithChildren =
@@ -393,3 +427,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
