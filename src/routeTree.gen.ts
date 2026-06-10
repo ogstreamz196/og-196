@@ -16,7 +16,9 @@ import { Route as PortalSlugRouteImport } from './routes/portal.$slug'
 import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated/library'
 import { Route as AuthenticatedBuyCoinsRouteImport } from './routes/_authenticated/buy-coins'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedBuyCoinsReturnRouteImport } from './routes/_authenticated/buy-coins.return'
 import { Route as AuthenticatedAdminCreatePortalRouteImport } from './routes/_authenticated/admin.create-portal'
+import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -52,41 +54,59 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedBuyCoinsReturnRoute =
+  AuthenticatedBuyCoinsReturnRouteImport.update({
+    id: '/return',
+    path: '/return',
+    getParentRoute: () => AuthenticatedBuyCoinsRoute,
+  } as any)
 const AuthenticatedAdminCreatePortalRoute =
   AuthenticatedAdminCreatePortalRouteImport.update({
     id: '/create-portal',
     path: '/create-portal',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const ApiPublicPaymentsWebhookRoute =
+  ApiPublicPaymentsWebhookRouteImport.update({
+    id: '/api/public/payments/webhook',
+    path: '/api/public/payments/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
-  '/buy-coins': typeof AuthenticatedBuyCoinsRoute
+  '/buy-coins': typeof AuthenticatedBuyCoinsRouteWithChildren
   '/library': typeof AuthenticatedLibraryRoute
   '/portal/$slug': typeof PortalSlugRoute
   '/admin/create-portal': typeof AuthenticatedAdminCreatePortalRoute
+  '/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
-  '/buy-coins': typeof AuthenticatedBuyCoinsRoute
+  '/buy-coins': typeof AuthenticatedBuyCoinsRouteWithChildren
   '/library': typeof AuthenticatedLibraryRoute
   '/portal/$slug': typeof PortalSlugRoute
   '/': typeof AuthenticatedIndexRoute
   '/admin/create-portal': typeof AuthenticatedAdminCreatePortalRoute
+  '/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
-  '/_authenticated/buy-coins': typeof AuthenticatedBuyCoinsRoute
+  '/_authenticated/buy-coins': typeof AuthenticatedBuyCoinsRouteWithChildren
   '/_authenticated/library': typeof AuthenticatedLibraryRoute
   '/portal/$slug': typeof PortalSlugRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/admin/create-portal': typeof AuthenticatedAdminCreatePortalRoute
+  '/_authenticated/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -98,6 +118,8 @@ export interface FileRouteTypes {
     | '/library'
     | '/portal/$slug'
     | '/admin/create-portal'
+    | '/buy-coins/return'
+    | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
@@ -107,6 +129,8 @@ export interface FileRouteTypes {
     | '/portal/$slug'
     | '/'
     | '/admin/create-portal'
+    | '/buy-coins/return'
+    | '/api/public/payments/webhook'
   id:
     | '__root__'
     | '/_authenticated'
@@ -117,12 +141,15 @@ export interface FileRouteTypes {
     | '/portal/$slug'
     | '/_authenticated/'
     | '/_authenticated/admin/create-portal'
+    | '/_authenticated/buy-coins/return'
+    | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   PortalSlugRoute: typeof PortalSlugRoute
+  ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -176,12 +203,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/buy-coins/return': {
+      id: '/_authenticated/buy-coins/return'
+      path: '/return'
+      fullPath: '/buy-coins/return'
+      preLoaderRoute: typeof AuthenticatedBuyCoinsReturnRouteImport
+      parentRoute: typeof AuthenticatedBuyCoinsRoute
+    }
     '/_authenticated/admin/create-portal': {
       id: '/_authenticated/admin/create-portal'
       path: '/create-portal'
       fullPath: '/admin/create-portal'
       preLoaderRoute: typeof AuthenticatedAdminCreatePortalRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/api/public/payments/webhook': {
+      id: '/api/public/payments/webhook'
+      path: '/api/public/payments/webhook'
+      fullPath: '/api/public/payments/webhook'
+      preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -197,16 +238,29 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
 const AuthenticatedAdminRouteWithChildren =
   AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
 
+interface AuthenticatedBuyCoinsRouteChildren {
+  AuthenticatedBuyCoinsReturnRoute: typeof AuthenticatedBuyCoinsReturnRoute
+}
+
+const AuthenticatedBuyCoinsRouteChildren: AuthenticatedBuyCoinsRouteChildren = {
+  AuthenticatedBuyCoinsReturnRoute: AuthenticatedBuyCoinsReturnRoute,
+}
+
+const AuthenticatedBuyCoinsRouteWithChildren =
+  AuthenticatedBuyCoinsRoute._addFileChildren(
+    AuthenticatedBuyCoinsRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
-  AuthenticatedBuyCoinsRoute: typeof AuthenticatedBuyCoinsRoute
+  AuthenticatedBuyCoinsRoute: typeof AuthenticatedBuyCoinsRouteWithChildren
   AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
-  AuthenticatedBuyCoinsRoute: AuthenticatedBuyCoinsRoute,
+  AuthenticatedBuyCoinsRoute: AuthenticatedBuyCoinsRouteWithChildren,
   AuthenticatedLibraryRoute: AuthenticatedLibraryRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
@@ -218,7 +272,18 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   PortalSlugRoute: PortalSlugRoute,
+  ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
