@@ -63,7 +63,9 @@ function DashboardHome() {
             <Sparkles className="h-3 w-3 text-primary" /> Powered by 0G-Streamz
           </div>
           <h2 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl">
-            {profile?.display_name ? (
+            {isAdmin ? (
+              <>Welcome back, <span className="text-gradient-brand">Boss</span> 👑</>
+            ) : profile?.display_name ? (
               <>Welcome back, <span className="text-gradient-brand">{profile.display_name}</span></>
             ) : (
               <>Welcome to your <span className="text-gradient-brand">studio</span></>
