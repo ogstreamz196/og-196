@@ -408,7 +408,7 @@ function PortalPage() {
 
           {lyrics && (
             <div>
-              <Label htmlFor="lyrics">Lyrics ({portal.language})</Label>
+              <Label htmlFor="lyrics">Lyrics ({language})</Label>
               <Textarea
                 id="lyrics"
                 value={lyrics}
@@ -419,7 +419,13 @@ function PortalPage() {
             </div>
           )}
 
-          <div className="border-t border-border pt-4">
+          <div className="flex items-center gap-2 border-b border-border pb-3 pt-2">
+            <div className="grid h-7 w-7 place-items-center rounded-full bg-primary/10 text-xs font-bold text-primary">3</div>
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Generate music</h2>
+          </div>
+
+          <div className="pt-1">
+
             {user ? (
               <>
                 <Button
