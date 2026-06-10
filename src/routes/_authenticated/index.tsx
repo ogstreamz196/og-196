@@ -1,203 +1,209 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Sparkles, Loader2, Music2, Coins } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import {
+  Library, Coins, Compass, Music2, Sparkles, ArrowRight, Loader2, Crown, ShieldCheck,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
-import { useSettings } from "@/hooks/use-settings";
+import { useRole } from "@/hooks/use-role";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import { SongCard, type Song } from "@/components/SongCard";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { toast } from "sonner";
-import { useEffect } from "react";
 
 export const Route = createFileRoute("/_authenticated/")({
-  component: HomePage,
+  component: DashboardHome,
 });
 
-function HomePage() {
+interface PortalRow {
+  id: string;
+  slug: string;
+  name: string;
+  language: string;
+  primary_color: string | null;
+  coin_cost_per_generation: number | null;
+}
+
+function DashboardHome() {
   const { user } = useAuth();
   const { data: profile } = useProfile();
-  const { data: settings } = useSettings();
-  const qc = useQueryClient();
-  const COIN_COST = settings?.coins_per_generation ?? 3;
-  const SONGS_PER_GEN = settings?.songs_per_generation ?? 2;
-  const SAMPLE_SECONDS = settings?.sample_seconds ?? 30;
-  const [prompt, setPrompt] = useState("");
-  const [style, setStyle] = useState("");
-  const [title, setTitle] = useState("");
-  const [lyrics, setLyrics] = useState("");
-  const [instrumental, setInstrumental] = useState(false);
+  const { isAdmin, isVip } = useRole();
 
-  const recentQuery = useQuery({
-    queryKey: ["recent-songs", user?.id],
+  const songCountQ = useQuery({
+    queryKey: ["dash-song-count", user?.id],
     enabled: !!user,
-    queryFn: async (): Promise<Song[]> => {
-      const { data, error } = await supabase
-        .from("songs").select("*")
-        .order("created_at", { ascending: false })
-        .limit(4);
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("songs")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user!.id);
       if (error) throw error;
-      return (data ?? []) as Song[];
+      return count ?? 0;
     },
   });
 
-  // Realtime: refresh list when a song updates
-  useEffect(() => {
-    if (!user) return;
-    const channel = supabase
-      .channel("songs-home")
-      .on("postgres_changes", { event: "*", schema: "public", table: "songs", filter: `user_id=eq.${user.id}` },
-        () => recentQuery.refetch())
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]);
-
-  const generate = useMutation({
-    mutationFn: async () => {
-      const { data, error } = await supabase.functions.invoke("suno-generate", {
-        body: { prompt, style, title, lyrics, instrumental },
-      });
-      if (error) throw new Error(error.message);
-      if (data?.error) throw new Error(data.error);
-      return data;
-    },
-    onSuccess: () => {
-      toast.success(`Queued! ${SONGS_PER_GEN} songs will appear in your library when ready (30s – 2min).`);
-      setPrompt(""); setLyrics(""); setTitle("");
-      qc.invalidateQueries({ queryKey: ["recent-songs"] });
-      qc.invalidateQueries({ queryKey: ["profile"] });
-    },
-    onError: (err: Error) => {
-      if (err.message.toLowerCase().includes("insufficient")) {
-        toast.error("Not enough coins — buy more to keep generating.");
-      } else {
-        toast.error(err.message || "Generation failed");
-      }
+  const portalsQ = useQuery({
+    queryKey: ["dash-portals"],
+    queryFn: async (): Promise<PortalRow[]> => {
+      const { data, error } = await supabase
+        .from("portals")
+        .select("id, slug, name, language, primary_color, coin_cost_per_generation")
+        .eq("status", "active")
+        .order("name")
+        .limit(6);
+      if (error) throw error;
+      return (data ?? []) as PortalRow[];
     },
   });
-
-  const canGenerate = (prompt.trim() || lyrics.trim()) && (profile?.coin_balance ?? 0) >= COIN_COST;
 
   return (
-    <DashboardShell title="Create">
-      <div className="mx-auto max-w-4xl">
-        {/* Hero */}
+    <DashboardShell title="Dashboard">
+      <div className="mx-auto max-w-6xl space-y-8">
+        {/* Welcome */}
         <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-8 shadow-card bg-gradient-hero">
-          <div className="relative">
-            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-background/50 px-3 py-1 text-xs text-muted-foreground backdrop-blur">
-              <Sparkles className="h-3 w-3 text-primary" />
-              Powered by 0G-Streamz
-            </div>
-            <h2 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl">
-              {profile?.display_name ? <>Hey, <span className="text-gradient-brand">{profile.display_name}</span> — turn ideas into songs</> : <>Turn ideas into <span className="text-gradient-brand">original songs</span></>}
-            </h2>
-            <p className="mt-2 max-w-xl text-muted-foreground">
-              Describe a vibe, drop in custom lyrics, or both. Sonix generates a full track in under two minutes.
-            </p>
+          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-background/50 px-3 py-1 text-xs text-muted-foreground backdrop-blur">
+            <Sparkles className="h-3 w-3 text-primary" /> Powered by 0G-Streamz
           </div>
-        </div>
-
-        {/* Generator */}
-        <div className="mt-6 rounded-2xl border border-border bg-card p-6 shadow-card">
-          <div className="grid gap-4">
-            <div>
-              <Label htmlFor="prompt">Song style / vibe</Label>
-              <Textarea
-                id="prompt"
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder="A melancholic synthwave ballad about late-night drives through neon streets..."
-                rows={3}
-                className="mt-2 resize-none"
-                maxLength={500}
-              />
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <Label htmlFor="title">Title (optional)</Label>
-                <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Neon Nights" className="mt-2" />
-              </div>
-              <div>
-                <Label htmlFor="style">Genre tags (optional)</Label>
-                <Input id="style" value={style} onChange={(e) => setStyle(e.target.value)} placeholder="synthwave, dreamy, 80s" className="mt-2" />
-              </div>
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="lyrics">Custom lyrics (optional)</Label>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Switch id="instrumental" checked={instrumental} onCheckedChange={setInstrumental} />
-                  <Label htmlFor="instrumental" className="cursor-pointer">Instrumental</Label>
-                </div>
-              </div>
-              <Textarea
-                id="lyrics"
-                value={lyrics}
-                onChange={(e) => setLyrics(e.target.value)}
-                placeholder="[Verse 1]&#10;..."
-                rows={5}
-                className="mt-2 resize-none font-mono text-sm"
-                maxLength={3000}
-                disabled={instrumental}
-              />
-            </div>
-
-            <div className="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm text-muted-foreground">
-                <Coins className="mr-1 inline h-3.5 w-3.5 text-coin" />
-                <span className="font-semibold text-foreground">{COIN_COST} coins</span> gets you{" "}
-                <span className="font-semibold text-foreground">{SONGS_PER_GEN} songs</span> with {SAMPLE_SECONDS}s previews.
-                Downloads are free.
-              </p>
-              <Button
-                size="lg"
-                onClick={() => generate.mutate()}
-                disabled={!canGenerate || generate.isPending}
-                className="bg-gradient-brand text-primary-foreground shadow-glow hover:opacity-90"
-              >
-                {generate.isPending ? (
-                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...</>
-                ) : (
-                  <><Sparkles className="mr-2 h-4 w-4" /> Generate ({COIN_COST} coins)</>
-                )}
-              </Button>
-            </div>
-            {(profile?.coin_balance ?? 0) < COIN_COST && (
-              <p className="text-sm text-destructive">You need {COIN_COST - (profile?.coin_balance ?? 0)} more coin(s). Visit Buy Coins.</p>
+          <h2 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl">
+            {profile?.display_name ? (
+              <>Welcome back, <span className="text-gradient-brand">{profile.display_name}</span></>
+            ) : (
+              <>Welcome to your <span className="text-gradient-brand">studio</span></>
+            )}
+          </h2>
+          <p className="mt-2 max-w-xl text-muted-foreground">
+            Pick a portal to start a new song, browse your library, or top up your coin balance.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {isAdmin && (
+              <span className="inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+                <ShieldCheck className="h-3 w-3" /> Boss
+              </span>
+            )}
+            {isVip && (
+              <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-0.5 text-xs font-medium text-amber-500">
+                <Crown className="h-3 w-3" /> VIP
+              </span>
             )}
           </div>
         </div>
 
-        {/* Recent */}
-        <div className="mt-10">
+        {/* Stat cards */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <StatCard
+            to="/library"
+            icon={<Library className="h-5 w-5" />}
+            label="Media created"
+            value={songCountQ.isLoading ? "—" : String(songCountQ.data ?? 0)}
+            sub="Songs in your library"
+            cta="Open library"
+          />
+          <StatCard
+            to="/buy-coins"
+            icon={<Coins className="h-5 w-5 text-coin" />}
+            label="Coin balance"
+            value={String(profile?.coin_balance ?? 0)}
+            sub="3 coins per generation"
+            cta="Buy more coins"
+            highlight
+          />
+          <StatCard
+            to="/portals"
+            icon={<Compass className="h-5 w-5" />}
+            label="Active portals"
+            value={portalsQ.isLoading ? "—" : String(portalsQ.data?.length ?? 0)}
+            sub="Curated by the Boss"
+            cta="Browse all"
+          />
+        </div>
+
+        {/* Portals grid */}
+        <section>
           <div className="mb-4 flex items-center justify-between">
             <h3 className="flex items-center gap-2 text-lg font-semibold">
-              <Music2 className="h-5 w-5 text-primary" /> Recent generations
+              <Compass className="h-5 w-5 text-primary" /> Generation portals
             </h3>
+            <Link to="/portals" className="text-sm text-muted-foreground hover:text-foreground">
+              View all <ArrowRight className="ml-1 inline h-3.5 w-3.5" />
+            </Link>
           </div>
 
-          {recentQuery.isLoading ? (
-            <div className="grid place-items-center py-12 text-muted-foreground"><Loader2 className="h-6 w-6 animate-spin" /></div>
-          ) : recentQuery.data && recentQuery.data.length > 0 ? (
-            <div className="grid gap-3">
-              {recentQuery.data.map((s) => <SongCard key={s.id} song={s} />)}
+          {portalsQ.isLoading ? (
+            <div className="grid place-items-center py-12 text-muted-foreground">
+              <Loader2 className="h-6 w-6 animate-spin" />
+            </div>
+          ) : !portalsQ.data || portalsQ.data.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border bg-card/50 p-12 text-center text-muted-foreground">
+              No portals are active right now. Check back soon.
             </div>
           ) : (
-            <div className="rounded-2xl border border-dashed border-border bg-card/50 p-12 text-center text-muted-foreground">
-              No songs yet. Generate your first track above.
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {portalsQ.data.map((p) => {
+                const themeColor = p.primary_color || "hsl(var(--primary))";
+                return (
+                  <Link
+                    key={p.id}
+                    to="/portal/$slug"
+                    params={{ slug: p.slug }}
+                    className="group relative overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-card transition-all hover:-translate-y-0.5 hover:shadow-glow"
+                    style={{ boxShadow: `0 0 40px -28px ${themeColor}` }}
+                  >
+                    <div
+                      className="grid h-10 w-10 place-items-center rounded-xl text-white"
+                      style={{ backgroundColor: themeColor }}
+                    >
+                      <Music2 className="h-5 w-5" />
+                    </div>
+                    <h4 className="mt-3 text-base font-semibold">{p.name}</h4>
+                    <p className="mt-0.5 text-xs text-muted-foreground">Lyrics in {p.language}</p>
+                    <div className="mt-4 flex items-center justify-between text-xs">
+                      <span className="inline-flex items-center gap-1 text-muted-foreground">
+                        <Coins className="h-3.5 w-3.5 text-coin" />
+                        {p.coin_cost_per_generation ?? 3} per generation
+                      </span>
+                      <span className="text-primary opacity-0 transition-opacity group-hover:opacity-100">
+                        Open <ArrowRight className="ml-0.5 inline h-3 w-3" />
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           )}
-        </div>
+        </section>
       </div>
     </DashboardShell>
+  );
+}
+
+interface StatCardProps {
+  to: "/library" | "/buy-coins" | "/portals";
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  sub: string;
+  cta: string;
+  highlight?: boolean;
+}
+
+function StatCard({ to, icon, label, value, sub, cta, highlight }: StatCardProps) {
+  return (
+    <Link
+      to={to}
+      className={
+        "group relative flex flex-col rounded-2xl border bg-card p-5 shadow-card transition-all hover:-translate-y-0.5 " +
+        (highlight ? "border-primary/50 shadow-glow" : "border-border hover:border-primary/40")
+      }
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          {icon} <span className="uppercase tracking-wide">{label}</span>
+        </div>
+        <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+      </div>
+      <div className="mt-3 text-3xl font-bold tabular-nums">{value}</div>
+      <p className="mt-1 text-xs text-muted-foreground">{sub}</p>
+      <span className="mt-4 inline-flex items-center text-xs font-medium text-primary">
+        {cta} <ArrowRight className="ml-1 h-3 w-3" />
+      </span>
+    </Link>
   );
 }
