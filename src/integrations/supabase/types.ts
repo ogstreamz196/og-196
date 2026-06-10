@@ -61,32 +61,47 @@ export type Database = {
       }
       portals: {
         Row: {
+          allowed_styles: string[] | null
+          coin_cost_per_generation: number
           created_at: string
           created_by: string | null
+          custom_welcome_text: string | null
           id: string
           language: string
           name: string
+          primary_color: string
           slug: string
+          status: string
           style_tags: string[]
           updated_at: string
         }
         Insert: {
+          allowed_styles?: string[] | null
+          coin_cost_per_generation?: number
           created_at?: string
           created_by?: string | null
+          custom_welcome_text?: string | null
           id?: string
           language: string
           name: string
+          primary_color?: string
           slug: string
+          status?: string
           style_tags?: string[]
           updated_at?: string
         }
         Update: {
+          allowed_styles?: string[] | null
+          coin_cost_per_generation?: number
           created_at?: string
           created_by?: string | null
+          custom_welcome_text?: string | null
           id?: string
           language?: string
           name?: string
+          primary_color?: string
           slug?: string
+          status?: string
           style_tags?: string[]
           updated_at?: string
         }
