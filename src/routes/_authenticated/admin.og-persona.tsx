@@ -40,6 +40,7 @@ function OgPersonaPage() {
   const [script, setScript] = useState("");
   const [voice, setVoice] = useState("");
   const [dictionary, setDictionary] = useState("");
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (loadingContent) return;
