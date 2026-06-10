@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as PortalSlugRouteImport } from './routes/portal.$slug'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated/library'
 import { Route as AuthenticatedBuyCoinsRouteImport } from './routes/_authenticated/buy-coins'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
@@ -39,6 +40,11 @@ const PortalSlugRoute = PortalSlugRouteImport.update({
   id: '/portal/$slug',
   path: '/portal/$slug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedLibraryRoute = AuthenticatedLibraryRouteImport.update({
   id: '/library',
@@ -85,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/buy-coins': typeof AuthenticatedBuyCoinsRouteWithChildren
   '/library': typeof AuthenticatedLibraryRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/portal/$slug': typeof PortalSlugRoute
   '/admin/create-portal': typeof AuthenticatedAdminCreatePortalRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
@@ -96,6 +103,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/buy-coins': typeof AuthenticatedBuyCoinsRouteWithChildren
   '/library': typeof AuthenticatedLibraryRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/portal/$slug': typeof PortalSlugRoute
   '/': typeof AuthenticatedIndexRoute
   '/admin/create-portal': typeof AuthenticatedAdminCreatePortalRoute
@@ -110,6 +118,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/buy-coins': typeof AuthenticatedBuyCoinsRouteWithChildren
   '/_authenticated/library': typeof AuthenticatedLibraryRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/portal/$slug': typeof PortalSlugRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/admin/create-portal': typeof AuthenticatedAdminCreatePortalRoute
@@ -125,6 +134,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/buy-coins'
     | '/library'
+    | '/settings'
     | '/portal/$slug'
     | '/admin/create-portal'
     | '/admin/users'
@@ -136,6 +146,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/buy-coins'
     | '/library'
+    | '/settings'
     | '/portal/$slug'
     | '/'
     | '/admin/create-portal'
@@ -149,6 +160,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/buy-coins'
     | '/_authenticated/library'
+    | '/_authenticated/settings'
     | '/portal/$slug'
     | '/_authenticated/'
     | '/_authenticated/admin/create-portal'
@@ -193,6 +205,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/portal/$slug'
       preLoaderRoute: typeof PortalSlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/library': {
       id: '/_authenticated/library'
@@ -276,6 +295,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedBuyCoinsRoute: typeof AuthenticatedBuyCoinsRouteWithChildren
   AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
@@ -283,6 +303,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedBuyCoinsRoute: AuthenticatedBuyCoinsRouteWithChildren,
   AuthenticatedLibraryRoute: AuthenticatedLibraryRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
 

@@ -1,12 +1,12 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Sparkles, Library, Coins as CoinsIcon, LogOut, Music2, Settings, Search } from "lucide-react";
-import type { ReactNode } from "react";
+import { Sparkles, Library, Coins as CoinsIcon, LogOut, Music2, Settings, Search, Clock, Loader2 } from "lucide-react";
+import { useEffect, type ReactNode } from "react";
 import { CoinBalance } from "./CoinBalance";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useRole } from "@/hooks/use-role";
 import { cn } from "@/lib/utils";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { AdminEditModeProvider, AdminEditModeToggle } from "@/components/admin/AdminEditMode";
 
@@ -15,6 +15,83 @@ const baseNavItems = [
   { to: "/library", label: "My Library", icon: Library },
   { to: "/buy-coins", label: "Buy Coins", icon: CoinsIcon },
 ] as const;
+
+interface RecentSong {
+  id: string;
+  title: string | null;
+  prompt: string;
+  status: string;
+  cover_url: string | null;
+}
+
+function RecentMedia({ userId }: { userId: string }) {
+  const qc = useQueryClient();
+  const { data, isLoading } = useQuery({
+    queryKey: ["recent-songs", userId],
+    queryFn: async (): Promise<RecentSong[]> => {
+      const { data, error } = await supabase
+        .from("songs")
+        .select("id, title, prompt, status, cover_url")
+        .order("created_at", { ascending: false })
+        .limit(8);
+      if (error) throw error;
+      return (data ?? []) as RecentSong[];
+    },
+  });
+
+  useEffect(() => {
+    const channel = supabase
+      .channel(`sidebar-songs:${userId}:${Math.random().toString(36).slice(2)}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "songs", filter: `user_id=eq.${userId}` },
+        () => qc.invalidateQueries({ queryKey: ["recent-songs", userId] }),
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userId, qc]);
+
+  return (
+    <div className="mt-6 flex min-h-0 flex-1 flex-col">
+      <div className="flex items-center gap-2 px-3 pb-2 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/50">
+        <Clock className="h-3.5 w-3.5" />
+        Recent
+      </div>
+      <div className="flex-1 space-y-0.5 overflow-y-auto pr-1">
+        {isLoading ? (
+          <div className="grid place-items-center py-6 text-sidebar-foreground/40">
+            <Loader2 className="h-4 w-4 animate-spin" />
+          </div>
+        ) : data && data.length > 0 ? (
+          data.map((s) => {
+            const label = s.title?.trim() || s.prompt?.slice(0, 40) || "Untitled";
+            return (
+              <Link
+                key={s.id}
+                to="/library"
+                className="group flex items-center gap-2 rounded-md px-2 py-1.5 text-xs text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                title={label}
+              >
+                <div className="grid h-7 w-7 shrink-0 place-items-center overflow-hidden rounded bg-sidebar-accent/50">
+                  {s.cover_url ? (
+                    <img src={s.cover_url} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <Music2 className="h-3.5 w-3.5 text-sidebar-foreground/50" />
+                  )}
+                </div>
+                <span className="truncate">{label}</span>
+              </Link>
+            );
+          })
+        ) : (
+          <p className="px-3 py-2 text-xs text-sidebar-foreground/40">No tracks yet.</p>
+        )}
+      </div>
+    </div>
+  );
+}
 
 const adminItem = { to: "/admin", label: "Admin Panel", icon: Settings } as const;
 
@@ -67,10 +144,24 @@ export function DashboardShell({ title, children }: { title: string; children: R
           })}
         </nav>
 
-        <div className="mt-auto space-y-2 border-t border-sidebar-border pt-4">
+        {user ? <RecentMedia userId={user.id} /> : <div className="flex-1" />}
+
+        <div className="mt-4 space-y-1 border-t border-sidebar-border pt-4">
           <div className="px-3 py-1 text-xs text-sidebar-foreground/50 truncate">
             {user?.email}
           </div>
+          <Link
+            to="/settings"
+            className={cn(
+              "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+              pathname === "/settings"
+                ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+            )}
+          >
+            <Settings className="h-4 w-4" />
+            Settings
+          </Link>
           <button
             onClick={handleSignOut}
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
