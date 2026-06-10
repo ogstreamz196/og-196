@@ -190,7 +190,7 @@ function PortalPage() {
           songName,
           description,
           styleTags: selectedTags,
-          language: portal.language,
+          language,
         },
       });
       if (error) throw new Error(error.message);
@@ -199,10 +199,11 @@ function PortalPage() {
     },
     onSuccess: (text) => {
       setLyrics(text);
-      toast.success(`Lyrics generated in ${portal.language}`);
+      toast.success(`Lyrics generated in ${language}`);
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
 
   const generateSongs = useMutation({
     mutationFn: async () => {
