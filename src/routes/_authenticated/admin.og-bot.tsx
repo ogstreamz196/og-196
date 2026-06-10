@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
-  Bot, Loader2, ShieldCheck, Copy, RotateCcw, Trash2, Search, ArrowLeft, Eye, EyeOff, Lock, KeyRound, Code2, CalendarClock, UserPlus, Plug, RefreshCw,
+  Bot, Loader2, ShieldCheck, Copy, RotateCcw, Trash2, Search, ArrowLeft, Eye, EyeOff, Lock, KeyRound, Code2, CalendarClock, UserPlus, Plug, RefreshCw, Flame, Undo2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRole } from "@/hooks/use-role";
@@ -95,6 +95,7 @@ interface TokenRow {
   updated_at: string;
   last_used_at: string | null;
   expires_at: string | null;
+  revoked_at: string | null;
 }
 interface ProfileRow {
   id: string;
@@ -102,30 +103,33 @@ interface ProfileRow {
   display_name: string | null;
 }
 
-type ExpiryStatus = "expired" | "expiring" | "active" | "never";
+type TokenStatus = "burned" | "expired" | "expiring" | "active" | "never";
 const EXPIRING_WINDOW_MS = 7 * 86400_000;
 
-function expiryStatus(expires_at: string | null, nowMs: number): ExpiryStatus {
-  if (!expires_at) return "never";
-  const t = new Date(expires_at).getTime();
+function tokenStatus(row: Pick<TokenRow, "expires_at" | "revoked_at">, nowMs: number): TokenStatus {
+  if (row.revoked_at) return "burned";
+  if (!row.expires_at) return "never";
+  const t = new Date(row.expires_at).getTime();
   if (t < nowMs) return "expired";
   if (t - nowMs < EXPIRING_WINDOW_MS) return "expiring";
   return "active";
 }
 
-const STATUS_LABEL: Record<ExpiryStatus | "all", string> = {
+const STATUS_LABEL: Record<TokenStatus | "all", string> = {
   all: "All",
   active: "Active",
   expiring: "Expiring soon",
   expired: "Expired",
   never: "No expiry",
+  burned: "Burned",
 };
 
-const STATUS_BADGE: Record<ExpiryStatus, string> = {
+const STATUS_BADGE: Record<TokenStatus, string> = {
   expired: "bg-destructive/15 text-destructive border-destructive/30",
   expiring: "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30",
   active: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30",
   never: "bg-muted text-muted-foreground border-border",
+  burned: "bg-zinc-500/15 text-zinc-700 dark:text-zinc-300 border-zinc-500/30",
 };
 
 type SortKey = "created_desc" | "expires_asc" | "expires_desc" | "last_used_desc";
@@ -136,7 +140,7 @@ function OgBotSettingsPage() {
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
-  const [statusFilter, setStatusFilter] = useState<ExpiryStatus | "all">("all");
+  const [statusFilter, setStatusFilter] = useState<TokenStatus | "all">("all");
   const [sortKey, setSortKey] = useState<SortKey>("created_desc");
   const [expiryEditFor, setExpiryEditFor] = useState<TokenRow | null>(null);
 
@@ -161,7 +165,7 @@ function OgBotSettingsPage() {
     queryFn: async (): Promise<TokenRow[]> => {
       const { data, error } = await supabase
         .from("og_bot_tokens")
-        .select("user_id, token, created_at, updated_at, last_used_at, expires_at")
+        .select("user_id, token, created_at, updated_at, last_used_at, expires_at, revoked_at")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as TokenRow[];
@@ -230,6 +234,46 @@ function OgBotSettingsPage() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  const burn = useMutation({
+    mutationFn: async (userId: string) => {
+      const { data, error } = await (supabase.rpc as unknown as (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>)(
+        "revoke_og_bot_token",
+        { target_user_id: userId, admin_notes: "boss_burn_from_og_bot_panel" },
+      );
+      if (error) throw new Error(error.message);
+      return (data as string | null) ?? new Date().toISOString();
+    },
+    onSuccess: (ts, userId) => {
+      toast.success("Token burned");
+      qc.setQueryData<TokenRow[]>(["admin-og-bot-tokens"], (prev) =>
+        (prev ?? []).map((t) =>
+          t.user_id === userId ? { ...t, revoked_at: ts, updated_at: new Date().toISOString() } : t,
+        ),
+      );
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const restore = useMutation({
+    mutationFn: async (userId: string) => {
+      const { error } = await (supabase.rpc as unknown as (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>)(
+        "unrevoke_og_bot_token",
+        { target_user_id: userId, admin_notes: "boss_restore_from_og_bot_panel" },
+      );
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: (_v, userId) => {
+      toast.success("Token restored");
+      qc.setQueryData<TokenRow[]>(["admin-og-bot-tokens"], (prev) =>
+        (prev ?? []).map((t) =>
+          t.user_id === userId ? { ...t, revoked_at: null, updated_at: new Date().toISOString() } : t,
+        ),
+      );
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
 
   const setExpiry = useMutation({
     mutationFn: async (vars: { userId: string; expiresAt: string | null }) => {
@@ -316,7 +360,7 @@ function OgBotSettingsPage() {
   const byStatus =
     statusFilter === "all"
       ? byTerm
-      : byTerm.filter((t) => expiryStatus(t.expires_at, now) === statusFilter);
+      : byTerm.filter((t) => tokenStatus(t, now) === statusFilter);
   const filtered = [...byStatus].sort((a, b) => {
     switch (sortKey) {
       case "expires_asc": {
@@ -340,10 +384,10 @@ function OgBotSettingsPage() {
     }
   });
 
-  const statusCounts: Record<ExpiryStatus, number> = {
-    active: 0, expiring: 0, expired: 0, never: 0,
+  const statusCounts: Record<TokenStatus, number> = {
+    active: 0, expiring: 0, expired: 0, never: 0, burned: 0,
   };
-  for (const t of tokens) statusCounts[expiryStatus(t.expires_at, now)]++;
+  for (const t of tokens) statusCounts[tokenStatus(t, now)]++;
 
   return (
     <DashboardShell title="OG Bot Setting">
@@ -379,11 +423,12 @@ function OgBotSettingsPage() {
         />
 
         {/* Stats */}
-        <section className="grid gap-4 sm:grid-cols-4">
+        <section className="grid gap-4 sm:grid-cols-5">
           <StatCard label="Total tokens" value={String(tokens.length)} />
           <StatCard label="Active" value={String(statusCounts.active + statusCounts.never)} hint={`${statusCounts.never} no expiry`} />
           <StatCard label="Expiring soon" value={String(statusCounts.expiring)} hint="Next 7 days" />
           <StatCard label="Expired" value={String(statusCounts.expired)} />
+          <StatCard label="Burned" value={String(statusCounts.burned)} hint="Revoked, reversible" />
         </section>
 
 
@@ -399,7 +444,7 @@ function OgBotSettingsPage() {
             />
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            {(["all", "active", "expiring", "expired", "never"] as const).map((k) => (
+            {(["all", "active", "expiring", "expired", "never", "burned"] as const).map((k) => (
               <button
                 key={k}
                 type="button"
@@ -414,7 +459,7 @@ function OgBotSettingsPage() {
                 {STATUS_LABEL[k]}
                 {k !== "all" && (
                   <span className="ml-1.5 tabular-nums opacity-70">
-                    {statusCounts[k as ExpiryStatus]}
+                    {statusCounts[k as TokenStatus]}
                   </span>
                 )}
               </button>
@@ -500,7 +545,7 @@ function OgBotSettingsPage() {
                   setShowReauth(true);
                   return true;
                 };
-                const status = expiryStatus(t.expires_at, now);
+                const status: TokenStatus = tokenStatus(t, now);
                 return (
                   <li key={t.user_id} className="space-y-3 px-4 py-4">
                     <div className="flex flex-wrap items-start justify-between gap-3">
@@ -517,8 +562,10 @@ function OgBotSettingsPage() {
                           {t.user_id}
                         </p>
                         <span className={`mt-1 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium ${STATUS_BADGE[status]}`}>
-                          <CalendarClock className="h-3 w-3" />
-                          {status === "never"
+                          {status === "burned" ? <Flame className="h-3 w-3" /> : <CalendarClock className="h-3 w-3" />}
+                          {status === "burned"
+                            ? `Burned ${t.revoked_at ? new Date(t.revoked_at).toLocaleDateString() : ""}`
+                            : status === "never"
                             ? "No expiry"
                             : status === "expired"
                             ? `Expired ${new Date(t.expires_at!).toLocaleDateString()}`
@@ -551,23 +598,59 @@ function OgBotSettingsPage() {
                           )}
                           Rotate
                         </Button>
+                        {status === "burned" ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => restore.mutate(t.user_id)}
+                            disabled={restore.isPending && restore.variables === t.user_id}
+                            title="Restore this burned token (clears revoked_at)"
+                          >
+                            {restore.isPending && restore.variables === t.user_id ? (
+                              <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <Undo2 className="mr-1.5 h-3.5 w-3.5" />
+                            )}
+                            Restore
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              if (window.confirm("Burn this token? It will be marked revoked and stop authenticating, but the row is kept for audit. You can restore it later.")) {
+                                burn.mutate(t.user_id);
+                              }
+                            }}
+                            disabled={burn.isPending && burn.variables === t.user_id}
+                            title="Mark token as burned/revoked (soft revoke, reversible)"
+                          >
+                            {burn.isPending && burn.variables === t.user_id ? (
+                              <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <Flame className="mr-1.5 h-3.5 w-3.5" />
+                            )}
+                            Burn
+                          </Button>
+                        )}
                         <Button
                           size="sm"
                           variant="outline"
                           className="text-destructive hover:text-destructive"
                           onClick={() => {
-                            if (window.confirm("Revoke OG Bot access for this user? Their token will be deleted.")) {
+                            if (window.confirm("Remove OG Bot access entirely? This deletes the token row and the og_bot role.")) {
                               revoke.mutate(t.user_id);
                             }
                           }}
                           disabled={revoke.isPending && revoke.variables === t.user_id}
+                          title="Delete token row and remove og_bot role (hard revoke)"
                         >
                           {revoke.isPending && revoke.variables === t.user_id ? (
                             <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
                           ) : (
                             <Trash2 className="mr-1.5 h-3.5 w-3.5" />
                           )}
-                          Revoke
+                          Remove
                         </Button>
                       </div>
                     </div>

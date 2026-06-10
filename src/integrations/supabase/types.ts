@@ -100,6 +100,7 @@ export type Database = {
           created_at: string
           expires_at: string | null
           last_used_at: string | null
+          revoked_at: string | null
           token: string
           updated_at: string
           user_id: string
@@ -108,6 +109,7 @@ export type Database = {
           created_at?: string
           expires_at?: string | null
           last_used_at?: string | null
+          revoked_at?: string | null
           token: string
           updated_at?: string
           user_id: string
@@ -116,6 +118,7 @@ export type Database = {
           created_at?: string
           expires_at?: string | null
           last_used_at?: string | null
+          revoked_at?: string | null
           token?: string
           updated_at?: string
           user_id?: string
@@ -351,6 +354,10 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: string
       }
+      revoke_og_bot_token: {
+        Args: { admin_notes?: string; target_user_id: string }
+        Returns: string
+      }
       set_balance_admin: {
         Args: {
           admin_notes: string
@@ -381,6 +388,10 @@ export type Database = {
           make_vip: boolean
           target_user_id: string
         }
+        Returns: boolean
+      }
+      unrevoke_og_bot_token: {
+        Args: { admin_notes?: string; target_user_id: string }
         Returns: boolean
       }
     }
