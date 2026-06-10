@@ -279,7 +279,7 @@ function OgBotSettingsPage() {
   const tokens = tokensQ.data ?? [];
   const profiles = profilesQ.data ?? {};
   const term = search.trim().toLowerCase();
-  const filtered = term
+  const byTerm = term
     ? tokens.filter((t) => {
         const p = profiles[t.user_id];
         return (
@@ -290,6 +290,37 @@ function OgBotSettingsPage() {
         );
       })
     : tokens;
+  const byStatus =
+    statusFilter === "all"
+      ? byTerm
+      : byTerm.filter((t) => expiryStatus(t.expires_at, now) === statusFilter);
+  const filtered = [...byStatus].sort((a, b) => {
+    switch (sortKey) {
+      case "expires_asc": {
+        const av = a.expires_at ? new Date(a.expires_at).getTime() : Number.POSITIVE_INFINITY;
+        const bv = b.expires_at ? new Date(b.expires_at).getTime() : Number.POSITIVE_INFINITY;
+        return av - bv;
+      }
+      case "expires_desc": {
+        const av = a.expires_at ? new Date(a.expires_at).getTime() : -1;
+        const bv = b.expires_at ? new Date(b.expires_at).getTime() : -1;
+        return bv - av;
+      }
+      case "last_used_desc": {
+        const av = a.last_used_at ? new Date(a.last_used_at).getTime() : 0;
+        const bv = b.last_used_at ? new Date(b.last_used_at).getTime() : 0;
+        return bv - av;
+      }
+      case "created_desc":
+      default:
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    }
+  });
+
+  const statusCounts: Record<ExpiryStatus, number> = {
+    active: 0, expiring: 0, expired: 0, never: 0,
+  };
+  for (const t of tokens) statusCounts[expiryStatus(t.expires_at, now)]++;
 
   return (
     <DashboardShell title="OG Bot Setting">
