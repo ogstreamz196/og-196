@@ -238,6 +238,30 @@ function OgBotSettingsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const setExpiry = useMutation({
+    mutationFn: async (vars: { userId: string; expiresAt: string | null }) => {
+      const { data, error } = await supabase.rpc("set_og_bot_token_expiry", {
+        target_user_id: vars.userId,
+        new_expires_at: vars.expiresAt,
+        admin_notes: "boss_set_expiry_from_og_bot_panel",
+      });
+      if (error) throw new Error(error.message);
+      return data as string | null;
+    },
+    onSuccess: (newExpires, vars) => {
+      toast.success(newExpires ? "Expiry updated" : "Expiry cleared");
+      qc.setQueryData<TokenRow[]>(["admin-og-bot-tokens"], (prev) =>
+        (prev ?? []).map((t) =>
+          t.user_id === vars.userId
+            ? { ...t, expires_at: newExpires, updated_at: new Date().toISOString() }
+            : t,
+        ),
+      );
+      setExpiryEditFor(null);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   if (isLoading || tokensQ.isLoading) {
     return (
       <DashboardShell title="OG Bot Setting">
