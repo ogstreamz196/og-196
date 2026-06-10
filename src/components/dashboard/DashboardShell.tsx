@@ -1,6 +1,6 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { Library, Coins as CoinsIcon, LogOut, Music2, Settings, Search, Clock, Loader2, Compass, UserCog, LayoutDashboard, PlusSquare, ShieldCheck, Bot, MessageCircle } from "lucide-react";
-// OG Bot widget is now injected globally via the remote loader in __root.tsx.
+import { OgBotWidget } from "@/components/messenger/OgBotWidget";
 import { useEffect, type ReactNode } from "react";
 import { CoinBalance } from "./CoinBalance";
 import { supabase } from "@/integrations/supabase/client";
@@ -268,6 +268,7 @@ export function DashboardShell({ title, children }: { title: string; children: R
         {isAdmin && <BossEditHint />}
         <main className="flex-1 px-4 py-6 md:px-8 md:py-10">{children}</main>
       </div>
+      <OgBotWidget />
     </div>
     </AdminEditModeProvider>
   );
