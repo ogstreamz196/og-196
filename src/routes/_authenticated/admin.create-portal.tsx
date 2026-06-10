@@ -41,7 +41,7 @@ function CreatePortalWizard() {
 
   function toggleTag(tag: string) {
     setTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : prev.length >= 5 ? prev : [...prev, tag],
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : prev.length >= 6 ? prev : [...prev, tag],
     );
   }
 
@@ -49,7 +49,7 @@ function CreatePortalWizard() {
     mutationFn: async () => {
       if (!name.trim()) throw new Error("Portal name required");
       if (!slugClean) throw new Error("URL slug required");
-      if (tags.length !== 5) throw new Error("Pick exactly 5 style tags");
+      if (tags.length < 4 || tags.length > 6) throw new Error("Pick between 4 and 6 style tags");
       const { data: { user } } = await supabase.auth.getUser();
       const { data, error } = await supabase.from("portals").insert({
         name: name.trim(),
