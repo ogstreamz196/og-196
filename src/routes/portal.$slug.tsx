@@ -291,34 +291,78 @@ function PortalPage() {
           )}
         </div>
 
-        <div className="mt-6 grid gap-4 rounded-2xl border border-border bg-card p-6 shadow-card">
-          <div>
-            <Label htmlFor="song-name">Song name</Label>
-            <Input
-              id="song-name"
-              value={songName}
-              onChange={(e) => setSongName(e.target.value)}
-              placeholder="My Brand New Song"
-              maxLength={200}
-              className="mt-2"
-            />
+        <div className="mt-6 grid gap-6 rounded-2xl border border-border bg-card p-6 shadow-card">
+          <div className="flex items-center gap-2 border-b border-border pb-3">
+            <div className="grid h-7 w-7 place-items-center rounded-full bg-primary/10 text-xs font-bold text-primary">1</div>
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Describe your song</h2>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <Label htmlFor="song-name" className="flex items-center gap-1.5">
+                <Pencil className="h-3.5 w-3.5 text-muted-foreground" /> Song name
+              </Label>
+              <Input
+                id="song-name"
+                value={songName}
+                onChange={(e) => setSongName(e.target.value)}
+                placeholder="My Brand New Song"
+                maxLength={200}
+                className="mt-2"
+              />
+            </div>
+
+            <div className="sm:col-span-2">
+              <Label htmlFor="description" className="flex items-center gap-1.5">
+                <FileText className="h-3.5 w-3.5 text-muted-foreground" /> Describe the lyrics
+              </Label>
+              <Textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="A love story set on a rainy night in the city..."
+                rows={3}
+                maxLength={1000}
+                className="mt-2 resize-none"
+              />
+              <p className="mt-1 text-xs text-muted-foreground">{description.length}/1000 characters</p>
+            </div>
+
+            <div>
+              <Label htmlFor="language" className="flex items-center gap-1.5">
+                <Languages className="h-3.5 w-3.5 text-muted-foreground" /> Lyrics language
+              </Label>
+              <Select value={language} onValueChange={setLanguage}>
+                <SelectTrigger id="language" className="mt-2">
+                  <SelectValue placeholder="Choose a language" />
+                </SelectTrigger>
+                <SelectContent className="max-h-72">
+                  {LANGUAGE_OPTIONS.map((lang) => (
+                    <SelectItem key={lang} value={lang}>{lang}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="flex items-center gap-1.5">
+                <Music className="h-3.5 w-3.5 text-muted-foreground" /> Vocal mood
+              </Label>
+              <div className="mt-2 rounded-md border border-dashed border-border bg-background/40 px-3 py-2 text-xs text-muted-foreground">
+                Tip: add mood words (dreamy, gritty, uplifting) into the description above.
+              </div>
+            </div>
           </div>
 
           <div>
-            <Label htmlFor="description">Describe the lyrics</Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="A love story set on a rainy night in the city..."
-              rows={3}
-              maxLength={1000}
-              className="mt-2 resize-none"
-            />
-          </div>
-
-          <div>
-            <Label>Style tags</Label>
+            <Label className="flex items-center gap-1.5">
+              <Tags className="h-3.5 w-3.5 text-muted-foreground" /> Style tags
+              {selectedTags.length > 0 && (
+                <span className="ml-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
+                  {selectedTags.length} selected
+                </span>
+              )}
+            </Label>
             <div className="mt-2 flex flex-wrap gap-2">
               {portal.style_tags.map((tag: string) => {
                 const selected = selectedTags.includes(tag);
@@ -344,17 +388,23 @@ function PortalPage() {
             </div>
           </div>
 
+          <div className="flex items-center gap-2 border-b border-border pb-3 pt-2">
+            <div className="grid h-7 w-7 place-items-center rounded-full bg-primary/10 text-xs font-bold text-primary">2</div>
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Write the lyrics</h2>
+          </div>
+
           <Button
             variant="outline"
             onClick={() => generateLyrics.mutate()}
             disabled={generateLyrics.isPending || (!songName.trim() && !description.trim())}
           >
             {generateLyrics.isPending
-              ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Writing in {portal.language}...</>
+              ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Writing in {language}...</>
               : lyrics
                 ? <><Wand2 className="mr-2 h-4 w-4" /> Regenerate Lyrics Draft (free)</>
-                : <><Wand2 className="mr-2 h-4 w-4" /> Generate Lyrics Draft (free)</>}
+                : <><Wand2 className="mr-2 h-4 w-4" /> Generate Lyrics Draft in {language} (free)</>}
           </Button>
+
 
           {lyrics && (
             <div>
