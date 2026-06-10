@@ -59,6 +59,30 @@ export type Database = {
         }
         Relationships: []
       }
+      og_bot_tokens: {
+        Row: {
+          created_at: string
+          last_used_at: string | null
+          token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          last_used_at?: string | null
+          token: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          last_used_at?: string | null
+          token?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       portals: {
         Row: {
           allowed_styles: string[] | null
@@ -264,6 +288,7 @@ export type Database = {
         Args: { p_amount: number; p_reference: string; p_user: string }
         Returns: number
       }
+      gen_og_bot_token: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -280,6 +305,10 @@ export type Database = {
         Returns: number
       }
       purchase_vip: { Args: never; Returns: number }
+      regenerate_og_bot_token: {
+        Args: { target_user_id: string }
+        Returns: string
+      }
       set_balance_admin: {
         Args: {
           admin_notes: string

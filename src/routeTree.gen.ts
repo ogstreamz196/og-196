@@ -22,6 +22,7 @@ import { Route as AuthenticatedLibrarySongIdRouteImport } from './routes/_authen
 import { Route as AuthenticatedBuyCoinsReturnRouteImport } from './routes/_authenticated/buy-coins.return'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedAdminUserSettingsRouteImport } from './routes/_authenticated/admin.user-settings'
+import { Route as AuthenticatedAdminOgBotRouteImport } from './routes/_authenticated/admin.og-bot'
 import { Route as AuthenticatedAdminCreatePortalRouteImport } from './routes/_authenticated/admin.create-portal'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as AuthenticatedAdminUsersUserIdRouteImport } from './routes/_authenticated/admin.users.$userId'
@@ -93,6 +94,11 @@ const AuthenticatedAdminUserSettingsRoute =
     path: '/user-settings',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminOgBotRoute = AuthenticatedAdminOgBotRouteImport.update({
+  id: '/og-bot',
+  path: '/og-bot',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAdminCreatePortalRoute =
   AuthenticatedAdminCreatePortalRouteImport.update({
     id: '/create-portal',
@@ -122,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/portal/$slug': typeof PortalSlugRoute
   '/admin/create-portal': typeof AuthenticatedAdminCreatePortalRoute
+  '/admin/og-bot': typeof AuthenticatedAdminOgBotRoute
   '/admin/user-settings': typeof AuthenticatedAdminUserSettingsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/portal/$slug': typeof PortalSlugRoute
   '/': typeof AuthenticatedIndexRoute
   '/admin/create-portal': typeof AuthenticatedAdminCreatePortalRoute
+  '/admin/og-bot': typeof AuthenticatedAdminOgBotRoute
   '/admin/user-settings': typeof AuthenticatedAdminUserSettingsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
@@ -158,6 +166,7 @@ export interface FileRoutesById {
   '/portal/$slug': typeof PortalSlugRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/admin/create-portal': typeof AuthenticatedAdminCreatePortalRoute
+  '/_authenticated/admin/og-bot': typeof AuthenticatedAdminOgBotRoute
   '/_authenticated/admin/user-settings': typeof AuthenticatedAdminUserSettingsRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/_authenticated/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
@@ -177,6 +186,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/portal/$slug'
     | '/admin/create-portal'
+    | '/admin/og-bot'
     | '/admin/user-settings'
     | '/admin/users'
     | '/buy-coins/return'
@@ -194,6 +204,7 @@ export interface FileRouteTypes {
     | '/portal/$slug'
     | '/'
     | '/admin/create-portal'
+    | '/admin/og-bot'
     | '/admin/user-settings'
     | '/admin/users'
     | '/buy-coins/return'
@@ -212,6 +223,7 @@ export interface FileRouteTypes {
     | '/portal/$slug'
     | '/_authenticated/'
     | '/_authenticated/admin/create-portal'
+    | '/_authenticated/admin/og-bot'
     | '/_authenticated/admin/user-settings'
     | '/_authenticated/admin/users'
     | '/_authenticated/buy-coins/return'
@@ -320,6 +332,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminUserSettingsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/og-bot': {
+      id: '/_authenticated/admin/og-bot'
+      path: '/og-bot'
+      fullPath: '/admin/og-bot'
+      preLoaderRoute: typeof AuthenticatedAdminOgBotRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/create-portal': {
       id: '/_authenticated/admin/create-portal'
       path: '/create-portal'
@@ -360,12 +379,14 @@ const AuthenticatedAdminUsersRouteWithChildren =
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminCreatePortalRoute: typeof AuthenticatedAdminCreatePortalRoute
+  AuthenticatedAdminOgBotRoute: typeof AuthenticatedAdminOgBotRoute
   AuthenticatedAdminUserSettingsRoute: typeof AuthenticatedAdminUserSettingsRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRouteWithChildren
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminCreatePortalRoute: AuthenticatedAdminCreatePortalRoute,
+  AuthenticatedAdminOgBotRoute: AuthenticatedAdminOgBotRoute,
   AuthenticatedAdminUserSettingsRoute: AuthenticatedAdminUserSettingsRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRouteWithChildren,
 }
