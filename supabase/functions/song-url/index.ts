@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
   if (!song.audio_path) return j({ error: "Not ready" }, 409);
 
   const { data, error } = await admin.storage.from("song-files")
-    .createSignedUrl(song.audio_path, 60 * 60); // 1 hour
+    .createSignedUrl(song.audio_path, 60 * 15); // 15 minutes
   if (error) return j({ error: error.message }, 500);
 
   return j({ url: data.signedUrl });

@@ -20,13 +20,17 @@ interface Portal {
   name: string;
   language: string;
   style_tags: string[];
+  status: string;
+  primary_color: string;
+  custom_welcome_text: string | null;
+  coin_cost_per_generation: number;
 }
 
 export const Route = createFileRoute("/portal/$slug")({
   loader: async ({ params }) => {
     const { data, error } = await supabase
       .from("portals")
-      .select("id, slug, name, language, style_tags")
+      .select("id, slug, name, language, style_tags, status, primary_color, custom_welcome_text, coin_cost_per_generation")
       .eq("slug", params.slug)
       .maybeSingle();
     if (error) throw error;
@@ -56,13 +60,33 @@ function PortalPage() {
   const { data: profile } = useProfile();
   const { data: settings } = useSettings();
   const qc = useQueryClient();
-  const COIN_COST = settings?.coins_per_generation ?? 3;
+  // Portal coin override wins; fall back to global setting if unset.
+  const COIN_COST = portal.coin_cost_per_generation ?? settings?.coins_per_generation ?? 3;
   const SONGS_PER_GEN = settings?.songs_per_generation ?? 2;
+  const themeColor = portal.primary_color || "hsl(var(--primary))";
 
   const [songName, setSongName] = useState("");
   const [description, setDescription] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [lyrics, setLyrics] = useState("");
+
+  // Maintenance gate — friendly screen, no generation possible
+  if (portal.status === "maintenance") {
+    return (
+      <div className="grid min-h-screen place-items-center bg-background p-6 text-center">
+        <div className="max-w-md">
+          <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl" style={{ backgroundColor: themeColor }}>
+            <Wand2 className="h-7 w-7 text-white" />
+          </div>
+          <h1 className="mt-4 text-2xl font-bold">{portal.name} is paused</h1>
+          <p className="mt-2 text-muted-foreground">
+            This portal is in maintenance mode. Please check back shortly — generation will be available again soon.
+          </p>
+          <Link to="/" className="mt-6 inline-block text-primary underline">Back to home</Link>
+        </div>
+      </div>
+    );
+  }
 
   function toggleTag(tag: string) {
     setSelectedTags((p) => (p.includes(tag) ? p.filter((t) => t !== tag) : [...p, tag]));
@@ -168,15 +192,29 @@ function PortalPage() {
       </header>
 
       <main className="mx-auto max-w-4xl px-4 py-8 md:px-8 md:py-12">
-        <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-8 shadow-card bg-gradient-hero">
-          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-background/50 px-3 py-1 text-xs text-muted-foreground backdrop-blur">
-            <Wand2 className="h-3 w-3 text-primary" />
+        <div
+          className="relative overflow-hidden rounded-3xl border bg-card p-8 shadow-card"
+          style={{ borderColor: themeColor, boxShadow: `0 0 60px -20px ${themeColor}` }}
+        >
+          <div
+            className="inline-flex items-center gap-2 rounded-full border bg-background/50 px-3 py-1 text-xs backdrop-blur"
+            style={{ borderColor: themeColor, color: themeColor }}
+          >
+            <Wand2 className="h-3 w-3" />
             Portal · Lyrics in {portal.language}
           </div>
           <h1 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl">{portal.name}</h1>
           <p className="mt-2 max-w-xl text-muted-foreground">
             Write your song idea below, generate lyrics for free, then turn them into music.
           </p>
+          {portal.custom_welcome_text && (
+            <div
+              className="mt-4 rounded-xl border bg-background/40 p-3 text-sm"
+              style={{ borderColor: themeColor }}
+            >
+              {portal.custom_welcome_text}
+            </div>
+          )}
         </div>
 
         <div className="mt-6 grid gap-4 rounded-2xl border border-border bg-card p-6 shadow-card">
@@ -218,9 +256,12 @@ function PortalPage() {
                     className={cn(
                       "rounded-full border px-3 py-1 text-xs transition-colors",
                       selected
-                        ? "border-primary bg-primary/15 text-primary"
-                        : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground",
+                        ? "text-white"
+                        : "border-border text-muted-foreground hover:text-foreground",
                     )}
+                    style={selected
+                      ? { backgroundColor: themeColor, borderColor: themeColor }
+                      : undefined}
                   >
                     {tag}
                   </button>
@@ -261,7 +302,8 @@ function PortalPage() {
                   size="lg"
                   onClick={() => generateSongs.mutate()}
                   disabled={generateSongs.isPending || !lyrics.trim() || (profile?.coin_balance ?? 0) < COIN_COST}
-                  className="w-full bg-gradient-brand text-primary-foreground shadow-glow hover:opacity-90"
+                  className="w-full text-white shadow-glow hover:opacity-90"
+                  style={{ backgroundColor: themeColor }}
                 >
                   {generateSongs.isPending
                     ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending to Suno...</>
