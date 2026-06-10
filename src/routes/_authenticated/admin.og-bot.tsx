@@ -432,6 +432,23 @@ function OgBotSettingsPage() {
                       >
                         {unlocked ? <Copy className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
                       </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7"
+                        onClick={async () => {
+                          if (requireReauth("copy")) return;
+                          try {
+                            await navigator.clipboard.writeText(buildEmbedPrompt(t.token));
+                            toast.success("Embed prompt copied — paste into the other project");
+                          } catch {
+                            toast.error("Could not copy to clipboard");
+                          }
+                        }}
+                        title={unlocked ? "Copy embed prompt (with this token baked in)" : "Re-auth required to copy embed prompt"}
+                      >
+                        {unlocked ? <Code2 className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+                      </Button>
                     </div>
 
                     <div className="grid gap-1 text-[11px] text-muted-foreground sm:grid-cols-3">
