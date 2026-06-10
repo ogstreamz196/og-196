@@ -97,6 +97,7 @@ export function DashboardShell({ title, children }: { title: string; children: R
               }}
             />
           </div>
+          <AdminEditModeToggle />
           <CoinBalance />
         </header>
 
