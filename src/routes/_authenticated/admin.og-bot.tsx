@@ -106,7 +106,11 @@ function OgBotSettingsPage() {
     },
     onSuccess: (newToken, userId) => {
       toast.success("Token rotated");
-      setRevealed((r) => ({ ...r, [userId]: true }));
+      // Only auto-reveal if the boss is currently re-authed; otherwise
+      // keep the new token masked until the next successful re-auth.
+      if (reauthedUntil > Date.now()) {
+        setRevealed((r) => ({ ...r, [userId]: true }));
+      }
       // Optimistic: keep cache up to date with new token
       qc.setQueryData<TokenRow[]>(["admin-og-bot-tokens"], (prev) =>
         (prev ?? []).map((t) =>
