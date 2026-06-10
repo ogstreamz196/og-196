@@ -147,7 +147,7 @@ function CreatePortalWizard() {
               <div className="mt-2 flex flex-wrap gap-2">
                 {TAG_LIBRARY.map((tag) => {
                   const selected = tags.includes(tag);
-                  const disabled = !selected && tags.length >= 5;
+                  const disabled = !selected && tags.length >= 6;
                   return (
                     <button
                       type="button"
