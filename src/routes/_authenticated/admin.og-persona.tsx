@@ -34,9 +34,10 @@ function OgPersonaPage() {
   const [script, setScript] = useState("");
   const [voice, setVoice] = useState("");
   const [dictionary, setDictionary] = useState("");
-  const [foulMouth, setFoulMouth] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [togglingFoul, setTogglingFoul] = useState(false);
+
+  const { foulMouth } = useFoulMouth();
+  const setFoulMouth = useSetFoulMouth();
 
   useEffect(() => {
     if (loadingContent) return;
@@ -45,24 +46,6 @@ function OgPersonaPage() {
     setDictionary(get("og_persona.dictionary", DEFAULT_DICTIONARY));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadingContent]);
-
-  // Load this user's saved foul-mouth preference from Supabase. Defaults to ON.
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const { data: u } = await supabase.auth.getUser();
-      const uid = u.user?.id;
-      if (!uid) return;
-      const { data } = await supabase
-        .from("user_preferences")
-        .select("foul_mouth")
-        .eq("user_id", uid)
-        .maybeSingle();
-      if (cancelled) return;
-      setFoulMouth(data?.foul_mouth ?? true);
-    })();
-    return () => { cancelled = true; };
-  }, []);
 
   if (isLoading) {
     return (
