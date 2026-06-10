@@ -909,38 +909,34 @@ interface ReauthDialogProps {
 }
 
 function ReauthDialog({ open, email, intent, onCancel, onSuccess }: ReauthDialogProps) {
-  const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!open) {
-      setPassword("");
-      setSubmitting(false);
-    }
+    if (!open) setSubmitting(false);
   }, [open]);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleConfirm() {
     if (!email) {
       toast.error("No signed-in email found");
       return;
     }
-    if (!password) {
-      toast.error("Enter your boss password");
-      return;
-    }
     setSubmitting(true);
     try {
-      // Re-auth pattern: verify the boss password without disrupting the
-      // active session. signInWithPassword refreshes the same session.
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
-        toast.error("Incorrect password");
+      // Re-verify current session against Supabase Auth. Because sign-in is
+      // Google-only, "re-auth" is a fresh identity check — confirms the
+      // signed-in user is still the boss and the session is still valid.
+      const { data, error } = await supabase.auth.getUser();
+      if (error || !data.user) {
+        toast.error("Session expired — sign in again with Google");
+        return;
+      }
+      if ((data.user.email ?? "").toLowerCase() !== email.toLowerCase()) {
+        toast.error("Signed-in identity changed — refresh the page");
         return;
       }
       await onSuccess();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Re-auth failed");
+      toast.error(err instanceof Error ? err.message : "Verification failed");
     } finally {
       setSubmitting(false);
     }
@@ -948,49 +944,38 @@ function ReauthDialog({ open, email, intent, onCancel, onSuccess }: ReauthDialog
 
   const intentText =
     intent === "reveal"
-      ? "Confirm your password to reveal this OG Bot token."
+      ? "Confirm your Google identity to reveal this OG Bot token."
       : intent === "copy"
-      ? "Confirm your password to copy this OG Bot token to your clipboard."
-      : "Confirm your password to unlock OG Bot tokens for the next 5 minutes.";
+      ? "Confirm your Google identity to copy this OG Bot token to your clipboard."
+      : "Confirm your Google identity to unlock OG Bot tokens for the next 5 minutes.";
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onCancel(); }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <ShieldCheck className="h-4 w-4 text-primary" /> Boss re-auth required
+            <ShieldCheck className="h-4 w-4 text-primary" /> Boss identity check
           </DialogTitle>
           <DialogDescription>{intentText}</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground">Signed in as</label>
+            <label className="text-xs font-medium text-muted-foreground">Signed in as (Google)</label>
             <Input value={email ?? ""} readOnly disabled className="font-mono text-xs" />
           </div>
-          <div className="space-y-1.5">
-            <label htmlFor="reauth-password" className="text-xs font-medium text-muted-foreground">
-              Boss password
-            </label>
-            <Input
-              id="reauth-password"
-              type="password"
-              autoComplete="current-password"
-              autoFocus
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-            />
-          </div>
-          <DialogFooter className="gap-2">
-            <Button type="button" variant="outline" onClick={onCancel} disabled={submitting}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={submitting || !password || !email}>
-              {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              <KeyRound className="mr-1.5 h-3.5 w-3.5" /> Unlock
-            </Button>
-          </DialogFooter>
-        </form>
+          <p className="text-xs text-muted-foreground">
+            One-click verify. We re-check your Google session with Supabase Auth — no password needed.
+          </p>
+        </div>
+        <DialogFooter className="gap-2">
+          <Button type="button" variant="outline" onClick={onCancel} disabled={submitting}>
+            Cancel
+          </Button>
+          <Button type="button" onClick={handleConfirm} disabled={submitting || !email}>
+            {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <KeyRound className="mr-1.5 h-3.5 w-3.5" /> Verify &amp; unlock
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
