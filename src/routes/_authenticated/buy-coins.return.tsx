@@ -5,6 +5,7 @@ import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Button } from "@/components/ui/button";
 import { useProfile } from "@/hooks/use-profile";
 import { useQueryClient } from "@tanstack/react-query";
+import { EditableContent } from "@/components/admin/EditableContent";
 
 export const Route = createFileRoute("/_authenticated/buy-coins/return")({
   validateSearch: (search: Record<string, unknown>): { session_id?: string; pack?: string } => ({
@@ -37,9 +38,15 @@ function CheckoutReturn() {
         {session_id ? (
           <>
             <CheckCircle2 className="mx-auto h-12 w-12 text-primary" />
-            <h2 className="mt-4 text-2xl font-bold">Payment complete</h2>
+            <h2 className="mt-4 text-2xl font-bold">
+              <EditableContent contentKey="buyCoins.return.heading" defaultValue="Payment complete" />
+            </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Coins are credited automatically — usually within a few seconds.
+              <EditableContent
+                contentKey="buyCoins.return.subtitle"
+                defaultValue="Coins are credited automatically — usually within a few seconds."
+                multiline
+              />
             </p>
             <div className="mx-auto mt-6 inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2">
               <Coins className="h-4 w-4 text-coin" />
@@ -60,8 +67,16 @@ function CheckoutReturn() {
           </>
         ) : (
           <>
-            <h2 className="text-2xl font-bold">No session found</h2>
-            <p className="mt-2 text-sm text-muted-foreground">We couldn't find your checkout session.</p>
+            <h2 className="text-2xl font-bold">
+              <EditableContent contentKey="buyCoins.return.missing.heading" defaultValue="No session found" />
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              <EditableContent
+                contentKey="buyCoins.return.missing.subtitle"
+                defaultValue="We couldn't find your checkout session."
+                multiline
+              />
+            </p>
             <Button asChild className="mt-6">
               <Link to="/buy-coins">Back to Buy Coins</Link>
             </Button>

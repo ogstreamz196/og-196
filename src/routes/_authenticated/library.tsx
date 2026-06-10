@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { SongCard, type Song } from "@/components/SongCard";
+import { EditableContent } from "@/components/admin/EditableContent";
 
 export const Route = createFileRoute("/_authenticated/library")({
   component: LibraryPage,
@@ -57,7 +58,13 @@ function LibraryPage() {
         ) : (
           <div className="rounded-2xl border border-dashed border-border bg-card/50 p-16 text-center">
             <LibraryIcon className="mx-auto h-10 w-10 text-muted-foreground" />
-            <p className="mt-3 text-muted-foreground">Your library is empty. Head to Home and generate your first track.</p>
+            <p className="mt-3 text-muted-foreground">
+              <EditableContent
+                contentKey="library.empty"
+                defaultValue="Your library is empty. Head to Home and generate your first track."
+                multiline
+              />
+            </p>
           </div>
         )}
       </div>

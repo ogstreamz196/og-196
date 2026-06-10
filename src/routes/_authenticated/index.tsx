@@ -141,7 +141,11 @@ function DashboardHome() {
             </div>
           ) : !portalsQ.data || portalsQ.data.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-border bg-card/50 p-12 text-center text-muted-foreground">
-              No portals are active right now. Check back soon.
+              <EditableContent
+                contentKey="dashboard.portals.empty"
+                defaultValue="No portals are active right now. Check back soon."
+                multiline
+              />
             </div>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { computeWatch, DEFAULT_TIMEOUT_MS } from "@/lib/generation-watch";
+import { EditableContent } from "@/components/admin/EditableContent";
 
 const LANGUAGE_OPTIONS = [
   "English", "Spanish", "French", "German", "Italian", "Portuguese",
@@ -279,7 +280,11 @@ function PortalPage() {
 
           <h1 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl">{portal.name}</h1>
           <p className="mt-2 max-w-xl text-muted-foreground">
-            Write your song idea below, generate lyrics for free, then turn them into music.
+            <EditableContent
+              contentKey="portal.subtitle"
+              defaultValue="Write your song idea below, generate lyrics for free, then turn them into music."
+              multiline
+            />
           </p>
           {portal.custom_welcome_text && (
             <div
@@ -294,7 +299,9 @@ function PortalPage() {
         <div className="mt-6 grid gap-6 rounded-2xl border border-border bg-card p-6 shadow-card">
           <div className="flex items-center gap-2 border-b border-border pb-3">
             <div className="grid h-7 w-7 place-items-center rounded-full bg-primary/10 text-xs font-bold text-primary">1</div>
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Describe your song</h2>
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+              <EditableContent contentKey="portal.step1.heading" defaultValue="Describe your song" />
+            </h2>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -390,7 +397,9 @@ function PortalPage() {
 
           <div className="flex items-center gap-2 border-b border-border pb-3 pt-2">
             <div className="grid h-7 w-7 place-items-center rounded-full bg-primary/10 text-xs font-bold text-primary">2</div>
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Write the lyrics</h2>
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+              <EditableContent contentKey="portal.step2.heading" defaultValue="Write the lyrics" />
+            </h2>
           </div>
 
           <Button

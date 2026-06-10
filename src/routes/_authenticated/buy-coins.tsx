@@ -143,9 +143,15 @@ function BuyCoinsPage() {
         <div className="mt-12">
           <div className="mb-4 flex items-end justify-between">
             <div>
-              <h3 className="text-xl font-bold">Unlock VIP status</h3>
+              <h3 className="text-xl font-bold">
+                <EditableContent contentKey="buyCoins.vip.heading" defaultValue="Unlock VIP status" />
+              </h3>
               <p className="text-sm text-muted-foreground">
-                Spend coins instead of cash. One-time purchase, never expires.
+                <EditableContent
+                  contentKey="buyCoins.vip.subtitle"
+                  defaultValue="Spend coins instead of cash. One-time purchase, never expires."
+                  multiline
+                />
               </p>
             </div>
             <span className="text-xs text-muted-foreground">Pay with coins</span>
@@ -157,7 +163,9 @@ function BuyCoinsPage() {
               </div>
               <div className="flex-1 min-w-[200px]">
                 <div className="flex items-center gap-2">
-                  <h4 className="text-lg font-semibold">VIP Status</h4>
+                  <h4 className="text-lg font-semibold">
+                    <EditableContent contentKey="buyCoins.vip.title" defaultValue="VIP Status" />
+                  </h4>
                   {isVip && (
                     <span className="rounded-full bg-coin/15 px-2 py-0.5 text-xs font-medium text-coin">
                       Active
@@ -165,7 +173,11 @@ function BuyCoinsPage() {
                   )}
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Show the VIP badge on your profile and unlock priority perks.
+                  <EditableContent
+                    contentKey="buyCoins.vip.description"
+                    defaultValue="Show the VIP badge on your profile and unlock priority perks."
+                    multiline
+                  />
                 </p>
               </div>
               <div className="flex items-center gap-2 text-lg font-semibold">
@@ -197,7 +209,11 @@ function BuyCoinsPage() {
 
 
         <p className="mt-8 text-center text-xs text-muted-foreground">
-          Secure payments powered by Lovable. Coins are credited to your account automatically after a successful checkout.
+          <EditableContent
+            contentKey="buyCoins.footer"
+            defaultValue="Secure payments powered by Lovable. Coins are credited to your account automatically after a successful checkout."
+            multiline
+          />
         </p>
       </div>
     </DashboardShell>

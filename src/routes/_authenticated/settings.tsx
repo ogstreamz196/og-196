@@ -20,15 +20,21 @@ function SettingsPage() {
           </h2>
           <dl className="mt-4 grid grid-cols-1 gap-3 text-sm">
             <div className="flex justify-between gap-4">
-              <dt className="text-muted-foreground">Email</dt>
+              <dt className="text-muted-foreground">
+                <EditableContent contentKey="settings.account.email" defaultValue="Email" />
+              </dt>
               <dd className="truncate">{user?.email}</dd>
             </div>
             <div className="flex justify-between gap-4">
-              <dt className="text-muted-foreground">Display name</dt>
+              <dt className="text-muted-foreground">
+                <EditableContent contentKey="settings.account.displayName" defaultValue="Display name" />
+              </dt>
               <dd>{profile?.display_name ?? "—"}</dd>
             </div>
             <div className="flex justify-between gap-4">
-              <dt className="text-muted-foreground">Coin balance</dt>
+              <dt className="text-muted-foreground">
+                <EditableContent contentKey="settings.account.coinBalance" defaultValue="Coin balance" />
+              </dt>
               <dd>{profile?.coin_balance ?? 0}</dd>
             </div>
           </dl>
