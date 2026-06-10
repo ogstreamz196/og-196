@@ -2,11 +2,21 @@
 // Suno returns 1-2 clips per task. We fan them out into individual song rows:
 // the first clip updates the original pending row, additional clips create sibling rows
 // owned by the same user and tagged with the same suno_task_id.
+//
+// Two-phase storage:
+//   1) Download a short SAMPLE_BYTES range from each clip, upload as `<user>/<song>.sample.mp3`
+//      and immediately mark the song "completed" so the UI unblocks.
+//   2) Schedule a background task (EdgeRuntime.waitUntil) that downloads the full file,
+//      uploads it as `<user>/<song>.mp3`, and updates audio_path + duration. All uploaded
+//      objects carry user_id / song_id custom metadata so files are traceable to the owner.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+// ~1 MB sample — covers >30s of mp3 audio at typical Suno bitrates.
+const SAMPLE_BYTES = 1_048_576;
 
 // Allow-list of hostnames we'll fetch audio from (defence-in-depth SSRF guard).
 const AUDIO_HOST_ALLOWLIST = [
@@ -42,6 +52,11 @@ function timingSafeEq(a: string, b: string): boolean {
   return r === 0;
 }
 
+// Owner-tagged storage metadata so every object can be traced back to its user.
+function ownerMeta(userId: string, songId: string, kind: "sample" | "full") {
+  return { user_id: userId, song_id: songId, kind, uploaded_at: new Date().toISOString() };
+}
+
 Deno.serve(async (req) => {
   const url = new URL(req.url);
   const songId = url.searchParams.get("song_id");
@@ -66,12 +81,10 @@ Deno.serve(async (req) => {
   // Failure callback
   const callbackType = payload?.data?.callbackType || payload?.callbackType;
   if (callbackType === "error" || (payload?.code && payload.code !== 200)) {
-    // Guard against double-refund: only refund when song still pending/processing.
     if (parentSong.status === "completed" || parentSong.status === "failed") {
       console.log("Skipping refund — song already terminal:", parentSong.status);
       return new Response("ok", { status: 200 });
     }
-    // Refund using portal override when applicable; fall back to global setting.
     let refundAmt = 3;
     if (parentSong.portal_id) {
       const { data: portal } = await admin
@@ -94,7 +107,6 @@ Deno.serve(async (req) => {
     return new Response("ok", { status: 200 });
   }
 
-  // Collect clip items (cover common gateway shapes)
   const rawItems =
     payload?.data?.data ||
     payload?.data ||
@@ -122,20 +134,21 @@ Deno.serve(async (req) => {
     for (let i = 0; i < clips.length; i++) {
       const clip = clips[i];
 
-      // Skip if we've already stored this clip
       if (clip.clipId) {
         const { data: existing } = await admin
           .from("songs").select("id").eq("suno_clip_id", clip.clipId).maybeSingle();
         if (existing) continue;
       }
 
-      const audioRes = await fetch(clip.audioUrl!);
-      if (!audioRes.ok) throw new Error(`Audio download failed: ${audioRes.status}`);
-      const audioBuf = new Uint8Array(await audioRes.arrayBuffer());
+      // --- Phase 1: short sample (fast) ---
+      const sampleRes = await fetch(clip.audioUrl!, { headers: { Range: `bytes=0-${SAMPLE_BYTES - 1}` } });
+      if (!sampleRes.ok && sampleRes.status !== 206) {
+        throw new Error(`Sample download failed: ${sampleRes.status}`);
+      }
+      const sampleBuf = new Uint8Array(await sampleRes.arrayBuffer());
 
       let targetId = i === 0 ? songId : null;
       if (!targetId) {
-        // Insert sibling row for additional clip
         const { data: sib, error: sibErr } = await admin.from("songs").insert({
           user_id: parentSong.user_id,
           prompt: parentSong.prompt,
@@ -150,21 +163,54 @@ Deno.serve(async (req) => {
         targetId = sib.id;
       }
 
-      const path = `${parentSong.user_id}/${targetId}.mp3`;
-      const { error: uploadErr } = await admin.storage.from("song-files").upload(path, audioBuf, {
-        contentType: "audio/mpeg", upsert: true,
-      });
-      if (uploadErr) throw uploadErr;
+      const samplePath = `${parentSong.user_id}/${targetId}.sample.mp3`;
+      const { error: sampleUpErr } = await admin.storage.from("song-files").upload(samplePath, sampleBuf, {
+        contentType: "audio/mpeg",
+        upsert: true,
+        metadata: ownerMeta(parentSong.user_id, targetId, "sample"),
+      } as any);
+      if (sampleUpErr) throw sampleUpErr;
 
+      // Mark completed now — UI can play the sample immediately.
       await admin.from("songs").update({
         status: "completed",
-        audio_path: path,
+        sample_path: samplePath,
         cover_url: clip.coverUrl ?? null,
         title: clip.title ?? parentSong.title,
         suno_clip_id: clip.clipId ?? null,
         duration_seconds: clip.duration ?? null,
         completed_at: new Date().toISOString(),
       }).eq("id", targetId);
+
+      // --- Phase 2: full download in background ---
+      const finalId = targetId;
+      const audioUrl = clip.audioUrl!;
+      const bgTask = (async () => {
+        try {
+          const fullRes = await fetch(audioUrl);
+          if (!fullRes.ok) throw new Error(`Full download failed: ${fullRes.status}`);
+          const fullBuf = new Uint8Array(await fullRes.arrayBuffer());
+          const fullPath = `${parentSong.user_id}/${finalId}.mp3`;
+          const { error: fullUpErr } = await admin.storage.from("song-files").upload(fullPath, fullBuf, {
+            contentType: "audio/mpeg",
+            upsert: true,
+            metadata: ownerMeta(parentSong.user_id, finalId, "full"),
+          } as any);
+          if (fullUpErr) throw fullUpErr;
+          await admin.from("songs").update({ audio_path: fullPath }).eq("id", finalId);
+          console.log("Full track stored for", finalId);
+        } catch (e) {
+          console.error("Background full-download failed for", finalId, e);
+        }
+      })();
+      // @ts-ignore Deno Edge Runtime
+      if (typeof EdgeRuntime !== "undefined" && EdgeRuntime?.waitUntil) {
+        // @ts-ignore
+        EdgeRuntime.waitUntil(bgTask);
+      } else {
+        // Fallback: don't block the response, but we have no waitUntil guarantee.
+        bgTask.catch(() => {});
+      }
     }
 
     return new Response("ok", { status: 200 });
