@@ -20,13 +20,17 @@ interface Portal {
   name: string;
   language: string;
   style_tags: string[];
+  status: string;
+  primary_color: string;
+  custom_welcome_text: string | null;
+  coin_cost_per_generation: number;
 }
 
 export const Route = createFileRoute("/portal/$slug")({
   loader: async ({ params }) => {
     const { data, error } = await supabase
       .from("portals")
-      .select("id, slug, name, language, style_tags")
+      .select("id, slug, name, language, style_tags, status, primary_color, custom_welcome_text, coin_cost_per_generation")
       .eq("slug", params.slug)
       .maybeSingle();
     if (error) throw error;
