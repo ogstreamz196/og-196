@@ -59,47 +59,25 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  loader: async () => {
-    const { getOgBotWidgetConfig } = await import("@/lib/og-bot-config.functions");
-    try {
-      const ogBot = await getOgBotWidgetConfig();
-      return { ogBot };
-    } catch {
-      return { ogBot: { loaderUrl: "", token: "" } };
-    }
-  },
-  head: (ctx) => {
-    const ogBot = (ctx.loaderData as { ogBot?: { loaderUrl: string; token: string } } | undefined)?.ogBot;
-    const scripts: Array<Record<string, string>> = [];
-    if (ogBot?.loaderUrl && ogBot.token) {
-      scripts.push({
-        src: ogBot.loaderUrl,
-        "data-token": ogBot.token,
-        "data-title": "OG Bot",
-        defer: "",
-      });
-    }
-    return {
-      meta: [
-        { charSet: "utf-8" },
-        { name: "viewport", content: "width=device-width, initial-scale=1" },
-        { title: "PORTAL" },
-        { name: "description", content: "Generate full songs from a prompt using AI. Powered by 0G-Streamz." },
-        { name: "author", content: "Sonix" },
-        { property: "og:title", content: "PORTAL" },
-        { property: "og:description", content: "Generate full songs from a prompt using AI. Powered by 0G-Streamz." },
-        { property: "og:type", content: "website" },
-        { name: "twitter:card", content: "summary_large_image" },
-        { name: "twitter:title", content: "PORTAL" },
-        { name: "twitter:description", content: "Generate full songs from a prompt using AI. Powered by 0G-Streamz." },
-        { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0962d120-9a6a-4403-b946-c07e83d9dfbd/id-preview-1984ac9d--07659a42-5b68-4c8b-83b5-ee9a625dbb92.lovable.app-1781064468022.png" },
-        { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0962d120-9a6a-4403-b946-c07e83d9dfbd/id-preview-1984ac9d--07659a42-5b68-4c8b-83b5-ee9a625dbb92.lovable.app-1781064468022.png" },
-        { name: "google-site-verification", content: "R34IxND5szTYrevWfX0gTnIvDi64kPx6wI0XCNM08YE" },
-      ],
-      links: [{ rel: "stylesheet", href: appCss }],
-      scripts,
-    };
-  },
+  head: () => ({
+    meta: [
+      { charSet: "utf-8" },
+      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { title: "PORTAL" },
+      { name: "description", content: "Generate full songs from a prompt using AI. Powered by 0G-Streamz." },
+      { name: "author", content: "Sonix" },
+      { property: "og:title", content: "PORTAL" },
+      { property: "og:description", content: "Generate full songs from a prompt using AI. Powered by 0G-Streamz." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "PORTAL" },
+      { name: "twitter:description", content: "Generate full songs from a prompt using AI. Powered by 0G-Streamz." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0962d120-9a6a-4403-b946-c07e83d9dfbd/id-preview-1984ac9d--07659a42-5b68-4c8b-83b5-ee9a625dbb92.lovable.app-1781064468022.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0962d120-9a6a-4403-b946-c07e83d9dfbd/id-preview-1984ac9d--07659a42-5b68-4c8b-83b5-ee9a625dbb92.lovable.app-1781064468022.png" },
+      { name: "google-site-verification", content: "R34IxND5szTYrevWfX0gTnIvDi64kPx6wI0XCNM08YE" },
+    ],
+    links: [{ rel: "stylesheet", href: appCss }],
+  }),
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
