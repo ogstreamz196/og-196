@@ -46,9 +46,25 @@ interface ProfileRow {
 
 function OgBotSettingsPage() {
   const { isAdmin, isLoading } = useRole();
+  const { user } = useAuth();
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
+
+  // Step-up auth state: tokens stay masked until the boss re-enters their
+  // password. After success, reveal/copy is unlocked for REAUTH_TTL_MS.
+  const [reauthedUntil, setReauthedUntil] = useState<number>(0);
+  const [now, setNow] = useState<number>(() => Date.now());
+  useEffect(() => {
+    const i = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(i);
+  }, []);
+  const unlocked = reauthedUntil > now;
+  const unlockedSecondsLeft = unlocked ? Math.max(0, Math.ceil((reauthedUntil - now) / 1000)) : 0;
+
+  // Pending action waiting on re-auth: "reveal" or "copy" + which token.
+  const [pending, setPending] = useState<{ kind: "reveal" | "copy"; userId: string } | null>(null);
+  const [showReauth, setShowReauth] = useState(false);
 
   const tokensQ = useQuery({
     queryKey: ["admin-og-bot-tokens"],
