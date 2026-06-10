@@ -96,6 +96,9 @@ function PortalPage() {
   const [songName, setSongName] = useState("");
   const [description, setDescription] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
+  const [moodBatch, setMoodBatch] = useState<string[]>(() => pickBatch(VOCAL_MOOD_POOL, [], VISIBLE_BATCH));
+  const [styleBatch, setStyleBatch] = useState<string[]>(() => pickBatch(portal.style_tags ?? [], [], VISIBLE_BATCH));
   const [lyrics, setLyrics] = useState("");
   const [language, setLanguage] = useState<string>(portal.language || "English");
 
