@@ -22,8 +22,9 @@ export function useProfile() {
   // Realtime subscription so the coin balance updates instantly after generation/purchase.
   useEffect(() => {
     if (!user) return;
+    const channelName = `profile:${user.id}:${Math.random().toString(36).slice(2)}`;
     const channel = supabase
-      .channel(`profile:${user.id}`)
+      .channel(channelName)
       .on(
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${user.id}` },
