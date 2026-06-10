@@ -597,23 +597,59 @@ function OgBotSettingsPage() {
                           )}
                           Rotate
                         </Button>
+                        {status === "burned" ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => restore.mutate(t.user_id)}
+                            disabled={restore.isPending && restore.variables === t.user_id}
+                            title="Restore this burned token (clears revoked_at)"
+                          >
+                            {restore.isPending && restore.variables === t.user_id ? (
+                              <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <Undo2 className="mr-1.5 h-3.5 w-3.5" />
+                            )}
+                            Restore
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              if (window.confirm("Burn this token? It will be marked revoked and stop authenticating, but the row is kept for audit. You can restore it later.")) {
+                                burn.mutate(t.user_id);
+                              }
+                            }}
+                            disabled={burn.isPending && burn.variables === t.user_id}
+                            title="Mark token as burned/revoked (soft revoke, reversible)"
+                          >
+                            {burn.isPending && burn.variables === t.user_id ? (
+                              <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <Flame className="mr-1.5 h-3.5 w-3.5" />
+                            )}
+                            Burn
+                          </Button>
+                        )}
                         <Button
                           size="sm"
                           variant="outline"
                           className="text-destructive hover:text-destructive"
                           onClick={() => {
-                            if (window.confirm("Revoke OG Bot access for this user? Their token will be deleted.")) {
+                            if (window.confirm("Remove OG Bot access entirely? This deletes the token row and the og_bot role.")) {
                               revoke.mutate(t.user_id);
                             }
                           }}
                           disabled={revoke.isPending && revoke.variables === t.user_id}
+                          title="Delete token row and remove og_bot role (hard revoke)"
                         >
                           {revoke.isPending && revoke.variables === t.user_id ? (
                             <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
                           ) : (
                             <Trash2 className="mr-1.5 h-3.5 w-3.5" />
                           )}
-                          Revoke
+                          Remove
                         </Button>
                       </div>
                     </div>
