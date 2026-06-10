@@ -343,31 +343,61 @@ function OgBotSettingsPage() {
         </div>
 
         {/* Stats */}
-        <section className="grid gap-4 sm:grid-cols-3">
-          <StatCard label="Active tokens" value={String(tokens.length)} />
-          <StatCard
-            label="Recently rotated"
-            value={String(
-              tokens.filter((t) => Date.now() - new Date(t.updated_at).getTime() < 7 * 86400_000).length,
-            )}
-            hint="Last 7 days"
-          />
-          <StatCard
-            label="Never used"
-            value={String(tokens.filter((t) => !t.last_used_at).length)}
-          />
+        <section className="grid gap-4 sm:grid-cols-4">
+          <StatCard label="Total tokens" value={String(tokens.length)} />
+          <StatCard label="Active" value={String(statusCounts.active + statusCounts.never)} hint={`${statusCounts.never} no expiry`} />
+          <StatCard label="Expiring soon" value={String(statusCounts.expiring)} hint="Next 7 days" />
+          <StatCard label="Expired" value={String(statusCounts.expired)} />
         </section>
 
-        {/* Search */}
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by email, name, user id, or token…"
-            className="pl-9"
-          />
+        {/* Search + filter + sort */}
+        <div className="space-y-3">
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by email, name, user id, or token…"
+              className="pl-9"
+            />
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {(["all", "active", "expiring", "expired", "never"] as const).map((k) => (
+              <button
+                key={k}
+                type="button"
+                onClick={() => setStatusFilter(k)}
+                className={
+                  "rounded-full border px-3 py-1 text-xs transition " +
+                  (statusFilter === k
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border bg-card text-muted-foreground hover:text-foreground")
+                }
+              >
+                {STATUS_LABEL[k]}
+                {k !== "all" && (
+                  <span className="ml-1.5 tabular-nums opacity-70">
+                    {statusCounts[k as ExpiryStatus]}
+                  </span>
+                )}
+              </button>
+            ))}
+            <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
+              <span>Sort</span>
+              <select
+                value={sortKey}
+                onChange={(e) => setSortKey(e.target.value as SortKey)}
+                className="rounded-md border border-border bg-card px-2 py-1 text-xs"
+              >
+                <option value="created_desc">Newest</option>
+                <option value="expires_asc">Expiring soonest</option>
+                <option value="expires_desc">Expiring latest</option>
+                <option value="last_used_desc">Recently used</option>
+              </select>
+            </div>
+          </div>
         </div>
+
 
         {/* Lock / unlock banner */}
         <div className={
