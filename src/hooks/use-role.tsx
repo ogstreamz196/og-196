@@ -5,7 +5,7 @@ import { useAuth } from "./use-auth";
 export type AppRole = "admin" | "user" | "vip";
 
 export function useRole() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const query = useQuery({
     queryKey: ["user-role", user?.id],
     enabled: !!user,
@@ -26,6 +26,7 @@ export function useRole() {
   });
   return {
     ...query,
+    isLoading: authLoading || query.isLoading,
     isAdmin: query.data?.isAdmin ?? false,
     isVip: query.data?.isVip ?? false,
     roles: query.data?.roles ?? [],
