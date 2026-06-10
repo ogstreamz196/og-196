@@ -4,6 +4,7 @@ import { Coins, Check, Sparkles, Loader2, ArrowLeft, Crown } from "lucide-react"
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import { EditableContent } from "@/components/admin/EditableContent";
 import { useProfile } from "@/hooks/use-profile";
 import { useRole } from "@/hooks/use-role";
 import { supabase } from "@/integrations/supabase/client";
