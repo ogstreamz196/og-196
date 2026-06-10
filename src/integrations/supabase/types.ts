@@ -231,6 +231,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_update_profile_label: {
+        Args: {
+          admin_notes: string
+          new_display_name: string
+          target_user_id: string
+        }
+        Returns: string
+      }
       deduct_coins: {
         Args: { p_amount: number; p_reference: string; p_user: string }
         Returns: number
@@ -248,6 +256,14 @@ export type Database = {
       }
       mint_coins_admin: {
         Args: { admin_notes: string; amount: number; target_user_id: string }
+        Returns: number
+      }
+      set_balance_admin: {
+        Args: {
+          admin_notes: string
+          new_balance: number
+          target_user_id: string
+        }
         Returns: number
       }
     }
