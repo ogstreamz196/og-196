@@ -432,9 +432,13 @@ function OgBotSettingsPage() {
         {/* Grant a new token */}
         <GrantTokenPanel
           existingUserIds={tokens.map((t) => t.user_id)}
-          onGrant={(id) => grant.mutate(id)}
+          onIssue={(vars) => grant.mutate(vars)}
           isPending={grant.isPending}
-          pendingId={typeof grant.variables === "string" ? grant.variables : null}
+          pendingId={
+            grant.variables && typeof grant.variables === "object"
+              ? (grant.variables as { targetUserId: string }).targetUserId
+              : null
+          }
         />
 
         {/* Stats */}
