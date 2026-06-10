@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useSiteContent, useSetSiteContent } from "@/hooks/use-site-content";
+import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { toast } from "sonner";
 
 const DEFAULT_SCRIPT =
