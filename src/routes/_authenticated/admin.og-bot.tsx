@@ -240,11 +240,14 @@ function OgBotSettingsPage() {
 
   const setExpiry = useMutation({
     mutationFn: async (vars: { userId: string; expiresAt: string | null }) => {
-      const { data, error } = await supabase.rpc("set_og_bot_token_expiry", {
-        target_user_id: vars.userId,
-        new_expires_at: vars.expiresAt,
-        admin_notes: "boss_set_expiry_from_og_bot_panel",
-      });
+      const { data, error } = await (supabase.rpc as unknown as (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>)(
+        "set_og_bot_token_expiry",
+        {
+          target_user_id: vars.userId,
+          new_expires_at: vars.expiresAt,
+          admin_notes: "boss_set_expiry_from_og_bot_panel",
+        },
+      );
       if (error) throw new Error(error.message);
       return (data as string | null) ?? null;
     },
