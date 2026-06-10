@@ -100,7 +100,7 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
   const { data: settings } = useSettings();
   const sampleSeconds = settings?.sample_seconds ?? 30;
 
-  const isReady = song.status === "completed" && !!song.audio_path;
+  const isReady = song.status === "completed" && !!(song.audio_path || (song as any).sample_path);
   const isFailed = song.status === "failed";
   const isPending = song.status === "pending" || song.status === "processing";
   const unlocked = !!song.unlocked;
