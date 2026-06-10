@@ -1,7 +1,10 @@
-import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
+import { createFileRoute, Navigate, Link, redirect } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, ShieldCheck, Search, ArrowLeft, Users as UsersIcon } from "lucide-react";
+import {
+  Loader2, ShieldCheck, Search, ArrowLeft, Users as UsersIcon,
+  UserCog, Crown, Coins, Settings as SettingsIcon,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRole } from "@/hooks/use-role";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
@@ -10,16 +13,19 @@ import { Button } from "@/components/ui/button";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import {
-  AdminEditableLabel,
-  AdminEditableBalance,
-  AdminEditModeToggle,
-} from "@/components/admin/AdminEditMode";
+import { AdminEditModeToggle } from "@/components/admin/AdminEditMode";
 import { BulkReconcilePanel } from "@/components/admin/BulkReconcilePanel";
-import { UserAuditTrail } from "@/components/admin/UserAuditTrail";
-import { VipBadgeAction } from "@/components/admin/VipBadgeAction";
 
 export const Route = createFileRoute("/_authenticated/admin/users")({
+  beforeLoad: async () => {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) throw redirect({ to: "/auth" });
+    const { data: isAdmin, error } = await supabase.rpc("has_role", {
+      _user_id: userData.user.id,
+      _role: "admin",
+    });
+    if (error || !isAdmin) throw redirect({ to: "/" });
+  },
   component: AdminUsersPage,
 });
 
@@ -31,10 +37,14 @@ interface ProfileRow {
   created_at: string;
 }
 
+interface RoleRow {
+  user_id: string;
+  role: string;
+}
+
 function AdminUsersPage() {
   const { isAdmin, isLoading: roleLoading } = useRole();
   const [q, setQ] = useState("");
-  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const usersQ = useQuery({
     queryKey: ["admin-users-list"],
@@ -50,6 +60,26 @@ function AdminUsersPage() {
     },
   });
 
+  const rolesQ = useQuery({
+    queryKey: ["admin-users-roles"],
+    enabled: isAdmin,
+    queryFn: async (): Promise<RoleRow[]> => {
+      const { data, error } = await supabase.from("user_roles").select("user_id, role");
+      if (error) throw error;
+      return (data ?? []) as RoleRow[];
+    },
+  });
+
+  const rolesByUser = useMemo(() => {
+    const map = new Map<string, string[]>();
+    (rolesQ.data ?? []).forEach((r) => {
+      const arr = map.get(r.user_id) ?? [];
+      arr.push(r.role);
+      map.set(r.user_id, arr);
+    });
+    return map;
+  }, [rolesQ.data]);
+
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
     const list = usersQ.data ?? [];
@@ -60,11 +90,6 @@ function AdminUsersPage() {
       || u.id.toLowerCase().includes(needle),
     );
   }, [usersQ.data, q]);
-
-  const selected = useMemo(
-    () => (usersQ.data ?? []).find((u) => u.id === selectedId) ?? null,
-    [usersQ.data, selectedId],
-  );
 
   if (roleLoading) {
     return (
@@ -77,18 +102,21 @@ function AdminUsersPage() {
   }
   if (!isAdmin) return <Navigate to="/" />;
 
+  const totalCoins = (usersQ.data ?? []).reduce((sum, p) => sum + (p.coin_balance ?? 0), 0);
+  const totalVip = (rolesQ.data ?? []).filter((r) => r.role === "vip").length;
+
   return (
     <DashboardShell title="Users">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-card p-4">
+      <div className="mx-auto max-w-6xl space-y-6">
+        <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-card p-4">
           <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-brand">
             <ShieldCheck className="h-5 w-5 text-primary-foreground" />
           </div>
           <div className="flex-1">
-            <h2 className="font-semibold">User labels & balances</h2>
+            <h2 className="font-semibold">Manage users</h2>
             <p className="text-sm text-muted-foreground">
-              Edit display names and coin balances. Every change is logged to the audit trail
-              and synced across dashboard & library views.
+              Search, view, and open per-user settings. Each user has their own settings page
+              with VIP toggle, label, balance, and full audit trail.
             </p>
           </div>
           <AdminEditModeToggle />
@@ -99,9 +127,15 @@ function AdminUsersPage() {
           </Link>
         </div>
 
+        <div className="grid gap-4 sm:grid-cols-3">
+          <StatCard icon={<UserCog className="h-4 w-4" />} label="Total users" value={usersQ.data?.length ?? 0} />
+          <StatCard icon={<Coins className="h-4 w-4 text-coin" />} label="Coins in circulation" value={totalCoins} />
+          <StatCard icon={<Crown className="h-4 w-4 text-amber-500" />} label="VIP members" value={totalVip} />
+        </div>
+
         <BulkReconcilePanel />
 
-        <div className="mb-3 flex items-center gap-2">
+        <div className="flex items-center gap-2">
           <UsersIcon className="h-4 w-4 text-muted-foreground" />
           <span className="text-sm text-muted-foreground">
             {usersQ.data ? `${filtered.length} of ${usersQ.data.length} users` : ""}
@@ -127,43 +161,51 @@ function AdminUsersPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Email</TableHead>
-                  <TableHead>Display label</TableHead>
+                  <TableHead>Display name</TableHead>
                   <TableHead className="text-right">Balance</TableHead>
-                  <TableHead>Tier</TableHead>
+                  <TableHead>Roles</TableHead>
                   <TableHead>Joined</TableHead>
-                  <TableHead className="text-right">Audit</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filtered.map((u) => (
-                  <TableRow key={u.id} data-state={selectedId === u.id ? "selected" : undefined}>
-                    <TableCell className="max-w-[260px]">
-                      <div className="truncate font-medium">{u.email ?? "—"}</div>
-                      <div className="truncate text-xs text-muted-foreground">{u.id.slice(0, 8)}…</div>
-                    </TableCell>
-                    <TableCell>
-                      <AdminEditableLabel userId={u.id} value={u.display_name} fallback="No label" />
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <AdminEditableBalance userId={u.id} value={u.coin_balance} />
-                    </TableCell>
-                    <TableCell>
-                      <VipBadgeAction userId={u.id} />
-                    </TableCell>
-                    <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
-                      {new Date(u.created_at).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        size="sm"
-                        variant={selectedId === u.id ? "default" : "outline"}
-                        onClick={() => setSelectedId(selectedId === u.id ? null : u.id)}
-                      >
-                        {selectedId === u.id ? "Hide" : "View"}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {filtered.map((u) => {
+                  const roles = rolesByUser.get(u.id) ?? [];
+                  return (
+                    <TableRow key={u.id}>
+                      <TableCell className="max-w-[260px]">
+                        <div className="truncate font-medium">{u.email ?? "—"}</div>
+                        <div className="truncate font-mono text-[10px] text-muted-foreground">{u.id.slice(0, 8)}…</div>
+                      </TableCell>
+                      <TableCell>{u.display_name ?? "—"}</TableCell>
+                      <TableCell className="text-right tabular-nums font-medium">{u.coin_balance ?? 0}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap items-center gap-1">
+                          {roles.length === 0 ? (
+                            <span className="text-xs text-muted-foreground">user</span>
+                          ) : roles.map((r) => (
+                            <span
+                              key={r}
+                              className="rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide"
+                            >
+                              {r}
+                            </span>
+                          ))}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                        {new Date(u.created_at).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Link to="/admin/users/$userId" params={{ userId: u.id }}>
+                          <Button size="sm" variant="outline">
+                            <SettingsIcon className="mr-1.5 h-3.5 w-3.5" /> Settings
+                          </Button>
+                        </Link>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           ) : (
@@ -173,11 +215,16 @@ function AdminUsersPage() {
             </div>
           )}
         </div>
-
-        {selected && (
-          <UserAuditTrail userId={selected.id} email={selected.email} />
-        )}
       </div>
     </DashboardShell>
+  );
+}
+
+function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
+  return (
+    <div className="rounded-2xl border border-border bg-card p-4">
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">{icon} {label}</div>
+      <div className="mt-2 text-2xl font-bold tabular-nums">{value.toLocaleString()}</div>
+    </div>
   );
 }

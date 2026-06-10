@@ -99,7 +99,6 @@ function RecentMedia({ userId }: { userId: string }) {
 
 const adminItems: NavItem[] = [
   { to: "/admin", label: "Boss Panel", icon: ShieldCheck, match: ["/admin"] },
-  { to: "/admin/user-settings", label: "User Settings", icon: UserCog, match: ["/admin/user-settings"] },
   { to: "/admin/users", label: "Manage Users", icon: UserCog, match: ["/admin/users"] },
   { to: "/admin/create-portal", label: "New Portal", icon: PlusSquare, match: ["/admin/create-portal"] },
 ];
