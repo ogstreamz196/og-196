@@ -133,14 +133,18 @@ function RootComponent() {
     return () => sub.subscription.unsubscribe();
   }, [router, queryClient]);
 
-  useSiteContentRealtime();
-
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+        <SiteContentRealtimeBridge />
         <Outlet />
         <Toaster />
       </AuthProvider>
     </QueryClientProvider>
   );
+}
+
+function SiteContentRealtimeBridge() {
+  useSiteContentRealtime();
+  return null;
 }
