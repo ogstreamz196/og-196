@@ -320,7 +320,7 @@ function OgBotSettingsPage() {
   const byStatus =
     statusFilter === "all"
       ? byTerm
-      : byTerm.filter((t) => expiryStatus(t.expires_at, now) === statusFilter);
+      : byTerm.filter((t) => tokenStatus(t, now) === statusFilter);
   const filtered = [...byStatus].sort((a, b) => {
     switch (sortKey) {
       case "expires_asc": {
