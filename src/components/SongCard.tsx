@@ -12,6 +12,7 @@ export interface Song {
   style: string | null;
   status: string;
   audio_path: string | null;
+  sample_path?: string | null;
   cover_url: string | null;
   duration_seconds: number | null;
   error_message: string | null;
