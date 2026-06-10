@@ -577,182 +577,206 @@ function OgBotSettingsPage() {
                 };
                 const status: TokenStatus = tokenStatus(t, now);
                 return (
-                  <li key={t.user_id} className="space-y-3 px-4 py-4">
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <Link
-                          to="/admin/users/$userId"
-                          params={{ userId: t.user_id }}
-                          className="block truncate text-sm font-medium hover:underline"
-                        >
+                  <li key={t.user_id} className="px-2 py-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setExpandedRows((r) => ({ ...r, [t.user_id]: !r[t.user_id] }))}
+                      className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left transition hover:bg-background/40"
+                      aria-expanded={!!expandedRows[t.user_id]}
+                    >
+                      {expandedRows[t.user_id] ? (
+                        <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium">
                           {p?.display_name ?? p?.email ?? t.user_id}
-                        </Link>
-                        <p className="truncate text-xs text-muted-foreground">{p?.email ?? "—"}</p>
-                        <p className="truncate font-mono text-[10px] text-muted-foreground/80">
-                          {t.user_id}
                         </p>
-                        <span className={`mt-1 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium ${STATUS_BADGE[status]}`}>
-                          {status === "burned" ? <Flame className="h-3 w-3" /> : <CalendarClock className="h-3 w-3" />}
-                          {status === "burned"
-                            ? `Burned ${t.revoked_at ? new Date(t.revoked_at).toLocaleDateString() : ""}`
-                            : status === "never"
-                            ? "No expiry"
-                            : status === "expired"
-                            ? `Expired ${new Date(t.expires_at!).toLocaleDateString()}`
-                            : status === "expiring"
-                            ? `Expires ${new Date(t.expires_at!).toLocaleDateString()}`
-                            : `Active until ${new Date(t.expires_at!).toLocaleDateString()}`}
-                        </span>
                       </div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setExpiryEditFor(t)}
-                          title="Set or clear this token's expiry date"
-                        >
-                          <CalendarClock className="mr-1.5 h-3.5 w-3.5" />
-                          Expiry
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => rotate.mutate(t.user_id)}
-                          disabled={rotate.isPending && rotate.variables === t.user_id}
-                          title="Generate a fresh token (invalidates the old one)"
-                        >
-                          {rotate.isPending && rotate.variables === t.user_id ? (
-                            <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                          ) : (
-                            <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
-                          )}
-                          Rotate
-                        </Button>
-                        {status === "burned" ? (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => restore.mutate(t.user_id)}
-                            disabled={restore.isPending && restore.variables === t.user_id}
-                            title="Restore this burned token (clears revoked_at)"
-                          >
-                            {restore.isPending && restore.variables === t.user_id ? (
-                              <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                      <span className="hidden truncate text-xs text-muted-foreground sm:inline max-w-[40%]">
+                        {p?.email ?? "—"}
+                      </span>
+                      <span className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium ${STATUS_BADGE[status]}`}>
+                        {status === "burned" ? <Flame className="h-3 w-3" /> : <CalendarClock className="h-3 w-3" />}
+                        {status === "burned"
+                          ? "Burned"
+                          : status === "never"
+                          ? "No expiry"
+                          : status === "expired"
+                          ? "Expired"
+                          : status === "expiring"
+                          ? "Expiring"
+                          : "Active"}
+                      </span>
+                    </button>
+
+                    {expandedRows[t.user_id] && (
+                      <div className="space-y-3 px-2 pb-3 pt-2">
+                        <div className="flex flex-wrap items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <Link
+                              to="/admin/users/$userId"
+                              params={{ userId: t.user_id }}
+                              className="block truncate text-xs text-primary hover:underline"
+                            >
+                              View user profile
+                            </Link>
+                            <p className="truncate font-mono text-[10px] text-muted-foreground/80">
+                              {t.user_id}
+                            </p>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setExpiryEditFor(t)}
+                              title="Set or clear this token's expiry date"
+                            >
+                              <CalendarClock className="mr-1.5 h-3.5 w-3.5" />
+                              Expiry
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => rotate.mutate(t.user_id)}
+                              disabled={rotate.isPending && rotate.variables === t.user_id}
+                              title="Generate a fresh token (invalidates the old one)"
+                            >
+                              {rotate.isPending && rotate.variables === t.user_id ? (
+                                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
+                              )}
+                              Rotate
+                            </Button>
+                            {status === "burned" ? (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => restore.mutate(t.user_id)}
+                                disabled={restore.isPending && restore.variables === t.user_id}
+                                title="Restore this burned token (clears revoked_at)"
+                              >
+                                {restore.isPending && restore.variables === t.user_id ? (
+                                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                  <Undo2 className="mr-1.5 h-3.5 w-3.5" />
+                                )}
+                                Restore
+                              </Button>
                             ) : (
-                              <Undo2 className="mr-1.5 h-3.5 w-3.5" />
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  if (window.confirm("Burn this token? It will be marked revoked and stop authenticating, but the row is kept for audit. You can restore it later.")) {
+                                    burn.mutate(t.user_id);
+                                  }
+                                }}
+                                disabled={burn.isPending && burn.variables === t.user_id}
+                                title="Mark token as burned/revoked (soft revoke, reversible)"
+                              >
+                                {burn.isPending && burn.variables === t.user_id ? (
+                                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                  <Flame className="mr-1.5 h-3.5 w-3.5" />
+                                )}
+                                Burn
+                              </Button>
                             )}
-                            Restore
-                          </Button>
-                        ) : (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-destructive hover:text-destructive"
+                              onClick={() => {
+                                if (window.confirm("Remove OG Bot access entirely? This deletes the token row and the og_bot role.")) {
+                                  revoke.mutate(t.user_id);
+                                }
+                              }}
+                              disabled={revoke.isPending && revoke.variables === t.user_id}
+                              title="Delete token row and remove og_bot role (hard revoke)"
+                            >
+                              {revoke.isPending && revoke.variables === t.user_id ? (
+                                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                              )}
+                              Remove
+                            </Button>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-background/40 px-3 py-2">
+                          <code className="flex-1 truncate font-mono text-xs">
+                            {isOpen ? t.token : masked}
+                          </code>
                           <Button
-                            size="sm"
-                            variant="outline"
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7"
                             onClick={() => {
-                              if (window.confirm("Burn this token? It will be marked revoked and stop authenticating, but the row is kept for audit. You can restore it later.")) {
-                                burn.mutate(t.user_id);
+                              if (isOpen) {
+                                setRevealed((r) => ({ ...r, [t.user_id]: false }));
+                                return;
+                              }
+                              if (requireReauth("reveal")) return;
+                              setRevealed((r) => ({ ...r, [t.user_id]: true }));
+                            }}
+                            title={isOpen ? "Hide token" : unlocked ? "Reveal token" : "Re-auth required to reveal"}
+                          >
+                            {isOpen ? <EyeOff className="h-3.5 w-3.5" /> : unlocked ? <Eye className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7"
+                            onClick={async () => {
+                              if (requireReauth("copy")) return;
+                              try {
+                                await navigator.clipboard.writeText(t.token);
+                                toast.success("Token copied");
+                              } catch {
+                                toast.error("Could not copy to clipboard");
                               }
                             }}
-                            disabled={burn.isPending && burn.variables === t.user_id}
-                            title="Mark token as burned/revoked (soft revoke, reversible)"
+                            title={unlocked ? "Copy token" : "Re-auth required to copy"}
                           >
-                            {burn.isPending && burn.variables === t.user_id ? (
-                              <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                            ) : (
-                              <Flame className="mr-1.5 h-3.5 w-3.5" />
-                            )}
-                            Burn
+                            {unlocked ? <Copy className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
                           </Button>
-                        )}
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => {
-                            if (window.confirm("Remove OG Bot access entirely? This deletes the token row and the og_bot role.")) {
-                              revoke.mutate(t.user_id);
-                            }
-                          }}
-                          disabled={revoke.isPending && revoke.variables === t.user_id}
-                          title="Delete token row and remove og_bot role (hard revoke)"
-                        >
-                          {revoke.isPending && revoke.variables === t.user_id ? (
-                            <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                          ) : (
-                            <Trash2 className="mr-1.5 h-3.5 w-3.5" />
-                          )}
-                          Remove
-                        </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7"
+                            onClick={async () => {
+                              if (requireReauth("copy")) return;
+                              try {
+                                await navigator.clipboard.writeText(buildEmbedPrompt(t.token));
+                                toast.success("Embed prompt copied — paste into the other project");
+                              } catch {
+                                toast.error("Could not copy to clipboard");
+                              }
+                            }}
+                            title={unlocked ? "Copy embed prompt (with this token baked in)" : "Re-auth required to copy embed prompt"}
+                          >
+                            {unlocked ? <Code2 className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+                          </Button>
+                        </div>
+
+                        <div className="grid gap-1 text-[11px] text-muted-foreground sm:grid-cols-2 lg:grid-cols-4">
+                          <span>Created {new Date(t.created_at).toLocaleString()}</span>
+                          <span>Updated {new Date(t.updated_at).toLocaleString()}</span>
+                          <span>
+                            Last used{" "}
+                            {t.last_used_at ? new Date(t.last_used_at).toLocaleString() : "—"}
+                          </span>
+                          <span>
+                            Expires{" "}
+                            {t.expires_at ? new Date(t.expires_at).toLocaleString() : "never"}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-background/40 px-3 py-2">
-                      <code className="flex-1 truncate font-mono text-xs">
-                        {isOpen ? t.token : masked}
-                      </code>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-7 w-7"
-                        onClick={() => {
-                          if (isOpen) {
-                            setRevealed((r) => ({ ...r, [t.user_id]: false }));
-                            return;
-                          }
-                          if (requireReauth("reveal")) return;
-                          setRevealed((r) => ({ ...r, [t.user_id]: true }));
-                        }}
-                        title={isOpen ? "Hide token" : unlocked ? "Reveal token" : "Re-auth required to reveal"}
-                      >
-                        {isOpen ? <EyeOff className="h-3.5 w-3.5" /> : unlocked ? <Eye className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-7 w-7"
-                        onClick={async () => {
-                          if (requireReauth("copy")) return;
-                          try {
-                            await navigator.clipboard.writeText(t.token);
-                            toast.success("Token copied");
-                          } catch {
-                            toast.error("Could not copy to clipboard");
-                          }
-                        }}
-                        title={unlocked ? "Copy token" : "Re-auth required to copy"}
-                      >
-                        {unlocked ? <Copy className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-7 w-7"
-                        onClick={async () => {
-                          if (requireReauth("copy")) return;
-                          try {
-                            await navigator.clipboard.writeText(buildEmbedPrompt(t.token));
-                            toast.success("Embed prompt copied — paste into the other project");
-                          } catch {
-                            toast.error("Could not copy to clipboard");
-                          }
-                        }}
-                        title={unlocked ? "Copy embed prompt (with this token baked in)" : "Re-auth required to copy embed prompt"}
-                      >
-                        {unlocked ? <Code2 className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
-                      </Button>
-                    </div>
-
-                    <div className="grid gap-1 text-[11px] text-muted-foreground sm:grid-cols-4">
-                      <span>Created {new Date(t.created_at).toLocaleString()}</span>
-                      <span>Updated {new Date(t.updated_at).toLocaleString()}</span>
-                      <span>
-                        Last used{" "}
-                        {t.last_used_at ? new Date(t.last_used_at).toLocaleString() : "—"}
-                      </span>
-                      <span>
-                        Expires{" "}
-                        {t.expires_at ? new Date(t.expires_at).toLocaleString() : "never"}
-                      </span>
-                    </div>
+                    )}
                   </li>
                 );
               })}
@@ -760,6 +784,7 @@ function OgBotSettingsPage() {
           )}
         </section>
       </div>
+
 
       <ReauthDialog
         open={showReauth}
