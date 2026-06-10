@@ -116,7 +116,7 @@ export function DashboardShell({ title, children }: { title: string; children: R
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { isAdmin } = useRole();
+  const { isAdmin, isLoading: roleLoading } = useRole();
   const qc = useQueryClient();
 
 
@@ -160,7 +160,7 @@ export function DashboardShell({ title, children }: { title: string; children: R
             );
           })}
 
-          {isAdmin && (
+          {!roleLoading && isAdmin && (
             <div className="mt-4 rounded-xl border border-primary/30 bg-gradient-brand-soft p-2">
               <div className="mb-1 flex items-center gap-2 px-2 pt-1 text-[10px] font-semibold uppercase tracking-wider text-primary">
                 <ShieldCheck className="h-3 w-3" /> Boss controls
@@ -243,7 +243,7 @@ export function DashboardShell({ title, children }: { title: string; children: R
 
         {/* Mobile nav */}
         <nav className="flex gap-1 overflow-x-auto border-b border-border bg-sidebar/50 px-2 py-2 md:hidden">
-          {[...baseNavItems, ...(isAdmin ? adminItems : [])].map((item) => {
+          {[...baseNavItems, ...(!roleLoading && isAdmin ? adminItems : [])].map((item) => {
             const active = isItemActive(item, pathname);
             const Icon = item.icon;
             return (
