@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Crown, Bot, ShieldCheck, Coins, Plus, Minus, LogOut, UserCog, Mail, Fingerprint, KeyRound, Search, UserPlus } from "lucide-react";
+import { Loader2, Crown, Bot, ShieldCheck, Coins, Plus, Minus, LogOut, UserCog, Mail, Fingerprint, KeyRound, Search, UserPlus, Ban, RotateCcw, AlertCircle, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
@@ -254,6 +254,12 @@ function SettingsPage() {
               <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">OG Bot token issuance</p>
               <CreateOgBotTokenPanel />
             </div>
+
+            <div className="space-y-2">
+              <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Active OG Bot tokens</p>
+              <ManageOgBotTokensPanel />
+            </div>
+
 
             <Separator />
             <div className="flex flex-wrap gap-2">
@@ -618,5 +624,198 @@ function IssueTokenWizard({ profile, submitting, onCancel, onConfirm }: IssueTok
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Manage existing OG Bot tokens (revoke / restore) — admin only
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface TokenRow {
+  user_id: string;
+  expires_at: string | null;
+  revoked_at: string | null;
+  last_used_at: string | null;
+  profile: { email: string | null; display_name: string | null } | null;
+}
+
+function ManageOgBotTokensPanel() {
+  const qc = useQueryClient();
+
+  const tokensQ = useQuery({
+    queryKey: ["settings-og-bot-tokens"],
+    queryFn: async (): Promise<TokenRow[]> => {
+      const { data, error } = await supabase
+        .from("og_bot_tokens")
+        .select("user_id, expires_at, revoked_at, last_used_at, profile:profiles!og_bot_tokens_user_id_fkey(email, display_name)")
+        .order("updated_at", { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return ((data ?? []) as unknown) as TokenRow[];
+    },
+  });
+
+  const [pending, setPending] = useState<string | null>(null);
+
+  const revoke = useMutation({
+    mutationFn: async (userId: string) => {
+      setPending(userId);
+      const { error } = await supabase.rpc("revoke_og_bot_token", {
+        target_user_id: userId,
+        admin_notes: "settings_revoke",
+      });
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      toast.success("Token revoked");
+      qc.invalidateQueries({ queryKey: ["settings-og-bot-tokens"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+    onSettled: () => setPending(null),
+  });
+
+  const unrevoke = useMutation({
+    mutationFn: async (userId: string) => {
+      setPending(userId);
+      const { error } = await supabase.rpc("unrevoke_og_bot_token", {
+        target_user_id: userId,
+        admin_notes: "settings_unrevoke",
+      });
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      toast.success("Token restored");
+      qc.invalidateQueries({ queryKey: ["settings-og-bot-tokens"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+    onSettled: () => setPending(null),
+  });
+
+  const disable = useMutation({
+    mutationFn: async (userId: string) => {
+      setPending(userId);
+      const { error } = await supabase.rpc("set_og_bot_admin", {
+        target_user_id: userId,
+        make_og: false,
+        admin_notes: "settings_disable",
+      });
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      toast.success("Token disabled and role removed");
+      qc.invalidateQueries({ queryKey: ["settings-og-bot-tokens"] });
+      qc.invalidateQueries({ queryKey: ["settings-og-bot-grantable"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+    onSettled: () => setPending(null),
+  });
+
+  const rows = tokensQ.data ?? [];
+  const now = Date.now();
+
+  if (tokensQ.isLoading) {
+    return (
+      <div className="flex items-center justify-center py-4 text-muted-foreground">
+        <Loader2 className="h-4 w-4 animate-spin" />
+      </div>
+    );
+  }
+  if (rows.length === 0) {
+    return (
+      <p className="rounded-xl border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
+        No OG Bot tokens have been issued yet.
+      </p>
+    );
+  }
+
+  return (
+    <ul className="divide-y divide-border rounded-xl border border-border">
+      {rows.map((t) => {
+        const isRevoked = !!t.revoked_at;
+        const isExpired = !isRevoked && t.expires_at !== null && new Date(t.expires_at).getTime() < now;
+        const status: "active" | "revoked" | "expired" = isRevoked ? "revoked" : isExpired ? "expired" : "active";
+        const label = t.profile?.display_name ?? t.profile?.email ?? t.user_id;
+        const isBusy = pending === t.user_id && (revoke.isPending || unrevoke.isPending || disable.isPending);
+        return (
+          <li key={t.user_id} className="flex items-center justify-between gap-3 px-3 py-2.5">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <p className="truncate text-sm font-medium">{label}</p>
+                <StatusPill status={status} />
+              </div>
+              <p className="truncate text-[11px] text-muted-foreground">
+                {t.profile?.email ?? "—"}
+                {t.expires_at && (
+                  <> · expires {new Date(t.expires_at).toLocaleDateString()}</>
+                )}
+                {t.last_used_at && (
+                  <> · used {new Date(t.last_used_at).toLocaleDateString()}</>
+                )}
+              </p>
+            </div>
+            <div className="flex items-center gap-1">
+              {isBusy && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+              {isRevoked ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={isBusy}
+                  onClick={() => unrevoke.mutate(t.user_id)}
+                  title="Restore token"
+                >
+                  <RotateCcw className="mr-1.5 h-3.5 w-3.5" /> Restore
+                </Button>
+              ) : (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={isBusy}
+                  onClick={() => revoke.mutate(t.user_id)}
+                  title="Revoke token (can be restored)"
+                >
+                  <Ban className="mr-1.5 h-3.5 w-3.5" /> Revoke
+                </Button>
+              )}
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-destructive hover:text-destructive"
+                disabled={isBusy}
+                onClick={() => {
+                  if (confirm(`Disable OG Bot for ${label}? This deletes the token and removes the role.`)) {
+                    disable.mutate(t.user_id);
+                  }
+                }}
+                title="Delete token and remove og_bot role"
+              >
+                Disable
+              </Button>
+            </div>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+function StatusPill({ status }: { status: "active" | "revoked" | "expired" }) {
+  if (status === "active") {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-medium text-emerald-500">
+        <CheckCircle2 className="h-3 w-3" /> Active
+      </span>
+    );
+  }
+  if (status === "revoked") {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-1.5 py-0.5 text-[10px] font-medium text-destructive">
+        <Ban className="h-3 w-3" /> Revoked
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-500">
+      <AlertCircle className="h-3 w-3" /> Expired
+    </span>
   );
 }
