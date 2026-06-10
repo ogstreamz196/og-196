@@ -129,6 +129,7 @@ function AdminUsersPage() {
                   <TableHead>Email</TableHead>
                   <TableHead>Display label</TableHead>
                   <TableHead className="text-right">Balance</TableHead>
+                  <TableHead>Tier</TableHead>
                   <TableHead>Joined</TableHead>
                   <TableHead className="text-right">Audit</TableHead>
                 </TableRow>
