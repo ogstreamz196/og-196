@@ -140,7 +140,7 @@ function OgBotSettingsPage() {
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
-  const [statusFilter, setStatusFilter] = useState<ExpiryStatus | "all">("all");
+  const [statusFilter, setStatusFilter] = useState<TokenStatus | "all">("all");
   const [sortKey, setSortKey] = useState<SortKey>("created_desc");
   const [expiryEditFor, setExpiryEditFor] = useState<TokenRow | null>(null);
 
