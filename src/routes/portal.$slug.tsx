@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Sparkles, Loader2, Music2, Coins, Wand2, LogIn, AlertTriangle } from "lucide-react";
+import { Sparkles, Loader2, Music2, Coins, Wand2, LogIn, AlertTriangle, Languages, Tags, FileText, Pencil, Music } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
@@ -11,9 +11,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { computeWatch, DEFAULT_TIMEOUT_MS } from "@/lib/generation-watch";
+
+const LANGUAGE_OPTIONS = [
+  "English", "Spanish", "French", "German", "Italian", "Portuguese",
+  "Dutch", "Polish", "Russian", "Ukrainian", "Turkish", "Arabic",
+  "Hindi", "Bengali", "Mandarin Chinese", "Cantonese", "Japanese",
+  "Korean", "Vietnamese", "Thai", "Indonesian", "Filipino", "Swahili",
+] as const;
+
 
 interface Portal {
   id: string;
