@@ -30,7 +30,7 @@ export function SongCard({ song }: { song: Song }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   async function ensureUrl() {
-    if (signedUrl || !song.audio_path) return signedUrl;
+    if (signedUrl || (!song.audio_path && !song.sample_path)) return signedUrl;
     setLoadingUrl(true);
     try {
       const { data, error } = await supabase.functions.invoke("song-url", {
