@@ -17,6 +17,7 @@ import {
 } from "@/components/admin/AdminEditMode";
 import { BulkReconcilePanel } from "@/components/admin/BulkReconcilePanel";
 import { UserAuditTrail } from "@/components/admin/UserAuditTrail";
+import { VipBadgeAction } from "@/components/admin/VipBadgeAction";
 
 export const Route = createFileRoute("/_authenticated/admin/users")({
   component: AdminUsersPage,
@@ -128,6 +129,7 @@ function AdminUsersPage() {
                   <TableHead>Email</TableHead>
                   <TableHead>Display label</TableHead>
                   <TableHead className="text-right">Balance</TableHead>
+                  <TableHead>Tier</TableHead>
                   <TableHead>Joined</TableHead>
                   <TableHead className="text-right">Audit</TableHead>
                 </TableRow>
@@ -144,6 +146,9 @@ function AdminUsersPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <AdminEditableBalance userId={u.id} value={u.coin_balance} />
+                    </TableCell>
+                    <TableCell>
+                      <VipBadgeAction userId={u.id} />
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
                       {new Date(u.created_at).toLocaleDateString()}
