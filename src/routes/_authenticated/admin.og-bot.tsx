@@ -1,8 +1,9 @@
-import { createFileRoute, Navigate, Link, redirect } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import {
-  Bot, Loader2, ShieldCheck, Copy, RotateCcw, Trash2, Search, ArrowLeft, Eye, EyeOff, Lock, KeyRound, Code2, CalendarClock,
+  Bot, Loader2, ShieldCheck, Copy, RotateCcw, Trash2, Search, ArrowLeft, Eye, EyeOff, Lock, KeyRound, Code2, CalendarClock, UserPlus, Plug, RefreshCw,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRole } from "@/hooks/use-role";
@@ -13,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
+import { pingOgBot } from "@/lib/og-bot-status.functions";
 import { toast } from "sonner";
 
 // How long a successful re-auth keeps reveal/copy unlocked, in ms.
@@ -83,15 +85,6 @@ Click 💬 and send: "introduce yourself with maximum bite".
 
 
 export const Route = createFileRoute("/_authenticated/admin/og-bot")({
-  beforeLoad: async () => {
-    const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) throw redirect({ to: "/auth" });
-    const { data: isAdmin, error } = await supabase.rpc("has_role", {
-      _user_id: userData.user.id,
-      _role: "admin",
-    });
-    if (error || !isAdmin) throw redirect({ to: "/" });
-  },
   component: OgBotSettingsPage,
 });
 
@@ -265,6 +258,36 @@ function OgBotSettingsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  // Grant a fresh OG Bot token to any user (creates the og_bot role +
+  // token row in one shot via set_og_bot_admin).
+  const grant = useMutation({
+    mutationFn: async (targetUserId: string) => {
+      const { error } = await supabase.rpc("set_og_bot_admin", {
+        target_user_id: targetUserId,
+        make_og: true,
+        admin_notes: "boss_grant_from_og_bot_panel",
+      });
+      if (error) throw new Error(error.message);
+      return targetUserId;
+    },
+    onSuccess: () => {
+      toast.success("OG Bot token issued");
+      qc.invalidateQueries({ queryKey: ["admin-og-bot-tokens"] });
+      qc.invalidateQueries({ queryKey: ["admin-og-bot-grantable"] });
+      qc.invalidateQueries({ queryKey: ["admin-user-roles"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  // Backend reachability ping. Refreshes every 60s.
+  const pingFn = useServerFn(pingOgBot);
+  const pingQ = useQuery({
+    queryKey: ["og-bot-backend-ping"],
+    enabled: isAdmin,
+    queryFn: () => pingFn(),
+    refetchInterval: 60_000,
+  });
+
   if (isLoading || tokensQ.isLoading) {
     return (
       <DashboardShell title="OG Bot Setting">
@@ -332,15 +355,28 @@ function OgBotSettingsPage() {
           <div className="flex-1 min-w-0">
             <h2 className="truncate font-semibold">OG Bot Setting</h2>
             <p className="text-xs text-muted-foreground">
-              Manage generated OG Bot tokens. Boss-only — tokens grant automated access on behalf of the user.
+              Manage OG Bot tokens. The token authenticates both the user's Messenger and the floating Boss widget.
             </p>
           </div>
+          <BackendStatusPill
+            data={pingQ.data}
+            loading={pingQ.isFetching}
+            onRefresh={() => pingQ.refetch()}
+          />
           <Link to="/admin/users">
             <Button variant="outline" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" /> Users
             </Button>
           </Link>
         </div>
+
+        {/* Grant a new token */}
+        <GrantTokenPanel
+          existingUserIds={tokens.map((t) => t.user_id)}
+          onGrant={(id) => grant.mutate(id)}
+          isPending={grant.isPending}
+          pendingId={typeof grant.variables === "string" ? grant.variables : null}
+        />
 
         {/* Stats */}
         <section className="grid gap-4 sm:grid-cols-4">
@@ -349,6 +385,7 @@ function OgBotSettingsPage() {
           <StatCard label="Expiring soon" value={String(statusCounts.expiring)} hint="Next 7 days" />
           <StatCard label="Expired" value={String(statusCounts.expired)} />
         </section>
+
 
         {/* Search + filter + sort */}
         <div className="space-y-3">
@@ -883,5 +920,134 @@ function StatCard({ label, value, hint }: { label: string; value: string; hint?:
       <div className="mt-1 text-2xl font-semibold tabular-nums">{value}</div>
       {hint && <div className="mt-1 text-[11px] text-muted-foreground">{hint}</div>}
     </div>
+  );
+}
+
+interface BackendStatusPillProps {
+  data: { ok: boolean; status: number; latencyMs?: number; host: string | null; error?: string } | undefined;
+  loading: boolean;
+  onRefresh: () => void;
+}
+
+function BackendStatusPill({ data, loading, onRefresh }: BackendStatusPillProps) {
+  const ok = !!data?.ok;
+  const cls = loading
+    ? "border-border bg-muted text-muted-foreground"
+    : ok
+    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+    : "border-destructive/30 bg-destructive/10 text-destructive";
+  const label = loading
+    ? "Checking…"
+    : ok
+    ? `Bot online · ${data?.latencyMs ?? 0}ms`
+    : data
+    ? `Offline · ${data.status || data.error || "no response"}`
+    : "Unknown";
+  return (
+    <button
+      type="button"
+      onClick={onRefresh}
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium transition ${cls}`}
+      title={data?.host ?? "OG Bot backend"}
+    >
+      <Plug className="h-3 w-3" />
+      {label}
+      <RefreshCw className={`h-3 w-3 ${loading ? "animate-spin" : "opacity-60"}`} />
+    </button>
+  );
+}
+
+interface GrantTokenPanelProps {
+  existingUserIds: string[];
+  onGrant: (userId: string) => void;
+  isPending: boolean;
+  pendingId: string | null;
+}
+
+interface GrantableProfile {
+  id: string;
+  email: string | null;
+  display_name: string | null;
+}
+
+function GrantTokenPanel({ existingUserIds, onGrant, isPending, pendingId }: GrantTokenPanelProps) {
+  const [query, setQuery] = useState("");
+  const term = query.trim();
+
+  const candidatesQ = useQuery({
+    queryKey: ["admin-og-bot-grantable", term, existingUserIds.length],
+    queryFn: async (): Promise<GrantableProfile[]> => {
+      let q = supabase
+        .from("profiles")
+        .select("id, email, display_name")
+        .order("created_at", { ascending: false })
+        .limit(8);
+      if (term) {
+        const safe = term.replace(/[%,]/g, " ");
+        q = q.or(`email.ilike.%${safe}%,display_name.ilike.%${safe}%,id.ilike.%${safe}%`);
+      }
+      const { data, error } = await q;
+      if (error) throw error;
+      const have = new Set(existingUserIds);
+      return ((data ?? []) as GrantableProfile[]).filter((p) => !have.has(p.id));
+    },
+  });
+
+  const rows = candidatesQ.data ?? [];
+
+  return (
+    <section className="rounded-2xl border border-border bg-card p-4 shadow-card space-y-3">
+      <header className="flex items-center gap-2">
+        <UserPlus className="h-4 w-4 text-primary" />
+        <h3 className="text-sm font-semibold">Issue OG Bot token to a user</h3>
+      </header>
+      <p className="text-xs text-muted-foreground">
+        Search any user, then click Issue token. The backend mints an <code className="font-mono">ogb_…</code> token that
+        unlocks both the Bot Messenger and the Boss widget for that user.
+      </p>
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search by email, display name, or user id…"
+          className="pl-9"
+        />
+      </div>
+      {candidatesQ.isLoading ? (
+        <div className="flex items-center justify-center py-4 text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" />
+        </div>
+      ) : rows.length === 0 ? (
+        <p className="py-3 text-center text-xs text-muted-foreground">
+          {term ? "No matching users without a token." : "No more users left to grant."}
+        </p>
+      ) : (
+        <ul className="divide-y divide-border rounded-xl border border-border">
+          {rows.map((p) => (
+            <li key={p.id} className="flex items-center justify-between gap-3 px-3 py-2">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium">
+                  {p.display_name ?? p.email ?? p.id}
+                </p>
+                <p className="truncate text-[11px] text-muted-foreground">{p.email ?? "—"}</p>
+              </div>
+              <Button
+                size="sm"
+                onClick={() => onGrant(p.id)}
+                disabled={isPending && pendingId === p.id}
+              >
+                {isPending && pendingId === p.id ? (
+                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <KeyRound className="mr-1.5 h-3.5 w-3.5" />
+                )}
+                Issue token
+              </Button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }
