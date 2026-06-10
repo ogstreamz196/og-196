@@ -8,7 +8,18 @@ import { useRole } from "@/hooks/use-role";
 import { cn } from "@/lib/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
-import { AdminEditModeProvider, AdminEditModeToggle } from "@/components/admin/AdminEditMode";
+import { AdminEditModeProvider, AdminEditModeToggle, useAdminEditMode } from "@/components/admin/AdminEditMode";
+
+function BossEditHint() {
+  const { enabled } = useAdminEditMode();
+  if (!enabled) return null;
+  return (
+    <div className="flex items-center justify-center gap-2 border-b border-primary/30 bg-primary/10 px-4 py-1.5 text-[11px] font-medium text-primary">
+      <ShieldCheck className="h-3.5 w-3.5" />
+      Edit mode is on — click any dashed-underlined heading, label, or description to update it for everyone.
+    </div>
+  );
+}
 
 type NavItem = { to: string; label: string; icon: typeof Library; match?: string[] };
 
