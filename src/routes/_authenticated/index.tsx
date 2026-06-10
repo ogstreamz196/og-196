@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
 import { useRole } from "@/hooks/use-role";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import { EditableContent } from "@/components/admin/EditableContent";
 
 export const Route = createFileRoute("/_authenticated/")({
   component: DashboardHome,
