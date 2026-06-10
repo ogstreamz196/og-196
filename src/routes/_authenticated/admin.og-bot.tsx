@@ -403,7 +403,7 @@ function OgBotSettingsPage() {
             />
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            {(["all", "active", "expiring", "expired", "never"] as const).map((k) => (
+            {(["all", "active", "expiring", "expired", "never", "burned"] as const).map((k) => (
               <button
                 key={k}
                 type="button"
@@ -418,7 +418,7 @@ function OgBotSettingsPage() {
                 {STATUS_LABEL[k]}
                 {k !== "all" && (
                   <span className="ml-1.5 tabular-nums opacity-70">
-                    {statusCounts[k as ExpiryStatus]}
+                    {statusCounts[k as TokenStatus]}
                   </span>
                 )}
               </button>
