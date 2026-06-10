@@ -504,7 +504,7 @@ function OgBotSettingsPage() {
                   setShowReauth(true);
                   return true;
                 };
-                const status = expiryStatus(t.expires_at, now);
+                const status: TokenStatus = tokenStatus(t, now);
                 return (
                   <li key={t.user_id} className="space-y-3 px-4 py-4">
                     <div className="flex flex-wrap items-start justify-between gap-3">
@@ -521,8 +521,10 @@ function OgBotSettingsPage() {
                           {t.user_id}
                         </p>
                         <span className={`mt-1 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium ${STATUS_BADGE[status]}`}>
-                          <CalendarClock className="h-3 w-3" />
-                          {status === "never"
+                          {status === "burned" ? <Flame className="h-3 w-3" /> : <CalendarClock className="h-3 w-3" />}
+                          {status === "burned"
+                            ? `Burned ${t.revoked_at ? new Date(t.revoked_at).toLocaleDateString() : ""}`
+                            : status === "never"
                             ? "No expiry"
                             : status === "expired"
                             ? `Expired ${new Date(t.expires_at!).toLocaleDateString()}`
