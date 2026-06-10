@@ -32,6 +32,8 @@ const baseNavItems: NavItem[] = [
   { to: "/buy-coins", label: "Buy Coins", icon: CoinsIcon, match: ["/buy-coins"] },
 ];
 
+const bossNavItem: NavItem = { to: "/admin", label: "Boss Panel", icon: ShieldCheck, match: ["/admin"] };
+
 
 interface RecentSong {
   id: string;
