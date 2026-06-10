@@ -233,8 +233,14 @@ function OgBotSettingsPage() {
             <ul className="divide-y divide-border">
               {filtered.map((t) => {
                 const p = profiles[t.user_id];
-                const isOpen = !!revealed[t.user_id];
+                const isOpen = unlocked && !!revealed[t.user_id];
                 const masked = `${t.token.slice(0, 8)}••••••••••••${t.token.slice(-4)}`;
+                const requireReauth = (kind: "reveal" | "copy") => {
+                  if (unlocked) return false;
+                  setPending({ kind, userId: t.user_id });
+                  setShowReauth(true);
+                  return true;
+                };
                 return (
                   <li key={t.user_id} className="space-y-3 px-4 py-4">
                     <div className="flex flex-wrap items-start justify-between gap-3">
@@ -295,16 +301,24 @@ function OgBotSettingsPage() {
                         size="icon"
                         variant="ghost"
                         className="h-7 w-7"
-                        onClick={() => setRevealed((r) => ({ ...r, [t.user_id]: !isOpen }))}
-                        title={isOpen ? "Hide token" : "Reveal token"}
+                        onClick={() => {
+                          if (isOpen) {
+                            setRevealed((r) => ({ ...r, [t.user_id]: false }));
+                            return;
+                          }
+                          if (requireReauth("reveal")) return;
+                          setRevealed((r) => ({ ...r, [t.user_id]: true }));
+                        }}
+                        title={isOpen ? "Hide token" : unlocked ? "Reveal token" : "Re-auth required to reveal"}
                       >
-                        {isOpen ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                        {isOpen ? <EyeOff className="h-3.5 w-3.5" /> : unlocked ? <Eye className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
                       </Button>
                       <Button
                         size="icon"
                         variant="ghost"
                         className="h-7 w-7"
                         onClick={async () => {
+                          if (requireReauth("copy")) return;
                           try {
                             await navigator.clipboard.writeText(t.token);
                             toast.success("Token copied");
@@ -312,9 +326,9 @@ function OgBotSettingsPage() {
                             toast.error("Could not copy to clipboard");
                           }
                         }}
-                        title="Copy token"
+                        title={unlocked ? "Copy token" : "Re-auth required to copy"}
                       >
-                        <Copy className="h-3.5 w-3.5" />
+                        {unlocked ? <Copy className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
                       </Button>
                     </div>
 
