@@ -1,7 +1,28 @@
+import { useEffect } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 const KEY = ["site-content"] as const;
+
+interface Row { key: string; value: string }
+
+/** Wire up once at the app root so every user gets live Boss edits. */
+export function useSiteContentRealtime() {
+  const qc = useQueryClient();
+  useEffect(() => {
+    const channel = supabase
+      .channel("site_content_live")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "site_content" },
+        () => qc.invalidateQueries({ queryKey: KEY }),
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [qc]);
+}
 
 interface Row { key: string; value: string }
 
