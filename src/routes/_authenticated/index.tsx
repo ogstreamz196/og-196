@@ -127,10 +127,11 @@ function DashboardHome() {
         <section>
           <div className="mb-4 flex items-center justify-between">
             <h3 className="flex items-center gap-2 text-lg font-semibold">
-              <Compass className="h-5 w-5 text-primary" /> Generation portals
+              <Compass className="h-5 w-5 text-primary" />
+              <EditableContent contentKey="dashboard.portals.heading" defaultValue="Generation portals" />
             </h3>
             <Link to="/portals" className="text-sm text-muted-foreground hover:text-foreground">
-              View all <ArrowRight className="ml-1 inline h-3.5 w-3.5" />
+              <EditableContent contentKey="dashboard.portals.viewAll" defaultValue="View all" /> <ArrowRight className="ml-1 inline h-3.5 w-3.5" />
             </Link>
           </div>
 
