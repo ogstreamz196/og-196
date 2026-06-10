@@ -73,23 +73,11 @@ function OgPersonaPage() {
   }
 
   async function toggleFoul(next: boolean) {
-    setTogglingFoul(true);
-    const prev = foulMouth;
-    setFoulMouth(next);
     try {
-      const { data: u } = await supabase.auth.getUser();
-      const uid = u.user?.id;
-      if (!uid) throw new Error("Sign in required");
-      const { error } = await supabase
-        .from("user_preferences")
-        .upsert({ user_id: uid, foul_mouth: next }, { onConflict: "user_id" });
-      if (error) throw new Error(error.message);
+      await setFoulMouth.mutateAsync(next);
       toast.success(next ? "Foul mouth mode: ON 🤬" : "Foul mouth mode: OFF");
     } catch (e) {
-      setFoulMouth(prev);
       toast.error((e as Error).message);
-    } finally {
-      setTogglingFoul(false);
     }
   }
 
