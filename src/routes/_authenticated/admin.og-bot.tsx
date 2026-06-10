@@ -145,6 +145,7 @@ function OgBotSettingsPage() {
   const [statusFilter, setStatusFilter] = useState<TokenStatus | "all">("all");
   const [sortKey, setSortKey] = useState<SortKey>("created_desc");
   const [expiryEditFor, setExpiryEditFor] = useState<TokenRow | null>(null);
+  const [showCreateWizard, setShowCreateWizard] = useState(false);
 
   // Step-up auth state: tokens stay masked until the boss re-enters their
   // password. After success, reveal/copy is unlocked for REAUTH_TTL_MS.
