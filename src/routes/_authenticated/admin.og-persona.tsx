@@ -42,9 +42,26 @@ function OgPersonaPage() {
     setScript(get("og_persona.script", DEFAULT_SCRIPT));
     setVoice(get("og_persona.voice", DEFAULT_VOICE));
     setDictionary(get("og_persona.dictionary", DEFAULT_DICTIONARY));
-    setFoulMouth(get("og_persona.foul_mouth", "true").toLowerCase() === "true");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadingContent]);
+
+  // Load this user's saved foul-mouth preference from Supabase. Defaults to ON.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: u } = await supabase.auth.getUser();
+      const uid = u.user?.id;
+      if (!uid) return;
+      const { data } = await supabase
+        .from("user_preferences")
+        .select("foul_mouth")
+        .eq("user_id", uid)
+        .maybeSingle();
+      if (cancelled) return;
+      setFoulMouth(data?.foul_mouth ?? true);
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   if (isLoading) {
     return (
