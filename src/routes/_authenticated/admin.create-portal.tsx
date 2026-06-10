@@ -172,7 +172,7 @@ function CreatePortalWizard() {
 
             <Button
               size="lg"
-              disabled={create.isPending || !name.trim() || !slugClean || tags.length !== 5}
+              disabled={create.isPending || !name.trim() || !slugClean || tags.length < 4 || tags.length > 6}
               onClick={() => create.mutate()}
               className="bg-gradient-brand text-primary-foreground"
             >
