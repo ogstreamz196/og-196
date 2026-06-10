@@ -16,7 +16,7 @@ import { toast } from "sonner";
 
 const VIP_COST = 20;
 
-export const Route = createFileRoute("/_authenticated/buy-coins")({
+export const Route = createFileRoute("/_authenticated/buy-coins/")({
   component: BuyCoinsPage,
 });
 
