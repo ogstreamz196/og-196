@@ -12,6 +12,7 @@ import { AdminEditModeProvider, AdminEditModeToggle } from "@/components/admin/A
 
 const baseNavItems = [
   { to: "/", label: "Generate", icon: Sparkles },
+  { to: "/portals", label: "Portals", icon: Compass },
   { to: "/library", label: "My Library", icon: Library },
   { to: "/buy-coins", label: "Buy Coins", icon: CoinsIcon },
 ] as const;
