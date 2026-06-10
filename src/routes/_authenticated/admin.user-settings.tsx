@@ -134,7 +134,10 @@ function AdminUserSettingsPage() {
           <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
             <div>
               <h2 className="text-lg font-semibold">All user settings</h2>
-              <p className="text-sm text-muted-foreground">Read-only view of each user's account profile.</p>
+              <p className="text-sm text-muted-foreground">
+                Read-only profile data. Flip "Edit mode" in the header to assign or revoke VIP,
+                rename users, and adjust coins inline.
+              </p>
             </div>
             <div className="relative w-full max-w-xs">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
