@@ -79,7 +79,7 @@ function AdminUserSettingsPage() {
     );
   }, [profilesQ.data, search]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <DashboardShell title="User Settings">
         <div className="grid h-64 place-items-center">
