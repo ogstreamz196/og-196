@@ -97,10 +97,20 @@ function RecentMedia({ userId }: { userId: string }) {
   );
 }
 
-const adminItems = [
-  { to: "/admin/user-settings", label: "User Settings", icon: UserCog },
-  { to: "/admin", label: "Admin Panel", icon: Settings },
-] as const;
+const adminItems: NavItem[] = [
+  { to: "/admin", label: "Boss Panel", icon: ShieldCheck, match: ["/admin"] },
+  { to: "/admin/user-settings", label: "User Settings", icon: UserCog, match: ["/admin/user-settings"] },
+  { to: "/admin/users", label: "Manage Users", icon: UserCog, match: ["/admin/users"] },
+  { to: "/admin/create-portal", label: "New Portal", icon: PlusSquare, match: ["/admin/create-portal"] },
+];
+
+function isItemActive(item: NavItem, pathname: string): boolean {
+  if (item.to === "/") return pathname === "/";
+  if (item.match) {
+    return item.match.some((m) => pathname === m || pathname.startsWith(m + "/") || pathname.startsWith(m));
+  }
+  return pathname === item.to;
+}
 
 export function DashboardShell({ title, children }: { title: string; children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -108,7 +118,6 @@ export function DashboardShell({ title, children }: { title: string; children: R
   const { user } = useAuth();
   const { isAdmin } = useRole();
   const qc = useQueryClient();
-  const navItems = isAdmin ? [...baseNavItems, ...adminItems] : [...baseNavItems];
 
 
   async function handleSignOut() {
@@ -131,8 +140,8 @@ export function DashboardShell({ title, children }: { title: string; children: R
         </Link>
 
         <nav className="mt-6 flex flex-col gap-1">
-          {navItems.map((item) => {
-            const active = pathname === item.to;
+          {baseNavItems.map((item) => {
+            const active = isItemActive(item, pathname);
             const Icon = item.icon;
             return (
               <Link
@@ -150,6 +159,33 @@ export function DashboardShell({ title, children }: { title: string; children: R
               </Link>
             );
           })}
+
+          {isAdmin && (
+            <>
+              <div className="mt-4 flex items-center gap-2 px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/40">
+                <ShieldCheck className="h-3 w-3" /> Boss controls
+              </div>
+              {adminItems.map((item) => {
+                const active = isItemActive(item, pathname);
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    className={cn(
+                      "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                      active
+                        ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                        : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+                    )}
+                  >
+                    <Icon className={cn("h-4 w-4", active && "text-primary")} />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </>
+          )}
         </nav>
 
         {user ? <RecentMedia userId={user.id} /> : <div className="flex-1" />}
