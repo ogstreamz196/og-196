@@ -235,6 +235,46 @@ function OgBotSettingsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const burn = useMutation({
+    mutationFn: async (userId: string) => {
+      const { data, error } = await (supabase.rpc as unknown as (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>)(
+        "revoke_og_bot_token",
+        { target_user_id: userId, admin_notes: "boss_burn_from_og_bot_panel" },
+      );
+      if (error) throw new Error(error.message);
+      return (data as string | null) ?? new Date().toISOString();
+    },
+    onSuccess: (ts, userId) => {
+      toast.success("Token burned");
+      qc.setQueryData<TokenRow[]>(["admin-og-bot-tokens"], (prev) =>
+        (prev ?? []).map((t) =>
+          t.user_id === userId ? { ...t, revoked_at: ts, updated_at: new Date().toISOString() } : t,
+        ),
+      );
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const restore = useMutation({
+    mutationFn: async (userId: string) => {
+      const { error } = await (supabase.rpc as unknown as (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>)(
+        "unrevoke_og_bot_token",
+        { target_user_id: userId, admin_notes: "boss_restore_from_og_bot_panel" },
+      );
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: (_v, userId) => {
+      toast.success("Token restored");
+      qc.setQueryData<TokenRow[]>(["admin-og-bot-tokens"], (prev) =>
+        (prev ?? []).map((t) =>
+          t.user_id === userId ? { ...t, revoked_at: null, updated_at: new Date().toISOString() } : t,
+        ),
+      );
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+
   const setExpiry = useMutation({
     mutationFn: async (vars: { userId: string; expiresAt: string | null }) => {
       const { data, error } = await (supabase.rpc as unknown as (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>)(
