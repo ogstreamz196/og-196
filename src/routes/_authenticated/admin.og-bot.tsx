@@ -425,12 +425,19 @@ function OgBotSettingsPage() {
             loading={pingQ.isFetching}
             onRefresh={() => pingQ.refetch()}
           />
+          <Button size="sm" onClick={() => setShowCreateWizard(true)}>
+            <Wand2 className="mr-2 h-4 w-4" /> Create bot token
+          </Button>
           <Link to="/admin/users">
             <Button variant="outline" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" /> Users
             </Button>
           </Link>
         </div>
+
+        {showCreateWizard && (
+          <CreateBotTokenWizard onClose={() => setShowCreateWizard(false)} />
+        )}
 
         {/* Grant a new token */}
         <GrantTokenPanel
