@@ -111,6 +111,7 @@ function RecentMedia({ userId }: { userId: string }) {
 const adminItems: NavItem[] = [
   { to: "/admin", label: "Boss Panel", icon: ShieldCheck, match: ["/admin"] },
   { to: "/admin/users", label: "Manage Users", icon: UserCog, match: ["/admin/users"] },
+  { to: "/admin/og-bot", label: "OG Bot Setting", icon: Bot, match: ["/admin/og-bot"] },
   { to: "/admin/create-portal", label: "New Portal", icon: PlusSquare, match: ["/admin/create-portal"] },
 ];
 
