@@ -1,15 +1,22 @@
 import { createFileRoute, Navigate, Link, redirect } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Bot, Loader2, ShieldCheck, Copy, RotateCcw, Trash2, Search, ArrowLeft, Eye, EyeOff,
+  Bot, Loader2, ShieldCheck, Copy, RotateCcw, Trash2, Search, ArrowLeft, Eye, EyeOff, Lock, KeyRound,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRole } from "@/hooks/use-role";
+import { useAuth } from "@/hooks/use-auth";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
+
+// How long a successful re-auth keeps reveal/copy unlocked, in ms.
+const REAUTH_TTL_MS = 5 * 60 * 1000;
 
 export const Route = createFileRoute("/_authenticated/admin/og-bot")({
   beforeLoad: async () => {
@@ -39,9 +46,25 @@ interface ProfileRow {
 
 function OgBotSettingsPage() {
   const { isAdmin, isLoading } = useRole();
+  const { user } = useAuth();
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
+
+  // Step-up auth state: tokens stay masked until the boss re-enters their
+  // password. After success, reveal/copy is unlocked for REAUTH_TTL_MS.
+  const [reauthedUntil, setReauthedUntil] = useState<number>(0);
+  const [now, setNow] = useState<number>(() => Date.now());
+  useEffect(() => {
+    const i = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(i);
+  }, []);
+  const unlocked = reauthedUntil > now;
+  const unlockedSecondsLeft = unlocked ? Math.max(0, Math.ceil((reauthedUntil - now) / 1000)) : 0;
+
+  // Pending action waiting on re-auth: "reveal" or "copy" + which token.
+  const [pending, setPending] = useState<{ kind: "reveal" | "copy"; userId: string } | null>(null);
+  const [showReauth, setShowReauth] = useState(false);
 
   const tokensQ = useQuery({
     queryKey: ["admin-og-bot-tokens"],
@@ -83,7 +106,11 @@ function OgBotSettingsPage() {
     },
     onSuccess: (newToken, userId) => {
       toast.success("Token rotated");
-      setRevealed((r) => ({ ...r, [userId]: true }));
+      // Only auto-reveal if the boss is currently re-authed; otherwise
+      // keep the new token masked until the next successful re-auth.
+      if (reauthedUntil > Date.now()) {
+        setRevealed((r) => ({ ...r, [userId]: true }));
+      }
       // Optimistic: keep cache up to date with new token
       qc.setQueryData<TokenRow[]>(["admin-og-bot-tokens"], (prev) =>
         (prev ?? []).map((t) =>
@@ -188,6 +215,40 @@ function OgBotSettingsPage() {
           />
         </div>
 
+        {/* Lock / unlock banner */}
+        <div className={
+          "flex flex-wrap items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-sm " +
+          (unlocked
+            ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+            : "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300")
+        }>
+          <div className="flex items-center gap-2">
+            {unlocked ? <KeyRound className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+            <span>
+              {unlocked
+                ? `Tokens unlocked for ${Math.floor(unlockedSecondsLeft / 60)}m ${unlockedSecondsLeft % 60}s`
+                : "Tokens are masked. Re-enter your boss password to reveal or copy."}
+            </span>
+          </div>
+          {unlocked ? (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setReauthedUntil(0);
+                setRevealed({});
+                toast.success("Tokens re-locked");
+              }}
+            >
+              <Lock className="mr-1.5 h-3.5 w-3.5" /> Lock now
+            </Button>
+          ) : (
+            <Button size="sm" onClick={() => { setPending(null); setShowReauth(true); }}>
+              <KeyRound className="mr-1.5 h-3.5 w-3.5" /> Unlock
+            </Button>
+          )}
+        </div>
+
         {/* Tokens list */}
         <section className="rounded-2xl border border-border bg-card shadow-card">
           <header className="flex items-center justify-between border-b border-border px-4 py-3">
@@ -210,8 +271,14 @@ function OgBotSettingsPage() {
             <ul className="divide-y divide-border">
               {filtered.map((t) => {
                 const p = profiles[t.user_id];
-                const isOpen = !!revealed[t.user_id];
+                const isOpen = unlocked && !!revealed[t.user_id];
                 const masked = `${t.token.slice(0, 8)}••••••••••••${t.token.slice(-4)}`;
+                const requireReauth = (kind: "reveal" | "copy") => {
+                  if (unlocked) return false;
+                  setPending({ kind, userId: t.user_id });
+                  setShowReauth(true);
+                  return true;
+                };
                 return (
                   <li key={t.user_id} className="space-y-3 px-4 py-4">
                     <div className="flex flex-wrap items-start justify-between gap-3">
@@ -272,16 +339,24 @@ function OgBotSettingsPage() {
                         size="icon"
                         variant="ghost"
                         className="h-7 w-7"
-                        onClick={() => setRevealed((r) => ({ ...r, [t.user_id]: !isOpen }))}
-                        title={isOpen ? "Hide token" : "Reveal token"}
+                        onClick={() => {
+                          if (isOpen) {
+                            setRevealed((r) => ({ ...r, [t.user_id]: false }));
+                            return;
+                          }
+                          if (requireReauth("reveal")) return;
+                          setRevealed((r) => ({ ...r, [t.user_id]: true }));
+                        }}
+                        title={isOpen ? "Hide token" : unlocked ? "Reveal token" : "Re-auth required to reveal"}
                       >
-                        {isOpen ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                        {isOpen ? <EyeOff className="h-3.5 w-3.5" /> : unlocked ? <Eye className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
                       </Button>
                       <Button
                         size="icon"
                         variant="ghost"
                         className="h-7 w-7"
                         onClick={async () => {
+                          if (requireReauth("copy")) return;
                           try {
                             await navigator.clipboard.writeText(t.token);
                             toast.success("Token copied");
@@ -289,9 +364,9 @@ function OgBotSettingsPage() {
                             toast.error("Could not copy to clipboard");
                           }
                         }}
-                        title="Copy token"
+                        title={unlocked ? "Copy token" : "Re-auth required to copy"}
                       >
-                        <Copy className="h-3.5 w-3.5" />
+                        {unlocked ? <Copy className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
                       </Button>
                     </div>
 
@@ -310,7 +385,131 @@ function OgBotSettingsPage() {
           )}
         </section>
       </div>
+
+      <ReauthDialog
+        open={showReauth}
+        email={user?.email ?? null}
+        intent={pending?.kind ?? null}
+        onCancel={() => { setShowReauth(false); setPending(null); }}
+        onSuccess={async () => {
+          setReauthedUntil(Date.now() + REAUTH_TTL_MS);
+          setShowReauth(false);
+          // Carry out the originally-requested action automatically.
+          if (pending) {
+            if (pending.kind === "reveal") {
+              setRevealed((r) => ({ ...r, [pending.userId]: true }));
+            } else if (pending.kind === "copy") {
+              const t = (tokensQ.data ?? []).find((x) => x.user_id === pending.userId);
+              if (t) {
+                try {
+                  await navigator.clipboard.writeText(t.token);
+                  toast.success("Token copied");
+                } catch {
+                  toast.error("Could not copy to clipboard");
+                }
+              }
+            }
+            setPending(null);
+          }
+        }}
+      />
     </DashboardShell>
+  );
+}
+
+interface ReauthDialogProps {
+  open: boolean;
+  email: string | null;
+  intent: "reveal" | "copy" | null;
+  onCancel: () => void;
+  onSuccess: () => void | Promise<void>;
+}
+
+function ReauthDialog({ open, email, intent, onCancel, onSuccess }: ReauthDialogProps) {
+  const [password, setPassword] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!open) {
+      setPassword("");
+      setSubmitting(false);
+    }
+  }, [open]);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email) {
+      toast.error("No signed-in email found");
+      return;
+    }
+    if (!password) {
+      toast.error("Enter your boss password");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      // Re-auth pattern: verify the boss password without disrupting the
+      // active session. signInWithPassword refreshes the same session.
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        toast.error("Incorrect password");
+        return;
+      }
+      await onSuccess();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Re-auth failed");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  const intentText =
+    intent === "reveal"
+      ? "Confirm your password to reveal this OG Bot token."
+      : intent === "copy"
+      ? "Confirm your password to copy this OG Bot token to your clipboard."
+      : "Confirm your password to unlock OG Bot tokens for the next 5 minutes.";
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => { if (!v) onCancel(); }}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <ShieldCheck className="h-4 w-4 text-primary" /> Boss re-auth required
+          </DialogTitle>
+          <DialogDescription>{intentText}</DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">Signed in as</label>
+            <Input value={email ?? ""} readOnly disabled className="font-mono text-xs" />
+          </div>
+          <div className="space-y-1.5">
+            <label htmlFor="reauth-password" className="text-xs font-medium text-muted-foreground">
+              Boss password
+            </label>
+            <Input
+              id="reauth-password"
+              type="password"
+              autoComplete="current-password"
+              autoFocus
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+            />
+          </div>
+          <DialogFooter className="gap-2">
+            <Button type="button" variant="outline" onClick={onCancel} disabled={submitting}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={submitting || !password || !email}>
+              {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              <KeyRound className="mr-1.5 h-3.5 w-3.5" /> Unlock
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
 
