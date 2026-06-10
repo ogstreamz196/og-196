@@ -1359,3 +1359,202 @@ function IssueTokenWizard({ profile, submitting, onCancel, onConfirm }: IssueTok
     </Dialog>
   );
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Create Bot Token Wizard — issues an unclaimed `og_bot_token_invites` code
+// that the first signed-in user to redeem claims, picking up the og_bot role
+// and the preset token expiry.
+// ─────────────────────────────────────────────────────────────────────────────
+
+type ClaimPreset = "1d" | "7d" | "30d" | "never" | "custom";
+type TokenPreset = "30d" | "90d" | "365d" | "never" | "custom";
+
+function CreateBotTokenWizard({ onClose }: { onClose: () => void }) {
+  const qc = useQueryClient();
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const [claimPreset, setClaimPreset] = useState<ClaimPreset>("7d");
+  const [claimCustom, setClaimCustom] = useState("");
+  const [tokenPreset, setTokenPreset] = useState<TokenPreset>("90d");
+  const [tokenCustom, setTokenCustom] = useState("");
+  const [notes, setNotes] = useState("");
+  const [issuedCode, setIssuedCode] = useState<string | null>(null);
+
+  const claimMs: Record<Exclude<ClaimPreset, "never" | "custom">, number> = {
+    "1d": 86400_000, "7d": 7 * 86400_000, "30d": 30 * 86400_000,
+  };
+  const tokenMs: Record<Exclude<TokenPreset, "never" | "custom">, number> = {
+    "30d": 30 * 86400_000, "90d": 90 * 86400_000, "365d": 365 * 86400_000,
+  };
+
+  function resolveClaim(): string | null | "invalid" {
+    if (claimPreset === "never") return null;
+    if (claimPreset === "custom") return claimCustom ? new Date(claimCustom).toISOString() : "invalid";
+    return new Date(Date.now() + claimMs[claimPreset]).toISOString();
+  }
+  function resolveToken(): string | null | "invalid" {
+    if (tokenPreset === "never") return null;
+    if (tokenPreset === "custom") return tokenCustom ? new Date(tokenCustom).toISOString() : "invalid";
+    return new Date(Date.now() + tokenMs[tokenPreset]).toISOString();
+  }
+
+  const claimResolved = resolveClaim();
+  const tokenResolved = resolveToken();
+  const fmt = (v: string | null | "invalid") =>
+    v === "invalid" ? "—" : v === null ? "Never" : new Date(v).toLocaleString();
+
+  const create = useMutation({
+    mutationFn: async () => {
+      const claim = resolveClaim();
+      const tok = resolveToken();
+      if (claim === "invalid" || tok === "invalid") throw new Error("Pick valid custom dates");
+      const { data, error } = await supabase.rpc("create_og_bot_invite", {
+        p_claim_expires_at: claim ?? undefined,
+        p_token_expires_at: tok ?? undefined,
+        p_notes: notes.trim() || undefined,
+      });
+      if (error) throw new Error(error.message);
+      return data as string;
+    },
+    onSuccess: (code) => {
+      setIssuedCode(code);
+      setStep(4);
+      toast.success("Invite code created");
+      qc.invalidateQueries({ queryKey: ["settings-og-bot-invites"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  async function copyCode() {
+    if (!issuedCode) return;
+    try {
+      await navigator.clipboard.writeText(issuedCode);
+      toast.success("Code copied");
+    } catch {
+      toast.error("Copy failed");
+    }
+  }
+
+  return (
+    <Dialog open onOpenChange={(v) => { if (!v && !create.isPending) onClose(); }}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Wand2 className="h-4 w-4 text-primary" />
+            {issuedCode ? "Bot token created" : `Create bot token · Step ${step} of 3`}
+          </DialogTitle>
+          <DialogDescription>
+            {issuedCode
+              ? "Share this code with the user. The first signed-in account to redeem it claims the token."
+              : "Mint an unclaimed invite code that grants og_bot role on redemption."}
+          </DialogDescription>
+        </DialogHeader>
+
+        {step === 1 && (
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium">Claim window</h4>
+            <p className="text-xs text-muted-foreground">How long the code can be redeemed before it expires unclaimed.</p>
+            <div className="space-y-2 text-sm">
+              {(["1d", "7d", "30d", "never", "custom"] as const).map((k) => (
+                <label key={k} className="flex items-center gap-2">
+                  <input type="radio" checked={claimPreset === k} onChange={() => setClaimPreset(k)} />
+                  <span>
+                    {k === "1d" && "Must be claimed within 24 hours"}
+                    {k === "7d" && "Must be claimed within 7 days"}
+                    {k === "30d" && "Must be claimed within 30 days"}
+                    {k === "never" && "No claim deadline"}
+                    {k === "custom" && "Custom date & time"}
+                  </span>
+                </label>
+              ))}
+              {claimPreset === "custom" && (
+                <Input type="datetime-local" value={claimCustom} onChange={(e) => setClaimCustom(e.target.value)} className="ml-6 w-[calc(100%-1.5rem)]" />
+              )}
+            </div>
+          </div>
+        )}
+
+        {step === 2 && (
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium">Token expiry once claimed</h4>
+            <p className="text-xs text-muted-foreground">The personal bot token minted at redemption uses this expiry.</p>
+            <div className="space-y-2 text-sm">
+              {(["30d", "90d", "365d", "never", "custom"] as const).map((k) => (
+                <label key={k} className="flex items-center gap-2">
+                  <input type="radio" checked={tokenPreset === k} onChange={() => setTokenPreset(k)} />
+                  <span>
+                    {k === "30d" && "Expires in 30 days"}
+                    {k === "90d" && "Expires in 90 days"}
+                    {k === "365d" && "Expires in 1 year"}
+                    {k === "never" && "No expiry (long-lived)"}
+                    {k === "custom" && "Custom date & time"}
+                  </span>
+                </label>
+              ))}
+              {tokenPreset === "custom" && (
+                <Input type="datetime-local" value={tokenCustom} onChange={(e) => setTokenCustom(e.target.value)} className="ml-6 w-[calc(100%-1.5rem)]" />
+              )}
+            </div>
+            <div className="space-y-1.5 pt-2">
+              <Label htmlFor="wiz-notes" className="text-xs">Notes (optional)</Label>
+              <Textarea id="wiz-notes" rows={2} maxLength={500} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Who's this for? Anything to remember." />
+            </div>
+          </div>
+        )}
+
+        {step === 3 && (
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium">Review &amp; mint</h4>
+            <div className="space-y-1 rounded-lg border border-border bg-background/40 p-3 text-sm">
+              <div className="flex justify-between gap-3"><span className="text-muted-foreground">Claim window</span><span>{fmt(claimResolved)}</span></div>
+              <div className="flex justify-between gap-3"><span className="text-muted-foreground">Token expiry</span><span>{fmt(tokenResolved)}</span></div>
+              <div className="flex justify-between gap-3"><span className="text-muted-foreground">Notes</span><span className="truncate text-right">{notes.trim() || "—"}</span></div>
+            </div>
+            <p className="text-xs text-muted-foreground">First signed-in user to redeem claims this token and gets the og_bot role.</p>
+          </div>
+        )}
+
+        {step === 4 && issuedCode && (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-700 dark:text-emerald-300">
+              <CheckCircle2 className="h-4 w-4" /> Invite code minted
+            </div>
+            <div className="rounded-lg border border-border bg-background/40 p-3">
+              <code className="block break-all font-mono text-xs">{issuedCode}</code>
+            </div>
+            <Button type="button" variant="outline" size="sm" onClick={copyCode}>
+              <Copy className="mr-2 h-4 w-4" /> Copy code
+            </Button>
+          </div>
+        )}
+
+        <DialogFooter className="gap-2">
+          {step < 4 ? (
+            <>
+              <Button type="button" variant="outline" onClick={onClose} disabled={create.isPending}>Cancel</Button>
+              {step > 1 && (
+                <Button type="button" variant="outline" onClick={() => setStep((s) => (s - 1) as 1 | 2 | 3)} disabled={create.isPending}>Back</Button>
+              )}
+              {step < 3 ? (
+                <Button
+                  type="button"
+                  onClick={() => {
+                    if (step === 1 && claimPreset === "custom" && !claimCustom) { toast.error("Pick a custom date and time"); return; }
+                    if (step === 2 && tokenPreset === "custom" && !tokenCustom) { toast.error("Pick a custom date and time"); return; }
+                    setStep((s) => (s + 1) as 1 | 2 | 3);
+                  }}
+                >Next</Button>
+              ) : (
+                <Button type="button" onClick={() => create.mutate()} disabled={create.isPending}>
+                  {create.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Mint invite code
+                </Button>
+              )}
+            </>
+          ) : (
+            <Button type="button" onClick={onClose}>Done</Button>
+          )}
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
