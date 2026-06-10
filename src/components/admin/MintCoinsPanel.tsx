@@ -91,8 +91,10 @@ export function MintCoinsPanel() {
       );
       qc.invalidateQueries({ queryKey: ["admin-mint-history"] });
       qc.invalidateQueries({ queryKey: ["admin-profiles-search"] });
+      qc.invalidateQueries({ queryKey: ["admin-user-audit", selected?.id] });
       qc.invalidateQueries({ queryKey: ["profile"] });
       setNotes("");
+      if (selected) setSelected({ ...selected, coin_balance: newBalance });
     },
     onError: (e: Error) => {
       const m = e.message.toLowerCase();
@@ -100,6 +102,36 @@ export function MintCoinsPanel() {
       else if (m.includes("target_not_found")) toast.error("User not found.");
       else if (m.includes("amount_must_be_nonzero")) toast.error("Amount can't be zero.");
       else if (m.includes("amount_out_of_range")) toast.error("Amount is out of range.");
+      else toast.error(e.message);
+    },
+  });
+
+  const setExact = useMutation({
+    mutationFn: async (next: number) => {
+      if (!selected) throw new Error("Select a user first");
+      if (!Number.isFinite(next) || next < 0) throw new Error("Balance must be ≥ 0");
+      const { data, error } = await supabase.rpc("set_balance_admin", {
+        target_user_id: selected.id,
+        new_balance: Math.trunc(next),
+        admin_notes: notes.trim() || "admin_set_balance",
+      });
+      if (error) throw new Error(error.message);
+      return data as number;
+    },
+    onSuccess: (newBalance) => {
+      toast.success(`Balance set to ${newBalance}`);
+      qc.invalidateQueries({ queryKey: ["admin-mint-history"] });
+      qc.invalidateQueries({ queryKey: ["admin-profiles-search"] });
+      qc.invalidateQueries({ queryKey: ["admin-user-audit", selected?.id] });
+      qc.invalidateQueries({ queryKey: ["profile"] });
+      setNotes("");
+      if (selected) setSelected({ ...selected, coin_balance: newBalance });
+    },
+    onError: (e: Error) => {
+      const m = e.message.toLowerCase();
+      if (m.includes("balance_out_of_range")) toast.error("Balance out of range.");
+      else if (m.includes("unauthorized")) toast.error("Not allowed.");
+      else if (m.includes("target_not_found")) toast.error("User not found.");
       else toast.error(e.message);
     },
   });
