@@ -1,5 +1,6 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Library, Coins as CoinsIcon, LogOut, Music2, Settings, Search, Clock, Loader2, Compass, UserCog, LayoutDashboard, PlusSquare, ShieldCheck, Bot } from "lucide-react";
+import { Library, Coins as CoinsIcon, LogOut, Music2, Settings, Search, Clock, Loader2, Compass, UserCog, LayoutDashboard, PlusSquare, ShieldCheck, Bot, MessageCircle } from "lucide-react";
+import { OgBotWidget } from "@/components/messenger/OgBotWidget";
 import { useEffect, type ReactNode } from "react";
 import { CoinBalance } from "./CoinBalance";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,6 +28,7 @@ const baseNavItems: NavItem[] = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
   { to: "/portals", label: "Portals", icon: Compass, match: ["/portals", "/portal/"] },
   { to: "/library", label: "My Library", icon: Library, match: ["/library"] },
+  { to: "/messenger", label: "OG Messenger", icon: MessageCircle, match: ["/messenger"] },
   { to: "/buy-coins", label: "Buy Coins", icon: CoinsIcon, match: ["/buy-coins"] },
 ];
 
@@ -111,7 +113,8 @@ function RecentMedia({ userId }: { userId: string }) {
 const adminItems: NavItem[] = [
   { to: "/admin", label: "Boss Panel", icon: ShieldCheck, match: ["/admin"] },
   { to: "/admin/users", label: "Manage Users", icon: UserCog, match: ["/admin/users"] },
-  { to: "/admin/og-bot", label: "OG Bot Setting", icon: Bot, match: ["/admin/og-bot"] },
+  { to: "/admin/og-bot", label: "OG Bot Tokens", icon: Bot, match: ["/admin/og-bot"] },
+  { to: "/admin/og-persona", label: "OG Bot Persona", icon: MessageCircle, match: ["/admin/og-persona"] },
   { to: "/admin/create-portal", label: "New Portal", icon: PlusSquare, match: ["/admin/create-portal"] },
 ];
 
