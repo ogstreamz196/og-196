@@ -29,7 +29,7 @@ interface RoleRow {
 }
 
 function AdminUserSettingsPage() {
-  const { isAdmin, loading } = useRole();
+  const { isAdmin, isLoading } = useRole();
   const [search, setSearch] = useState("");
 
   const profilesQ = useQuery({
