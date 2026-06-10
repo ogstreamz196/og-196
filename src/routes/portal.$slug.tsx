@@ -274,8 +274,9 @@ function PortalPage() {
             style={{ borderColor: themeColor, color: themeColor }}
           >
             <Wand2 className="h-3 w-3" />
-            Portal · Lyrics in {portal.language}
+            Portal · Lyrics in {language}
           </div>
+
           <h1 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl">{portal.name}</h1>
           <p className="mt-2 max-w-xl text-muted-foreground">
             Write your song idea below, generate lyrics for free, then turn them into music.
