@@ -258,6 +258,36 @@ function OgBotSettingsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  // Grant a fresh OG Bot token to any user (creates the og_bot role +
+  // token row in one shot via set_og_bot_admin).
+  const grant = useMutation({
+    mutationFn: async (targetUserId: string) => {
+      const { error } = await supabase.rpc("set_og_bot_admin", {
+        target_user_id: targetUserId,
+        make_og: true,
+        admin_notes: "boss_grant_from_og_bot_panel",
+      });
+      if (error) throw new Error(error.message);
+      return targetUserId;
+    },
+    onSuccess: () => {
+      toast.success("OG Bot token issued");
+      qc.invalidateQueries({ queryKey: ["admin-og-bot-tokens"] });
+      qc.invalidateQueries({ queryKey: ["admin-og-bot-grantable"] });
+      qc.invalidateQueries({ queryKey: ["admin-user-roles"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  // Backend reachability ping. Refreshes every 60s.
+  const pingFn = useServerFn(pingOgBot);
+  const pingQ = useQuery({
+    queryKey: ["og-bot-backend-ping"],
+    enabled: isAdmin,
+    queryFn: () => pingFn(),
+    refetchInterval: 60_000,
+  });
+
   if (isLoading || tokensQ.isLoading) {
     return (
       <DashboardShell title="OG Bot Setting">
