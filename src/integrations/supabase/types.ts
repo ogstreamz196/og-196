@@ -242,6 +242,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      mint_coins: {
+        Args: { p_amount: number; p_reason?: string; p_target: string }
+        Returns: number
+      }
     }
     Enums: {
       app_role: "admin" | "user"
