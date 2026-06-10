@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Sparkles, Loader2, Music2, Coins, Wand2, LogIn, AlertTriangle, Languages, Tags, FileText, Pencil, Music } from "lucide-react";
+import { Sparkles, Loader2, Music2, Coins, Wand2, LogIn, AlertTriangle, Languages, Tags, FileText, Pencil, Music, RefreshCw, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
