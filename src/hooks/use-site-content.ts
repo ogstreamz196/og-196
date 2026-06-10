@@ -32,6 +32,23 @@ export function useSetSiteContent() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ key, value }: { key: string; value: string }) => {
+      // Client-side boss guard. The DB enforces this too (set_site_content
+      // RPC + RLS), but we block the call early so non-boss users never
+      // even attempt the write.
+      const { data: userData } = await supabase.auth.getUser();
+      const uid = userData.user?.id;
+      if (!uid) throw new Error("Sign in required");
+      const { data: roles, error: roleErr } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", uid)
+        .eq("role", "admin")
+        .limit(1);
+      if (roleErr) throw new Error(roleErr.message);
+      if (!roles || roles.length === 0) {
+        throw new Error("Boss role required to edit site content.");
+      }
+
       const { data, error } = await supabase.rpc("set_site_content", {
         p_key: key,
         p_value: value,

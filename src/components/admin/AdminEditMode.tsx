@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Pencil, Check, X, Loader2, Coins, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,8 +13,21 @@ interface Ctx { enabled: boolean; toggle: () => void; }
 const AdminEditCtx = createContext<Ctx>({ enabled: false, toggle: () => {} });
 
 export function AdminEditModeProvider({ children }: { children: ReactNode }) {
-  const [enabled, setEnabled] = useState(false);
-  const toggle = useCallback(() => setEnabled((v) => !v), []);
+  const { isAdmin } = useRole();
+  const [enabledRaw, setEnabled] = useState(false);
+  // Hard guard: non-boss users can never have edit mode enabled, even if
+  // state was somehow flipped (devtools, stale render, role downgrade).
+  const enabled = isAdmin && enabledRaw;
+  useEffect(() => {
+    if (!isAdmin && enabledRaw) setEnabled(false);
+  }, [isAdmin, enabledRaw]);
+  const toggle = useCallback(() => {
+    if (!isAdmin) {
+      toast.error("Boss role required to edit site content.");
+      return;
+    }
+    setEnabled((v) => !v);
+  }, [isAdmin]);
   const value = useMemo(() => ({ enabled, toggle }), [enabled, toggle]);
   return <AdminEditCtx.Provider value={value}>{children}</AdminEditCtx.Provider>;
 }
