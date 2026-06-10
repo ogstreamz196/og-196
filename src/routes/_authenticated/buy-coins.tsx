@@ -64,7 +64,7 @@ function BuyCoinsPage() {
               <div>
                 <div className="text-sm text-muted-foreground">{selected.label}</div>
                 <div className="text-lg font-semibold">
-                  {selected.coins} coins · ${(selected.priceCents / 100).toFixed(2)}
+                  {selected.coins} coins · {CURRENCY_SYMBOL}{(selected.priceCents / 100).toFixed(2)}
                 </div>
               </div>
               <Coins className="h-6 w-6 text-coin" />
