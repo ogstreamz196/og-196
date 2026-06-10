@@ -8,6 +8,7 @@ import { useSettings } from "@/hooks/use-settings";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { PortalManager } from "@/components/admin/PortalManager";
 import { MintCoinsPanel } from "@/components/admin/MintCoinsPanel";
+import { OgCoinsPanel } from "@/components/admin/OgCoinsPanel";
 import { AdminEditableLabel, AdminEditableBalance } from "@/components/admin/AdminEditMode";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -142,6 +143,8 @@ function AdminPanel() {
             </Button>
           </Link>
         </div>
+
+        <OgCoinsPanel />
 
         <PricingControls />
 
