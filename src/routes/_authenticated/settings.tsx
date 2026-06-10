@@ -1049,9 +1049,9 @@ function IssueOgBotInvitePanel() {
       const claimExp = claimN > 0 ? new Date(Date.now() + claimN * 86400_000).toISOString() : null;
       const tokenExp = tokenN > 0 ? new Date(Date.now() + tokenN * 86400_000).toISOString() : null;
       const { data, error } = await supabase.rpc("create_og_bot_invite", {
-        p_claim_expires_at: claimExp,
-        p_token_expires_at: tokenExp,
-        p_notes: notes || null,
+        p_claim_expires_at: claimExp ?? undefined,
+        p_token_expires_at: tokenExp ?? undefined,
+        p_notes: notes || undefined,
       });
       if (error) throw new Error(error.message);
       return data as string;
