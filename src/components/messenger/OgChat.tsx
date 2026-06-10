@@ -71,7 +71,7 @@ export function OgChat({ compact = false }: { compact?: boolean }) {
   }, []);
 
   const m = useMutation({
-    mutationFn: async (history: OgChatMessage[]) => chat({ data: { messages: history } }),
+    mutationFn: async (history: OgChatMessage[]) => chat({ data: { messages: history, token } }),
     onSuccess: (res) => {
       setMessages((cur) => {
         const next = [...cur, { role: "assistant" as const, content: res.reply || "..." }];
