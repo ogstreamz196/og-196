@@ -30,16 +30,26 @@ export const chatOgBot = createServerFn({ method: "POST" })
     const { data: rows } = await supabase
       .from("site_content")
       .select("key, value")
-      .in("key", ["og_persona.script", "og_persona.voice", "og_persona.dictionary"]);
+      .in("key", [
+        "og_persona.script",
+        "og_persona.voice",
+        "og_persona.dictionary",
+        "og_persona.foul_mouth",
+      ]);
     const map = new Map<string, string>();
     (rows ?? []).forEach((r: { key: string; value: string }) => map.set(r.key, r.value));
 
     const script = map.get("og_persona.script")?.trim() || DEFAULT_SCRIPT;
     const voice = map.get("og_persona.voice")?.trim() || DEFAULT_VOICE;
     const dictionary = map.get("og_persona.dictionary")?.trim() || DEFAULT_DICTIONARY;
+    const foulMouth = (map.get("og_persona.foul_mouth") ?? "false").toLowerCase() === "true";
+
+    const foulDirective = foulMouth
+      ? "\n\n--- LANGUAGE FILTER: OFF ---\nFoul mouth mode is ON. Talk raw, unfiltered, street. Swear naturally when it fits the vibe (shit, fuck, damn, hell). Don't force it — let it feel real, not edgy for the sake of it. Never slurs, never targeted abuse."
+      : "\n\n--- LANGUAGE FILTER: ON ---\nKeep it clean. No profanity.";
 
     const systemPrompt =
-      `${script}\n\n--- VOICE ---\n${voice}\n\n--- DICTIONARY / SLANG ---\n${dictionary}`;
+      `${script}\n\n--- VOICE ---\n${voice}\n\n--- DICTIONARY / SLANG ---\n${dictionary}${foulDirective}`;
 
     const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

@@ -1,12 +1,13 @@
 import { createFileRoute, Navigate, Link, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Bot, Loader2, Save, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Bot, Loader2, Save, ShieldCheck, Skull } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRole } from "@/hooks/use-role";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { useSiteContent, useSetSiteContent } from "@/hooks/use-site-content";
 import { toast } from "sonner";
 
@@ -40,13 +41,16 @@ function OgPersonaPage() {
   const [script, setScript] = useState("");
   const [voice, setVoice] = useState("");
   const [dictionary, setDictionary] = useState("");
+  const [foulMouth, setFoulMouth] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [togglingFoul, setTogglingFoul] = useState(false);
 
   useEffect(() => {
     if (loadingContent) return;
     setScript(get("og_persona.script", DEFAULT_SCRIPT));
     setVoice(get("og_persona.voice", DEFAULT_VOICE));
     setDictionary(get("og_persona.dictionary", DEFAULT_DICTIONARY));
+    setFoulMouth(get("og_persona.foul_mouth", "false").toLowerCase() === "true");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadingContent]);
 
@@ -75,6 +79,21 @@ function OgPersonaPage() {
     }
   }
 
+  async function toggleFoul(next: boolean) {
+    setTogglingFoul(true);
+    const prev = foulMouth;
+    setFoulMouth(next);
+    try {
+      await setContent.mutateAsync({ key: "og_persona.foul_mouth", value: next ? "true" : "false" });
+      toast.success(next ? "Foul mouth mode: ON 🤬" : "Foul mouth mode: OFF");
+    } catch (e) {
+      setFoulMouth(prev);
+      toast.error((e as Error).message);
+    } finally {
+      setTogglingFoul(false);
+    }
+  }
+
   return (
     <DashboardShell title="OG Bot Persona">
       <div className="mx-auto max-w-3xl space-y-6">
@@ -93,6 +112,21 @@ function OgPersonaPage() {
           <p className="mt-1 text-sm text-muted-foreground">
             Script, voice, and dictionary control how OG Bot talks site-wide — synced to the OG Messenger page and the bottom-right widget for every user.
           </p>
+        </div>
+
+        <div className="flex items-center justify-between rounded-xl border border-border bg-card p-4">
+          <div className="flex items-start gap-3">
+            <div className="grid h-9 w-9 place-items-center rounded-lg bg-destructive/10 text-destructive">
+              <Skull className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold">Foul mouth mode</p>
+              <p className="text-xs text-muted-foreground">
+                When ON, OG Bot drops the language filter and talks raw. Script is still pulled from the OG Bot code section below — this only flips the filter.
+              </p>
+            </div>
+          </div>
+          <Switch checked={foulMouth} onCheckedChange={toggleFoul} disabled={togglingFoul} aria-label="Toggle foul mouth mode" />
         </div>
 
         <div className="space-y-2">
