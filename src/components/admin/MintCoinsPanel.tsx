@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Coins, Loader2, Plus, Minus, History, ChevronsUpDown, Check, User as UserIcon } from "lucide-react";
+import { Coins, Loader2, Plus, Minus, History, ChevronsUpDown, Check, User as UserIcon, Equal } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/command";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { UserAuditTrail } from "./UserAuditTrail";
 
 interface ProfileLite {
   id: string;
@@ -90,8 +91,10 @@ export function MintCoinsPanel() {
       );
       qc.invalidateQueries({ queryKey: ["admin-mint-history"] });
       qc.invalidateQueries({ queryKey: ["admin-profiles-search"] });
+      qc.invalidateQueries({ queryKey: ["admin-user-audit", selected?.id] });
       qc.invalidateQueries({ queryKey: ["profile"] });
       setNotes("");
+      if (selected) setSelected({ ...selected, coin_balance: newBalance });
     },
     onError: (e: Error) => {
       const m = e.message.toLowerCase();
@@ -99,6 +102,36 @@ export function MintCoinsPanel() {
       else if (m.includes("target_not_found")) toast.error("User not found.");
       else if (m.includes("amount_must_be_nonzero")) toast.error("Amount can't be zero.");
       else if (m.includes("amount_out_of_range")) toast.error("Amount is out of range.");
+      else toast.error(e.message);
+    },
+  });
+
+  const setExact = useMutation({
+    mutationFn: async (next: number) => {
+      if (!selected) throw new Error("Select a user first");
+      if (!Number.isFinite(next) || next < 0) throw new Error("Balance must be ≥ 0");
+      const { data, error } = await supabase.rpc("set_balance_admin", {
+        target_user_id: selected.id,
+        new_balance: Math.trunc(next),
+        admin_notes: notes.trim() || "admin_set_balance",
+      });
+      if (error) throw new Error(error.message);
+      return data as number;
+    },
+    onSuccess: (newBalance) => {
+      toast.success(`Balance set to ${newBalance}`);
+      qc.invalidateQueries({ queryKey: ["admin-mint-history"] });
+      qc.invalidateQueries({ queryKey: ["admin-profiles-search"] });
+      qc.invalidateQueries({ queryKey: ["admin-user-audit", selected?.id] });
+      qc.invalidateQueries({ queryKey: ["profile"] });
+      setNotes("");
+      if (selected) setSelected({ ...selected, coin_balance: newBalance });
+    },
+    onError: (e: Error) => {
+      const m = e.message.toLowerCase();
+      if (m.includes("balance_out_of_range")) toast.error("Balance out of range.");
+      else if (m.includes("unauthorized")) toast.error("Not allowed.");
+      else if (m.includes("target_not_found")) toast.error("User not found.");
       else toast.error(e.message);
     },
   });
@@ -241,11 +274,24 @@ export function MintCoinsPanel() {
           <Minus className="mr-2 h-4 w-4" />
           Deduct {Math.abs(numericAmount || 0)}
         </Button>
+        <Button
+          variant="secondary"
+          onClick={() => setExact.mutate(Math.abs(numericAmount))}
+          disabled={setExact.isPending || !selected || !Number.isFinite(numericAmount) || numericAmount < 0}
+          title="Sets the balance to exactly this number (logs the delta)"
+        >
+          {setExact.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Equal className="mr-2 h-4 w-4" />}
+          Set to {Math.abs(numericAmount || 0)}
+        </Button>
       </div>
+
+      {selected && (
+        <UserAuditTrail userId={selected.id} email={selected.email} />
+      )}
 
       <div className="mt-6">
         <div className="mb-2 flex items-center gap-2 text-sm font-medium text-muted-foreground">
-          <History className="h-4 w-4" /> Recent admin changes
+          <History className="h-4 w-4" /> Recent admin changes (global)
         </div>
         {recent.isLoading ? (
           <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
@@ -272,3 +318,4 @@ export function MintCoinsPanel() {
     </div>
   );
 }
+

@@ -8,6 +8,7 @@ import { useRole } from "@/hooks/use-role";
 import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
+import { AdminEditModeProvider, AdminEditModeToggle } from "@/components/admin/AdminEditMode";
 
 const baseNavItems = [
   { to: "/", label: "Generate", icon: Sparkles },
@@ -33,6 +34,7 @@ export function DashboardShell({ title, children }: { title: string; children: R
   }
 
   return (
+    <AdminEditModeProvider>
     <div className="flex min-h-screen w-full bg-background">
       {/* Sidebar */}
       <aside className="hidden md:flex w-64 flex-col border-r border-sidebar-border bg-sidebar p-4">
@@ -95,6 +97,7 @@ export function DashboardShell({ title, children }: { title: string; children: R
               }}
             />
           </div>
+          <AdminEditModeToggle />
           <CoinBalance />
         </header>
 
@@ -122,5 +125,6 @@ export function DashboardShell({ title, children }: { title: string; children: R
         <main className="flex-1 px-4 py-6 md:px-8 md:py-10">{children}</main>
       </div>
     </div>
+    </AdminEditModeProvider>
   );
 }
