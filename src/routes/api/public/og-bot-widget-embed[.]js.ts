@@ -111,7 +111,7 @@ const LOADER_JS = `(function(){
 })();
 `;
 
-export const Route = createFileRoute("/api/public/og-bot-widget-embed/js")({
+export const Route = createFileRoute("/api/public/og-bot-widget-embed.js")({
   server: {
     handlers: {
       GET: async () =>
