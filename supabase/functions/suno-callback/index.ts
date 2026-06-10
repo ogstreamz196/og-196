@@ -66,6 +66,11 @@ Deno.serve(async (req) => {
   // Failure callback
   const callbackType = payload?.data?.callbackType || payload?.callbackType;
   if (callbackType === "error" || (payload?.code && payload.code !== 200)) {
+    // Guard against double-refund: only refund when song still pending/processing.
+    if (parentSong.status === "completed" || parentSong.status === "failed") {
+      console.log("Skipping refund — song already terminal:", parentSong.status);
+      return new Response("ok", { status: 200 });
+    }
     // Refund using portal override when applicable; fall back to global setting.
     let refundAmt = 3;
     if (parentSong.portal_id) {
