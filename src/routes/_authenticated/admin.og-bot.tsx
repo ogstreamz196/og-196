@@ -355,15 +355,28 @@ function OgBotSettingsPage() {
           <div className="flex-1 min-w-0">
             <h2 className="truncate font-semibold">OG Bot Setting</h2>
             <p className="text-xs text-muted-foreground">
-              Manage generated OG Bot tokens. Boss-only — tokens grant automated access on behalf of the user.
+              Manage OG Bot tokens. The token authenticates both the user's Messenger and the floating Boss widget.
             </p>
           </div>
+          <BackendStatusPill
+            data={pingQ.data}
+            loading={pingQ.isFetching}
+            onRefresh={() => pingQ.refetch()}
+          />
           <Link to="/admin/users">
             <Button variant="outline" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" /> Users
             </Button>
           </Link>
         </div>
+
+        {/* Grant a new token */}
+        <GrantTokenPanel
+          existingUserIds={tokens.map((t) => t.user_id)}
+          onGrant={(id) => grant.mutate(id)}
+          isPending={grant.isPending}
+          pendingId={typeof grant.variables === "string" ? grant.variables : null}
+        />
 
         {/* Stats */}
         <section className="grid gap-4 sm:grid-cols-4">
@@ -372,6 +385,7 @@ function OgBotSettingsPage() {
           <StatCard label="Expiring soon" value={String(statusCounts.expiring)} hint="Next 7 days" />
           <StatCard label="Expired" value={String(statusCounts.expired)} />
         </section>
+
 
         {/* Search + filter + sort */}
         <div className="space-y-3">
