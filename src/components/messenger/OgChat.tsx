@@ -95,6 +95,10 @@ export function OgChat({ compact = false }: { compact?: boolean }) {
   function send() {
     const text = input.trim();
     if (!text || m.isPending) return;
+    if (!token) {
+      toast.error("Paste your OG Bot token first.");
+      return;
+    }
     const next = [...messages, { role: "user" as const, content: text }];
     setMessages(next);
     selfSyncRef.current = true;
@@ -102,6 +106,56 @@ export function OgChat({ compact = false }: { compact?: boolean }) {
     setInput("");
     m.mutate(next);
   }
+
+  function saveToken() {
+    const t = tokenDraft.trim();
+    if (!t.startsWith("ogb_")) {
+      toast.error("Token should start with 'ogb_'");
+      return;
+    }
+    window.localStorage.setItem(TOKEN_KEY, t);
+    setToken(t);
+    setTokenDraft("");
+    toast.success("OG Bot token saved — chat unlocked");
+  }
+
+  function clearToken() {
+    window.localStorage.removeItem(TOKEN_KEY);
+    setToken("");
+    toast.message("Token cleared");
+  }
+
+  if (!token) {
+    return (
+      <div className={cn("flex h-full flex-col items-center justify-center gap-4 p-6 text-center",
+        compact ? "" : "rounded-xl border border-border bg-card")}>
+        <div className="grid h-12 w-12 place-items-center rounded-full bg-gradient-brand shadow-glow">
+          <KeyRound className="h-6 w-6 text-primary-foreground" />
+        </div>
+        <div className="max-w-sm space-y-1">
+          <p className="text-sm font-semibold">Unlock OG Messenger</p>
+          <p className="text-xs text-muted-foreground">
+            Paste your OG Bot token to start chatting. Tokens are issued by the Boss in the OG Bot Tokens panel.
+          </p>
+        </div>
+        <form
+          onSubmit={(e) => { e.preventDefault(); saveToken(); }}
+          className="flex w-full max-w-sm flex-col gap-2"
+        >
+          <Input
+            value={tokenDraft}
+            onChange={(e) => setTokenDraft(e.target.value)}
+            placeholder="ogb_..."
+            autoComplete="off"
+            spellCheck={false}
+            maxLength={200}
+          />
+          <Button type="submit" disabled={!tokenDraft.trim()}>Unlock chat</Button>
+        </form>
+      </div>
+    );
+  }
+
 
   return (
     <div className={cn("flex h-full flex-col", compact ? "" : "rounded-xl border border-border bg-card")}>
