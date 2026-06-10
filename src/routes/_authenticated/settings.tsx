@@ -255,6 +255,12 @@ function SettingsPage() {
               <CreateOgBotTokenPanel />
             </div>
 
+            <div className="space-y-2">
+              <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Active OG Bot tokens</p>
+              <ManageOgBotTokensPanel />
+            </div>
+
+
             <Separator />
             <div className="flex flex-wrap gap-2">
               <Link to="/admin"><Button variant="outline" size="sm">Admin home</Button></Link>
