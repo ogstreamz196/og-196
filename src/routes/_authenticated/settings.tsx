@@ -209,38 +209,50 @@ function SettingsPage() {
 
         {/* Roles (admin only) */}
         {isAdmin && (
-          <section className="rounded-2xl border border-border bg-card p-6 shadow-card space-y-4">
-            <header>
-              <h2 className="font-semibold">Roles & access</h2>
-              <p className="text-xs text-muted-foreground">Quick toggles for your own account.</p>
+          <section className="rounded-2xl border border-border bg-card p-6 shadow-card space-y-5">
+            <header className="flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-primary" />
+              <div>
+                <h2 className="font-semibold leading-tight">Roles & access</h2>
+                <p className="text-xs text-muted-foreground">Toggle perks for yourself and mint tokens for others.</p>
+              </div>
             </header>
 
-            <RoleRow
-              icon={<Crown className="h-5 w-5 text-amber-500" />}
-              title="VIP"
-              description="Premium tiers and bonus features."
-              checked={isVip}
-              pending={toggleRole.isPending}
-              onChange={(v) => toggleRole.mutate({ rpc: "set_vip_admin", key: "make_vip", value: v })}
-            />
-            <RoleRow
-              icon={<Bot className="h-5 w-5 text-primary" />}
-              title="OG Bot"
-              description="Automated/bot privileges."
-              checked={isOgBot}
-              pending={toggleRole.isPending}
-              onChange={(v) => toggleRole.mutate({ rpc: "set_og_bot_admin", key: "make_og", value: v })}
-            />
-            <CreateOgBotTokenPanel />
-            <div className="flex items-center justify-between rounded-xl border border-border bg-background/40 p-3 opacity-80">
-              <div className="flex items-center gap-3">
-                <ShieldCheck className="h-5 w-5 text-primary" />
-                <div>
-                  <Label className="text-sm font-medium">Boss / admin</Label>
-                  <p className="text-xs text-muted-foreground">Provisioned in the database.</p>
+            <div className="space-y-2">
+              <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Your roles</p>
+              <RoleRow
+                icon={<Crown className="h-5 w-5 text-amber-500" />}
+                title="VIP"
+                description="Premium tiers and bonus features."
+                checked={isVip}
+                pending={toggleRole.isPending}
+                onChange={(v) => toggleRole.mutate({ rpc: "set_vip_admin", key: "make_vip", value: v })}
+              />
+              <RoleRow
+                icon={<Bot className="h-5 w-5 text-primary" />}
+                title="OG Bot"
+                description="Automated/bot privileges."
+                checked={isOgBot}
+                pending={toggleRole.isPending}
+                onChange={(v) => toggleRole.mutate({ rpc: "set_og_bot_admin", key: "make_og", value: v })}
+              />
+              <div className="flex items-center justify-between rounded-xl border border-border bg-background/40 p-3 opacity-80">
+                <div className="flex items-center gap-3">
+                  <ShieldCheck className="h-5 w-5 text-primary" />
+                  <div>
+                    <Label className="text-sm font-medium">Boss / admin</Label>
+                    <p className="text-xs text-muted-foreground">Provisioned in the database.</p>
+                  </div>
                 </div>
+                <Switch checked disabled />
               </div>
-              <Switch checked disabled />
+            </div>
+
+            <Separator />
+
+            <div className="space-y-2">
+              <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">OG Bot token issuance</p>
+              <CreateOgBotTokenPanel />
             </div>
 
             <Separator />
@@ -251,6 +263,7 @@ function SettingsPage() {
             </div>
           </section>
         )}
+
 
         {/* Session */}
         <section className="rounded-2xl border border-border bg-card p-6 shadow-card flex items-center justify-between">
