@@ -17,6 +17,7 @@ import {
 } from "@/components/admin/AdminEditMode";
 import { BulkReconcilePanel } from "@/components/admin/BulkReconcilePanel";
 import { UserAuditTrail } from "@/components/admin/UserAuditTrail";
+import { VipBadgeAction } from "@/components/admin/VipBadgeAction";
 
 export const Route = createFileRoute("/_authenticated/admin/users")({
   component: AdminUsersPage,
