@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import { EditableContent } from "@/components/admin/EditableContent";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
 
@@ -14,7 +15,9 @@ function SettingsPage() {
     <DashboardShell title="Settings">
       <div className="mx-auto max-w-2xl space-y-6">
         <section className="rounded-2xl border border-border bg-card p-6">
-          <h2 className="text-lg font-semibold">Account</h2>
+          <h2 className="text-lg font-semibold">
+            <EditableContent contentKey="settings.account.heading" defaultValue="Account" />
+          </h2>
           <dl className="mt-4 grid grid-cols-1 gap-3 text-sm">
             <div className="flex justify-between gap-4">
               <dt className="text-muted-foreground">Email</dt>
