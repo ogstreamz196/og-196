@@ -291,6 +291,7 @@ export function DashboardShell({ title, children }: { title: string; children: R
         {isAdmin && <BossEditHint />}
         <main className="flex-1 px-4 py-6 md:px-8 md:py-10">{children}</main>
       </div>
+      <OgBotWidget />
     </div>
     </AdminEditModeProvider>
   );
