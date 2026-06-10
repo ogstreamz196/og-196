@@ -231,6 +231,7 @@ function SettingsPage() {
               pending={toggleRole.isPending}
               onChange={(v) => toggleRole.mutate({ rpc: "set_og_bot_admin", key: "make_og", value: v })}
             />
+            <CreateOgBotTokenPanel />
             <div className="flex items-center justify-between rounded-xl border border-border bg-background/40 p-3 opacity-80">
               <div className="flex items-center gap-3">
                 <ShieldCheck className="h-5 w-5 text-primary" />
