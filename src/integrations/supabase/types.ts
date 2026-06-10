@@ -98,6 +98,7 @@ export type Database = {
       og_bot_tokens: {
         Row: {
           created_at: string
+          expires_at: string | null
           last_used_at: string | null
           token: string
           updated_at: string
@@ -105,6 +106,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          expires_at?: string | null
           last_used_at?: string | null
           token: string
           updated_at?: string
@@ -112,6 +114,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          expires_at?: string | null
           last_used_at?: string | null
           token?: string
           updated_at?: string
@@ -356,6 +359,14 @@ export type Database = {
       set_og_bot_admin: {
         Args: { admin_notes?: string; make_og: boolean; target_user_id: string }
         Returns: boolean
+      }
+      set_og_bot_token_expiry: {
+        Args: {
+          admin_notes?: string
+          new_expires_at: string
+          target_user_id: string
+        }
+        Returns: string
       }
       set_site_content: {
         Args: { p_key: string; p_value: string }
