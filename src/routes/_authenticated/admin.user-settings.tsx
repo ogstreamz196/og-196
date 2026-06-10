@@ -182,19 +182,18 @@ function AdminUserSettingsPage() {
                         <TableCell className="font-medium">{p.email ?? "—"}</TableCell>
                         <TableCell>{p.display_name ?? "—"}</TableCell>
                         <TableCell>
-                          <div className="flex flex-wrap gap-1">
-                            {roles.length === 0 ? (
-                              <span className="text-xs text-muted-foreground">—</span>
-                            ) : (
-                              roles.map((r) => (
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <VipBadgeAction userId={p.id} />
+                            {roles
+                              .filter((r) => r !== "vip")
+                              .map((r) => (
                                 <span
                                   key={r}
                                   className="rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide"
                                 >
                                   {r}
                                 </span>
-                              ))
-                            )}
+                              ))}
                           </div>
                         </TableCell>
                         <TableCell className="text-right tabular-nums font-medium">{p.coin_balance ?? 0}</TableCell>
