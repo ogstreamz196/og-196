@@ -60,7 +60,8 @@ function DashboardHome() {
         {/* Welcome */}
         <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-8 shadow-card bg-gradient-hero">
           <div className="inline-flex items-center gap-2 rounded-full border border-border bg-background/50 px-3 py-1 text-xs text-muted-foreground backdrop-blur">
-            <Sparkles className="h-3 w-3 text-primary" /> Powered by 0G-Streamz
+            <Sparkles className="h-3 w-3 text-primary" />
+            <EditableContent contentKey="dashboard.welcome.eyebrow" defaultValue="Powered by 0G-Streamz" />
           </div>
           <h2 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl">
             {isAdmin ? (
@@ -72,7 +73,11 @@ function DashboardHome() {
             )}
           </h2>
           <p className="mt-2 max-w-xl text-muted-foreground">
-            Pick a portal to start a new song, browse your library, or top up your coin balance.
+            <EditableContent
+              contentKey="dashboard.welcome.subtitle"
+              defaultValue="Pick a portal to start a new song, browse your library, or top up your coin balance."
+              multiline
+            />
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             {isAdmin && (
