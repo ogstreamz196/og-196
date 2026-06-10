@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Crown, Bot, ShieldCheck, Coins, Plus, Minus, LogOut, UserCog, Mail, Fingerprint, KeyRound, Search, UserPlus, Ban, RotateCcw, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Loader2, Crown, Bot, ShieldCheck, Coins, Plus, Minus, LogOut, UserCog, Mail, Fingerprint, KeyRound, Search, UserPlus, Ban, RotateCcw, AlertCircle, CheckCircle2, Copy, Eye } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
