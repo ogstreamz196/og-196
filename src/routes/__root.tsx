@@ -13,6 +13,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
+import { ensureCurrentUserBootstrap } from "@/lib/user-bootstrap.functions";
 
 function NotFoundComponent() {
   return (
@@ -88,6 +89,32 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
+
+  useEffect(() => {
+    let active = true;
+
+    const bootstrap = async () => {
+      const { data } = await supabase.auth.getUser();
+      if (!active || !data.user) return;
+      try {
+        const result = await ensureCurrentUserBootstrap();
+        if (result.ensuredBossRole || result.ensuredUserRole || result.ensuredProfile) {
+          await Promise.all([
+            queryClient.invalidateQueries({ queryKey: ["user-role", data.user.id] }),
+            queryClient.invalidateQueries({ queryKey: ["profile", data.user.id] }),
+          ]);
+          router.invalidate();
+        }
+      } catch (error) {
+        console.error("user bootstrap failed", error);
+      }
+    };
+
+    bootstrap();
+    return () => {
+      active = false;
+    };
+  }, [queryClient, router]);
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
