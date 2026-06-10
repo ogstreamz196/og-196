@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Send, Bot } from "lucide-react";
+import { Loader2, Send, Bot, KeyRound, LogOut } from "lucide-react";
 import { chatOgBot, type OgChatMessage } from "@/lib/og-messenger.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 const STORAGE_KEY = "og-messenger-thread-v1";
+const TOKEN_KEY = "og-messenger-token-v1";
 
 function loadThread(): OgChatMessage[] {
   if (typeof window === "undefined") return [];
