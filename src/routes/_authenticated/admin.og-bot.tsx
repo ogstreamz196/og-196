@@ -463,6 +463,7 @@ function OgBotSettingsPage() {
                   setShowReauth(true);
                   return true;
                 };
+                const status = expiryStatus(t.expires_at, now);
                 return (
                   <li key={t.user_id} className="space-y-3 px-4 py-4">
                     <div className="flex flex-wrap items-start justify-between gap-3">
@@ -478,6 +479,16 @@ function OgBotSettingsPage() {
                         <p className="truncate font-mono text-[10px] text-muted-foreground/80">
                           {t.user_id}
                         </p>
+                        <span className={`mt-1 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium ${STATUS_BADGE[status]}`}>
+                          <CalendarClock className="h-3 w-3" />
+                          {status === "never"
+                            ? "No expiry"
+                            : status === "expired"
+                            ? `Expired ${new Date(t.expires_at!).toLocaleDateString()}`
+                            : status === "expiring"
+                            ? `Expires ${new Date(t.expires_at!).toLocaleDateString()}`
+                            : `Active until ${new Date(t.expires_at!).toLocaleDateString()}`}
+                        </span>
                       </div>
                       <div className="flex flex-wrap items-center gap-2">
                         <Button
