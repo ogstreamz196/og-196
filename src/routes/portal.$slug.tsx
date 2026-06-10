@@ -362,16 +362,38 @@ function PortalPage() {
                 <Button
                   size="lg"
                   onClick={() => generateSongs.mutate()}
-                  disabled={generateSongs.isPending || !lyrics.trim() || (profile?.coin_balance ?? 0) < COIN_COST}
+                  disabled={
+                    generateSongs.isPending ||
+                    isWatching ||
+                    !lyrics.trim() ||
+                    (profile?.coin_balance ?? 0) < COIN_COST
+                  }
                   className="w-full text-white shadow-glow hover:opacity-90"
                   style={{ backgroundColor: themeColor }}
                 >
                   {generateSongs.isPending
                     ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending to Suno...</>
-                    : (portalSongsQuery.data && portalSongsQuery.data.length > 0)
-                      ? <><Sparkles className="mr-2 h-4 w-4" /> Regenerate Song Tracks ({COIN_COST} coins)</>
-                      : <><Sparkles className="mr-2 h-4 w-4" /> Generate Song Tracks · {SONGS_PER_GEN} variations ({COIN_COST} coins)</>}
+                    : isWatching
+                      ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating · {Math.floor(watch.elapsedMs / 1000)}s elapsed</>
+                      : (portalSongsQuery.data && portalSongsQuery.data.length > 0)
+                        ? <><Sparkles className="mr-2 h-4 w-4" /> Regenerate Song Tracks ({COIN_COST} coins)</>
+                        : <><Sparkles className="mr-2 h-4 w-4" /> Generate Song Tracks · {SONGS_PER_GEN} variations ({COIN_COST} coins)</>}
                 </Button>
+                {isWatching && (
+                  <div className="mt-3 flex items-start gap-2 rounded-xl border border-border bg-background/40 p-3 text-xs text-muted-foreground">
+                    <Loader2 className="mt-0.5 h-3.5 w-3.5 shrink-0 animate-spin text-primary" />
+                    <span>
+                      Suno typically takes 30–120 seconds. We'll auto-update when it's ready.
+                      If nothing arrives in 3 minutes, your coins are refunded.
+                    </span>
+                  </div>
+                )}
+                {watch.state === "timeout" && (
+                  <div className="mt-3 flex items-start gap-2 rounded-xl border border-destructive/40 bg-destructive/5 p-3 text-xs text-destructive">
+                    <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                    <span>Generation timed out. Try again — and let us know if it keeps happening.</span>
+                  </div>
+                )}
                 <p className="mt-2 text-center text-xs text-muted-foreground">
                   Each regeneration costs {COIN_COST} coins. Downloads of generated tracks are free.
                 </p>
