@@ -1,6 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { verifyOgBotTokenInternal } from "./og-bot-tokens.functions";
 
 export type OgChatMessage = { role: "user" | "assistant"; content: string };
 
