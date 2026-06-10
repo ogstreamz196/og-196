@@ -144,6 +144,8 @@ function AdminPanel() {
           </Link>
         </div>
 
+        <OgCoinsPanel />
+
         <PricingControls />
 
         <MintCoinsPanel />
