@@ -258,10 +258,12 @@ function PortalPage() {
 
   const generateSongs = useMutation({
     mutationFn: async () => {
+      const vocalSuffix = selectedMoods.length ? ` Vocal: ${selectedMoods.join(", ")}.` : "";
+      const styleString = [...selectedTags, ...selectedMoods.map((m) => `${m} vocals`)].join(", ");
       const { data, error } = await supabase.functions.invoke("suno-generate", {
         body: {
-          prompt: description || songName,
-          style: selectedTags.join(", "),
+          prompt: (description || songName) + vocalSuffix,
+          style: styleString,
           title: songName,
           lyrics,
           portal_id: portal.id,
