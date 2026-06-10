@@ -1,0 +1,208 @@
+import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Loader2, ShieldCheck, Search, ArrowLeft, UserCog, Crown, Coins } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useRole } from "@/hooks/use-role";
+import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
+
+export const Route = createFileRoute("/_authenticated/admin/user-settings")({
+  component: AdminUserSettingsPage,
+});
+
+interface ProfileRow {
+  id: string;
+  email: string | null;
+  display_name: string | null;
+  coin_balance: number;
+  created_at: string;
+}
+
+interface RoleRow {
+  user_id: string;
+  role: string;
+}
+
+function AdminUserSettingsPage() {
+  const { isAdmin, isLoading } = useRole();
+  const [search, setSearch] = useState("");
+
+  const profilesQ = useQuery({
+    queryKey: ["admin-user-settings-profiles"],
+    enabled: isAdmin,
+    queryFn: async (): Promise<ProfileRow[]> => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, email, display_name, coin_balance, created_at")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as ProfileRow[];
+    },
+  });
+
+  const rolesQ = useQuery({
+    queryKey: ["admin-user-settings-roles"],
+    enabled: isAdmin,
+    queryFn: async (): Promise<RoleRow[]> => {
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("user_id, role");
+      if (error) throw error;
+      return (data ?? []) as RoleRow[];
+    },
+  });
+
+  const rolesByUser = useMemo(() => {
+    const map = new Map<string, string[]>();
+    (rolesQ.data ?? []).forEach((r) => {
+      const arr = map.get(r.user_id) ?? [];
+      arr.push(r.role);
+      map.set(r.user_id, arr);
+    });
+    return map;
+  }, [rolesQ.data]);
+
+  const filtered = useMemo(() => {
+    const list = profilesQ.data ?? [];
+    const q = search.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter(
+      (p) =>
+        (p.email ?? "").toLowerCase().includes(q) ||
+        (p.display_name ?? "").toLowerCase().includes(q) ||
+        p.id.toLowerCase().includes(q),
+    );
+  }, [profilesQ.data, search]);
+
+  if (isLoading) {
+    return (
+      <DashboardShell title="User Settings">
+        <div className="grid h-64 place-items-center">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      </DashboardShell>
+    );
+  }
+  if (!isAdmin) return <Navigate to="/" />;
+
+  const totalCoins = (profilesQ.data ?? []).reduce((sum, p) => sum + (p.coin_balance ?? 0), 0);
+  const totalVip = (rolesQ.data ?? []).filter((r) => r.role === "vip").length;
+
+  return (
+    <DashboardShell title="User Settings">
+      <div className="mx-auto max-w-6xl space-y-6">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <Link to="/admin">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="mr-2 h-4 w-4" /> Admin
+              </Button>
+            </Link>
+            <div className="flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground">
+              <ShieldCheck className="h-3.5 w-3.5 text-primary" /> Boss view
+            </div>
+          </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-3">
+          <StatCard icon={<UserCog className="h-4 w-4" />} label="Total users" value={profilesQ.data?.length ?? 0} />
+          <StatCard icon={<Coins className="h-4 w-4 text-coin" />} label="Coins in circulation" value={totalCoins} />
+          <StatCard icon={<Crown className="h-4 w-4 text-amber-500" />} label="VIP members" value={totalVip} />
+        </div>
+
+        <section className="rounded-2xl border border-border bg-card p-6 shadow-card">
+          <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+            <div>
+              <h2 className="text-lg font-semibold">All user settings</h2>
+              <p className="text-sm text-muted-foreground">Read-only view of each user's account profile.</p>
+            </div>
+            <div className="relative w-full max-w-xs">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search by email, name, or id"
+                className="pl-9"
+              />
+            </div>
+          </div>
+
+          <div className="mt-4 overflow-x-auto rounded-xl border border-border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Display name</TableHead>
+                  <TableHead>Roles</TableHead>
+                  <TableHead className="text-right">Coins</TableHead>
+                  <TableHead>Joined</TableHead>
+                  <TableHead>User ID</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {profilesQ.isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="py-10 text-center">
+                      <Loader2 className="mx-auto h-5 w-5 animate-spin text-muted-foreground" />
+                    </TableCell>
+                  </TableRow>
+                ) : filtered.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
+                      No users match your search.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filtered.map((p) => {
+                    const roles = rolesByUser.get(p.id) ?? [];
+                    return (
+                      <TableRow key={p.id}>
+                        <TableCell className="font-medium">{p.email ?? "—"}</TableCell>
+                        <TableCell>{p.display_name ?? "—"}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-wrap gap-1">
+                            {roles.length === 0 ? (
+                              <span className="text-xs text-muted-foreground">—</span>
+                            ) : (
+                              roles.map((r) => (
+                                <span
+                                  key={r}
+                                  className="rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide"
+                                >
+                                  {r}
+                                </span>
+                              ))
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums">{p.coin_balance ?? 0}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {new Date(p.created_at).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell className="font-mono text-[10px] text-muted-foreground">{p.id.slice(0, 8)}…</TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </section>
+      </div>
+    </DashboardShell>
+  );
+}
+
+function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
+  return (
+    <div className="rounded-2xl border border-border bg-card p-4">
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">{icon} {label}</div>
+      <div className="mt-2 text-2xl font-bold tabular-nums">{value.toLocaleString()}</div>
+    </div>
+  );
+}

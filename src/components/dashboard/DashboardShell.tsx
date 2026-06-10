@@ -1,5 +1,5 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Sparkles, Library, Coins as CoinsIcon, LogOut, Music2, Settings, Search, Clock, Loader2, Compass } from "lucide-react";
+import { Library, Coins as CoinsIcon, LogOut, Music2, Settings, Search, Clock, Loader2, Compass, UserCog } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
 import { CoinBalance } from "./CoinBalance";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,11 +11,11 @@ import { Input } from "@/components/ui/input";
 import { AdminEditModeProvider, AdminEditModeToggle } from "@/components/admin/AdminEditMode";
 
 const baseNavItems = [
-  { to: "/", label: "Generate", icon: Sparkles },
   { to: "/portals", label: "Portals", icon: Compass },
   { to: "/library", label: "My Library", icon: Library },
   { to: "/buy-coins", label: "Buy Coins", icon: CoinsIcon },
 ] as const;
+
 
 interface RecentSong {
   id: string;
@@ -94,7 +94,10 @@ function RecentMedia({ userId }: { userId: string }) {
   );
 }
 
-const adminItem = { to: "/admin", label: "Admin Panel", icon: Settings } as const;
+const adminItems = [
+  { to: "/admin/user-settings", label: "User Settings", icon: UserCog },
+  { to: "/admin", label: "Admin Panel", icon: Settings },
+] as const;
 
 export function DashboardShell({ title, children }: { title: string; children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -102,7 +105,8 @@ export function DashboardShell({ title, children }: { title: string; children: R
   const { user } = useAuth();
   const { isAdmin } = useRole();
   const qc = useQueryClient();
-  const navItems = isAdmin ? [...baseNavItems, adminItem] : [...baseNavItems];
+  const navItems = isAdmin ? [...baseNavItems, ...adminItems] : [...baseNavItems];
+
 
   async function handleSignOut() {
     await qc.cancelQueries();
