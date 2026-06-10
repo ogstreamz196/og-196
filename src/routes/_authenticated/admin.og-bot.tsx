@@ -165,7 +165,7 @@ function OgBotSettingsPage() {
     queryFn: async (): Promise<TokenRow[]> => {
       const { data, error } = await supabase
         .from("og_bot_tokens")
-        .select("user_id, token, created_at, updated_at, last_used_at, expires_at")
+        .select("user_id, token, created_at, updated_at, last_used_at, expires_at, revoked_at")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as TokenRow[];
