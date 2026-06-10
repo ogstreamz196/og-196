@@ -88,10 +88,10 @@ Deno.serve(async (req) => {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${SUNO_API_KEY}` },
         body: JSON.stringify({
-          prompt: lyrics || prompt,
+          prompt: effectiveLyrics || effectivePrompt,
           style: style || undefined,
           title: title || undefined,
-          customMode: !!(style || lyrics || title),
+          customMode: !!(style || effectiveLyrics || title),
           instrumental,
           model: "V4",
           callBackUrl: callbackUrl,
