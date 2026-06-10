@@ -40,7 +40,7 @@ function AdminPanel() {
   const songsQuery = useQuery({
     queryKey: ["admin-songs"],
     enabled: isAdmin,
-    queryFn: async (): Promise<(AdminSong & { email: string | null })[]> => {
+    queryFn: async (): Promise<(AdminSong & { email: string | null; display_name: string | null; coin_balance: number })[]> => {
       const { data: songs, error } = await supabase
         .from("songs")
         .select("id, user_id, title, prompt, status, unlocked, error_message, created_at")
@@ -49,13 +49,18 @@ function AdminPanel() {
       if (error) throw error;
       const list = (songs ?? []) as AdminSong[];
       const userIds = Array.from(new Set(list.map((s) => s.user_id)));
-      let emailMap = new Map<string, string>();
+      let map = new Map<string, { email: string | null; display_name: string | null; coin_balance: number }>();
       if (userIds.length) {
         const { data: profs } = await supabase
-          .from("profiles").select("id, email").in("id", userIds);
-        emailMap = new Map((profs ?? []).map((p: any) => [p.id, p.email]));
+          .from("profiles").select("id, email, display_name, coin_balance").in("id", userIds);
+        map = new Map((profs ?? []).map((p: any) => [p.id, { email: p.email, display_name: p.display_name, coin_balance: p.coin_balance }]));
       }
-      return list.map((s) => ({ ...s, email: emailMap.get(s.user_id) ?? null }));
+      return list.map((s) => ({
+        ...s,
+        email: map.get(s.user_id)?.email ?? null,
+        display_name: map.get(s.user_id)?.display_name ?? null,
+        coin_balance: map.get(s.user_id)?.coin_balance ?? 0,
+      }));
     },
   });
 
