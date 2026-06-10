@@ -1,5 +1,5 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Library, Coins as CoinsIcon, LogOut, Music2, Settings, Search, Clock, Loader2, Compass, UserCog } from "lucide-react";
+import { Library, Coins as CoinsIcon, LogOut, Music2, Settings, Search, Clock, Loader2, Compass, UserCog, LayoutDashboard, PlusSquare, ShieldCheck } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
 import { CoinBalance } from "./CoinBalance";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,11 +10,14 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { AdminEditModeProvider, AdminEditModeToggle } from "@/components/admin/AdminEditMode";
 
-const baseNavItems = [
-  { to: "/portals", label: "Portals", icon: Compass },
-  { to: "/library", label: "My Library", icon: Library },
-  { to: "/buy-coins", label: "Buy Coins", icon: CoinsIcon },
-] as const;
+type NavItem = { to: string; label: string; icon: typeof Library; match?: string[] };
+
+const baseNavItems: NavItem[] = [
+  { to: "/", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/portals", label: "Portals", icon: Compass, match: ["/portals", "/portal/"] },
+  { to: "/library", label: "My Library", icon: Library, match: ["/library"] },
+  { to: "/buy-coins", label: "Buy Coins", icon: CoinsIcon, match: ["/buy-coins"] },
+];
 
 
 interface RecentSong {
