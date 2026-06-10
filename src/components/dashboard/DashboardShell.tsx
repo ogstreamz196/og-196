@@ -8,6 +8,7 @@ import { useRole } from "@/hooks/use-role";
 import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
+import { AdminEditModeProvider, AdminEditModeToggle } from "@/components/admin/AdminEditMode";
 
 const baseNavItems = [
   { to: "/", label: "Generate", icon: Sparkles },
