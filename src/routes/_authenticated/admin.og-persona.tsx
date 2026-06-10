@@ -114,6 +114,21 @@ function OgPersonaPage() {
           </p>
         </div>
 
+        <div className="flex items-center justify-between rounded-xl border border-border bg-card p-4">
+          <div className="flex items-start gap-3">
+            <div className="grid h-9 w-9 place-items-center rounded-lg bg-destructive/10 text-destructive">
+              <Skull className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold">Foul mouth mode</p>
+              <p className="text-xs text-muted-foreground">
+                When ON, OG Bot drops the language filter and talks raw. Script is still pulled from the OG Bot code section below — this only flips the filter.
+              </p>
+            </div>
+          </div>
+          <Switch checked={foulMouth} onCheckedChange={toggleFoul} disabled={togglingFoul} aria-label="Toggle foul mouth mode" />
+        </div>
+
         <div className="space-y-2">
           <Label htmlFor="og-script">Script (system prompt)</Label>
           <Textarea id="og-script" rows={8} value={script} onChange={(e) => setScript(e.target.value)} maxLength={5000} />
