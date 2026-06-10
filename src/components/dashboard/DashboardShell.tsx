@@ -237,6 +237,12 @@ export function DashboardShell({ title, children }: { title: string; children: R
               }}
             />
           </div>
+          {!roleLoading && isAdmin && (
+            <div className="hidden sm:flex items-center gap-1.5 rounded-full border border-primary/40 bg-gradient-brand px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-primary-foreground shadow-glow">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              Boss
+            </div>
+          )}
           <AdminEditModeToggle />
           <CoinBalance />
         </header>
