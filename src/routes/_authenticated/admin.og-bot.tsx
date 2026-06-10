@@ -423,11 +423,12 @@ function OgBotSettingsPage() {
         />
 
         {/* Stats */}
-        <section className="grid gap-4 sm:grid-cols-4">
+        <section className="grid gap-4 sm:grid-cols-5">
           <StatCard label="Total tokens" value={String(tokens.length)} />
           <StatCard label="Active" value={String(statusCounts.active + statusCounts.never)} hint={`${statusCounts.never} no expiry`} />
           <StatCard label="Expiring soon" value={String(statusCounts.expiring)} hint="Next 7 days" />
           <StatCard label="Expired" value={String(statusCounts.expired)} />
+          <StatCard label="Burned" value={String(statusCounts.burned)} hint="Revoked, reversible" />
         </section>
 
 
