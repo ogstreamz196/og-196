@@ -8,10 +8,51 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
+// Allow-list of hostnames we'll fetch audio from (defence-in-depth SSRF guard).
+const AUDIO_HOST_ALLOWLIST = [
+  "apibox.erweima.ai",
+  "cdn1.suno.ai",
+  "cdn2.suno.ai",
+  "audiopipe.suno.ai",
+  "mfile.erweima.ai",
+  "sunoapi.org",
+];
+
+function hostAllowed(u: string): boolean {
+  try {
+    const h = new URL(u).hostname.toLowerCase();
+    return AUDIO_HOST_ALLOWLIST.some((d) => h === d || h.endsWith("." + d));
+  } catch { return false; }
+}
+
+async function expectedToken(songId: string): Promise<string> {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw", enc.encode(SERVICE_ROLE),
+    { name: "HMAC", hash: "SHA-256" }, false, ["sign"],
+  );
+  const buf = await crypto.subtle.sign("HMAC", key, enc.encode(songId));
+  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function timingSafeEq(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let r = 0;
+  for (let i = 0; i < a.length; i++) r |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return r === 0;
+}
+
 Deno.serve(async (req) => {
   const url = new URL(req.url);
   const songId = url.searchParams.get("song_id");
+  const token = url.searchParams.get("token") ?? "";
   if (!songId) return new Response("Missing song_id", { status: 400 });
+
+  const expected = await expectedToken(songId);
+  if (!timingSafeEq(token, expected)) {
+    console.warn("Suno callback rejected: bad token for", songId);
+    return new Response("Unauthorized", { status: 401 });
+  }
 
   let payload: any = {};
   try { payload = await req.json(); } catch { /* tolerate empty */ }
