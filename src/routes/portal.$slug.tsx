@@ -236,7 +236,9 @@ function PortalPage() {
           >
             {generateLyrics.isPending
               ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Writing in {portal.language}...</>
-              : <><Wand2 className="mr-2 h-4 w-4" /> Generate Lyrics (free)</>}
+              : lyrics
+                ? <><Wand2 className="mr-2 h-4 w-4" /> Regenerate Lyrics Draft (free)</>
+                : <><Wand2 className="mr-2 h-4 w-4" /> Generate Lyrics Draft (free)</>}
           </Button>
 
           {lyrics && (
@@ -263,8 +265,13 @@ function PortalPage() {
                 >
                   {generateSongs.isPending
                     ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending to Suno...</>
-                    : <><Sparkles className="mr-2 h-4 w-4" /> Generate {SONGS_PER_GEN} Songs ({COIN_COST} coins)</>}
+                    : (portalSongsQuery.data && portalSongsQuery.data.length > 0)
+                      ? <><Sparkles className="mr-2 h-4 w-4" /> Regenerate Song Tracks ({COIN_COST} coins)</>
+                      : <><Sparkles className="mr-2 h-4 w-4" /> Generate Song Tracks · {SONGS_PER_GEN} variations ({COIN_COST} coins)</>}
                 </Button>
+                <p className="mt-2 text-center text-xs text-muted-foreground">
+                  Each regeneration costs {COIN_COST} coins. Downloads of generated tracks are free.
+                </p>
                 {(profile?.coin_balance ?? 0) < COIN_COST && (
                   <p className="mt-2 text-center text-sm text-destructive">
                     You need {COIN_COST - (profile?.coin_balance ?? 0)} more coin(s).{" "}
