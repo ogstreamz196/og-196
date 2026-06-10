@@ -344,10 +344,10 @@ function OgBotSettingsPage() {
     }
   });
 
-  const statusCounts: Record<ExpiryStatus, number> = {
-    active: 0, expiring: 0, expired: 0, never: 0,
+  const statusCounts: Record<TokenStatus, number> = {
+    active: 0, expiring: 0, expired: 0, never: 0, burned: 0,
   };
-  for (const t of tokens) statusCounts[expiryStatus(t.expires_at, now)]++;
+  for (const t of tokens) statusCounts[tokenStatus(t, now)]++;
 
   return (
     <DashboardShell title="OG Bot Setting">
