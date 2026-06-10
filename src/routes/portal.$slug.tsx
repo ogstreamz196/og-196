@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Sparkles, Loader2, Music2, Coins, Wand2, LogIn } from "lucide-react";
+import { Sparkles, Loader2, Music2, Coins, Wand2, LogIn, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { computeWatch, DEFAULT_TIMEOUT_MS } from "@/lib/generation-watch";
 
 interface Portal {
   id: string;
@@ -98,7 +99,7 @@ function PortalPage() {
     queryFn: async (): Promise<Song[]> => {
       const { data, error } = await supabase
         .from("songs")
-        .select("*")
+        .select("id, title, prompt, style, status, audio_path, cover_url, duration_seconds, error_message, created_at, suno_task_id")
         .eq("portal_id", portal.id)
         .order("created_at", { ascending: false })
         .limit(6);
@@ -107,6 +108,27 @@ function PortalPage() {
     },
   });
 
+  // ---- Resilient watch for Suno generation (30–120s typical, 180s hard timeout) ----
+  const [watchTaskId, setWatchTaskId] = useState<string | null>(null);
+  const [watchStartedAt, setWatchStartedAt] = useState<number | null>(null);
+  const [tick, setTick] = useState(0); // forces re-render so elapsed/timeout recompute
+  const lastTerminalRef = useRef<string | null>(null);
+
+  const watch = computeWatch({
+    taskId: watchTaskId,
+    startedAt: watchStartedAt,
+    now: Date.now() + tick * 0, // tick is just a re-render signal
+    songs: (portalSongsQuery.data ?? []).map((s: any) => ({
+      suno_task_id: s.suno_task_id ?? null,
+      status: s.status,
+      error_message: s.error_message,
+    })),
+    expectedCount: SONGS_PER_GEN,
+    timeoutMs: DEFAULT_TIMEOUT_MS,
+  });
+  const isWatching = watch.state === "watching";
+
+  // Realtime subscription (primary) — keeps the song list in sync.
   useEffect(() => {
     if (!user) return;
     const channel = supabase
@@ -118,6 +140,37 @@ function PortalPage() {
     return () => { supabase.removeChannel(channel); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, portal.id]);
+
+  // Polling fallback — realtime can drop on flaky networks. While watching, refetch every 5s and tick every 1s.
+  useEffect(() => {
+    if (!isWatching) return;
+    const refetch = setInterval(() => portalSongsQuery.refetch(), 5_000);
+    const ticker = setInterval(() => setTick((t) => t + 1), 1_000);
+    return () => { clearInterval(refetch); clearInterval(ticker); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isWatching]);
+
+  // Terminal transitions → toast + clear watch state once per task.
+  useEffect(() => {
+    if (!watchTaskId) return;
+    if (watch.state === "completed" && lastTerminalRef.current !== watchTaskId) {
+      lastTerminalRef.current = watchTaskId;
+      toast.success(`Songs ready! ${watch.matched.length} variation${watch.matched.length === 1 ? "" : "s"} delivered.`);
+      setWatchTaskId(null);
+      setWatchStartedAt(null);
+    } else if (watch.state === "failed" && lastTerminalRef.current !== watchTaskId) {
+      lastTerminalRef.current = watchTaskId;
+      toast.error(watch.errorMessage || "Generation failed. Coins refunded.");
+      qc.invalidateQueries({ queryKey: ["profile"] });
+      setWatchTaskId(null);
+      setWatchStartedAt(null);
+    } else if (watch.state === "timeout" && lastTerminalRef.current !== watchTaskId) {
+      lastTerminalRef.current = watchTaskId;
+      toast.error("Suno didn't respond in 3 minutes. If coins weren't refunded, contact support.");
+      setWatchTaskId(null);
+      setWatchStartedAt(null);
+    }
+  }, [watch.state, watchTaskId, watch.matched.length, watch.errorMessage, qc]);
 
   const generateLyrics = useMutation({
     mutationFn: async () => {
@@ -153,16 +206,24 @@ function PortalPage() {
       });
       if (error) throw new Error(error.message);
       if (data?.error) throw new Error(data.error);
-      return data;
+      return data as { song_id: string; task_id: string | null; coin_balance: number };
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success(`Queued ${SONGS_PER_GEN} songs — they'll appear below shortly`);
+      if (data.task_id) {
+        lastTerminalRef.current = null;
+        setWatchTaskId(data.task_id);
+        setWatchStartedAt(Date.now());
+      }
       qc.invalidateQueries({ queryKey: ["portal-songs"] });
       qc.invalidateQueries({ queryKey: ["profile"] });
     },
     onError: (e: Error) => {
-      if (e.message.toLowerCase().includes("insufficient")) {
+      const msg = e.message?.toLowerCase() ?? "";
+      if (msg.includes("insufficient")) {
         toast.error("Not enough coins — visit Buy Coins.");
+      } else if (msg.includes("maintenance")) {
+        toast.error("This portal is in maintenance mode.");
       } else {
         toast.error(e.message || "Generation failed");
       }
