@@ -8,7 +8,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { useRole } from "@/hooks/use-role";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
-import { COIN_PACKS, type CoinPack } from "@/lib/coin-packs";
+import { COIN_PACKS, CURRENCY_SYMBOL, type CoinPack } from "@/lib/coin-packs";
 import { StripeEmbeddedCheckoutInline } from "@/components/StripeEmbeddedCheckout";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { toast } from "sonner";
@@ -64,7 +64,7 @@ function BuyCoinsPage() {
               <div>
                 <div className="text-sm text-muted-foreground">{selected.label}</div>
                 <div className="text-lg font-semibold">
-                  {selected.coins} coins · ${(selected.priceCents / 100).toFixed(2)}
+                  {selected.coins} coins · {CURRENCY_SYMBOL}{(selected.priceCents / 100).toFixed(2)}
                 </div>
               </div>
               <Coins className="h-6 w-6 text-coin" />
@@ -110,7 +110,7 @@ function BuyCoinsPage() {
               )}
               <div className="text-sm font-medium text-muted-foreground">{t.label}</div>
               <div className="mt-2 flex items-baseline gap-1">
-                <span className="text-4xl font-bold">${(t.priceCents / 100).toFixed(0)}</span>
+                <span className="text-4xl font-bold">{CURRENCY_SYMBOL}{(t.priceCents / 100).toFixed(0)}</span>
               </div>
               <div className="mt-1 flex items-center gap-1.5 text-lg font-semibold text-coin">
                 <Coins className="h-4 w-4" /> {t.coins} coins

@@ -7,47 +7,49 @@ export interface CoinPack {
   priceId: string;
   coins: number;
   priceCents: number;
-  currency: "usd";
+  currency: "gbp";
   label: string;
   description: string;
   popular?: boolean;
 }
 
+export const CURRENCY_SYMBOL = "£";
+
 export const COIN_PACKS: readonly CoinPack[] = [
   {
     bundleId: "coins_10",
-    priceId: "coins_10_usd",
+    priceId: "coins_10_gbp",
     coins: 10,
     priceCents: 500,
-    currency: "usd",
+    currency: "gbp",
     label: "Starter",
     description: "~3 song generations",
   },
   {
     bundleId: "coins_50",
-    priceId: "coins_50_usd",
+    priceId: "coins_50_gbp",
     coins: 50,
     priceCents: 1900,
-    currency: "usd",
+    currency: "gbp",
     label: "Creator",
     description: "~16 song generations",
     popular: true,
   },
   {
     bundleId: "coins_200",
-    priceId: "coins_200_usd",
+    priceId: "coins_200_gbp",
     coins: 200,
     priceCents: 6900,
-    currency: "usd",
+    currency: "gbp",
     label: "Studio",
     description: "~66 song generations",
   },
   {
     bundleId: "coins_500",
-    priceId: "coins_500_usd",
+    priceId: "coins_500_gbp",
     coins: 500,
     priceCents: 14900,
-    currency: "usd",
+    currency: "gbp",
     label: "Producer",
     description: "~166 song generations",
   },
