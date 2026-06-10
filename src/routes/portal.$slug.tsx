@@ -125,6 +125,36 @@ function PortalPage() {
     setSelectedTags((p) => (p.includes(tag) ? p.filter((t) => t !== tag) : [...p, tag]));
   }
 
+  function pickStyle(tag: string) {
+    setSelectedTags((p) => (p.includes(tag) ? p : [...p, tag]));
+    setStyleBatch((batch) => {
+      const exclude = [...batch, tag, ...selectedTags];
+      const [replacement] = pickBatch(portal.style_tags ?? [], exclude, 1);
+      return batch.map((t) => (t === tag ? (replacement ?? t) : t)).filter((t, i, arr) => arr.indexOf(t) === i);
+    });
+  }
+  function unpickStyle(tag: string) {
+    setSelectedTags((p) => p.filter((t) => t !== tag));
+  }
+  function refreshStyles() {
+    setStyleBatch(pickBatch(portal.style_tags ?? [], selectedTags, VISIBLE_BATCH));
+  }
+
+  function pickMood(mood: string) {
+    setSelectedMoods((p) => (p.includes(mood) ? p : [...p, mood]));
+    setMoodBatch((batch) => {
+      const exclude = [...batch, mood, ...selectedMoods];
+      const [replacement] = pickBatch(VOCAL_MOOD_POOL, exclude, 1);
+      return batch.map((t) => (t === mood ? (replacement ?? t) : t)).filter((t, i, arr) => arr.indexOf(t) === i);
+    });
+  }
+  function unpickMood(mood: string) {
+    setSelectedMoods((p) => p.filter((m) => m !== mood));
+  }
+  function refreshMoods() {
+    setMoodBatch(pickBatch(VOCAL_MOOD_POOL, selectedMoods, VISIBLE_BATCH));
+  }
+
   const portalSongsQuery = useQuery({
     queryKey: ["portal-songs", portal.id, user?.id],
     enabled: !!user,
