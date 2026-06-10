@@ -15,6 +15,7 @@ import { AuthProvider } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
 import { ensureCurrentUserBootstrap } from "@/lib/user-bootstrap.functions";
+import { useSiteContentRealtime } from "@/hooks/use-site-content";
 
 function NotFoundComponent() {
   return (
