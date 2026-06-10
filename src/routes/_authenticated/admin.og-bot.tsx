@@ -211,7 +211,7 @@ function OgBotSettingsPage() {
       qc.setQueryData<TokenRow[]>(["admin-og-bot-tokens"], (prev) =>
         (prev ?? []).map((t) =>
           t.user_id === userId
-            ? { ...t, token: newToken, updated_at: new Date().toISOString(), last_used_at: null }
+            ? { ...t, token: newToken, updated_at: new Date().toISOString(), last_used_at: null, expires_at: t.expires_at }
             : t,
         ),
       );
