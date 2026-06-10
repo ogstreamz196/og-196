@@ -8,7 +8,7 @@ import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { SongCard, type Song } from "@/components/SongCard";
 import { EditableContent } from "@/components/admin/EditableContent";
 
-export const Route = createFileRoute("/_authenticated/library")({
+export const Route = createFileRoute("/_authenticated/library/")({
   component: LibraryPage,
 });
 
