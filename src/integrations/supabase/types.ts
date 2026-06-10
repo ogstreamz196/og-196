@@ -230,6 +230,7 @@ export type Database = {
           lyrics: string | null
           portal_id: string | null
           prompt: string
+          sample_path: string | null
           status: string
           style: string | null
           suno_clip_id: string | null
@@ -250,6 +251,7 @@ export type Database = {
           lyrics?: string | null
           portal_id?: string | null
           prompt: string
+          sample_path?: string | null
           status?: string
           style?: string | null
           suno_clip_id?: string | null
@@ -270,6 +272,7 @@ export type Database = {
           lyrics?: string | null
           portal_id?: string | null
           prompt?: string
+          sample_path?: string | null
           status?: string
           style?: string | null
           suno_clip_id?: string | null

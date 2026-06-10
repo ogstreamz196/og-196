@@ -161,7 +161,7 @@ function PortalPage() {
     queryFn: async (): Promise<Song[]> => {
       const { data, error } = await supabase
         .from("songs")
-        .select("id, title, prompt, style, status, audio_path, cover_url, duration_seconds, error_message, created_at, suno_task_id")
+        .select("id, title, prompt, style, status, audio_path, sample_path, cover_url, duration_seconds, error_message, created_at, suno_task_id")
         .eq("portal_id", portal.id)
         .order("created_at", { ascending: false })
         .limit(6);

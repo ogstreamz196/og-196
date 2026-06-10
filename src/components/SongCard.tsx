@@ -12,6 +12,7 @@ export interface Song {
   style: string | null;
   status: string;
   audio_path: string | null;
+  sample_path?: string | null;
   cover_url: string | null;
   duration_seconds: number | null;
   error_message: string | null;
@@ -29,7 +30,7 @@ export function SongCard({ song }: { song: Song }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   async function ensureUrl() {
-    if (signedUrl || !song.audio_path) return signedUrl;
+    if (signedUrl || (!song.audio_path && !song.sample_path)) return signedUrl;
     setLoadingUrl(true);
     try {
       const { data, error } = await supabase.functions.invoke("song-url", {
@@ -82,7 +83,7 @@ export function SongCard({ song }: { song: Song }) {
     return () => el.removeEventListener("timeupdate", onTime);
   }, [sampleSeconds]);
 
-  const isReady = song.status === "completed" && !!song.audio_path;
+  const isReady = song.status === "completed" && !!(song.audio_path || song.sample_path);
   const isFailed = song.status === "failed";
   const isPending = song.status === "pending" || song.status === "processing";
 
