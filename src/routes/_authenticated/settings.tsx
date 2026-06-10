@@ -257,6 +257,11 @@ function SettingsPage() {
             </div>
 
             <div className="space-y-2">
+              <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Unclaimed invite codes</p>
+              <IssueOgBotInvitePanel />
+            </div>
+
+            <div className="space-y-2">
               <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Active OG Bot tokens</p>
               <ManageOgBotTokensPanel />
             </div>
@@ -271,6 +276,9 @@ function SettingsPage() {
           </section>
         )}
 
+
+        {/* Redeem an invite — visible to anyone signed in */}
+        <RedeemOgBotInvitePanel />
 
         {/* My OG Bot tokens — visible to anyone who has one issued */}
         <MyOgBotTokensSection />
@@ -994,4 +1002,270 @@ function DetailRow({ label, value, mono }: { label: string; value: string; mono?
       <span className={`text-xs ${mono ? "font-mono" : ""}`}>{value}</span>
     </div>
   );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Issue an unclaimed OG Bot invite — admin only
+// First user to redeem the code gets the og_bot role and a fresh token whose
+// expiry was preset here at creation time.
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface InviteRow {
+  id: string;
+  code: string;
+  created_at: string | null;
+  claim_expires_at: string | null;
+  token_expires_at: string | null;
+  notes: string | null;
+  redeemed_by: string | null;
+  redeemed_at: string | null;
+  revoked_at: string | null;
+}
+
+function IssueOgBotInvitePanel() {
+  const qc = useQueryClient();
+  const [claimDays, setClaimDays] = useState("7");
+  const [tokenDays, setTokenDays] = useState("30");
+  const [notes, setNotes] = useState("");
+  const [lastCode, setLastCode] = useState<string | null>(null);
+
+  const invitesQ = useQuery({
+    queryKey: ["settings-og-bot-invites"],
+    queryFn: async (): Promise<InviteRow[]> => {
+      const { data, error } = await supabase
+        .from("og_bot_token_invites")
+        .select("id, code, created_at, claim_expires_at, token_expires_at, notes, redeemed_by, redeemed_at, revoked_at")
+        .order("created_at", { ascending: false })
+        .limit(25);
+      if (error) throw error;
+      return (data ?? []) as InviteRow[];
+    },
+  });
+
+  const create = useMutation({
+    mutationFn: async () => {
+      const claimN = Number(claimDays);
+      const tokenN = Number(tokenDays);
+      const claimExp = claimN > 0 ? new Date(Date.now() + claimN * 86400_000).toISOString() : null;
+      const tokenExp = tokenN > 0 ? new Date(Date.now() + tokenN * 86400_000).toISOString() : null;
+      const { data, error } = await supabase.rpc("create_og_bot_invite", {
+        p_claim_expires_at: claimExp,
+        p_token_expires_at: tokenExp,
+        p_notes: notes || null,
+      });
+      if (error) throw new Error(error.message);
+      return data as string;
+    },
+    onSuccess: (code) => {
+      setLastCode(code);
+      setNotes("");
+      toast.success("Invite code created");
+      qc.invalidateQueries({ queryKey: ["settings-og-bot-invites"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const revoke = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.rpc("revoke_og_bot_invite", { p_invite_id: id });
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      toast.success("Invite revoked");
+      qc.invalidateQueries({ queryKey: ["settings-og-bot-invites"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  async function copy(text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("Copied");
+    } catch {
+      toast.error("Copy failed");
+    }
+  }
+
+  const rows = invitesQ.data ?? [];
+  const now = Date.now();
+
+  return (
+    <div className="space-y-3 rounded-xl border border-border p-3">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+        <div className="space-y-1">
+          <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">Claim window (days)</Label>
+          <Input type="number" min={0} value={claimDays} onChange={(e) => setClaimDays(e.target.value)} placeholder="0 = never" />
+        </div>
+        <div className="space-y-1">
+          <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">Token expiry (days)</Label>
+          <Input type="number" min={0} value={tokenDays} onChange={(e) => setTokenDays(e.target.value)} placeholder="0 = never" />
+        </div>
+        <div className="space-y-1">
+          <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">Notes</Label>
+          <Input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional label" />
+        </div>
+      </div>
+      <Button onClick={() => create.mutate()} disabled={create.isPending} size="sm">
+        {create.isPending ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Plus className="mr-2 h-3.5 w-3.5" />}
+        Generate claim code
+      </Button>
+
+      {lastCode && (
+        <div className="rounded-lg border border-primary/30 bg-primary/5 p-2.5">
+          <p className="text-[11px] font-medium uppercase tracking-wider text-primary">New code — copy now</p>
+          <div className="mt-1 flex items-center gap-2">
+            <Input readOnly value={lastCode} className="font-mono text-xs" />
+            <Button size="sm" variant="outline" onClick={() => copy(lastCode)}>
+              <Copy className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {invitesQ.isLoading ? (
+        <div className="flex items-center justify-center py-3"><Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /></div>
+      ) : rows.length === 0 ? (
+        <p className="rounded-lg border border-dashed border-border p-3 text-center text-xs text-muted-foreground">
+          No invite codes yet.
+        </p>
+      ) : (
+        <ul className="divide-y divide-border rounded-lg border border-border">
+          {rows.map((inv) => {
+            const isRedeemed = !!inv.redeemed_at;
+            const isRevoked = !!inv.revoked_at;
+            const isExpired = !isRedeemed && !isRevoked && inv.claim_expires_at !== null && new Date(inv.claim_expires_at).getTime() < now;
+            const status: "active" | "revoked" | "expired" | "redeemed" =
+              isRedeemed ? "redeemed" : isRevoked ? "revoked" : isExpired ? "expired" : "active";
+            return (
+              <li key={inv.id} className="flex items-center justify-between gap-3 px-3 py-2">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <code className="truncate font-mono text-xs">{inv.code.slice(0, 12)}…{inv.code.slice(-4)}</code>
+                    <InviteStatusPill status={status} />
+                  </div>
+                  <p className="truncate text-[11px] text-muted-foreground">
+                    {inv.notes ? `${inv.notes} · ` : ""}
+                    claim {inv.claim_expires_at ? `by ${new Date(inv.claim_expires_at).toLocaleDateString()}` : "anytime"}
+                    {" · "}
+                    token {inv.token_expires_at ? `expires ${new Date(inv.token_expires_at).toLocaleDateString()}` : "never expires"}
+                  </p>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button size="sm" variant="outline" onClick={() => copy(inv.code)} title="Copy code">
+                    <Copy className="h-3.5 w-3.5" />
+                  </Button>
+                  {status === "active" && (
+                    <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive"
+                      onClick={() => { if (confirm("Revoke this invite code?")) revoke.mutate(inv.id); }}>
+                      <Ban className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function InviteStatusPill({ status }: { status: "active" | "revoked" | "expired" | "redeemed" }) {
+  if (status === "active") {
+    return <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-medium text-emerald-500"><CheckCircle2 className="h-3 w-3" /> Open</span>;
+  }
+  if (status === "redeemed") {
+    return <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary"><CheckCircle2 className="h-3 w-3" /> Redeemed</span>;
+  }
+  if (status === "revoked") {
+    return <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-1.5 py-0.5 text-[10px] font-medium text-destructive"><Ban className="h-3 w-3" /> Revoked</span>;
+  }
+  return <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-500"><AlertCircle className="h-3 w-3" /> Expired</span>;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Redeem an invite — any signed-in user
+// ─────────────────────────────────────────────────────────────────────────────
+
+function RedeemOgBotInvitePanel() {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  const [code, setCode] = useState("");
+  const [issued, setIssued] = useState<string | null>(null);
+
+  const redeem = useMutation({
+    mutationFn: async () => {
+      const trimmed = code.trim();
+      if (!trimmed) throw new Error("Paste an invite code");
+      const { data, error } = await supabase.rpc("redeem_og_bot_invite", { p_code: trimmed });
+      if (error) throw new Error(humaniseRedeemError(error.message));
+      return data as string;
+    },
+    onSuccess: (token) => {
+      setIssued(token);
+      setCode("");
+      toast.success("Invite redeemed — token issued");
+      qc.invalidateQueries({ queryKey: ["settings-my-og-bot-tokens", user?.id] });
+      qc.invalidateQueries({ queryKey: ["settings-og-bot-invites"] });
+      qc.invalidateQueries({ queryKey: ["role", user?.id] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  async function copy(text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("Token copied");
+    } catch {
+      toast.error("Copy failed");
+    }
+  }
+
+  return (
+    <section className="rounded-2xl border border-border bg-card p-6 shadow-card">
+      <div className="mb-3 flex items-center gap-2">
+        <KeyRound className="h-4 w-4 text-primary" />
+        <div>
+          <h2 className="font-semibold">Redeem an OG Bot invite</h2>
+          <p className="text-xs text-muted-foreground">
+            First user to claim a code gets the bot token with whatever rights the boss set on it.
+          </p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <Input
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+          placeholder="ogi_…"
+          className="font-mono text-xs"
+          onKeyDown={(e) => { if (e.key === "Enter") redeem.mutate(); }}
+        />
+        <Button onClick={() => redeem.mutate()} disabled={redeem.isPending}>
+          {redeem.isPending ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="mr-2 h-3.5 w-3.5" />}
+          Redeem
+        </Button>
+      </div>
+
+      {issued && (
+        <div className="mt-3 rounded-lg border border-primary/30 bg-primary/5 p-2.5">
+          <p className="text-[11px] font-medium uppercase tracking-wider text-primary">Your new bot token — copy now</p>
+          <div className="mt-1 flex items-center gap-2">
+            <Input readOnly value={issued} className="font-mono text-xs" />
+            <Button size="sm" variant="outline" onClick={() => copy(issued)}>
+              <Copy className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function humaniseRedeemError(msg: string): string {
+  if (msg.includes("invite_not_found")) return "Invite code not found.";
+  if (msg.includes("invite_revoked")) return "This invite has been revoked.";
+  if (msg.includes("invite_already_redeemed")) return "This invite has already been claimed.";
+  if (msg.includes("invite_expired")) return "This invite has expired.";
+  if (msg.includes("not_authenticated")) return "Sign in to redeem an invite.";
+  return msg;
 }

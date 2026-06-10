@@ -95,6 +95,48 @@ export type Database = {
         }
         Relationships: []
       }
+      og_bot_token_invites: {
+        Row: {
+          claim_expires_at: string | null
+          code: string
+          created_at: string
+          created_by: string
+          id: string
+          notes: string | null
+          redeemed_at: string | null
+          redeemed_by: string | null
+          revoked_at: string | null
+          token_expires_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          claim_expires_at?: string | null
+          code: string
+          created_at?: string
+          created_by: string
+          id?: string
+          notes?: string | null
+          redeemed_at?: string | null
+          redeemed_by?: string | null
+          revoked_at?: string | null
+          token_expires_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          claim_expires_at?: string | null
+          code?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          notes?: string | null
+          redeemed_at?: string | null
+          redeemed_by?: string | null
+          revoked_at?: string | null
+          token_expires_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       og_bot_tokens: {
         Row: {
           created_at: string
@@ -350,10 +392,19 @@ export type Database = {
         }
         Returns: string
       }
+      create_og_bot_invite: {
+        Args: {
+          p_claim_expires_at?: string
+          p_notes?: string
+          p_token_expires_at?: string
+        }
+        Returns: string
+      }
       deduct_coins: {
         Args: { p_amount: number; p_reference: string; p_user: string }
         Returns: number
       }
+      gen_og_bot_invite_code: { Args: never; Returns: string }
       gen_og_bot_token: { Args: never; Returns: string }
       has_role: {
         Args: {
@@ -371,10 +422,12 @@ export type Database = {
         Returns: number
       }
       purchase_vip: { Args: never; Returns: number }
+      redeem_og_bot_invite: { Args: { p_code: string }; Returns: string }
       regenerate_og_bot_token: {
         Args: { target_user_id: string }
         Returns: string
       }
+      revoke_og_bot_invite: { Args: { p_invite_id: string }; Returns: boolean }
       revoke_og_bot_token: {
         Args: { admin_notes?: string; target_user_id: string }
         Returns: string
