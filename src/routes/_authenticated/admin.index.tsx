@@ -153,6 +153,8 @@ function AdminPanel() {
 
         <PortalManager />
 
+        <BossAuditLog />
+
 
 
 
