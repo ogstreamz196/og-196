@@ -94,7 +94,10 @@ function RecentMedia({ userId }: { userId: string }) {
   );
 }
 
-const adminItem = { to: "/admin", label: "Admin Panel", icon: Settings } as const;
+const adminItems = [
+  { to: "/admin/user-settings", label: "User Settings", icon: UserCog },
+  { to: "/admin", label: "Admin Panel", icon: Settings },
+] as const;
 
 export function DashboardShell({ title, children }: { title: string; children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -102,7 +105,8 @@ export function DashboardShell({ title, children }: { title: string; children: R
   const { user } = useAuth();
   const { isAdmin } = useRole();
   const qc = useQueryClient();
-  const navItems = isAdmin ? [...baseNavItems, adminItem] : [...baseNavItems];
+  const navItems = isAdmin ? [...baseNavItems, ...adminItems] : [...baseNavItems];
+
 
   async function handleSignOut() {
     await qc.cancelQueries();
