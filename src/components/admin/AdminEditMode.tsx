@@ -70,6 +70,8 @@ export function AdminEditableLabel({ userId, value, fallback, className }: Edita
     onSuccess: () => {
       toast.success("Label updated & logged");
       qc.invalidateQueries({ queryKey: ["admin-profiles-search"] });
+      qc.invalidateQueries({ queryKey: ["admin-users-list"] });
+      qc.invalidateQueries({ queryKey: ["admin-songs"] });
       qc.invalidateQueries({ queryKey: ["admin-user-audit", userId] });
       qc.invalidateQueries({ queryKey: ["profile"] });
       setEditing(false);
@@ -158,6 +160,8 @@ export function AdminEditableBalance({ userId, value, className, showIcon = true
     onSuccess: (newBal) => {
       toast.success(`Balance set to ${newBal}`);
       qc.invalidateQueries({ queryKey: ["admin-profiles-search"] });
+      qc.invalidateQueries({ queryKey: ["admin-users-list"] });
+      qc.invalidateQueries({ queryKey: ["admin-songs"] });
       qc.invalidateQueries({ queryKey: ["admin-user-audit", userId] });
       qc.invalidateQueries({ queryKey: ["admin-mint-history"] });
       qc.invalidateQueries({ queryKey: ["profile"] });

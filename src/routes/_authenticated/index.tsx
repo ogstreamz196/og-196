@@ -96,7 +96,7 @@ function HomePage() {
               Powered by Suno AI
             </div>
             <h2 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl">
-              Turn ideas into <span className="text-gradient-brand">original songs</span>
+              {profile?.display_name ? <>Hey, <span className="text-gradient-brand">{profile.display_name}</span> — turn ideas into songs</> : <>Turn ideas into <span className="text-gradient-brand">original songs</span></>}
             </h2>
             <p className="mt-2 max-w-xl text-muted-foreground">
               Describe a vibe, drop in custom lyrics, or both. Sonix generates a full track in under two minutes.

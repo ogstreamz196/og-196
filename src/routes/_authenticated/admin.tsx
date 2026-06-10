@@ -122,6 +122,11 @@ function AdminPanel() {
             <h2 className="font-semibold">Admin controls</h2>
             <p className="text-sm text-muted-foreground">Pricing, portals, recent generations, manual unlocks, and retries.</p>
           </div>
+          <Link to="/admin/users">
+            <Button size="sm" variant="outline">
+              <ShieldCheck className="mr-2 h-4 w-4" /> Manage users
+            </Button>
+          </Link>
           <Link to="/admin/create-portal">
             <Button size="sm" className="bg-gradient-brand text-primary-foreground">
               <Music2 className="mr-2 h-4 w-4" /> New Portal
