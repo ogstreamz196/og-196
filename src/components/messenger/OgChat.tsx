@@ -29,13 +29,13 @@ export function OgChat({ compact = false }: { compact?: boolean }) {
   const [messages, setMessages] = useState<OgChatMessage[]>(() => loadThread());
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
+  const selfSyncRef = useRef(false);
   const chat = useServerFn(chatOgBot);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(messages.slice(-50)));
     }
-    // Sync across page (messenger <-> widget) via storage events handled below.
   }, [messages]);
 
   useEffect(() => {
@@ -49,6 +49,10 @@ export function OgChat({ compact = false }: { compact?: boolean }) {
       }
     }
     function onLocal() {
+      if (selfSyncRef.current) {
+        selfSyncRef.current = false;
+        return;
+      }
       setMessages(loadThread());
     }
     window.addEventListener("storage", onStorage);
@@ -58,10 +62,6 @@ export function OgChat({ compact = false }: { compact?: boolean }) {
       window.removeEventListener("og-messenger:sync", onLocal);
     };
   }, []);
-
-  useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages]);
 
   const m = useMutation({
     mutationFn: async (history: OgChatMessage[]) => chat({ data: { messages: history } }),
