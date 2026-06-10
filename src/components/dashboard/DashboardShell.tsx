@@ -268,6 +268,12 @@ export function DashboardShell({ title, children }: { title: string; children: R
           })}
         </nav>
 
+        {!roleLoading && isAdmin && (
+          <div className="flex items-center justify-center gap-2 border-b border-primary/40 bg-gradient-brand px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-primary-foreground shadow-glow">
+            <ShieldCheck className="h-3.5 w-3.5" />
+            Boss mode active — signed in as {user?.email}
+          </div>
+        )}
         <main className="flex-1 px-4 py-6 md:px-8 md:py-10">{children}</main>
       </div>
     </div>
