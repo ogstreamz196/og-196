@@ -494,6 +494,15 @@ function OgBotSettingsPage() {
                         <Button
                           size="sm"
                           variant="outline"
+                          onClick={() => setExpiryEditFor(t)}
+                          title="Set or clear this token's expiry date"
+                        >
+                          <CalendarClock className="mr-1.5 h-3.5 w-3.5" />
+                          Expiry
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
                           onClick={() => rotate.mutate(t.user_id)}
                           disabled={rotate.isPending && rotate.variables === t.user_id}
                           title="Generate a fresh token (invalidates the old one)"
