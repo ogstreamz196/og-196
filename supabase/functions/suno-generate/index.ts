@@ -50,9 +50,22 @@ Deno.serve(async (req) => {
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
     const coinCost = await getSetting(admin, "coins_per_generation", 3);
 
+    // If this generation came from a portal, force the hardcoded language into the Suno prompt
+    let portalLanguage: string | null = null;
+    if (portalId) {
+      const { data: p } = await admin.from("portals").select("language").eq("id", portalId).maybeSingle();
+      portalLanguage = p?.language ?? null;
+    }
+    const effectiveLyrics = lyrics && portalLanguage
+      ? `[Language: ${portalLanguage}]\n${lyrics}`
+      : lyrics;
+    const effectivePrompt = !lyrics && portalLanguage
+      ? `[Language: ${portalLanguage}] ${prompt}`
+      : prompt;
+
     const { data: song, error: songErr } = await admin
       .from("songs")
-      .insert({ user_id: user.id, prompt, style, lyrics, title, status: "pending", portal_id: portalId })
+      .insert({ user_id: user.id, prompt: effectivePrompt, style, lyrics: effectiveLyrics, title, status: "pending", portal_id: portalId })
       .select()
       .single();
     if (songErr) return json({ error: songErr.message }, 500);
@@ -75,10 +88,10 @@ Deno.serve(async (req) => {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${SUNO_API_KEY}` },
         body: JSON.stringify({
-          prompt: lyrics || prompt,
+          prompt: effectiveLyrics || effectivePrompt,
           style: style || undefined,
           title: title || undefined,
-          customMode: !!(style || lyrics || title),
+          customMode: !!(style || effectiveLyrics || title),
           instrumental,
           model: "V4",
           callBackUrl: callbackUrl,

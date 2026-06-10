@@ -41,7 +41,7 @@ function CreatePortalWizard() {
 
   function toggleTag(tag: string) {
     setTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : prev.length >= 5 ? prev : [...prev, tag],
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : prev.length >= 6 ? prev : [...prev, tag],
     );
   }
 
@@ -49,7 +49,7 @@ function CreatePortalWizard() {
     mutationFn: async () => {
       if (!name.trim()) throw new Error("Portal name required");
       if (!slugClean) throw new Error("URL slug required");
-      if (tags.length !== 5) throw new Error("Pick exactly 5 style tags");
+      if (tags.length < 4 || tags.length > 6) throw new Error("Pick between 4 and 6 style tags");
       const { data: { user } } = await supabase.auth.getUser();
       const { data, error } = await supabase.from("portals").insert({
         name: name.trim(),
@@ -139,7 +139,7 @@ function CreatePortalWizard() {
 
             <div>
               <div className="flex items-center justify-between">
-                <Label>Preset style tags ({tags.length}/5)</Label>
+                <Label>Preset style tags ({tags.length}/6 · pick 4–6)</Label>
                 {tags.length > 0 && (
                   <button type="button" className="text-xs text-muted-foreground hover:text-foreground" onClick={() => setTags([])}>Clear</button>
                 )}
@@ -147,7 +147,7 @@ function CreatePortalWizard() {
               <div className="mt-2 flex flex-wrap gap-2">
                 {TAG_LIBRARY.map((tag) => {
                   const selected = tags.includes(tag);
-                  const disabled = !selected && tags.length >= 5;
+                  const disabled = !selected && tags.length >= 6;
                   return (
                     <button
                       type="button"
@@ -172,7 +172,7 @@ function CreatePortalWizard() {
 
             <Button
               size="lg"
-              disabled={create.isPending || !name.trim() || !slugClean || tags.length !== 5}
+              disabled={create.isPending || !name.trim() || !slugClean || tags.length < 4 || tags.length > 6}
               onClick={() => create.mutate()}
               className="bg-gradient-brand text-primary-foreground"
             >
