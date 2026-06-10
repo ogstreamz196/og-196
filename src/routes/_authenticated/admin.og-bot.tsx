@@ -101,12 +101,41 @@ interface TokenRow {
   created_at: string;
   updated_at: string;
   last_used_at: string | null;
+  expires_at: string | null;
 }
 interface ProfileRow {
   id: string;
   email: string | null;
   display_name: string | null;
 }
+
+type ExpiryStatus = "expired" | "expiring" | "active" | "never";
+const EXPIRING_WINDOW_MS = 7 * 86400_000;
+
+function expiryStatus(expires_at: string | null, nowMs: number): ExpiryStatus {
+  if (!expires_at) return "never";
+  const t = new Date(expires_at).getTime();
+  if (t < nowMs) return "expired";
+  if (t - nowMs < EXPIRING_WINDOW_MS) return "expiring";
+  return "active";
+}
+
+const STATUS_LABEL: Record<ExpiryStatus | "all", string> = {
+  all: "All",
+  active: "Active",
+  expiring: "Expiring soon",
+  expired: "Expired",
+  never: "No expiry",
+};
+
+const STATUS_BADGE: Record<ExpiryStatus, string> = {
+  expired: "bg-destructive/15 text-destructive border-destructive/30",
+  expiring: "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30",
+  active: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30",
+  never: "bg-muted text-muted-foreground border-border",
+};
+
+type SortKey = "created_desc" | "expires_asc" | "expires_desc" | "last_used_desc";
 
 function OgBotSettingsPage() {
   const { isAdmin, isLoading } = useRole();
