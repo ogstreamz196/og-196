@@ -246,6 +246,10 @@ export type Database = {
         Args: { p_amount: number; p_reason?: string; p_target: string }
         Returns: number
       }
+      mint_coins_admin: {
+        Args: { admin_notes: string; amount: number; target_user_id: string }
+        Returns: number
+      }
     }
     Enums: {
       app_role: "admin" | "user"
