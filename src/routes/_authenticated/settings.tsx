@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Crown, Bot, ShieldCheck, Coins, Plus, Minus, LogOut, UserCog, Mail, Fingerprint } from "lucide-react";
+import { Loader2, Crown, Bot, ShieldCheck, Coins, Plus, Minus, LogOut, UserCog, Mail, Fingerprint, KeyRound, Search, UserPlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/settings")({
@@ -230,6 +231,7 @@ function SettingsPage() {
               pending={toggleRole.isPending}
               onChange={(v) => toggleRole.mutate({ rpc: "set_og_bot_admin", key: "make_og", value: v })}
             />
+            <CreateOgBotTokenPanel />
             <div className="flex items-center justify-between rounded-xl border border-border bg-background/40 p-3 opacity-80">
               <div className="flex items-center gap-3">
                 <ShieldCheck className="h-5 w-5 text-primary" />
@@ -283,5 +285,325 @@ function RoleRow({ icon, title, description, checked, pending, onChange }: {
         <Switch checked={checked} disabled={pending} onCheckedChange={onChange} />
       </div>
     </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Create OG Bot Token (inline wizard) — admin only
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface GrantableProfile {
+  id: string;
+  email: string | null;
+  display_name: string | null;
+}
+
+function CreateOgBotTokenPanel() {
+  const qc = useQueryClient();
+  const [query, setQuery] = useState("");
+  const [wizardFor, setWizardFor] = useState<GrantableProfile | null>(null);
+  const [pendingId, setPendingId] = useState<string | null>(null);
+  const term = query.trim();
+
+  const candidatesQ = useQuery({
+    queryKey: ["settings-og-bot-grantable", term],
+    queryFn: async (): Promise<GrantableProfile[]> => {
+      let q = supabase
+        .from("profiles")
+        .select("id, email, display_name")
+        .order("created_at", { ascending: false })
+        .limit(6);
+      if (term) {
+        const safe = term.replace(/[%,]/g, " ");
+        q = q.or(`email.ilike.%${safe}%,display_name.ilike.%${safe}%,id.ilike.%${safe}%`);
+      }
+      const { data, error } = await q;
+      if (error) throw error;
+      return (data ?? []) as GrantableProfile[];
+    },
+  });
+
+  const grant = useMutation({
+    mutationFn: async (vars: { targetUserId: string; expiresAt: string | null; makeVip: boolean }) => {
+      setPendingId(vars.targetUserId);
+      const { error } = await supabase.rpc("set_og_bot_admin", {
+        target_user_id: vars.targetUserId,
+        make_og: true,
+        admin_notes: "settings_issue_wizard",
+      });
+      if (error) throw new Error(error.message);
+      if (vars.expiresAt) {
+        const { error: e2 } = await (
+          supabase.rpc as unknown as (
+            fn: string,
+            args: Record<string, unknown>,
+          ) => Promise<{ data: unknown; error: { message: string } | null }>
+        )("set_og_bot_token_expiry", {
+          target_user_id: vars.targetUserId,
+          new_expires_at: vars.expiresAt,
+          admin_notes: "settings_issue_wizard",
+        });
+        if (e2) throw new Error(e2.message);
+      }
+      if (vars.makeVip) {
+        const { error: e3 } = await supabase.rpc("set_vip_admin", {
+          target_user_id: vars.targetUserId,
+          make_vip: true,
+          admin_notes: "settings_issue_wizard",
+        });
+        if (e3) throw new Error(e3.message);
+      }
+    },
+    onSuccess: () => {
+      toast.success("OG Bot token issued");
+      setWizardFor(null);
+      qc.invalidateQueries({ queryKey: ["admin-og-bot-tokens"] });
+      qc.invalidateQueries({ queryKey: ["settings-og-bot-grantable"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+    onSettled: () => setPendingId(null),
+  });
+
+  const rows = candidatesQ.data ?? [];
+
+  return (
+    <div className="rounded-xl border border-border bg-background/40 p-3 space-y-3">
+      <header className="flex items-center gap-2">
+        <UserPlus className="h-4 w-4 text-primary" />
+        <h3 className="text-sm font-semibold">Create OG Bot token</h3>
+      </header>
+      <p className="text-xs text-muted-foreground">
+        Pick a user, choose expiry and optional role grants. A fresh{" "}
+        <code className="font-mono">ogb_…</code> token is minted.
+      </p>
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search by email, name, or user id…"
+          className="pl-9"
+        />
+      </div>
+      {candidatesQ.isLoading ? (
+        <div className="flex items-center justify-center py-2 text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" />
+        </div>
+      ) : rows.length === 0 ? (
+        <p className="py-2 text-center text-xs text-muted-foreground">No matching users.</p>
+      ) : (
+        <ul className="divide-y divide-border rounded-lg border border-border">
+          {rows.map((p) => (
+            <li key={p.id} className="flex items-center justify-between gap-3 px-3 py-2">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium">
+                  {p.display_name ?? p.email ?? p.id}
+                </p>
+                <p className="truncate text-[11px] text-muted-foreground">{p.email ?? "—"}</p>
+              </div>
+              <Button
+                size="sm"
+                onClick={() => setWizardFor(p)}
+                disabled={grant.isPending && pendingId === p.id}
+              >
+                {grant.isPending && pendingId === p.id ? (
+                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <KeyRound className="mr-1.5 h-3.5 w-3.5" />
+                )}
+                Issue token
+              </Button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <IssueTokenWizard
+        profile={wizardFor}
+        submitting={grant.isPending && pendingId === wizardFor?.id}
+        onCancel={() => { if (!grant.isPending) setWizardFor(null); }}
+        onConfirm={(expiresAt, makeVip) => {
+          if (!wizardFor) return;
+          grant.mutate({ targetUserId: wizardFor.id, expiresAt, makeVip });
+        }}
+      />
+    </div>
+  );
+}
+
+type WizardPreset = "30d" | "90d" | "365d" | "never" | "custom";
+
+interface IssueTokenWizardProps {
+  profile: GrantableProfile | null;
+  submitting: boolean;
+  onCancel: () => void;
+  onConfirm: (expiresAt: string | null, makeVip: boolean) => void;
+}
+
+function IssueTokenWizard({ profile, submitting, onCancel, onConfirm }: IssueTokenWizardProps) {
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [preset, setPreset] = useState<WizardPreset>("90d");
+  const [customDate, setCustomDate] = useState("");
+  const [makeVip, setMakeVip] = useState(false);
+
+  useEffect(() => {
+    if (profile) {
+      setStep(1);
+      setPreset("90d");
+      setCustomDate("");
+      setMakeVip(false);
+    }
+  }, [profile?.id]);
+
+  if (!profile) return null;
+
+  const presetMs: Record<Exclude<WizardPreset, "never" | "custom">, number> = {
+    "30d": 30 * 86400_000,
+    "90d": 90 * 86400_000,
+    "365d": 365 * 86400_000,
+  };
+
+  function resolveExpiry(): string | null | "invalid" {
+    if (preset === "never") return null;
+    if (preset === "custom") {
+      if (!customDate) return "invalid";
+      return new Date(customDate).toISOString();
+    }
+    return new Date(Date.now() + presetMs[preset]).toISOString();
+  }
+
+  const expiryResolved = resolveExpiry();
+  const expiryLabel =
+    expiryResolved === "invalid"
+      ? "—"
+      : expiryResolved === null
+      ? "Never expires"
+      : new Date(expiryResolved).toLocaleString();
+
+  function submit() {
+    const exp = resolveExpiry();
+    if (exp === "invalid") {
+      toast.error("Pick a custom date and time");
+      return;
+    }
+    onConfirm(exp, makeVip);
+  }
+
+  return (
+    <Dialog open onOpenChange={(v) => { if (!v && !submitting) onCancel(); }}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <KeyRound className="h-4 w-4 text-primary" />
+            Issue OG Bot token · Step {step} of 3
+          </DialogTitle>
+          <DialogDescription>
+            {profile.display_name ?? profile.email ?? profile.id}
+          </DialogDescription>
+        </DialogHeader>
+
+        {step === 1 && (
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium">Choose expiry</h4>
+            <div className="space-y-2 text-sm">
+              {(["30d", "90d", "365d", "never", "custom"] as const).map((k) => (
+                <label key={k} className="flex items-center gap-2">
+                  <input type="radio" checked={preset === k} onChange={() => setPreset(k)} />
+                  <span>
+                    {k === "30d" && "Expires in 30 days"}
+                    {k === "90d" && "Expires in 90 days"}
+                    {k === "365d" && "Expires in 1 year"}
+                    {k === "never" && "No expiry (long-lived)"}
+                    {k === "custom" && "Custom date & time"}
+                  </span>
+                </label>
+              ))}
+              {preset === "custom" && (
+                <Input
+                  type="datetime-local"
+                  value={customDate}
+                  onChange={(e) => setCustomDate(e.target.value)}
+                  className="ml-6 w-[calc(100%-1.5rem)]"
+                />
+              )}
+            </div>
+          </div>
+        )}
+
+        {step === 2 && (
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium">Role grants</h4>
+            <p className="text-xs text-muted-foreground">
+              Every token automatically grants the <code className="font-mono">og_bot</code> role.
+              Optionally also grant:
+            </p>
+            <label className="flex items-start gap-2 rounded-lg border border-border bg-background/40 p-3 text-sm">
+              <input
+                type="checkbox"
+                checked={makeVip}
+                onChange={(e) => setMakeVip(e.target.checked)}
+                className="mt-0.5"
+              />
+              <div>
+                <div className="font-medium">VIP role</div>
+                <div className="text-xs text-muted-foreground">
+                  Grants the user VIP perks alongside the bot token.
+                </div>
+              </div>
+            </label>
+          </div>
+        )}
+
+        {step === 3 && (
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium">Review &amp; confirm</h4>
+            <div className="space-y-1 rounded-lg border border-border bg-background/40 p-3 text-sm">
+              <div className="flex justify-between gap-3">
+                <span className="text-muted-foreground">User</span>
+                <span className="truncate text-right">{profile.email ?? profile.id}</span>
+              </div>
+              <div className="flex justify-between gap-3">
+                <span className="text-muted-foreground">Expiry</span>
+                <span>{expiryLabel}</span>
+              </div>
+              <div className="flex justify-between gap-3">
+                <span className="text-muted-foreground">Roles granted</span>
+                <span>{makeVip ? "og_bot + vip" : "og_bot"}</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <DialogFooter className="gap-2">
+          <Button type="button" variant="outline" onClick={onCancel} disabled={submitting}>
+            Cancel
+          </Button>
+          {step > 1 && (
+            <Button type="button" variant="outline" onClick={() => setStep((s) => (s - 1) as 1 | 2 | 3)} disabled={submitting}>
+              Back
+            </Button>
+          )}
+          {step < 3 ? (
+            <Button
+              type="button"
+              onClick={() => {
+                if (step === 1 && preset === "custom" && !customDate) {
+                  toast.error("Pick a custom date and time");
+                  return;
+                }
+                setStep((s) => (s + 1) as 1 | 2 | 3);
+              }}
+            >
+              Next
+            </Button>
+          ) : (
+            <Button type="button" onClick={submit} disabled={submitting}>
+              {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Issue token
+            </Button>
+          )}
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
