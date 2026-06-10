@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { Loader2, Library as LibraryIcon } from "lucide-react";
@@ -43,7 +43,16 @@ function LibraryPage() {
           </div>
         ) : query.data && query.data.length > 0 ? (
           <div className="grid gap-3">
-            {query.data.map((s) => <SongCard key={s.id} song={s} />)}
+            {query.data.map((s) => (
+              <Link
+                key={s.id}
+                to="/library/$songId"
+                params={{ songId: s.id }}
+                className="block rounded-2xl transition-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <SongCard song={s} />
+              </Link>
+            ))}
           </div>
         ) : (
           <div className="rounded-2xl border border-dashed border-border bg-card/50 p-16 text-center">

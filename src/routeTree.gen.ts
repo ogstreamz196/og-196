@@ -17,6 +17,7 @@ import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated/library'
 import { Route as AuthenticatedBuyCoinsRouteImport } from './routes/_authenticated/buy-coins'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedLibrarySongIdRouteImport } from './routes/_authenticated/library.$songId'
 import { Route as AuthenticatedBuyCoinsReturnRouteImport } from './routes/_authenticated/buy-coins.return'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedAdminCreatePortalRouteImport } from './routes/_authenticated/admin.create-portal'
@@ -61,6 +62,12 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedLibrarySongIdRoute =
+  AuthenticatedLibrarySongIdRouteImport.update({
+    id: '/$songId',
+    path: '/$songId',
+    getParentRoute: () => AuthenticatedLibraryRoute,
+  } as any)
 const AuthenticatedBuyCoinsReturnRoute =
   AuthenticatedBuyCoinsReturnRouteImport.update({
     id: '/return',
@@ -90,25 +97,27 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/buy-coins': typeof AuthenticatedBuyCoinsRouteWithChildren
-  '/library': typeof AuthenticatedLibraryRoute
+  '/library': typeof AuthenticatedLibraryRouteWithChildren
   '/settings': typeof AuthenticatedSettingsRoute
   '/portal/$slug': typeof PortalSlugRoute
   '/admin/create-portal': typeof AuthenticatedAdminCreatePortalRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
+  '/library/$songId': typeof AuthenticatedLibrarySongIdRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/buy-coins': typeof AuthenticatedBuyCoinsRouteWithChildren
-  '/library': typeof AuthenticatedLibraryRoute
+  '/library': typeof AuthenticatedLibraryRouteWithChildren
   '/settings': typeof AuthenticatedSettingsRoute
   '/portal/$slug': typeof PortalSlugRoute
   '/': typeof AuthenticatedIndexRoute
   '/admin/create-portal': typeof AuthenticatedAdminCreatePortalRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
+  '/library/$songId': typeof AuthenticatedLibrarySongIdRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
@@ -117,13 +126,14 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/buy-coins': typeof AuthenticatedBuyCoinsRouteWithChildren
-  '/_authenticated/library': typeof AuthenticatedLibraryRoute
+  '/_authenticated/library': typeof AuthenticatedLibraryRouteWithChildren
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/portal/$slug': typeof PortalSlugRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/admin/create-portal': typeof AuthenticatedAdminCreatePortalRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
+  '/_authenticated/library/$songId': typeof AuthenticatedLibrarySongIdRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
@@ -139,6 +149,7 @@ export interface FileRouteTypes {
     | '/admin/create-portal'
     | '/admin/users'
     | '/buy-coins/return'
+    | '/library/$songId'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -152,6 +163,7 @@ export interface FileRouteTypes {
     | '/admin/create-portal'
     | '/admin/users'
     | '/buy-coins/return'
+    | '/library/$songId'
     | '/api/public/payments/webhook'
   id:
     | '__root__'
@@ -166,6 +178,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/create-portal'
     | '/_authenticated/admin/users'
     | '/_authenticated/buy-coins/return'
+    | '/_authenticated/library/$songId'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -234,6 +247,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/library/$songId': {
+      id: '/_authenticated/library/$songId'
+      path: '/$songId'
+      fullPath: '/library/$songId'
+      preLoaderRoute: typeof AuthenticatedLibrarySongIdRouteImport
+      parentRoute: typeof AuthenticatedLibraryRoute
+    }
     '/_authenticated/buy-coins/return': {
       id: '/_authenticated/buy-coins/return'
       path: '/return'
@@ -291,10 +311,21 @@ const AuthenticatedBuyCoinsRouteWithChildren =
     AuthenticatedBuyCoinsRouteChildren,
   )
 
+interface AuthenticatedLibraryRouteChildren {
+  AuthenticatedLibrarySongIdRoute: typeof AuthenticatedLibrarySongIdRoute
+}
+
+const AuthenticatedLibraryRouteChildren: AuthenticatedLibraryRouteChildren = {
+  AuthenticatedLibrarySongIdRoute: AuthenticatedLibrarySongIdRoute,
+}
+
+const AuthenticatedLibraryRouteWithChildren =
+  AuthenticatedLibraryRoute._addFileChildren(AuthenticatedLibraryRouteChildren)
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedBuyCoinsRoute: typeof AuthenticatedBuyCoinsRouteWithChildren
-  AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRoute
+  AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRouteWithChildren
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
@@ -302,7 +333,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedBuyCoinsRoute: AuthenticatedBuyCoinsRouteWithChildren,
-  AuthenticatedLibraryRoute: AuthenticatedLibraryRoute,
+  AuthenticatedLibraryRoute: AuthenticatedLibraryRouteWithChildren,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
