@@ -192,15 +192,29 @@ function PortalPage() {
       </header>
 
       <main className="mx-auto max-w-4xl px-4 py-8 md:px-8 md:py-12">
-        <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-8 shadow-card bg-gradient-hero">
-          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-background/50 px-3 py-1 text-xs text-muted-foreground backdrop-blur">
-            <Wand2 className="h-3 w-3 text-primary" />
+        <div
+          className="relative overflow-hidden rounded-3xl border bg-card p-8 shadow-card"
+          style={{ borderColor: themeColor, boxShadow: `0 0 60px -20px ${themeColor}` }}
+        >
+          <div
+            className="inline-flex items-center gap-2 rounded-full border bg-background/50 px-3 py-1 text-xs backdrop-blur"
+            style={{ borderColor: themeColor, color: themeColor }}
+          >
+            <Wand2 className="h-3 w-3" />
             Portal · Lyrics in {portal.language}
           </div>
           <h1 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl">{portal.name}</h1>
           <p className="mt-2 max-w-xl text-muted-foreground">
             Write your song idea below, generate lyrics for free, then turn them into music.
           </p>
+          {portal.custom_welcome_text && (
+            <div
+              className="mt-4 rounded-xl border bg-background/40 p-3 text-sm"
+              style={{ borderColor: themeColor }}
+            >
+              {portal.custom_welcome_text}
+            </div>
+          )}
         </div>
 
         <div className="mt-6 grid gap-4 rounded-2xl border border-border bg-card p-6 shadow-card">
