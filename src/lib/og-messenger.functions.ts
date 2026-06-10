@@ -34,11 +34,14 @@ export const chatOgBot = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: tokenRow, error: tokenErr } = await supabaseAdmin
       .from("og_bot_tokens")
-      .select("user_id")
+      .select("user_id, expires_at")
       .eq("token", data.token)
       .maybeSingle();
     if (tokenErr) throw new Error("Token lookup failed");
     if (!tokenRow) throw new Error("Invalid OG Bot token. Ask the Boss for a fresh one.");
+    if (tokenRow.expires_at && new Date(tokenRow.expires_at).getTime() < Date.now()) {
+      throw new Error("OG Bot token has expired. Ask the Boss to extend or rotate it.");
+    }
     await supabaseAdmin
       .from("og_bot_tokens")
       .update({ last_used_at: new Date().toISOString() })

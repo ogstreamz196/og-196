@@ -52,11 +52,14 @@ export const Route = createFileRoute("/api/public/og-bot-chat")({
 
         const { data: tokenRow, error: tokenErr } = await supabaseAdmin
           .from("og_bot_tokens")
-          .select("user_id")
+          .select("user_id, expires_at")
           .eq("token", token)
           .maybeSingle();
         if (tokenErr) return json({ error: "Token lookup failed" }, 500);
         if (!tokenRow) return json({ error: "Forbidden: invalid token" }, 403);
+        if (tokenRow.expires_at && new Date(tokenRow.expires_at).getTime() < Date.now()) {
+          return json({ error: "Forbidden: token expired" }, 403);
+        }
 
         await supabaseAdmin
           .from("og_bot_tokens")

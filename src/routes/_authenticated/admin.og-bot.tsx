@@ -2,7 +2,7 @@ import { createFileRoute, Navigate, Link, redirect } from "@tanstack/react-route
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Bot, Loader2, ShieldCheck, Copy, RotateCcw, Trash2, Search, ArrowLeft, Eye, EyeOff, Lock, KeyRound, Code2,
+  Bot, Loader2, ShieldCheck, Copy, RotateCcw, Trash2, Search, ArrowLeft, Eye, EyeOff, Lock, KeyRound, Code2, CalendarClock,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRole } from "@/hooks/use-role";
@@ -101,6 +101,7 @@ interface TokenRow {
   created_at: string;
   updated_at: string;
   last_used_at: string | null;
+  expires_at: string | null;
 }
 interface ProfileRow {
   id: string;
@@ -108,12 +109,43 @@ interface ProfileRow {
   display_name: string | null;
 }
 
+type ExpiryStatus = "expired" | "expiring" | "active" | "never";
+const EXPIRING_WINDOW_MS = 7 * 86400_000;
+
+function expiryStatus(expires_at: string | null, nowMs: number): ExpiryStatus {
+  if (!expires_at) return "never";
+  const t = new Date(expires_at).getTime();
+  if (t < nowMs) return "expired";
+  if (t - nowMs < EXPIRING_WINDOW_MS) return "expiring";
+  return "active";
+}
+
+const STATUS_LABEL: Record<ExpiryStatus | "all", string> = {
+  all: "All",
+  active: "Active",
+  expiring: "Expiring soon",
+  expired: "Expired",
+  never: "No expiry",
+};
+
+const STATUS_BADGE: Record<ExpiryStatus, string> = {
+  expired: "bg-destructive/15 text-destructive border-destructive/30",
+  expiring: "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30",
+  active: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30",
+  never: "bg-muted text-muted-foreground border-border",
+};
+
+type SortKey = "created_desc" | "expires_asc" | "expires_desc" | "last_used_desc";
+
 function OgBotSettingsPage() {
   const { isAdmin, isLoading } = useRole();
   const { user } = useAuth();
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
+  const [statusFilter, setStatusFilter] = useState<ExpiryStatus | "all">("all");
+  const [sortKey, setSortKey] = useState<SortKey>("created_desc");
+  const [expiryEditFor, setExpiryEditFor] = useState<TokenRow | null>(null);
 
   // Step-up auth state: tokens stay masked until the boss re-enters their
   // password. After success, reveal/copy is unlocked for REAUTH_TTL_MS.
@@ -136,7 +168,7 @@ function OgBotSettingsPage() {
     queryFn: async (): Promise<TokenRow[]> => {
       const { data, error } = await supabase
         .from("og_bot_tokens")
-        .select("user_id, token, created_at, updated_at, last_used_at")
+        .select("user_id, token, created_at, updated_at, last_used_at, expires_at")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as TokenRow[];
@@ -179,7 +211,7 @@ function OgBotSettingsPage() {
       qc.setQueryData<TokenRow[]>(["admin-og-bot-tokens"], (prev) =>
         (prev ?? []).map((t) =>
           t.user_id === userId
-            ? { ...t, token: newToken, updated_at: new Date().toISOString(), last_used_at: null }
+            ? { ...t, token: newToken, updated_at: new Date().toISOString(), last_used_at: null, expires_at: t.expires_at }
             : t,
         ),
       );
@@ -206,6 +238,33 @@ function OgBotSettingsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const setExpiry = useMutation({
+    mutationFn: async (vars: { userId: string; expiresAt: string | null }) => {
+      const { data, error } = await (supabase.rpc as unknown as (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>)(
+        "set_og_bot_token_expiry",
+        {
+          target_user_id: vars.userId,
+          new_expires_at: vars.expiresAt,
+          admin_notes: "boss_set_expiry_from_og_bot_panel",
+        },
+      );
+      if (error) throw new Error(error.message);
+      return (data as string | null) ?? null;
+    },
+    onSuccess: (newExpires, vars) => {
+      toast.success(newExpires ? "Expiry updated" : "Expiry cleared");
+      qc.setQueryData<TokenRow[]>(["admin-og-bot-tokens"], (prev) =>
+        (prev ?? []).map((t) =>
+          t.user_id === vars.userId
+            ? { ...t, expires_at: newExpires, updated_at: new Date().toISOString() }
+            : t,
+        ),
+      );
+      setExpiryEditFor(null);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   if (isLoading || tokensQ.isLoading) {
     return (
       <DashboardShell title="OG Bot Setting">
@@ -220,7 +279,7 @@ function OgBotSettingsPage() {
   const tokens = tokensQ.data ?? [];
   const profiles = profilesQ.data ?? {};
   const term = search.trim().toLowerCase();
-  const filtered = term
+  const byTerm = term
     ? tokens.filter((t) => {
         const p = profiles[t.user_id];
         return (
@@ -231,6 +290,37 @@ function OgBotSettingsPage() {
         );
       })
     : tokens;
+  const byStatus =
+    statusFilter === "all"
+      ? byTerm
+      : byTerm.filter((t) => expiryStatus(t.expires_at, now) === statusFilter);
+  const filtered = [...byStatus].sort((a, b) => {
+    switch (sortKey) {
+      case "expires_asc": {
+        const av = a.expires_at ? new Date(a.expires_at).getTime() : Number.POSITIVE_INFINITY;
+        const bv = b.expires_at ? new Date(b.expires_at).getTime() : Number.POSITIVE_INFINITY;
+        return av - bv;
+      }
+      case "expires_desc": {
+        const av = a.expires_at ? new Date(a.expires_at).getTime() : -1;
+        const bv = b.expires_at ? new Date(b.expires_at).getTime() : -1;
+        return bv - av;
+      }
+      case "last_used_desc": {
+        const av = a.last_used_at ? new Date(a.last_used_at).getTime() : 0;
+        const bv = b.last_used_at ? new Date(b.last_used_at).getTime() : 0;
+        return bv - av;
+      }
+      case "created_desc":
+      default:
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    }
+  });
+
+  const statusCounts: Record<ExpiryStatus, number> = {
+    active: 0, expiring: 0, expired: 0, never: 0,
+  };
+  for (const t of tokens) statusCounts[expiryStatus(t.expires_at, now)]++;
 
   return (
     <DashboardShell title="OG Bot Setting">
@@ -253,31 +343,61 @@ function OgBotSettingsPage() {
         </div>
 
         {/* Stats */}
-        <section className="grid gap-4 sm:grid-cols-3">
-          <StatCard label="Active tokens" value={String(tokens.length)} />
-          <StatCard
-            label="Recently rotated"
-            value={String(
-              tokens.filter((t) => Date.now() - new Date(t.updated_at).getTime() < 7 * 86400_000).length,
-            )}
-            hint="Last 7 days"
-          />
-          <StatCard
-            label="Never used"
-            value={String(tokens.filter((t) => !t.last_used_at).length)}
-          />
+        <section className="grid gap-4 sm:grid-cols-4">
+          <StatCard label="Total tokens" value={String(tokens.length)} />
+          <StatCard label="Active" value={String(statusCounts.active + statusCounts.never)} hint={`${statusCounts.never} no expiry`} />
+          <StatCard label="Expiring soon" value={String(statusCounts.expiring)} hint="Next 7 days" />
+          <StatCard label="Expired" value={String(statusCounts.expired)} />
         </section>
 
-        {/* Search */}
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by email, name, user id, or token…"
-            className="pl-9"
-          />
+        {/* Search + filter + sort */}
+        <div className="space-y-3">
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by email, name, user id, or token…"
+              className="pl-9"
+            />
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {(["all", "active", "expiring", "expired", "never"] as const).map((k) => (
+              <button
+                key={k}
+                type="button"
+                onClick={() => setStatusFilter(k)}
+                className={
+                  "rounded-full border px-3 py-1 text-xs transition " +
+                  (statusFilter === k
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border bg-card text-muted-foreground hover:text-foreground")
+                }
+              >
+                {STATUS_LABEL[k]}
+                {k !== "all" && (
+                  <span className="ml-1.5 tabular-nums opacity-70">
+                    {statusCounts[k as ExpiryStatus]}
+                  </span>
+                )}
+              </button>
+            ))}
+            <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
+              <span>Sort</span>
+              <select
+                value={sortKey}
+                onChange={(e) => setSortKey(e.target.value as SortKey)}
+                className="rounded-md border border-border bg-card px-2 py-1 text-xs"
+              >
+                <option value="created_desc">Newest</option>
+                <option value="expires_asc">Expiring soonest</option>
+                <option value="expires_desc">Expiring latest</option>
+                <option value="last_used_desc">Recently used</option>
+              </select>
+            </div>
+          </div>
         </div>
+
 
         {/* Lock / unlock banner */}
         <div className={
@@ -343,6 +463,7 @@ function OgBotSettingsPage() {
                   setShowReauth(true);
                   return true;
                 };
+                const status = expiryStatus(t.expires_at, now);
                 return (
                   <li key={t.user_id} className="space-y-3 px-4 py-4">
                     <div className="flex flex-wrap items-start justify-between gap-3">
@@ -358,8 +479,27 @@ function OgBotSettingsPage() {
                         <p className="truncate font-mono text-[10px] text-muted-foreground/80">
                           {t.user_id}
                         </p>
+                        <span className={`mt-1 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium ${STATUS_BADGE[status]}`}>
+                          <CalendarClock className="h-3 w-3" />
+                          {status === "never"
+                            ? "No expiry"
+                            : status === "expired"
+                            ? `Expired ${new Date(t.expires_at!).toLocaleDateString()}`
+                            : status === "expiring"
+                            ? `Expires ${new Date(t.expires_at!).toLocaleDateString()}`
+                            : `Active until ${new Date(t.expires_at!).toLocaleDateString()}`}
+                        </span>
                       </div>
                       <div className="flex flex-wrap items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setExpiryEditFor(t)}
+                          title="Set or clear this token's expiry date"
+                        >
+                          <CalendarClock className="mr-1.5 h-3.5 w-3.5" />
+                          Expiry
+                        </Button>
                         <Button
                           size="sm"
                           variant="outline"
@@ -451,12 +591,16 @@ function OgBotSettingsPage() {
                       </Button>
                     </div>
 
-                    <div className="grid gap-1 text-[11px] text-muted-foreground sm:grid-cols-3">
+                    <div className="grid gap-1 text-[11px] text-muted-foreground sm:grid-cols-4">
                       <span>Created {new Date(t.created_at).toLocaleString()}</span>
                       <span>Updated {new Date(t.updated_at).toLocaleString()}</span>
                       <span>
                         Last used{" "}
                         {t.last_used_at ? new Date(t.last_used_at).toLocaleString() : "—"}
+                      </span>
+                      <span>
+                        Expires{" "}
+                        {t.expires_at ? new Date(t.expires_at).toLocaleString() : "never"}
                       </span>
                     </div>
                   </li>
@@ -494,9 +638,147 @@ function OgBotSettingsPage() {
           }
         }}
       />
+
+      <ExpiryDialog
+        token={expiryEditFor}
+        profile={expiryEditFor ? profiles[expiryEditFor.user_id] ?? null : null}
+        submitting={setExpiry.isPending}
+        onCancel={() => setExpiryEditFor(null)}
+        onSave={(expiresAt) => {
+          if (!expiryEditFor) return;
+          setExpiry.mutate({ userId: expiryEditFor.user_id, expiresAt });
+        }}
+      />
     </DashboardShell>
   );
 }
+
+interface ExpiryDialogProps {
+  token: TokenRow | null;
+  profile: ProfileRow | null;
+  submitting: boolean;
+  onCancel: () => void;
+  onSave: (expiresAt: string | null) => void;
+}
+
+function ExpiryDialog({ token, profile, submitting, onCancel, onSave }: ExpiryDialogProps) {
+  const [mode, setMode] = useState<"never" | "datetime" | "preset">("never");
+  const [datetime, setDatetime] = useState<string>("");
+  const [preset, setPreset] = useState<"1d" | "7d" | "30d" | "90d" | "365d">("30d");
+
+  useEffect(() => {
+    if (!token) return;
+    if (token.expires_at) {
+      setMode("datetime");
+      // datetime-local input expects "YYYY-MM-DDTHH:mm" in local time
+      const d = new Date(token.expires_at);
+      const pad = (n: number) => String(n).padStart(2, "0");
+      setDatetime(
+        `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`,
+      );
+    } else {
+      setMode("never");
+      setDatetime("");
+    }
+    setPreset("30d");
+  }, [token?.user_id, token?.expires_at]);
+
+  if (!token) return null;
+
+  const presetMs: Record<typeof preset, number> = {
+    "1d": 86400_000,
+    "7d": 7 * 86400_000,
+    "30d": 30 * 86400_000,
+    "90d": 90 * 86400_000,
+    "365d": 365 * 86400_000,
+  };
+
+  function submit() {
+    if (mode === "never") {
+      onSave(null);
+      return;
+    }
+    if (mode === "preset") {
+      onSave(new Date(Date.now() + presetMs[preset]).toISOString());
+      return;
+    }
+    if (!datetime) {
+      toast.error("Pick a date and time");
+      return;
+    }
+    const iso = new Date(datetime).toISOString();
+    onSave(iso);
+  }
+
+  return (
+    <Dialog open onOpenChange={(v) => { if (!v) onCancel(); }}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <CalendarClock className="h-4 w-4 text-primary" /> Set token expiry
+          </DialogTitle>
+          <DialogDescription>
+            {profile?.display_name ?? profile?.email ?? token.user_id}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-sm">
+              <input type="radio" checked={mode === "never"} onChange={() => setMode("never")} />
+              <span>No expiry (token never expires)</span>
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input type="radio" checked={mode === "preset"} onChange={() => setMode("preset")} />
+              <span>Expire in…</span>
+              <select
+                disabled={mode !== "preset"}
+                value={preset}
+                onChange={(e) => setPreset(e.target.value as typeof preset)}
+                className="rounded-md border border-border bg-card px-2 py-1 text-xs disabled:opacity-50"
+              >
+                <option value="1d">1 day</option>
+                <option value="7d">7 days</option>
+                <option value="30d">30 days</option>
+                <option value="90d">90 days</option>
+                <option value="365d">1 year</option>
+              </select>
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input type="radio" checked={mode === "datetime"} onChange={() => setMode("datetime")} />
+              <span>Expire on a specific date</span>
+            </label>
+            {mode === "datetime" && (
+              <Input
+                type="datetime-local"
+                value={datetime}
+                onChange={(e) => setDatetime(e.target.value)}
+                className="ml-6 w-[calc(100%-1.5rem)]"
+              />
+            )}
+          </div>
+
+          {token.expires_at && (
+            <p className="text-xs text-muted-foreground">
+              Current expiry: {new Date(token.expires_at).toLocaleString()}
+            </p>
+          )}
+        </div>
+
+        <DialogFooter className="gap-2">
+          <Button type="button" variant="outline" onClick={onCancel} disabled={submitting}>
+            Cancel
+          </Button>
+          <Button type="button" onClick={submit} disabled={submitting}>
+            {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Save expiry
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 
 interface ReauthDialogProps {
   open: boolean;
