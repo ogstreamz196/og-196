@@ -302,17 +302,32 @@ function OgBotSettingsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  // Grant a fresh OG Bot token to any user (creates the og_bot role +
-  // token row in one shot via set_og_bot_admin).
+  // Issue a fresh OG Bot token via the wizard: creates og_bot role + token
+  // (set_og_bot_admin), optionally sets expiry, and optionally grants VIP.
   const grant = useMutation({
-    mutationFn: async (targetUserId: string) => {
+    mutationFn: async (vars: { targetUserId: string; expiresAt: string | null; makeVip: boolean }) => {
       const { error } = await supabase.rpc("set_og_bot_admin", {
-        target_user_id: targetUserId,
+        target_user_id: vars.targetUserId,
         make_og: true,
-        admin_notes: "boss_grant_from_og_bot_panel",
+        admin_notes: "boss_issue_wizard",
       });
       if (error) throw new Error(error.message);
-      return targetUserId;
+      if (vars.expiresAt) {
+        const { error: e2 } = await (supabase.rpc as unknown as (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>)(
+          "set_og_bot_token_expiry",
+          { target_user_id: vars.targetUserId, new_expires_at: vars.expiresAt, admin_notes: "boss_issue_wizard" },
+        );
+        if (e2) throw new Error(e2.message);
+      }
+      if (vars.makeVip) {
+        const { error: e3 } = await supabase.rpc("set_vip_admin", {
+          target_user_id: vars.targetUserId,
+          make_vip: true,
+          admin_notes: "boss_issue_wizard",
+        });
+        if (e3) throw new Error(e3.message);
+      }
+      return vars.targetUserId;
     },
     onSuccess: () => {
       toast.success("OG Bot token issued");
