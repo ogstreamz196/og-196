@@ -15,6 +15,7 @@ import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/
 import { Route as PortalSlugRouteImport } from './routes/portal.$slug'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedPortalsRouteImport } from './routes/_authenticated/portals'
+import { Route as AuthenticatedMessengerRouteImport } from './routes/_authenticated/messenger'
 import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated/library'
 import { Route as AuthenticatedBuyCoinsRouteImport } from './routes/_authenticated/buy-coins'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
@@ -54,6 +55,11 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
 const AuthenticatedPortalsRoute = AuthenticatedPortalsRouteImport.update({
   id: '/portals',
   path: '/portals',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMessengerRoute = AuthenticatedMessengerRouteImport.update({
+  id: '/messenger',
+  path: '/messenger',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedLibraryRoute = AuthenticatedLibraryRouteImport.update({
@@ -124,6 +130,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/buy-coins': typeof AuthenticatedBuyCoinsRouteWithChildren
   '/library': typeof AuthenticatedLibraryRouteWithChildren
+  '/messenger': typeof AuthenticatedMessengerRoute
   '/portals': typeof AuthenticatedPortalsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/portal/$slug': typeof PortalSlugRoute
@@ -141,6 +148,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/buy-coins': typeof AuthenticatedBuyCoinsRouteWithChildren
   '/library': typeof AuthenticatedLibraryRouteWithChildren
+  '/messenger': typeof AuthenticatedMessengerRoute
   '/portals': typeof AuthenticatedPortalsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/portal/$slug': typeof PortalSlugRoute
@@ -161,6 +169,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/buy-coins': typeof AuthenticatedBuyCoinsRouteWithChildren
   '/_authenticated/library': typeof AuthenticatedLibraryRouteWithChildren
+  '/_authenticated/messenger': typeof AuthenticatedMessengerRoute
   '/_authenticated/portals': typeof AuthenticatedPortalsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/portal/$slug': typeof PortalSlugRoute
@@ -182,6 +191,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/buy-coins'
     | '/library'
+    | '/messenger'
     | '/portals'
     | '/settings'
     | '/portal/$slug'
@@ -199,6 +209,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/buy-coins'
     | '/library'
+    | '/messenger'
     | '/portals'
     | '/settings'
     | '/portal/$slug'
@@ -218,6 +229,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/buy-coins'
     | '/_authenticated/library'
+    | '/_authenticated/messenger'
     | '/_authenticated/portals'
     | '/_authenticated/settings'
     | '/portal/$slug'
@@ -281,6 +293,13 @@ declare module '@tanstack/react-router' {
       path: '/portals'
       fullPath: '/portals'
       preLoaderRoute: typeof AuthenticatedPortalsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/messenger': {
+      id: '/_authenticated/messenger'
+      path: '/messenger'
+      fullPath: '/messenger'
+      preLoaderRoute: typeof AuthenticatedMessengerRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/library': {
@@ -422,6 +441,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedBuyCoinsRoute: typeof AuthenticatedBuyCoinsRouteWithChildren
   AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRouteWithChildren
+  AuthenticatedMessengerRoute: typeof AuthenticatedMessengerRoute
   AuthenticatedPortalsRoute: typeof AuthenticatedPortalsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
@@ -431,6 +451,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedBuyCoinsRoute: AuthenticatedBuyCoinsRouteWithChildren,
   AuthenticatedLibraryRoute: AuthenticatedLibraryRouteWithChildren,
+  AuthenticatedMessengerRoute: AuthenticatedMessengerRoute,
   AuthenticatedPortalsRoute: AuthenticatedPortalsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
@@ -448,3 +469,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
