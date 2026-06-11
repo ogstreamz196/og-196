@@ -80,6 +80,28 @@ export function RemoteTokenInspector() {
   const [introspection, setIntrospection] = useState<Introspection | null>(null);
   const [lastBurn, setLastBurn] = useState<BurnResult | null>(null);
 
+  const localTokensQ = useQuery({
+    queryKey: ["rti-local-og-bot-tokens"],
+    queryFn: async () => {
+      const { data: toks, error } = await supabase
+        .from("og_bot_tokens")
+        .select("user_id, token, created_at, expires_at, revoked_at")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      const tokens = (toks ?? []) as LocalToken[];
+      const ids = tokens.map((t) => t.user_id);
+      let profiles: Record<string, LocalProfile> = {};
+      if (ids.length) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("id, email, display_name")
+          .in("id", ids);
+        for (const p of (profs ?? []) as LocalProfile[]) profiles[p.id] = p;
+      }
+      return { tokens, profiles };
+    },
+  });
+
   const tokenTrim = token.trim();
   const originTrim = origin.trim();
 
