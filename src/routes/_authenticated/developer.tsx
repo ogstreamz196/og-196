@@ -260,7 +260,7 @@ function TokenCard({ token }: { token: BotToken }) {
           <Button
             size="sm"
             variant={isSuspended ? "default" : "outline"}
-            onClick={toggleSuspend}
+            onClick={() => setConfirmOpen(true)}
             disabled={suspending}
             className="gap-1.5"
           >
