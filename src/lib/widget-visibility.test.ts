@@ -69,9 +69,10 @@ describe("OG Bot widget visibility via Supabase Realtime", () => {
     // the exact shape used by developer.tsx + OgBotWidget realtime hooks.
     mock.client
       .channel("bot-tokens-test")
-      .on("postgres_changes", { event: "*", schema: "public", table: "bot_tokens" }, (p) => {
+      .on("postgres_changes", { event: "*", schema: "public", table: "bot_tokens" }, (p: PgChangePayload) => {
         if (p.eventType === "UPDATE" && p.new) {
-          tokens = tokens.map((_, i) => (i === 0 ? { status: p.new!.status } : _));
+          const next = p.new.status;
+          tokens = tokens.map((t, i) => (i === 0 ? { status: next } : t));
         }
       })
       .subscribe();
