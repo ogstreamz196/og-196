@@ -259,7 +259,7 @@ export function RemoteTokenInspector() {
               }
             />
           </div>
-          {(introspection.scopes || introspection.policy) && (
+          {Boolean(introspection.scopes || introspection.policy) && (
             <details className="text-xs">
               <summary className="cursor-pointer text-muted-foreground">scopes / policy</summary>
               <pre className="mt-1 overflow-x-auto rounded bg-background p-2 text-[11px]">
