@@ -47,9 +47,15 @@ function createMockSupabase() {
   };
   return {
     client: {
-      channel: vi.fn(() => channel),
-      removeChannel: vi.fn(),
+      channel: vi.fn((_name: string) => channel),
+      removeChannel: vi.fn((_c: unknown) => {}),
     },
+    emit: (payload: PgChangePayload) => {
+      if (!handler) throw new Error("subscription handler not registered");
+      handler(payload);
+    },
+  };
+}
     emit: (payload: PgChangePayload) => {
       if (!handler) throw new Error("subscription handler not registered");
       handler(payload);
