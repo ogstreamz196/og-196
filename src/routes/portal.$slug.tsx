@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { computeWatch, DEFAULT_TIMEOUT_MS } from "@/lib/generation-watch";
 import { EditableContent } from "@/components/admin/EditableContent";
+import { SongStudioCoPilot } from "@/components/messenger/SongStudioCoPilot";
 
 const LANGUAGE_OPTIONS = [
   "English", "Spanish", "French", "German", "Italian", "Portuguese",
@@ -602,6 +603,7 @@ function PortalPage() {
           </div>
         )}
       </main>
+      {portal.slug === "song-studio" && <SongStudioCoPilot />}
     </div>
   );
 }
