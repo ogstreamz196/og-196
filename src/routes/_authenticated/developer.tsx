@@ -53,9 +53,7 @@ function DeveloperCenter() {
 
   const purchase = useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.rpc("purchase_bot_token", {
-        p_allowed_domain: null,
-      });
+      const { data, error } = await supabase.rpc("purchase_bot_token", {});
       if (error) throw error;
       return data;
     },

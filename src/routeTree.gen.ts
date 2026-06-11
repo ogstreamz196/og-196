@@ -16,6 +16,7 @@ import { Route as PortalSlugRouteImport } from './routes/portal.$slug'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedPortalsRouteImport } from './routes/_authenticated/portals'
 import { Route as AuthenticatedMessengerRouteImport } from './routes/_authenticated/messenger'
+import { Route as AuthenticatedDeveloperRouteImport } from './routes/_authenticated/developer'
 import { Route as AuthenticatedLibraryIndexRouteImport } from './routes/_authenticated/library.index'
 import { Route as AuthenticatedBuyCoinsIndexRouteImport } from './routes/_authenticated/buy-coins.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
@@ -61,6 +62,11 @@ const AuthenticatedPortalsRoute = AuthenticatedPortalsRouteImport.update({
 const AuthenticatedMessengerRoute = AuthenticatedMessengerRouteImport.update({
   id: '/messenger',
   path: '/messenger',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDeveloperRoute = AuthenticatedDeveloperRouteImport.update({
+  id: '/developer',
+  path: '/developer',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedLibraryIndexRoute =
@@ -136,6 +142,7 @@ const AuthenticatedAdminUsersUserIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
+  '/developer': typeof AuthenticatedDeveloperRoute
   '/messenger': typeof AuthenticatedMessengerRoute
   '/portals': typeof AuthenticatedPortalsRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -155,6 +162,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
+  '/developer': typeof AuthenticatedDeveloperRoute
   '/messenger': typeof AuthenticatedMessengerRoute
   '/portals': typeof AuthenticatedPortalsRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -177,6 +185,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/developer': typeof AuthenticatedDeveloperRoute
   '/_authenticated/messenger': typeof AuthenticatedMessengerRoute
   '/_authenticated/portals': typeof AuthenticatedPortalsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
@@ -200,6 +209,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/developer'
     | '/messenger'
     | '/portals'
     | '/settings'
@@ -219,6 +229,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
+    | '/developer'
     | '/messenger'
     | '/portals'
     | '/settings'
@@ -240,6 +251,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/developer'
     | '/_authenticated/messenger'
     | '/_authenticated/portals'
     | '/_authenticated/settings'
@@ -315,6 +327,13 @@ declare module '@tanstack/react-router' {
       path: '/messenger'
       fullPath: '/messenger'
       preLoaderRoute: typeof AuthenticatedMessengerRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/developer': {
+      id: '/_authenticated/developer'
+      path: '/developer'
+      fullPath: '/developer'
+      preLoaderRoute: typeof AuthenticatedDeveloperRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/library/': {
@@ -419,6 +438,7 @@ const AuthenticatedAdminUsersRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedDeveloperRoute: typeof AuthenticatedDeveloperRoute
   AuthenticatedMessengerRoute: typeof AuthenticatedMessengerRoute
   AuthenticatedPortalsRoute: typeof AuthenticatedPortalsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
@@ -436,6 +456,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedDeveloperRoute: AuthenticatedDeveloperRoute,
   AuthenticatedMessengerRoute: AuthenticatedMessengerRoute,
   AuthenticatedPortalsRoute: AuthenticatedPortalsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
