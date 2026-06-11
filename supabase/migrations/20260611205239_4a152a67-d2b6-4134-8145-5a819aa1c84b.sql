@@ -1,0 +1,1 @@
+CREATE POLICY "Admins delete all songs" ON public.songs FOR DELETE TO authenticated USING (public.has_role(auth.uid(), 'admin'));
