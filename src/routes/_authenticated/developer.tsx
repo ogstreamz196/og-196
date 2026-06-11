@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Code2, Coins, Copy, Check, Eye, EyeOff, Globe, Loader2, Plus, Power, PowerOff, ShieldCheck, Sparkles,
@@ -11,6 +11,10 @@ import { useProfile } from "@/hooks/use-profile";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/_authenticated/developer")({
   component: DeveloperCenter,
@@ -69,6 +73,20 @@ function DeveloperCenter() {
       toast.error(msg);
     },
   });
+
+  // Realtime: instantly reflect status changes on this developer's tokens
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel(`bot-tokens-${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "bot_tokens", filter: `developer_id=eq.${user.id}` },
+        () => qc.invalidateQueries({ queryKey: ["bot-tokens"] }),
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user, qc]);
 
   return (
     <DashboardShell title="Developer Center">
@@ -149,11 +167,12 @@ function TokenCard({ token }: { token: BotToken }) {
   const [domain, setDomain] = useState(token.allowed_domain ?? "");
   const [saving, setSaving] = useState(false);
   const [suspending, setSuspending] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const isSuspended = token.status !== "active";
 
   const snippet = `<script src="${WIDGET_CDN}" data-og-token="${token.token_string}"></script>`;
 
-  async function toggleSuspend() {
+  async function confirmToggleSuspend() {
     setSuspending(true);
     const nextStatus = isSuspended ? "active" : "suspended";
     const { error } = await supabase
@@ -161,14 +180,15 @@ function TokenCard({ token }: { token: BotToken }) {
       .update({ status: nextStatus })
       .eq("id", token.id);
     setSuspending(false);
+    setConfirmOpen(false);
     if (error) {
       toast.error(error.message);
       return;
     }
     toast.success(
       nextStatus === "suspended"
-        ? "Token suspended — widget & OG Messenger will hide on next check"
-        : "Token reactivated",
+        ? "Token suspended — widget & OG Messenger hiding now"
+        : "Token reactivated — service resumed",
     );
     qc.invalidateQueries({ queryKey: ["bot-tokens"] });
   }
@@ -240,7 +260,7 @@ function TokenCard({ token }: { token: BotToken }) {
           <Button
             size="sm"
             variant={isSuspended ? "default" : "outline"}
-            onClick={toggleSuspend}
+            onClick={() => setConfirmOpen(true)}
             disabled={suspending}
             className="gap-1.5"
           >
@@ -268,7 +288,7 @@ function TokenCard({ token }: { token: BotToken }) {
           </div>
           <Button
             size="sm"
-            onClick={toggleSuspend}
+            onClick={() => setConfirmOpen(true)}
             disabled={suspending}
             className="gap-1.5 bg-emerald-500 text-white hover:bg-emerald-600"
           >
@@ -328,6 +348,46 @@ function TokenCard({ token }: { token: BotToken }) {
           <code className="font-mono text-foreground/90">{snippet}</code>
         </pre>
       </div>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {isSuspended ? "Reactivate this token?" : "Suspend this token?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {isSuspended ? (
+                <>
+                  This will <strong className="text-foreground">resume access</strong> for the
+                  OG Bot widget and OG Messenger on every site using token{" "}
+                  <code className="rounded bg-muted px-1 text-xs">{mask(token.token_string)}</code>.
+                  The widgets will reappear in real time.
+                </>
+              ) : (
+                <>
+                  This will <strong className="text-foreground">immediately deny access</strong> and
+                  hide the OG Bot widget and OG Messenger on every site using token{" "}
+                  <code className="rounded bg-muted px-1 text-xs">{mask(token.token_string)}</code>.
+                  You can reactivate at any time.
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={suspending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); confirmToggleSuspend(); }}
+              disabled={suspending}
+              className={isSuspended ? "bg-emerald-500 hover:bg-emerald-600" : "bg-destructive hover:bg-destructive/90"}
+            >
+              {suspending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : null}
+              {isSuspended ? "Yes, reactivate" : "Yes, suspend"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
