@@ -1,5 +1,5 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Library, Coins as CoinsIcon, LogOut, Music2, Settings, Search, Clock, Loader2, Compass, UserCog, LayoutDashboard, PlusSquare, ShieldCheck, Bot, MessageCircle } from "lucide-react";
+import { Library, Coins as CoinsIcon, LogOut, Music2, Settings, Search, Clock, Loader2, Compass, UserCog, LayoutDashboard, PlusSquare, ShieldCheck, Bot, MessageCircle, Code2 } from "lucide-react";
 import { OgBotWidget } from "@/components/messenger/OgBotWidget";
 import { useEffect, type ReactNode } from "react";
 import { CoinBalance } from "./CoinBalance";
@@ -29,6 +29,7 @@ const baseNavItems: NavItem[] = [
   { to: "/portals", label: "Portals", icon: Compass, match: ["/portals", "/portal/"] },
   { to: "/library", label: "My Library", icon: Library, match: ["/library"] },
   { to: "/messenger", label: "OG Messenger", icon: MessageCircle, match: ["/messenger"] },
+  { to: "/developer", label: "Developer Center", icon: Code2, match: ["/developer"] },
   { to: "/buy-coins", label: "Buy OG Coins", icon: CoinsIcon, match: ["/buy-coins"] },
 ];
 
