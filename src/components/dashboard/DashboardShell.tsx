@@ -29,6 +29,7 @@ const baseNavItems: NavItem[] = [
   { to: "/portals", label: "Portals", icon: Compass, match: ["/portals", "/portal/"] },
   { to: "/library", label: "My Library", icon: Library, match: ["/library"] },
   { to: "/messenger", label: "OG Messenger", icon: MessageCircle, match: ["/messenger"] },
+  { to: "/developer", label: "Developer Center", icon: Code2, match: ["/developer"] },
   { to: "/buy-coins", label: "Buy OG Coins", icon: CoinsIcon, match: ["/buy-coins"] },
 ];
 
