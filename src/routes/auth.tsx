@@ -73,6 +73,15 @@ function AuthPage() {
     }
   }
 
+  async function handlePortal() {
+    const { data } = await supabase.auth.getSession();
+    if (data.session) {
+      navigate({ to: "/", replace: true });
+    } else {
+      scrollToAuth();
+    }
+  }
+
   function scrollToAuth() {
     authAnchor.current?.scrollIntoView({ behavior: "smooth", block: "center" });
   }
@@ -152,7 +161,7 @@ function AuthPage() {
               <Button
                 size="lg"
                 variant="outline"
-                onClick={scrollToAuth}
+                onClick={handlePortal}
                 className="glass-panel border-white/15 text-foreground hover:bg-white/5"
               >
                 <Music2 className="mr-2 h-4 w-4" />
@@ -279,7 +288,7 @@ function AuthPage() {
             <Button
               size="lg"
               variant="outline"
-              onClick={handleGoogle}
+              onClick={handlePortal}
               disabled={loading}
               className="glass-panel border-white/15 text-foreground hover:bg-white/5"
             >
@@ -351,8 +360,8 @@ function FeatureCard({
   body: string;
 }) {
   return (
-    <div className="group rounded-2xl glass-panel p-5 transition-transform hover:-translate-y-0.5">
-      <div className="mb-4 grid h-10 w-10 place-items-center rounded-xl bg-gradient-brand text-primary-foreground shadow-glow">
+    <div className="group rounded-2xl glass-panel p-5 transition-all duration-300 hover:scale-105 hover:-translate-y-1 hover:shadow-[0_0_40px_-5px_oklch(0.62_0.20_268_/_0.6)] hover:border-primary/40">
+      <div className="mb-4 grid h-10 w-10 place-items-center rounded-xl bg-gradient-brand text-primary-foreground shadow-glow transition-transform group-hover:scale-110">
         {icon}
       </div>
       <h3 className="text-base font-bold">{title}</h3>
@@ -363,15 +372,13 @@ function FeatureCard({
 
 type Msg = { from: "bot" | "user"; text: string };
 const DEMO_CONVO: Msg[] = [
-  { from: "user", text: "What can you actually do?" },
   {
-    from: "bot",
-    text: "Crawl the web, read your images, run code, remember every dumb thing you've ever asked me. Want a list or you just gonna keep stalling?",
+    from: "user",
+    text: "Hey OG Bot, can you summarize this technical document and add it to my database?",
   },
-  { from: "user", text: "Damn. Okay, summarise my last support ticket." },
   {
     from: "bot",
-    text: "Done. User's mad about checkout. Refund'em, send the apology, move on. Want me to draft it?",
+    text: "Yeah, yeah, I'm on it. Already crawled the URL, analyzed the image assets, and pushed the data straight to your Supabase tables. Took me 1.2 seconds. What else you got, or are you just gonna stare at my clean UI all day?",
   },
 ];
 
@@ -460,13 +467,16 @@ function WidgetMockup({ open, setOpen }: { open: boolean; setOpen: (v: boolean) 
             <button
               type="button"
               onClick={() => setOpen(!open)}
-              className="group relative grid h-16 w-16 place-items-center rounded-full bg-gradient-brand shadow-glow ring-2 ring-white/20 transition-transform hover:scale-105"
+              className="group relative grid h-16 w-16 place-items-center rounded-full bg-gradient-brand shadow-glow ring-2 ring-white/20 transition-transform hover:scale-110"
               aria-label="Open OG Bot widget"
             >
+              {!open && (
+                <span className="pointer-events-none absolute inset-0 animate-ping rounded-full bg-primary/40" />
+              )}
               <img
                 src={ogLogoAsset.url}
                 alt=""
-                className="h-12 w-12 rounded-full object-cover"
+                className="relative h-12 w-12 rounded-full object-cover"
               />
               {!open && (
                 <span className="absolute -right-0.5 -top-0.5 grid h-5 w-5 place-items-center rounded-full bg-emerald-400 text-[10px] font-bold text-emerald-950 ring-2 ring-background">
