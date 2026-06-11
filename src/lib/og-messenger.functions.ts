@@ -45,7 +45,8 @@ export const chatOgBot = createServerFn({ method: "POST" })
       if (res.status === 402) throw new Error("AI credits exhausted on the OG Bot backend.");
       if (res.status === 401 || res.status === 403)
         throw new Error("Invalid or unauthorized OG Bot token.");
-      throw new Error("OG Bot couldn't respond right now.");
+      const snippet = text ? ` — ${text.slice(0, 200)}` : "";
+      throw new Error(`OG Bot couldn't respond right now (HTTP ${res.status})${snippet}`);
     }
 
     const json = (await res.json().catch(() => ({}))) as { reply?: string; error?: string };
