@@ -288,7 +288,7 @@ function TokenCard({ token }: { token: BotToken }) {
           </div>
           <Button
             size="sm"
-            onClick={toggleSuspend}
+            onClick={() => setConfirmOpen(true)}
             disabled={suspending}
             className="gap-1.5 bg-emerald-500 text-white hover:bg-emerald-600"
           >
