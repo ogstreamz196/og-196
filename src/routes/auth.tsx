@@ -161,7 +161,7 @@ function AuthPage() {
               <Button
                 size="lg"
                 variant="outline"
-                onClick={scrollToAuth}
+                onClick={handlePortal}
                 className="glass-panel border-white/15 text-foreground hover:bg-white/5"
               >
                 <Music2 className="mr-2 h-4 w-4" />
