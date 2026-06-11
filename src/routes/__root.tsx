@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "@/hooks/use-auth";
+import { RemoteAuthProvider } from "@/hooks/use-remote-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
 import { ensureCurrentUserBootstrap } from "@/lib/user-bootstrap.functions";
@@ -136,9 +137,11 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <SiteContentRealtimeBridge />
-        <Outlet />
-        <Toaster />
+        <RemoteAuthProvider>
+          <SiteContentRealtimeBridge />
+          <Outlet />
+          <Toaster />
+        </RemoteAuthProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
