@@ -1,12 +1,23 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, Flame, ShieldCheck, ShieldAlert } from "lucide-react";
+import { Loader2, Search, Flame, ShieldCheck, ShieldAlert, KeyRound, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+
+type LocalToken = {
+  user_id: string;
+  token: string;
+  created_at: string;
+  expires_at: string | null;
+  revoked_at: string | null;
+};
+type LocalProfile = { id: string; email: string | null; display_name: string | null };
 
 const REMOTE_SUPABASE_URL = "https://dawcdietltejjxbdimkm.supabase.co";
 const REMOTE_SUPABASE_ANON_KEY =
