@@ -360,8 +360,8 @@ function FeatureCard({
   body: string;
 }) {
   return (
-    <div className="group rounded-2xl glass-panel p-5 transition-transform hover:-translate-y-0.5">
-      <div className="mb-4 grid h-10 w-10 place-items-center rounded-xl bg-gradient-brand text-primary-foreground shadow-glow">
+    <div className="group rounded-2xl glass-panel p-5 transition-all duration-300 hover:scale-105 hover:-translate-y-1 hover:shadow-[0_0_40px_-5px_oklch(0.62_0.20_268_/_0.6)] hover:border-primary/40">
+      <div className="mb-4 grid h-10 w-10 place-items-center rounded-xl bg-gradient-brand text-primary-foreground shadow-glow transition-transform group-hover:scale-110">
         {icon}
       </div>
       <h3 className="text-base font-bold">{title}</h3>
@@ -372,6 +372,15 @@ function FeatureCard({
 
 type Msg = { from: "bot" | "user"; text: string };
 const DEMO_CONVO: Msg[] = [
+  {
+    from: "user",
+    text: "Hey OG Bot, can you summarize this technical document and add it to my database?",
+  },
+  {
+    from: "bot",
+    text: "Yeah, yeah, I'm on it. Already crawled the URL, analyzed the image assets, and pushed the data straight to your Supabase tables. Took me 1.2 seconds. What else you got, or are you just gonna stare at my clean UI all day?",
+  },
+];
   { from: "user", text: "What can you actually do?" },
   {
     from: "bot",
