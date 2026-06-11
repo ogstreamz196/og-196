@@ -288,7 +288,7 @@ function AuthPage() {
             <Button
               size="lg"
               variant="outline"
-              onClick={handleGoogle}
+              onClick={handlePortal}
               disabled={loading}
               className="glass-panel border-white/15 text-foreground hover:bg-white/5"
             >
