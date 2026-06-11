@@ -56,12 +56,6 @@ function createMockSupabase() {
     },
   };
 }
-    emit: (payload: PgChangePayload) => {
-      if (!handler) throw new Error("subscription handler not registered");
-      handler(payload);
-    },
-  };
-}
 
 describe("OG Bot widget visibility via Supabase Realtime", () => {
   let tokens: TokenLike[];
