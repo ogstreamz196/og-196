@@ -108,7 +108,13 @@ function PortalsPage() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {data.map((p) => (
               <CardWrapper key={p.id} portal={p}>
-                <div className="flex items-center gap-3">
+                {(() => {
+                  const isOgPortal = p.slug === "song-studio";
+                  const displayName = isOgPortal ? "OG Portal" : p.name;
+
+                  return (
+                    <>
+                      <div className="flex items-center gap-3">
                   <div
                     className="grid h-10 w-10 shrink-0 place-items-center rounded-xl"
                     style={{
@@ -120,14 +126,21 @@ function PortalsPage() {
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <h3 className="truncate font-semibold">
-                        <AdminEditablePortalField portalId={p.id} field="name" value={p.name} />
+                        {isOgPortal ? (
+                          displayName
+                        ) : (
+                          <AdminEditablePortalField portalId={p.id} field="name" value={p.name} />
+                        )}
                       </h3>
-                      {p.slug === "song-studio" && (
+                      {isOgPortal && (
                         <span className="inline-flex items-center gap-1 rounded-full bg-gradient-brand px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-primary-foreground shadow-glow ring-1 ring-primary/40">
                           <Bot className="h-2.5 w-2.5" /> OG Bot Engine
                         </span>
                       )}
                     </div>
+                    {isOgPortal && (
+                      <p className="text-xs font-medium text-primary/80">Song Studio</p>
+                    )}
                     <p className="flex items-center gap-1 text-xs text-muted-foreground">
                       <Globe2 className="h-3 w-3" /> {p.language}
                     </p>
@@ -135,9 +148,9 @@ function PortalsPage() {
                 </div>
 
                 <div className="line-clamp-3 text-sm text-muted-foreground">
-                  {p.slug === "song-studio" ? (
+                  {isOgPortal ? (
                     <span>
-                      The flagship portal — describe your song idea, pick a style, and let
+                      The flagship OG Portal — describe your song idea, pick a style, and let
                       <span className="font-semibold text-primary"> OG Bot </span>
                       write the raw lyrics, compose the tracks, and manage your production workflow.
                     </span>
@@ -179,6 +192,9 @@ function PortalsPage() {
                     </span>
                   </div>
                 )}
+                    </>
+                  );
+                })()}
               </CardWrapper>
             ))}
           </div>
