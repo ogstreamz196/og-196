@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  Code2, Coins, Copy, Check, Eye, EyeOff, Globe, Loader2, Plus, ShieldCheck, Sparkles,
+  Code2, Coins, Copy, Check, Eye, EyeOff, Globe, Loader2, Plus, Power, PowerOff, ShieldCheck, Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -148,8 +148,30 @@ function TokenCard({ token }: { token: BotToken }) {
   const [copied, setCopied] = useState(false);
   const [domain, setDomain] = useState(token.allowed_domain ?? "");
   const [saving, setSaving] = useState(false);
+  const [suspending, setSuspending] = useState(false);
+  const isSuspended = token.status !== "active";
 
   const snippet = `<script src="${WIDGET_CDN}" data-og-token="${token.token_string}"></script>`;
+
+  async function toggleSuspend() {
+    setSuspending(true);
+    const nextStatus = isSuspended ? "active" : "suspended";
+    const { error } = await supabase
+      .from("bot_tokens")
+      .update({ status: nextStatus })
+      .eq("id", token.id);
+    setSuspending(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success(
+      nextStatus === "suspended"
+        ? "Token suspended — widget & OG Messenger will hide on next check"
+        : "Token reactivated",
+    );
+    qc.invalidateQueries({ queryKey: ["bot-tokens"] });
+  }
 
   async function saveDomain() {
     const trimmed = domain.trim();
@@ -203,18 +225,43 @@ function TokenCard({ token }: { token: BotToken }) {
             </p>
           </div>
         </div>
-        <span
-          className={
-            "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium " +
-            (token.status === "active"
-              ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-500"
-              : "border-amber-500/40 bg-amber-500/10 text-amber-500")
-          }
-        >
-          <span className="h-1.5 w-1.5 rounded-full bg-current" />
-          {token.status}
-        </span>
+        <div className="flex items-center gap-2">
+          <span
+            className={
+              "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium " +
+              (token.status === "active"
+                ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-500"
+                : "border-amber-500/40 bg-amber-500/10 text-amber-500")
+            }
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-current" />
+            {token.status}
+          </span>
+          <Button
+            size="sm"
+            variant={isSuspended ? "default" : "outline"}
+            onClick={toggleSuspend}
+            disabled={suspending}
+            className="gap-1.5"
+          >
+            {suspending ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : isSuspended ? (
+              <Power className="h-3.5 w-3.5" />
+            ) : (
+              <PowerOff className="h-3.5 w-3.5" />
+            )}
+            {isSuspended ? "Reactivate" : "Suspend"}
+          </Button>
+        </div>
       </div>
+
+      {isSuspended && (
+        <div className="mt-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-300">
+          This token is suspended. The OG Bot widget and OG Messenger will deny access
+          and hide themselves on every site using this token until you reactivate it.
+        </div>
+      )}
 
       {/* Domain binding */}
       <div className="mt-5">
