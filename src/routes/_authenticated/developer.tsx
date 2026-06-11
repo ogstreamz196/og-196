@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import { RemoteAuthCard } from "@/components/remote-auth/RemoteAuthCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -91,6 +92,7 @@ function DeveloperCenter() {
   return (
     <DashboardShell title="Developer Center">
       <div className="mx-auto max-w-6xl space-y-8">
+        <RemoteAuthCard />
         {/* Hero */}
         <div className="relative overflow-hidden rounded-3xl border border-border bg-card/60 p-8 shadow-card backdrop-blur-xl">
           <div className="inline-flex items-center gap-2 rounded-full border border-border bg-background/50 px-3 py-1 text-xs text-muted-foreground backdrop-blur">
