@@ -74,6 +74,20 @@ function DeveloperCenter() {
     },
   });
 
+  // Realtime: instantly reflect status changes on this developer's tokens
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel(`bot-tokens-${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "bot_tokens", filter: `developer_id=eq.${user.id}` },
+        () => qc.invalidateQueries({ queryKey: ["bot-tokens"] }),
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user, qc]);
+
   return (
     <DashboardShell title="Developer Center">
       <div className="mx-auto max-w-6xl space-y-8">
