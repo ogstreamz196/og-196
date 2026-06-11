@@ -225,18 +225,43 @@ function TokenCard({ token }: { token: BotToken }) {
             </p>
           </div>
         </div>
-        <span
-          className={
-            "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium " +
-            (token.status === "active"
-              ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-500"
-              : "border-amber-500/40 bg-amber-500/10 text-amber-500")
-          }
-        >
-          <span className="h-1.5 w-1.5 rounded-full bg-current" />
-          {token.status}
-        </span>
+        <div className="flex items-center gap-2">
+          <span
+            className={
+              "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium " +
+              (token.status === "active"
+                ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-500"
+                : "border-amber-500/40 bg-amber-500/10 text-amber-500")
+            }
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-current" />
+            {token.status}
+          </span>
+          <Button
+            size="sm"
+            variant={isSuspended ? "default" : "outline"}
+            onClick={toggleSuspend}
+            disabled={suspending}
+            className="gap-1.5"
+          >
+            {suspending ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : isSuspended ? (
+              <Power className="h-3.5 w-3.5" />
+            ) : (
+              <PowerOff className="h-3.5 w-3.5" />
+            )}
+            {isSuspended ? "Reactivate" : "Suspend"}
+          </Button>
+        </div>
       </div>
+
+      {isSuspended && (
+        <div className="mt-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-300">
+          This token is suspended. The OG Bot widget and OG Messenger will deny access
+          and hide themselves on every site using this token until you reactivate it.
+        </div>
+      )}
 
       {/* Domain binding */}
       <div className="mt-5">
