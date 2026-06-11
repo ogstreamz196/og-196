@@ -467,13 +467,16 @@ function WidgetMockup({ open, setOpen }: { open: boolean; setOpen: (v: boolean) 
             <button
               type="button"
               onClick={() => setOpen(!open)}
-              className="group relative grid h-16 w-16 place-items-center rounded-full bg-gradient-brand shadow-glow ring-2 ring-white/20 transition-transform hover:scale-105"
+              className="group relative grid h-16 w-16 place-items-center rounded-full bg-gradient-brand shadow-glow ring-2 ring-white/20 transition-transform hover:scale-110"
               aria-label="Open OG Bot widget"
             >
+              {!open && (
+                <span className="pointer-events-none absolute inset-0 animate-ping rounded-full bg-primary/40" />
+              )}
               <img
                 src={ogLogoAsset.url}
                 alt=""
-                className="h-12 w-12 rounded-full object-cover"
+                className="relative h-12 w-12 rounded-full object-cover"
               />
               {!open && (
                 <span className="absolute -right-0.5 -top-0.5 grid h-5 w-5 place-items-center rounded-full bg-emerald-400 text-[10px] font-bold text-emerald-950 ring-2 ring-background">
