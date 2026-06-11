@@ -348,6 +348,46 @@ function TokenCard({ token }: { token: BotToken }) {
           <code className="font-mono text-foreground/90">{snippet}</code>
         </pre>
       </div>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {isSuspended ? "Reactivate this token?" : "Suspend this token?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {isSuspended ? (
+                <>
+                  This will <strong className="text-foreground">resume access</strong> for the
+                  OG Bot widget and OG Messenger on every site using token{" "}
+                  <code className="rounded bg-muted px-1 text-xs">{mask(token.token_string)}</code>.
+                  The widgets will reappear in real time.
+                </>
+              ) : (
+                <>
+                  This will <strong className="text-foreground">immediately deny access</strong> and
+                  hide the OG Bot widget and OG Messenger on every site using token{" "}
+                  <code className="rounded bg-muted px-1 text-xs">{mask(token.token_string)}</code>.
+                  You can reactivate at any time.
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={suspending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); confirmToggleSuspend(); }}
+              disabled={suspending}
+              className={isSuspended ? "bg-emerald-500 hover:bg-emerald-600" : "bg-destructive hover:bg-destructive/90"}
+            >
+              {suspending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : null}
+              {isSuspended ? "Yes, reactivate" : "Yes, suspend"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
