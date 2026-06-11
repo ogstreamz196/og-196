@@ -68,6 +68,44 @@ export type Database = {
         }
         Relationships: []
       }
+      bot_tokens: {
+        Row: {
+          allowed_domain: string | null
+          created_at: string
+          developer_id: string
+          id: string
+          status: string
+          token_string: string
+          updated_at: string
+        }
+        Insert: {
+          allowed_domain?: string | null
+          created_at?: string
+          developer_id: string
+          id?: string
+          status?: string
+          token_string?: string
+          updated_at?: string
+        }
+        Update: {
+          allowed_domain?: string | null
+          created_at?: string
+          developer_id?: string
+          id?: string
+          status?: string
+          token_string?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bot_tokens_developer_id_fkey"
+            columns: ["developer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coin_transactions: {
         Row: {
           amount: number
@@ -413,6 +451,7 @@ export type Database = {
         Args: { p_amount: number; p_reference: string; p_user: string }
         Returns: number
       }
+      gen_bot_token_string: { Args: never; Returns: string }
       gen_og_bot_invite_code: { Args: never; Returns: string }
       gen_og_bot_token: { Args: never; Returns: string }
       has_role: {
@@ -433,6 +472,13 @@ export type Database = {
       mint_coins_admin: {
         Args: { admin_notes: string; amount: number; target_user_id: string }
         Returns: number
+      }
+      purchase_bot_token: {
+        Args: { p_allowed_domain?: string }
+        Returns: {
+          id: string
+          token_string: string
+        }[]
       }
       purchase_vip: { Args: never; Returns: number }
       redeem_og_bot_invite: { Args: { p_code: string }; Returns: string }
@@ -479,6 +525,10 @@ export type Database = {
       }
       unrevoke_og_bot_token: {
         Args: { admin_notes?: string; target_user_id: string }
+        Returns: boolean
+      }
+      validate_bot_token: {
+        Args: { p_origin: string; p_token: string }
         Returns: boolean
       }
     }
