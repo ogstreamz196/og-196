@@ -453,6 +453,10 @@ function OgBotSettingsPage() {
           }
         />
 
+        {/* Remote token inspect + burn (mother project) */}
+        <RemoteTokenInspector />
+
+
         {/* Stats */}
         <section className="grid gap-4 sm:grid-cols-5">
           <StatCard label="Total tokens" value={String(tokens.length)} />
