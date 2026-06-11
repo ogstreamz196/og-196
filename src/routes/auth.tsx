@@ -381,17 +381,6 @@ const DEMO_CONVO: Msg[] = [
     text: "Yeah, yeah, I'm on it. Already crawled the URL, analyzed the image assets, and pushed the data straight to your Supabase tables. Took me 1.2 seconds. What else you got, or are you just gonna stare at my clean UI all day?",
   },
 ];
-  { from: "user", text: "What can you actually do?" },
-  {
-    from: "bot",
-    text: "Crawl the web, read your images, run code, remember every dumb thing you've ever asked me. Want a list or you just gonna keep stalling?",
-  },
-  { from: "user", text: "Damn. Okay, summarise my last support ticket." },
-  {
-    from: "bot",
-    text: "Done. User's mad about checkout. Refund'em, send the apology, move on. Want me to draft it?",
-  },
-];
 
 function WidgetMockup({ open, setOpen }: { open: boolean; setOpen: (v: boolean) => void }) {
   return (
