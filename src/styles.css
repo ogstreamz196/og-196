@@ -51,26 +51,26 @@
 :root {
   --radius: 0.875rem;
 
-  /* Deep midnight navy — regal base */
-  --background: oklch(0.14 0.04 265);
-  --foreground: oklch(0.97 0.008 250);
+  /* Deep midnight navy — base (translucent so the brand wallpaper shows through) */
+  --background: oklch(0.10 0.04 265 / 0);
+  --foreground: oklch(0.98 0.008 250);
 
-  /* Glassy panels: lifted navy with subtle silver sheen */
-  --card: oklch(0.19 0.045 263);
-  --card-foreground: oklch(0.97 0.008 250);
+  /* Glassy panels: translucent navy ink over the wallpaper */
+  --card: oklch(0.12 0.04 265 / 0.55);
+  --card-foreground: oklch(0.98 0.008 250);
 
-  --popover: oklch(0.19 0.045 263);
-  --popover-foreground: oklch(0.97 0.008 250);
+  --popover: oklch(0.14 0.04 265 / 0.92);
+  --popover-foreground: oklch(0.98 0.008 250);
 
   /* Royal blue — dominant CTA */
   --primary: oklch(0.55 0.22 268);
   --primary-foreground: oklch(0.98 0.005 250);
 
-  --secondary: oklch(0.24 0.04 263);
+  --secondary: oklch(0.20 0.04 263 / 0.55);
   --secondary-foreground: oklch(0.97 0.008 250);
 
-  --muted: oklch(0.22 0.035 263);
-  --muted-foreground: oklch(0.72 0.02 255);
+  --muted: oklch(0.18 0.035 263 / 0.55);
+  --muted-foreground: oklch(0.80 0.02 255);
 
   /* Polished silver — secondary accent */
   --accent: oklch(0.86 0.012 255);
@@ -79,17 +79,17 @@
   --destructive: oklch(0.62 0.22 25);
   --destructive-foreground: oklch(0.98 0.005 250);
 
-  --border: oklch(0.32 0.045 263);
-  --input: oklch(0.24 0.04 263);
+  --border: oklch(1 0 0 / 0.10);
+  --input: oklch(1 0 0 / 0.08);
   --ring: oklch(0.62 0.20 268);
 
-  --sidebar: oklch(0.11 0.035 265);
-  --sidebar-foreground: oklch(0.92 0.008 250);
+  --sidebar: oklch(0.08 0.035 265 / 0.55);
+  --sidebar-foreground: oklch(0.94 0.008 250);
   --sidebar-primary: oklch(0.55 0.22 268);
   --sidebar-primary-foreground: oklch(0.98 0.005 250);
-  --sidebar-accent: oklch(0.20 0.045 263);
-  --sidebar-accent-foreground: oklch(0.97 0.008 250);
-  --sidebar-border: oklch(0.26 0.045 263);
+  --sidebar-accent: oklch(0.20 0.045 263 / 0.55);
+  --sidebar-accent-foreground: oklch(0.98 0.008 250);
+  --sidebar-border: oklch(1 0 0 / 0.10);
   --sidebar-ring: oklch(0.62 0.20 268);
 
   /* Coin — silver-platinum (was amber) */
@@ -118,32 +118,32 @@
 
 /* This app is dark-first. .dark mirrors :root. */
 .dark {
-  --background: oklch(0.14 0.04 265);
-  --foreground: oklch(0.97 0.008 250);
-  --card: oklch(0.19 0.045 263);
-  --card-foreground: oklch(0.97 0.008 250);
-  --popover: oklch(0.19 0.045 263);
-  --popover-foreground: oklch(0.97 0.008 250);
+  --background: oklch(0.10 0.04 265 / 0);
+  --foreground: oklch(0.98 0.008 250);
+  --card: oklch(0.12 0.04 265 / 0.55);
+  --card-foreground: oklch(0.98 0.008 250);
+  --popover: oklch(0.14 0.04 265 / 0.92);
+  --popover-foreground: oklch(0.98 0.008 250);
   --primary: oklch(0.55 0.22 268);
   --primary-foreground: oklch(0.98 0.005 250);
-  --secondary: oklch(0.24 0.04 263);
+  --secondary: oklch(0.20 0.04 263 / 0.55);
   --secondary-foreground: oklch(0.97 0.008 250);
-  --muted: oklch(0.22 0.035 263);
-  --muted-foreground: oklch(0.72 0.02 255);
+  --muted: oklch(0.18 0.035 263 / 0.55);
+  --muted-foreground: oklch(0.80 0.02 255);
   --accent: oklch(0.86 0.012 255);
   --accent-foreground: oklch(0.18 0.04 263);
   --destructive: oklch(0.62 0.22 25);
   --destructive-foreground: oklch(0.98 0.005 250);
-  --border: oklch(0.32 0.045 263);
-  --input: oklch(0.24 0.04 263);
+  --border: oklch(1 0 0 / 0.10);
+  --input: oklch(1 0 0 / 0.08);
   --ring: oklch(0.62 0.20 268);
-  --sidebar: oklch(0.11 0.035 265);
-  --sidebar-foreground: oklch(0.92 0.008 250);
+  --sidebar: oklch(0.08 0.035 265 / 0.55);
+  --sidebar-foreground: oklch(0.94 0.008 250);
   --sidebar-primary: oklch(0.55 0.22 268);
   --sidebar-primary-foreground: oklch(0.98 0.005 250);
-  --sidebar-accent: oklch(0.20 0.045 263);
-  --sidebar-accent-foreground: oklch(0.97 0.008 250);
-  --sidebar-border: oklch(0.26 0.045 263);
+  --sidebar-accent: oklch(0.20 0.045 263 / 0.55);
+  --sidebar-accent-foreground: oklch(0.98 0.008 250);
+  --sidebar-border: oklch(1 0 0 / 0.10);
   --sidebar-ring: oklch(0.62 0.20 268);
 }
 
@@ -156,12 +156,47 @@
     color: var(--color-foreground);
     font-feature-settings: "ss01", "cv11";
     -webkit-font-smoothing: antialiased;
-    background-image:
-      radial-gradient(ellipse 90% 60% at 50% -10%, oklch(0.35 0.18 268 / 0.35), transparent 60%),
-      radial-gradient(ellipse 70% 50% at 100% 100%, oklch(0.30 0.14 270 / 0.25), transparent 65%),
-      radial-gradient(circle at 20% 40%, oklch(0.78 0.05 255 / 0.05), transparent 50%);
-    background-attachment: fixed;
+    position: relative;
+    min-height: 100vh;
   }
+  /* Sitewide brand wallpaper, fixed and full-bleed */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    background-image: url("./assets/app-background.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+  /* Smoky tint for legibility over the wallpaper */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 90% 60% at 50% -10%, oklch(0.35 0.18 268 / 0.30), transparent 60%),
+      radial-gradient(ellipse 70% 50% at 100% 100%, oklch(0.30 0.14 270 / 0.30), transparent 65%),
+      linear-gradient(180deg, oklch(0.10 0.04 265 / 0.55), oklch(0.10 0.04 265 / 0.72));
+  }
+}
+
+/* Glassmorphism utilities — transparent floating panels over the wallpaper */
+@utility glass-panel {
+  background-color: color-mix(in oklab, black 55%, transparent);
+  backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid color-mix(in oklab, white 10%, transparent);
+  box-shadow:
+    0 10px 40px -12px oklch(0 0 0 / 0.6),
+    inset 0 1px 0 0 oklch(1 0 0 / 0.06);
+}
+@utility glass-panel-strong {
+  background-color: color-mix(in oklab, black 65%, transparent);
+  backdrop-filter: blur(24px) saturate(150%);
+  border: 1px solid color-mix(in oklab, white 12%, transparent);
 }
 
 @utility text-gradient-brand {
@@ -194,4 +229,9 @@
     0 1px 0 0 oklch(1 0 0 / 0.06) inset,
     0 -1px 0 0 oklch(0 0 0 / 0.35) inset,
     0 12px 40px -16px oklch(0.30 0.18 268 / 0.45);
+}
+
+/* Sitewide glassmorphism — every surface using these tokens becomes a translucent floating panel */
+.bg-card, .bg-sidebar, .bg-popover, [data-slot="card"], [data-slot="popover-content"], [data-slot="dialog-content"], [data-slot="sheet-content"], [data-slot="dropdown-menu-content"], [data-slot="select-content"] {
+  backdrop-filter: blur(16px) saturate(140%);
 }
