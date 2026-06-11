@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  Code2, Coins, Copy, Check, Eye, EyeOff, Globe, Loader2, Plus, ShieldCheck, Sparkles,
+  Code2, Coins, Copy, Check, Eye, EyeOff, Globe, Loader2, Plus, Power, PowerOff, ShieldCheck, Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
