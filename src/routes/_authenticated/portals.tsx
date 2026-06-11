@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, Compass, Globe2, Coins, Sparkles } from "lucide-react";
+import { Loader2, Compass, Globe2, Coins, Sparkles, Bot } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { AdminEditablePortalField, useAdminEditMode } from "@/components/admin/AdminEditMode";
@@ -118,9 +118,16 @@ function PortalsPage() {
                     <Sparkles className="h-5 w-5 text-white" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h3 className="truncate font-semibold">
-                      <AdminEditablePortalField portalId={p.id} field="name" value={p.name} />
-                    </h3>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="truncate font-semibold">
+                        <AdminEditablePortalField portalId={p.id} field="name" value={p.name} />
+                      </h3>
+                      {p.slug === "song-studio" && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-gradient-brand px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-primary-foreground shadow-glow ring-1 ring-primary/40">
+                          <Bot className="h-2.5 w-2.5" /> OG Bot Engine
+                        </span>
+                      )}
+                    </div>
                     <p className="flex items-center gap-1 text-xs text-muted-foreground">
                       <Globe2 className="h-3 w-3" /> {p.language}
                     </p>
@@ -128,13 +135,21 @@ function PortalsPage() {
                 </div>
 
                 <div className="line-clamp-3 text-sm text-muted-foreground">
-                  <AdminEditablePortalField
-                    portalId={p.id}
-                    field="custom_welcome_text"
-                    value={p.custom_welcome_text}
-                    fallback={editingActive ? "Add a welcome message…" : ""}
-                    multiline
-                  />
+                  {p.slug === "song-studio" ? (
+                    <span>
+                      The flagship portal — describe your song idea, pick a style, and let
+                      <span className="font-semibold text-primary"> OG Bot </span>
+                      write the raw lyrics, compose the tracks, and manage your production workflow.
+                    </span>
+                  ) : (
+                    <AdminEditablePortalField
+                      portalId={p.id}
+                      field="custom_welcome_text"
+                      value={p.custom_welcome_text}
+                      fallback={editingActive ? "Add a welcome message…" : ""}
+                      multiline
+                    />
+                  )}
                 </div>
 
                 {p.style_tags && p.style_tags.length > 0 && (
