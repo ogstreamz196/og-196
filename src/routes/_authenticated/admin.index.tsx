@@ -10,6 +10,9 @@ import { PortalManager } from "@/components/admin/PortalManager";
 import { MintCoinsPanel } from "@/components/admin/MintCoinsPanel";
 import { OgCoinsPanel } from "@/components/admin/OgCoinsPanel";
 import { BossAuditLog } from "@/components/admin/BossAuditLog";
+import { BossNav } from "@/components/admin/BossNav";
+import { WidgetAccessAudit } from "@/components/admin/WidgetAccessAudit";
+import { HardwiredCapabilities } from "@/components/admin/HardwiredCapabilities";
 import { AdminEditableLabel, AdminEditableBalance } from "@/components/admin/AdminEditMode";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -115,6 +118,7 @@ function AdminPanel() {
 
   return (
     <DashboardShell title="Boss Panel">
+      <BossNav />
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-card p-4">
           <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-brand">
@@ -145,6 +149,8 @@ function AdminPanel() {
           </Link>
         </div>
 
+        <WidgetAccessAudit />
+
         <OgCoinsPanel />
 
         <PricingControls />
@@ -154,6 +160,8 @@ function AdminPanel() {
         <PortalManager />
 
         <BossAuditLog />
+
+        <HardwiredCapabilities />
 
 
 
