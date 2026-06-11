@@ -167,11 +167,12 @@ function TokenCard({ token }: { token: BotToken }) {
   const [domain, setDomain] = useState(token.allowed_domain ?? "");
   const [saving, setSaving] = useState(false);
   const [suspending, setSuspending] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const isSuspended = token.status !== "active";
 
   const snippet = `<script src="${WIDGET_CDN}" data-og-token="${token.token_string}"></script>`;
 
-  async function toggleSuspend() {
+  async function confirmToggleSuspend() {
     setSuspending(true);
     const nextStatus = isSuspended ? "active" : "suspended";
     const { error } = await supabase
@@ -179,14 +180,15 @@ function TokenCard({ token }: { token: BotToken }) {
       .update({ status: nextStatus })
       .eq("id", token.id);
     setSuspending(false);
+    setConfirmOpen(false);
     if (error) {
       toast.error(error.message);
       return;
     }
     toast.success(
       nextStatus === "suspended"
-        ? "Token suspended — widget & OG Messenger will hide on next check"
-        : "Token reactivated",
+        ? "Token suspended — widget & OG Messenger hiding now"
+        : "Token reactivated — service resumed",
     );
     qc.invalidateQueries({ queryKey: ["bot-tokens"] });
   }
