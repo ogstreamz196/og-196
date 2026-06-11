@@ -15,7 +15,7 @@ export function CoinBalance({ className }: { className?: string }) {
       <span className="text-sm font-semibold tabular-nums">
         {isLoading ? "—" : (data?.coin_balance ?? 0)}
       </span>
-      <span className="text-xs text-muted-foreground">coins</span>
+      <span className="text-xs text-muted-foreground">OG coins</span>
     </div>
   );
 }

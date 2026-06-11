@@ -29,7 +29,7 @@ const baseNavItems: NavItem[] = [
   { to: "/portals", label: "Portals", icon: Compass, match: ["/portals", "/portal/"] },
   { to: "/library", label: "My Library", icon: Library, match: ["/library"] },
   { to: "/messenger", label: "OG Messenger", icon: MessageCircle, match: ["/messenger"] },
-  { to: "/buy-coins", label: "Buy Coins", icon: CoinsIcon, match: ["/buy-coins"] },
+  { to: "/buy-coins", label: "Buy OG Coins", icon: CoinsIcon, match: ["/buy-coins"] },
 ];
 
 const bossNavItem: NavItem = { to: "/admin", label: "Boss Panel", icon: ShieldCheck, match: ["/admin"] };
