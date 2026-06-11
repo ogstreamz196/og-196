@@ -73,6 +73,15 @@ function AuthPage() {
     }
   }
 
+  async function handlePortal() {
+    const { data } = await supabase.auth.getSession();
+    if (data.session) {
+      navigate({ to: "/", replace: true });
+    } else {
+      scrollToAuth();
+    }
+  }
+
   function scrollToAuth() {
     authAnchor.current?.scrollIntoView({ behavior: "smooth", block: "center" });
   }
