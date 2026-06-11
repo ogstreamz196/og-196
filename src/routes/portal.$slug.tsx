@@ -604,6 +604,31 @@ function PortalPage() {
         )}
       </main>
       {portal.slug === "song-studio" && <SongStudioCoPilot />}
+      {portal.slug === "song-studio" && user && (profile?.coin_balance ?? 0) <= 0 && (
+        <div className="fixed inset-0 z-[80] grid place-items-center bg-black/70 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl border border-white/10 bg-black/55 p-6 text-center shadow-glow backdrop-blur-lg">
+            <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-gradient-brand shadow-glow">
+              <Coins className="h-6 w-6 text-primary-foreground" />
+            </div>
+            <h3 className="mt-4 text-xl font-bold text-white">You're out of fuel.</h3>
+            <p className="mt-2 text-sm text-white/70">
+              Head to the Dashboard or call the Boss to top up your balance.
+            </p>
+            <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center">
+              <Link to="/buy-coins">
+                <Button size="sm" className="w-full bg-gradient-brand text-primary-foreground sm:w-auto">
+                  <Coins className="mr-2 h-4 w-4" /> Top up balance
+                </Button>
+              </Link>
+              <Link to="/">
+                <Button size="sm" variant="outline" className="w-full border-white/20 bg-white/5 text-white hover:bg-white/10 sm:w-auto">
+                  Back to dashboard
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

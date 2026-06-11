@@ -219,26 +219,35 @@ export type Database = {
         Row: {
           coin_balance: number
           created_at: string
+          custom_bot_name: string
           display_name: string | null
           email: string | null
           id: string
+          total_bot_interactions: number
           updated_at: string
+          widget_deployed_domains: string[]
         }
         Insert: {
           coin_balance?: number
           created_at?: string
+          custom_bot_name?: string
           display_name?: string | null
           email?: string | null
           id: string
+          total_bot_interactions?: number
           updated_at?: string
+          widget_deployed_domains?: string[]
         }
         Update: {
           coin_balance?: number
           created_at?: string
+          custom_bot_name?: string
           display_name?: string | null
           email?: string | null
           id?: string
+          total_bot_interactions?: number
           updated_at?: string
+          widget_deployed_domains?: string[]
         }
         Relationships: []
       }
@@ -412,6 +421,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      increment_bot_interactions: {
+        Args: { p_delta?: number }
+        Returns: number
       }
       mint_coins: {
         Args: { p_amount: number; p_reason?: string; p_target: string }
