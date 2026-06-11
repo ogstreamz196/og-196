@@ -17,6 +17,7 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { pingOgBot } from "@/lib/og-bot-status.functions";
+import { RemoteTokenInspector } from "@/components/og-bot/RemoteTokenInspector";
 import { toast } from "sonner";
 
 // How long a successful re-auth keeps reveal/copy unlocked, in ms.
@@ -451,6 +452,10 @@ function OgBotSettingsPage() {
               : null
           }
         />
+
+        {/* Remote token inspect + burn (mother project) */}
+        <RemoteTokenInspector />
+
 
         {/* Stats */}
         <section className="grid gap-4 sm:grid-cols-5">
