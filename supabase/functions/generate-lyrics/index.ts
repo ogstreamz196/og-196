@@ -1,11 +1,13 @@
-// Free lyrics generation using Lovable AI Gateway.
-// Returns lyrics in the requested language for the given song topic.
+// Lyrics generation using the user's own Gemini API key (stored in Supabase secrets).
+// Calls Google's Generative Language API directly — no Lovable AI gateway involved.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
-const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
+const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!;
+const GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") ?? "gemini-2.5-flash";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ?? Deno.env.get("SUPABASE_ANON_KEY")!;
+const SUPABASE_ANON_KEY =
+  Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ?? Deno.env.get("SUPABASE_ANON_KEY")!;
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -17,6 +19,8 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
 
   try {
+    if (!GEMINI_API_KEY) return json({ error: "GEMINI_API_KEY not configured" }, 500);
+
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) return json({ error: "Unauthorized" }, 401);
     const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -35,7 +39,8 @@ Deno.serve(async (req) => {
       return json({ error: "Provide a song name or description" }, 400);
     }
 
-    const systemPrompt = `You are a professional songwriter. Write original song lyrics in ${language}. ` +
+    const systemPrompt =
+      `You are a professional songwriter. Write original song lyrics in ${language}. ` +
       `Use clear section markers like [Verse 1], [Chorus], [Verse 2], [Bridge], [Outro]. ` +
       `Keep the song between 200 and 400 words. Output ONLY the lyrics, no explanations.`;
     const userPrompt =
@@ -44,31 +49,33 @@ Deno.serve(async (req) => {
       `Style tags: ${styleTags.join(", ") || "(none)"}\n` +
       `Language: ${language}\n\nWrite the lyrics now.`;
 
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const url =
+      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent?key=${GEMINI_API_KEY}`;
+
+    const res = await fetch(url, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
+        systemInstruction: { role: "system", parts: [{ text: systemPrompt }] },
+        contents: [{ role: "user", parts: [{ text: userPrompt }] }],
+        generationConfig: { temperature: 0.9, maxOutputTokens: 1200 },
       }),
     });
 
-    if (res.status === 429) return json({ error: "Rate limit, try again shortly" }, 429);
-    if (res.status === 402) return json({ error: "AI credits exhausted" }, 402);
+    if (res.status === 429) return json({ error: "Gemini rate limit, try again shortly" }, 429);
     if (!res.ok) {
       const txt = await res.text();
-      console.error("AI gateway error", res.status, txt);
-      return json({ error: "Lyrics generation failed" }, 502);
+      console.error("Gemini API error", res.status, txt);
+      return json({ error: "Lyrics generation failed", detail: txt.slice(0, 500) }, 502);
     }
 
     const data = await res.json();
-    const lyrics = data?.choices?.[0]?.message?.content?.trim() ?? "";
+    const lyrics =
+      (data?.candidates?.[0]?.content?.parts ?? [])
+        .map((p: { text?: string }) => p?.text ?? "")
+        .join("")
+        .trim() ?? "";
+
     return json({ lyrics });
   } catch (e) {
     console.error(e);
