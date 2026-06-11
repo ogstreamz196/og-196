@@ -44,7 +44,7 @@ function CheckoutReturn() {
             <p className="mt-2 text-sm text-muted-foreground">
               <EditableContent
                 contentKey="buyCoins.return.subtitle"
-                defaultValue="Coins are credited automatically — usually within a few seconds."
+                defaultValue="OG coins are credited automatically — usually within a few seconds."
                 multiline
               />
             </p>

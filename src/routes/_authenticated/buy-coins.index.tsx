@@ -41,7 +41,7 @@ function BuyCoinsPage() {
     onError: (e: Error) => {
       const m = e.message.toLowerCase();
       if (m.includes("insufficient_coins"))
-        toast.error(`Not enough coins. You need ${VIP_COST}.`);
+        toast.error(`Not enough OG coins. You need ${VIP_COST}.`);
       else if (m.includes("already_vip")) toast.error("You're already VIP.");
       else toast.error(e.message);
     },
@@ -50,7 +50,7 @@ function BuyCoinsPage() {
   if (selected) {
     const returnUrl = `${window.location.origin}/buy-coins/return?session_id={CHECKOUT_SESSION_ID}&pack=${selected.bundleId}`;
     return (
-      <DashboardShell title={`Buy ${selected.coins} coins`}>
+      <DashboardShell title={`Buy ${selected.coins} OG coins`}>
         <PaymentTestModeBanner />
         <div className="mx-auto max-w-2xl">
           <Button
@@ -65,7 +65,7 @@ function BuyCoinsPage() {
               <div>
                 <div className="text-sm text-muted-foreground">{selected.label}</div>
                 <div className="text-lg font-semibold">
-                  {selected.coins} coins · {CURRENCY_SYMBOL}{(selected.priceCents / 100).toFixed(2)}
+                  {selected.coins} OG coins · {CURRENCY_SYMBOL}{(selected.priceCents / 100).toFixed(2)}
                 </div>
               </div>
               <Coins className="h-6 w-6 text-coin" />
@@ -81,21 +81,21 @@ function BuyCoinsPage() {
   }
 
   return (
-    <DashboardShell title="Buy Coins">
+    <DashboardShell title="Buy OG Coins">
       <PaymentTestModeBanner />
       <div className="mx-auto max-w-5xl">
         <div className="text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5">
             <Coins className="h-4 w-4 text-coin" />
             <span className="text-sm">
-              You have <span className="font-bold tabular-nums">{profile?.coin_balance ?? 0}</span> coins
+              You have <span className="font-bold tabular-nums">{profile?.coin_balance ?? 0}</span> OG coins
             </span>
           </div>
           <h2 className="mt-4 text-3xl font-bold">
-            <EditableContent contentKey="buyCoins.heading" defaultValue="Top up your coins" />
+            <EditableContent contentKey="buyCoins.heading" defaultValue="Top up your OG coins" />
           </h2>
           <p className="mt-2 text-muted-foreground">
-            <EditableContent contentKey="buyCoins.subtitle" defaultValue="3 coins per song. Coins never expire." multiline />
+            <EditableContent contentKey="buyCoins.subtitle" defaultValue="3 OG coins per song. OG coins never expire." multiline />
           </p>
         </div>
 
@@ -123,7 +123,7 @@ function BuyCoinsPage() {
                 <span className="text-4xl font-bold">{CURRENCY_SYMBOL}{(t.priceCents / 100).toFixed(0)}</span>
               </div>
               <div className="mt-1 flex items-center gap-1.5 text-lg font-semibold text-coin">
-                <Coins className="h-4 w-4" /> {t.coins} coins
+                <Coins className="h-4 w-4" /> {t.coins} OG coins
               </div>
               <ul className="mt-4 flex-1 space-y-2 text-sm text-muted-foreground">
                 <li className="flex items-start gap-2">
@@ -135,7 +135,7 @@ function BuyCoinsPage() {
                   />
                 </li>
                 <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> Free downloads</li>
-                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> Coins never expire</li>
+                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> OG coins never expire</li>
               </ul>
               <Button
                 className={cn(
@@ -161,12 +161,12 @@ function BuyCoinsPage() {
               <p className="text-sm text-muted-foreground">
                 <EditableContent
                   contentKey="buyCoins.vip.subtitle"
-                  defaultValue="Spend coins instead of cash. One-time purchase, never expires."
+                  defaultValue="Spend OG coins instead of cash. One-time purchase, never expires."
                   multiline
                 />
               </p>
             </div>
-            <span className="text-xs text-muted-foreground">Pay with coins</span>
+            <span className="text-xs text-muted-foreground">Pay with OG coins</span>
           </div>
           <div className="relative overflow-hidden rounded-2xl border border-coin/40 bg-gradient-to-br from-coin/10 via-card to-card p-6 shadow-card">
             <div className="flex flex-wrap items-center gap-4">
@@ -195,7 +195,7 @@ function BuyCoinsPage() {
               <div className="flex items-center gap-2 text-lg font-semibold">
                 <Coins className="h-5 w-5 text-coin" />
                 <span className="tabular-nums">{VIP_COST}</span>
-                <span className="text-sm text-muted-foreground">coins</span>
+                <span className="text-sm text-muted-foreground">OG coins</span>
               </div>
               <Button
                 disabled={isVip || buyVip.isPending || (profile?.coin_balance ?? 0) < VIP_COST}
@@ -207,13 +207,13 @@ function BuyCoinsPage() {
                 ) : isVip ? (
                   <>You're VIP</>
                 ) : (
-                  <><Crown className="mr-2 h-4 w-4" /> Buy VIP for {VIP_COST} coins</>
+                  <><Crown className="mr-2 h-4 w-4" /> Buy VIP for {VIP_COST} OG coins</>
                 )}
               </Button>
             </div>
             {!isVip && (profile?.coin_balance ?? 0) < VIP_COST && (
               <p className="mt-3 text-xs text-destructive">
-                You need {VIP_COST - (profile?.coin_balance ?? 0)} more coin(s) — grab a pack above.
+                You need {VIP_COST - (profile?.coin_balance ?? 0)} more OG coin(s) — grab a pack above.
               </p>
             )}
           </div>
@@ -223,7 +223,7 @@ function BuyCoinsPage() {
         <p className="mt-8 text-center text-xs text-muted-foreground">
           <EditableContent
             contentKey="buyCoins.footer"
-            defaultValue="Secure payments powered by Lovable. Coins are credited to your account automatically after a successful checkout."
+            defaultValue="Secure payments powered by Lovable. OG coins are credited to your account automatically after a successful checkout."
             multiline
           />
         </p>
