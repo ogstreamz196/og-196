@@ -156,12 +156,47 @@
     color: var(--color-foreground);
     font-feature-settings: "ss01", "cv11";
     -webkit-font-smoothing: antialiased;
-    background-image:
-      radial-gradient(ellipse 90% 60% at 50% -10%, oklch(0.35 0.18 268 / 0.35), transparent 60%),
-      radial-gradient(ellipse 70% 50% at 100% 100%, oklch(0.30 0.14 270 / 0.25), transparent 65%),
-      radial-gradient(circle at 20% 40%, oklch(0.78 0.05 255 / 0.05), transparent 50%);
-    background-attachment: fixed;
+    position: relative;
+    min-height: 100vh;
   }
+  /* Sitewide brand wallpaper, fixed and full-bleed */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    background-image: url("./assets/app-background.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+  /* Smoky tint for legibility over the wallpaper */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 90% 60% at 50% -10%, oklch(0.35 0.18 268 / 0.30), transparent 60%),
+      radial-gradient(ellipse 70% 50% at 100% 100%, oklch(0.30 0.14 270 / 0.30), transparent 65%),
+      linear-gradient(180deg, oklch(0.10 0.04 265 / 0.55), oklch(0.10 0.04 265 / 0.72));
+  }
+}
+
+/* Glassmorphism utilities — transparent floating panels over the wallpaper */
+@utility glass-panel {
+  background-color: color-mix(in oklab, black 55%, transparent);
+  backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid color-mix(in oklab, white 10%, transparent);
+  box-shadow:
+    0 10px 40px -12px oklch(0 0 0 / 0.6),
+    inset 0 1px 0 0 oklch(1 0 0 / 0.06);
+}
+@utility glass-panel-strong {
+  background-color: color-mix(in oklab, black 65%, transparent);
+  backdrop-filter: blur(24px) saturate(150%);
+  border: 1px solid color-mix(in oklab, white 12%, transparent);
 }
 
 @utility text-gradient-brand {
