@@ -257,9 +257,28 @@ function TokenCard({ token }: { token: BotToken }) {
       </div>
 
       {isSuspended && (
-        <div className="mt-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-300">
-          This token is suspended. The OG Bot widget and OG Messenger will deny access
-          and hide themselves on every site using this token until you reactivate it.
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-xs text-amber-300">
+          <div className="flex items-start gap-2">
+            <PowerOff className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+            <span>
+              <strong className="font-semibold text-amber-200">Token suspended.</strong>{" "}
+              The OG Bot widget and OG Messenger are denying access and hiding on every
+              site using this token. Reactivate to instantly resume service.
+            </span>
+          </div>
+          <Button
+            size="sm"
+            onClick={toggleSuspend}
+            disabled={suspending}
+            className="gap-1.5 bg-emerald-500 text-white hover:bg-emerald-600"
+          >
+            {suspending ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Power className="h-3.5 w-3.5" />
+            )}
+            Reactivate now
+          </Button>
         </div>
       )}
 
