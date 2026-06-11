@@ -1,12 +1,23 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, Flame, ShieldCheck, ShieldAlert } from "lucide-react";
+import { Loader2, Search, Flame, ShieldCheck, ShieldAlert, KeyRound, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+
+type LocalToken = {
+  user_id: string;
+  token: string;
+  created_at: string;
+  expires_at: string | null;
+  revoked_at: string | null;
+};
+type LocalProfile = { id: string; email: string | null; display_name: string | null };
 
 const REMOTE_SUPABASE_URL = "https://dawcdietltejjxbdimkm.supabase.co";
 const REMOTE_SUPABASE_ANON_KEY =
@@ -68,6 +79,28 @@ export function RemoteTokenInspector() {
   const [burning, setBurning] = useState(false);
   const [introspection, setIntrospection] = useState<Introspection | null>(null);
   const [lastBurn, setLastBurn] = useState<BurnResult | null>(null);
+
+  const localTokensQ = useQuery({
+    queryKey: ["rti-local-og-bot-tokens"],
+    queryFn: async () => {
+      const { data: toks, error } = await supabase
+        .from("og_bot_tokens")
+        .select("user_id, token, created_at, expires_at, revoked_at")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      const tokens = (toks ?? []) as LocalToken[];
+      const ids = tokens.map((t) => t.user_id);
+      let profiles: Record<string, LocalProfile> = {};
+      if (ids.length) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("id, email, display_name")
+          .in("id", ids);
+        for (const p of (profs ?? []) as LocalProfile[]) profiles[p.id] = p;
+      }
+      return { tokens, profiles };
+    },
+  });
 
   const tokenTrim = token.trim();
   const originTrim = origin.trim();
@@ -158,6 +191,81 @@ export function RemoteTokenInspector() {
         <code className="text-xs">og_bot_token_introspect</code> and can burn one use via{" "}
         <code className="text-xs">og_bot_token_burn</code>.
       </p>
+
+      <div className="rounded-lg border bg-muted/30 p-3 space-y-2">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <KeyRound className="h-3.5 w-3.5 text-primary" />
+            <span className="text-xs font-medium">Created tokens</span>
+            <Badge variant="outline" className="text-[10px]">
+              {localTokensQ.data?.tokens.length ?? 0}
+            </Badge>
+          </div>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-7 px-2"
+            onClick={() => localTokensQ.refetch()}
+            disabled={localTokensQ.isFetching}
+          >
+            {localTokensQ.isFetching ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <RefreshCw className="h-3.5 w-3.5" />
+            )}
+          </Button>
+        </div>
+        {localTokensQ.isLoading ? (
+          <div className="text-xs text-muted-foreground">Loading…</div>
+        ) : (localTokensQ.data?.tokens.length ?? 0) === 0 ? (
+          <div className="text-xs text-muted-foreground">
+            No tokens created yet. Use “Create bot token” above.
+          </div>
+        ) : (
+          <div className="max-h-44 overflow-y-auto divide-y divide-border/60 rounded border bg-background">
+            {localTokensQ.data!.tokens.map((t) => {
+              const p = localTokensQ.data!.profiles[t.user_id];
+              const label = p?.display_name || p?.email || t.user_id.slice(0, 8);
+              const isActive = token === t.token;
+              return (
+                <button
+                  key={t.user_id}
+                  type="button"
+                  onClick={() => {
+                    setToken(t.token);
+                    setIntrospection(null);
+                    setLastBurn(null);
+                  }}
+                  className={`w-full text-left px-2 py-1.5 hover:bg-muted/60 transition-colors ${
+                    isActive ? "bg-primary/10" : ""
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs truncate">{label}</span>
+                    <div className="flex items-center gap-1 shrink-0">
+                      {t.revoked_at && (
+                        <Badge variant="destructive" className="text-[9px] h-4 px-1">burned</Badge>
+                      )}
+                      {!t.revoked_at && t.expires_at && new Date(t.expires_at) < new Date() && (
+                        <Badge variant="outline" className="text-[9px] h-4 px-1">expired</Badge>
+                      )}
+                      {!t.revoked_at && (!t.expires_at || new Date(t.expires_at) >= new Date()) && (
+                        <Badge variant="outline" className="text-[9px] h-4 px-1 border-emerald-500/40 text-emerald-600">active</Badge>
+                      )}
+                    </div>
+                  </div>
+                  <div className="font-mono text-[10px] text-muted-foreground truncate">
+                    {t.token}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+        <p className="text-[10px] text-muted-foreground">
+          Click any token to load it into the inspector below.
+        </p>
+      </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="sm:col-span-2 space-y-1.5">
