@@ -113,7 +113,12 @@ function BuyCoinsPage() {
                   Most popular
                 </div>
               )}
-              <div className="text-sm font-medium text-muted-foreground">{t.label}</div>
+              <div className="text-sm font-medium text-muted-foreground">
+                <EditableContent
+                  contentKey={`buyCoins.pack.${t.bundleId}.label`}
+                  defaultValue={t.label}
+                />
+              </div>
               <div className="mt-2 flex items-baseline gap-1">
                 <span className="text-4xl font-bold">{CURRENCY_SYMBOL}{(t.priceCents / 100).toFixed(0)}</span>
               </div>
@@ -121,7 +126,14 @@ function BuyCoinsPage() {
                 <Coins className="h-4 w-4" /> {t.coins} coins
               </div>
               <ul className="mt-4 flex-1 space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> {t.description}</li>
+                <li className="flex items-start gap-2">
+                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                  <EditableContent
+                    contentKey={`buyCoins.pack.${t.bundleId}.description`}
+                    defaultValue={t.description}
+                    multiline
+                  />
+                </li>
                 <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> Free downloads</li>
                 <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> Coins never expire</li>
               </ul>
