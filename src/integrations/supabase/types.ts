@@ -143,7 +143,7 @@ export type Database = {
           id: string
           origin_host: string
           revoked_at: string | null
-          signing_secret: string
+          signing_secret: string | null
           token: string
           uses_remaining: number | null
         }
@@ -156,7 +156,7 @@ export type Database = {
           id?: string
           origin_host: string
           revoked_at?: string | null
-          signing_secret: string
+          signing_secret?: string | null
           token: string
           uses_remaining?: number | null
         }
@@ -169,7 +169,7 @@ export type Database = {
           id?: string
           origin_host?: string
           revoked_at?: string | null
-          signing_secret?: string
+          signing_secret?: string | null
           token?: string
           uses_remaining?: number | null
         }
