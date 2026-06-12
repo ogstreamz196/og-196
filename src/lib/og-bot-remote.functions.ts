@@ -155,3 +155,78 @@ export const revokeOgBotToken = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });
+
+const IntrospectInput = z.object({
+  token: z.string().trim().min(1).max(512),
+  originHost: z.string().trim().min(1).max(253),
+});
+
+type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [k: string]: JsonValue };
+
+export type Introspection = {
+  ok: boolean;
+  reason?: string | null;
+  expires_at?: string | null;
+  uses_remaining?: number | null;
+  grants_vip?: boolean | null;
+  bound_external_user?: string | null;
+  domains?: string[] | null;
+  scopes?: JsonValue | null;
+  policy?: JsonValue | null;
+};
+
+export const introspectOgBotToken = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) => IntrospectInput.parse(data))
+  .handler(async ({ data }): Promise<Introspection> => {
+    const secret = process.env.OG_BOT_REMOTE_MINT_SECRET;
+    if (!secret) throw new Error("OG_BOT_REMOTE_MINT_SECRET missing");
+    const baseUrl = (
+      process.env.OG_BOT_MOTHERSHIP_URL ?? MOTHERSHIP_DEFAULT
+    ).replace(/\/+$/, "");
+
+    const originHost = data.originHost
+      .toLowerCase()
+      .replace(/^https?:\/\//, "")
+      .split("/")[0]
+      .split(":")[0]
+      .trim();
+    if (!originHost) throw new Error("invalid_origin");
+
+    const rawBody = JSON.stringify({
+      token: data.token,
+      origin_host: originHost,
+    });
+    const ts = Math.floor(Date.now() / 1000).toString();
+    const nonce = randomUUID();
+    const sig = createHmac("sha256", secret)
+      .update(`${ts}.${nonce}.${rawBody}`)
+      .digest("hex");
+
+    const res = await fetch(`${baseUrl}/api/public/og-bot/introspect`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-admin-timestamp": ts,
+        "x-admin-nonce": nonce,
+        "x-admin-signature": sig,
+      },
+      body: rawBody,
+    });
+
+    const text = await res.text();
+    if (!res.ok) {
+      throw new Error(`introspect failed: ${res.status} ${text.slice(0, 300)}`);
+    }
+    try {
+      return JSON.parse(text) as Introspection;
+    } catch {
+      throw new Error(`introspect returned non-JSON: ${text.slice(0, 300)}`);
+    }
+  });
