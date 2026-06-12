@@ -33,7 +33,7 @@ const baseNavItems: NavItem[] = [
   { to: "/buy-coins", label: "Buy OG Coins", icon: CoinsIcon, match: ["/buy-coins"] },
 ];
 
-const vipNavItem: NavItem = { to: "/og-bot/connect", label: "OG Bot Portal", icon: Bot, match: ["/og-bot"] };
+const vipNavItem: NavItem = { to: "/og-bot/connect", label: "Song Studio", icon: Bot, match: ["/og-bot"] };
 const bossNavItem: NavItem = { to: "/admin", label: "Boss Panel", icon: ShieldCheck, match: ["/admin"] };
 
 
