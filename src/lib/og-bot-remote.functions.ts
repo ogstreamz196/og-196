@@ -183,12 +183,16 @@ export type Introspection = {
   domains?: string[] | null;
   scopes?: JsonValue | null;
   policy?: JsonValue | null;
+  token_type?: "og_bot" | "developer" | "remote" | null;
 };
 
 export const introspectOgBotToken = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) => IntrospectInput.parse(data))
   .handler(async ({ data }): Promise<Introspection> => {
+    const { supabaseAdmin } = await import(
+      "@/integrations/supabase/client.server"
+    );
     const originHost = data.originHost
       .toLowerCase()
       .replace(/^https?:\/\//, "")
@@ -197,8 +201,95 @@ export const introspectOgBotToken = createServerFn({ method: "POST" })
       .trim();
     if (!originHost) throw new Error("invalid_origin");
 
+    const token = data.token.trim();
+
+    const { data: localOgToken, error: localOgTokenError } = await supabaseAdmin
+      .from("og_bot_tokens")
+      .select("user_id, expires_at, revoked_at")
+      .eq("token", token)
+      .maybeSingle();
+
+    if (localOgTokenError) {
+      throw new Error(`introspect failed: ${localOgTokenError.message}`);
+    }
+
+    if (localOgToken) {
+      const isRevoked = Boolean(localOgToken.revoked_at);
+      const isExpired = Boolean(
+        localOgToken.expires_at &&
+          new Date(localOgToken.expires_at).getTime() < Date.now(),
+      );
+
+      return {
+        ok: !isRevoked && !isExpired,
+        reason: isRevoked ? "revoked" : isExpired ? "expired" : null,
+        expires_at: localOgToken.expires_at,
+        uses_remaining: null,
+        grants_vip: null,
+        bound_external_user: localOgToken.user_id,
+        domains: null,
+        scopes: null,
+        policy: null,
+        token_type: "og_bot",
+      };
+    }
+
+    const { data: developerToken, error: developerTokenError } =
+      await supabaseAdmin
+        .from("bot_tokens")
+        .select("allowed_domain, status")
+        .eq("token_string", token)
+        .maybeSingle();
+
+    if (developerTokenError) {
+      throw new Error(`introspect failed: ${developerTokenError.message}`);
+    }
+
+    if (developerToken) {
+      const { data: isValid, error: validateError } = await supabaseAdmin.rpc(
+        "validate_bot_token",
+        {
+          p_token: token,
+          p_origin: originHost,
+        },
+      );
+
+      if (validateError) {
+        throw new Error(`introspect failed: ${validateError.message}`);
+      }
+
+      const normalizedAllowedDomain = developerToken.allowed_domain
+        ? developerToken.allowed_domain
+            .toLowerCase()
+            .replace(/^https?:\/\//, "")
+            .split("/")[0]
+            .split(":")[0]
+            .trim()
+        : null;
+
+      return {
+        ok: Boolean(isValid),
+        reason:
+          developerToken.status !== "active"
+            ? developerToken.status
+            : !developerToken.allowed_domain
+              ? "not_bound"
+              : isValid
+                ? null
+                : "origin_mismatch",
+        expires_at: null,
+        uses_remaining: null,
+        grants_vip: null,
+        bound_external_user: null,
+        domains: normalizedAllowedDomain ? [normalizedAllowedDomain] : null,
+        scopes: null,
+        policy: null,
+        token_type: "developer",
+      };
+    }
+
     const rawBody = JSON.stringify({
-      _token: data.token,
+      _token: token,
       _origin_host: originHost,
     });
 
@@ -222,7 +313,10 @@ export const introspectOgBotToken = createServerFn({ method: "POST" })
       if (!result || typeof result !== "object") {
         throw new Error("empty introspection result");
       }
-      return result;
+      return {
+        ...result,
+        token_type: "remote",
+      };
     } catch {
       throw new Error(`introspect returned non-JSON: ${text.slice(0, 300)}`);
     }
