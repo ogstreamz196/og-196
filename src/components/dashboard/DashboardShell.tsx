@@ -33,6 +33,7 @@ const baseNavItems: NavItem[] = [
   { to: "/buy-coins", label: "Buy OG Coins", icon: CoinsIcon, match: ["/buy-coins"] },
 ];
 
+const vipNavItem: NavItem = { to: "/og-bot/connect", label: "OG Bot Portal", icon: Bot, match: ["/og-bot"] };
 const bossNavItem: NavItem = { to: "/admin", label: "Boss Panel", icon: ShieldCheck, match: ["/admin"] };
 
 
@@ -133,7 +134,7 @@ export function DashboardShell({ title, children }: { title: string; children: R
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { isAdmin, isLoading: roleLoading } = useRole();
+  const { isAdmin, isVip, isLoading: roleLoading } = useRole();
   const qc = useQueryClient();
 
 
@@ -157,10 +158,11 @@ export function DashboardShell({ title, children }: { title: string; children: R
         </Link>
 
         <nav className="mt-6 flex flex-col gap-1">
-          {[...baseNavItems, ...(!roleLoading && isAdmin ? [bossNavItem] : [])].map((item) => {
+          {[...baseNavItems, ...(!roleLoading && (isVip || isAdmin) ? [vipNavItem] : []), ...(!roleLoading && isAdmin ? [bossNavItem] : [])].map((item) => {
             const active = isItemActive(item, pathname);
             const Icon = item.icon;
             const isBoss = item.to === "/admin";
+            const isVipItem = item.to === "/og-bot/connect";
             return (
               <Link
                 key={item.to}
@@ -168,16 +170,22 @@ export function DashboardShell({ title, children }: { title: string; children: R
                 className={cn(
                   "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                   isBoss && "mt-2 border border-primary/30 bg-gradient-brand-soft",
+                  isVipItem && "border border-amber-500/40 bg-amber-500/10",
                   active
                     ? "bg-sidebar-accent text-sidebar-accent-foreground"
                     : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
                 )}
               >
-                <Icon className={cn("h-4 w-4", (active || isBoss) && "text-primary")} />
+                <Icon className={cn("h-4 w-4", (active || isBoss) && "text-primary", isVipItem && "text-amber-500")} />
                 {item.label}
                 {isBoss && (
                   <span className="ml-auto rounded-full bg-primary/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary">
                     Boss
+                  </span>
+                )}
+                {isVipItem && (
+                  <span className="ml-auto rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-amber-500">
+                    VIP
                   </span>
                 )}
               </Link>
@@ -241,7 +249,7 @@ export function DashboardShell({ title, children }: { title: string; children: R
 
         {/* Mobile nav */}
         <nav className="flex gap-1 overflow-x-auto border-b border-border bg-sidebar/50 px-2 py-2 md:hidden">
-          {[...baseNavItems, ...(!roleLoading && isAdmin ? [bossNavItem] : [])].map((item) => {
+          {[...baseNavItems, ...(!roleLoading && (isVip || isAdmin) ? [vipNavItem] : []), ...(!roleLoading && isAdmin ? [bossNavItem] : [])].map((item) => {
             const active = isItemActive(item, pathname);
             const Icon = item.icon;
             return (
