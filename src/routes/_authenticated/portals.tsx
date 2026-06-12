@@ -110,7 +110,7 @@ function PortalsPage() {
               <CardWrapper key={p.id} portal={p}>
                 {(() => {
                   const isOgPortal = p.slug === "song-studio";
-                  const displayName = isOgPortal ? "OG Portal" : p.name;
+                  const displayName = isOgPortal ? "Song Studio" : p.name;
 
                   return (
                     <>
@@ -138,14 +138,12 @@ function PortalsPage() {
                         </span>
                       )}
                     </div>
-                    {isOgPortal && (
-                      <p className="text-xs font-medium text-primary/80">Song Studio</p>
-                    )}
                     <p className="flex items-center gap-1 text-xs text-muted-foreground">
                       <Globe2 className="h-3 w-3" /> {p.language}
                     </p>
                   </div>
                 </div>
+
 
                 <div className="line-clamp-3 text-sm text-muted-foreground">
                   {isOgPortal ? (
