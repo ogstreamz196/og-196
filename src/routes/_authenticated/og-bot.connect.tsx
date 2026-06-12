@@ -117,15 +117,35 @@ function ConnectPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-8 p-6">
-      <header className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">
-          Plug into OG Bot.
-        </h1>
-        <p className="text-muted-foreground">
-          One token. One domain. Don't share it, don't lose it, don't paste it
-          on Discord you absolute melt.
-        </p>
+      <header className="overflow-hidden rounded-2xl border border-primary/30 bg-gradient-brand-soft p-6 shadow-card">
+        <div className="flex items-start gap-4">
+          <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-gradient-brand text-primary-foreground shadow-glow">
+            <Bot className="h-6 w-6" />
+          </div>
+          <div className="flex-1 space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-3xl font-bold tracking-tight">OG Bot Portal</h1>
+              <span className="inline-flex items-center gap-1 rounded-full bg-gradient-brand px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-primary-foreground shadow-glow ring-1 ring-primary/40">
+                <KeyRound className="h-3 w-3" /> API Keys
+              </span>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              A different breed of portal — instead of burning coins on tracks, you spend
+              them to mint bot API tokens bound to your domain. One token. One origin.
+              Don't paste it anywhere stupid.
+            </p>
+            <div className="flex flex-wrap gap-3 pt-1 text-xs text-muted-foreground">
+              <span className="inline-flex items-center gap-1">
+                <Coins className="h-3.5 w-3.5 text-primary" /> coins → API keys
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <Bot className="h-3.5 w-3.5 text-primary" /> OG Bot Co-Pilot below
+              </span>
+            </div>
+          </div>
+        </div>
       </header>
+
 
       <Card>
         <CardHeader>
