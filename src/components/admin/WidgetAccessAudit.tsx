@@ -101,6 +101,23 @@ export function WidgetAccessAudit() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const [editing, setEditing] = useState<{ id: string; value: string } | null>(null);
+
+  const setBalance = useMutation({
+    mutationFn: async ({ userId, newBalance }: { userId: string; newBalance: number }) => {
+      const { error } = await supabase.rpc("set_balance_admin", {
+        target_user_id: userId, new_balance: newBalance, admin_notes: "widget_audit_adjust",
+      });
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-widget-audit"] });
+      setEditing(null);
+      toast.success("Coins updated");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   return (
     <div className="mb-6 rounded-2xl border border-border bg-card/70 p-5 shadow-card">
       <div className="mb-4 flex flex-wrap items-center gap-3">
