@@ -185,11 +185,10 @@ export const introspectOgBotToken = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) => IntrospectInput.parse(data))
   .handler(async ({ data }): Promise<Introspection> => {
-    const secret = process.env.OG_BOT_REMOTE_MINT_SECRET;
-    if (!secret) throw new Error("OG_BOT_REMOTE_MINT_SECRET missing");
-    const baseUrl = (
-      process.env.OG_BOT_MOTHERSHIP_URL ?? MOTHERSHIP_DEFAULT
-    ).replace(/\/+$/, "");
+    const host = process.env.OG_BOT_HOST?.replace(/\/+$/, "");
+    const token = process.env.OG_BOT_TOKEN?.trim();
+    if (!host) throw new Error("OG_BOT_HOST missing");
+    if (!token) throw new Error("OG_BOT_TOKEN missing");
 
     const originHost = data.originHost
       .toLowerCase()
@@ -203,19 +202,12 @@ export const introspectOgBotToken = createServerFn({ method: "POST" })
       token: data.token,
       origin_host: originHost,
     });
-    const ts = Math.floor(Date.now() / 1000).toString();
-    const nonce = randomUUID();
-    const sig = createHmac("sha256", secret)
-      .update(`${ts}.${nonce}.${rawBody}`)
-      .digest("hex");
 
-    const res = await fetch(`${baseUrl}/api/public/og-bot/introspect`, {
+    const res = await fetch(`${host}/api/public/og-bot/introspect`, {
       method: "POST",
       headers: {
         "content-type": "application/json",
-        "x-admin-timestamp": ts,
-        "x-admin-nonce": nonce,
-        "x-admin-signature": sig,
+        authorization: `Bearer ${token}`,
       },
       body: rawBody,
     });
