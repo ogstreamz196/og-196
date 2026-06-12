@@ -169,8 +169,8 @@ export type Introspection = {
   grants_vip?: boolean | null;
   bound_external_user?: string | null;
   domains?: string[] | null;
-  scopes?: unknown;
-  policy?: unknown;
+  scopes?: unknown | null;
+  policy?: unknown | null;
 };
 
 export const introspectOgBotToken = createServerFn({ method: "POST" })
