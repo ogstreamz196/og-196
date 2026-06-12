@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Bot, Crown, Loader2, Search, ShieldOff, ShieldCheck, Globe } from "lucide-react";
+import { Bot, Coins as CoinsIcon, Crown, Loader2, Search, ShieldOff, ShieldCheck, Globe, Check, X as XIcon, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -101,6 +101,23 @@ export function WidgetAccessAudit() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const [editing, setEditing] = useState<{ id: string; value: string } | null>(null);
+
+  const setBalance = useMutation({
+    mutationFn: async ({ userId, newBalance }: { userId: string; newBalance: number }) => {
+      const { error } = await supabase.rpc("set_balance_admin", {
+        target_user_id: userId, new_balance: newBalance, admin_notes: "widget_audit_adjust",
+      });
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-widget-audit"] });
+      setEditing(null);
+      toast.success("Coins updated");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   return (
     <div className="mb-6 rounded-2xl border border-border bg-card/70 p-5 shadow-card">
       <div className="mb-4 flex flex-wrap items-center gap-3">
@@ -187,7 +204,48 @@ export function WidgetAccessAudit() {
                       )}
                     </TableCell>
                     <TableCell className="text-right tabular-nums text-sm">{r.interactions}</TableCell>
-                    <TableCell className="text-right tabular-nums text-sm">{r.coin_balance}</TableCell>
+                    <TableCell className="text-right tabular-nums text-sm">
+                      {editing?.id === r.id ? (
+                        <form
+                          className="flex items-center justify-end gap-1"
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            const n = parseInt(editing.value, 10);
+                            if (Number.isNaN(n) || n < 0) {
+                              toast.error("Enter a non-negative number");
+                              return;
+                            }
+                            setBalance.mutate({ userId: r.id, newBalance: n });
+                          }}
+                        >
+                          <Input
+                            autoFocus
+                            type="number"
+                            min={0}
+                            value={editing.value}
+                            onChange={(e) => setEditing({ id: r.id, value: e.target.value })}
+                            className="h-7 w-20 text-right text-sm"
+                          />
+                          <Button type="submit" size="icon" variant="ghost" className="h-7 w-7" disabled={setBalance.isPending}>
+                            {setBalance.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5 text-emerald-400" />}
+                          </Button>
+                          <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={() => setEditing(null)}>
+                            <XIcon className="h-3.5 w-3.5" />
+                          </Button>
+                        </form>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setEditing({ id: r.id, value: String(r.coin_balance) })}
+                          className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 hover:bg-muted/60"
+                          title="Adjust coins"
+                        >
+                          <CoinsIcon className="h-3 w-3 text-amber-400" />
+                          <span>{r.coin_balance}</span>
+                          <Pencil className="h-2.5 w-2.5 text-muted-foreground opacity-60" />
+                        </button>
+                      )}
+                    </TableCell>
                     <TableCell className="text-center">
                       <Switch
                         checked={isVip}
