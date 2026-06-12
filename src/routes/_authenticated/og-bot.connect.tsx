@@ -24,6 +24,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { SongStudioCoPilot } from "@/components/messenger/SongStudioCoPilot";
+import { Bot, Coins, KeyRound } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/og-bot/connect")({
   component: ConnectPage,
