@@ -3,9 +3,17 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export type OgChatMessage = { role: "user" | "assistant"; content: string };
 
+const SYSTEM_PROMPT =
+  "You are OG Bot — a blunt, no-nonsense studio co-pilot for OGStreamz. " +
+  "Help users with songwriting, bot tokens, coins, and portal questions. " +
+  "Keep replies tight (under 120 words). No corporate fluff, no apologies.";
+
 /**
- * Proxy chat messages to the remote OG Bot backend using the
- * end-user's own OG Bot token. Each user supplies their own token.
+ * Chat backend for the OG Bot messenger widget.
+ *
+ * Validates the user's `ogb_` token against the local `og_bot_tokens` table
+ * (via the admin client) and then generates a reply through the Lovable AI
+ * gateway. The mothership chat endpoint is no longer required.
  */
 export const chatOgBot = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -24,32 +32,61 @@ export const chatOgBot = createServerFn({ method: "POST" })
     return { messages, token, pageContext };
   })
   .handler(async ({ data, context }) => {
-    const host = process.env.OG_BOT_HOST;
-    if (!host) throw new Error("Missing OG_BOT_HOST");
+    const apiKey = process.env.LOVABLE_API_KEY;
+    if (!apiKey) throw new Error("AI gateway not configured");
 
-    const res = await fetch(`${host.replace(/\/$/, "")}/api/public/og-bot-chat`, {
+    // Validate the caller's bot token against our local registry.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row, error: tokenErr } = await supabaseAdmin
+      .from("og_bot_tokens")
+      .select("user_id, revoked_at, expires_at")
+      .eq("token", data.token)
+      .maybeSingle();
+
+    if (tokenErr) {
+      console.error("Token lookup failed", tokenErr);
+      throw new Error("Could not verify OG Bot token.");
+    }
+    if (!row) throw new Error("Invalid OG Bot token.");
+    if (row.revoked_at) throw new Error("This OG Bot token has been revoked.");
+    if (row.expires_at && new Date(row.expires_at).getTime() < Date.now()) {
+      throw new Error("This OG Bot token has expired.");
+    }
+    if (row.user_id !== context.userId) {
+      throw new Error("This token belongs to another account.");
+    }
+
+    const systemContent = data.pageContext
+      ? `${SYSTEM_PROMPT}\n\nPage context: ${data.pageContext}`
+      : SYSTEM_PROMPT;
+
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
       body: JSON.stringify({
-        token: data.token,
-        visitor_id: context.userId,
-        messages: data.messages,
-        page_context: data.pageContext,
+        model: "google/gemini-2.5-flash",
+        messages: [
+          { role: "system", content: systemContent },
+          ...data.messages,
+        ],
       }),
     });
 
     if (!res.ok) {
       const text = await res.text().catch(() => "");
-      console.error("OG Bot backend error", res.status, text);
+      console.error("Lovable AI gateway error", res.status, text);
       if (res.status === 429) throw new Error("OG Bot is rate-limited, try again soon.");
-      if (res.status === 402) throw new Error("AI credits exhausted on the OG Bot backend.");
-      if (res.status === 401 || res.status === 403)
-        throw new Error("Invalid or unauthorized OG Bot token.");
+      if (res.status === 402) throw new Error("AI credits exhausted — top up Lovable AI balance.");
       const snippet = text ? ` — ${text.slice(0, 200)}` : "";
       throw new Error(`OG Bot couldn't respond right now (HTTP ${res.status})${snippet}`);
     }
 
-    const json = (await res.json().catch(() => ({}))) as { reply?: string; error?: string };
-    if (json.error) throw new Error(json.error);
-    return { reply: json.reply ?? "" };
+    const json = (await res.json().catch(() => ({}))) as {
+      choices?: { message?: { content?: string } }[];
+    };
+    const reply = json.choices?.[0]?.message?.content ?? "";
+    return { reply };
   });
