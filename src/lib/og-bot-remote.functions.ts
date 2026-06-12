@@ -13,6 +13,10 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const MOTHERSHIP_DEFAULT = "https://ogstreamz.lovable.app";
+const OG_BOT_REMOTE_RPC_URL =
+  "https://dawcdietltejjxbdimkm.supabase.co/rest/v1/rpc/og_bot_token_introspect";
+const OG_BOT_REMOTE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhd2NkaWV0bHRlamp4YmRpbWttIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNTcyODYsImV4cCI6MjA5MzgzMzI4Nn0.evNy8qk5a3MLZxJRSUOTNfKbkeqhbgxVVfJWxqY7BPA";
 
 const MintInput = z.object({
   originHost: z.string().trim().min(1).max(253),
@@ -185,11 +189,6 @@ export const introspectOgBotToken = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) => IntrospectInput.parse(data))
   .handler(async ({ data }): Promise<Introspection> => {
-    const host = process.env.OG_BOT_HOST?.replace(/\/+$/, "");
-    const token = process.env.OG_BOT_TOKEN?.trim();
-    if (!host) throw new Error("OG_BOT_HOST missing");
-    if (!token) throw new Error("OG_BOT_TOKEN missing");
-
     const originHost = data.originHost
       .toLowerCase()
       .replace(/^https?:\/\//, "")
@@ -199,15 +198,16 @@ export const introspectOgBotToken = createServerFn({ method: "POST" })
     if (!originHost) throw new Error("invalid_origin");
 
     const rawBody = JSON.stringify({
-      token: data.token,
-      origin_host: originHost,
+      _token: data.token,
+      _origin_host: originHost,
     });
 
-    const res = await fetch(`${host}/api/public/og-bot/introspect`, {
+    const res = await fetch(OG_BOT_REMOTE_RPC_URL, {
       method: "POST",
       headers: {
         "content-type": "application/json",
-        authorization: `Bearer ${token}`,
+        apikey: OG_BOT_REMOTE_ANON_KEY,
+        authorization: `Bearer ${OG_BOT_REMOTE_ANON_KEY}`,
       },
       body: rawBody,
     });
@@ -217,7 +217,12 @@ export const introspectOgBotToken = createServerFn({ method: "POST" })
       throw new Error(`introspect failed: ${res.status} ${text.slice(0, 300)}`);
     }
     try {
-      return JSON.parse(text) as Introspection;
+      const parsed = JSON.parse(text) as Introspection | Introspection[];
+      const result = Array.isArray(parsed) ? parsed[0] : parsed;
+      if (!result || typeof result !== "object") {
+        throw new Error("empty introspection result");
+      }
+      return result;
     } catch {
       throw new Error(`introspect returned non-JSON: ${text.slice(0, 300)}`);
     }
