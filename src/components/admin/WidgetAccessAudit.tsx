@@ -204,7 +204,48 @@ export function WidgetAccessAudit() {
                       )}
                     </TableCell>
                     <TableCell className="text-right tabular-nums text-sm">{r.interactions}</TableCell>
-                    <TableCell className="text-right tabular-nums text-sm">{r.coin_balance}</TableCell>
+                    <TableCell className="text-right tabular-nums text-sm">
+                      {editing?.id === r.id ? (
+                        <form
+                          className="flex items-center justify-end gap-1"
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            const n = parseInt(editing.value, 10);
+                            if (Number.isNaN(n) || n < 0) {
+                              toast.error("Enter a non-negative number");
+                              return;
+                            }
+                            setBalance.mutate({ userId: r.id, newBalance: n });
+                          }}
+                        >
+                          <Input
+                            autoFocus
+                            type="number"
+                            min={0}
+                            value={editing.value}
+                            onChange={(e) => setEditing({ id: r.id, value: e.target.value })}
+                            className="h-7 w-20 text-right text-sm"
+                          />
+                          <Button type="submit" size="icon" variant="ghost" className="h-7 w-7" disabled={setBalance.isPending}>
+                            {setBalance.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5 text-emerald-400" />}
+                          </Button>
+                          <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={() => setEditing(null)}>
+                            <XIcon className="h-3.5 w-3.5" />
+                          </Button>
+                        </form>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setEditing({ id: r.id, value: String(r.coin_balance) })}
+                          className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 hover:bg-muted/60"
+                          title="Adjust coins"
+                        >
+                          <CoinsIcon className="h-3 w-3 text-amber-400" />
+                          <span>{r.coin_balance}</span>
+                          <Pencil className="h-2.5 w-2.5 text-muted-foreground opacity-60" />
+                        </button>
+                      )}
+                    </TableCell>
                     <TableCell className="text-center">
                       <Switch
                         checked={isVip}
