@@ -38,7 +38,32 @@ function ConnectPage() {
   const mintFn = useServerFn(mintOgBotToken);
   const listFn = useServerFn(listMyOgBotTokens);
   const revokeFn = useServerFn(revokeOgBotToken);
+  const introspectFn = useServerFn(introspectOgBotToken);
   const qc = useQueryClient();
+
+  const [validateToken, setValidateToken] = useState("");
+  const [validateOrigin, setValidateOrigin] = useState("");
+  const [introspection, setIntrospection] = useState<Introspection | null>(null);
+
+  const introspectMut = useMutation({
+    mutationFn: () =>
+      introspectFn({
+        data: {
+          token: validateToken.trim(),
+          originHost: validateOrigin.trim(),
+        },
+      }),
+    onSuccess: (data) => {
+      setIntrospection(data);
+      if (data.ok) toast.success("Token is valid for this origin.");
+      else toast.error(`Invalid: ${data.reason ?? "unknown"}`);
+    },
+    onError: (e: unknown) => {
+      setIntrospection(null);
+      const msg = e instanceof Error ? e.message : String(e);
+      toast.error(msg.length > 300 ? msg.slice(0, 300) + "…" : msg);
+    },
+  });
 
   const [originHost, setOriginHost] = useState("");
   const [externalUser, setExternalUser] = useState("");
