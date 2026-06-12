@@ -158,7 +158,7 @@ export function DashboardShell({ title, children }: { title: string; children: R
         </Link>
 
         <nav className="mt-6 flex flex-col gap-1">
-          {[...baseNavItems, ...(!roleLoading && isAdmin ? [bossNavItem] : [])].map((item) => {
+          {[...baseNavItems, ...(!roleLoading && (isVip || isAdmin) ? [vipNavItem] : []), ...(!roleLoading && isAdmin ? [bossNavItem] : [])].map((item) => {
             const active = isItemActive(item, pathname);
             const Icon = item.icon;
             const isBoss = item.to === "/admin";
