@@ -244,6 +244,69 @@ function ConnectPage() {
 
       <Card>
         <CardHeader>
+          <CardTitle>Validate any token</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form
+            className="space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!validateToken.trim() || !validateOrigin.trim()) {
+                toast.error("Need both a token and an origin host.");
+                return;
+              }
+              setIntrospection(null);
+              introspectMut.mutate();
+            }}
+          >
+            <div className="space-y-2">
+              <Label htmlFor="vToken">Token</Label>
+              <Input
+                id="vToken"
+                placeholder="ogb_…"
+                value={validateToken}
+                onChange={(e) => setValidateToken(e.target.value)}
+                autoComplete="off"
+                spellCheck={false}
+                className="font-mono text-xs"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="vOrigin">Origin host</Label>
+              <Input
+                id="vOrigin"
+                placeholder="ocsportal.co.uk"
+                value={validateOrigin}
+                onChange={(e) => setValidateOrigin(e.target.value)}
+                autoComplete="off"
+                spellCheck={false}
+                className="font-mono text-xs"
+              />
+            </div>
+            <Button type="submit" disabled={introspectMut.isPending}>
+              {introspectMut.isPending ? "Checking…" : "Validate"}
+            </Button>
+          </form>
+
+          {introspection && (
+            <div className="mt-4 rounded-md border p-3 text-xs space-y-1">
+              <div className="font-medium">
+                {introspection.ok ? "✅ Valid" : `❌ Invalid — ${introspection.reason ?? "unknown"}`}
+              </div>
+              <div>uses_remaining: {introspection.uses_remaining ?? "∞"}</div>
+              <div>expires_at: {introspection.expires_at ?? "never"}</div>
+              <div>grants_vip: {introspection.grants_vip ? "yes" : "no"}</div>
+              <div>bound_external_user: {introspection.bound_external_user ?? "—"}</div>
+              {Array.isArray(introspection.domains) && (
+                <div>domains: {introspection.domains.join(", ") || "—"}</div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle>Your tokens</CardTitle>
         </CardHeader>
         <CardContent>
