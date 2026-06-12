@@ -44,7 +44,9 @@ function ConnectPage() {
   const qc = useQueryClient();
 
   const [validateToken, setValidateToken] = useState("");
-  const [validateOrigin, setValidateOrigin] = useState("");
+  const [validateOrigin, setValidateOrigin] = useState(
+    typeof window !== "undefined" ? window.location.hostname : "",
+  );
   const [introspection, setIntrospection] = useState<Introspection | null>(null);
 
   const introspectMut = useMutation({
@@ -304,6 +306,10 @@ function ConnectPage() {
                 spellCheck={false}
                 className="font-mono text-xs"
               />
+              <p className="text-xs text-muted-foreground">
+                Required for domain-bound developer or remote tokens. Plain OG Bot tokens from this
+                project validate against the local token registry.
+              </p>
             </div>
             <Button type="submit" disabled={introspectMut.isPending}>
               {introspectMut.isPending ? "Checking…" : "Validate"}
@@ -315,6 +321,7 @@ function ConnectPage() {
               <div className="font-medium">
                 {introspection.ok ? "✅ Valid" : `❌ Invalid — ${introspection.reason ?? "unknown"}`}
               </div>
+              <div>token_type: {introspection.token_type ?? "unknown"}</div>
               <div>uses_remaining: {introspection.uses_remaining ?? "∞"}</div>
               <div>expires_at: {introspection.expires_at ?? "never"}</div>
               <div>grants_vip: {introspection.grants_vip ? "yes" : "no"}</div>
