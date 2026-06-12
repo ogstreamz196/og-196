@@ -67,8 +67,8 @@ export function SongStudioCoPilot() {
             <Bot className="h-4 w-4" />
           </div>
           <div className="leading-tight">
-            <div className="text-sm font-semibold">OG Co-Pilot</div>
-            <div className="text-[10px] uppercase tracking-widest opacity-80">Song Studio engine</div>
+            <div className="text-sm font-semibold">Song Studio</div>
+            <div className="text-[10px] uppercase tracking-widest opacity-80">OG co-pilot engine</div>
           </div>
         </div>
         <div className="flex items-center gap-1">
