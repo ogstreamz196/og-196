@@ -133,6 +133,48 @@ export type Database = {
         }
         Relationships: []
       }
+      og_bot_remote_tokens: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          external_user: string | null
+          grants_vip: boolean
+          id: string
+          origin_host: string
+          revoked_at: string | null
+          signing_secret: string
+          token: string
+          uses_remaining: number | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          external_user?: string | null
+          grants_vip?: boolean
+          id?: string
+          origin_host: string
+          revoked_at?: string | null
+          signing_secret: string
+          token: string
+          uses_remaining?: number | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          external_user?: string | null
+          grants_vip?: boolean
+          id?: string
+          origin_host?: string
+          revoked_at?: string | null
+          signing_secret?: string
+          token?: string
+          uses_remaining?: number | null
+        }
+        Relationships: []
+      }
       og_bot_token_invites: {
         Row: {
           claim_expires_at: string | null
@@ -464,6 +506,21 @@ export type Database = {
       increment_bot_interactions: {
         Args: { p_delta?: number }
         Returns: number
+      }
+      list_og_bot_remote_tokens_safe: {
+        Args: never
+        Returns: {
+          created_at: string
+          created_by: string
+          expires_at: string
+          external_user: string
+          grants_vip: boolean
+          id: string
+          origin_host: string
+          revoked_at: string
+          token: string
+          uses_remaining: number
+        }[]
       }
       mint_coins: {
         Args: { p_amount: number; p_reason?: string; p_target: string }
