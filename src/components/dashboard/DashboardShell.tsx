@@ -170,16 +170,22 @@ export function DashboardShell({ title, children }: { title: string; children: R
                 className={cn(
                   "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                   isBoss && "mt-2 border border-primary/30 bg-gradient-brand-soft",
+                  isVipItem && "border border-amber-500/40 bg-amber-500/10",
                   active
                     ? "bg-sidebar-accent text-sidebar-accent-foreground"
                     : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
                 )}
               >
-                <Icon className={cn("h-4 w-4", (active || isBoss) && "text-primary")} />
+                <Icon className={cn("h-4 w-4", (active || isBoss) && "text-primary", isVipItem && "text-amber-500")} />
                 {item.label}
                 {isBoss && (
                   <span className="ml-auto rounded-full bg-primary/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary">
                     Boss
+                  </span>
+                )}
+                {isVipItem && (
+                  <span className="ml-auto rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-amber-500">
+                    VIP
                   </span>
                 )}
               </Link>
