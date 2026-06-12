@@ -315,6 +315,7 @@ function ConnectPage() {
               <div className="font-medium">
                 {introspection.ok ? "✅ Valid" : `❌ Invalid — ${introspection.reason ?? "unknown"}`}
               </div>
+              <div>token_type: {introspection.token_type ?? "unknown"}</div>
               <div>uses_remaining: {introspection.uses_remaining ?? "∞"}</div>
               <div>expires_at: {introspection.expires_at ?? "never"}</div>
               <div>grants_vip: {introspection.grants_vip ? "yes" : "no"}</div>
