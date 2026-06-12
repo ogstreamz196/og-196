@@ -106,11 +106,44 @@ function PortalsPage() {
           </div>
         ) : data && data.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <Link
+              to="/og-bot/connect"
+              className="group flex flex-col gap-3 overflow-hidden rounded-2xl border border-primary/40 bg-gradient-brand-soft p-5 shadow-card transition-all hover:-translate-y-0.5 hover:shadow-glow focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <div className="flex items-center gap-3">
+                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-brand shadow-glow">
+                  <Bot className="h-5 w-5 text-primary-foreground" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="truncate font-semibold">OG Bot Portal</h3>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-gradient-brand px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-primary-foreground shadow-glow ring-1 ring-primary/40">
+                      API Keys
+                    </span>
+                  </div>
+                  <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Globe2 className="h-3 w-3" /> any domain
+                  </p>
+                </div>
+              </div>
+              <p className="line-clamp-3 text-sm text-muted-foreground">
+                Spend coins to mint OG Bot API tokens bound to your domain, then drop the embed script
+                onto your own site.
+              </p>
+              <div className="mt-auto flex items-center justify-between border-t border-primary/30 pt-3 text-xs">
+                <span className="inline-flex items-center gap-1 text-muted-foreground">
+                  <Coins className="h-3.5 w-3.5 text-primary" />
+                  coins → tokens
+                </span>
+                <span className="font-medium text-primary group-hover:underline">Open →</span>
+              </div>
+            </Link>
             {data.map((p) => (
+
               <CardWrapper key={p.id} portal={p}>
                 {(() => {
                   const isOgPortal = p.slug === "song-studio";
-                  const displayName = isOgPortal ? "OG Portal" : p.name;
+                  const displayName = isOgPortal ? "Song Studio" : p.name;
 
                   return (
                     <>
@@ -138,14 +171,12 @@ function PortalsPage() {
                         </span>
                       )}
                     </div>
-                    {isOgPortal && (
-                      <p className="text-xs font-medium text-primary/80">Song Studio</p>
-                    )}
                     <p className="flex items-center gap-1 text-xs text-muted-foreground">
                       <Globe2 className="h-3 w-3" /> {p.language}
                     </p>
                   </div>
                 </div>
+
 
                 <div className="line-clamp-3 text-sm text-muted-foreground">
                   {isOgPortal ? (
