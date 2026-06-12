@@ -162,6 +162,7 @@ export function DashboardShell({ title, children }: { title: string; children: R
             const active = isItemActive(item, pathname);
             const Icon = item.icon;
             const isBoss = item.to === "/admin";
+            const isVipItem = item.to === "/og-bot/connect";
             return (
               <Link
                 key={item.to}
