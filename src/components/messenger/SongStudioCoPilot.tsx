@@ -46,7 +46,7 @@ export function SongStudioCoPilot() {
       <button
         onClick={() => setOpen(true)}
         className="fixed bottom-6 right-6 z-40 grid h-14 w-14 place-items-center rounded-full bg-gradient-brand text-primary-foreground shadow-glow ring-2 ring-primary/30 transition-transform hover:scale-110"
-        aria-label="Open OG Co-Pilot"
+        aria-label="Open Song Studio"
       >
         <Bot className="h-6 w-6" />
         <span className="pointer-events-none absolute inset-0 animate-ping rounded-full bg-primary/40" />
@@ -67,8 +67,8 @@ export function SongStudioCoPilot() {
             <Bot className="h-4 w-4" />
           </div>
           <div className="leading-tight">
-            <div className="text-sm font-semibold">OG Co-Pilot</div>
-            <div className="text-[10px] uppercase tracking-widest opacity-80">Song Studio engine</div>
+            <div className="text-sm font-semibold">Song Studio</div>
+            <div className="text-[10px] uppercase tracking-widest opacity-80">OG co-pilot engine</div>
           </div>
         </div>
         <div className="flex items-center gap-1">

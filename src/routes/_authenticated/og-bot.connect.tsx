@@ -141,7 +141,7 @@ function ConnectPage() {
                 <Coins className="h-3.5 w-3.5 text-primary" /> coins → API keys
               </span>
               <span className="inline-flex items-center gap-1">
-                <Bot className="h-3.5 w-3.5 text-primary" /> OG Bot Co-Pilot below
+                <Bot className="h-3.5 w-3.5 text-primary" /> Song Studio below
               </span>
             </div>
           </div>
