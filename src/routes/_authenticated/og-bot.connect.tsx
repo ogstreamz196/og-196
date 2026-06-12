@@ -4,9 +4,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
+  introspectOgBotToken,
   listMyOgBotTokens,
   mintOgBotToken,
   revokeOgBotToken,
+  type Introspection,
   type MintedToken,
 } from "@/lib/og-bot-remote.functions";
 import { Button } from "@/components/ui/button";
