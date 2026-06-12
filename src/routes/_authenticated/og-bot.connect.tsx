@@ -268,6 +268,42 @@ function ConnectPage() {
 
       <Card>
         <CardHeader>
+          <CardTitle>Embed script</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Drop this on your site. Replace <code className="text-xs">YOUR_TOKEN</code> with a token you minted above —
+            it auths every chat request against the OG Bot mothership.
+          </p>
+          <pre className="overflow-auto rounded bg-muted p-3 text-xs">
+{`<script
+  src="https://cdn.ogstreamz.co.uk/widget.js"
+  data-bot-id="og-bot"
+  data-token="YOUR_TOKEN"
+  data-auth-url="https://portal.ogstreamz.co.uk/og-bot/connect"
+  defer
+></script>`}
+          </pre>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => {
+              const snippet = `<script src="https://cdn.ogstreamz.co.uk/widget.js" data-bot-id="og-bot" data-token="YOUR_TOKEN" data-auth-url="https://portal.ogstreamz.co.uk/og-bot/connect" defer></script>`;
+              navigator.clipboard.writeText(snippet);
+              toast.success("Embed copied. Paste before </body>.");
+            }}
+          >
+            Copy embed
+          </Button>
+          <p className="text-xs text-muted-foreground">
+            Auth path: <code>https://portal.ogstreamz.co.uk/og-bot/connect</code> — visitors who need to mint or
+            manage their own tokens get sent here.
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle>Validate any token</CardTitle>
         </CardHeader>
         <CardContent>
