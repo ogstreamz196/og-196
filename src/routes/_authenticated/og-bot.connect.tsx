@@ -397,6 +397,8 @@ function ConnectPage() {
           )}
         </CardContent>
       </Card>
+      <SongStudioCoPilot />
     </div>
   );
 }
+
