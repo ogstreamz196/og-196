@@ -161,6 +161,14 @@ const IntrospectInput = z.object({
   originHost: z.string().trim().min(1).max(253),
 });
 
+type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [k: string]: JsonValue };
+
 export type Introspection = {
   ok: boolean;
   reason?: string | null;
@@ -169,8 +177,8 @@ export type Introspection = {
   grants_vip?: boolean | null;
   bound_external_user?: string | null;
   domains?: string[] | null;
-  scopes?: unknown | null;
-  policy?: unknown | null;
+  scopes?: JsonValue | null;
+  policy?: JsonValue | null;
 };
 
 export const introspectOgBotToken = createServerFn({ method: "POST" })
