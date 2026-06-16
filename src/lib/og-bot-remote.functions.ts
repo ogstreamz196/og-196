@@ -59,11 +59,7 @@ export const mintOgBotToken = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) => MintInput.parse(data))
   .handler(async ({ data, context }): Promise<MintedToken> => {
-    const secret = process.env.OG_BOT_REMOTE_MINT_SECRET;
-    if (!secret) throw new Error("OG_BOT_REMOTE_MINT_SECRET missing");
-    const baseUrl = (
-      process.env.OG_BOT_MOTHERSHIP_URL ?? MOTHERSHIP_DEFAULT
-    ).replace(/\/+$/, "");
+    const baseUrl = mothershipBase();
 
     const originHost = data.originHost
       .toLowerCase()
@@ -81,11 +77,7 @@ export const mintOgBotToken = createServerFn({ method: "POST" })
     if (data.expiresAt !== undefined) payload.expires_at = data.expiresAt;
 
     const rawBody = JSON.stringify(payload);
-    const ts = Math.floor(Date.now() / 1000).toString();
-    const nonce = randomUUID();
-    const sig = createHmac("sha256", secret)
-      .update(`${ts}.${nonce}.${rawBody}`)
-      .digest("hex");
+    const { ts, nonce, sig } = signAdminRequest(rawBody);
 
     const res = await fetch(`${baseUrl}/api/public/og-bot/mint`, {
       method: "POST",
