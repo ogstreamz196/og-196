@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { useRemoteAuth } from "@/hooks/use-remote-auth";
 
 export function RemoteAuthCard() {
-  const { user, isLoading, signInWithPassword, signUpWithPassword, signInWithGoogle, signOut } =
+  const { user, isLoading, signInWithPassword, signUpWithPassword, signOut } =
     useRemoteAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,15 +27,6 @@ export function RemoteAuthCard() {
       if (error) toast.error(error.message);
       else toast.success(mode === "signin" ? "Signed in to OG Bot project." : "Check your email to confirm.");
     } finally {
-      setBusy(false);
-    }
-  }
-
-  async function handleGoogle() {
-    setBusy(true);
-    const { error } = await signInWithGoogle();
-    if (error) {
-      toast.error(error.message);
       setBusy(false);
     }
   }
@@ -92,15 +83,6 @@ export function RemoteAuthCard() {
               <Button size="sm" type="submit" disabled={busy}>
                 {busy ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <LogIn className="mr-1.5 h-3.5 w-3.5" />}
                 {mode === "signin" ? "Sign in" : "Sign up"}
-              </Button>
-              <Button
-                size="sm"
-                type="button"
-                variant="outline"
-                onClick={handleGoogle}
-                disabled={busy}
-              >
-                Continue with Google
               </Button>
               <button
                 type="button"
