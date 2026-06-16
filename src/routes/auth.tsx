@@ -152,14 +152,6 @@ function AuthPage() {
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Button
                 size="lg"
-                onClick={scrollToAuth}
-                className="bg-gradient-brand text-base font-bold shadow-glow"
-              >
-                Deploy the OG Bot Today
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-              <Button
-                size="lg"
                 variant="outline"
                 onClick={handlePortal}
                 className="glass-panel border-white/15 text-foreground hover:bg-white/5"
@@ -276,15 +268,6 @@ function AuthPage() {
           </p>
 
           <div className="mt-7 grid gap-3 sm:grid-cols-2">
-            <Button
-              size="lg"
-              onClick={handleGoogle}
-              disabled={loading}
-              className="bg-gradient-brand text-base font-bold shadow-glow"
-            >
-              Deploy the OG Bot Today
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
             <Button
               size="lg"
               variant="outline"
