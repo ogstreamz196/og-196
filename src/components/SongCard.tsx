@@ -189,7 +189,7 @@ export function SongCard({ song }: { song: Song }) {
         </div>
       </div>
 
-      <audio ref={audioRef} onEnded={() => setPlaying(false)} className="hidden" />
+      <audio ref={audioRef} preload="auto" onEnded={() => setPlaying(false)} className="hidden" />
     </div>
   );
 }
