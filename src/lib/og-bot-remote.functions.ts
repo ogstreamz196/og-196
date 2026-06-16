@@ -302,17 +302,20 @@ export const introspectOgBotToken = createServerFn({ method: "POST" })
       };
     }
 
+    // Remote fallback: HMAC-signed call to the mothership introspect endpoint.
     const rawBody = JSON.stringify({
-      _token: token,
-      _origin_host: originHost,
+      token,
+      origin_host: originHost,
     });
+    const { ts, nonce, sig } = signAdminRequest(rawBody);
 
-    const res = await fetch(OG_BOT_REMOTE_RPC_URL, {
+    const res = await fetch(`${mothershipBase()}/api/public/og-bot/introspect`, {
       method: "POST",
       headers: {
         "content-type": "application/json",
-        apikey: OG_BOT_REMOTE_ANON_KEY,
-        authorization: `Bearer ${OG_BOT_REMOTE_ANON_KEY}`,
+        "x-admin-timestamp": ts,
+        "x-admin-nonce": nonce,
+        "x-admin-signature": sig,
       },
       body: rawBody,
     });
@@ -333,5 +336,41 @@ export const introspectOgBotToken = createServerFn({ method: "POST" })
       };
     } catch {
       throw new Error(`introspect returned non-JSON: ${text.slice(0, 300)}`);
+    }
+  });
+
+// Widget chat proxy. Standard per-site tokens auth as Bearer against the
+// mothership's public widget endpoint — no HMAC, no admin secret. Wrapped
+// in a server fn so callers don't need to know the upstream URL.
+const ChatInput = z.object({
+  token: z.string().trim().min(1).max(512),
+  message: z.string().trim().min(1).max(8000),
+  conversationId: z.string().trim().max(128).optional(),
+});
+
+export const chatWithOgBot = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) => ChatInput.parse(data))
+  .handler(async ({ data }) => {
+    const body: Record<string, unknown> = { message: data.message };
+    if (data.conversationId) body.conversation_id = data.conversationId;
+
+    const res = await fetch(`${mothershipBase()}/api/public/og-bot-widget`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${data.token}`,
+      },
+      body: JSON.stringify(body),
+    });
+
+    const text = await res.text();
+    if (!res.ok) {
+      throw new Error(`chat failed: ${res.status} ${text.slice(0, 300)}`);
+    }
+    try {
+      return JSON.parse(text) as Record<string, unknown>;
+    } catch {
+      return { reply: text };
     }
   });
