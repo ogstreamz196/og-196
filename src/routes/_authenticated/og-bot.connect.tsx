@@ -272,35 +272,47 @@ function ConnectPage() {
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm text-muted-foreground">
-            Drop this on your site. Replace <code className="text-xs">YOUR_TOKEN</code> with a token you minted above —
-            it auths every chat request against the OG Bot mothership.
+            Drop this on your site. {revealed
+              ? <>Your freshly-minted token is already baked in below — paste &amp; ship.</>
+              : <>Mint a token above and it'll auto-fill here. Until then it shows <code className="text-xs">YOUR_TOKEN</code> as a placeholder.</>}
           </p>
-          <pre className="overflow-auto rounded bg-muted p-3 text-xs">
-{`<script
+          {(() => {
+            const tokenForEmbed = revealed?.token ?? "YOUR_TOKEN";
+            const pretty = `<script
   src="https://cdn.ogstreamz.co.uk/widget.js"
   data-bot-id="og-bot"
-  data-token="YOUR_TOKEN"
+  data-token="${tokenForEmbed}"
   data-auth-url="https://portal.ogstreamz.co.uk/og-bot/connect"
   defer
-></script>`}
-          </pre>
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={() => {
-              const snippet = `<script src="https://cdn.ogstreamz.co.uk/widget.js" data-bot-id="og-bot" data-token="YOUR_TOKEN" data-auth-url="https://portal.ogstreamz.co.uk/og-bot/connect" defer></script>`;
-              navigator.clipboard.writeText(snippet);
-              toast.success("Embed copied. Paste before </body>.");
-            }}
-          >
-            Copy embed
-          </Button>
+></script>`;
+            const compact = `<script src="https://cdn.ogstreamz.co.uk/widget.js" data-bot-id="og-bot" data-token="${tokenForEmbed}" data-auth-url="https://portal.ogstreamz.co.uk/og-bot/connect" defer></script>`;
+            return (
+              <>
+                <pre className="overflow-auto rounded bg-muted p-3 text-xs">{pretty}</pre>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => {
+                    navigator.clipboard.writeText(compact);
+                    toast.success(
+                      revealed
+                        ? "Embed + token copied. Paste before </body>."
+                        : "Embed copied (placeholder token). Paste before </body>.",
+                    );
+                  }}
+                >
+                  {revealed ? "Copy embed with token" : "Copy embed"}
+                </Button>
+              </>
+            );
+          })()}
           <p className="text-xs text-muted-foreground">
             Auth path: <code>https://portal.ogstreamz.co.uk/og-bot/connect</code> — visitors who need to mint or
             manage their own tokens get sent here.
           </p>
         </CardContent>
       </Card>
+
 
       <Card>
         <CardHeader>
