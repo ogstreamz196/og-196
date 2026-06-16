@@ -351,7 +351,7 @@ const ChatInput = z.object({
 export const chatWithOgBot = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) => ChatInput.parse(data))
-  .handler(async ({ data }) => {
+  .handler(async ({ data }): Promise<{ reply: string; raw: string }> => {
     const body: Record<string, unknown> = { message: data.message };
     if (data.conversationId) body.conversation_id = data.conversationId;
 
@@ -368,9 +368,12 @@ export const chatWithOgBot = createServerFn({ method: "POST" })
     if (!res.ok) {
       throw new Error(`chat failed: ${res.status} ${text.slice(0, 300)}`);
     }
+    let reply = text;
     try {
-      return JSON.parse(text) as Record<string, unknown>;
+      const parsed = JSON.parse(text) as { reply?: string; message?: string };
+      reply = parsed.reply ?? parsed.message ?? text;
     } catch {
-      return { reply: text };
+      /* keep raw text */
     }
+    return { reply, raw: text };
   });
