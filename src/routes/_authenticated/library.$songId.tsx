@@ -318,7 +318,7 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
         </div>
       </div>
 
-      <audio ref={audioRef} onEnded={() => setPlaying(false)} className="hidden" />
+      <audio ref={audioRef} preload="auto" onEnded={() => setPlaying(false)} className="hidden" />
     </article>
   );
 }
