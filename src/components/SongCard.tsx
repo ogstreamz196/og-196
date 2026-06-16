@@ -29,20 +29,37 @@ export function SongCard({ song }: { song: Song }) {
   const [progress, setProgress] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  const isReadyForPreview =
+    song.status === "completed" && !!(song.audio_path || song.sample_path);
+
   async function ensureUrl() {
     if (signedUrl || (!song.audio_path && !song.sample_path)) return signedUrl;
     setLoadingUrl(true);
     try {
       const { data, error } = await supabase.functions.invoke("song-url", {
-        body: { song_id: song.id },
+        body: { song_id: song.id, mode: "preview" },
       });
       if (error) throw error;
       setSignedUrl(data.url);
+      // Warm the audio element so playback starts instantly on click.
+      const el = audioRef.current;
+      if (el && el.src !== data.url) {
+        el.src = data.url as string;
+        el.load();
+      }
       return data.url as string;
     } finally {
       setLoadingUrl(false);
     }
   }
+
+  // Pre-fetch the signed URL as soon as the song is ready so the first
+  // play click is instant instead of waiting on a round-trip + buffering.
+  useEffect(() => {
+    if (!isReadyForPreview || signedUrl || loadingUrl) return;
+    ensureUrl().catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isReadyForPreview, song.id]);
 
   async function togglePlay() {
     const url = await ensureUrl();
@@ -172,7 +189,7 @@ export function SongCard({ song }: { song: Song }) {
         </div>
       </div>
 
-      <audio ref={audioRef} onEnded={() => setPlaying(false)} className="hidden" />
+      <audio ref={audioRef} preload="auto" onEnded={() => setPlaying(false)} className="hidden" />
     </div>
   );
 }
