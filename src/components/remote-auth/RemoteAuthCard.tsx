@@ -84,15 +84,6 @@ export function RemoteAuthCard() {
                 {busy ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <LogIn className="mr-1.5 h-3.5 w-3.5" />}
                 {mode === "signin" ? "Sign in" : "Sign up"}
               </Button>
-              <Button
-                size="sm"
-                type="button"
-                variant="outline"
-                onClick={handleGoogle}
-                disabled={busy}
-              >
-                Continue with Google
-              </Button>
               <button
                 type="button"
                 className="ml-auto text-[11px] text-muted-foreground hover:text-foreground underline"
