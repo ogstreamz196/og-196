@@ -13,10 +13,32 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const MOTHERSHIP_DEFAULT = "https://ogstreamz.lovable.app";
-const OG_BOT_REMOTE_RPC_URL =
-  "https://dawcdietltejjxbdimkm.supabase.co/rest/v1/rpc/og_bot_token_introspect";
-const OG_BOT_REMOTE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhd2NkaWV0bHRlamp4YmRpbWttIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNTcyODYsImV4cCI6MjA5MzgzMzI4Nn0.evNy8qk5a3MLZxJRSUOTNfKbkeqhbgxVVfJWxqY7BPA";
+
+function mothershipBase(): string {
+  return (process.env.OG_BOT_MOTHERSHIP_URL ?? MOTHERSHIP_DEFAULT).replace(
+    /\/+$/,
+    "",
+  );
+}
+
+// Sign an outbound admin request to the mothership.
+// Payload string is literally `${ts}.${nonce}.${rawBody}`.
+// ts is unix SECONDS; the mothership enforces a ±300s drift window, so
+// don't cache or pre-sign — sign at send time.
+function signAdminRequest(rawBody: string): {
+  ts: string;
+  nonce: string;
+  sig: string;
+} {
+  const secret = process.env.OG_BOT_REMOTE_MINT_SECRET;
+  if (!secret) throw new Error("OG_BOT_REMOTE_MINT_SECRET missing");
+  const ts = Math.floor(Date.now() / 1000).toString();
+  const nonce = randomUUID();
+  const sig = createHmac("sha256", secret)
+    .update(`${ts}.${nonce}.${rawBody}`)
+    .digest("hex");
+  return { ts, nonce, sig };
+}
 
 const MintInput = z.object({
   originHost: z.string().trim().min(1).max(253),
@@ -37,11 +59,7 @@ export const mintOgBotToken = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) => MintInput.parse(data))
   .handler(async ({ data, context }): Promise<MintedToken> => {
-    const secret = process.env.OG_BOT_REMOTE_MINT_SECRET;
-    if (!secret) throw new Error("OG_BOT_REMOTE_MINT_SECRET missing");
-    const baseUrl = (
-      process.env.OG_BOT_MOTHERSHIP_URL ?? MOTHERSHIP_DEFAULT
-    ).replace(/\/+$/, "");
+    const baseUrl = mothershipBase();
 
     const originHost = data.originHost
       .toLowerCase()
@@ -59,11 +77,7 @@ export const mintOgBotToken = createServerFn({ method: "POST" })
     if (data.expiresAt !== undefined) payload.expires_at = data.expiresAt;
 
     const rawBody = JSON.stringify(payload);
-    const ts = Math.floor(Date.now() / 1000).toString();
-    const nonce = randomUUID();
-    const sig = createHmac("sha256", secret)
-      .update(`${ts}.${nonce}.${rawBody}`)
-      .digest("hex");
+    const { ts, nonce, sig } = signAdminRequest(rawBody);
 
     const res = await fetch(`${baseUrl}/api/public/og-bot/mint`, {
       method: "POST",
@@ -288,17 +302,20 @@ export const introspectOgBotToken = createServerFn({ method: "POST" })
       };
     }
 
+    // Remote fallback: HMAC-signed call to the mothership introspect endpoint.
     const rawBody = JSON.stringify({
-      _token: token,
-      _origin_host: originHost,
+      token,
+      origin_host: originHost,
     });
+    const { ts, nonce, sig } = signAdminRequest(rawBody);
 
-    const res = await fetch(OG_BOT_REMOTE_RPC_URL, {
+    const res = await fetch(`${mothershipBase()}/api/public/og-bot/introspect`, {
       method: "POST",
       headers: {
         "content-type": "application/json",
-        apikey: OG_BOT_REMOTE_ANON_KEY,
-        authorization: `Bearer ${OG_BOT_REMOTE_ANON_KEY}`,
+        "x-admin-timestamp": ts,
+        "x-admin-nonce": nonce,
+        "x-admin-signature": sig,
       },
       body: rawBody,
     });
@@ -320,4 +337,43 @@ export const introspectOgBotToken = createServerFn({ method: "POST" })
     } catch {
       throw new Error(`introspect returned non-JSON: ${text.slice(0, 300)}`);
     }
+  });
+
+// Widget chat proxy. Standard per-site tokens auth as Bearer against the
+// mothership's public widget endpoint — no HMAC, no admin secret. Wrapped
+// in a server fn so callers don't need to know the upstream URL.
+const ChatInput = z.object({
+  token: z.string().trim().min(1).max(512),
+  message: z.string().trim().min(1).max(8000),
+  conversationId: z.string().trim().max(128).optional(),
+});
+
+export const chatWithOgBot = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) => ChatInput.parse(data))
+  .handler(async ({ data }): Promise<{ reply: string; raw: string }> => {
+    const body: Record<string, unknown> = { message: data.message };
+    if (data.conversationId) body.conversation_id = data.conversationId;
+
+    const res = await fetch(`${mothershipBase()}/api/public/og-bot-widget`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${data.token}`,
+      },
+      body: JSON.stringify(body),
+    });
+
+    const text = await res.text();
+    if (!res.ok) {
+      throw new Error(`chat failed: ${res.status} ${text.slice(0, 300)}`);
+    }
+    let reply = text;
+    try {
+      const parsed = JSON.parse(text) as { reply?: string; message?: string };
+      reply = parsed.reply ?? parsed.message ?? text;
+    } catch {
+      /* keep raw text */
+    }
+    return { reply, raw: text };
   });
