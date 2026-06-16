@@ -267,7 +267,7 @@ function AuthPage() {
             Pick your lane. New here? Deploy the bot. Returning? Drop straight into the Music Hub.
           </p>
 
-          <div className="mt-7 grid gap-3 sm:grid-cols-2">
+          <div className="mt-7 grid gap-3">
             <Button
               size="lg"
               variant="outline"
