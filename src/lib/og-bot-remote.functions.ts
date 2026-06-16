@@ -13,10 +13,32 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const MOTHERSHIP_DEFAULT = "https://ogstreamz.lovable.app";
-const OG_BOT_REMOTE_RPC_URL =
-  "https://dawcdietltejjxbdimkm.supabase.co/rest/v1/rpc/og_bot_token_introspect";
-const OG_BOT_REMOTE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhd2NkaWV0bHRlamp4YmRpbWttIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNTcyODYsImV4cCI6MjA5MzgzMzI4Nn0.evNy8qk5a3MLZxJRSUOTNfKbkeqhbgxVVfJWxqY7BPA";
+
+function mothershipBase(): string {
+  return (process.env.OG_BOT_MOTHERSHIP_URL ?? MOTHERSHIP_DEFAULT).replace(
+    /\/+$/,
+    "",
+  );
+}
+
+// Sign an outbound admin request to the mothership.
+// Payload string is literally `${ts}.${nonce}.${rawBody}`.
+// ts is unix SECONDS; the mothership enforces a ±300s drift window, so
+// don't cache or pre-sign — sign at send time.
+function signAdminRequest(rawBody: string): {
+  ts: string;
+  nonce: string;
+  sig: string;
+} {
+  const secret = process.env.OG_BOT_REMOTE_MINT_SECRET;
+  if (!secret) throw new Error("OG_BOT_REMOTE_MINT_SECRET missing");
+  const ts = Math.floor(Date.now() / 1000).toString();
+  const nonce = randomUUID();
+  const sig = createHmac("sha256", secret)
+    .update(`${ts}.${nonce}.${rawBody}`)
+    .digest("hex");
+  return { ts, nonce, sig };
+}
 
 const MintInput = z.object({
   originHost: z.string().trim().min(1).max(253),
