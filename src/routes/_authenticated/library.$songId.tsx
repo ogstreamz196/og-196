@@ -112,7 +112,8 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
   const [downloading, setDownloading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Auto-load the preview URL as soon as the song becomes ready.
+  // Auto-load the preview URL as soon as the song becomes ready,
+  // and warm the <audio> element so the first play click is instant.
   useEffect(() => {
     let cancelled = false;
     async function load() {
@@ -123,7 +124,13 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
           body: { song_id: song.id, mode: "preview" },
         });
         if (error) throw error;
-        if (!cancelled) setPreviewUrl(data.url as string);
+        if (cancelled) return;
+        setPreviewUrl(data.url as string);
+        const el = audioRef.current;
+        if (el && el.src !== data.url) {
+          el.src = data.url as string;
+          el.load();
+        }
       } catch (e) {
         if (!cancelled) toast.error(e instanceof Error ? e.message : "Could not load preview");
       } finally {
