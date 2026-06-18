@@ -82,15 +82,48 @@ export function OgChat({ compact = false }: { compact?: boolean }) {
     };
   }, []);
 
+  const TOKEN_ERROR_RE = /invalid og bot token|revoked|expired|token required|belongs to another/i;
+
+  async function runChat(history: OgChatMessage[], tokenOverride?: string) {
+    return chat({
+      data: {
+        messages: history,
+        token: tokenOverride ?? token,
+        pageContext: typeof window !== "undefined" ? window.location.pathname : "",
+      },
+    });
+  }
+
   const m = useMutation({
-    mutationFn: async (history: OgChatMessage[]) =>
-      chat({
-        data: {
-          messages: history,
-          token,
-          pageContext: typeof window !== "undefined" ? window.location.pathname : "",
-        },
-      }),
+    mutationFn: async (history: OgChatMessage[]) => {
+      try {
+        retriedRef.current = false;
+        return await runChat(history);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        if (!TOKEN_ERROR_RE.test(msg) || retriedRef.current) throw err;
+        // Try to silently refresh from the backend registry and retry once.
+        retriedRef.current = true;
+        const refreshed = await refreshToken({ data: undefined }).catch(() => null);
+        if (!refreshed?.token) {
+          // No active token on file — clear local cache so the unlock UI shows.
+          window.localStorage.removeItem(tokenKey(userId));
+          setToken("");
+          throw new Error(
+            refreshed?.reason === "revoked"
+              ? "Your OG Bot token was revoked. Paste a new one to continue."
+              : refreshed?.reason === "expired"
+                ? "Your OG Bot token expired. Paste a fresh one to continue."
+                : "OG Bot token unavailable. Paste a new token to continue.",
+          );
+        }
+        // Persist the refreshed token and retry the chat call seamlessly.
+        window.localStorage.setItem(tokenKey(userId), refreshed.token);
+        setToken(refreshed.token);
+        toast.message("OG Bot token refreshed");
+        return await runChat(history, refreshed.token);
+      }
+    },
     onSuccess: (res) => {
       setMessages((cur) => {
         const next = [...cur, { role: "assistant" as const, content: res.reply || "..." }];
