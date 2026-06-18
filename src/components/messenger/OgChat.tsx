@@ -42,6 +42,8 @@ export function OgChat({ compact = false }: { compact?: boolean }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const selfSyncRef = useRef(false);
   const chat = useServerFn(chatOgBot);
+  const refreshToken = useServerFn(getMyActiveOgBotToken);
+  const retriedRef = useRef(false);
 
   // Load token per-user whenever the signed-in user changes.
   useEffect(() => {
