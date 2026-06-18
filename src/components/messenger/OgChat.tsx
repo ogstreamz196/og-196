@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, Send, Bot, KeyRound, LogOut } from "lucide-react";
-import { chatOgBot, type OgChatMessage } from "@/lib/og-messenger.functions";
+import { chatOgBot, getMyActiveOgBotToken, type OgChatMessage } from "@/lib/og-messenger.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
