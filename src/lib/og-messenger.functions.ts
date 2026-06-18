@@ -3,6 +3,36 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export type OgChatMessage = { role: "user" | "assistant"; content: string };
 
+/**
+ * Returns the signed-in user's current active OG Bot token, if any.
+ *
+ * Used by the messenger widget to silently refresh the per-site Bearer token
+ * when the previously cached one is rejected (expired / revoked / rotated).
+ * Returns `{ token: null, reason }` instead of throwing so the client can
+ * fall back to the manual paste flow cleanly.
+ */
+export const getMyActiveOgBotToken = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<{
+    token: string | null;
+    expires_at: string | null;
+    reason: "ok" | "missing" | "revoked" | "expired";
+  }> => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row, error } = await supabaseAdmin
+      .from("og_bot_tokens")
+      .select("token, expires_at, revoked_at")
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!row) return { token: null, expires_at: null, reason: "missing" };
+    if (row.revoked_at) return { token: null, expires_at: row.expires_at, reason: "revoked" };
+    if (row.expires_at && new Date(row.expires_at).getTime() < Date.now()) {
+      return { token: null, expires_at: row.expires_at, reason: "expired" };
+    }
+    return { token: row.token, expires_at: row.expires_at, reason: "ok" };
+  });
+
 const SYSTEM_PROMPT =
   "You are OG Bot — a blunt, no-nonsense studio co-pilot for OGStreamz. " +
   "Help users with songwriting, bot tokens, coins, and portal questions. " +
