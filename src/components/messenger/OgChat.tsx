@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, Send, Bot, KeyRound, LogOut } from "lucide-react";
-import { chatOgBot, type OgChatMessage } from "@/lib/og-messenger.functions";
+import { chatOgBot, getMyActiveOgBotToken, type OgChatMessage } from "@/lib/og-messenger.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -42,6 +42,8 @@ export function OgChat({ compact = false }: { compact?: boolean }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const selfSyncRef = useRef(false);
   const chat = useServerFn(chatOgBot);
+  const refreshToken = useServerFn(getMyActiveOgBotToken);
+  const retriedRef = useRef(false);
 
   // Load token per-user whenever the signed-in user changes.
   useEffect(() => {
@@ -80,15 +82,48 @@ export function OgChat({ compact = false }: { compact?: boolean }) {
     };
   }, []);
 
+  const TOKEN_ERROR_RE = /invalid og bot token|revoked|expired|token required|belongs to another/i;
+
+  async function runChat(history: OgChatMessage[], tokenOverride?: string) {
+    return chat({
+      data: {
+        messages: history,
+        token: tokenOverride ?? token,
+        pageContext: typeof window !== "undefined" ? window.location.pathname : "",
+      },
+    });
+  }
+
   const m = useMutation({
-    mutationFn: async (history: OgChatMessage[]) =>
-      chat({
-        data: {
-          messages: history,
-          token,
-          pageContext: typeof window !== "undefined" ? window.location.pathname : "",
-        },
-      }),
+    mutationFn: async (history: OgChatMessage[]) => {
+      try {
+        retriedRef.current = false;
+        return await runChat(history);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        if (!TOKEN_ERROR_RE.test(msg) || retriedRef.current) throw err;
+        // Try to silently refresh from the backend registry and retry once.
+        retriedRef.current = true;
+        const refreshed = await refreshToken({ data: undefined }).catch(() => null);
+        if (!refreshed?.token) {
+          // No active token on file — clear local cache so the unlock UI shows.
+          window.localStorage.removeItem(tokenKey(userId));
+          setToken("");
+          throw new Error(
+            refreshed?.reason === "revoked"
+              ? "Your OG Bot token was revoked. Paste a new one to continue."
+              : refreshed?.reason === "expired"
+                ? "Your OG Bot token expired. Paste a fresh one to continue."
+                : "OG Bot token unavailable. Paste a new token to continue.",
+          );
+        }
+        // Persist the refreshed token and retry the chat call seamlessly.
+        window.localStorage.setItem(tokenKey(userId), refreshed.token);
+        setToken(refreshed.token);
+        toast.message("OG Bot token refreshed");
+        return await runChat(history, refreshed.token);
+      }
+    },
     onSuccess: (res) => {
       setMessages((cur) => {
         const next = [...cur, { role: "assistant" as const, content: res.reply || "..." }];
