@@ -201,7 +201,7 @@ export function OgChat({
       {showHeader && (
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 px-3 py-2 text-xs">
           <div className="flex items-center gap-2 text-muted-foreground">
-            <Bot className="h-3.5 w-3.5 text-primary" />
+            <OgAvatar size={18} />
             <span>
               OG Bot · {balance} coin{balance === 1 ? "" : "s"}
             </span>
