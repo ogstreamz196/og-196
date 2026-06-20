@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { type StripeEnv, verifyWebhook } from "@/lib/stripe.server";
-import { findCoinPackByBundleId } from "@/lib/coin-packs";
+import { findCoinPackByBundleId, isVipBundle } from "@/lib/coin-packs";
 
 async function getAdminClient() {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -73,12 +73,38 @@ async function creditCoinsForSession(session: any, env: StripeEnv) {
   }
 }
 
+async function grantVipForSession(session: any, env: StripeEnv) {
+  const meta = (session?.metadata ?? {}) as Record<string, string | undefined>;
+  const userId = meta.userId;
+  if (!userId) {
+    console.warn("payments webhook: missing userId on VIP session", session?.id);
+    return;
+  }
+  if (session?.payment_status && session.payment_status !== "paid" && session?.status !== "complete") {
+    console.log("payments webhook: ignoring unpaid VIP session", session.id);
+    return;
+  }
+  const supabase = await getAdminClient();
+  const { error } = await supabase
+    .from("user_roles")
+    .upsert({ user_id: userId, role: "vip" }, { onConflict: "user_id,role" });
+  if (error) console.error("payments webhook: VIP role grant failed", error);
+  else console.log("payments webhook: VIP granted", { userId, env, sessionId: session?.id });
+}
+
 async function handleEvent(event: { type: string; data: { object: any } }, env: StripeEnv) {
   switch (event.type) {
     case "checkout.session.completed":
-    case "transaction.completed":
-      await creditCoinsForSession(event.data.object, env);
+    case "transaction.completed": {
+      const session = event.data.object;
+      const bundleId = session?.metadata?.bundleId;
+      if (isVipBundle(bundleId)) {
+        await grantVipForSession(session, env);
+      } else {
+        await creditCoinsForSession(session, env);
+      }
       break;
+    }
     default:
       console.log("payments webhook: unhandled event", event.type);
   }
