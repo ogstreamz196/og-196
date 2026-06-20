@@ -1,0 +1,56 @@
+import { Music2, Compass, Wand2, Library, MessageCircle } from "lucide-react";
+import { HubCard } from "./HubCard";
+
+const FEATURES = [
+  {
+    to: "/portals",
+    icon: <Compass className="h-6 w-6" />,
+    title: "Browse Portals",
+    description: "Explore curated music portals. Each one is a unique AI engine tuned to a genre or style.",
+    cta: "Explore",
+    primary: true,
+  },
+  {
+    to: "/portals",
+    icon: <Wand2 className="h-6 w-6" />,
+    title: "Generate Tracks",
+    description: "Describe your idea, pick a portal, and let OG Bot compose your next hit in seconds.",
+    cta: "Create",
+  },
+  {
+    to: "/library",
+    icon: <Library className="h-6 w-6" />,
+    title: "Your Library",
+    description: "Every track you generate lives here. Stream, review, and build your personal catalog.",
+    cta: "Open Library",
+  },
+  {
+    to: "/messenger",
+    icon: <MessageCircle className="h-6 w-6" />,
+    title: "OG Messenger",
+    description: "Chat with OG Bot for tips, recommendations, and production advice. 5 free credits on sign-up.",
+    cta: "Chat",
+  },
+] as const;
+
+export function FeatureGrid() {
+  return (
+    <section>
+      <div className="mb-6 flex items-center gap-3">
+        <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-brand-soft">
+          <Music2 className="h-5 w-5 text-primary" />
+        </div>
+        <div>
+          <h2 className="text-2xl font-bold">What you can do</h2>
+          <p className="text-sm text-muted-foreground">Everything you need to create and collect music.</p>
+        </div>
+      </div>
+
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {FEATURES.map((f) => (
+          <HubCard key={f.title} {...f} />
+        ))}
+      </div>
+    </section>
+  );
+}
