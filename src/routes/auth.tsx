@@ -56,14 +56,14 @@ function AuthPage() {
     });
   }, [navigate]);
 
-  async function handleGoogle() {
+  async function handleOAuth(provider: "google" | "apple") {
     setLoading(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", {
+      const result = await lovable.auth.signInWithOAuth(provider, {
         redirect_uri: window.location.origin,
       });
       if (result.error) {
-        toast.error(result.error.message || "Google sign-in failed");
+        toast.error(result.error.message || `${provider === "apple" ? "Apple" : "Google"} sign-in failed`);
         return;
       }
       if (result.redirected) return;
@@ -72,6 +72,8 @@ function AuthPage() {
       setLoading(false);
     }
   }
+  const handleGoogle = () => handleOAuth("google");
+  const handleApple = () => handleOAuth("apple");
 
   async function handlePortal() {
     const { data } = await supabase.auth.getSession();
@@ -319,11 +321,28 @@ function AuthPage() {
               Continue with Google
             </Button>
 
+            <Button
+              type="button"
+              size="lg"
+              onClick={handleApple}
+              disabled={loading}
+              className="mt-3 w-full max-w-sm border border-white/15 bg-black text-base font-semibold text-white hover:bg-black/80"
+            >
+              {loading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M16.365 1.43c0 1.14-.467 2.227-1.222 3.014-.789.836-2.073 1.488-3.119 1.4-.13-1.108.466-2.272 1.169-3.001.79-.825 2.149-1.448 3.172-1.413zM20.5 17.41c-.55 1.27-.815 1.836-1.524 2.96-.99 1.566-2.385 3.516-4.116 3.53-1.537.014-1.932-1.001-4.018-.99-2.086.012-2.521 1.01-4.06.996-1.731-.014-3.052-1.776-4.042-3.342C.077 15.95-.21 10.747 1.97 7.998c1.55-1.96 4-3.103 6.295-3.061 2.337.043 3.808.998 4.747 1.005.937.007 2.74-1.246 4.624-1.063.789.033 3.001.319 4.422 2.402-3.857 2.114-3.224 7.625.442 10.13z" />
+                </svg>
+              )}
+              Continue with Apple
+            </Button>
+
             <div className="mt-4 flex items-start gap-2 text-xs text-muted-foreground">
               <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
               <span>
-                Google identity only. New accounts get 10 starter OG coins. Boss access goes to the
-                authorised owner email.
+                Free tier: new accounts get starter OG credits on first sign-in (1 credit per OG Bot message).
+                Top up any time. Boss access goes to the authorised owner email.
               </span>
             </div>
           </div>

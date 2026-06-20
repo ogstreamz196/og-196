@@ -5,12 +5,14 @@ export type AppSettings = {
   coins_per_generation: number;
   songs_per_generation: number;
   sample_seconds: number;
+  signup_credits: number;
 };
 
 const DEFAULTS: AppSettings = {
   coins_per_generation: 3,
   songs_per_generation: 2,
   sample_seconds: 30,
+  signup_credits: 5,
 };
 
 export function useSettings() {
@@ -22,10 +24,13 @@ export function useSettings() {
       if (error) throw error;
       const map: Record<string, unknown> = {};
       for (const row of data ?? []) map[row.key] = row.value;
+      const numOrDefault = (v: unknown, d: number) =>
+        typeof v === "number" ? v : (typeof v === "string" && Number.isFinite(Number(v)) ? Number(v) : d);
       return {
-        coins_per_generation: typeof map.coins_per_generation === "number" ? map.coins_per_generation : DEFAULTS.coins_per_generation,
-        songs_per_generation: typeof map.songs_per_generation === "number" ? map.songs_per_generation : DEFAULTS.songs_per_generation,
-        sample_seconds: typeof map.sample_seconds === "number" ? map.sample_seconds : DEFAULTS.sample_seconds,
+        coins_per_generation: numOrDefault(map.coins_per_generation, DEFAULTS.coins_per_generation),
+        songs_per_generation: numOrDefault(map.songs_per_generation, DEFAULTS.songs_per_generation),
+        sample_seconds: numOrDefault(map.sample_seconds, DEFAULTS.sample_seconds),
+        signup_credits: numOrDefault(map.signup_credits, DEFAULTS.signup_credits),
       };
     },
   });
