@@ -1,15 +1,23 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import { Loader2, Library as LibraryIcon, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Loader2,
+  Library as LibraryIcon,
+  Trash2,
+  Plus,
+  Sparkles,
+  Heart,
+  Notebook,
+  MessageSquareMore,
+} from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useRole } from "@/hooks/use-role";
-import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { SongCard, type Song } from "@/components/SongCard";
-import { EditableContent } from "@/components/admin/EditableContent";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,22 +28,43 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  CreateSongDialog,
+  composePromptFromDraft,
+  type CreationFlow,
+  type SongBriefDraft,
+} from "@/components/library/CreateSongDialog";
 
 export const Route = createFileRoute("/_authenticated/library/")({
   component: LibraryPage,
 });
 
+type Filter = "all" | "drafts" | "completed" | "failed";
+
+const ENTRY_POINTS: { flow: CreationFlow; title: string; body: string; icon: React.ReactNode }[] = [
+  { flow: "scratch",   title: "From scratch",     body: "Open brief and shape it.",       icon: <Plus className="h-4 w-4" /> },
+  { flow: "memory",    title: "From a memory",    body: "Turn a moment into a song.",     icon: <Notebook className="h-4 w-4" /> },
+  { flow: "tribute",   title: "Dedication",       body: "Honour someone you love.",       icon: <Heart className="h-4 w-4" /> },
+  { flow: "messenger", title: "With OG",          body: "Co-write in OG Messenger.",      icon: <MessageSquareMore className="h-4 w-4" /> },
+];
+
 function LibraryPage() {
   const { user } = useAuth();
   const { isAdmin } = useRole();
+  const navigate = useNavigate();
   const [pendingDelete, setPendingDelete] = useState<Song | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [openFlow, setOpenFlow] = useState<CreationFlow | null>(null);
+  const [filter, setFilter] = useState<Filter>("all");
 
   const query = useQuery({
     queryKey: ["library", user?.id],
     enabled: !!user,
     queryFn: async (): Promise<Song[]> => {
-      const { data, error } = await supabase.from("songs").select("*").order("created_at", { ascending: false });
+      const { data, error } = await supabase
+        .from("songs")
+        .select("*")
+        .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as Song[];
     },
@@ -45,12 +74,20 @@ function LibraryPage() {
     if (!user) return;
     const channel = supabase
       .channel("songs-library")
-      .on("postgres_changes", { event: "*", schema: "public", table: "songs", filter: `user_id=eq.${user.id}` },
-        () => query.refetch())
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "songs", filter: `user_id=eq.${user.id}` },
+        () => query.refetch(),
+      )
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      supabase.removeChannel(channel);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
+
+  const songs = query.data ?? [];
+  const filtered = useMemo(() => filterSongs(songs, filter), [songs, filter]);
 
   async function handleDelete() {
     if (!pendingDelete) return;
@@ -68,55 +105,125 @@ function LibraryPage() {
     }
   }
 
+  async function handleCreate(draft: SongBriefDraft) {
+    if (!user) return;
+    if (draft.flow === "messenger") {
+      setOpenFlow(null);
+      navigate({ to: "/messenger" });
+      return;
+    }
+    const prompt = composePromptFromDraft(draft);
+    const { data, error } = await supabase
+      .from("songs")
+      .insert({
+        user_id: user.id,
+        prompt,
+        title: draft.title || null,
+        style: [draft.mood, draft.genre, draft.lyricalStyle].filter(Boolean).join(" · ") || null,
+        status: "draft",
+      })
+      .select("id")
+      .single();
+
+    if (error) {
+      toast.error(error.message || "Couldn't save draft");
+      return;
+    }
+    toast.success("Draft saved");
+    setOpenFlow(null);
+    if (data?.id) navigate({ to: "/library/$songId", params: { songId: data.id } });
+  }
+
   return (
-    <DashboardShell title="My Library">
-      <div className="mx-auto max-w-4xl">
-        {query.isLoading ? (
-          <div className="grid place-items-center py-16 text-muted-foreground">
-            <Loader2 className="h-6 w-6 animate-spin" />
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
+      {/* Heading */}
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Music Hub</h1>
+          <p className="mt-1 max-w-xl text-sm text-muted-foreground">
+            Create personalised tracks and manage every song project in one place.
+          </p>
+        </div>
+        <Button size="lg" onClick={() => setOpenFlow("scratch")} className="gap-2">
+          <Plus className="h-4 w-4" /> New song project
+        </Button>
+      </header>
+
+      {/* Creation entry points */}
+      <section>
+        <h2 className="mb-3 text-sm font-medium text-muted-foreground">Start a new song</h2>
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {ENTRY_POINTS.map((e) => (
+            <button
+              key={e.flow}
+              type="button"
+              onClick={() => setOpenFlow(e.flow)}
+              className="group flex flex-col items-start gap-2 rounded-xl border border-border bg-card p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md"
+            >
+              <span className="flex h-8 w-8 items-center justify-center rounded-md border border-border/60 bg-background text-primary">
+                {e.icon}
+              </span>
+              <p className="text-sm font-medium">{e.title}</p>
+              <p className="text-xs text-muted-foreground">{e.body}</p>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* List */}
+      <section>
+        <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
+          <div className="mb-4 flex items-center justify-between">
+            <TabsList>
+              <TabsTrigger value="all">All ({songs.length})</TabsTrigger>
+              <TabsTrigger value="drafts">Drafts</TabsTrigger>
+              <TabsTrigger value="completed">Completed</TabsTrigger>
+              <TabsTrigger value="failed">Issues</TabsTrigger>
+            </TabsList>
           </div>
-        ) : query.data && query.data.length > 0 ? (
-          <div className="grid gap-3">
-            {query.data.map((s) => (
-              <div key={s.id} className="relative">
-                <Link
-                  to="/library/$songId"
-                  params={{ songId: s.id }}
-                  className="block rounded-2xl transition-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <SongCard song={s} />
-                </Link>
-                {isAdmin && (
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    className="absolute right-3 top-3 h-8 w-8 opacity-90"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setPendingDelete(s);
-                    }}
-                    aria-label="Delete track"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                )}
+
+          <TabsContent value={filter} className="m-0">
+            {query.isLoading ? (
+              <div className="grid place-items-center py-16 text-muted-foreground">
+                <Loader2 className="h-6 w-6 animate-spin" />
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="rounded-2xl border border-dashed border-border bg-card/50 p-16 text-center">
-            <LibraryIcon className="mx-auto h-10 w-10 text-muted-foreground" />
-            <p className="mt-3 text-muted-foreground">
-              <EditableContent
-                contentKey="library.empty"
-                defaultValue="Your library is empty. Head to Home and generate your first track."
-                multiline
-              />
-            </p>
-          </div>
-        )}
-      </div>
+            ) : filtered.length > 0 ? (
+              <div className="grid gap-3">
+                {filtered.map((s) => (
+                  <div key={s.id} className="relative">
+                    <Link
+                      to="/library/$songId"
+                      params={{ songId: s.id }}
+                      className="block rounded-2xl transition-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <SongCard song={s} />
+                    </Link>
+                    {isAdmin && (
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="absolute right-3 top-3 h-8 w-8 opacity-90"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setPendingDelete(s);
+                        }}
+                        aria-label="Delete track"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <EmptyState onCreate={() => setOpenFlow("scratch")} filter={filter} />
+            )}
+          </TabsContent>
+        </Tabs>
+      </section>
+
+      <CreateSongDialog flow={openFlow} onClose={() => setOpenFlow(null)} onSubmit={handleCreate} />
 
       <AlertDialog open={!!pendingDelete} onOpenChange={(o) => !o && setPendingDelete(null)}>
         <AlertDialogContent>
@@ -134,6 +241,32 @@ function LibraryPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </DashboardShell>
+    </div>
+  );
+}
+
+function filterSongs(songs: Song[], filter: Filter): Song[] {
+  if (filter === "all") return songs;
+  if (filter === "completed") return songs.filter((s) => s.status === "completed");
+  if (filter === "failed") return songs.filter((s) => s.status === "failed");
+  return songs.filter((s) => s.status === "draft" || s.status === "pending" || s.status === "processing");
+}
+
+function EmptyState({ onCreate, filter }: { onCreate: () => void; filter: Filter }) {
+  return (
+    <div className="rounded-2xl border border-dashed border-border bg-card/50 p-16 text-center">
+      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-border bg-background">
+        <LibraryIcon className="h-5 w-5 text-muted-foreground" />
+      </div>
+      <p className="mt-4 text-sm font-medium">
+        {filter === "all" ? "No songs yet" : `Nothing in ${filter}`}
+      </p>
+      <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
+        Start your first personalised song — from scratch, a memory, or a dedication.
+      </p>
+      <Button onClick={onCreate} className="mt-5 gap-2">
+        <Sparkles className="h-4 w-4" /> Start a song
+      </Button>
+    </div>
   );
 }

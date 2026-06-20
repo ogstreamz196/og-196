@@ -18,6 +18,7 @@ import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { useSettings } from "@/hooks/use-settings";
 import { Button } from "@/components/ui/button";
 import type { Song } from "@/components/SongCard";
+import { SongWorkspace } from "@/components/library/SongWorkspace";
 
 export const Route = createFileRoute("/_authenticated/library/$songId")({
   component: SongDetailPage,
@@ -65,8 +66,8 @@ function SongDetailPage() {
   }, [songId, qc]);
 
   return (
-    <DashboardShell title="Player">
-      <div className="mx-auto max-w-3xl space-y-4">
+    <DashboardShell title="Song workspace">
+      <div className="mx-auto max-w-5xl space-y-6">
         <Button asChild variant="ghost" size="sm">
           <Link to="/library">
             <ArrowLeft className="h-4 w-4" /> Back to library
@@ -80,7 +81,10 @@ function SongDetailPage() {
             Track not found.
           </div>
         ) : (
-          <PlayerCard song={data} onRefresh={refetch} />
+          <>
+            <PlayerCard song={data} onRefresh={refetch} />
+            <SongWorkspace song={data} onSaved={refetch} />
+          </>
         )}
       </div>
     </DashboardShell>
