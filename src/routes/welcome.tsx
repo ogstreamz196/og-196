@@ -2,8 +2,6 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   Music2,
-  MessageSquareMore,
-  Bot,
   Sparkles,
   Loader2,
   Headphones,
@@ -37,16 +35,16 @@ export const Route = createFileRoute("/welcome")({
   component: WelcomePage,
   head: () => ({
     meta: [
-      { title: "OG Studio — Music Hub, powered by OG Bot" },
+      { title: "OG Studio — Prompt Songs & Album Covers" },
       {
         name: "description",
         content:
-          "Turn real moments into real songs. Music Hub powered by OG Bot. Sign in with Google or Apple.",
+          "Turn prompts, moods and memories into different song styles with album covers. Sign in with Google or Apple.",
       },
-      { property: "og:title", content: "OG Studio — Music Hub, powered by OG Bot" },
+      { property: "og:title", content: "OG Studio — Prompt Songs & Album Covers" },
       {
         property: "og:description",
-        content: "Make a song from your life in minutes. Powered by OG Bot.",
+        content: "Prompt rap, pop, drill, afrobeats, heartbreak and party songs with cover art.",
       },
     ],
   }),
@@ -301,6 +299,7 @@ function AlbumCoverShowcase() {
           <div className="absolute inset-x-0 bottom-0 bg-background/75 p-3 text-left backdrop-blur-md">
             <p className="font-display text-xl leading-none tracking-tight sm:text-2xl">{cover.title}</p>
             <p className="mt-1 text-xs font-black uppercase tracking-[0.16em] text-primary">{cover.style}</p>
+            <p className="mt-2 hidden text-xs font-bold leading-tight text-foreground/85 sm:block">{cover.prompt}</p>
           </div>
         </article>
       ))}
@@ -323,23 +322,6 @@ function Sticker({
       style={{ transform: `rotate(${rotate}deg)` }}
     >
       {children}
-    </div>
-  );
-}
-
-function Bubble({ side, children }: { side: "you" | "bot"; children: React.ReactNode }) {
-  const mine = side === "you";
-  return (
-    <div className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-      <div
-        className={`max-w-[88%] rounded-2xl px-4 py-2.5 leading-snug shadow-md ${
-          mine
-            ? "rounded-br-md bg-gradient-brand text-primary-foreground"
-            : "rounded-bl-md border border-white/10 bg-background/70 text-foreground"
-        }`}
-      >
-        {children}
-      </div>
     </div>
   );
 }
