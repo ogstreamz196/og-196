@@ -29,8 +29,7 @@ export function SongCard({ song }: { song: Song }) {
   const [progress, setProgress] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const isReadyForPreview =
-    song.status === "completed" && !!(song.audio_path || song.sample_path);
+  const isReadyForPreview = song.status === "completed" && !!(song.audio_path || song.sample_path);
 
   async function ensureUrl() {
     if (signedUrl || (!song.audio_path && !song.sample_path)) return signedUrl;
