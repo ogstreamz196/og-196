@@ -267,12 +267,14 @@ function PricingControls() {
   const [coins, setCoins] = useState<string>("");
   const [songs, setSongs] = useState<string>("");
   const [sample, setSample] = useState<string>("");
+  const [signup, setSignup] = useState<string>("");
 
   useEffect(() => {
     if (settings) {
       setCoins(String(settings.coins_per_generation));
       setSongs(String(settings.songs_per_generation));
       setSample(String(settings.sample_seconds));
+      setSignup(String(settings.signup_credits));
     }
   }, [settings]);
 
@@ -282,10 +284,13 @@ function PricingControls() {
         { key: "coins_per_generation", value: Number(coins) },
         { key: "songs_per_generation", value: Number(songs) },
         { key: "sample_seconds", value: Number(sample) },
+        { key: "signup_credits", value: Number(signup) },
       ];
       for (const u of updates) {
         if (!Number.isFinite(u.value) || u.value < 0) throw new Error(`Invalid ${u.key}`);
-        const { error } = await supabase.from("app_settings").update({ value: u.value }).eq("key", u.key);
+        const { error } = await supabase
+          .from("app_settings")
+          .upsert({ key: u.key, value: u.value as any }, { onConflict: "key" });
         if (error) throw error;
       }
     },
@@ -302,7 +307,12 @@ function PricingControls() {
         <Coins className="h-4 w-4 text-coin" />
         <h3 className="font-semibold">Pricing & limits</h3>
       </div>
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div>
+          <Label htmlFor="signup">Free-tier signup credits</Label>
+          <Input id="signup" type="number" min={0} max={1000} value={signup} onChange={(e) => setSignup(e.target.value)} className="mt-2" />
+          <p className="mt-1 text-xs text-muted-foreground">Granted once on first sign-in. 1 credit = 1 OG Bot message.</p>
+        </div>
         <div>
           <Label htmlFor="coins">Coins per generation</Label>
           <Input id="coins" type="number" min={0} value={coins} onChange={(e) => setCoins(e.target.value)} className="mt-2" />
