@@ -4,10 +4,13 @@ import {
   Music2,
   MessageSquareMore,
   Bot,
-  ArrowUpRight,
-  PlayCircle,
-  Loader2,
   Sparkles,
+  Loader2,
+  Headphones,
+  Heart,
+  Star,
+  Wand2,
+  Mic2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { lovable } from "@/integrations/lovable";
@@ -23,12 +26,12 @@ export const Route = createFileRoute("/welcome")({
       {
         name: "description",
         content:
-          "A personal music studio. Turn real memories into finished songs with OG Bot. Sign in with Google or Apple.",
+          "Turn real moments into real songs. Music Hub powered by OG Bot. Sign in with Google or Apple.",
       },
       { property: "og:title", content: "OG Studio — Music Hub, powered by OG Bot" },
       {
         property: "og:description",
-        content: "A personal music studio. Real stories become real songs.",
+        content: "Make a song from your life in minutes. Powered by OG Bot.",
       },
     ],
   }),
@@ -86,83 +89,88 @@ function AppleIcon({ className }: { className?: string }) {
   );
 }
 
-function AuthButtons() {
+function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
   const { signIn, pending } = useOAuthSignIn();
+  const h = size === "xl" ? "h-16 text-lg" : "h-14 text-base";
   return (
-    <div className="grid w-full gap-3 sm:grid-cols-2">
-      <Button
+    <div className="grid w-full gap-4 sm:grid-cols-2">
+      <button
         onClick={() => signIn("google")}
         disabled={pending !== null}
-        className="h-12 gap-2.5 bg-white text-black hover:bg-white/90 shadow-md transition disabled:opacity-70"
+        className={`${h} group relative inline-flex items-center justify-center gap-3 rounded-2xl bg-white text-black font-bold tracking-tight shadow-[0_8px_0_0_rgba(0,0,0,0.35)] transition-all duration-150 hover:-translate-y-0.5 hover:shadow-[0_12px_0_0_rgba(0,0,0,0.35)] active:translate-y-1 active:shadow-[0_2px_0_0_rgba(0,0,0,0.35)] disabled:opacity-70 disabled:cursor-wait`}
       >
         {pending === "google" ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
+          <Loader2 className="h-6 w-6 animate-spin" />
         ) : (
-          <GoogleIcon className="h-4 w-4" />
+          <GoogleIcon className="h-6 w-6" />
         )}
-        <span className="font-medium">Continue with Google</span>
-      </Button>
-      <Button
+        Continue with Google
+      </button>
+      <button
         onClick={() => signIn("apple")}
         disabled={pending !== null}
-        className="h-12 gap-2.5 bg-black text-white hover:bg-black/85 border border-white/10 shadow-md transition disabled:opacity-70"
+        className={`${h} group relative inline-flex items-center justify-center gap-3 rounded-2xl bg-black text-white font-bold tracking-tight border border-white/15 shadow-[0_8px_0_0_rgba(255,255,255,0.08)] transition-all duration-150 hover:-translate-y-0.5 hover:shadow-[0_12px_0_0_rgba(255,255,255,0.1)] active:translate-y-1 active:shadow-[0_2px_0_0_rgba(255,255,255,0.08)] disabled:opacity-70 disabled:cursor-wait`}
       >
         {pending === "apple" ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
+          <Loader2 className="h-6 w-6 animate-spin" />
         ) : (
-          <AppleIcon className="h-4 w-4" />
+          <AppleIcon className="h-6 w-6" />
         )}
-        <span className="font-medium">Continue with Apple</span>
-      </Button>
+        Continue with Apple
+      </button>
     </div>
   );
 }
 
 function WelcomePage() {
   return (
-    <main className="min-h-screen text-foreground">
+    <main className="relative min-h-screen overflow-x-hidden text-foreground">
+      <Blobs />
       <TopNav />
       <Hero />
       <Pillars />
+      <HowItWorks />
       <ClosingCta />
       <Footer />
     </main>
   );
 }
 
+function Blobs() {
+  return (
+    <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+      <div className="wc-blob absolute -left-32 top-10 h-[420px] w-[420px] rounded-full bg-gradient-brand opacity-40 blur-3xl" />
+      <div
+        className="wc-blob absolute -right-24 top-40 h-[360px] w-[360px] rounded-full bg-gradient-brand-soft opacity-60 blur-3xl"
+        style={{ animationDelay: "-5s" }}
+      />
+      <div
+        className="wc-blob absolute left-1/3 bottom-0 h-[480px] w-[480px] rounded-full bg-gradient-brand opacity-30 blur-3xl"
+        style={{ animationDelay: "-9s" }}
+      />
+    </div>
+  );
+}
+
 function TopNav() {
   return (
-    <header className="sticky top-0 z-30 border-b border-border/40 bg-background/60 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 sm:px-8">
-        <Link to="/welcome" className="flex items-center gap-2.5">
-          <span className="grid h-8 w-8 place-items-center rounded-md bg-gradient-brand text-primary-foreground shadow-glow">
-            <Sparkles className="h-3.5 w-3.5" />
+    <header className="sticky top-0 z-30 border-b border-white/10 bg-background/40 backdrop-blur-xl">
+      <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-5 sm:px-8">
+        <Link to="/welcome" className="group flex items-center gap-3">
+          <span className="wc-wiggle grid h-11 w-11 place-items-center rounded-2xl bg-gradient-brand text-primary-foreground shadow-glow">
+            <Sparkles className="h-5 w-5" />
           </span>
           <div className="leading-none">
-            <p className="font-display text-base font-medium tracking-tight">OG Studio</p>
-            <p className="mt-0.5 text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+            <p className="font-display text-xl font-semibold tracking-tight">OG Studio</p>
+            <p className="mt-1 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
               Music Hub
             </p>
           </div>
         </Link>
 
-        <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
-          <a href="#studio" className="transition hover:text-foreground">
-            The Studio
-          </a>
-          <a href="#how" className="transition hover:text-foreground">
-            How it works
-          </a>
-        </nav>
-
         <Link to="/auth">
-          <Button
-            size="sm"
-            variant="outline"
-            className="h-9 gap-1.5 border-white/15 bg-white/5 backdrop-blur"
-          >
+          <Button className="h-11 rounded-xl px-5 text-sm font-semibold bg-gradient-brand text-primary-foreground shadow-glow hover:opacity-95">
             Sign in
-            <ArrowUpRight className="h-3.5 w-3.5" />
           </Button>
         </Link>
       </div>
@@ -172,70 +180,82 @@ function TopNav() {
 
 function Hero() {
   return (
-    <section className="relative mx-auto max-w-6xl px-5 pt-20 pb-24 sm:px-8 lg:pt-28 lg:pb-32">
-      <div className="mx-auto max-w-3xl text-center">
-        <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-1 text-xs tracking-wide text-muted-foreground backdrop-blur">
-          <span className="h-1.5 w-1.5 rounded-full bg-primary shadow-glow" />
+    <section className="relative mx-auto max-w-6xl px-5 pt-14 pb-20 sm:px-8 lg:pt-24">
+      {/* Floating stickers */}
+      <Sticker className="left-[6%] top-8 wc-float" rotate="-12">
+        <Heart className="h-5 w-5 text-pink-400" />
+      </Sticker>
+      <Sticker className="right-[8%] top-16 wc-float-slow" rotate="14">
+        <Star className="h-5 w-5 text-amber-300" />
+      </Sticker>
+      <Sticker className="left-[10%] top-[55%] wc-float-slow" rotate="8">
+        <Headphones className="h-5 w-5 text-primary" />
+      </Sticker>
+      <Sticker className="right-[6%] top-[60%] wc-float" rotate="-10">
+        <Mic2 className="h-5 w-5 text-violet-300" />
+      </Sticker>
+
+      <div className="relative mx-auto max-w-4xl text-center">
+        <div className="wc-pop inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-sm font-medium backdrop-blur-xl">
+          <span className="h-2 w-2 animate-pulse rounded-full bg-primary shadow-glow" />
           Music Hub · powered by OG Bot
         </div>
 
-        <h1 className="font-display mt-8 text-[clamp(2.75rem,7vw,5.25rem)] font-light leading-[1.02] tracking-[-0.03em]">
-          A personal music studio,
-          <br className="hidden sm:block" />
-          <em className="italic text-gradient-brand not-italic sm:italic">
-            written from your life.
-          </em>
+        <h1 className="font-display mt-8 text-[clamp(3.25rem,9vw,7rem)] font-semibold leading-[0.95] tracking-[-0.04em]">
+          <span className="wc-pop inline-block">Make a song</span>
+          <br />
+          <span className="wc-pop inline-block" style={{ animationDelay: "0.15s" }}>
+            from your{" "}
+          </span>
+          <span
+            className="wc-pop inline-block italic text-gradient-brand wc-bounce-soft"
+            style={{ animationDelay: "0.3s" }}
+          >
+            life
+          </span>
+          <span className="wc-pop inline-block" style={{ animationDelay: "0.45s" }}>
+            .
+          </span>
         </h1>
 
-        <p className="mx-auto mt-7 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-          Tell OG Bot a real story — a name, a memory, a moment. Get back finished lyrics, a song
-          brief, and a track ready to play.
+        <p className="mx-auto mt-8 max-w-2xl text-xl leading-relaxed text-muted-foreground sm:text-2xl">
+          Tell <span className="font-semibold text-foreground">OG Bot</span> a real story.
+          <br className="hidden sm:block" />
+          Get back lyrics + a finished track. <span className="inline-block wc-wiggle">🎧</span>
         </p>
 
-        <div className="mx-auto mt-10 max-w-lg">
-          <AuthButtons />
-          <p className="mt-4 text-xs text-muted-foreground">Free to start · No card required</p>
+        <div className="mx-auto mt-12 max-w-2xl">
+          <AuthButtons size="xl" />
+          <p className="mt-5 text-sm text-muted-foreground">
+            ✨ Free to start · No card required · Takes 30 seconds
+          </p>
         </div>
       </div>
 
-      {/* Editorial mockup card */}
-      <div className="relative mx-auto mt-20 max-w-4xl">
-        <div className="pointer-events-none absolute -inset-x-10 -top-10 -bottom-10 rounded-[2rem] bg-gradient-brand-soft opacity-60 blur-3xl" />
-        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-card/70 shadow-card backdrop-blur-xl">
-          <div className="flex items-center gap-1.5 border-b border-white/5 px-5 py-3">
-            <span className="h-2 w-2 rounded-full bg-white/15" />
-            <span className="h-2 w-2 rounded-full bg-white/15" />
-            <span className="h-2 w-2 rounded-full bg-white/15" />
-            <span className="ml-3 text-[11px] tracking-wide text-muted-foreground">
-              ogstudio.app / library
+      {/* Chat preview card */}
+      <div className="relative mx-auto mt-24 max-w-3xl">
+        <div className="pointer-events-none absolute -inset-x-8 -inset-y-8 rounded-[2.5rem] bg-gradient-brand-soft opacity-60 blur-3xl" />
+        <div className="relative overflow-hidden rounded-[2rem] border-2 border-white/15 bg-card/80 p-6 shadow-card backdrop-blur-xl sm:p-8">
+          <div className="flex items-center gap-3">
+            <span className="grid h-10 w-10 place-items-center rounded-full bg-gradient-brand text-primary-foreground shadow-glow wc-wiggle">
+              <Bot className="h-5 w-5" />
             </span>
+            <div>
+              <p className="font-display text-lg font-semibold">OG Bot</p>
+              <p className="text-xs text-muted-foreground">online · ready to write</p>
+            </div>
           </div>
-          <div className="grid gap-5 p-6 sm:grid-cols-5">
-            <div className="sm:col-span-3">
-              <div className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-muted-foreground">
-                <Music2 className="h-3.5 w-3.5 text-primary" />
-                Music Hub
-              </div>
-              <div className="mt-4 space-y-2.5">
-                <Track title="For Mum — 60th" mood="Soulful · Acoustic" pct={86} />
-                <Track title="Liverpool nights" mood="Indie · Anthemic" pct={54} />
-                <Track title="Letter to my younger self" mood="Cinematic · Ballad" pct={32} />
-              </div>
-            </div>
-            <div className="rounded-lg border border-white/8 bg-background/40 p-4 sm:col-span-2">
-              <div className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-muted-foreground">
-                <MessageSquareMore className="h-3.5 w-3.5 text-primary" />
-                OG Bot
-              </div>
-              <div className="mt-4 space-y-2.5 text-[13px] leading-snug">
-                <Bubble side="you">A tribute song for my grandad. He loved jazz.</Bubble>
-                <Bubble side="bot">
-                  Tell me one memory of him that still makes you smile — we'll build the hook from
-                  there.
-                </Bubble>
-                <Bubble side="you">Sundays. Vinyl. Burnt toast.</Bubble>
-              </div>
-            </div>
+          <div className="mt-6 space-y-3 text-base sm:text-lg">
+            <Bubble side="you">A tribute to my mum's 60th 💜</Bubble>
+            <Bubble side="bot">
+              Lovely. Give me one memory of her that still makes you smile.
+            </Bubble>
+            <Bubble side="you">Sunday roasts. Singing Tina Turner in the kitchen.</Bubble>
+            <Bubble side="bot">
+              <span className="inline-flex items-center gap-1.5">
+                <Wand2 className="h-4 w-4" /> Cooking up your song…
+              </span>
+            </Bubble>
           </div>
         </div>
       </div>
@@ -243,19 +263,21 @@ function Hero() {
   );
 }
 
-function Track({ title, mood, pct }: { title: string; mood: string; pct: number }) {
+function Sticker({
+  children,
+  className,
+  rotate,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  rotate: string;
+}) {
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-white/8 bg-background/30 p-3 transition hover:border-primary/30">
-      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-gradient-brand-soft text-primary">
-        <PlayCircle className="h-4 w-4" />
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium">{title}</p>
-        <p className="truncate text-[11px] text-muted-foreground">{mood}</p>
-        <div className="mt-2 h-[3px] w-full overflow-hidden rounded-full bg-white/8">
-          <div className="h-full rounded-full bg-gradient-brand" style={{ width: `${pct}%` }} />
-        </div>
-      </div>
+    <div
+      className={`absolute hidden sm:grid place-items-center h-12 w-12 rounded-2xl border-2 border-white/20 bg-card/80 shadow-card backdrop-blur-xl ${className ?? ""}`}
+      style={{ transform: `rotate(${rotate}deg)` }}
+    >
+      {children}
     </div>
   );
 }
@@ -265,10 +287,10 @@ function Bubble({ side, children }: { side: "you" | "bot"; children: React.React
   return (
     <div className={`flex ${mine ? "justify-end" : "justify-start"}`}>
       <div
-        className={`max-w-[88%] rounded-lg px-3 py-1.5 ${
+        className={`max-w-[88%] rounded-2xl px-4 py-2.5 leading-snug shadow-md ${
           mine
-            ? "bg-primary/90 text-primary-foreground"
-            : "border border-white/8 bg-background/50 text-foreground"
+            ? "rounded-br-md bg-gradient-brand text-primary-foreground"
+            : "rounded-bl-md border border-white/10 bg-background/70 text-foreground"
         }`}
       >
         {children}
@@ -280,50 +302,97 @@ function Bubble({ side, children }: { side: "you" | "bot"; children: React.React
 function Pillars() {
   const items = [
     {
-      icon: <Music2 className="h-4 w-4" />,
-      eyebrow: "Hub",
+      icon: <Music2 className="h-6 w-6" />,
+      emoji: "🎵",
       title: "Music Hub",
-      body: "Your studio for personalised tracks. Drafts, briefs and workspaces — calm, organised, yours.",
+      body: "Your home for personalised songs. Drafts, briefs and workspaces — all in one happy place.",
+      tilt: "-2",
     },
     {
-      icon: <MessageSquareMore className="h-4 w-4" />,
-      eyebrow: "Messenger",
+      icon: <MessageSquareMore className="h-6 w-6" />,
+      emoji: "💬",
       title: "OG Messenger",
       body: "A long-form room to think out loud. Brainstorm lyrics, hooks and concepts with OG Bot.",
+      tilt: "1.5",
     },
     {
-      icon: <Bot className="h-4 w-4" />,
-      eyebrow: "Companion",
+      icon: <Bot className="h-6 w-6" />,
+      emoji: "🤖",
       title: "Floating OG Bot",
-      body: "An assistant that travels with you across the app. One tap, anywhere — no context lost.",
+      body: "A companion that follows you everywhere. One tap, anywhere — never lose your thread.",
+      tilt: "-1",
     },
   ];
 
   return (
-    <section id="studio" className="border-t border-white/8">
+    <section id="studio" className="relative">
       <div className="mx-auto max-w-6xl px-5 py-24 sm:px-8 lg:py-32">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">The Studio</p>
-          <h2 className="font-display mt-4 text-4xl font-light leading-tight tracking-tight sm:text-5xl">
-            One assistant. <em className="italic text-muted-foreground">Three rooms.</em>
+        <div className="mx-auto max-w-3xl text-center">
+          <p className="text-sm font-medium uppercase tracking-[0.25em] text-muted-foreground">
+            The Studio
+          </p>
+          <h2 className="font-display mt-4 text-5xl font-semibold leading-tight tracking-[-0.03em] sm:text-6xl">
+            One bot. <em className="italic text-gradient-brand">Three rooms.</em>
           </h2>
         </div>
 
-        <div className="mt-16 grid gap-px overflow-hidden rounded-2xl border border-white/8 bg-white/8 md:grid-cols-3">
+        <div className="mt-16 grid gap-6 md:grid-cols-3">
           {items.map((it) => (
             <article
               key={it.title}
-              className="bg-card/70 p-8 backdrop-blur-xl transition hover:bg-card/85"
+              style={{ transform: `rotate(${it.tilt}deg)` }}
+              className="group relative rounded-3xl border-2 border-white/12 bg-card/80 p-8 backdrop-blur-xl transition-all duration-200 hover:-translate-y-2 hover:rotate-0 hover:border-primary/40 hover:shadow-glow"
             >
-              <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-                <span className="grid h-6 w-6 place-items-center rounded-md bg-gradient-brand-soft text-primary">
+              <div className="flex items-center gap-3">
+                <span className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-brand text-primary-foreground shadow-glow transition-transform duration-200 group-hover:scale-110 group-hover:rotate-6">
                   {it.icon}
                 </span>
-                {it.eyebrow}
+                <span className="text-3xl">{it.emoji}</span>
               </div>
-              <h3 className="font-display mt-6 text-2xl font-normal tracking-tight">{it.title}</h3>
-              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{it.body}</p>
+              <h3 className="font-display mt-6 text-3xl font-semibold tracking-tight">
+                {it.title}
+              </h3>
+              <p className="mt-3 text-base leading-relaxed text-muted-foreground">{it.body}</p>
             </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function HowItWorks() {
+  const steps = [
+    { n: "1", emoji: "👋", title: "Sign in", body: "Google or Apple. Two taps, you're in." },
+    { n: "2", emoji: "✍️", title: "Tell OG a story", body: "A name. A memory. A moment that matters." },
+    { n: "3", emoji: "🎶", title: "Get your song", body: "Lyrics + a finished track, ready to play." },
+  ];
+  return (
+    <section className="relative border-t border-white/10">
+      <div className="mx-auto max-w-6xl px-5 py-24 sm:px-8">
+        <div className="mx-auto max-w-3xl text-center">
+          <p className="text-sm font-medium uppercase tracking-[0.25em] text-muted-foreground">
+            How it works
+          </p>
+          <h2 className="font-display mt-4 text-5xl font-semibold tracking-[-0.03em] sm:text-6xl">
+            Easy as <em className="italic text-gradient-brand">1 · 2 · 3</em>
+          </h2>
+        </div>
+
+        <div className="mt-14 grid gap-6 md:grid-cols-3">
+          {steps.map((s, i) => (
+            <div
+              key={s.n}
+              className="group relative rounded-3xl border-2 border-white/12 bg-card/70 p-8 text-center backdrop-blur-xl transition hover:-translate-y-1 hover:border-primary/40"
+              style={{ animationDelay: `${i * 120}ms` }}
+            >
+              <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-gradient-brand text-3xl font-black text-primary-foreground shadow-glow wc-bounce-soft">
+                {s.n}
+              </div>
+              <div className="mt-5 text-5xl">{s.emoji}</div>
+              <h3 className="font-display mt-3 text-2xl font-semibold">{s.title}</h3>
+              <p className="mt-2 text-base text-muted-foreground">{s.body}</p>
+            </div>
           ))}
         </div>
       </div>
@@ -333,20 +402,24 @@ function Pillars() {
 
 function ClosingCta() {
   return (
-    <section id="how" className="border-t border-white/8">
-      <div className="mx-auto max-w-3xl px-5 py-28 text-center sm:px-8 lg:py-36">
-        <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Begin</p>
-        <h2 className="font-display mt-5 text-4xl font-light leading-[1.05] tracking-[-0.02em] sm:text-6xl">
+    <section id="how" className="relative border-t border-white/10">
+      <div className="mx-auto max-w-4xl px-5 py-28 text-center sm:px-8 lg:py-32">
+        <p className="text-sm font-medium uppercase tracking-[0.25em] text-muted-foreground">
+          Begin
+        </p>
+        <h2 className="font-display mt-5 text-6xl font-semibold leading-[1] tracking-[-0.04em] sm:text-7xl">
           Your next song
           <br />
-          <em className="italic text-gradient-brand">is one story away.</em>
+          <em className="italic text-gradient-brand wc-bounce-soft inline-block">
+            is one story away.
+          </em>
         </h2>
-        <p className="mx-auto mt-6 max-w-md text-base text-muted-foreground">
-          Sign in. Tell OG Bot a real moment. Listen.
+        <p className="mx-auto mt-7 max-w-xl text-xl text-muted-foreground">
+          Sign in. Tell OG Bot a moment. Hit play. <span className="inline-block wc-wiggle">🎉</span>
         </p>
 
-        <div className="mx-auto mt-10 max-w-lg">
-          <AuthButtons />
+        <div className="mx-auto mt-12 max-w-2xl">
+          <AuthButtons size="xl" />
         </div>
       </div>
     </section>
@@ -355,16 +428,10 @@ function ClosingCta() {
 
 function Footer() {
   return (
-    <footer className="border-t border-white/8">
-      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-8 text-xs text-muted-foreground sm:flex-row sm:px-8">
+    <footer className="border-t border-white/10">
+      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-8 text-sm text-muted-foreground sm:flex-row sm:px-8">
         <span>© {new Date().getFullYear()} OG Studio · Music Hub powered by OG Bot</span>
         <div className="flex items-center gap-6">
-          <a href="#" className="transition hover:text-foreground">
-            Privacy
-          </a>
-          <a href="#" className="transition hover:text-foreground">
-            Terms
-          </a>
           <Link to="/auth" className="transition hover:text-foreground">
             Sign in
           </Link>
