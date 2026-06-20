@@ -84,8 +84,8 @@ function OgPersonaPage() {
   return (
     <DashboardShell title="OG Bot Persona">
       <div className="mx-auto max-w-3xl space-y-6">
-        <Link to="/admin/og-bot" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="h-4 w-4" /> Back to OG Bot tokens
+        <Link to="/admin" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
+          <ArrowLeft className="h-4 w-4" /> Back to admin
         </Link>
 
         <div className="rounded-xl border border-primary/30 bg-gradient-brand-soft p-5">
