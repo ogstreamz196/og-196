@@ -299,24 +299,24 @@ function Bubble({ side, children }: { side: "you" | "bot"; children: React.React
 function Pillars() {
   const items = [
     {
-      icon: <Music2 className="h-6 w-6" />,
+      icon: <Music2 className="h-7 w-7" />,
       emoji: "🎵",
       title: "Music Hub",
-      body: "Your home for personalised songs. Drafts, briefs and workspaces — all in one happy place.",
+      body: "Your studio for personalised songs. Briefs, drafts and finished tracks — all in one happy place.",
       tilt: "-2",
     },
     {
-      icon: <MessageSquareMore className="h-6 w-6" />,
-      emoji: "💬",
-      title: "OG Messenger",
-      body: "A long-form room to think out loud. Brainstorm lyrics, hooks and concepts with OG Bot.",
+      icon: <Bot className="h-7 w-7" />,
+      emoji: "🤖",
+      title: "OG Bot",
+      body: "The brain behind every song. Tell it a real story, get back lyrics + a track shaped around you.",
       tilt: "1.5",
     },
     {
-      icon: <Bot className="h-6 w-6" />,
-      emoji: "🤖",
-      title: "Floating OG Bot",
-      body: "A companion that follows you everywhere. One tap, anywhere — never lose your thread.",
+      icon: <MessageSquareMore className="h-7 w-7" />,
+      emoji: "💬",
+      title: "OG Messenger",
+      body: "A long-form room to think out loud with OG Bot — brainstorm hooks, lyrics and concepts.",
       tilt: "-1",
     },
   ];
@@ -325,11 +325,11 @@ function Pillars() {
     <section id="studio" className="relative">
       <div className="mx-auto max-w-6xl px-5 py-24 sm:px-8 lg:py-32">
         <div className="mx-auto max-w-3xl text-center">
-          <p className="text-sm font-medium uppercase tracking-[0.25em] text-muted-foreground">
-            The Studio
+          <p className="text-sm font-semibold uppercase tracking-[0.25em] text-muted-foreground">
+            Music Hub
           </p>
           <h2 className="font-display mt-4 text-6xl font-semibold leading-[1] tracking-[-0.035em] sm:text-7xl md:text-8xl">
-            One bot. <em className="italic text-gradient-brand">Three rooms.</em>
+            Powered by <em className="italic text-gradient-brand">OG Bot.</em>
           </h2>
         </div>
 
@@ -357,6 +357,7 @@ function Pillars() {
     </section>
   );
 }
+
 
 function HowItWorks() {
   const steps = [
