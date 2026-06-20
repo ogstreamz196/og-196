@@ -285,3 +285,46 @@
 [data-slot="select-content"] {
   backdrop-filter: blur(16px) saturate(140%);
 }
+
+/* Welcome page — playful cartoon animations */
+@keyframes wc-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-18px) rotate(2deg); }
+}
+@keyframes wc-float-slow {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-26px) rotate(-3deg); }
+}
+@keyframes wc-wiggle {
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+}
+@keyframes wc-pop {
+  0% { transform: scale(0.6); opacity: 0; }
+  60% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes wc-blob {
+  0%, 100% { transform: translate(0,0) scale(1); }
+  33% { transform: translate(30px,-20px) scale(1.1); }
+  66% { transform: translate(-20px,25px) scale(0.95); }
+}
+@keyframes wc-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes wc-bounce-soft {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.wc-float { animation: wc-float 6s ease-in-out infinite; }
+.wc-float-slow { animation: wc-float-slow 9s ease-in-out infinite; }
+.wc-wiggle { animation: wc-wiggle 3s ease-in-out infinite; transform-origin: center; }
+.wc-pop { animation: wc-pop 0.6s cubic-bezier(.34,1.56,.64,1) both; }
+.wc-blob { animation: wc-blob 14s ease-in-out infinite; }
+.wc-bounce-soft { animation: wc-bounce-soft 2.4s ease-in-out infinite; }
+.wc-shimmer {
+  background: linear-gradient(90deg, transparent, oklch(1 0 0 / 0.15), transparent);
+  background-size: 200% 100%;
+  animation: wc-shimmer 2.5s linear infinite;
+}
