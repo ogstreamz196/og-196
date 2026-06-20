@@ -42,10 +42,30 @@ export const Route = createFileRoute("/_authenticated/library/")({
 type Filter = "all" | "drafts" | "completed" | "failed";
 
 const ENTRY_POINTS: { flow: CreationFlow; title: string; body: string; icon: React.ReactNode }[] = [
-  { flow: "scratch",   title: "From scratch",     body: "Open brief and shape it.",       icon: <Plus className="h-4 w-4" /> },
-  { flow: "memory",    title: "From a memory",    body: "Turn a moment into a song.",     icon: <Notebook className="h-4 w-4" /> },
-  { flow: "tribute",   title: "Dedication",       body: "Honour someone you love.",       icon: <Heart className="h-4 w-4" /> },
-  { flow: "messenger", title: "With OG",          body: "Co-write in OG Messenger.",      icon: <MessageSquareMore className="h-4 w-4" /> },
+  {
+    flow: "scratch",
+    title: "From scratch",
+    body: "Open brief and shape it.",
+    icon: <Plus className="h-4 w-4" />,
+  },
+  {
+    flow: "memory",
+    title: "From a memory",
+    body: "Turn a moment into a song.",
+    icon: <Notebook className="h-4 w-4" />,
+  },
+  {
+    flow: "tribute",
+    title: "Dedication",
+    body: "Honour someone you love.",
+    icon: <Heart className="h-4 w-4" />,
+  },
+  {
+    flow: "messenger",
+    title: "With OG",
+    body: "Co-write in OG Messenger.",
+    icon: <MessageSquareMore className="h-4 w-4" />,
+  },
 ];
 
 function LibraryPage() {
@@ -86,7 +106,7 @@ function LibraryPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
-  const songs = query.data ?? [];
+  const songs = useMemo<Song[]>(() => query.data ?? [], [query.data]);
   const filtered = useMemo(() => filterSongs(songs, filter), [songs, filter]);
 
   async function handleDelete() {
@@ -183,7 +203,6 @@ function LibraryPage() {
         </div>
       </section>
 
-
       {/* List */}
       <section>
         <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
@@ -244,7 +263,8 @@ function LibraryPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete this track?</AlertDialogTitle>
             <AlertDialogDescription>
-              "{pendingDelete?.title || "Untitled"}" will be removed from the library. This cannot be undone.
+              "{pendingDelete?.title || "Untitled"}" will be removed from the library. This cannot
+              be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -263,7 +283,9 @@ function filterSongs(songs: Song[], filter: Filter): Song[] {
   if (filter === "all") return songs;
   if (filter === "completed") return songs.filter((s) => s.status === "completed");
   if (filter === "failed") return songs.filter((s) => s.status === "failed");
-  return songs.filter((s) => s.status === "draft" || s.status === "pending" || s.status === "processing");
+  return songs.filter(
+    (s) => s.status === "draft" || s.status === "pending" || s.status === "processing",
+  );
 }
 
 function EmptyState({ onCreate, filter }: { onCreate: () => void; filter: Filter }) {

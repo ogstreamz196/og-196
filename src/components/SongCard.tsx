@@ -29,8 +29,7 @@ export function SongCard({ song }: { song: Song }) {
   const [progress, setProgress] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const isReadyForPreview =
-    song.status === "completed" && !!(song.audio_path || song.sample_path);
+  const isReadyForPreview = song.status === "completed" && !!(song.audio_path || song.sample_path);
 
   async function ensureUrl() {
     if (signedUrl || (!song.audio_path && !song.sample_path)) return signedUrl;
@@ -108,7 +107,13 @@ export function SongCard({ song }: { song: Song }) {
     <div className="group flex gap-4 rounded-2xl border border-border bg-card p-4 shadow-card transition-all hover:shadow-glow">
       <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-gradient-brand-soft">
         {song.cover_url ? (
-          <img src={song.cover_url} alt="" className="h-full w-full object-cover" />
+          <img
+            src={song.cover_url}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            className="h-full w-full object-cover"
+          />
         ) : (
           <div className="grid h-full w-full place-items-center">
             <Music2 className="h-8 w-8 text-muted-foreground" />

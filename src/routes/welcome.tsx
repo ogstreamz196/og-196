@@ -70,7 +70,10 @@ function useOAuthSignIn() {
 function GoogleIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" aria-hidden>
-      <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.4-1.7 4.1-5.5 4.1-3.3 0-6-2.7-6-6.2s2.7-6.2 6-6.2c1.9 0 3.2.8 3.9 1.5l2.7-2.6C16.9 3 14.7 2 12 2 6.9 2 2.8 6.1 2.8 11.9S6.9 22 12 22c6.9 0 9.4-4.9 9.4-9 0-.6-.1-1-.2-1.6H12z" />
+      <path
+        fill="#EA4335"
+        d="M12 10.2v3.9h5.5c-.2 1.4-1.7 4.1-5.5 4.1-3.3 0-6-2.7-6-6.2s2.7-6.2 6-6.2c1.9 0 3.2.8 3.9 1.5l2.7-2.6C16.9 3 14.7 2 12 2 6.9 2 2.8 6.1 2.8 11.9S6.9 22 12 22c6.9 0 9.4-4.9 9.4-9 0-.6-.1-1-.2-1.6H12z"
+      />
     </svg>
   );
 }
@@ -144,12 +147,20 @@ function TopNav() {
         </Link>
 
         <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
-          <a href="#studio" className="transition hover:text-foreground">The Studio</a>
-          <a href="#how" className="transition hover:text-foreground">How it works</a>
+          <a href="#studio" className="transition hover:text-foreground">
+            The Studio
+          </a>
+          <a href="#how" className="transition hover:text-foreground">
+            How it works
+          </a>
         </nav>
 
         <Link to="/auth">
-          <Button size="sm" variant="outline" className="h-9 gap-1.5 border-white/15 bg-white/5 backdrop-blur">
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-9 gap-1.5 border-white/15 bg-white/5 backdrop-blur"
+          >
             Sign in
             <ArrowUpRight className="h-3.5 w-3.5" />
           </Button>
@@ -171,19 +182,19 @@ function Hero() {
         <h1 className="font-display mt-8 text-[clamp(2.75rem,7vw,5.25rem)] font-light leading-[1.02] tracking-[-0.03em]">
           A personal music studio,
           <br className="hidden sm:block" />
-          <em className="italic text-gradient-brand not-italic sm:italic">written from your life.</em>
+          <em className="italic text-gradient-brand not-italic sm:italic">
+            written from your life.
+          </em>
         </h1>
 
         <p className="mx-auto mt-7 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-          Tell OG Bot a real story — a name, a memory, a moment.
-          Get back finished lyrics, a song brief, and a track ready to play.
+          Tell OG Bot a real story — a name, a memory, a moment. Get back finished lyrics, a song
+          brief, and a track ready to play.
         </p>
 
         <div className="mx-auto mt-10 max-w-lg">
           <AuthButtons />
-          <p className="mt-4 text-xs text-muted-foreground">
-            Free to start · No card required
-          </p>
+          <p className="mt-4 text-xs text-muted-foreground">Free to start · No card required</p>
         </div>
       </div>
 
@@ -218,7 +229,10 @@ function Hero() {
               </div>
               <div className="mt-4 space-y-2.5 text-[13px] leading-snug">
                 <Bubble side="you">A tribute song for my grandad. He loved jazz.</Bubble>
-                <Bubble side="bot">Tell me one memory of him that still makes you smile — we'll build the hook from there.</Bubble>
+                <Bubble side="bot">
+                  Tell me one memory of him that still makes you smile — we'll build the hook from
+                  there.
+                </Bubble>
                 <Bubble side="you">Sundays. Vinyl. Burnt toast.</Bubble>
               </div>
             </div>
@@ -239,10 +253,7 @@ function Track({ title, mood, pct }: { title: string; mood: string; pct: number 
         <p className="truncate text-sm font-medium">{title}</p>
         <p className="truncate text-[11px] text-muted-foreground">{mood}</p>
         <div className="mt-2 h-[3px] w-full overflow-hidden rounded-full bg-white/8">
-          <div
-            className="h-full rounded-full bg-gradient-brand"
-            style={{ width: `${pct}%` }}
-          />
+          <div className="h-full rounded-full bg-gradient-brand" style={{ width: `${pct}%` }} />
         </div>
       </div>
     </div>
@@ -300,7 +311,10 @@ function Pillars() {
 
         <div className="mt-16 grid gap-px overflow-hidden rounded-2xl border border-white/8 bg-white/8 md:grid-cols-3">
           {items.map((it) => (
-            <article key={it.title} className="bg-card/70 p-8 backdrop-blur-xl transition hover:bg-card/85">
+            <article
+              key={it.title}
+              className="bg-card/70 p-8 backdrop-blur-xl transition hover:bg-card/85"
+            >
               <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
                 <span className="grid h-6 w-6 place-items-center rounded-md bg-gradient-brand-soft text-primary">
                   {it.icon}
@@ -345,9 +359,15 @@ function Footer() {
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-8 text-xs text-muted-foreground sm:flex-row sm:px-8">
         <span>© {new Date().getFullYear()} OG Studio · Music Hub powered by OG Bot</span>
         <div className="flex items-center gap-6">
-          <a href="#" className="transition hover:text-foreground">Privacy</a>
-          <a href="#" className="transition hover:text-foreground">Terms</a>
-          <Link to="/auth" className="transition hover:text-foreground">Sign in</Link>
+          <a href="#" className="transition hover:text-foreground">
+            Privacy
+          </a>
+          <a href="#" className="transition hover:text-foreground">
+            Terms
+          </a>
+          <Link to="/auth" className="transition hover:text-foreground">
+            Sign in
+          </Link>
         </div>
       </div>
     </footer>
