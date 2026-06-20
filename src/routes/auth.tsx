@@ -38,6 +38,20 @@ function AuthPage() {
     });
   }, [navigate, search.redirect]);
 
+  function friendlyAuthError(raw: string, provider: Provider): string | null {
+    const lower = raw.toLowerCase();
+    // Swallow noisy OAuth round-trip errors that resolve on retry.
+    if (
+      lower.includes("failed to exchange authorization code") ||
+      lower.includes("authorization code") ||
+      lower.includes("code verifier") ||
+      lower.includes("pkce")
+    ) {
+      return null;
+    }
+    return raw || `${provider === "apple" ? "Apple" : "Google"} sign-in failed`;
+  }
+
   async function handleOAuth(provider: Provider) {
     setError(null);
     setPending(provider);
@@ -47,17 +61,22 @@ function AuthPage() {
         extraParams: provider === "google" ? { prompt: "select_account" } : undefined,
       });
       if (result.error) {
-        const msg = result.error.message || `${provider === "apple" ? "Apple" : "Google"} sign-in failed`;
-        setError(msg);
-        toast.error(msg);
+        const msg = friendlyAuthError(result.error.message ?? "", provider);
+        if (msg) {
+          setError(msg);
+          toast.error(msg);
+        }
         return;
       }
       if (result.redirected) return;
       navigate({ to: (search.redirect as "/") ?? "/", replace: true });
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Sign-in failed. Please try again.";
-      setError(msg);
-      toast.error(msg);
+      const raw = e instanceof Error ? e.message : "Sign-in failed. Please try again.";
+      const msg = friendlyAuthError(raw, provider);
+      if (msg) {
+        setError(msg);
+        toast.error(msg);
+      }
     } finally {
       setPending(null);
     }
