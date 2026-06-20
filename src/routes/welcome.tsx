@@ -325,7 +325,36 @@ function Pillars() {
       icon: <MessageSquareMore className="h-7 w-7" />,
       emoji: "💬",
       title: "OG Messenger",
-      body: "A long-form room to think out loud with OG Bot — brainstorm hooks, lyrics and concepts.",
+  const items: Array<{
+    icon: React.ReactNode;
+    emoji: string;
+    title: React.ReactNode;
+    body: string;
+    tilt: string;
+    key: string;
+  }> = [
+    {
+      key: "hub",
+      icon: <Music2 className="h-7 w-7" />,
+      emoji: "🎵",
+      title: "Music Hub",
+      body: "Your studio for personalised songs. Briefs, drafts and finished tracks — all in one happy place.",
+      tilt: "-2",
+    },
+    {
+      key: "bot",
+      icon: <Bot className="h-7 w-7" />,
+      emoji: "🤖",
+      title: <OgBotLogo className="h-14 w-14" />,
+      body: "The brain behind every song. Tell it a real story, get back lyrics + a track shaped around you.",
+      tilt: "1.5",
+    },
+    {
+      key: "msg",
+      icon: <MessageSquareMore className="h-7 w-7" />,
+      emoji: "💬",
+      title: "OG Messenger",
+      body: "A long-form room to think out loud with OgBot — brainstorm hooks, lyrics and concepts.",
       tilt: "-1",
     },
   ];
@@ -346,7 +375,7 @@ function Pillars() {
         <div className="mt-16 grid gap-6 md:grid-cols-3">
           {items.map((it) => (
             <article
-              key={it.title}
+              key={it.key}
               style={{ transform: `rotate(${it.tilt}deg)` }}
               className="group relative rounded-3xl border-2 border-white/12 bg-card/80 p-8 backdrop-blur-xl transition-all duration-200 hover:-translate-y-2 hover:rotate-0 hover:border-primary/40 hover:shadow-glow"
             >
