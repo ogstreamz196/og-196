@@ -108,14 +108,15 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
       <button
         onClick={() => signIn("google")}
         disabled={pending !== null}
-        className={`${h} group relative inline-flex items-center justify-center gap-3 rounded-2xl bg-white text-black font-bold tracking-tight shadow-[0_8px_0_0_rgba(0,0,0,0.35)] transition-all duration-150 hover:-translate-y-0.5 hover:shadow-[0_12px_0_0_rgba(0,0,0,0.35)] active:translate-y-1 active:shadow-[0_2px_0_0_rgba(0,0,0,0.35)] disabled:opacity-70 disabled:cursor-wait`}
+        style={{ fontFamily: '"Roboto", "Helvetica Neue", Arial, sans-serif' }}
+        className={`${h} group relative inline-flex items-center justify-center gap-3 rounded-full bg-white text-[#1f1f1f] font-medium tracking-normal border border-[#dadce0] shadow-sm transition-all duration-150 hover:bg-[#f8faff] hover:shadow-md active:bg-[#f1f3f4] disabled:opacity-70 disabled:cursor-wait`}
       >
         {pending === "google" ? (
-          <Loader2 className="h-6 w-6 animate-spin" />
+          <Loader2 className="h-5 w-5 animate-spin" />
         ) : (
-          <GoogleIcon className="h-6 w-6" />
+          <GoogleIcon className="h-5 w-5" />
         )}
-        Continue with Google
+        Sign in with Google
       </button>
       <button
         onClick={() => signIn("apple")}
@@ -207,7 +208,14 @@ function Hero() {
       </Sticker>
 
       <div className="relative mx-auto w-full max-w-6xl text-center">
-        <div className="wc-pop inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2 text-base font-semibold uppercase tracking-[0.18em] backdrop-blur-xl">
+        <div className="mx-auto max-w-3xl">
+          <AuthButtons size="xl" />
+          <p className="mt-5 text-base font-semibold text-muted-foreground">
+            ✨ Free to start · No card required · Takes 30 seconds
+          </p>
+        </div>
+
+        <div className="wc-pop mt-12 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2 text-base font-semibold uppercase tracking-[0.18em] backdrop-blur-xl">
           <span className="h-2 w-2 animate-pulse rounded-full bg-primary shadow-glow" />
           <span>Music Hub · powered by</span>
           <OgBotLogo className="h-6 w-6" />
@@ -231,13 +239,6 @@ function Hero() {
           <br className="hidden sm:block" />
           Get back lyrics + a finished track. <span className="inline-block wc-wiggle">🎧</span>
         </p>
-
-        <div className="mx-auto mt-12 max-w-3xl">
-          <AuthButtons size="xl" />
-          <p className="mt-6 text-lg font-semibold text-muted-foreground">
-            ✨ Free to start · No card required · Takes 30 seconds
-          </p>
-        </div>
       </div>
 
 
