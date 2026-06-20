@@ -1,27 +1,11 @@
 import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
-import {
-  Loader2,
-  ShieldCheck,
-  Globe2,
-  Code2,
-  Cpu,
-  MessageSquareMore,
-  Flame,
-  ArrowRight,
-  Music2,
-  Brain,
-  Send,
-  X,
-  Check,
-  Copy,
-} from "lucide-react";
+import { Loader2, Music2, MessageSquareMore, Sparkles, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import ogLogoAsset from "@/assets/og-logo.png.asset.json";
 
 const searchSchema = z.object({ redirect: z.string().optional().catch("/") });
 
@@ -30,467 +14,188 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
   head: () => ({
     meta: [
-      { title: "OG Bot — The Foul-Mouthed AI Assistant You Can Embed Anywhere" },
+      { title: "Sign in — OG Studio" },
       {
         name: "description",
         content:
-          "Deploy OG Bot — an AI with attitude, total recall, and zero filter — as a floating widget on any site in seconds.",
+          "Sign in to OG Studio — your personalised music creation platform with Music Hub, OG Messenger, and a floating AI assistant.",
       },
     ],
   }),
 });
 
-const EMBED_SNIPPET = `<script src="https://cdn.ogstreamz.co.uk/widget.js" data-bot-id="og-bot"></script>`;
+type Provider = "google" | "apple";
 
 function AuthPage() {
   const navigate = useNavigate();
   const search = useSearch({ from: "/auth" });
-  const [loading, setLoading] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [widgetOpen, setWidgetOpen] = useState(false);
-  const authAnchor = useRef<HTMLDivElement>(null);
+  const [pending, setPending] = useState<Provider | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/", replace: true });
+      if (data.session) navigate({ to: (search.redirect as "/") ?? "/", replace: true });
     });
-  }, [navigate]);
+  }, [navigate, search.redirect]);
 
-  async function handleOAuth(provider: "google" | "apple") {
-    setLoading(true);
+  async function handleOAuth(provider: Provider) {
+    setError(null);
+    setPending(provider);
     try {
       const result = await lovable.auth.signInWithOAuth(provider, {
         redirect_uri: window.location.origin,
       });
       if (result.error) {
-        toast.error(result.error.message || `${provider === "apple" ? "Apple" : "Google"} sign-in failed`);
+        const msg = result.error.message || `${provider === "apple" ? "Apple" : "Google"} sign-in failed`;
+        setError(msg);
+        toast.error(msg);
         return;
       }
       if (result.redirected) return;
-      navigate({ to: search.redirect ?? ("/" as never), replace: true });
+      navigate({ to: (search.redirect as "/") ?? "/", replace: true });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Sign-in failed. Please try again.";
+      setError(msg);
+      toast.error(msg);
     } finally {
-      setLoading(false);
-    }
-  }
-  const handleGoogle = () => handleOAuth("google");
-  const handleApple = () => handleOAuth("apple");
-
-  async function handlePortal() {
-    const { data } = await supabase.auth.getSession();
-    if (data.session) {
-      navigate({ to: "/", replace: true });
-    } else {
-      scrollToAuth();
-    }
-  }
-
-  function scrollToAuth() {
-    authAnchor.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-  }
-
-  async function copyEmbed() {
-    try {
-      await navigator.clipboard.writeText(EMBED_SNIPPET);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1800);
-    } catch {
-      toast.error("Couldn't copy. Select and copy manually.");
+      setPending(null);
     }
   }
 
   return (
-    <div className="relative min-h-screen w-full">
-      {/* HEADER */}
-      <header className="sticky top-0 z-30 flex items-center justify-between px-4 py-4 md:px-10">
-        <div className="flex items-center gap-3 rounded-2xl glass-panel px-3 py-2">
+    <main className="min-h-screen w-full bg-background text-foreground">
+      <div className="mx-auto grid min-h-screen w-full max-w-6xl grid-cols-1 lg:grid-cols-2">
+        {/* Pitch */}
+        <section className="relative hidden flex-col justify-between overflow-hidden border-r border-border/50 p-12 lg:flex">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.18),transparent_60%),radial-gradient(circle_at_bottom_right,hsl(var(--accent)/0.15),transparent_55%)]" />
           <div className="relative">
-            <img
-              src={ogLogoAsset.url}
-              alt="OG Bot"
-              className="h-10 w-10 rounded-full object-cover ring-2 ring-primary/60"
-            />
-            <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-emerald-400 ring-2 ring-background" />
-          </div>
-          <div className="leading-tight">
-            <div
-              className="text-sm font-black uppercase tracking-[0.18em] text-foreground"
-              style={{ textShadow: "0 0 18px oklch(0.62 0.20 268 / 0.85)" }}
-            >
-              OG BOT
+            <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/60 px-3 py-1 text-xs font-medium backdrop-blur">
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
+              Personalised music creation, reimagined
             </div>
-            <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-              OG Streamz · Music Hub
-            </div>
-          </div>
-        </div>
-        <Button
-          onClick={scrollToAuth}
-          className="glass-panel border border-white/15 bg-white/5 font-semibold text-foreground hover:bg-white/10"
-        >
-          Sign In / Sign Up
-          <ArrowRight className="ml-1.5 h-4 w-4" />
-        </Button>
-      </header>
-
-      {/* HERO */}
-      <section className="relative mx-auto max-w-6xl px-4 pt-8 pb-16 md:pt-16 md:pb-24">
-        <div className="grid items-center gap-12 md:grid-cols-[1.1fr_0.9fr]">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full glass-panel px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-primary">
-              <Flame className="h-3.5 w-3.5" />
-              New · OG Bot Floating Widget
-            </div>
-            <h1 className="mt-5 text-4xl font-black leading-[1.05] tracking-tight md:text-6xl">
-              Meet the <span className="text-gradient-brand">OG Bot</span>:<br />
-              The Foul-Mouthed, No-B.S.{" "}
-              <span className="text-gradient-metal">Personal Assistant</span> You Can Embed
-              Anywhere.
+            <h1 className="mt-8 text-4xl font-semibold leading-tight tracking-tight xl:text-5xl">
+              Make music that sounds like <span className="text-primary">you</span>.
             </h1>
-            <p className="mt-6 max-w-2xl text-base text-muted-foreground md:text-lg">
-              An AI assistant with a serious attitude, total recall, and zero filter. Deploy him to
-              run background tasks, write code, or talk back to your users.
+            <p className="mt-4 max-w-md text-base text-muted-foreground">
+              OG Studio is your personal music workspace — generate, refine and ship tracks with an
+              assistant that learns your taste.
             </p>
+          </div>
 
-            <div className="mt-8 flex flex-wrap items-center gap-3">
+          <ul className="relative mt-12 space-y-5">
+            <Feature
+              icon={<Music2 className="h-4 w-4" />}
+              title="Music Hub"
+              body="Create, organise and remix your entire catalogue in one place."
+            />
+            <Feature
+              icon={<MessageSquareMore className="h-4 w-4" />}
+              title="OG Messenger"
+              body="Chat with collaborators and your AI co-producer in real time."
+            />
+            <Feature
+              icon={<Sparkles className="h-4 w-4" />}
+              title="Floating assistant"
+              body="A premium AI sidekick that follows you across every page after login."
+            />
+          </ul>
+
+          <p className="relative mt-12 text-xs text-muted-foreground">
+            © {new Date().getFullYear()} OG Studio. Sign in to start creating.
+          </p>
+        </section>
+
+        {/* Auth card */}
+        <section className="flex items-center justify-center p-6 sm:p-12">
+          <div className="w-full max-w-sm">
+            <div className="mb-8 text-center lg:text-left">
+              <h2 className="text-2xl font-semibold tracking-tight">Welcome back</h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Sign in to access Music Hub, OG Messenger and your assistant.
+              </p>
+            </div>
+
+            <div className="space-y-3">
               <Button
-                size="lg"
-                variant="outline"
-                onClick={handlePortal}
-                className="glass-panel border-white/15 text-foreground hover:bg-white/5"
+                onClick={() => handleOAuth("google")}
+                disabled={pending !== null}
+                className="h-11 w-full justify-center gap-3 bg-foreground text-background hover:bg-foreground/90"
               >
-                <Music2 className="mr-2 h-4 w-4" />
-                Enter the Music Hub Portal
+                {pending === "google" ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <GoogleIcon />
+                )}
+                Continue with Google
+              </Button>
+
+              <Button
+                onClick={() => handleOAuth("apple")}
+                disabled={pending !== null}
+                variant="outline"
+                className="h-11 w-full justify-center gap-3"
+              >
+                {pending === "apple" ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <AppleIcon />
+                )}
+                Continue with Apple
               </Button>
             </div>
 
-            <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
-              <span className="inline-flex items-center gap-1.5">
-                <ShieldCheck className="h-3.5 w-3.5 text-primary" /> Google sign-in
-              </span>
-              <span>· 10 starter OG coins on signup</span>
-              <span>· One script tag to deploy</span>
-            </div>
-          </div>
-
-          {/* Widget mockup */}
-          <WidgetMockup open={widgetOpen} setOpen={setWidgetOpen} />
-        </div>
-      </section>
-
-      {/* FEATURES */}
-      <section className="mx-auto max-w-6xl px-4 pb-16 md:pb-24">
-        <div className="mb-8 text-center">
-          <h2 className="text-2xl font-bold md:text-3xl">Built different. On purpose.</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Three reasons OG Bot eats every polite chatbot for breakfast.
-          </p>
-        </div>
-        <div className="grid gap-4 md:grid-cols-3">
-          <FeatureCard
-            icon={<MessageSquareMore className="h-5 w-5" />}
-            title="Zero Filter Personality"
-            body="Hilariously authentic, foul-mouthed, and brutally honest — built to stand out from corporate AI clones."
-          />
-          <FeatureCard
-            icon={<Cpu className="h-5 w-5" />}
-            title="Hard-Wired Background Engine"
-            body="Web crawling, deep image analysis, automated code execution, and data scraping run 24/7 silently behind the scenes."
-          />
-          <FeatureCard
-            icon={<Brain className="h-5 w-5" />}
-            title="Total Recall Memory"
-            body="Never forgets a pattern, an event, or a user preference — adapts instantly to repeat workflows."
-          />
-        </div>
-      </section>
-
-      {/* EMBED SNIPPET */}
-      <section className="mx-auto max-w-4xl px-4 pb-16 md:pb-24">
-        <div className="text-center">
-          <div className="inline-flex items-center gap-2 rounded-full glass-panel px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-primary">
-            <Globe2 className="h-3.5 w-3.5" /> One-line install
-          </div>
-          <h2 className="mt-4 text-2xl font-bold md:text-3xl">Deploy Sitewide in 2 Seconds</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Drop this script into your site's <code className="rounded bg-white/5 px-1">&lt;head&gt;</code>. That's it. He's live everywhere.
-          </p>
-        </div>
-
-        <div className="mt-6 overflow-hidden rounded-2xl glass-panel-strong shadow-glow">
-          <div className="flex items-center justify-between border-b border-white/10 px-4 py-2.5 text-xs">
-            <span className="inline-flex items-center gap-2 font-mono text-muted-foreground">
-              <Code2 className="h-3.5 w-3.5" /> embed.html
-            </span>
-            <Button
-              size="sm"
-              onClick={copyEmbed}
-              className={
-                copied
-                  ? "bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/25"
-                  : "bg-gradient-brand text-primary-foreground shadow-glow"
-              }
-            >
-              {copied ? (
-                <>
-                  <Check className="mr-1.5 h-4 w-4" /> Copied!
-                </>
-              ) : (
-                <>
-                  <Copy className="mr-1.5 h-4 w-4" /> Copy
-                </>
-              )}
-            </Button>
-          </div>
-          <pre className="overflow-x-auto px-5 py-5 text-sm font-mono leading-relaxed">
-            <code>
-              <span className="text-muted-foreground">&lt;</span>
-              <span className="text-primary">script</span>{" "}
-              <span className="text-emerald-300">src</span>=
-              <span className="text-amber-200">
-                "https://cdn.ogstreamz.co.uk/widget.js"
-              </span>{" "}
-              <span className="text-emerald-300">data-bot-id</span>=
-              <span className="text-amber-200">"og-bot"</span>
-              <span className="text-muted-foreground">&gt;&lt;/</span>
-              <span className="text-primary">script</span>
-              <span className="text-muted-foreground">&gt;</span>
-            </code>
-          </pre>
-        </div>
-      </section>
-
-      {/* CTA + AUTH ANCHOR */}
-      <section ref={authAnchor} className="mx-auto max-w-3xl px-4 pb-24">
-        <div className="rounded-3xl glass-panel-strong p-8 shadow-glow md:p-12">
-          <h2 className="text-center text-3xl font-black md:text-4xl">
-            Ready to unleash the <span className="text-gradient-brand">OG Bot</span>?
-          </h2>
-          <p className="mx-auto mt-3 max-w-xl text-center text-sm text-muted-foreground">
-            Pick your lane. New here? Deploy the bot. Returning? Drop straight into the Music Hub.
-          </p>
-
-          <div className="mt-7 grid gap-3">
-            <Button
-              size="lg"
-              variant="outline"
-              onClick={handlePortal}
-              disabled={loading}
-              className="glass-panel border-white/15 text-foreground hover:bg-white/5"
-            >
-              <Music2 className="mr-2 h-4 w-4" />
-              Enter the Music Hub Portal
-            </Button>
-          </div>
-
-          <div className="mt-7 flex flex-col items-center">
-            <div className="mb-3 flex items-center gap-3 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-              <span className="h-px w-12 bg-white/15" />
-              Sign in or sign up
-              <span className="h-px w-12 bg-white/15" />
-            </div>
-
-            <Button
-              type="button"
-              size="lg"
-              onClick={handleGoogle}
-              disabled={loading}
-              className="w-full max-w-sm glass-panel border border-white/15 bg-white/5 text-base font-semibold text-foreground hover:bg-white/10"
-            >
-              {loading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24">
-                  <path
-                    fill="#4285F4"
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                  />
-                  <path
-                    fill="#34A853"
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                  />
-                  <path
-                    fill="#FBBC05"
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22z"
-                  />
-                  <path
-                    fill="#EA4335"
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                  />
-                </svg>
-              )}
-              Continue with Google
-            </Button>
-
-            <Button
-              type="button"
-              size="lg"
-              onClick={handleApple}
-              disabled={loading}
-              className="mt-3 w-full max-w-sm border border-white/15 bg-black text-base font-semibold text-white hover:bg-black/80"
-            >
-              {loading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M16.365 1.43c0 1.14-.467 2.227-1.222 3.014-.789.836-2.073 1.488-3.119 1.4-.13-1.108.466-2.272 1.169-3.001.79-.825 2.149-1.448 3.172-1.413zM20.5 17.41c-.55 1.27-.815 1.836-1.524 2.96-.99 1.566-2.385 3.516-4.116 3.53-1.537.014-1.932-1.001-4.018-.99-2.086.012-2.521 1.01-4.06.996-1.731-.014-3.052-1.776-4.042-3.342C.077 15.95-.21 10.747 1.97 7.998c1.55-1.96 4-3.103 6.295-3.061 2.337.043 3.808.998 4.747 1.005.937.007 2.74-1.246 4.624-1.063.789.033 3.001.319 4.422 2.402-3.857 2.114-3.224 7.625.442 10.13z" />
-                </svg>
-              )}
-              Continue with Apple
-            </Button>
-
-            <div className="mt-4 flex items-start gap-2 text-xs text-muted-foreground">
-              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-              <span>
-                Free tier: new accounts get starter OG credits on first sign-in (1 credit per OG Bot message).
-                Top up any time. Boss access goes to the authorised owner email.
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
-  );
-}
-
-function FeatureCard({
-  icon,
-  title,
-  body,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  body: string;
-}) {
-  return (
-    <div className="group rounded-2xl glass-panel p-5 transition-all duration-300 hover:scale-105 hover:-translate-y-1 hover:shadow-[0_0_40px_-5px_oklch(0.62_0.20_268_/_0.6)] hover:border-primary/40">
-      <div className="mb-4 grid h-10 w-10 place-items-center rounded-xl bg-gradient-brand text-primary-foreground shadow-glow transition-transform group-hover:scale-110">
-        {icon}
-      </div>
-      <h3 className="text-base font-bold">{title}</h3>
-      <p className="mt-1.5 text-sm text-muted-foreground">{body}</p>
-    </div>
-  );
-}
-
-type Msg = { from: "bot" | "user"; text: string };
-const DEMO_CONVO: Msg[] = [
-  {
-    from: "user",
-    text: "Hey OG Bot, can you summarize this technical document and add it to my database?",
-  },
-  {
-    from: "bot",
-    text: "Yeah, yeah, I'm on it. Already crawled the URL, analyzed the image assets, and pushed the data straight to your Supabase tables. Took me 1.2 seconds. What else you got, or are you just gonna stare at my clean UI all day?",
-  },
-];
-
-function WidgetMockup({ open, setOpen }: { open: boolean; setOpen: (v: boolean) => void }) {
-  return (
-    <div className="relative">
-      <div className="relative aspect-[4/5] w-full overflow-hidden rounded-3xl glass-panel-strong shadow-glow">
-        {/* Faux browser chrome */}
-        <div className="flex items-center gap-1.5 border-b border-white/10 px-4 py-2.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-red-400/80" />
-          <span className="h-2.5 w-2.5 rounded-full bg-amber-300/80" />
-          <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/80" />
-          <span className="ml-3 truncate rounded-md bg-white/5 px-2 py-0.5 text-[10px] text-muted-foreground">
-            yoursite.com
-          </span>
-        </div>
-        {/* Faux page content */}
-        <div className="relative h-[calc(100%-2.5rem)] p-5">
-          <div className="space-y-2">
-            <div className="h-3 w-1/2 rounded bg-white/10" />
-            <div className="h-3 w-2/3 rounded bg-white/10" />
-            <div className="h-3 w-1/3 rounded bg-white/10" />
-          </div>
-          <div className="mt-6 grid grid-cols-2 gap-3">
-            <div className="h-24 rounded-xl bg-white/5" />
-            <div className="h-24 rounded-xl bg-white/5" />
-            <div className="h-24 rounded-xl bg-white/5" />
-            <div className="h-24 rounded-xl bg-white/5" />
-          </div>
-
-          {/* Floating widget bubble + chat window */}
-          <div className="absolute bottom-4 right-4 flex flex-col items-end gap-3">
-            {open && (
-              <div className="w-[16rem] origin-bottom-right animate-in fade-in slide-in-from-bottom-2 overflow-hidden rounded-2xl glass-panel-strong shadow-glow duration-200">
-                <div className="flex items-center justify-between border-b border-white/10 px-3 py-2">
-                  <div className="flex items-center gap-2">
-                    <img
-                      src={ogLogoAsset.url}
-                      alt=""
-                      className="h-6 w-6 rounded-full object-cover ring-1 ring-primary/60"
-                    />
-                    <div className="leading-tight">
-                      <div className="text-xs font-bold">OG Bot</div>
-                      <div className="text-[9px] uppercase tracking-wider text-emerald-300">
-                        ● Online · zero filter
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setOpen(false)}
-                    aria-label="Close"
-                    className="grid h-6 w-6 place-items-center rounded-md text-muted-foreground hover:bg-white/10 hover:text-foreground"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-                <div className="max-h-56 space-y-2 overflow-y-auto px-3 py-3">
-                  {DEMO_CONVO.map((m, i) => (
-                    <div
-                      key={i}
-                      className={`flex ${m.from === "user" ? "justify-end" : "justify-start"}`}
-                    >
-                      <div
-                        className={
-                          m.from === "user"
-                            ? "max-w-[80%] rounded-2xl rounded-br-sm bg-primary px-2.5 py-1.5 text-[11px] text-primary-foreground"
-                            : "max-w-[85%] rounded-2xl rounded-bl-sm border border-white/10 bg-white/5 px-2.5 py-1.5 text-[11px] text-foreground"
-                        }
-                      >
-                        {m.text}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex items-center gap-2 border-t border-white/10 px-2 py-2">
-                  <div className="flex-1 truncate rounded-md bg-white/5 px-2 py-1.5 text-[11px] text-muted-foreground">
-                    Type something…
-                  </div>
-                  <button className="grid h-7 w-7 place-items-center rounded-md bg-gradient-brand text-primary-foreground shadow-glow">
-                    <Send className="h-3.5 w-3.5" />
-                  </button>
-                </div>
+            {error && (
+              <div
+                role="alert"
+                className="mt-4 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+              >
+                {error}
               </div>
             )}
 
-            <button
-              type="button"
-              onClick={() => setOpen(!open)}
-              className="group relative grid h-16 w-16 place-items-center rounded-full bg-gradient-brand shadow-glow ring-2 ring-white/20 transition-transform hover:scale-110"
-              aria-label="Open OG Bot widget"
-            >
-              {!open && (
-                <span className="pointer-events-none absolute inset-0 animate-ping rounded-full bg-primary/40" />
-              )}
-              <img
-                src={ogLogoAsset.url}
-                alt=""
-                className="relative h-12 w-12 rounded-full object-cover"
-              />
-              {!open && (
-                <span className="absolute -right-0.5 -top-0.5 grid h-5 w-5 place-items-center rounded-full bg-emerald-400 text-[10px] font-bold text-emerald-950 ring-2 ring-background">
-                  1
-                </span>
-              )}
-            </button>
+            <div className="mt-8 flex items-start gap-2 text-xs text-muted-foreground">
+              <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+              <p>
+                By continuing, you agree to our Terms and acknowledge our Privacy Policy.
+                No passwords. No spam.
+              </p>
+            </div>
           </div>
-        </div>
+        </section>
       </div>
-      {/* Glow halo */}
-      <div className="pointer-events-none absolute -inset-6 -z-10 rounded-[2rem] bg-gradient-brand opacity-20 blur-3xl" />
-    </div>
+    </main>
+  );
+}
+
+function Feature({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
+  return (
+    <li className="flex items-start gap-3">
+      <span className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-md border border-border/60 bg-card/60 text-primary">
+        {icon}
+      </span>
+      <div>
+        <p className="text-sm font-medium">{title}</p>
+        <p className="text-sm text-muted-foreground">{body}</p>
+      </div>
+    </li>
+  );
+}
+
+function GoogleIcon() {
+  return (
+    <svg className="h-4 w-4" viewBox="0 0 48 48" aria-hidden="true">
+      <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.4 29.3 35.5 24 35.5c-6.4 0-11.5-5.1-11.5-11.5S17.6 12.5 24 12.5c2.9 0 5.6 1.1 7.6 2.9l5.7-5.7C33.6 6.5 29 4.5 24 4.5 13.2 4.5 4.5 13.2 4.5 24S13.2 43.5 24 43.5 43.5 34.8 43.5 24c0-1.2-.1-2.4-.4-3.5z" />
+      <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 12.5 24 12.5c2.9 0 5.6 1.1 7.6 2.9l5.7-5.7C33.6 6.5 29 4.5 24 4.5 16.3 4.5 9.7 8.8 6.3 14.7z" />
+      <path fill="#4CAF50" d="M24 43.5c5.2 0 9.7-2 13.2-5.2l-6.1-5c-1.9 1.3-4.3 2.2-7.1 2.2-5.3 0-9.7-3.1-11.3-7.5l-6.5 5C9.6 39.1 16.2 43.5 24 43.5z" />
+      <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.1-4.1 5.4l6.1 5c-.4.4 6.7-4.9 6.7-14.4 0-1.2-.1-2.4-.4-3.5z" />
+    </svg>
+  );
+}
+
+function AppleIcon() {
+  return (
+    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M16.365 1.43c0 1.14-.43 2.22-1.21 3.02-.84.87-2.19 1.55-3.3 1.46-.13-1.09.43-2.24 1.16-3 .82-.86 2.24-1.5 3.35-1.48zM20.5 17.27c-.55 1.27-.82 1.84-1.53 2.97-.98 1.57-2.36 3.53-4.07 3.54-1.52.02-1.91-.99-3.97-.98-2.06.01-2.49 1-4.01.98-1.71-.02-3.02-1.78-4-3.35C.27 16.13-.04 11.6 1.78 8.9c1.3-1.93 3.35-3.06 5.27-3.06 1.96 0 3.19 1.07 4.8 1.07 1.57 0 2.52-1.07 4.78-1.07 1.71 0 3.52.93 4.81 2.54-4.23 2.32-3.54 8.37-.94 8.89z" />
+    </svg>
   );
 }
