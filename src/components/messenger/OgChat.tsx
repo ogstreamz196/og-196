@@ -1,25 +1,29 @@
 import { useEffect, useRef, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Send, Bot, KeyRound, LogOut } from "lucide-react";
-import { chatOgBot, getMyActiveOgBotToken, type OgChatMessage } from "@/lib/og-messenger.functions";
+import ReactMarkdown from "react-markdown";
+import { Loader2, Send, Bot, Trash2, Skull, ShieldCheck } from "lucide-react";
+import { chatOgBot, type OgChatMessage } from "@/lib/og-messenger.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
+import { useProfile } from "@/hooks/use-profile";
+import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { cn } from "@/lib/utils";
 
-const STORAGE_KEY = "og-messenger-thread-v1";
-const TOKEN_KEY_PREFIX = "og-messenger-token-v1:";
+const STORAGE_KEY_PREFIX = "og-messenger-thread-v2:";
+const SYNC_EVENT = "og-messenger:sync";
+const MAX_PERSISTED = 60;
 
-function tokenKey(userId: string | null | undefined) {
-  return `${TOKEN_KEY_PREFIX}${userId ?? "anon"}`;
+function storageKey(userId: string | null | undefined) {
+  return `${STORAGE_KEY_PREFIX}${userId ?? "anon"}`;
 }
 
-function loadThread(): OgChatMessage[] {
+function loadThread(userId: string | null | undefined): OgChatMessage[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const raw = window.localStorage.getItem(storageKey(userId));
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
@@ -32,34 +36,52 @@ function loadThread(): OgChatMessage[] {
   }
 }
 
-export function OgChat({ compact = false }: { compact?: boolean }) {
+interface OgChatProps {
+  /** Compact variant for the floating widget (no outer card chrome). */
+  compact?: boolean;
+  /** Show a "Clear chat" button — only the dedicated Messenger page does. */
+  showClearButton?: boolean;
+}
+
+/**
+ * Shared OG Bot chat surface. Powers both the dedicated /messenger page and
+ * the floating widget. Same backend, same memory (per-user localStorage,
+ * synced live across the two surfaces via a CustomEvent).
+ *
+ * The widget hides the header/clear; the Messenger page shows them.
+ */
+export function OgChat({ compact = false, showClearButton = false }: OgChatProps) {
   const { user } = useAuth();
   const userId = user?.id ?? null;
-  const [messages, setMessages] = useState<OgChatMessage[]>(() => loadThread());
+  const [messages, setMessages] = useState<OgChatMessage[]>(() => loadThread(userId));
   const [input, setInput] = useState("");
-  const [token, setToken] = useState<string>("");
-  const [tokenDraft, setTokenDraft] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const selfSyncRef = useRef(false);
   const chat = useServerFn(chatOgBot);
-  const refreshToken = useServerFn(getMyActiveOgBotToken);
-  const retriedRef = useRef(false);
+  const qc = useQueryClient();
+  const { data: profile } = useProfile();
+  const { foulMouth } = useFoulMouth();
+  const setFoulMouth = useSetFoulMouth();
 
-  // Load token per-user whenever the signed-in user changes.
+  // Reload thread when the signed-in user changes.
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    setToken(window.localStorage.getItem(tokenKey(userId)) ?? "");
+    setMessages(loadThread(userId));
   }, [userId]);
 
+  // Persist on every change and notify the other surface (widget ↔ page).
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(messages.slice(-50)));
-    }
-  }, [messages]);
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(
+      storageKey(userId),
+      JSON.stringify(messages.slice(-MAX_PERSISTED)),
+    );
+  }, [messages, userId]);
 
+  // Cross-surface sync (same tab via CustomEvent, cross-tab via storage event).
   useEffect(() => {
     function onStorage(e: StorageEvent) {
-      if (e.key !== STORAGE_KEY || !e.newValue) return;
+      if (e.key !== storageKey(userId) || !e.newValue) return;
       try {
         const parsed = JSON.parse(e.newValue);
         if (Array.isArray(parsed)) setMessages(parsed);
@@ -72,165 +94,132 @@ export function OgChat({ compact = false }: { compact?: boolean }) {
         selfSyncRef.current = false;
         return;
       }
-      setMessages(loadThread());
+      setMessages(loadThread(userId));
     }
     window.addEventListener("storage", onStorage);
-    window.addEventListener("og-messenger:sync", onLocal);
+    window.addEventListener(SYNC_EVENT, onLocal);
     return () => {
       window.removeEventListener("storage", onStorage);
-      window.removeEventListener("og-messenger:sync", onLocal);
+      window.removeEventListener(SYNC_EVENT, onLocal);
     };
-  }, []);
+  }, [userId]);
 
-  const TOKEN_ERROR_RE = /invalid og bot token|revoked|expired|token required|belongs to another/i;
-
-  async function runChat(history: OgChatMessage[], tokenOverride?: string) {
-    return chat({
-      data: {
-        messages: history,
-        token: tokenOverride ?? token,
-        pageContext: typeof window !== "undefined" ? window.location.pathname : "",
-      },
-    });
-  }
-
-  const m = useMutation({
-    mutationFn: async (history: OgChatMessage[]) => {
-      try {
-        retriedRef.current = false;
-        return await runChat(history);
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        if (!TOKEN_ERROR_RE.test(msg) || retriedRef.current) throw err;
-        // Try to silently refresh from the backend registry and retry once.
-        retriedRef.current = true;
-        const refreshed = await refreshToken({ data: undefined }).catch(() => null);
-        if (!refreshed?.token) {
-          // No active token on file — clear local cache so the unlock UI shows.
-          window.localStorage.removeItem(tokenKey(userId));
-          setToken("");
-          throw new Error(
-            refreshed?.reason === "revoked"
-              ? "Your OG Bot token was revoked. Paste a new one to continue."
-              : refreshed?.reason === "expired"
-                ? "Your OG Bot token expired. Paste a fresh one to continue."
-                : "OG Bot token unavailable. Paste a new token to continue.",
-          );
-        }
-        // Persist the refreshed token and retry the chat call seamlessly.
-        window.localStorage.setItem(tokenKey(userId), refreshed.token);
-        setToken(refreshed.token);
-        toast.message("OG Bot token refreshed");
-        return await runChat(history, refreshed.token);
-      }
-    },
-    onSuccess: (res) => {
-      setMessages((cur) => {
-        const next = [...cur, { role: "assistant" as const, content: res.reply || "..." }];
-        selfSyncRef.current = true;
-        window.dispatchEvent(new Event("og-messenger:sync"));
-        return next;
-      });
-    },
-    onError: (err: Error) => {
-      setMessages((cur) => [...cur, { role: "assistant", content: `⚠️ ${err.message}` }]);
-    },
-  });
-
+  // Auto-scroll on new content.
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages, m.isPending]);
+  }, [messages]);
+
+  // Keep textarea focused after sends / mounts.
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, [userId]);
+
+  const m = useMutation({
+    mutationFn: async (history: OgChatMessage[]) =>
+      chat({
+        data: {
+          messages: history,
+          pageContext: typeof window !== "undefined" ? window.location.pathname : "",
+        },
+      }),
+    onSuccess: (res) => {
+      setMessages((cur) => {
+        const next = [...cur, { role: "assistant" as const, content: res.reply || "…" }];
+        selfSyncRef.current = true;
+        window.dispatchEvent(new Event(SYNC_EVENT));
+        return next;
+      });
+      // Refresh balance everywhere.
+      qc.invalidateQueries({ queryKey: ["profile"] });
+      setTimeout(() => inputRef.current?.focus(), 0);
+    },
+    onError: (err: Error) => {
+      setMessages((cur) => [
+        ...cur,
+        { role: "assistant", content: `⚠️ ${err.message}` },
+      ]);
+      qc.invalidateQueries({ queryKey: ["profile"] });
+    },
+  });
 
   function send() {
     const text = input.trim();
     if (!text || m.isPending) return;
-    if (!token) {
-      toast.error("Paste your OG Bot token first.");
+    if (!user) {
+      toast.error("Sign in to chat with OG Bot.");
+      return;
+    }
+    if ((profile?.coin_balance ?? 0) <= 0) {
+      toast.error("You're out of OG coins. Top up to keep chatting.");
       return;
     }
     const next = [...messages, { role: "user" as const, content: text }];
     setMessages(next);
     selfSyncRef.current = true;
-    window.dispatchEvent(new Event("og-messenger:sync"));
+    window.dispatchEvent(new Event(SYNC_EVENT));
     setInput("");
     m.mutate(next);
   }
 
-  function saveToken() {
-    const t = tokenDraft.trim();
-    if (!t.startsWith("ogb_")) {
-      toast.error("Token should start with 'ogb_'");
-      return;
+  function clearChat() {
+    setMessages([]);
+    selfSyncRef.current = true;
+    window.dispatchEvent(new Event(SYNC_EVENT));
+    toast.message("Chat cleared");
+  }
+
+  async function toggleFoul() {
+    try {
+      const next = !foulMouth;
+      await setFoulMouth.mutateAsync(next);
+      toast.message(next ? "🖕 Foul mouth: ON" : "🛡️ Safe mode: ON");
+    } catch (e) {
+      toast.error((e as Error).message);
     }
-    window.localStorage.setItem(tokenKey(userId), t);
-    setToken(t);
-    setTokenDraft("");
-    toast.success("OG Bot token saved — chat unlocked");
   }
 
-  function clearToken() {
-    window.localStorage.removeItem(tokenKey(userId));
-    setToken("");
-    toast.message("Token cleared");
-  }
-
-  if (!token) {
-    return (
-      <div
-        className={cn(
-          "flex h-full flex-col items-center justify-center gap-4 p-6 text-center",
-          compact ? "" : "rounded-xl border border-border bg-card",
-        )}
-      >
-        <div className="grid h-12 w-12 place-items-center rounded-full bg-gradient-brand shadow-glow">
-          <KeyRound className="h-6 w-6 text-primary-foreground" />
-        </div>
-        <div className="max-w-sm space-y-1">
-          <p className="text-sm font-semibold">Unlock OG Messenger</p>
-          <p className="text-xs text-muted-foreground">
-            Paste your personal OG Bot token to start chatting. Each user needs their own token —
-            ask the Boss to issue one.
-          </p>
-        </div>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            saveToken();
-          }}
-          className="flex w-full max-w-sm flex-col gap-2"
-        >
-          <Input
-            value={tokenDraft}
-            onChange={(e) => setTokenDraft(e.target.value)}
-            placeholder="ogb_..."
-            autoComplete="off"
-            spellCheck={false}
-            maxLength={200}
-          />
-          <Button type="submit" disabled={!tokenDraft.trim()}>
-            Unlock chat
-          </Button>
-        </form>
-      </div>
-    );
-  }
+  const balance = profile?.coin_balance ?? 0;
+  const isOut = balance <= 0;
 
   return (
     <div className={cn("flex h-full flex-col", compact ? "" : "rounded-xl border border-border bg-card")}>
-      <div className="flex items-center justify-between border-b border-border/60 px-3 py-1.5 text-[10px] text-muted-foreground">
-        <span className="inline-flex items-center gap-1">
-          <KeyRound className="h-3 w-3 text-primary" />
-          Token ••••{token.slice(-4)}
-        </span>
-        <button
-          type="button"
-          onClick={clearToken}
-          className="inline-flex items-center gap-1 hover:text-foreground"
-          title="Clear OG Bot token"
-        >
-          <LogOut className="h-3 w-3" /> clear
-        </button>
-      </div>
+      {showClearButton && (
+        <div className="flex items-center justify-between gap-2 border-b border-border/60 px-3 py-2 text-xs">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Bot className="h-3.5 w-3.5 text-primary" />
+            <span>OG Bot · {balance} coin{balance === 1 ? "" : "s"}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={toggleFoul}
+              disabled={setFoulMouth.isPending}
+              className={cn(
+                "inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] font-medium transition",
+                foulMouth
+                  ? "border-destructive/40 bg-destructive/10 text-destructive hover:bg-destructive/20"
+                  : "border-border bg-muted text-muted-foreground hover:bg-muted/80",
+              )}
+              aria-label={foulMouth ? "Switch to safe mode" : "Switch to foul mouth mode"}
+              title={foulMouth ? "Foul mouth ON — click for Safe" : "Safe mode — click for 🖕"}
+            >
+              {foulMouth ? <Skull className="h-3 w-3" /> : <ShieldCheck className="h-3 w-3" />}
+              {foulMouth ? "Foul" : "Safe"}
+            </button>
+            {messages.length > 0 && (
+              <button
+                type="button"
+                onClick={clearChat}
+                className="inline-flex items-center gap-1 rounded-md border border-border bg-muted px-2 py-1 text-[11px] font-medium text-muted-foreground transition hover:bg-muted/80"
+                title="Clear chat history"
+              >
+                <Trash2 className="h-3 w-3" /> Clear
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto p-4">
         {messages.length === 0 && (
           <div className="grid h-full place-items-center text-center">
@@ -240,7 +229,9 @@ export function OgChat({ compact = false }: { compact?: boolean }) {
               </div>
               <p className="text-sm font-semibold">OG Bot is online</p>
               <p className="text-xs text-muted-foreground">
-                Ask about songs, coins, portals, or whatever's on your mind.
+                Ask about songs, coins, portals, your account — or whatever's on your mind.
+                <br />
+                <span className="opacity-70">1 coin per message · {balance} left</span>
               </p>
             </div>
           </div>
@@ -249,13 +240,19 @@ export function OgChat({ compact = false }: { compact?: boolean }) {
           <div key={i} className={cn("flex", msg.role === "user" ? "justify-end" : "justify-start")}>
             <div
               className={cn(
-                "max-w-[80%] rounded-2xl px-3.5 py-2 text-sm whitespace-pre-wrap break-words shadow-sm",
+                "max-w-[85%] rounded-2xl px-3.5 py-2 text-sm break-words shadow-sm",
                 msg.role === "user"
-                  ? "rounded-br-sm bg-primary text-primary-foreground"
+                  ? "rounded-br-sm bg-primary text-primary-foreground whitespace-pre-wrap"
                   : "rounded-bl-sm bg-muted text-foreground",
               )}
             >
-              {msg.content}
+              {msg.role === "assistant" ? (
+                <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-headings:my-2">
+                  <ReactMarkdown>{msg.content}</ReactMarkdown>
+                </div>
+              ) : (
+                msg.content
+              )}
             </div>
           </div>
         ))}
@@ -267,6 +264,7 @@ export function OgChat({ compact = false }: { compact?: boolean }) {
           </div>
         )}
       </div>
+
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -275,13 +273,20 @@ export function OgChat({ compact = false }: { compact?: boolean }) {
         className="flex items-center gap-2 border-t border-border p-3"
       >
         <Input
+          ref={inputRef}
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Message OG Bot…"
-          disabled={m.isPending}
+          placeholder={isOut ? "Out of coins — top up to chat" : "Message OG Bot…"}
+          disabled={m.isPending || isOut || !user}
           maxLength={2000}
+          autoFocus
         />
-        <Button type="submit" size="icon" disabled={m.isPending || !input.trim()}>
+        <Button
+          type="submit"
+          size="icon"
+          disabled={m.isPending || !input.trim() || isOut || !user}
+          aria-label="Send"
+        >
           <Send className="h-4 w-4" />
         </Button>
       </form>
