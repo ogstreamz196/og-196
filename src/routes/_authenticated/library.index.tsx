@@ -135,40 +135,54 @@ function LibraryPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-10">
       {/* Heading */}
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Music Hub</h1>
-          <p className="mt-1 max-w-xl text-sm text-muted-foreground">
+      <header className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 sm:flex sm:flex-wrap sm:items-end sm:justify-between">
+        <div className="min-w-0">
+          <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+            Your studio
+          </p>
+          <h1 className="font-display mt-3 text-4xl font-light leading-[1.05] tracking-[-0.02em] sm:text-5xl">
+            Music <em className="italic text-gradient-brand">Hub</em>
+          </h1>
+          <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">
             Create personalised tracks and manage every song project in one place.
           </p>
         </div>
-        <Button size="lg" onClick={() => setOpenFlow("scratch")} className="gap-2">
-          <Plus className="h-4 w-4" /> New song project
+        <Button
+          size="lg"
+          onClick={() => setOpenFlow("scratch")}
+          className="shrink-0 gap-2 bg-gradient-brand text-primary-foreground shadow-glow hover:opacity-95"
+        >
+          <Plus className="h-4 w-4" /> New song
         </Button>
       </header>
 
       {/* Creation entry points */}
       <section>
-        <h2 className="mb-3 text-sm font-medium text-muted-foreground">Start a new song</h2>
+        <h2 className="mb-4 text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+          Start a new song
+        </h2>
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           {ENTRY_POINTS.map((e) => (
             <button
               key={e.flow}
               type="button"
               onClick={() => setOpenFlow(e.flow)}
-              className="group flex flex-col items-start gap-2 rounded-xl border border-border bg-card p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md"
+              className="group flex flex-col items-start gap-3 rounded-2xl border border-white/10 bg-card/70 p-5 text-left shadow-card backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-glow"
             >
-              <span className="flex h-8 w-8 items-center justify-center rounded-md border border-border/60 bg-background text-primary">
+              <span className="grid h-9 w-9 place-items-center rounded-lg border border-white/10 bg-gradient-brand-soft text-primary">
                 {e.icon}
               </span>
-              <p className="text-sm font-medium">{e.title}</p>
-              <p className="text-xs text-muted-foreground">{e.body}</p>
+              <div className="min-w-0">
+                <p className="font-display text-base font-normal tracking-tight">{e.title}</p>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{e.body}</p>
+              </div>
             </button>
           ))}
         </div>
       </section>
+
 
       {/* List */}
       <section>
