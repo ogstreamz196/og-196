@@ -293,49 +293,64 @@ export function OgChat({
             </div>
           </div>
         )}
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={cn(
-              "flex items-end gap-2 animate-[pop_0.25s_ease-out]",
-              msg.role === "user" ? "justify-end" : "justify-start",
-            )}
-          >
-            {msg.role === "assistant" && <OgAvatar size={36} className="shrink-0 mb-1" />}
+        {messages.map((msg, i) => {
+          const isUser = msg.role === "user";
+          const initial = (profile?.display_name || user?.email || "Y").trim().charAt(0).toUpperCase();
+          return (
             <div
+              key={i}
               className={cn(
-                "relative max-w-[80%] px-4 py-2.5 text-sm break-words transition-transform hover:scale-[1.01]",
-                msg.role === "user"
-                  ? "rounded-[22px] rounded-br-md bg-primary text-primary-foreground whitespace-pre-wrap font-semibold shadow-[0_6px_0_-2px_hsl(var(--primary)/0.45),0_12px_30px_-8px_hsl(var(--primary)/0.55)]"
-                  : "rounded-[22px] rounded-bl-md bg-muted text-foreground shadow-[0_4px_0_-2px_hsl(var(--muted)/0.6)]",
+                "flex items-end gap-2.5 animate-[pop_0.25s_ease-out]",
+                isUser ? "flex-row-reverse" : "flex-row",
               )}
             >
-              {msg.role === "user" && (
-                <OgAvatar
-                  size={28}
-                  className="absolute -right-1 -bottom-1 mix-blend-luminosity opacity-90"
-                />
-              )}
-              {msg.role === "assistant" ? (
-                <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-headings:my-2">
-                  <ReactMarkdown>{msg.content}</ReactMarkdown>
+              {isUser ? (
+                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-brand text-sm font-black text-primary-foreground shadow-glow">
+                  {initial}
                 </div>
               ) : (
-                msg.content
+                <OgAvatar size={36} className="shrink-0" />
               )}
+              <div className={cn("flex max-w-[78%] flex-col gap-1", isUser ? "items-end" : "items-start")}>
+                <span className="px-1 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                  {isUser ? "You" : "OG Bot"}
+                </span>
+                <div
+                  className={cn(
+                    "px-4 py-2.5 text-sm break-words transition-transform hover:scale-[1.01]",
+                    isUser
+                      ? "rounded-[22px] rounded-br-md bg-primary text-primary-foreground whitespace-pre-wrap font-semibold shadow-[0_6px_0_-2px_hsl(var(--primary)/0.45),0_12px_30px_-8px_hsl(var(--primary)/0.55)]"
+                      : "rounded-[22px] rounded-bl-md bg-muted text-foreground shadow-[0_4px_0_-2px_hsl(var(--muted)/0.6)]",
+                  )}
+                >
+                  {msg.role === "assistant" ? (
+                    <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-headings:my-2">
+                      <ReactMarkdown>{msg.content}</ReactMarkdown>
+                    </div>
+                  ) : (
+                    msg.content
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
         {m.isPending && (
-          <div className="flex items-end gap-2 justify-start">
-            <OgAvatar size={36} className="shrink-0 mb-1 animate-pulse" />
-            <div className="rounded-[22px] rounded-bl-md bg-muted px-4 py-3 text-sm text-muted-foreground inline-flex items-center gap-1">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]" />
-              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]" />
-              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce" />
+          <div className="flex items-end gap-2.5">
+            <OgAvatar size={36} className="shrink-0 animate-pulse" />
+            <div className="flex flex-col gap-1">
+              <span className="px-1 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                OG Bot
+              </span>
+              <div className="rounded-[22px] rounded-bl-md bg-muted px-4 py-3 text-sm text-muted-foreground inline-flex items-center gap-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]" />
+                <span className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]" />
+                <span className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce" />
+              </div>
             </div>
           </div>
         )}
+
 
       </div>
 
