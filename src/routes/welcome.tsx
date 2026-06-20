@@ -365,17 +365,8 @@ function FinalCta() {
               Sign in and let's make something they'll never forget.
             </p>
 
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-              <Link to="/auth">
-                <Button size="lg" className="h-14 gap-2 px-8 text-base font-bold shadow-lg shadow-primary/20 transition hover:scale-[1.03]">
-                  Continue with Google
-                </Button>
-              </Link>
-              <Link to="/auth">
-                <Button size="lg" variant="outline" className="h-14 gap-2 px-8 text-base font-semibold transition hover:scale-[1.03]">
-                  Continue with Apple
-                </Button>
-              </Link>
+            <div className="mx-auto mt-8 max-w-xl">
+              <AuthButtons size="lg" />
             </div>
 
             <p className="mt-5 text-sm text-muted-foreground">
