@@ -167,26 +167,27 @@ function PrimaryCard({
   return (
     <Link
       to={to}
-      className="group relative flex flex-col justify-between overflow-hidden rounded-xl border border-border bg-card p-6 transition-all hover:border-primary/50 hover:shadow-lg"
+      className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-card/70 p-7 shadow-card backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-glow"
     >
       <div
         className={
-          "pointer-events-none absolute inset-0 opacity-60 transition-opacity group-hover:opacity-100 " +
+          "pointer-events-none absolute inset-0 opacity-50 transition-opacity duration-500 group-hover:opacity-100 " +
           (variant === "accent"
-            ? "bg-[radial-gradient(circle_at_top_right,hsl(var(--accent)/0.18),transparent_60%)]"
-            : "bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.18),transparent_60%)]")
+            ? "bg-[radial-gradient(circle_at_top_right,oklch(0.86_0.012_255/0.18),transparent_60%)]"
+            : "bg-[radial-gradient(circle_at_top_right,oklch(0.55_0.22_268/0.22),transparent_60%)]")
         }
       />
       <div className="relative">
-        <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border/60 bg-background/60 text-primary">
+        <div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-background/40 text-primary">
           {icon}
         </div>
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{eyebrow}</p>
-        <h3 className="mt-1 text-xl font-semibold tracking-tight">{title}</h3>
-        <p className="mt-2 max-w-md text-sm text-muted-foreground">{body}</p>
+        <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">{eyebrow}</p>
+        <h3 className="font-display mt-2 text-2xl font-normal tracking-tight">{title}</h3>
+        <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">{body}</p>
       </div>
-      <div className="relative mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-primary">
-        {cta} <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+      <div className="relative mt-8 inline-flex items-center gap-1.5 text-sm font-medium text-primary">
+        {cta}
+        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
       </div>
     </Link>
   );
