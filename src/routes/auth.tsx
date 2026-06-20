@@ -56,14 +56,14 @@ function AuthPage() {
     });
   }, [navigate]);
 
-  async function handleGoogle() {
+  async function handleOAuth(provider: "google" | "apple") {
     setLoading(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", {
+      const result = await lovable.auth.signInWithOAuth(provider, {
         redirect_uri: window.location.origin,
       });
       if (result.error) {
-        toast.error(result.error.message || "Google sign-in failed");
+        toast.error(result.error.message || `${provider === "apple" ? "Apple" : "Google"} sign-in failed`);
         return;
       }
       if (result.redirected) return;
@@ -72,6 +72,8 @@ function AuthPage() {
       setLoading(false);
     }
   }
+  const handleGoogle = () => handleOAuth("google");
+  const handleApple = () => handleOAuth("apple");
 
   async function handlePortal() {
     const { data } = await supabase.auth.getSession();
