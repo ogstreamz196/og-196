@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import ReactMarkdown from "react-markdown";
-import { Loader2, Send, Bot, Trash2, Sparkles, Skull, ShieldCheck } from "lucide-react";
+import { Loader2, Send, Trash2, Sparkles, Skull, ShieldCheck } from "lucide-react";
 import { chatOgBot, type OgChatMessage } from "@/lib/og-messenger.functions";
 import { QUICK_STARTS } from "@/lib/og-persona";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,22 @@ import { useProfile } from "@/hooks/use-profile";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { useOgMode } from "@/hooks/use-og-mode";
 import { cn } from "@/lib/utils";
+import ogBotAsset from "@/assets/ogbot.png.asset.json";
+
+function OgAvatar({ size = 36, className = "" }: { size?: number; className?: string }) {
+  return (
+    <img
+      src={ogBotAsset.url}
+      alt="OG Bot"
+      width={size}
+      height={size}
+      className={cn("rounded-full object-cover ring-0 border-0 outline-none select-none pointer-events-none", className)}
+      style={{ width: size, height: size }}
+      draggable={false}
+    />
+  );
+}
+
 
 const STORAGE_KEY_PREFIX = "og-messenger-thread-v3:";
 const SYNC_EVENT = "og-messenger:sync";
