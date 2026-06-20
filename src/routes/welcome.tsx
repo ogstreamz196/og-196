@@ -180,57 +180,54 @@ function TopNav() {
 
 function Hero() {
   return (
-    <section className="relative mx-auto max-w-6xl px-5 pt-14 pb-20 sm:px-8 lg:pt-24">
+    <section className="relative mx-auto flex min-h-[calc(100vh-5rem)] max-w-7xl flex-col justify-center px-5 pt-10 pb-16 sm:px-8">
       {/* Floating stickers */}
-      <Sticker className="left-[6%] top-8 wc-float" rotate="-12">
-        <Heart className="h-5 w-5 text-pink-400" />
+      <Sticker className="left-[4%] top-10 wc-float" rotate="-12">
+        <Heart className="h-6 w-6 text-pink-400" />
       </Sticker>
-      <Sticker className="right-[8%] top-16 wc-float-slow" rotate="14">
-        <Star className="h-5 w-5 text-amber-300" />
+      <Sticker className="right-[6%] top-16 wc-float-slow" rotate="14">
+        <Star className="h-6 w-6 text-amber-300" />
       </Sticker>
-      <Sticker className="left-[10%] top-[55%] wc-float-slow" rotate="8">
-        <Headphones className="h-5 w-5 text-primary" />
+      <Sticker className="left-[8%] bottom-[18%] wc-float-slow" rotate="8">
+        <Headphones className="h-6 w-6 text-primary" />
       </Sticker>
-      <Sticker className="right-[6%] top-[60%] wc-float" rotate="-10">
-        <Mic2 className="h-5 w-5 text-violet-300" />
+      <Sticker className="right-[6%] bottom-[22%] wc-float" rotate="-10">
+        <Mic2 className="h-6 w-6 text-violet-300" />
       </Sticker>
 
-      <div className="relative mx-auto max-w-4xl text-center">
-        <div className="wc-pop inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-sm font-medium backdrop-blur-xl">
+      <div className="relative mx-auto w-full max-w-6xl text-center">
+        <div className="wc-pop inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2 text-base font-semibold uppercase tracking-[0.18em] backdrop-blur-xl">
           <span className="h-2 w-2 animate-pulse rounded-full bg-primary shadow-glow" />
           Music Hub · powered by OG Bot
         </div>
 
-        <h1 className="font-display mt-8 text-[clamp(4.5rem,13vw,10rem)] font-semibold leading-[0.92] tracking-[-0.045em]">
-          <span className="wc-pop inline-block">Make a song</span>
-          <br />
-          <span className="wc-pop inline-block" style={{ animationDelay: "0.15s" }}>
-            from your{" "}
-          </span>
-          <span
-            className="wc-pop inline-block italic text-gradient-brand wc-bounce-soft"
-            style={{ animationDelay: "0.3s" }}
-          >
-            life
-          </span>
-          <span className="wc-pop inline-block" style={{ animationDelay: "0.45s" }}>
-            .
+        <h1 className="font-display mt-10 text-[clamp(5rem,16vw,13rem)] font-black leading-[0.85] tracking-[-0.055em] drop-shadow-[0_8px_30px_rgba(80,60,255,0.35)]">
+          <span className="wc-pop block">MAKE A SONG</span>
+          <span className="wc-pop block" style={{ animationDelay: "0.15s" }}>
+            FROM YOUR{" "}
+            <span
+              className="italic text-gradient-brand wc-bounce-soft inline-block"
+              style={{ animationDelay: "0.3s" }}
+            >
+              LIFE.
+            </span>
           </span>
         </h1>
 
-        <p className="mx-auto mt-10 max-w-3xl text-2xl leading-snug text-muted-foreground sm:text-3xl md:text-4xl">
-          Tell <span className="font-semibold text-foreground">OG Bot</span> a real story.
+        <p className="mx-auto mt-10 max-w-4xl text-3xl font-semibold leading-[1.15] text-foreground/90 sm:text-4xl md:text-5xl">
+          Tell <span className="text-gradient-brand font-black">OG Bot</span> a real story.
           <br className="hidden sm:block" />
           Get back lyrics + a finished track. <span className="inline-block wc-wiggle">🎧</span>
         </p>
 
-        <div className="mx-auto mt-12 max-w-2xl">
+        <div className="mx-auto mt-12 max-w-3xl">
           <AuthButtons size="xl" />
-          <p className="mt-5 text-sm text-muted-foreground">
+          <p className="mt-6 text-lg font-semibold text-muted-foreground">
             ✨ Free to start · No card required · Takes 30 seconds
           </p>
         </div>
       </div>
+
 
       {/* Chat preview card */}
       <div className="relative mx-auto mt-24 max-w-3xl">
