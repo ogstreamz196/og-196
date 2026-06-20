@@ -306,25 +306,6 @@ function Bubble({ side, children }: { side: "you" | "bot"; children: React.React
 }
 
 function Pillars() {
-  const items = [
-    {
-      icon: <Music2 className="h-7 w-7" />,
-      emoji: "🎵",
-      title: "Music Hub",
-      body: "Your studio for personalised songs. Briefs, drafts and finished tracks — all in one happy place.",
-      tilt: "-2",
-    },
-    {
-      icon: <Bot className="h-7 w-7" />,
-      emoji: "🤖",
-      title: "OG Bot",
-      body: "The brain behind every song. Tell it a real story, get back lyrics + a track shaped around you.",
-      tilt: "1.5",
-    },
-    {
-      icon: <MessageSquareMore className="h-7 w-7" />,
-      emoji: "💬",
-      title: "OG Messenger",
   const items: Array<{
     icon: React.ReactNode;
     emoji: string;
