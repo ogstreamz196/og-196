@@ -38,25 +38,33 @@ function DashboardHome() {
   const hasSongs = recentSongs.length > 0;
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-10">
       {/* Welcome */}
-      <section className="flex flex-col gap-2">
-        <p className="text-sm text-muted-foreground">Welcome back</p>
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            Hello, <span className="text-primary">{displayName}</span>
-          </h1>
-          <div className="flex items-center gap-2 text-sm">
-            {isVip && <Badge variant="secondary" className="gap-1"><Sparkles className="h-3 w-3" /> VIP</Badge>}
-            <Badge variant="outline" className="gap-1.5">
+      <section className="flex flex-col gap-3">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 sm:flex sm:flex-wrap sm:items-end sm:justify-between">
+          <div className="min-w-0">
+            <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+              Welcome back
+            </p>
+            <h1 className="font-display mt-3 text-4xl font-light leading-[1.05] tracking-[-0.02em] sm:text-5xl">
+              Hello, <em className="italic text-gradient-brand">{displayName}</em>
+            </h1>
+            <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">
+              Jump back into your music workspace or pick up a conversation with OG Messenger.
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-2 text-sm">
+            {isVip && (
+              <Badge variant="secondary" className="gap-1">
+                <Sparkles className="h-3 w-3" /> VIP
+              </Badge>
+            )}
+            <Badge variant="outline" className="gap-1.5 border-white/15 bg-white/5">
               <Coins className="h-3.5 w-3.5 text-primary" />
               {balance} coins
             </Badge>
           </div>
         </div>
-        <p className="max-w-xl text-sm text-muted-foreground">
-          Jump back into your music workspace or pick up a conversation with OG Messenger.
-        </p>
       </section>
 
       {/* Primary CTAs */}
@@ -82,7 +90,9 @@ function DashboardHome() {
 
       {/* Quick actions */}
       <section>
-        <h2 className="mb-3 text-sm font-medium text-muted-foreground">Quick actions</h2>
+        <h2 className="mb-4 text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+          Quick actions
+        </h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <QuickAction to="/library" icon={<Plus className="h-4 w-4" />} label="New song" />
           <QuickAction to="/library" icon={<Library className="h-4 w-4" />} label="My library" />
@@ -90,6 +100,7 @@ function DashboardHome() {
           <QuickAction to="/buy-coins" icon={<Coins className="h-4 w-4" />} label="Buy coins" />
         </div>
       </section>
+
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Recent */}
@@ -156,26 +167,27 @@ function PrimaryCard({
   return (
     <Link
       to={to}
-      className="group relative flex flex-col justify-between overflow-hidden rounded-xl border border-border bg-card p-6 transition-all hover:border-primary/50 hover:shadow-lg"
+      className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-card/70 p-7 shadow-card backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-glow"
     >
       <div
         className={
-          "pointer-events-none absolute inset-0 opacity-60 transition-opacity group-hover:opacity-100 " +
+          "pointer-events-none absolute inset-0 opacity-50 transition-opacity duration-500 group-hover:opacity-100 " +
           (variant === "accent"
-            ? "bg-[radial-gradient(circle_at_top_right,hsl(var(--accent)/0.18),transparent_60%)]"
-            : "bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.18),transparent_60%)]")
+            ? "bg-[radial-gradient(circle_at_top_right,oklch(0.86_0.012_255/0.18),transparent_60%)]"
+            : "bg-[radial-gradient(circle_at_top_right,oklch(0.55_0.22_268/0.22),transparent_60%)]")
         }
       />
       <div className="relative">
-        <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border/60 bg-background/60 text-primary">
+        <div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-background/40 text-primary">
           {icon}
         </div>
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{eyebrow}</p>
-        <h3 className="mt-1 text-xl font-semibold tracking-tight">{title}</h3>
-        <p className="mt-2 max-w-md text-sm text-muted-foreground">{body}</p>
+        <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">{eyebrow}</p>
+        <h3 className="font-display mt-2 text-2xl font-normal tracking-tight">{title}</h3>
+        <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">{body}</p>
       </div>
-      <div className="relative mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-primary">
-        {cta} <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+      <div className="relative mt-8 inline-flex items-center gap-1.5 text-sm font-medium text-primary">
+        {cta}
+        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
       </div>
     </Link>
   );

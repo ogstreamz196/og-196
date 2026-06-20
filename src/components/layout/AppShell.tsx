@@ -64,38 +64,55 @@ export function AppShell({ children }: { children: ReactNode }) {
           <AppSidebar />
 
           <div className="flex min-w-0 flex-1 flex-col">
-            <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border/60 bg-background/85 px-3 backdrop-blur-xl sm:px-4 lg:px-6">
+            <header className="sticky top-0 z-30 grid h-16 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 border-b border-white/8 bg-background/70 px-3 backdrop-blur-xl sm:px-5 lg:px-7">
               <SidebarTrigger className="shrink-0" />
-              <div className="min-w-0">
-                <p className="truncate text-xs font-medium uppercase text-muted-foreground">OG Streamz</p>
-                <h1 className="truncate text-base font-semibold leading-tight sm:text-lg">{title}</h1>
-              </div>
 
-              <div className="relative ml-auto hidden w-full max-w-sm sm:block">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder="Search songs"
-                  className="h-9 bg-card pl-9"
-                  onChange={(event) => {
-                    window.dispatchEvent(new CustomEvent("sonix:search", { detail: event.target.value }));
-                  }}
-                />
-              </div>
-
-              {!roleLoading && isAdmin && (
-                <div className="hidden items-center gap-1.5 rounded-full border border-primary/40 bg-gradient-brand px-3 py-1 text-xs font-bold uppercase text-primary-foreground shadow-glow sm:flex">
-                  <ShieldCheck className="h-3.5 w-3.5" />
-                  Boss
+              <div className="flex min-w-0 items-center gap-4">
+                <div className="min-w-0">
+                  <p className="truncate text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                    OG Streamz
+                  </p>
+                  <h1 className="font-display truncate text-lg font-normal leading-tight tracking-tight sm:text-xl">
+                    {title}
+                  </h1>
                 </div>
-              )}
-              <AdminEditModeToggle className="hidden sm:inline-flex" />
-              <CoinBalance className="hidden sm:inline-flex" />
-              <Button type="button" variant="ghost" size="icon" onClick={handleSignOut} title={`Sign out${user?.email ? ` ${user.email}` : ""}`}>
-                <LogOut className="h-4 w-4" />
-                <span className="sr-only">Sign out</span>
-              </Button>
+
+                <div className="relative hidden w-full max-w-xs lg:block">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    type="search"
+                    placeholder="Search songs"
+                    className="h-9 border-white/10 bg-white/5 pl-9"
+                    onChange={(event) => {
+                      window.dispatchEvent(new CustomEvent("sonix:search", { detail: event.target.value }));
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+                {!roleLoading && isAdmin && (
+                  <div className="hidden items-center gap-1.5 rounded-full border border-primary/40 bg-gradient-brand px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow-glow sm:flex">
+                    <ShieldCheck className="h-3 w-3" />
+                    Boss
+                  </div>
+                )}
+                <AdminEditModeToggle className="hidden sm:inline-flex" />
+                <CoinBalance className="hidden sm:inline-flex" />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleSignOut}
+                  title={`Sign out${user?.email ? ` ${user.email}` : ""}`}
+                  className="h-9 w-9 hover:bg-white/5"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span className="sr-only">Sign out</span>
+                </Button>
+              </div>
             </header>
+
 
             {!roleLoading && isAdmin && (
               <div className="flex items-center justify-center gap-2 border-b border-primary/40 bg-gradient-brand px-4 py-1.5 text-xs font-semibold uppercase text-primary-foreground shadow-glow">
