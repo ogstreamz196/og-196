@@ -20,11 +20,14 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { useRole } from "@/hooks/use-role";
 import { useAuth } from "@/hooks/use-auth";
 
-type NavItem = { title: string; url: string; icon: typeof Home };
+type AppRoute = "/" | "/library" | "/messenger" | "/portals" | "/buy-coins" | "/settings" | "/developer" | "/admin";
+type NavItem = { title: string; url: AppRoute; icon: typeof Home };
 
 const primaryNav: NavItem[] = [
   { title: "Home", url: "/", icon: Home },
@@ -41,6 +44,7 @@ const accountNav: NavItem[] = [
 
 export function AppSidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { setOpenMobile, isMobile } = useSidebar();
   const { user } = useAuth();
   const { isAdmin } = useRole();
 
@@ -51,7 +55,7 @@ export function AppSidebar() {
     items.map((item) => (
       <SidebarMenuItem key={item.url}>
         <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-          <Link to={item.url} className="flex items-center gap-2">
+          <Link to={item.url} onClick={() => isMobile && setOpenMobile(false)} className="flex items-center gap-2">
             <item.icon className="h-4 w-4 shrink-0" />
             <span className="truncate">{item.title}</span>
           </Link>
@@ -95,7 +99,7 @@ export function AppSidebar() {
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild isActive={isActive("/admin")} tooltip="Admin">
-                    <Link to="/admin" className="flex items-center gap-2">
+                    <Link to="/admin" onClick={() => isMobile && setOpenMobile(false)} className="flex items-center gap-2">
                       <Shield className="h-4 w-4 shrink-0" />
                       <span className="truncate">Admin</span>
                     </Link>
@@ -115,6 +119,7 @@ export function AppSidebar() {
           <span className="truncate">{user?.email ?? "Signed in"}</span>
         </div>
       </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
   );
 }
