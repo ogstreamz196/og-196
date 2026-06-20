@@ -225,7 +225,13 @@ function RecentRow({ song }: { song: RecentSong }) {
       >
         <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border bg-muted">
           {song.cover_url ? (
-            <img src={song.cover_url} alt="" className="h-full w-full object-cover" />
+            <img
+              src={song.cover_url}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              className="h-full w-full object-cover"
+            />
           ) : (
             <Headphones className="h-4 w-4 text-muted-foreground" />
           )}
