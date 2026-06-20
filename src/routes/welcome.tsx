@@ -239,8 +239,8 @@ function Hero() {
       <div className="relative mx-auto w-full max-w-6xl text-center">
         <div className="mx-auto max-w-3xl">
           <AuthButtons size="xl" />
-          <p className="mt-5 text-base font-semibold text-muted-foreground">
-            ✨ Free to start · No card required · Takes 30 seconds
+          <p className="mt-6 text-lg font-bold text-foreground sm:text-xl">
+            Free to start — no card required
           </p>
         </div>
 
