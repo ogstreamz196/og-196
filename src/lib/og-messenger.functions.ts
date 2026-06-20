@@ -169,13 +169,15 @@ export const chatOgBot = createServerFn({ method: "POST" })
       };
     } catch (err) {
       // Refund the coin on hard AI failure so the user isn't charged for nothing.
-      await supabaseAdmin.rpc("mint_coins_admin", {
-        target_user_id: context.userId,
-        amount: 1,
-        admin_notes: "og_messenger_chat_refund",
-      }).catch(() => {
+      try {
+        await supabaseAdmin.rpc("mint_coins_admin", {
+          target_user_id: context.userId,
+          amount: 1,
+          admin_notes: "og_messenger_chat_refund",
+        });
+      } catch {
         // best-effort refund; do not mask the original failure
-      });
+      }
       throw err;
     }
   });
