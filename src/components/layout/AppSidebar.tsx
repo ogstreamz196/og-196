@@ -27,19 +27,19 @@ import { useRole } from "@/hooks/use-role";
 import { useAuth } from "@/hooks/use-auth";
 
 type AppRoute = "/" | "/library" | "/messenger" | "/portals" | "/buy-coins" | "/settings" | "/developer" | "/admin";
-type NavItem = { title: string; url: AppRoute; icon: typeof Home };
+type NavItem = { title: string; url: AppRoute; icon: typeof Home; adminOnly?: boolean };
 
 const primaryNav: NavItem[] = [
   { title: "Home", url: "/", icon: Home },
   { title: "Music Hub", url: "/library", icon: Music2 },
   { title: "Messenger", url: "/messenger", icon: MessagesSquare },
-  { title: "Portals", url: "/portals", icon: DoorOpen },
+  { title: "Portals", url: "/portals", icon: DoorOpen, adminOnly: true },
 ];
 
 const accountNav: NavItem[] = [
-  { title: "Buy Coins", url: "/buy-coins", icon: Coins },
+  { title: "Store", url: "/buy-coins", icon: Coins },
   { title: "Settings", url: "/settings", icon: Settings },
-  { title: "Developer", url: "/developer", icon: Code2 },
+  { title: "Developer", url: "/developer", icon: Code2, adminOnly: true },
 ];
 
 export function AppSidebar() {
@@ -51,8 +51,10 @@ export function AppSidebar() {
   const isActive = (url: string) =>
     url === "/" ? pathname === "/" : pathname === url || pathname.startsWith(url + "/");
 
+  const visible = (items: NavItem[]) => items.filter((i) => !i.adminOnly || isAdmin);
+
   const renderItems = (items: NavItem[]) =>
-    items.map((item) => (
+    visible(items).map((item) => (
       <SidebarMenuItem key={item.url}>
         <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
           <Link to={item.url} onClick={() => isMobile && setOpenMobile(false)} className="flex items-center gap-2">
@@ -91,6 +93,7 @@ export function AppSidebar() {
             <SidebarMenu>{renderItems(accountNav)}</SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
 
         {isAdmin && (
           <SidebarGroup>

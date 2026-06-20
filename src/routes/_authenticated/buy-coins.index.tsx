@@ -74,20 +74,37 @@ function BuyCoinsPage() {
   }
 
   return (
-    <DashboardShell title="Top up OG Coins">
+    <DashboardShell title="Store">
       <PaymentTestModeBanner />
-      <div className="mx-auto max-w-5xl">
-        <div className="text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5">
-            <Coins className="h-4 w-4 text-coin" />
-            <span className="text-sm">
-              You have <span className="font-bold tabular-nums">{profile?.coin_balance ?? 0}</span> OG coins
-            </span>
+      <div className="mx-auto max-w-5xl space-y-10">
+        {/* Big coin balance hero */}
+        <div className="relative overflow-hidden rounded-3xl border border-coin/40 bg-gradient-to-br from-coin/15 via-card to-card p-8 shadow-card">
+          <div className="flex flex-wrap items-center justify-between gap-6">
+            <div className="flex items-center gap-5">
+              <div className="grid h-20 w-20 place-items-center rounded-3xl bg-coin/20 shadow-glow">
+                <Coins className="h-10 w-10 text-coin" />
+              </div>
+              <div>
+                <div className="text-sm uppercase tracking-wider text-muted-foreground">Your balance</div>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-6xl font-black tabular-nums leading-none text-foreground">
+                    {profile?.coin_balance ?? 0}
+                  </span>
+                  <span className="text-xl font-semibold text-coin">OG coins</span>
+                </div>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-xs text-muted-foreground">Pick a pack below — checkout opens instantly.</div>
+              <h2 className="mt-2 text-2xl font-bold">
+                <EditableContent contentKey="buyCoins.heading" defaultValue="Top up & keep creating" />
+              </h2>
+            </div>
           </div>
-          <h2 className="mt-4 text-3xl font-bold">
-            <EditableContent contentKey="buyCoins.heading" defaultValue="Fuel your OG Bot" />
-          </h2>
-          <p className="mt-2 text-muted-foreground">
+        </div>
+
+        <div>
+          <p className="text-center text-muted-foreground">
             <EditableContent
               contentKey="buyCoins.subtitle"
               defaultValue="Every signed-in user gets 5 free credits. Each OG Messenger message costs 1 credit."
@@ -95,6 +112,7 @@ function BuyCoinsPage() {
             />
           </p>
         </div>
+
 
         <div className="mt-10 grid gap-4 sm:grid-cols-2">
           {COIN_PACKS.map((t) => (
