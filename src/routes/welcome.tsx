@@ -2,8 +2,6 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   Music2,
-  MessageSquareMore,
-  Bot,
   Sparkles,
   Loader2,
   Headphones,
@@ -17,6 +15,10 @@ import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
+import partyCoverAsset from "@/assets/album-party-anthem.jpg.asset.json";
+import heartbreakCoverAsset from "@/assets/album-heartbreak.jpg.asset.json";
+import drillCoverAsset from "@/assets/album-drill.jpg.asset.json";
+import afrobeatsCoverAsset from "@/assets/album-afrobeats.jpg.asset.json";
 
 function OgBotLogo({ className = "h-8 w-8" }: { className?: string }) {
   return (
@@ -33,22 +35,49 @@ export const Route = createFileRoute("/welcome")({
   component: WelcomePage,
   head: () => ({
     meta: [
-      { title: "OG Studio — Music Hub, powered by OG Bot" },
+      { title: "OG Studio — Prompt Songs & Album Covers" },
       {
         name: "description",
         content:
-          "Turn real moments into real songs. Music Hub powered by OG Bot. Sign in with Google or Apple.",
+          "Turn prompts, moods and memories into different song styles with album covers. Sign in with Google or Apple.",
       },
-      { property: "og:title", content: "OG Studio — Music Hub, powered by OG Bot" },
+      { property: "og:title", content: "OG Studio — Prompt Songs & Album Covers" },
       {
         property: "og:description",
-        content: "Make a song from your life in minutes. Powered by OG Bot.",
+        content: "Prompt rap, pop, drill, afrobeats, heartbreak and party songs with cover art.",
       },
     ],
   }),
 });
 
 type OAuthProvider = "google" | "apple";
+
+const albumCovers = [
+  {
+    title: "Party anthem",
+    prompt: "Make it loud, funny and ready for the group chat.",
+    style: "Pop · Dance",
+    image: partyCoverAsset.url,
+  },
+  {
+    title: "Heartbreak hook",
+    prompt: "Turn the messy message into a chorus people feel.",
+    style: "R&B · Ballad",
+    image: heartbreakCoverAsset.url,
+  },
+  {
+    title: "Street energy",
+    prompt: "Give it a cold intro, sharp bars and heavy bass.",
+    style: "Rap · Drill",
+    image: drillCoverAsset.url,
+  },
+  {
+    title: "Summer bounce",
+    prompt: "Sunny, catchy and made for the speakers.",
+    style: "Afrobeats · Vibes",
+    image: afrobeatsCoverAsset.url,
+  },
+];
 
 function useOAuthSignIn() {
   const navigate = useNavigate();
@@ -65,6 +94,7 @@ function useOAuthSignIn() {
     try {
       const result = await lovable.auth.signInWithOAuth(provider, {
         redirect_uri: window.location.origin,
+        extraParams: provider === "google" ? { prompt: "select_account" } : undefined,
       });
       if (result.error) {
         toast.error(result.error.message || `${provider} sign-in failed`);
@@ -217,32 +247,63 @@ function Hero() {
 
         <div className="wc-pop mt-12 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2 text-base font-semibold uppercase tracking-[0.18em] backdrop-blur-xl">
           <span className="h-2 w-2 animate-pulse rounded-full bg-primary shadow-glow" />
-          <span>Music Hub · powered by</span>
+          <span>Prompt Lab · song styles by</span>
           <OgBotLogo className="h-6 w-6" />
         </div>
 
         <h1 className="font-display mt-10 text-[clamp(5rem,16vw,13rem)] font-black leading-[0.85] tracking-[-0.055em] drop-shadow-[0_8px_30px_rgba(80,60,255,0.35)]">
-          <span className="wc-pop block">MAKE A SONG</span>
+          <span className="wc-pop block">PROMPT IT.</span>
           <span className="wc-pop block" style={{ animationDelay: "0.15s" }}>
-            FROM YOUR{" "}
+            MAKE A{" "}
             <span
               className="italic text-gradient-brand wc-bounce-soft inline-block"
               style={{ animationDelay: "0.3s" }}
             >
-              LIFE.
+              BANGER.
             </span>
           </span>
         </h1>
 
         <p className="mx-auto mt-10 max-w-4xl text-3xl font-semibold leading-[1.15] text-foreground/90 sm:text-4xl md:text-5xl">
-          Tell <OgBotLogo className="h-14 w-14 sm:h-16 sm:w-16 mx-2" /> a real story.
+          Type a wild idea, a name, a mood, a memory.
           <br className="hidden sm:block" />
-          Get back lyrics + a finished track. <span className="inline-block wc-wiggle">🎧</span>
+          Pick rap, afrobeats, pop, drill, heartbreak or party. <span className="inline-block wc-wiggle">🎧</span>
         </p>
+
+        <AlbumCoverShowcase />
       </div>
 
 
     </section>
+  );
+}
+
+function AlbumCoverShowcase() {
+  return (
+    <div className="mx-auto mt-12 grid max-w-5xl grid-cols-2 gap-4 sm:grid-cols-4">
+      {albumCovers.map((cover, i) => (
+        <article
+          key={cover.title}
+          className="group relative overflow-hidden rounded-3xl border-2 border-white/15 bg-card/80 shadow-card transition-all duration-300 hover:-translate-y-2 hover:rotate-0 hover:border-primary/50 hover:shadow-glow"
+          style={{ transform: `rotate(${[-3, 2, -1, 3][i]}deg)` }}
+        >
+          <img
+            src={cover.image}
+            alt={`${cover.title} album cover`}
+            width={768}
+            height={768}
+            loading="lazy"
+            decoding="async"
+            className="aspect-square w-full object-cover transition-transform duration-500 group-hover:scale-110"
+          />
+          <div className="absolute inset-x-0 bottom-0 bg-background/75 p-3 text-left backdrop-blur-md">
+            <p className="font-display text-xl leading-none tracking-tight sm:text-2xl">{cover.title}</p>
+            <p className="mt-1 text-xs font-black uppercase tracking-[0.16em] text-primary">{cover.style}</p>
+            <p className="mt-2 hidden text-xs font-bold leading-tight text-foreground/85 sm:block">{cover.prompt}</p>
+          </div>
+        </article>
+      ))}
+    </div>
   );
 }
 
@@ -265,23 +326,6 @@ function Sticker({
   );
 }
 
-function Bubble({ side, children }: { side: "you" | "bot"; children: React.ReactNode }) {
-  const mine = side === "you";
-  return (
-    <div className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-      <div
-        className={`max-w-[88%] rounded-2xl px-4 py-2.5 leading-snug shadow-md ${
-          mine
-            ? "rounded-br-md bg-gradient-brand text-primary-foreground"
-            : "rounded-bl-md border border-white/10 bg-background/70 text-foreground"
-        }`}
-      >
-        {children}
-      </div>
-    </div>
-  );
-}
-
 function Pillars() {
   const items: Array<{
     icon: React.ReactNode;
@@ -295,24 +339,24 @@ function Pillars() {
       key: "hub",
       icon: <Music2 className="h-7 w-7" />,
       emoji: "🎵",
-      title: "Music Hub",
-      body: "Your studio for personalised songs. Briefs, drafts and finished tracks — all in one happy place.",
+      title: "Prompt anything",
+      body: "Drop a birthday roast, love note, voice note, inside joke or full story — turn the chaos into a song.",
       tilt: "-2",
     },
     {
       key: "bot",
-      icon: <Bot className="h-7 w-7" />,
-      emoji: "🤖",
-      title: <OgBotLogo className="h-14 w-14" />,
-      body: "The brain behind every song. Tell it a real story, get back lyrics + a track shaped around you.",
+      icon: <Wand2 className="h-7 w-7" />,
+      emoji: "🪄",
+      title: "Pick the vibe",
+      body: "Go drill, rap, afrobeats, dance, pop, R&B, sad ballad, hype anthem or silly meme song.",
       tilt: "1.5",
     },
     {
       key: "msg",
-      icon: <MessageSquareMore className="h-7 w-7" />,
-      emoji: "💬",
-      title: "OG Messenger",
-      body: "A long-form room to think out loud with OgBot — brainstorm hooks, lyrics and concepts.",
+      icon: <Sparkles className="h-7 w-7" />,
+      emoji: "💿",
+      title: "Cover included",
+      body: "Every song idea feels like a real drop with colourful cover art and a track ready to play.",
       tilt: "-1",
     },
   ];
@@ -322,10 +366,10 @@ function Pillars() {
       <div className="mx-auto max-w-6xl px-5 py-24 sm:px-8 lg:py-32">
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-sm font-semibold uppercase tracking-[0.25em] text-muted-foreground">
-            Music Hub
+            Prompt playground
           </p>
           <h2 className="font-display mt-4 flex flex-wrap items-center justify-center gap-4 text-6xl font-semibold leading-[1] tracking-[-0.035em] sm:text-7xl md:text-8xl">
-            <span>Powered by</span>
+            <span>Different songs</span>
             <OgBotLogo className="h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28" />
           </h2>
         </div>
@@ -358,9 +402,9 @@ function Pillars() {
 
 function HowItWorks() {
   const steps = [
-    { n: "1", emoji: "👋", title: "Sign in", body: "Google or Apple. Two taps, you're in." },
-    { n: "2", emoji: "✍️", title: "Tell OG a story", body: "A name. A memory. A moment that matters." },
-    { n: "3", emoji: "🎶", title: "Get your song", body: "Lyrics + a finished track, ready to play." },
+    { n: "1", emoji: "✍️", title: "Write the prompt", body: "A name, joke, mood, memory, drama or wild idea." },
+    { n: "2", emoji: "🎛️", title: "Choose the sound", body: "Rap, pop, drill, afrobeats, dance, R&B or ballad." },
+    { n: "3", emoji: "💿", title: "Drop the track", body: "Get lyrics, music and cover art made for the moment." },
   ];
   return (
     <section className="relative border-t border-white/10">
@@ -400,17 +444,17 @@ function ClosingCta() {
     <section id="how" className="relative border-t border-white/10">
       <div className="mx-auto max-w-4xl px-5 py-28 text-center sm:px-8 lg:py-32">
         <p className="text-sm font-medium uppercase tracking-[0.25em] text-muted-foreground">
-          Begin
+          Ready?
         </p>
         <h2 className="font-display mt-5 text-7xl font-semibold leading-[0.95] tracking-[-0.045em] sm:text-8xl md:text-9xl">
-          Your next song
+          Your next prompt
           <br />
           <em className="italic text-gradient-brand wc-bounce-soft inline-block">
-            is one story away.
+            could be a hit.
           </em>
         </h2>
         <p className="mx-auto mt-8 max-w-2xl text-2xl text-muted-foreground sm:text-3xl">
-          Sign in. Tell <OgBotLogo className="h-8 w-8 mx-1" /> a moment. Hit play. <span className="inline-block wc-wiggle">🎉</span>
+          Sign in. Type the idea. Pick the vibe. Get the cover and the song. <span className="inline-block wc-wiggle">🎉</span>
         </p>
 
         <div className="mx-auto mt-12 max-w-2xl">
@@ -425,7 +469,7 @@ function Footer() {
   return (
     <footer className="border-t border-white/10">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-8 text-sm text-muted-foreground sm:flex-row sm:px-8">
-        <span className="inline-flex items-center gap-2">© {new Date().getFullYear()} OG Studio · Music Hub powered by <OgBotLogo className="h-5 w-5" /></span>
+        <span className="inline-flex items-center gap-2">© {new Date().getFullYear()} OG Studio · Prompt songs powered by <OgBotLogo className="h-5 w-5" /></span>
         <div className="flex items-center gap-6">
           <Link to="/auth" className="transition hover:text-foreground">
             Sign in

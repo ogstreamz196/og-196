@@ -44,6 +44,7 @@ function AuthPage() {
     try {
       const result = await lovable.auth.signInWithOAuth(provider, {
         redirect_uri: window.location.origin,
+        extraParams: provider === "google" ? { prompt: "select_account" } : undefined,
       });
       if (result.error) {
         const msg = result.error.message || `${provider === "apple" ? "Apple" : "Google"} sign-in failed`;
@@ -77,26 +78,25 @@ function AuthPage() {
               Make music that sounds like <span className="text-primary">you</span>.
             </h1>
             <p className="mt-4 max-w-md text-base text-muted-foreground">
-              OG Studio is your personal music workspace — generate, refine and ship tracks with an
-              assistant that learns your taste.
+              Type a prompt, choose a style, then turn jokes, memories and moods into finished tracks.
             </p>
           </div>
 
           <ul className="relative mt-12 space-y-5">
             <Feature
               icon={<Music2 className="h-4 w-4" />}
-              title="Music Hub"
-              body="Create, organise and remix your entire catalogue in one place."
+              title="Prompt songs"
+              body="Start with a lyric idea, birthday message, love story or wild voice-note vibe."
             />
             <Feature
               icon={<MessageSquareMore className="h-4 w-4" />}
-              title="OG Messenger"
-              body="Chat with collaborators and your AI co-producer in real time."
+              title="Different styles"
+              body="Make rap, drill, pop, afrobeats, R&B, dance tracks, sad ballads and hype anthems."
             />
             <Feature
               icon={<Sparkles className="h-4 w-4" />}
-              title="Floating assistant"
-              body="A premium AI sidekick that follows you across every page after login."
+              title="Album cover energy"
+              body="Every idea feels like a real drop with colourful artwork and a playable song."
             />
           </ul>
 
@@ -126,7 +126,7 @@ function AuthPage() {
                 ) : (
                   <GoogleIcon />
                 )}
-                Continue with Google
+                  Sign in with Google
               </Button>
 
               <Button
