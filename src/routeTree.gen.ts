@@ -20,14 +20,11 @@ import { Route as AuthenticatedDeveloperRouteImport } from './routes/_authentica
 import { Route as AuthenticatedLibraryIndexRouteImport } from './routes/_authenticated/library.index'
 import { Route as AuthenticatedBuyCoinsIndexRouteImport } from './routes/_authenticated/buy-coins.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
-import { Route as AuthenticatedOgBotConnectRouteImport } from './routes/_authenticated/og-bot.connect'
 import { Route as AuthenticatedLibrarySongIdRouteImport } from './routes/_authenticated/library.$songId'
 import { Route as AuthenticatedBuyCoinsReturnRouteImport } from './routes/_authenticated/buy-coins.return'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedAdminUserSettingsRouteImport } from './routes/_authenticated/admin.user-settings'
 import { Route as AuthenticatedAdminOgPersonaRouteImport } from './routes/_authenticated/admin.og-persona'
-import { Route as AuthenticatedAdminOgBotRouteImport } from './routes/_authenticated/admin.og-bot'
-import { Route as AuthenticatedAdminCreatePortalRouteImport } from './routes/_authenticated/admin.create-portal'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as AuthenticatedAdminUsersUserIdRouteImport } from './routes/_authenticated/admin.users.$userId'
 
@@ -87,12 +84,6 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedOgBotConnectRoute =
-  AuthenticatedOgBotConnectRouteImport.update({
-    id: '/og-bot/connect',
-    path: '/og-bot/connect',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedLibrarySongIdRoute =
   AuthenticatedLibrarySongIdRouteImport.update({
     id: '/library/$songId',
@@ -122,17 +113,6 @@ const AuthenticatedAdminOgPersonaRoute =
     path: '/admin/og-persona',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAdminOgBotRoute = AuthenticatedAdminOgBotRouteImport.update({
-  id: '/admin/og-bot',
-  path: '/admin/og-bot',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedAdminCreatePortalRoute =
-  AuthenticatedAdminCreatePortalRouteImport.update({
-    id: '/admin/create-portal',
-    path: '/admin/create-portal',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const ApiPublicPaymentsWebhookRoute =
   ApiPublicPaymentsWebhookRouteImport.update({
     id: '/api/public/payments/webhook',
@@ -154,14 +134,11 @@ export interface FileRoutesByFullPath {
   '/portals': typeof AuthenticatedPortalsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/portal/$slug': typeof PortalSlugRoute
-  '/admin/create-portal': typeof AuthenticatedAdminCreatePortalRoute
-  '/admin/og-bot': typeof AuthenticatedAdminOgBotRoute
   '/admin/og-persona': typeof AuthenticatedAdminOgPersonaRoute
   '/admin/user-settings': typeof AuthenticatedAdminUserSettingsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
   '/library/$songId': typeof AuthenticatedLibrarySongIdRoute
-  '/og-bot/connect': typeof AuthenticatedOgBotConnectRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/buy-coins/': typeof AuthenticatedBuyCoinsIndexRoute
   '/library/': typeof AuthenticatedLibraryIndexRoute
@@ -176,14 +153,11 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/portal/$slug': typeof PortalSlugRoute
   '/': typeof AuthenticatedIndexRoute
-  '/admin/create-portal': typeof AuthenticatedAdminCreatePortalRoute
-  '/admin/og-bot': typeof AuthenticatedAdminOgBotRoute
   '/admin/og-persona': typeof AuthenticatedAdminOgPersonaRoute
   '/admin/user-settings': typeof AuthenticatedAdminUserSettingsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
   '/library/$songId': typeof AuthenticatedLibrarySongIdRoute
-  '/og-bot/connect': typeof AuthenticatedOgBotConnectRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/buy-coins': typeof AuthenticatedBuyCoinsIndexRoute
   '/library': typeof AuthenticatedLibraryIndexRoute
@@ -200,14 +174,11 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/portal/$slug': typeof PortalSlugRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
-  '/_authenticated/admin/create-portal': typeof AuthenticatedAdminCreatePortalRoute
-  '/_authenticated/admin/og-bot': typeof AuthenticatedAdminOgBotRoute
   '/_authenticated/admin/og-persona': typeof AuthenticatedAdminOgPersonaRoute
   '/_authenticated/admin/user-settings': typeof AuthenticatedAdminUserSettingsRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/_authenticated/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
   '/_authenticated/library/$songId': typeof AuthenticatedLibrarySongIdRoute
-  '/_authenticated/og-bot/connect': typeof AuthenticatedOgBotConnectRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/buy-coins/': typeof AuthenticatedBuyCoinsIndexRoute
   '/_authenticated/library/': typeof AuthenticatedLibraryIndexRoute
@@ -224,14 +195,11 @@ export interface FileRouteTypes {
     | '/portals'
     | '/settings'
     | '/portal/$slug'
-    | '/admin/create-portal'
-    | '/admin/og-bot'
     | '/admin/og-persona'
     | '/admin/user-settings'
     | '/admin/users'
     | '/buy-coins/return'
     | '/library/$songId'
-    | '/og-bot/connect'
     | '/admin/'
     | '/buy-coins/'
     | '/library/'
@@ -246,14 +214,11 @@ export interface FileRouteTypes {
     | '/settings'
     | '/portal/$slug'
     | '/'
-    | '/admin/create-portal'
-    | '/admin/og-bot'
     | '/admin/og-persona'
     | '/admin/user-settings'
     | '/admin/users'
     | '/buy-coins/return'
     | '/library/$songId'
-    | '/og-bot/connect'
     | '/admin'
     | '/buy-coins'
     | '/library'
@@ -269,14 +234,11 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/portal/$slug'
     | '/_authenticated/'
-    | '/_authenticated/admin/create-portal'
-    | '/_authenticated/admin/og-bot'
     | '/_authenticated/admin/og-persona'
     | '/_authenticated/admin/user-settings'
     | '/_authenticated/admin/users'
     | '/_authenticated/buy-coins/return'
     | '/_authenticated/library/$songId'
-    | '/_authenticated/og-bot/connect'
     | '/_authenticated/admin/'
     | '/_authenticated/buy-coins/'
     | '/_authenticated/library/'
@@ -370,13 +332,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/og-bot/connect': {
-      id: '/_authenticated/og-bot/connect'
-      path: '/og-bot/connect'
-      fullPath: '/og-bot/connect'
-      preLoaderRoute: typeof AuthenticatedOgBotConnectRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/library/$songId': {
       id: '/_authenticated/library/$songId'
       path: '/library/$songId'
@@ -410,20 +365,6 @@ declare module '@tanstack/react-router' {
       path: '/admin/og-persona'
       fullPath: '/admin/og-persona'
       preLoaderRoute: typeof AuthenticatedAdminOgPersonaRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/admin/og-bot': {
-      id: '/_authenticated/admin/og-bot'
-      path: '/admin/og-bot'
-      fullPath: '/admin/og-bot'
-      preLoaderRoute: typeof AuthenticatedAdminOgBotRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/admin/create-portal': {
-      id: '/_authenticated/admin/create-portal'
-      path: '/admin/create-portal'
-      fullPath: '/admin/create-portal'
-      preLoaderRoute: typeof AuthenticatedAdminCreatePortalRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/api/public/payments/webhook': {
@@ -463,14 +404,11 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPortalsRoute: typeof AuthenticatedPortalsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
-  AuthenticatedAdminCreatePortalRoute: typeof AuthenticatedAdminCreatePortalRoute
-  AuthenticatedAdminOgBotRoute: typeof AuthenticatedAdminOgBotRoute
   AuthenticatedAdminOgPersonaRoute: typeof AuthenticatedAdminOgPersonaRoute
   AuthenticatedAdminUserSettingsRoute: typeof AuthenticatedAdminUserSettingsRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRouteWithChildren
   AuthenticatedBuyCoinsReturnRoute: typeof AuthenticatedBuyCoinsReturnRoute
   AuthenticatedLibrarySongIdRoute: typeof AuthenticatedLibrarySongIdRoute
-  AuthenticatedOgBotConnectRoute: typeof AuthenticatedOgBotConnectRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedBuyCoinsIndexRoute: typeof AuthenticatedBuyCoinsIndexRoute
   AuthenticatedLibraryIndexRoute: typeof AuthenticatedLibraryIndexRoute
@@ -482,14 +420,11 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPortalsRoute: AuthenticatedPortalsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
-  AuthenticatedAdminCreatePortalRoute: AuthenticatedAdminCreatePortalRoute,
-  AuthenticatedAdminOgBotRoute: AuthenticatedAdminOgBotRoute,
   AuthenticatedAdminOgPersonaRoute: AuthenticatedAdminOgPersonaRoute,
   AuthenticatedAdminUserSettingsRoute: AuthenticatedAdminUserSettingsRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRouteWithChildren,
   AuthenticatedBuyCoinsReturnRoute: AuthenticatedBuyCoinsReturnRoute,
   AuthenticatedLibrarySongIdRoute: AuthenticatedLibrarySongIdRoute,
-  AuthenticatedOgBotConnectRoute: AuthenticatedOgBotConnectRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
   AuthenticatedBuyCoinsIndexRoute: AuthenticatedBuyCoinsIndexRoute,
   AuthenticatedLibraryIndexRoute: AuthenticatedLibraryIndexRoute,

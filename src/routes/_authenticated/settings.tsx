@@ -271,7 +271,6 @@ function SettingsPage() {
             <div className="flex flex-wrap gap-2">
               <Link to="/admin"><Button variant="outline" size="sm">Admin home</Button></Link>
               <Link to="/admin/users"><Button variant="outline" size="sm">Manage users</Button></Link>
-              <Link to="/admin/og-bot"><Button variant="outline" size="sm">OG Bot tokens</Button></Link>
             </div>
           </section>
         )}
