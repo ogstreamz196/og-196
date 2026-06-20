@@ -97,13 +97,19 @@ function useOAuthSignIn() {
         extraParams: provider === "google" ? { prompt: "select_account" } : undefined,
       });
       if (result.error) {
-        toast.error(result.error.message || `${provider} sign-in failed`);
+        const raw = (result.error.message ?? "").toLowerCase();
+        const transient =
+          raw.includes("authorization code") || raw.includes("code verifier") || raw.includes("pkce");
+        if (!transient) toast.error(result.error.message || `${provider} sign-in failed`);
         return;
       }
       if (result.redirected) return;
       navigate({ to: "/", replace: true });
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Sign-in failed");
+      const raw = (e instanceof Error ? e.message : "").toLowerCase();
+      const transient =
+        raw.includes("authorization code") || raw.includes("code verifier") || raw.includes("pkce");
+      if (!transient) toast.error(e instanceof Error ? e.message : "Sign-in failed");
     } finally {
       setPending(null);
     }
