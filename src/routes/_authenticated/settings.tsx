@@ -15,6 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { PreferencesPanel } from "@/components/settings/PreferencesPanel";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   component: SettingsPage,
@@ -154,11 +155,25 @@ function SettingsPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Fingerprint className="h-3.5 w-3.5" />
-            <span className="font-mono truncate">{user?.id}</span>
+          <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+            <span className="inline-flex items-center gap-1.5">
+              <Fingerprint className="h-3.5 w-3.5" />
+              <span className="font-mono truncate max-w-[18ch]">{user?.id}</span>
+            </span>
+            {(() => {
+              const provider = user?.app_metadata?.provider as string | undefined;
+              if (!provider) return null;
+              return (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/60 px-2 py-0.5 capitalize">
+                  <KeyRound className="h-3 w-3" /> Signed in with {provider}
+                </span>
+              );
+            })()}
           </div>
         </section>
+
+        {/* Preferences — assistant, music, appearance */}
+        <PreferencesPanel />
 
         {/* Coins */}
         <section className="rounded-2xl border border-border bg-card p-6 shadow-card space-y-4">
