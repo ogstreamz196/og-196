@@ -106,7 +106,7 @@ function LibraryPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
-  const songs = query.data ?? [];
+  const songs = useMemo<Song[]>(() => query.data ?? [], [query.data]);
   const filtered = useMemo(() => filterSongs(songs, filter), [songs, filter]);
 
   async function handleDelete() {
