@@ -197,13 +197,13 @@ function Hero() {
   }, []);
 
   return (
-    <section className="relative mx-auto max-w-5xl px-4 pt-16 pb-12 text-center sm:px-6 lg:pt-24">
-      <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/60 px-4 py-1.5 text-sm font-medium backdrop-blur">
-        <span className="text-base">🎶</span>
-        Made with OG Bot
+    <section className="relative mx-auto max-w-5xl px-4 pt-12 pb-12 text-center sm:px-6 lg:pt-20">
+      <div className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-4 py-1.5 text-sm font-bold backdrop-blur">
+        <Music2 className="h-4 w-4 text-primary" />
+        Music Hub · powered by OG Bot 🤖
       </div>
 
-      <h1 className="mt-8 text-5xl font-extrabold leading-[1.02] tracking-tight sm:text-6xl lg:text-7xl">
+      <h1 className="mt-7 text-5xl font-extrabold leading-[1.02] tracking-tight sm:text-6xl lg:text-7xl">
         Make a song
         <br />
         about{" "}
@@ -215,36 +215,17 @@ function Hero() {
         </span>
       </h1>
 
-      <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
-        Tell us the story. We turn it into lyrics, a vibe, and a song.
-        <br className="hidden sm:block" />
-        No music degree. No blank page. Just you and OG Bot. 🤖✨
+      <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
+        Welcome to the <span className="font-bold text-foreground">Music Hub</span> — your AI music
+        studio. Sign in and start your first song in seconds. 🎶
       </p>
 
-      <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-        <Link to="/auth">
-          <Button
-            size="lg"
-            className="h-14 gap-2 px-8 text-base font-bold shadow-lg shadow-primary/20 transition hover:scale-[1.03]"
-          >
-            Start your song
-            <ArrowRight className="h-5 w-5" />
-          </Button>
-        </Link>
-        <Link to="/auth">
-          <Button
-            size="lg"
-            variant="outline"
-            className="h-14 gap-2 px-8 text-base font-semibold transition hover:scale-[1.03]"
-          >
-            <MessageSquareMore className="h-5 w-5" />
-            Chat with OG Bot
-          </Button>
-        </Link>
+      <div className="mx-auto mt-9 max-w-xl">
+        <AuthButtons size="lg" />
       </div>
 
       <p className="mt-5 text-sm text-muted-foreground">
-        Free to try • No card needed • Takes 2 minutes
+        Free to try • No card needed • One tap to start
       </p>
     </section>
   );
