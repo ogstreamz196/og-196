@@ -113,6 +113,7 @@ export const chatOgBot = createServerFn({ method: "POST" })
     };
 
     const system = buildSystemPrompt({
+      mode: data.mode,
       foulMouth,
       bossScript: personaMap.get("og_persona.script") ?? null,
       bossVoice: personaMap.get("og_persona.voice") ?? null,
