@@ -24,7 +24,10 @@ function NotFoundComponent() {
       <div className="text-center">
         <h1 className="text-7xl font-bold text-gradient-brand">404</h1>
         <p className="mt-3 text-muted-foreground">This page doesn't exist.</p>
-        <a href="/" className="mt-6 inline-block rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
+        <a
+          href="/"
+          className="mt-6 inline-block rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+        >
           Go home
         </a>
       </div>
@@ -45,7 +48,10 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         <p className="mt-2 text-sm text-muted-foreground">Try again or head home.</p>
         <div className="mt-6 flex justify-center gap-2">
           <button
-            onClick={() => { router.invalidate(); reset(); }}
+            onClick={() => {
+              router.invalidate();
+              reset();
+            }}
             className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
           >
             Try again
@@ -65,16 +71,33 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "PORTAL" },
-      { name: "description", content: "Generate full songs from a prompt using AI. Powered by 0G-Streamz." },
+      {
+        name: "description",
+        content: "Generate full songs from a prompt using AI. Powered by 0G-Streamz.",
+      },
       { name: "author", content: "Sonix" },
       { property: "og:title", content: "PORTAL" },
-      { property: "og:description", content: "Generate full songs from a prompt using AI. Powered by 0G-Streamz." },
+      {
+        property: "og:description",
+        content: "Generate full songs from a prompt using AI. Powered by 0G-Streamz.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "PORTAL" },
-      { name: "twitter:description", content: "Generate full songs from a prompt using AI. Powered by 0G-Streamz." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0962d120-9a6a-4403-b946-c07e83d9dfbd/id-preview-1984ac9d--07659a42-5b68-4c8b-83b5-ee9a625dbb92.lovable.app-1781064468022.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0962d120-9a6a-4403-b946-c07e83d9dfbd/id-preview-1984ac9d--07659a42-5b68-4c8b-83b5-ee9a625dbb92.lovable.app-1781064468022.png" },
+      {
+        name: "twitter:description",
+        content: "Generate full songs from a prompt using AI. Powered by 0G-Streamz.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0962d120-9a6a-4403-b946-c07e83d9dfbd/id-preview-1984ac9d--07659a42-5b68-4c8b-83b5-ee9a625dbb92.lovable.app-1781064468022.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0962d120-9a6a-4403-b946-c07e83d9dfbd/id-preview-1984ac9d--07659a42-5b68-4c8b-83b5-ee9a625dbb92.lovable.app-1781064468022.png",
+      },
       { name: "google-site-verification", content: "R34IxND5szTYrevWfX0gTnIvDi64kPx6wI0XCNM08YE" },
     ],
     links: [
@@ -96,8 +119,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className="dark">
-      <head><HeadContent /></head>
-      <body>{children}<Scripts /></body>
+      <head>
+        <HeadContent />
+      </head>
+      <body>
+        {children}
+        <Scripts />
+      </body>
     </html>
   );
 }

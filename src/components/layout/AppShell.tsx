@@ -5,7 +5,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { AdminEditModeProvider, AdminEditModeToggle, useAdminEditMode } from "@/components/admin/AdminEditMode";
+import {
+  AdminEditModeProvider,
+  AdminEditModeToggle,
+  useAdminEditMode,
+} from "@/components/admin/AdminEditMode";
 import { CoinBalance } from "@/components/dashboard/CoinBalance";
 import { useAuth } from "@/hooks/use-auth";
 import { useRole } from "@/hooks/use-role";
@@ -26,7 +30,9 @@ const routeTitles: Record<string, string> = {
 
 function getRouteTitle(pathname: string) {
   const match = Object.keys(routeTitles)
-    .filter((path) => (path === "/" ? pathname === "/" : pathname === path || pathname.startsWith(path + "/")))
+    .filter((path) =>
+      path === "/" ? pathname === "/" : pathname === path || pathname.startsWith(path + "/"),
+    )
     .sort((a, b) => b.length - a.length)[0];
   return match ? routeTitles[match] : "PORTAL";
 }
@@ -84,7 +90,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                     placeholder="Search songs"
                     className="h-9 border-white/10 bg-white/5 pl-9"
                     onChange={(event) => {
-                      window.dispatchEvent(new CustomEvent("sonix:search", { detail: event.target.value }));
+                      window.dispatchEvent(
+                        new CustomEvent("sonix:search", { detail: event.target.value }),
+                      );
                     }}
                   />
                 </div>
@@ -113,7 +121,6 @@ export function AppShell({ children }: { children: ReactNode }) {
               </div>
             </header>
 
-
             {!roleLoading && isAdmin && (
               <div className="flex items-center justify-center gap-2 border-b border-primary/40 bg-gradient-brand px-4 py-1.5 text-xs font-semibold uppercase text-primary-foreground shadow-glow">
                 <ShieldCheck className="h-3.5 w-3.5" />
@@ -123,7 +130,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             <AdminEditHint />
 
             <main className="min-w-0 flex-1">
-              <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-10">{children}</div>
+              <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
+                {children}
+              </div>
             </main>
 
             <OgFloatingWidget />

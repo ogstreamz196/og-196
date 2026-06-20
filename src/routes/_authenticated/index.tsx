@@ -30,10 +30,7 @@ function DashboardHome() {
   const { isVip } = useRole();
   const { data: recentSongs = [], isLoading: songsLoading } = useRecentSongs(user?.id);
 
-  const displayName =
-    profile?.display_name?.trim() ||
-    user?.email?.split("@")[0] ||
-    "there";
+  const displayName = profile?.display_name?.trim() || user?.email?.split("@")[0] || "there";
   const balance = profile?.coin_balance ?? 0;
   const hasSongs = recentSongs.length > 0;
 
@@ -101,7 +98,6 @@ function DashboardHome() {
         </div>
       </section>
 
-
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Recent */}
         <Card className="lg:col-span-2">
@@ -111,7 +107,9 @@ function DashboardHome() {
               <CardDescription>Pick up where you left off.</CardDescription>
             </div>
             <Button asChild variant="ghost" size="sm" className="gap-1">
-              <Link to="/library">View all <ArrowRight className="h-3.5 w-3.5" /></Link>
+              <Link to="/library">
+                View all <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
             </Button>
           </CardHeader>
           <CardContent>
@@ -136,7 +134,11 @@ function DashboardHome() {
             <CardDescription>Get the most out of OG Studio.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <ChecklistItem done={!!profile?.display_name} label="Complete your profile" to="/settings" />
+            <ChecklistItem
+              done={!!profile?.display_name}
+              label="Complete your profile"
+              to="/settings"
+            />
             <ChecklistItem done={hasSongs} label="Create your first song" to="/library" />
             <ChecklistItem done={false} label="Say hi in OG Messenger" to="/messenger" />
             <ChecklistItem done={isVip} label="Unlock VIP perks" to="/buy-coins" />
@@ -234,7 +236,9 @@ function RecentRow({ song }: { song: RecentSong }) {
             {new Date(song.created_at).toLocaleDateString()}
           </p>
         </div>
-        <Badge variant="outline" className="text-xs capitalize">{song.status}</Badge>
+        <Badge variant="outline" className="text-xs capitalize">
+          {song.status}
+        </Badge>
       </Link>
     </li>
   );
@@ -294,7 +298,9 @@ function ChecklistItem({
       ) : (
         <Circle className="h-4 w-4 text-muted-foreground" />
       )}
-      <span className={"text-sm " + (done ? "text-muted-foreground line-through" : "")}>{label}</span>
+      <span className={"text-sm " + (done ? "text-muted-foreground line-through" : "")}>
+        {label}
+      </span>
       <ArrowRight className="ml-auto h-3.5 w-3.5 text-muted-foreground" />
     </Link>
   );
