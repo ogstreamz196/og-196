@@ -2,17 +2,19 @@ import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import ReactMarkdown from "react-markdown";
-import { Loader2, Send, Bot, Trash2, Skull, ShieldCheck } from "lucide-react";
+import { Loader2, Send, Bot, Trash2, Sparkles, Skull, ShieldCheck } from "lucide-react";
 import { chatOgBot, type OgChatMessage } from "@/lib/og-messenger.functions";
+import { QUICK_STARTS } from "@/lib/og-persona";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
+import { useOgMode } from "@/hooks/use-og-mode";
 import { cn } from "@/lib/utils";
 
-const STORAGE_KEY_PREFIX = "og-messenger-thread-v2:";
+const STORAGE_KEY_PREFIX = "og-messenger-thread-v3:";
 const SYNC_EVENT = "og-messenger:sync";
 const MAX_PERSISTED = 60;
 
@@ -39,18 +41,22 @@ function loadThread(userId: string | null | undefined): OgChatMessage[] {
 interface OgChatProps {
   /** Compact variant for the floating widget (no outer card chrome). */
   compact?: boolean;
-  /** Show a "Clear chat" button — only the dedicated Messenger page does. */
-  showClearButton?: boolean;
+  /** Show the header strip with toggles + clear. */
+  showHeader?: boolean;
+  /** Show quick-start chips on empty state. */
+  showQuickStarts?: boolean;
 }
 
 /**
- * Shared OG Bot chat surface. Powers both the dedicated /messenger page and
- * the floating widget. Same backend, same memory (per-user localStorage,
- * synced live across the two surfaces via a CustomEvent).
- *
- * The widget hides the header/clear; the Messenger page shows them.
+ * Shared OG Bot chat surface. Used by both /messenger and the floating
+ * widget. Same backend, same memory, same toggles — synced cross-surface
+ * via localStorage + CustomEvent.
  */
-export function OgChat({ compact = false, showClearButton = false }: OgChatProps) {
+export function OgChat({
+  compact = false,
+  showHeader = false,
+  showQuickStarts = true,
+}: OgChatProps) {
   const { user } = useAuth();
   const userId = user?.id ?? null;
   const [messages, setMessages] = useState<OgChatMessage[]>(() => loadThread(userId));
@@ -63,13 +69,12 @@ export function OgChat({ compact = false, showClearButton = false }: OgChatProps
   const { data: profile } = useProfile();
   const { foulMouth } = useFoulMouth();
   const setFoulMouth = useSetFoulMouth();
+  const { mode, toggle: toggleMode } = useOgMode();
 
-  // Reload thread when the signed-in user changes.
   useEffect(() => {
     setMessages(loadThread(userId));
   }, [userId]);
 
-  // Persist on every change and notify the other surface (widget ↔ page).
   useEffect(() => {
     if (typeof window === "undefined") return;
     window.localStorage.setItem(
@@ -78,7 +83,6 @@ export function OgChat({ compact = false, showClearButton = false }: OgChatProps
     );
   }, [messages, userId]);
 
-  // Cross-surface sync (same tab via CustomEvent, cross-tab via storage event).
   useEffect(() => {
     function onStorage(e: StorageEvent) {
       if (e.key !== storageKey(userId) || !e.newValue) return;
@@ -104,12 +108,10 @@ export function OgChat({ compact = false, showClearButton = false }: OgChatProps
     };
   }, [userId]);
 
-  // Auto-scroll on new content.
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
-  // Keep textarea focused after sends / mounts.
   useEffect(() => {
     inputRef.current?.focus();
   }, [userId]);
@@ -119,6 +121,7 @@ export function OgChat({ compact = false, showClearButton = false }: OgChatProps
       chat({
         data: {
           messages: history,
+          mode,
           pageContext: typeof window !== "undefined" ? window.location.pathname : "",
         },
       }),
@@ -129,7 +132,6 @@ export function OgChat({ compact = false, showClearButton = false }: OgChatProps
         window.dispatchEvent(new Event(SYNC_EVENT));
         return next;
       });
-      // Refresh balance everywhere.
       qc.invalidateQueries({ queryKey: ["profile"] });
       setTimeout(() => inputRef.current?.focus(), 0);
     },
@@ -142,18 +144,14 @@ export function OgChat({ compact = false, showClearButton = false }: OgChatProps
     },
   });
 
-  function send() {
-    const text = input.trim();
-    if (!text || m.isPending) return;
-    if (!user) {
-      toast.error("Sign in to chat with OG Bot.");
-      return;
-    }
+  function sendText(text: string) {
+    const t = text.trim();
+    if (!t || m.isPending) return;
+    if (!user) return toast.error("Sign in to chat with OG Bot.");
     if ((profile?.coin_balance ?? 0) <= 0) {
-      toast.error("You're out of OG coins. Top up to keep chatting.");
-      return;
+      return toast.error("You're out of OG coins. Top up to keep chatting.");
     }
-    const next = [...messages, { role: "user" as const, content: text }];
+    const next = [...messages, { role: "user" as const, content: t }];
     setMessages(next);
     selfSyncRef.current = true;
     window.dispatchEvent(new Event(SYNC_EVENT));
@@ -172,7 +170,7 @@ export function OgChat({ compact = false, showClearButton = false }: OgChatProps
     try {
       const next = !foulMouth;
       await setFoulMouth.mutateAsync(next);
-      toast.message(next ? "🖕 Foul mouth: ON" : "🛡️ Safe mode: ON");
+      toast.message(next ? "🖕 Foul mouth: ON" : "🧼 Foul mouth: OFF");
     } catch (e) {
       toast.error((e as Error).message);
     }
@@ -180,31 +178,58 @@ export function OgChat({ compact = false, showClearButton = false }: OgChatProps
 
   const balance = profile?.coin_balance ?? 0;
   const isOut = balance <= 0;
+  const foulActive = mode === "og" && foulMouth;
 
   return (
     <div className={cn("flex h-full flex-col", compact ? "" : "rounded-xl border border-border bg-card")}>
-      {showClearButton && (
-        <div className="flex items-center justify-between gap-2 border-b border-border/60 px-3 py-2 text-xs">
+      {showHeader && (
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 px-3 py-2 text-xs">
           <div className="flex items-center gap-2 text-muted-foreground">
             <Bot className="h-3.5 w-3.5 text-primary" />
-            <span>OG Bot · {balance} coin{balance === 1 ? "" : "s"}</span>
+            <span>
+              OG Bot · {balance} coin{balance === 1 ? "" : "s"}
+            </span>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button
+              type="button"
+              onClick={toggleMode}
+              className={cn(
+                "inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] font-semibold transition",
+                mode === "og"
+                  ? "border-primary/40 bg-primary/10 text-primary"
+                  : "border-border bg-muted text-muted-foreground",
+              )}
+              title={mode === "og" ? "OG mode — tap for Safe" : "Safe mode — tap for OG"}
+            >
+              {mode === "og" ? <Sparkles className="h-3 w-3" /> : <ShieldCheck className="h-3 w-3" />}
+              {mode === "og" ? "OG" : "Safe"}
+            </button>
             <button
               type="button"
               onClick={toggleFoul}
-              disabled={setFoulMouth.isPending}
+              disabled={setFoulMouth.isPending || mode === "safe"}
               className={cn(
-                "inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] font-medium transition",
-                foulMouth
+                "inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] font-semibold transition disabled:opacity-40",
+                foulActive
                   ? "border-destructive/40 bg-destructive/10 text-destructive hover:bg-destructive/20"
                   : "border-border bg-muted text-muted-foreground hover:bg-muted/80",
               )}
-              aria-label={foulMouth ? "Switch to safe mode" : "Switch to foul mouth mode"}
-              title={foulMouth ? "Foul mouth ON — click for Safe" : "Safe mode — click for 🖕"}
+              title={
+                mode === "safe"
+                  ? "Switch to OG mode to enable foul mouth"
+                  : foulActive
+                    ? "Foul mouth ON — tap for clean"
+                    : "Foul mouth OFF — tap to unleash"
+              }
+              aria-label="Toggle foul mouth"
             >
-              {foulMouth ? <Skull className="h-3 w-3" /> : <ShieldCheck className="h-3 w-3" />}
-              {foulMouth ? "Foul" : "Safe"}
+              {foulActive ? (
+                <span className="text-sm leading-none">🖕</span>
+              ) : (
+                <Skull className="h-3 w-3" />
+              )}
+              {foulActive ? "Foul" : "Clean"}
             </button>
             {messages.length > 0 && (
               <button
@@ -223,16 +248,32 @@ export function OgChat({ compact = false, showClearButton = false }: OgChatProps
       <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto p-4">
         {messages.length === 0 && (
           <div className="grid h-full place-items-center text-center">
-            <div className="max-w-xs space-y-2">
+            <div className="w-full max-w-sm space-y-3">
               <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-gradient-brand shadow-glow">
                 <Bot className="h-6 w-6 text-primary-foreground" />
               </div>
               <p className="text-sm font-semibold">OG Bot is online</p>
               <p className="text-xs text-muted-foreground">
-                Ask about songs, coins, portals, your account — or whatever's on your mind.
+                Your songwriting partner. Ask me to draft lyrics, hooks, titles, or a
+                Suno-ready prompt.
                 <br />
                 <span className="opacity-70">1 coin per message · {balance} left</span>
               </p>
+              {showQuickStarts && (
+                <div className="flex flex-wrap justify-center gap-1.5 pt-2">
+                  {QUICK_STARTS.map((q) => (
+                    <button
+                      key={q.label}
+                      type="button"
+                      onClick={() => sendText(q.prompt)}
+                      disabled={m.isPending || isOut || !user}
+                      className="rounded-full border border-border bg-muted px-3 py-1 text-[11px] font-medium text-foreground transition hover:border-primary/40 hover:bg-primary/5 disabled:opacity-40"
+                    >
+                      {q.label}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -268,7 +309,7 @@ export function OgChat({ compact = false, showClearButton = false }: OgChatProps
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          send();
+          sendText(input);
         }}
         className="flex items-center gap-2 border-t border-border p-3"
       >
@@ -276,7 +317,13 @@ export function OgChat({ compact = false, showClearButton = false }: OgChatProps
           ref={inputRef}
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={isOut ? "Out of coins — top up to chat" : "Message OG Bot…"}
+          placeholder={
+            isOut
+              ? "Out of coins — top up to chat"
+              : foulActive
+                ? "Go on then, type something…"
+                : "Message OG Bot…"
+          }
           disabled={m.isPending || isOut || !user}
           maxLength={2000}
           autoFocus

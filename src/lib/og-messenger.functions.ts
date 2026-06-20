@@ -48,7 +48,7 @@ interface ChatReply {
  */
 export const chatOgBot = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { messages: OgChatMessage[]; pageContext?: string }) => {
+  .inputValidator((data: { messages: OgChatMessage[]; pageContext?: string; mode?: "safe" | "og" }) => {
     if (!data || !Array.isArray(data.messages)) throw new Error("messages required");
     const messages = data.messages.slice(-30).map((m) => ({
       role: m.role === "assistant" ? "assistant" as const : "user" as const,
@@ -57,7 +57,8 @@ export const chatOgBot = createServerFn({ method: "POST" })
     if (messages.length === 0) throw new Error("Empty conversation");
     const pageContext =
       typeof data.pageContext === "string" ? data.pageContext.slice(0, 200) : "";
-    return { messages, pageContext };
+    const mode: "safe" | "og" = data.mode === "safe" ? "safe" : "og";
+    return { messages, pageContext, mode };
   })
   .handler(async ({ data, context }): Promise<ChatReply> => {
     const apiKey = process.env.LOVABLE_API_KEY;
@@ -112,6 +113,7 @@ export const chatOgBot = createServerFn({ method: "POST" })
     };
 
     const system = buildSystemPrompt({
+      mode: data.mode,
       foulMouth,
       bossScript: personaMap.get("og_persona.script") ?? null,
       bossVoice: personaMap.get("og_persona.voice") ?? null,
@@ -132,7 +134,48 @@ export const chatOgBot = createServerFn({ method: "POST" })
       throw new Error(deductErr.message);
     }
 
-    // 3. Call the AI gateway.
+    // 3. Optional Firecrawl research prelude. If the latest user message
+    //    starts with "/research " or "research:" AND FIRECRAWL_API_KEY is
+    //    set, scrape the web and prepend findings as a RESEARCH block.
+    const outgoing = [...data.messages];
+    const last = outgoing[outgoing.length - 1];
+    if (last?.role === "user") {
+      const m = last.content.match(/^\s*(?:\/research|research:)\s+(.+)$/i);
+      const fcKey = process.env.FIRECRAWL_API_KEY;
+      if (m && fcKey) {
+        const query = m[1].trim().slice(0, 200);
+        try {
+          const r = await fetch("https://api.firecrawl.dev/v2/search", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${fcKey}`,
+            },
+            body: JSON.stringify({ query, limit: 5 }),
+            signal: AbortSignal.timeout(15000),
+          });
+          if (r.ok) {
+            const j = (await r.json().catch(() => ({}))) as {
+              data?: { web?: { url: string; title?: string; description?: string }[] };
+            };
+            const hits = j.data?.web ?? [];
+            if (hits.length) {
+              const block = hits
+                .map((h, i) => `${i + 1}. [${h.title ?? h.url}](${h.url})\n   ${h.description ?? ""}`)
+                .join("\n");
+              outgoing[outgoing.length - 1] = {
+                role: "user",
+                content: `RESEARCH (web results for "${query}"):\n${block}\n\nUser question: ${last.content.replace(m[0], "").trim() || query}`,
+              };
+            }
+          }
+        } catch (e) {
+          console.warn("Firecrawl research failed (soft):", (e as Error).message);
+        }
+      }
+    }
+
+    // 4. Call the AI gateway.
     try {
       const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
@@ -142,10 +185,10 @@ export const chatOgBot = createServerFn({ method: "POST" })
         },
         body: JSON.stringify({
           model: "google/gemini-2.5-flash",
-          temperature: foulMouth ? 0.85 : 0.6,
+          temperature: data.mode === "og" && foulMouth ? 0.9 : data.mode === "og" ? 0.75 : 0.6,
           messages: [
             { role: "system", content: system },
-            ...data.messages,
+            ...outgoing,
           ],
         }),
       });
