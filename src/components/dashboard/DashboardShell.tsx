@@ -1,5 +1,5 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Library, Coins as CoinsIcon, LogOut, Music2, Settings, Search, Clock, Loader2, Compass, UserCog, LayoutDashboard, PlusSquare, ShieldCheck, Bot, MessageCircle, Code2 } from "lucide-react";
+import { Library, Coins as CoinsIcon, LogOut, Music2, Settings, Search, Clock, Loader2, Compass, UserCog, LayoutDashboard, ShieldCheck, MessageCircle, Code2 } from "lucide-react";
 import { OgBotWidget } from "@/components/messenger/OgBotWidget";
 import { useEffect, type ReactNode } from "react";
 import { CoinBalance } from "./CoinBalance";

@@ -11,7 +11,7 @@ import { MintCoinsPanel } from "@/components/admin/MintCoinsPanel";
 import { OgCoinsPanel } from "@/components/admin/OgCoinsPanel";
 import { BossAuditLog } from "@/components/admin/BossAuditLog";
 import { BossNav } from "@/components/admin/BossNav";
-import { WidgetAccessAudit } from "@/components/admin/WidgetAccessAudit";
+
 import { HardwiredCapabilities } from "@/components/admin/HardwiredCapabilities";
 import { AdminEditableLabel, AdminEditableBalance } from "@/components/admin/AdminEditMode";
 import { Button } from "@/components/ui/button";
