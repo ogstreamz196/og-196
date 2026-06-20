@@ -38,25 +38,33 @@ function DashboardHome() {
   const hasSongs = recentSongs.length > 0;
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-10">
       {/* Welcome */}
-      <section className="flex flex-col gap-2">
-        <p className="text-sm text-muted-foreground">Welcome back</p>
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            Hello, <span className="text-primary">{displayName}</span>
-          </h1>
-          <div className="flex items-center gap-2 text-sm">
-            {isVip && <Badge variant="secondary" className="gap-1"><Sparkles className="h-3 w-3" /> VIP</Badge>}
-            <Badge variant="outline" className="gap-1.5">
+      <section className="flex flex-col gap-3">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 sm:flex sm:flex-wrap sm:items-end sm:justify-between">
+          <div className="min-w-0">
+            <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+              Welcome back
+            </p>
+            <h1 className="font-display mt-3 text-4xl font-light leading-[1.05] tracking-[-0.02em] sm:text-5xl">
+              Hello, <em className="italic text-gradient-brand">{displayName}</em>
+            </h1>
+            <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">
+              Jump back into your music workspace or pick up a conversation with OG Messenger.
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-2 text-sm">
+            {isVip && (
+              <Badge variant="secondary" className="gap-1">
+                <Sparkles className="h-3 w-3" /> VIP
+              </Badge>
+            )}
+            <Badge variant="outline" className="gap-1.5 border-white/15 bg-white/5">
               <Coins className="h-3.5 w-3.5 text-primary" />
               {balance} coins
             </Badge>
           </div>
         </div>
-        <p className="max-w-xl text-sm text-muted-foreground">
-          Jump back into your music workspace or pick up a conversation with OG Messenger.
-        </p>
       </section>
 
       {/* Primary CTAs */}
@@ -82,7 +90,9 @@ function DashboardHome() {
 
       {/* Quick actions */}
       <section>
-        <h2 className="mb-3 text-sm font-medium text-muted-foreground">Quick actions</h2>
+        <h2 className="mb-4 text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+          Quick actions
+        </h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <QuickAction to="/library" icon={<Plus className="h-4 w-4" />} label="New song" />
           <QuickAction to="/library" icon={<Library className="h-4 w-4" />} label="My library" />
@@ -90,6 +100,7 @@ function DashboardHome() {
           <QuickAction to="/buy-coins" icon={<Coins className="h-4 w-4" />} label="Buy coins" />
         </div>
       </section>
+
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Recent */}
