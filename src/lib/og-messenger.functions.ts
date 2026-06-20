@@ -48,7 +48,7 @@ interface ChatReply {
  */
 export const chatOgBot = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { messages: OgChatMessage[]; pageContext?: string }) => {
+  .inputValidator((data: { messages: OgChatMessage[]; pageContext?: string; mode?: "safe" | "og" }) => {
     if (!data || !Array.isArray(data.messages)) throw new Error("messages required");
     const messages = data.messages.slice(-30).map((m) => ({
       role: m.role === "assistant" ? "assistant" as const : "user" as const,
@@ -57,7 +57,8 @@ export const chatOgBot = createServerFn({ method: "POST" })
     if (messages.length === 0) throw new Error("Empty conversation");
     const pageContext =
       typeof data.pageContext === "string" ? data.pageContext.slice(0, 200) : "";
-    return { messages, pageContext };
+    const mode: "safe" | "og" = data.mode === "safe" ? "safe" : "og";
+    return { messages, pageContext, mode };
   })
   .handler(async ({ data, context }): Promise<ChatReply> => {
     const apiKey = process.env.LOVABLE_API_KEY;
