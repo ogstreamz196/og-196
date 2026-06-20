@@ -1,15 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { buildSystemPrompt, type UserContextSummary } from "@/lib/og-persona";
 
 export type OgChatMessage = { role: "user" | "assistant"; content: string };
 
 /**
- * Returns the signed-in user's current active OG Bot token, if any.
- *
- * Used by the messenger widget to silently refresh the per-site Bearer token
- * when the previously cached one is rejected (expired / revoked / rotated).
- * Returns `{ token: null, reason }` instead of throwing so the client can
- * fall back to the manual paste flow cleanly.
+ * Legacy: returns the signed-in user's active OG Bot token if any.
+ * The unified messenger no longer requires this token — chat is auth-only.
+ * Kept so existing settings/admin UI that reads it still compiles.
  */
 export const getMyActiveOgBotToken = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -33,90 +31,153 @@ export const getMyActiveOgBotToken = createServerFn({ method: "POST" })
     return { token: row.token, expires_at: row.expires_at, reason: "ok" };
   });
 
-const SYSTEM_PROMPT =
-  "You are OG Bot — a blunt, no-nonsense studio co-pilot for OGStreamz. " +
-  "Help users with songwriting, bot tokens, coins, and portal questions. " +
-  "Keep replies tight (under 120 words). No corporate fluff, no apologies.";
+interface ChatReply {
+  reply: string;
+  coin_balance: number;
+}
 
 /**
- * Chat backend for the OG Bot messenger widget.
+ * Unified chat backend for the OG Messenger page and the floating widget.
  *
- * Validates the user's `ogb_` token against the local `og_bot_tokens` table
- * (via the admin client) and then generates a reply through the Lovable AI
- * gateway. The mothership chat endpoint is no longer required.
+ * - Authenticates via Supabase (no extra token required).
+ * - Charges 1 OG coin per message (atomic via `deduct_coins` RPC).
+ * - Pulls the user's foul-mouth preference, role flags, profile, and any
+ *   Boss persona overrides from `site_content`, then builds the system
+ *   prompt accordingly.
+ * - Returns the assistant reply plus the user's new coin balance.
  */
 export const chatOgBot = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { messages: OgChatMessage[]; token: string; pageContext?: string }) => {
+  .inputValidator((data: { messages: OgChatMessage[]; pageContext?: string }) => {
     if (!data || !Array.isArray(data.messages)) throw new Error("messages required");
-    const token = typeof data.token === "string" ? data.token.trim().slice(0, 200) : "";
-    if (!token.startsWith("ogb_")) {
-      throw new Error("OG Bot token required. Paste your token to unlock chat.");
-    }
-    const messages = data.messages.slice(-20).map((m) => ({
-      role: m.role === "assistant" ? "assistant" : "user",
+    const messages = data.messages.slice(-30).map((m) => ({
+      role: m.role === "assistant" ? "assistant" as const : "user" as const,
       content: String(m.content ?? "").slice(0, 4000),
     }));
+    if (messages.length === 0) throw new Error("Empty conversation");
     const pageContext =
-      typeof data.pageContext === "string" ? data.pageContext.slice(0, 500) : "";
-    return { messages, token, pageContext };
+      typeof data.pageContext === "string" ? data.pageContext.slice(0, 200) : "";
+    return { messages, pageContext };
   })
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data, context }): Promise<ChatReply> => {
     const apiKey = process.env.LOVABLE_API_KEY;
     if (!apiKey) throw new Error("AI gateway not configured");
 
-    // Validate the caller's bot token against our local registry.
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: row, error: tokenErr } = await supabaseAdmin
-      .from("og_bot_tokens")
-      .select("user_id, revoked_at, expires_at")
-      .eq("token", data.token)
-      .maybeSingle();
 
-    if (tokenErr) {
-      console.error("Token lookup failed", tokenErr);
-      throw new Error("Could not verify OG Bot token.");
-    }
-    if (!row) throw new Error("Invalid OG Bot token.");
-    if (row.revoked_at) throw new Error("This OG Bot token has been revoked.");
-    if (row.expires_at && new Date(row.expires_at).getTime() < Date.now()) {
-      throw new Error("This OG Bot token has expired.");
-    }
-    if (row.user_id !== context.userId) {
-      throw new Error("This token belongs to another account.");
+    // 1. Load user context in parallel (profile, role flags, foul pref, persona overrides).
+    const [profileRes, rolesRes, prefRes, siteRes] = await Promise.all([
+      supabaseAdmin
+        .from("profiles")
+        .select("display_name, email, coin_balance")
+        .eq("id", context.userId)
+        .maybeSingle(),
+      supabaseAdmin
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", context.userId),
+      supabaseAdmin
+        .from("user_preferences")
+        .select("foul_mouth")
+        .eq("user_id", context.userId)
+        .maybeSingle(),
+      supabaseAdmin
+        .from("site_content")
+        .select("key, value")
+        .in("key", ["og_persona.script", "og_persona.voice", "og_persona.dictionary"]),
+    ]);
+
+    if (profileRes.error) throw new Error(profileRes.error.message);
+    const profile = profileRes.data;
+    if (!profile) throw new Error("Profile not found");
+    if ((profile.coin_balance ?? 0) <= 0) {
+      throw new Error(
+        "Out of OG coins. Top up from Buy OG Coins or grab VIP to keep chatting.",
+      );
     }
 
-    const systemContent = data.pageContext
-      ? `${SYSTEM_PROMPT}\n\nPage context: ${data.pageContext}`
-      : SYSTEM_PROMPT;
+    const roles = (rolesRes.data ?? []).map((r) => r.role);
+    const personaMap = new Map<string, string>(
+      (siteRes.data ?? []).map((r: { key: string; value: string }) => [r.key, r.value]),
+    );
+    const foulMouth = prefRes.data?.foul_mouth ?? true;
 
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemContent },
-          ...data.messages,
-        ],
-      }),
+    const userCtx: UserContextSummary = {
+      display_name: profile.display_name,
+      email: profile.email,
+      coin_balance: profile.coin_balance ?? 0,
+      is_admin: roles.includes("admin"),
+      is_vip: roles.includes("vip"),
+      page_context: data.pageContext || undefined,
+    };
+
+    const system = buildSystemPrompt({
+      foulMouth,
+      bossScript: personaMap.get("og_persona.script") ?? null,
+      bossVoice: personaMap.get("og_persona.voice") ?? null,
+      bossDictionary: personaMap.get("og_persona.dictionary") ?? null,
+      user: userCtx,
     });
 
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      console.error("Lovable AI gateway error", res.status, text);
-      if (res.status === 429) throw new Error("OG Bot is rate-limited, try again soon.");
-      if (res.status === 402) throw new Error("AI credits exhausted — top up Lovable AI balance.");
-      const snippet = text ? ` — ${text.slice(0, 200)}` : "";
-      throw new Error(`OG Bot couldn't respond right now (HTTP ${res.status})${snippet}`);
+    // 2. Deduct 1 coin atomically BEFORE the AI call to avoid double-spend on retry.
+    const { data: newBalance, error: deductErr } = await supabaseAdmin.rpc("deduct_coins", {
+      p_user: context.userId,
+      p_amount: 1,
+      p_reference: "og_messenger_chat",
+    });
+    if (deductErr) {
+      if (/insufficient_coins/i.test(deductErr.message)) {
+        throw new Error("Out of OG coins. Top up to keep chatting.");
+      }
+      throw new Error(deductErr.message);
     }
 
-    const json = (await res.json().catch(() => ({}))) as {
-      choices?: { message?: { content?: string } }[];
-    };
-    const reply = json.choices?.[0]?.message?.content ?? "";
-    return { reply };
+    // 3. Call the AI gateway.
+    try {
+      const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          temperature: foulMouth ? 0.85 : 0.6,
+          messages: [
+            { role: "system", content: system },
+            ...data.messages,
+          ],
+        }),
+      });
+
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        console.error("Lovable AI gateway error", res.status, text);
+        if (res.status === 429) throw new Error("OG Bot is rate-limited, try again soon.");
+        if (res.status === 402) throw new Error("AI credits exhausted — Boss needs to top up Lovable AI.");
+        throw new Error(`OG Bot couldn't respond right now (HTTP ${res.status})`);
+      }
+
+      const json = (await res.json().catch(() => ({}))) as {
+        choices?: { message?: { content?: string } }[];
+      };
+      const reply = (json.choices?.[0]?.message?.content ?? "").trim() || "…";
+
+      return {
+        reply,
+        coin_balance: (newBalance as number | null) ?? userCtx.coin_balance - 1,
+      };
+    } catch (err) {
+      // Refund the coin on hard AI failure so the user isn't charged for nothing.
+      try {
+        await supabaseAdmin.rpc("mint_coins_admin", {
+          target_user_id: context.userId,
+          amount: 1,
+          admin_notes: "og_messenger_chat_refund",
+        });
+      } catch {
+        // best-effort refund; do not mask the original failure
+      }
+      throw err;
+    }
   });
