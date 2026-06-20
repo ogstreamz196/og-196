@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   Sparkles,
@@ -14,8 +14,96 @@ import {
   Headphones,
   PlayCircle,
   Wand2,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { lovable } from "@/integrations/lovable";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+type OAuthProvider = "google" | "apple";
+
+function useOAuthSignIn() {
+  const navigate = useNavigate();
+  const [pending, setPending] = useState<OAuthProvider | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) navigate({ to: "/", replace: true });
+    });
+  }, [navigate]);
+
+  async function signIn(provider: OAuthProvider) {
+    setPending(provider);
+    try {
+      const result = await lovable.auth.signInWithOAuth(provider, {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) {
+        toast.error(result.error.message || `${provider} sign-in failed`);
+        return;
+      }
+      if (result.redirected) return;
+      navigate({ to: "/", replace: true });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Sign-in failed");
+    } finally {
+      setPending(null);
+    }
+  }
+  return { signIn, pending };
+}
+
+function GoogleIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden>
+      <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.4-1.7 4.1-5.5 4.1-3.3 0-6-2.7-6-6.2s2.7-6.2 6-6.2c1.9 0 3.2.8 3.9 1.5l2.7-2.6C16.9 3 14.7 2 12 2 6.9 2 2.8 6.1 2.8 11.9S6.9 22 12 22c6.9 0 9.4-4.9 9.4-9 0-.6-.1-1-.2-1.6H12z" />
+    </svg>
+  );
+}
+
+function AppleIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden fill="currentColor">
+      <path d="M16.4 12.7c0-2.5 2-3.7 2.1-3.8-1.2-1.7-3-1.9-3.6-2-1.6-.2-3 .9-3.8.9-.8 0-2-.9-3.3-.9-1.7 0-3.3 1-4.1 2.5-1.8 3.1-.5 7.6 1.2 10.1.9 1.2 1.9 2.6 3.2 2.5 1.3-.1 1.8-.8 3.4-.8s2 .8 3.4.8c1.4 0 2.3-1.2 3.2-2.5.7-1 1.2-2.1 1.5-3.3-2.5-.9-3.2-2.7-3.2-3.5zM13.8 5.2c.7-.9 1.2-2 1.1-3.2-1 0-2.3.7-3 1.6-.6.8-1.2 2-1 3.1 1.1.1 2.2-.6 2.9-1.5z" />
+    </svg>
+  );
+}
+
+function AuthButtons({ size = "lg" }: { size?: "lg" | "default" }) {
+  const { signIn, pending } = useOAuthSignIn();
+  const h = size === "lg" ? "h-14 text-base" : "h-12 text-sm";
+  return (
+    <div className="flex w-full flex-col gap-3 sm:flex-row sm:justify-center">
+      <Button
+        onClick={() => signIn("google")}
+        disabled={pending !== null}
+        size={size}
+        className={`${h} gap-2.5 px-6 font-bold bg-white text-black hover:bg-white/90 shadow-lg transition hover:scale-[1.02]`}
+      >
+        {pending === "google" ? (
+          <Loader2 className="h-5 w-5 animate-spin" />
+        ) : (
+          <GoogleIcon className="h-5 w-5" />
+        )}
+        Sign in with Google
+      </Button>
+      <Button
+        onClick={() => signIn("apple")}
+        disabled={pending !== null}
+        size={size}
+        className={`${h} gap-2.5 px-6 font-bold bg-black text-white hover:bg-black/85 shadow-lg transition hover:scale-[1.02]`}
+      >
+        {pending === "apple" ? (
+          <Loader2 className="h-5 w-5 animate-spin" />
+        ) : (
+          <AppleIcon className="h-5 w-5" />
+        )}
+        Sign in with Apple
+      </Button>
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/welcome")({
   ssr: false,
