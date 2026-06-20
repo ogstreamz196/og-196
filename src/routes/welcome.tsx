@@ -241,30 +241,6 @@ function Hero() {
       </div>
 
 
-      {/* Chat preview card */}
-      <div className="relative mx-auto mt-24 max-w-3xl">
-        <div className="pointer-events-none absolute -inset-x-8 -inset-y-8 rounded-[2.5rem] bg-gradient-brand-soft opacity-60 blur-3xl" />
-        <div className="relative overflow-hidden rounded-[2rem] border-2 border-white/15 bg-card/80 p-6 shadow-card backdrop-blur-xl sm:p-8">
-          <div className="flex items-center gap-3">
-            <OgBotLogo className="h-12 w-12 wc-wiggle" />
-            <div>
-              <p className="text-xs text-muted-foreground">online · ready to write</p>
-            </div>
-          </div>
-          <div className="mt-6 space-y-3 text-base sm:text-lg">
-            <Bubble side="you">A tribute to my mum's 60th 💜</Bubble>
-            <Bubble side="bot">
-              Lovely. Give me one memory of her that still makes you smile.
-            </Bubble>
-            <Bubble side="you">Sunday roasts. Singing Tina Turner in the kitchen.</Bubble>
-            <Bubble side="bot">
-              <span className="inline-flex items-center gap-1.5">
-                <Wand2 className="h-4 w-4" /> Cooking up your song…
-              </span>
-            </Bubble>
-          </div>
-        </div>
-      </div>
     </section>
   );
 }
