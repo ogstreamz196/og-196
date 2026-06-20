@@ -5,7 +5,7 @@ import {
   createStripeClient,
   getStripeErrorMessage,
 } from "@/lib/stripe.server";
-import { findCoinPackByPriceId } from "@/lib/coin-packs";
+import { findCoinPackByPriceId, VIP_PLAN } from "@/lib/coin-packs";
 
 type CheckoutSessionResult = { clientSecret: string } | { error: string };
 
@@ -106,6 +106,60 @@ export const createCoinCheckoutSession = createServerFn({ method: "POST" })
       return { clientSecret: session.client_secret ?? "" };
     } catch (error) {
       console.error("createCoinCheckoutSession failed", error);
+      return { error: getStripeErrorMessage(error) };
+    }
+  });
+
+export const createVipCheckoutSession = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    (data: { returnUrl: string; environment: StripeEnv }) => {
+      if (data.environment !== "sandbox" && data.environment !== "live") {
+        throw new Error("Invalid environment");
+      }
+      if (!/^https?:\/\//.test(data.returnUrl)) throw new Error("Invalid returnUrl");
+      return data;
+    },
+  )
+  .handler(async ({ data, context }): Promise<CheckoutSessionResult> => {
+    const { userId, supabase } = context;
+    try {
+      const stripe = createStripeClient(data.environment);
+      const prices = await stripe.prices.list({ lookup_keys: [VIP_PLAN.priceId] });
+      if (!prices.data.length) throw new Error("VIP price not found");
+      const stripePrice = prices.data[0];
+
+      let email: string | undefined;
+      try {
+        const { data: prof } = await supabase
+          .from("profiles").select("email").eq("id", userId).maybeSingle();
+        email = (prof?.email as string | undefined) ?? undefined;
+      } catch { /* email optional */ }
+
+      const customerId = await resolveOrCreateCustomer(stripe, { email, userId });
+
+      const session = await stripe.checkout.sessions.create({
+        line_items: [{ price: stripePrice.id, quantity: 1 }],
+        mode: "subscription",
+        ui_mode: "embedded_page",
+        return_url: data.returnUrl,
+        customer: customerId,
+        metadata: {
+          userId,
+          bundleId: VIP_PLAN.bundleId,
+          environment: data.environment,
+        },
+        subscription_data: {
+          metadata: {
+            userId,
+            bundleId: VIP_PLAN.bundleId,
+          },
+        },
+      });
+
+      return { clientSecret: session.client_secret ?? "" };
+    } catch (error) {
+      console.error("createVipCheckoutSession failed", error);
       return { error: getStripeErrorMessage(error) };
     }
   });

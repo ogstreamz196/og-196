@@ -1,4 +1,4 @@
-// Single source of truth for purchasable coin packs.
+// Single source of truth for purchasable coin packs and the VIP subscription.
 // Used by both the client (Buy Coins page) and the server (checkout + webhook
 // validation). Keep `priceId` in sync with payments--batch_create_product.
 
@@ -17,43 +17,41 @@ export const CURRENCY_SYMBOL = "£";
 
 export const COIN_PACKS: readonly CoinPack[] = [
   {
-    bundleId: "coins_10",
-    priceId: "coins_10_gbp",
-    coins: 10,
-    priceCents: 500,
-    currency: "gbp",
-    label: "Starter",
-    description: "~3 song generations",
-  },
-  {
     bundleId: "coins_50",
     priceId: "coins_50_gbp",
     coins: 50,
-    priceCents: 1900,
+    priceCents: 999,
     currency: "gbp",
-    label: "Creator",
-    description: "~16 song generations",
+    label: "Starter",
+    description: "50 OG coins — great for casual chats and a few generations.",
+  },
+  {
+    bundleId: "coins_120",
+    priceId: "coins_120_gbp",
+    coins: 120,
+    priceCents: 1999,
+    currency: "gbp",
+    label: "Power",
+    description: "120 OG coins — best value for active creators.",
     popular: true,
   },
-  {
-    bundleId: "coins_200",
-    priceId: "coins_200_gbp",
-    coins: 200,
-    priceCents: 6900,
-    currency: "gbp",
-    label: "Studio",
-    description: "~66 song generations",
-  },
-  {
-    bundleId: "coins_500",
-    priceId: "coins_500_gbp",
-    coins: 500,
-    priceCents: 14900,
-    currency: "gbp",
-    label: "Producer",
-    description: "~166 song generations",
-  },
 ] as const;
+
+export interface VipPlan {
+  bundleId: "vip_yearly";
+  priceId: "vip_yearly_gbp";
+  priceCents: number;
+  currency: "gbp";
+  label: string;
+}
+
+export const VIP_PLAN: VipPlan = {
+  bundleId: "vip_yearly",
+  priceId: "vip_yearly_gbp",
+  priceCents: 2000,
+  currency: "gbp",
+  label: "OG VIP — Yearly",
+};
 
 export function findCoinPackByPriceId(priceId: string): CoinPack | undefined {
   return COIN_PACKS.find((p) => p.priceId === priceId);
@@ -61,4 +59,8 @@ export function findCoinPackByPriceId(priceId: string): CoinPack | undefined {
 
 export function findCoinPackByBundleId(bundleId: string): CoinPack | undefined {
   return COIN_PACKS.find((p) => p.bundleId === bundleId);
+}
+
+export function isVipBundle(bundleId: string | undefined): boolean {
+  return bundleId === VIP_PLAN.bundleId;
 }
