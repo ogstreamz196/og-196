@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useRole } from "@/hooks/use-role";
 import { supabase } from "@/integrations/supabase/client";
 import { AppSidebar } from "./AppSidebar";
+import { OgFloatingWidget } from "@/components/og-widget/OgFloatingWidget";
 
 const routeTitles: Record<string, string> = {
   "/": "Music Hub",
@@ -108,7 +109,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-10">{children}</div>
             </main>
 
-            <div id="og-widget-root" className="pointer-events-none fixed inset-0 z-40" aria-hidden />
+            <OgFloatingWidget />
           </div>
         </div>
       </SidebarProvider>
