@@ -138,30 +138,59 @@ function AppleIcon({ className }: { className?: string }) {
 
 function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
   const { signIn, pending } = useOAuthSignIn();
-  const h = size === "xl" ? "h-14" : "h-12";
+  const h = size === "xl" ? "h-24" : "h-20";
+  const silver =
+    "bg-[linear-gradient(180deg,#fdfdfd_0%,#e8eaed_50%,#c8ccd1_100%)] border border-[#b5b9be] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_2px_6px_rgba(0,0,0,0.25)] hover:brightness-[1.03] active:brightness-95";
   return (
-    <div className="grid w-full gap-3 sm:grid-cols-2">
-      <button
-        onClick={() => signIn("google")}
-        disabled={pending !== null}
-        style={{ fontFamily: '"Roboto", "Helvetica Neue", Arial, sans-serif' }}
-        className={`${h} inline-flex items-center justify-center gap-3 rounded-md bg-white px-5 text-[15px] font-medium text-[#1f1f1f] border border-[#dadce0] shadow-[0_1px_2px_rgba(60,64,67,0.15)] transition hover:bg-[#f8faff] hover:shadow-[0_1px_3px_rgba(60,64,67,0.25)] active:bg-[#f1f3f4] disabled:opacity-70 disabled:cursor-wait`}
-      >
-        {pending === "google" ? <Loader2 className="h-5 w-5 animate-spin" /> : <GoogleIcon className="h-5 w-5" />}
-        Sign in with Google
-      </button>
-      <button
-        onClick={() => signIn("apple")}
-        disabled={pending !== null}
-        style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif' }}
-        className={`${h} inline-flex items-center justify-center gap-2 rounded-md bg-black px-5 text-[15px] font-medium text-white transition hover:bg-[#1a1a1a] disabled:opacity-70 disabled:cursor-wait`}
-      >
-        {pending === "apple" ? <Loader2 className="h-5 w-5 animate-spin" /> : <AppleIcon className="h-5 w-5" />}
-        Sign in with Apple
-      </button>
+    <div className="w-full space-y-3">
+      <p className="text-center text-sm font-bold uppercase tracking-[0.2em] text-foreground/80">
+        Pick your device to continue
+      </p>
+      <div className="grid w-full gap-3 sm:grid-cols-2">
+        <button
+          onClick={() => signIn("google")}
+          disabled={pending !== null}
+          style={{ fontFamily: '"Roboto", "Helvetica Neue", Arial, sans-serif' }}
+          className={`${h} ${silver} group inline-flex flex-col items-center justify-center gap-1 rounded-2xl px-5 text-[#1f1f1f] transition disabled:opacity-70 disabled:cursor-wait`}
+        >
+          <div className="flex items-center gap-3">
+            {pending === "google" ? (
+              <Loader2 className="h-8 w-8 animate-spin" />
+            ) : (
+              <GoogleIcon className="h-9 w-9" />
+            )}
+            <span className="text-xl font-semibold tracking-tight">Sign in with Google</span>
+          </div>
+          <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#5f6368]">
+            Android phone
+          </span>
+        </button>
+        <button
+          onClick={() => signIn("apple")}
+          disabled={pending !== null}
+          style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif' }}
+          className={`${h} ${silver} group inline-flex flex-col items-center justify-center gap-1 rounded-2xl px-5 text-[#1f1f1f] transition disabled:opacity-70 disabled:cursor-wait`}
+        >
+          <div className="flex items-center gap-3">
+            {pending === "apple" ? (
+              <Loader2 className="h-8 w-8 animate-spin" />
+            ) : (
+              <AppleIcon className="h-9 w-9" />
+            )}
+            <span className="text-xl font-semibold tracking-tight">Sign in with Apple</span>
+          </div>
+          <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#5f6368]">
+            iPhone / iPad
+          </span>
+        </button>
+      </div>
+      <p className="rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-2.5 text-center text-sm font-bold text-amber-200">
+        ⚠️ Tap <span className="underline">Allow</span> / <span className="underline">Accept</span> on every prompt that appears after picking your device.
+      </p>
     </div>
   );
 }
+
 
 function WelcomePage() {
   return (
