@@ -131,7 +131,7 @@ export function DashboardShell({ title, children }: { title: string; children: R
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { isAdmin, isVip, isLoading: roleLoading } = useRole();
+  const { isAdmin, isLoading: roleLoading } = useRole();
   const qc = useQueryClient();
 
 
