@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import ReactMarkdown from "react-markdown";
-import { Loader2, Send, Bot, Trash2, Sparkles, Skull, ShieldCheck } from "lucide-react";
+import { Send, Trash2, Sparkles, Skull, ShieldCheck } from "lucide-react";
 import { chatOgBot, type OgChatMessage } from "@/lib/og-messenger.functions";
 import { QUICK_STARTS } from "@/lib/og-persona";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,22 @@ import { useProfile } from "@/hooks/use-profile";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { useOgMode } from "@/hooks/use-og-mode";
 import { cn } from "@/lib/utils";
+import ogBotAsset from "@/assets/ogbot.png.asset.json";
+
+function OgAvatar({ size = 36, className = "" }: { size?: number; className?: string }) {
+  return (
+    <img
+      src={ogBotAsset.url}
+      alt="OG Bot"
+      width={size}
+      height={size}
+      className={cn("rounded-full object-cover ring-0 border-0 outline-none select-none pointer-events-none", className)}
+      style={{ width: size, height: size }}
+      draggable={false}
+    />
+  );
+}
+
 
 const STORAGE_KEY_PREFIX = "og-messenger-thread-v3:";
 const SYNC_EVENT = "og-messenger:sync";
@@ -185,7 +201,7 @@ export function OgChat({
       {showHeader && (
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 px-3 py-2 text-xs">
           <div className="flex items-center gap-2 text-muted-foreground">
-            <Bot className="h-3.5 w-3.5 text-primary" />
+            <OgAvatar size={18} />
             <span>
               OG Bot · {balance} coin{balance === 1 ? "" : "s"}
             </span>
@@ -245,17 +261,17 @@ export function OgChat({
         </div>
       )}
 
-      <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto p-4">
+      <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto p-4">
         {messages.length === 0 && (
           <div className="grid h-full place-items-center text-center">
             <div className="w-full max-w-sm space-y-3">
-              <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-gradient-brand shadow-glow">
-                <Bot className="h-6 w-6 text-primary-foreground" />
+              <div className="relative mx-auto h-20 w-20">
+                <div className="absolute inset-0 rounded-full bg-primary/30 blur-2xl animate-pulse" />
+                <OgAvatar size={80} className="relative drop-shadow-[0_0_24px_hsl(var(--primary)/0.7)] animate-[bob_3s_ease-in-out_infinite]" />
               </div>
-              <p className="text-sm font-semibold">OG Bot is online</p>
+              <p className="text-base font-black tracking-tight">OG Bot is online 🎤</p>
               <p className="text-xs text-muted-foreground">
-                Your songwriting partner. Ask me to draft lyrics, hooks, titles, or a
-                Suno-ready prompt.
+                Drop a vibe, a joke, a memory — I'll spin lyrics, hooks &amp; Suno prompts.
                 <br />
                 <span className="opacity-70">1 coin per message · {balance} left</span>
               </p>
@@ -267,7 +283,7 @@ export function OgChat({
                       type="button"
                       onClick={() => sendText(q.prompt)}
                       disabled={m.isPending || isOut || !user}
-                      className="rounded-full border border-border bg-muted px-3 py-1 text-[11px] font-medium text-foreground transition hover:border-primary/40 hover:bg-primary/5 disabled:opacity-40"
+                      className="rounded-full border-2 border-primary/30 bg-primary/5 px-3 py-1 text-[11px] font-bold text-foreground transition hover:-translate-y-0.5 hover:rotate-[-1deg] hover:border-primary hover:bg-primary/15 active:translate-y-0 disabled:opacity-40"
                     >
                       {q.label}
                     </button>
@@ -278,15 +294,28 @@ export function OgChat({
           </div>
         )}
         {messages.map((msg, i) => (
-          <div key={i} className={cn("flex", msg.role === "user" ? "justify-end" : "justify-start")}>
+          <div
+            key={i}
+            className={cn(
+              "flex items-end gap-2 animate-[pop_0.25s_ease-out]",
+              msg.role === "user" ? "justify-end" : "justify-start",
+            )}
+          >
+            {msg.role === "assistant" && <OgAvatar size={36} className="shrink-0 mb-1" />}
             <div
               className={cn(
-                "max-w-[85%] rounded-2xl px-3.5 py-2 text-sm break-words shadow-sm",
+                "relative max-w-[80%] px-4 py-2.5 text-sm break-words transition-transform hover:scale-[1.01]",
                 msg.role === "user"
-                  ? "rounded-br-sm bg-primary text-primary-foreground whitespace-pre-wrap"
-                  : "rounded-bl-sm bg-muted text-foreground",
+                  ? "rounded-[22px] rounded-br-md bg-primary text-primary-foreground whitespace-pre-wrap font-semibold shadow-[0_6px_0_-2px_hsl(var(--primary)/0.45),0_12px_30px_-8px_hsl(var(--primary)/0.55)]"
+                  : "rounded-[22px] rounded-bl-md bg-muted text-foreground shadow-[0_4px_0_-2px_hsl(var(--muted)/0.6)]",
               )}
             >
+              {msg.role === "user" && (
+                <OgAvatar
+                  size={28}
+                  className="absolute -right-1 -bottom-1 mix-blend-luminosity opacity-90"
+                />
+              )}
               {msg.role === "assistant" ? (
                 <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-headings:my-2">
                   <ReactMarkdown>{msg.content}</ReactMarkdown>
@@ -298,12 +327,16 @@ export function OgChat({
           </div>
         ))}
         {m.isPending && (
-          <div className="flex justify-start">
-            <div className="rounded-2xl rounded-bl-sm bg-muted px-3.5 py-2 text-sm text-muted-foreground">
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          <div className="flex items-end gap-2 justify-start">
+            <OgAvatar size={36} className="shrink-0 mb-1 animate-pulse" />
+            <div className="rounded-[22px] rounded-bl-md bg-muted px-4 py-3 text-sm text-muted-foreground inline-flex items-center gap-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]" />
+              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]" />
+              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce" />
             </div>
           </div>
         )}
+
       </div>
 
       <form
