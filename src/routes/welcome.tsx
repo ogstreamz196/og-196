@@ -201,7 +201,7 @@ function Hero() {
           Music Hub · powered by OG Bot
         </div>
 
-        <h1 className="font-display mt-8 text-[clamp(3.25rem,9vw,7rem)] font-semibold leading-[0.95] tracking-[-0.04em]">
+        <h1 className="font-display mt-8 text-[clamp(4.5rem,13vw,10rem)] font-semibold leading-[0.92] tracking-[-0.045em]">
           <span className="wc-pop inline-block">Make a song</span>
           <br />
           <span className="wc-pop inline-block" style={{ animationDelay: "0.15s" }}>
@@ -218,7 +218,7 @@ function Hero() {
           </span>
         </h1>
 
-        <p className="mx-auto mt-8 max-w-2xl text-xl leading-relaxed text-muted-foreground sm:text-2xl">
+        <p className="mx-auto mt-10 max-w-3xl text-2xl leading-snug text-muted-foreground sm:text-3xl md:text-4xl">
           Tell <span className="font-semibold text-foreground">OG Bot</span> a real story.
           <br className="hidden sm:block" />
           Get back lyrics + a finished track. <span className="inline-block wc-wiggle">🎧</span>
@@ -331,7 +331,7 @@ function Pillars() {
           <p className="text-sm font-medium uppercase tracking-[0.25em] text-muted-foreground">
             The Studio
           </p>
-          <h2 className="font-display mt-4 text-5xl font-semibold leading-tight tracking-[-0.03em] sm:text-6xl">
+          <h2 className="font-display mt-4 text-6xl font-semibold leading-[1] tracking-[-0.035em] sm:text-7xl md:text-8xl">
             One bot. <em className="italic text-gradient-brand">Three rooms.</em>
           </h2>
         </div>
@@ -349,10 +349,10 @@ function Pillars() {
                 </span>
                 <span className="text-3xl">{it.emoji}</span>
               </div>
-              <h3 className="font-display mt-6 text-3xl font-semibold tracking-tight">
+              <h3 className="font-display mt-6 text-4xl font-semibold tracking-tight sm:text-5xl">
                 {it.title}
               </h3>
-              <p className="mt-3 text-base leading-relaxed text-muted-foreground">{it.body}</p>
+              <p className="mt-4 text-lg leading-relaxed text-muted-foreground sm:text-xl">{it.body}</p>
             </article>
           ))}
         </div>
@@ -374,7 +374,7 @@ function HowItWorks() {
           <p className="text-sm font-medium uppercase tracking-[0.25em] text-muted-foreground">
             How it works
           </p>
-          <h2 className="font-display mt-4 text-5xl font-semibold tracking-[-0.03em] sm:text-6xl">
+          <h2 className="font-display mt-4 text-6xl font-semibold tracking-[-0.035em] sm:text-7xl md:text-8xl">
             Easy as <em className="italic text-gradient-brand">1 · 2 · 3</em>
           </h2>
         </div>
@@ -386,12 +386,12 @@ function HowItWorks() {
               className="group relative rounded-3xl border-2 border-white/12 bg-card/70 p-8 text-center backdrop-blur-xl transition hover:-translate-y-1 hover:border-primary/40"
               style={{ animationDelay: `${i * 120}ms` }}
             >
-              <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-gradient-brand text-3xl font-black text-primary-foreground shadow-glow wc-bounce-soft">
+              <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-gradient-brand text-4xl font-black text-primary-foreground shadow-glow wc-bounce-soft">
                 {s.n}
               </div>
-              <div className="mt-5 text-5xl">{s.emoji}</div>
-              <h3 className="font-display mt-3 text-2xl font-semibold">{s.title}</h3>
-              <p className="mt-2 text-base text-muted-foreground">{s.body}</p>
+              <div className="mt-5 text-6xl">{s.emoji}</div>
+              <h3 className="font-display mt-4 text-3xl font-semibold sm:text-4xl">{s.title}</h3>
+              <p className="mt-3 text-lg text-muted-foreground sm:text-xl">{s.body}</p>
             </div>
           ))}
         </div>
@@ -407,14 +407,14 @@ function ClosingCta() {
         <p className="text-sm font-medium uppercase tracking-[0.25em] text-muted-foreground">
           Begin
         </p>
-        <h2 className="font-display mt-5 text-6xl font-semibold leading-[1] tracking-[-0.04em] sm:text-7xl">
+        <h2 className="font-display mt-5 text-7xl font-semibold leading-[0.95] tracking-[-0.045em] sm:text-8xl md:text-9xl">
           Your next song
           <br />
           <em className="italic text-gradient-brand wc-bounce-soft inline-block">
             is one story away.
           </em>
         </h2>
-        <p className="mx-auto mt-7 max-w-xl text-xl text-muted-foreground">
+        <p className="mx-auto mt-8 max-w-2xl text-2xl text-muted-foreground sm:text-3xl">
           Sign in. Tell OG Bot a moment. Hit play. <span className="inline-block wc-wiggle">🎉</span>
         </p>
 
