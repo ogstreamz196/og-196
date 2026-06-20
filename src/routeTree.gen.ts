@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
@@ -28,6 +29,11 @@ import { Route as AuthenticatedAdminOgPersonaRouteImport } from './routes/_authe
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as AuthenticatedAdminUsersUserIdRouteImport } from './routes/_authenticated/admin.users.$userId'
 
+const WelcomeRoute = WelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -129,6 +135,7 @@ const AuthenticatedAdminUsersUserIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
+  '/welcome': typeof WelcomeRoute
   '/developer': typeof AuthenticatedDeveloperRoute
   '/messenger': typeof AuthenticatedMessengerRoute
   '/portals': typeof AuthenticatedPortalsRoute
@@ -147,6 +154,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
+  '/welcome': typeof WelcomeRoute
   '/developer': typeof AuthenticatedDeveloperRoute
   '/messenger': typeof AuthenticatedMessengerRoute
   '/portals': typeof AuthenticatedPortalsRoute
@@ -168,6 +176,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/welcome': typeof WelcomeRoute
   '/_authenticated/developer': typeof AuthenticatedDeveloperRoute
   '/_authenticated/messenger': typeof AuthenticatedMessengerRoute
   '/_authenticated/portals': typeof AuthenticatedPortalsRoute
@@ -190,6 +199,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/welcome'
     | '/developer'
     | '/messenger'
     | '/portals'
@@ -208,6 +218,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
+    | '/welcome'
     | '/developer'
     | '/messenger'
     | '/portals'
@@ -228,6 +239,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_authenticated'
     | '/auth'
+    | '/welcome'
     | '/_authenticated/developer'
     | '/_authenticated/messenger'
     | '/_authenticated/portals'
@@ -249,12 +261,20 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  WelcomeRoute: typeof WelcomeRoute
   PortalSlugRoute: typeof PortalSlugRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/welcome': {
+      id: '/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof WelcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -436,6 +456,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  WelcomeRoute: WelcomeRoute,
   PortalSlugRoute: PortalSlugRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
