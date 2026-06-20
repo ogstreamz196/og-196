@@ -16,6 +16,17 @@ import { Button } from "@/components/ui/button";
 import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import ogBotAsset from "@/assets/ogbot.png.asset.json";
+
+function OgBotLogo({ className = "h-8 w-8" }: { className?: string }) {
+  return (
+    <img
+      src={ogBotAsset.url}
+      alt="OG Bot"
+      className={`inline-block aspect-square rounded-xl object-cover align-middle shadow-glow ${className}`}
+    />
+  );
+}
 
 export const Route = createFileRoute("/welcome")({
   ssr: false,
@@ -198,7 +209,8 @@ function Hero() {
       <div className="relative mx-auto w-full max-w-6xl text-center">
         <div className="wc-pop inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2 text-base font-semibold uppercase tracking-[0.18em] backdrop-blur-xl">
           <span className="h-2 w-2 animate-pulse rounded-full bg-primary shadow-glow" />
-          Music Hub · powered by OG Bot
+          <span>Music Hub · powered by</span>
+          <OgBotLogo className="h-6 w-6" />
         </div>
 
         <h1 className="font-display mt-10 text-[clamp(5rem,16vw,13rem)] font-black leading-[0.85] tracking-[-0.055em] drop-shadow-[0_8px_30px_rgba(80,60,255,0.35)]">
@@ -215,7 +227,7 @@ function Hero() {
         </h1>
 
         <p className="mx-auto mt-10 max-w-4xl text-3xl font-semibold leading-[1.15] text-foreground/90 sm:text-4xl md:text-5xl">
-          Tell <span className="text-gradient-brand font-black">OG Bot</span> a real story.
+          Tell <OgBotLogo className="h-14 w-14 sm:h-16 sm:w-16 mx-2" /> a real story.
           <br className="hidden sm:block" />
           Get back lyrics + a finished track. <span className="inline-block wc-wiggle">🎧</span>
         </p>
@@ -234,11 +246,8 @@ function Hero() {
         <div className="pointer-events-none absolute -inset-x-8 -inset-y-8 rounded-[2.5rem] bg-gradient-brand-soft opacity-60 blur-3xl" />
         <div className="relative overflow-hidden rounded-[2rem] border-2 border-white/15 bg-card/80 p-6 shadow-card backdrop-blur-xl sm:p-8">
           <div className="flex items-center gap-3">
-            <span className="grid h-10 w-10 place-items-center rounded-full bg-gradient-brand text-primary-foreground shadow-glow wc-wiggle">
-              <Bot className="h-5 w-5" />
-            </span>
+            <OgBotLogo className="h-12 w-12 wc-wiggle" />
             <div>
-              <p className="font-display text-lg font-semibold">OG Bot</p>
               <p className="text-xs text-muted-foreground">online · ready to write</p>
             </div>
           </div>
@@ -328,8 +337,9 @@ function Pillars() {
           <p className="text-sm font-semibold uppercase tracking-[0.25em] text-muted-foreground">
             Music Hub
           </p>
-          <h2 className="font-display mt-4 text-6xl font-semibold leading-[1] tracking-[-0.035em] sm:text-7xl md:text-8xl">
-            Powered by <em className="italic text-gradient-brand">OG Bot.</em>
+          <h2 className="font-display mt-4 flex flex-wrap items-center justify-center gap-4 text-6xl font-semibold leading-[1] tracking-[-0.035em] sm:text-7xl md:text-8xl">
+            <span>Powered by</span>
+            <OgBotLogo className="h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28" />
           </h2>
         </div>
 
@@ -413,7 +423,7 @@ function ClosingCta() {
           </em>
         </h2>
         <p className="mx-auto mt-8 max-w-2xl text-2xl text-muted-foreground sm:text-3xl">
-          Sign in. Tell OG Bot a moment. Hit play. <span className="inline-block wc-wiggle">🎉</span>
+          Sign in. Tell <OgBotLogo className="h-8 w-8 mx-1" /> a moment. Hit play. <span className="inline-block wc-wiggle">🎉</span>
         </p>
 
         <div className="mx-auto mt-12 max-w-2xl">
@@ -428,7 +438,7 @@ function Footer() {
   return (
     <footer className="border-t border-white/10">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-8 text-sm text-muted-foreground sm:flex-row sm:px-8">
-        <span>© {new Date().getFullYear()} OG Studio · Music Hub powered by OG Bot</span>
+        <span className="inline-flex items-center gap-2">© {new Date().getFullYear()} OG Studio · Music Hub powered by <OgBotLogo className="h-5 w-5" /></span>
         <div className="flex items-center gap-6">
           <Link to="/auth" className="transition hover:text-foreground">
             Sign in
