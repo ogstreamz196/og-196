@@ -511,6 +511,14 @@ export type Database = {
         }
         Returns: string
       }
+      boss_burn_coins: {
+        Args: { amount: number; boss_notes?: string; target_user_id: string }
+        Returns: number
+      }
+      boss_reclaim_coins: {
+        Args: { amount: number; boss_notes?: string; target_user_id: string }
+        Returns: number
+      }
       create_og_bot_invite: {
         Args: {
           p_claim_expires_at?: string
@@ -521,6 +529,14 @@ export type Database = {
       }
       deduct_coins: {
         Args: { p_amount: number; p_reference: string; p_user: string }
+        Returns: number
+      }
+      dev_override_balance: {
+        Args: {
+          dev_notes?: string
+          new_balance: number
+          target_user_id: string
+        }
         Returns: number
       }
       gen_bot_token_string: { Args: never; Returns: string }
