@@ -80,7 +80,7 @@ export const chatOgBot = createServerFn({ method: "POST" })
     const personaMap = new Map<string, string>(
       (siteRes.data ?? []).map((r: { key: string; value: string }) => [r.key, r.value]),
     );
-    const foulMouth = prefRes.data?.foul_mouth ?? true;
+    const foulMouth = prefRes.data?.foul_mouth ?? false;
 
     const userCtx: UserContextSummary = {
       display_name: profile.display_name,
