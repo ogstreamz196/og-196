@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Coins, Check, ArrowLeft, Crown, Star, Zap, ShieldCheck, Lock, Sparkles, MessageSquare, Music2, Wand2, Infinity as InfinityIcon, TrendingDown, Gift, Pencil, X, Loader2, CreditCard } from "lucide-react";
+import { Coins, Check, ArrowLeft, Crown, Star, Zap, ShieldCheck, Lock, Sparkles, MessageSquare, Music2, Wand2, Infinity as InfinityIcon, TrendingDown, Gift, Pencil, X, Loader2, CreditCard, Plus, Minus, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
@@ -10,7 +10,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { useRole } from "@/hooks/use-role";
 import { useSiteContent, useSetSiteContent } from "@/hooks/use-site-content";
 import { cn } from "@/lib/utils";
-import { COIN_PACKS, CURRENCY_SYMBOL, VIP_PLAN, findCoinPackByBundleId, type CoinPack } from "@/lib/coin-packs";
+import { COIN_PACKS, CURRENCY_SYMBOL, VIP_PLAN, CUSTOM_COIN_UNIT, findCoinPackByBundleId, type CoinPack } from "@/lib/coin-packs";
 import { StripeEmbeddedCheckoutInline } from "@/components/StripeEmbeddedCheckout";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { CirculatingCoins } from "@/components/CirculatingCoins";
@@ -20,10 +20,12 @@ const SELECTION_STORAGE_KEY = "buyCoins.lastSelection";
 
 type StoredSelection =
   | { type: "coins"; bundleId: string }
+  | { type: "custom"; units: number }
   | { type: "vip" };
 
 type Selection =
   | { type: "coins"; pack: CoinPack }
+  | { type: "custom"; units: number }
   | { type: "vip" };
 
 export const Route = createFileRoute("/_authenticated/buy-coins/")({
@@ -54,6 +56,11 @@ function BuyCoinsPage() {
           setStage("confirm");
           toast.info("We brought you back to your last selection.");
         }
+      } else if (parsed.type === "custom") {
+        const u = Math.min(Math.max(parsed.units, CUSTOM_COIN_UNIT.minUnits), CUSTOM_COIN_UNIT.maxUnits);
+        setSelected({ type: "custom", units: u });
+        setStage("confirm");
+        toast.info("We brought you back to your last selection.");
       }
     } catch {
       /* ignore */
@@ -62,7 +69,11 @@ function BuyCoinsPage() {
 
   const pickSelection = (s: Selection) => {
     const stored: StoredSelection =
-      s.type === "vip" ? { type: "vip" } : { type: "coins", bundleId: s.pack.bundleId };
+      s.type === "vip"
+        ? { type: "vip" }
+        : s.type === "custom"
+        ? { type: "custom", units: s.units }
+        : { type: "coins", bundleId: s.pack.bundleId };
     try { sessionStorage.setItem(SELECTION_STORAGE_KEY, JSON.stringify(stored)); } catch { /* ignore */ }
     setSelected(s);
     setStage("confirm");
@@ -82,14 +93,31 @@ function BuyCoinsPage() {
 
   if (selected) {
     const isVipFlow = selected.type === "vip";
-    const returnUrl =
-      selected.type === "coins"
-        ? `${window.location.origin}/buy-coins/return?session_id={CHECKOUT_SESSION_ID}&pack=${selected.pack.bundleId}`
-        : `${window.location.origin}/buy-coins/return?session_id={CHECKOUT_SESSION_ID}&pack=${VIP_PLAN.bundleId}`;
-    const headline = isVipFlow ? "Join OG VIP" : `Buy ${selected.pack.coins} OG Coins`;
-    const totalCents = isVipFlow ? VIP_PLAN.priceCents : selected.pack.priceCents;
-    const perCoin = !isVipFlow ? selected.pack.priceCents / 100 / selected.pack.coins : 0;
-    const savingsPct = !isVipFlow && basePerCoin > 0
+    const isCustomFlow = selected.type === "custom";
+    const coinsForOrder = isVipFlow
+      ? 0
+      : isCustomFlow
+      ? selected.units * CUSTOM_COIN_UNIT.coins
+      : selected.pack.coins;
+    const labelForOrder = isVipFlow
+      ? VIP_PLAN.label
+      : isCustomFlow
+      ? `Custom · ${coinsForOrder} OG Coins`
+      : `${selected.pack.coins} OG Coins · ${selected.pack.label}`;
+    const totalCents = isVipFlow
+      ? VIP_PLAN.priceCents
+      : isCustomFlow
+      ? selected.units * CUSTOM_COIN_UNIT.priceCents
+      : selected.pack.priceCents;
+    const returnUrlPack = isVipFlow
+      ? VIP_PLAN.bundleId
+      : isCustomFlow
+      ? "coins_custom"
+      : selected.pack.bundleId;
+    const returnUrl = `${window.location.origin}/buy-coins/return?session_id={CHECKOUT_SESSION_ID}&pack=${returnUrlPack}`;
+    const headline = isVipFlow ? "Join OG VIP" : `Buy ${coinsForOrder} OG Coins`;
+    const perCoin = !isVipFlow && coinsForOrder > 0 ? totalCents / 100 / coinsForOrder : 0;
+    const savingsPct = !isVipFlow && basePerCoin > 0 && perCoin > 0
       ? Math.round((1 - perCoin / basePerCoin) * 100)
       : 0;
 
@@ -111,7 +139,7 @@ function BuyCoinsPage() {
                     Order summary
                   </p>
                   <p className="truncate text-base font-bold">
-                    {isVipFlow ? VIP_PLAN.label : `${selected.pack.coins} OG Coins · ${selected.pack.label}`}
+                    {labelForOrder}
                   </p>
                 </div>
               </div>
@@ -135,8 +163,11 @@ function BuyCoinsPage() {
                   Confirm your order
                 </p>
                 <div className="mt-3 grid gap-2 rounded-2xl border border-border bg-background/40 p-4 text-sm">
-                  <Row label={isVipFlow ? "Plan" : "Pack"} value={isVipFlow ? VIP_PLAN.label : selected.pack.label} />
-                  {!isVipFlow && <Row label="Coins" value={`${selected.pack.coins} OG Coins`} />}
+                  <Row
+                    label={isVipFlow ? "Plan" : "Pack"}
+                    value={isVipFlow ? VIP_PLAN.label : isCustomFlow ? "Custom" : (selected as { pack: CoinPack }).pack.label}
+                  />
+                  {!isVipFlow && <Row label="Coins" value={`${coinsForOrder} OG Coins`} />}
                   {!isVipFlow && (
                     <Row
                       label="Per coin"
@@ -175,6 +206,8 @@ function BuyCoinsPage() {
               <div className="p-4 sm:p-5">
                 {selected.type === "coins" ? (
                   <StripeEmbeddedCheckoutInline priceId={selected.pack.priceId} returnUrl={returnUrl} />
+                ) : selected.type === "custom" ? (
+                  <StripeEmbeddedCheckoutInline type="custom" customUnits={selected.units} returnUrl={returnUrl} />
                 ) : (
                   <StripeEmbeddedCheckoutInline type="vip" returnUrl={returnUrl} />
                 )}
@@ -207,7 +240,7 @@ function BuyCoinsPage() {
               <span className="inline-flex items-center gap-1.5 rounded-full border border-coin/40 bg-coin/15 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-coin">
                 <Sparkles className="h-3 w-3" /> OG Coins Store
               </span>
-              <h1 className="mt-4 font-display text-5xl font-black leading-[0.95] tracking-tight text-gradient-brand sm:text-6xl">
+              <h1 className="mt-4 break-words font-display text-[clamp(2rem,7vw,3.75rem)] font-black leading-[1.02] tracking-tight text-gradient-brand">
                 <EditableContent contentKey="buyCoins.heading" defaultValue="Top up. Create more." />
               </h1>
               <p className="mt-3 max-w-xl text-base font-medium text-muted-foreground sm:text-lg">
@@ -230,7 +263,7 @@ function BuyCoinsPage() {
               </p>
               <div className="mt-2 flex items-baseline gap-2">
                 <Coins className="h-7 w-7 text-coin" />
-                <span className="text-5xl font-black tabular-nums leading-none text-foreground">
+                <span className="text-[clamp(2.25rem,8vw,3rem)] font-black tabular-nums leading-none text-foreground">
                   {profile?.coin_balance ?? 0}
                 </span>
               </div>
@@ -253,14 +286,14 @@ function BuyCoinsPage() {
         <section>
           <div className="mb-5 flex flex-wrap items-end justify-between gap-2">
             <div>
-              <h2 className="font-display text-2xl font-black tracking-tight sm:text-3xl">Pick your pack</h2>
+              <h2 className="font-display text-xl font-black tracking-tight sm:text-2xl md:text-3xl">Pick your pack</h2>
               <p className="text-sm text-muted-foreground">Bigger packs = better price per coin. Coins never expire.</p>
             </div>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-bold uppercase tracking-wider text-emerald-400 ring-1 ring-emerald-500/30">
+            <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-emerald-400 ring-1 ring-emerald-500/30 sm:text-xs">
               <TrendingDown className="h-3.5 w-3.5" /> Save up to {Math.round((1 - (COIN_PACKS[COIN_PACKS.length - 1].priceCents / 100 / COIN_PACKS[COIN_PACKS.length - 1].coins) / basePerCoin) * 100)}%
             </span>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {COIN_PACKS.map((t) => (
               <PackCard
                 key={t.bundleId}
@@ -270,6 +303,12 @@ function BuyCoinsPage() {
               />
             ))}
           </div>
+
+          {/* Custom pack */}
+          <div className="mt-6">
+            <CustomPackCard onBuy={(units) => pickSelection({ type: "custom", units })} />
+          </div>
+
           <p className="mt-4 flex items-center justify-center gap-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
             <Lock className="h-3 w-3" /> Secure checkout · Apple Pay · Google Pay · Card
           </p>
@@ -624,3 +663,92 @@ function Row({ label, value, hint }: { label: string; value: string; hint?: stri
     </div>
   );
 }
+
+function CustomPackCard({ onBuy }: { onBuy: (units: number) => void }) {
+  const [units, setUnits] = useState<number>(CUSTOM_COIN_UNIT.minUnits);
+  const coins = units * CUSTOM_COIN_UNIT.coins;
+  const totalCents = units * CUSTOM_COIN_UNIT.priceCents;
+  const atMin = units <= CUSTOM_COIN_UNIT.minUnits;
+  const atMax = units >= CUSTOM_COIN_UNIT.maxUnits;
+
+  const dec = () => setUnits((u) => Math.max(CUSTOM_COIN_UNIT.minUnits, u - 1));
+  const inc = () => setUnits((u) => Math.min(CUSTOM_COIN_UNIT.maxUnits, u + 1));
+
+  return (
+    <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-5 shadow-card sm:p-6">
+      <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-primary/15 blur-3xl" />
+      <div className="relative grid gap-5 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center">
+        <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-primary/15 text-primary">
+          <SlidersHorizontal className="h-6 w-6" />
+        </div>
+
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="font-display text-lg font-black tracking-tight sm:text-xl">Custom amount</h3>
+            <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+              {CURRENCY_SYMBOL}{(CUSTOM_COIN_UNIT.priceCents / 100).toFixed(2)} per {CUSTOM_COIN_UNIT.coins} coins
+            </span>
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+            Tap − or + to add or remove {CUSTOM_COIN_UNIT.coins} coins at a time.
+          </p>
+
+          <div className="mt-4 flex items-center gap-3">
+            <Button
+              type="button"
+              size="icon"
+              variant="outline"
+              className="h-11 w-11 shrink-0 rounded-full"
+              onClick={dec}
+              disabled={atMin}
+              aria-label={`Remove ${CUSTOM_COIN_UNIT.coins} coins`}
+            >
+              <Minus className="h-5 w-5" />
+            </Button>
+            <div className="flex-1 rounded-2xl border border-border bg-background/60 px-4 py-3 text-center">
+              <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">You get</div>
+              <div className="mt-0.5 flex items-baseline justify-center gap-1.5 leading-none">
+                <Coins className="h-5 w-5 shrink-0 text-coin" />
+                <span className="text-[clamp(1.75rem,6vw,2.25rem)] font-black tabular-nums text-foreground">{coins}</span>
+                <span className="text-xs font-bold text-coin">OG Coins</span>
+              </div>
+            </div>
+            <Button
+              type="button"
+              size="icon"
+              variant="outline"
+              className="h-11 w-11 shrink-0 rounded-full"
+              onClick={inc}
+              disabled={atMax}
+              aria-label={`Add ${CUSTOM_COIN_UNIT.coins} coins`}
+            >
+              <Plus className="h-5 w-5" />
+            </Button>
+          </div>
+          {atMax && (
+            <p className="mt-2 text-[11px] text-muted-foreground">
+              Max custom top-up is {CUSTOM_COIN_UNIT.maxUnits * CUSTOM_COIN_UNIT.coins} coins.
+            </p>
+          )}
+        </div>
+
+        <div className="flex items-center justify-between gap-3 sm:flex-col sm:items-end sm:justify-center">
+          <div className="text-right">
+            <div className="text-[clamp(1.5rem,5vw,2rem)] font-black tabular-nums leading-none">
+              {CURRENCY_SYMBOL}{(totalCents / 100).toFixed(2)}
+            </div>
+            <div className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">one-time</div>
+          </div>
+          <Button
+            size="lg"
+            onClick={() => onBuy(units)}
+            className="bg-gradient-brand font-bold text-primary-foreground shadow-glow transition-transform hover:-translate-y-0.5 hover:opacity-90 active:translate-y-0"
+          >
+            <CreditCard className="mr-2 h-4 w-4" /> Buy {coins} coins
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+

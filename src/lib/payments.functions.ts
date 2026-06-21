@@ -5,7 +5,7 @@ import {
   createStripeClient,
   getStripeErrorMessage,
 } from "@/lib/stripe.server";
-import { findCoinPackByPriceId, VIP_PLAN } from "@/lib/coin-packs";
+import { findCoinPackByPriceId, VIP_PLAN, CUSTOM_COIN_UNIT } from "@/lib/coin-packs";
 
 type CheckoutSessionResult = { clientSecret: string } | { error: string };
 
@@ -160,6 +160,74 @@ export const createVipCheckoutSession = createServerFn({ method: "POST" })
       return { clientSecret: session.client_secret ?? "" };
     } catch (error) {
       console.error("createVipCheckoutSession failed", error);
+      return { error: getStripeErrorMessage(error) };
+    }
+  });
+
+export const createCustomCoinCheckoutSession = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    (data: { units: number; returnUrl: string; environment: StripeEnv }) => {
+      if (!Number.isInteger(data.units)) throw new Error("Invalid units");
+      if (data.units < CUSTOM_COIN_UNIT.minUnits || data.units > CUSTOM_COIN_UNIT.maxUnits) {
+        throw new Error(`Units must be between ${CUSTOM_COIN_UNIT.minUnits} and ${CUSTOM_COIN_UNIT.maxUnits}`);
+      }
+      if (data.environment !== "sandbox" && data.environment !== "live") {
+        throw new Error("Invalid environment");
+      }
+      if (!/^https?:\/\//.test(data.returnUrl)) throw new Error("Invalid returnUrl");
+      return data;
+    },
+  )
+  .handler(async ({ data, context }): Promise<CheckoutSessionResult> => {
+    const { userId, supabase } = context;
+    try {
+      const stripe = createStripeClient(data.environment);
+      const coins = data.units * CUSTOM_COIN_UNIT.coins;
+      const amount = data.units * CUSTOM_COIN_UNIT.priceCents;
+
+      let email: string | undefined;
+      try {
+        const { data: prof } = await supabase
+          .from("profiles").select("email").eq("id", userId).maybeSingle();
+        email = (prof?.email as string | undefined) ?? undefined;
+      } catch { /* optional */ }
+
+      const customerId = await resolveOrCreateCustomer(stripe, { email, userId });
+
+      const description = `${coins} OG Coins (Custom)`;
+      const session = await stripe.checkout.sessions.create({
+        line_items: [{
+          price_data: {
+            currency: "gbp",
+            product_data: { name: description },
+            unit_amount: amount,
+          },
+          quantity: 1,
+        }],
+        mode: "payment",
+        ui_mode: "embedded_page",
+        return_url: data.returnUrl,
+        customer: customerId,
+        payment_intent_data: {
+          description,
+          metadata: {
+            userId,
+            bundleId: "coins_custom",
+            coins: String(coins),
+          },
+        },
+        metadata: {
+          userId,
+          bundleId: "coins_custom",
+          coins: String(coins),
+          environment: data.environment,
+        },
+      });
+
+      return { clientSecret: session.client_secret ?? "" };
+    } catch (error) {
+      console.error("createCustomCoinCheckoutSession failed", error);
       return { error: getStripeErrorMessage(error) };
     }
   });
