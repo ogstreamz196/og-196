@@ -25,6 +25,8 @@ import {
 } from "@/components/ui/sidebar";
 import { useRole } from "@/hooks/use-role";
 import { useAuth } from "@/hooks/use-auth";
+import ogStreamzLogo from "@/assets/ogstreamz-logo.jpg.asset.json";
+import ogBotAsset from "@/assets/ogbot.png.asset.json";
 
 type AppRoute = "/" | "/library" | "/messenger" | "/portals" | "/buy-coins" | "/settings" | "/developer" | "/admin";
 type NavItem = { title: string; url: AppRoute; icon: typeof Home; adminOnly?: boolean };
