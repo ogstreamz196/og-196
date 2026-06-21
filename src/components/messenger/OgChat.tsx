@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import ReactMarkdown from "react-markdown";
-import { Send, Trash2, Sparkles, Skull, ShieldCheck, UploadCloud, Mic, RotateCcw } from "lucide-react";
+import { Send, Trash2, Sparkles, Skull, ShieldCheck, UploadCloud, Mic, RotateCcw, Crown } from "lucide-react";
 import { chatOgBot, type OgChatMessage } from "@/lib/og-messenger.functions";
 import { QUICK_STARTS } from "@/lib/og-persona";
 import { Button } from "@/components/ui/button";
@@ -10,9 +10,21 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
+import { useRole } from "@/hooks/use-role";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { useOgMode } from "@/hooks/use-og-mode";
 import { cn } from "@/lib/utils";
+
+/** Telegram-style premium font stack — SF on Apple, Segoe on Windows, Roboto on Android. */
+const TELEGRAM_FONT_STACK =
+  '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif';
+const TELEGRAM_FONT_STYLE: React.CSSProperties = {
+  fontFamily: TELEGRAM_FONT_STACK,
+  fontFeatureSettings: '"ss01", "cv11", "kern"',
+  letterSpacing: "-0.01em",
+  WebkitFontSmoothing: "antialiased",
+  MozOsxFontSmoothing: "grayscale",
+};
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
 
 function OgAvatar({ size = 36, className = "" }: { size?: number; className?: string }) {
