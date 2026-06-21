@@ -54,16 +54,34 @@ export function AppSidebar() {
   const visible = (items: NavItem[]) => items.filter((i) => !i.adminOnly || isAdmin);
 
   const renderItems = (items: NavItem[]) =>
-    visible(items).map((item) => (
-      <SidebarMenuItem key={item.url}>
-        <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-          <Link to={item.url} onClick={() => isMobile && setOpenMobile(false)} className="flex items-center gap-2">
-            <item.icon className="h-4 w-4 shrink-0" />
-            <span className="truncate">{item.title}</span>
-          </Link>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-    ));
+    visible(items).map((item) => {
+      const active = isActive(item.url);
+      const isMessenger = item.url === "/messenger";
+      return (
+        <SidebarMenuItem key={item.url}>
+          <SidebarMenuButton
+            asChild
+            isActive={active}
+            tooltip={item.title}
+            className={`font-display text-[15px] tracking-tight transition-all duration-200 hover:translate-x-0.5 hover:scale-[1.02] ${
+              active
+                ? "bg-gradient-brand text-primary-foreground shadow-glow hover:bg-gradient-brand"
+                : ""
+            } ${isMessenger ? "hover:text-primary" : ""}`}
+          >
+            <Link to={item.url} onClick={() => isMobile && setOpenMobile(false)} className="flex items-center gap-2">
+              <item.icon className={`h-4 w-4 shrink-0 ${isMessenger && !active ? "text-primary" : ""}`} />
+              <span className="truncate">{item.title}</span>
+              {isMessenger && (
+                <span className="ml-auto rounded-full bg-primary/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary">
+                  Bot
+                </span>
+              )}
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      );
+    });
 
   return (
     <Sidebar collapsible="icon">
