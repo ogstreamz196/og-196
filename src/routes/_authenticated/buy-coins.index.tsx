@@ -665,7 +665,7 @@ function Row({ label, value, hint }: { label: string; value: string; hint?: stri
 }
 
 function CustomPackCard({ onBuy }: { onBuy: (units: number) => void }) {
-  const [units, setUnits] = useState(CUSTOM_COIN_UNIT.minUnits);
+  const [units, setUnits] = useState<number>(CUSTOM_COIN_UNIT.minUnits);
   const coins = units * CUSTOM_COIN_UNIT.coins;
   const totalCents = units * CUSTOM_COIN_UNIT.priceCents;
   const atMin = units <= CUSTOM_COIN_UNIT.minUnits;
