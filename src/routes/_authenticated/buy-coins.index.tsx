@@ -56,6 +56,11 @@ function BuyCoinsPage() {
           setStage("confirm");
           toast.info("We brought you back to your last selection.");
         }
+      } else if (parsed.type === "custom") {
+        const u = Math.min(Math.max(parsed.units, CUSTOM_COIN_UNIT.minUnits), CUSTOM_COIN_UNIT.maxUnits);
+        setSelected({ type: "custom", units: u });
+        setStage("confirm");
+        toast.info("We brought you back to your last selection.");
       }
     } catch {
       /* ignore */
