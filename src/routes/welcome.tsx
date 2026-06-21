@@ -414,35 +414,56 @@ function Hero() {
 }
 
 function AlbumCoverShowcase() {
+  const examples = [
+    { label: "Their name", example: "“For my sister Aaliyah…”", emoji: "🪪" },
+    { label: "The occasion", example: "“…her 30th birthday this Saturday.”", emoji: "🎂" },
+    { label: "What they love", example: "“Obsessed with afrobeats, mango margaritas and her dog Bruno.”", emoji: "💛" },
+    { label: "An inside joke or memory", example: "“Remind her about the karaoke night we don’t talk about.”", emoji: "🤫" },
+  ];
+
   return (
-    <div className="mx-auto mt-10 grid max-w-5xl grid-cols-2 gap-3 px-1 sm:mt-12 sm:grid-cols-4 sm:gap-4 sm:px-0">
-      {albumCovers.map((cover, i) => (
-        <article
-          key={cover.title}
-          className="group relative overflow-hidden rounded-2xl border-2 border-white/15 bg-card/80 shadow-card transition-all duration-300 hover:-translate-y-2 hover:rotate-0 hover:border-primary/50 hover:shadow-glow sm:rounded-3xl"
-          style={{ transform: `rotate(${[-1.5, 1, -0.5, 1.5][i]}deg)` }}
-        >
-          <CardEditBadge />
-          <img
-            src={cover.image}
-            alt={`${cover.title} album cover`}
-            width={768}
-            height={768}
-            loading="lazy"
-            decoding="async"
-            className="aspect-square w-full object-cover transition-transform duration-500 group-hover:scale-110"
-          />
-          <div className="absolute inset-x-0 bottom-0 bg-background/75 p-2.5 text-left backdrop-blur-md sm:p-3">
-            <EditableContent as="p" contentKey={`welcome.album.${i}.title`} defaultValue={cover.title}
-              className="font-display text-base leading-none tracking-tight sm:text-2xl" />
-            <EditableContent as="p" contentKey={`welcome.album.${i}.style`} defaultValue={cover.style}
-              className="mt-1 text-[10px] font-black uppercase tracking-[0.16em] text-primary sm:text-xs" />
-            <EditableContent as="p" contentKey={`welcome.album.${i}.prompt`} defaultValue={cover.prompt}
-              multiline
-              className="mt-2 hidden text-xs font-bold leading-tight text-foreground/85 sm:block" />
-          </div>
-        </article>
-      ))}
+    <div className="mx-auto mt-12 max-w-4xl px-1 sm:mt-16 sm:px-0">
+      <div className="text-center">
+        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground sm:text-sm">
+          What to tell us
+        </p>
+        <h3 className="font-display mt-3 text-balance text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:mt-4 sm:text-5xl md:text-6xl">
+          The more personal, <em className="italic text-gradient-brand">the better the song</em>
+        </h3>
+      </div>
+
+      <ul className="mt-8 grid gap-3 sm:mt-10 sm:gap-4 md:grid-cols-2">
+        {examples.map((e, i) => (
+          <li
+            key={e.label}
+            className="group relative flex items-start gap-4 rounded-2xl border-2 border-white/12 bg-card/70 p-4 text-left backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-primary/40 sm:rounded-3xl sm:p-5"
+          >
+            <CardEditBadge />
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-brand text-2xl shadow-glow sm:h-14 sm:w-14 sm:text-3xl">
+              {e.emoji}
+            </span>
+            <div className="min-w-0">
+              <EditableContent
+                as="p"
+                contentKey={`welcome.example.${i}.label`}
+                defaultValue={e.label}
+                className="text-[11px] font-black uppercase tracking-[0.18em] text-primary sm:text-xs"
+              />
+              <EditableContent
+                as="p"
+                multiline
+                contentKey={`welcome.example.${i}.example`}
+                defaultValue={e.example}
+                className="mt-1.5 block text-base font-semibold leading-snug text-foreground sm:text-lg md:text-xl"
+              />
+            </div>
+          </li>
+        ))}
+      </ul>
+
+      <p className="mt-6 text-center text-sm font-semibold text-muted-foreground sm:mt-8 sm:text-base">
+        Even one or two details turns into a track that feels like <em className="italic text-foreground">them</em>. 🎧
+      </p>
     </div>
   );
 }
