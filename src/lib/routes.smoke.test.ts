@@ -20,6 +20,7 @@ const KEY_LINKS = [
   "/settings",
   "/portals",
   "/developer",
+  "/referrals",
   "/admin",
   "/admin/users",
   "/admin/user-settings",

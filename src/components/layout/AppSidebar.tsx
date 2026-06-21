@@ -8,6 +8,7 @@ import {
   Settings,
   Shield,
   LogOut,
+  Gift,
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -32,7 +33,7 @@ import { useDevMode } from "@/hooks/use-dev-mode";
 import ogStreamzLogo from "@/assets/ogstreamz-logo.jpg.asset.json";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
 
-type AppRoute = "/" | "/library" | "/messenger" | "/portals" | "/buy-coins" | "/settings" | "/developer" | "/admin";
+type AppRoute = "/" | "/library" | "/messenger" | "/portals" | "/buy-coins" | "/settings" | "/developer" | "/admin" | "/referrals";
 type NavItem = { title: string; url: AppRoute; icon: typeof Home; adminOnly?: boolean };
 
 const primaryNav: NavItem[] = [
@@ -43,6 +44,7 @@ const primaryNav: NavItem[] = [
 ];
 
 const accountNav: NavItem[] = [
+  { title: "Referrals", url: "/referrals", icon: Gift },
   { title: "Store", url: "/buy-coins", icon: Coins },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
