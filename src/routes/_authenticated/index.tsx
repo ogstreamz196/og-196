@@ -74,7 +74,7 @@ function DashboardHome() {
           to="/library"
           icon={<Music2 className="h-5 w-5" />}
           eyebrow="Music Hub"
-          title="Create a personalised song"
+          title="Create a song"
           body="Generate, refine and remix tracks tailored to your taste with the OG engine."
           cta="Open Music Hub"
         />
@@ -82,11 +82,12 @@ function DashboardHome() {
           to="/messenger"
           icon={<MessageSquareMore className="h-5 w-5" />}
           eyebrow="OG Messenger"
-          title="Chat with OG Messenger"
+          title="Chat to OG Bot"
           body="Talk to your AI co-producer, brainstorm lyrics, or just shoot the breeze."
           cta="Open Messenger"
           variant="accent"
         />
+
       </section>
 
       {/* Quick actions */}
