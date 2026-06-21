@@ -90,15 +90,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                     {title}
                   </h1>
                 </div>
-              </div>
-              <div className="hidden" />
-              {false && (
-                <div className="min-w-0">
-                  <h1>{title}</h1>
-                </div>
-              )}
-
-                <div className="relative hidden w-full max-w-xs lg:block">
+                <div className="relative ml-2 hidden w-full max-w-xs lg:block">
                   <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     type="search"
