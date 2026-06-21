@@ -525,6 +525,22 @@ function LibraryPage() {
                 Write lyrics
               </h3>
             </div>
+            <div className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2.5">
+              <div className="flex flex-col">
+                <Label htmlFor="foul-mouth-toggle" className="text-sm font-semibold">
+                  OG Foul Mouth
+                </Label>
+                <span className="text-xs text-muted-foreground">
+                  {foulMouth ? "Explicit — full swearing on" : "Clean version"}
+                </span>
+              </div>
+              <Switch
+                id="foul-mouth-toggle"
+                checked={foulMouth}
+                onCheckedChange={setFoulMouth}
+                disabled={genLyrics}
+              />
+            </div>
             <Button
               onClick={generateLyrics}
               disabled={!canGenerateLyrics || genLyrics}
