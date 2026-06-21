@@ -343,16 +343,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
                   Generate lyrics in stage 1 first.
                 </p>
               )}
-              {isPending && (
-                <div
-                  role="status"
-                  aria-live="polite"
-                  className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground"
-                >
-                  <Loader2 className="h-4 w-4 animate-spin text-primary" aria-hidden="true" />
-                  Generating preview — refreshes automatically.
-                </div>
-              )}
+              {isPending && <GeneratingProgress sampleSeconds={settings?.sample_seconds ?? 30} />}
               {isFailed && (
                 <div
                   role="alert"
@@ -406,11 +397,29 @@ export function SongWorkspace({ song, onSaved }: Props) {
                       ? "Full HQ unlocked. Download as many times as you like."
                       : "Sample plays in the player above. Unlock once to download the full HQ track."}
                   </p>
+
+                  {!song.unlocked && balance < fullUnlockCost && (
+                    <div className="flex items-start gap-3 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
+                      <Coins className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+                      <div className="flex-1">
+                        <p className="font-semibold text-amber-100">
+                          You need {fullUnlockCost - balance} more coin{fullUnlockCost - balance === 1 ? "" : "s"} to unlock
+                        </p>
+                        <p className="text-xs text-amber-200/80">
+                          Balance: {balance} · Cost: {fullUnlockCost}
+                        </p>
+                      </div>
+                      <Button asChild size="sm" className="shrink-0">
+                        <Link to="/buy-coins">Top up</Link>
+                      </Button>
+                    </div>
+                  )}
+
                   <div className="flex flex-wrap justify-end gap-2">
                     <Button
                       variant="outline"
                       onClick={generatePreview}
-                      disabled={genPreview || isPending}
+                      disabled={genPreview || isPending || unlocking}
                     >
                       {genPreview ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
                       Regenerate sample
@@ -418,15 +427,26 @@ export function SongWorkspace({ song, onSaved }: Props) {
                         <Coins className="h-3 w-3" /> {previewCost}
                       </span>
                     </Button>
-                    <Button onClick={unlockFull} disabled={unlocking}>
-                      {unlocking ? <Loader2 className="h-4 w-4 animate-spin" /> : <Music2 className="h-4 w-4" />}
-                      {song.unlocked ? "Download full HQ" : `Unlock & download · ${fullUnlockCost}`}
+                    <Button
+                      onClick={unlockFull}
+                      disabled={unlocking || (!song.unlocked && balance < fullUnlockCost)}
+                      className="gap-2"
+                      aria-live="polite"
+                    >
+                      {unlocking ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          {song.unlocked ? "Preparing download…" : "Processing payment…"}
+                        </>
+                      ) : (
+                        <>
+                          <Music2 className="h-4 w-4" />
+                          {song.unlocked
+                            ? "Download full HQ"
+                            : `Unlock & download · ${fullUnlockCost} coins`}
+                        </>
+                      )}
                     </Button>
-                    {balance < fullUnlockCost && !song.unlocked && (
-                      <Button asChild variant="ghost" size="sm">
-                        <Link to="/buy-coins"><Coins className="h-4 w-4" /> Top up</Link>
-                      </Button>
-                    )}
                   </div>
                 </>
               )}
@@ -511,3 +531,90 @@ function CostBadge({ cost }: { cost: number }) {
     </span>
   );
 }
+
+/**
+ * Professional "generating" progress block — elapsed timer, animated waveform
+ * skeleton, and rotating status copy so the wait feels intentional rather than
+ * dead. Suno typically takes 30–90s; we model that with a soft progress curve
+ * that asymptotes near the expected window.
+ */
+function GeneratingProgress({ sampleSeconds }: { sampleSeconds: number }) {
+  const [elapsed, setElapsed] = useState(0);
+  useEffect(() => {
+    const start = Date.now();
+    const id = setInterval(() => setElapsed(Math.floor((Date.now() - start) / 1000)), 250);
+    return () => clearInterval(id);
+  }, []);
+
+  // Soft progress curve — 0→90% over ~90s, then crawls to 99%.
+  const target = 90;
+  const pct = Math.min(99, Math.round(100 * (1 - Math.exp(-elapsed / target))));
+
+  const phase =
+    elapsed < 8
+      ? "Sending lyrics to the model…"
+      : elapsed < 25
+        ? "Arranging the beat and melody…"
+        : elapsed < 55
+          ? "Recording vocals and mixing…"
+          : elapsed < 90
+            ? "Mastering the preview…"
+            : "Almost there — just polishing the final mix…";
+
+  const mm = String(Math.floor(elapsed / 60)).padStart(2, "0");
+  const ss = String(elapsed % 60).padStart(2, "0");
+
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className="space-y-3 rounded-xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-card p-4 shadow-glow"
+    >
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <span className="relative grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary/15">
+            <span className="absolute inset-0 rounded-full bg-primary/30 blur-md animate-pulse" />
+            <Loader2 className="relative h-4 w-4 animate-spin text-primary" aria-hidden="true" />
+          </span>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-foreground">Cooking your {sampleSeconds}s preview</p>
+            <p className="truncate text-xs text-muted-foreground">{phase}</p>
+          </div>
+        </div>
+        <div className="shrink-0 rounded-full border border-border bg-background/60 px-2.5 py-1 text-xs font-bold tabular-nums">
+          {mm}:{ss}
+        </div>
+      </div>
+
+      {/* Animated waveform skeleton */}
+      <div className="flex h-10 items-end gap-1" aria-hidden="true">
+        {Array.from({ length: 28 }).map((_, i) => (
+          <span
+            key={i}
+            className="flex-1 rounded-sm bg-gradient-to-t from-primary/40 to-primary/80"
+            style={{
+              height: `${30 + Math.abs(Math.sin((i + elapsed) * 0.6)) * 70}%`,
+              opacity: 0.35 + (i % 4) * 0.15,
+              transition: "height 320ms ease-in-out",
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Progress bar */}
+      <div className="space-y-1">
+        <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+          <div
+            className="h-full bg-gradient-to-r from-primary via-primary/90 to-primary/70 transition-all duration-500"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+        <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+          <span>This usually takes 30–90 seconds.</span>
+          <span className="tabular-nums">{pct}%</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
