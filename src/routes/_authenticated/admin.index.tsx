@@ -252,6 +252,8 @@ function AdminPanel() {
                 ))}
               </TableBody>
             </Table>
+              </div>
+            </div>
           ) : (
             <div className="grid place-items-center gap-2 py-16 text-muted-foreground">
               <Music2 className="h-8 w-8" />
