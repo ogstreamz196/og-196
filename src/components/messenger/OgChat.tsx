@@ -325,8 +325,19 @@ export function OgChat({
               )}
             >
               {isUser ? (
-                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-brand text-sm font-black text-primary-foreground shadow-glow">
+                <div
+                  className={cn(
+                    "relative grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-brand text-sm font-black text-primary-foreground shadow-glow",
+                    isVip && "ring-2 ring-amber-300 ring-offset-2 ring-offset-background shadow-[0_0_18px_rgba(251,191,36,0.55)]",
+                  )}
+                >
                   {initial}
+                  {isVip && (
+                    <Crown
+                      className="absolute -top-2 -right-1 h-4 w-4 rotate-[18deg] fill-amber-300 text-amber-500 drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]"
+                      aria-label="VIP"
+                    />
+                  )}
                 </div>
               ) : (
                 <OgAvatar size={40} className="shrink-0" />
@@ -334,17 +345,25 @@ export function OgChat({
               <div className={cn("flex max-w-[75%] flex-col gap-1.5", isUser ? "items-end" : "items-start")}>
                 <span
                   className={cn(
-                    "px-2 text-[10px] font-black uppercase tracking-[0.18em]",
-                    isUser ? "text-primary" : "text-foreground/70",
+                    "inline-flex items-center gap-1 px-2 text-[10px] font-black uppercase tracking-[0.18em]",
+                    isUser ? (isVip ? "text-amber-400" : "text-primary") : "text-foreground/70",
                   )}
                 >
                   {isUser ? "You" : "OG Bot"}
+                  {isUser && isVip && (
+                    <>
+                      <Crown className="h-3 w-3 fill-amber-300 text-amber-500" />
+                      <span className="text-amber-400">VIP</span>
+                    </>
+                  )}
                 </span>
                 <div
                   className={cn(
-                    "px-4 py-3 text-[15px] leading-relaxed break-words",
+                    "px-4 py-2.5 text-[15px] leading-[1.45] break-words",
                     isUser
-                      ? "rounded-2xl rounded-br-sm bg-primary text-primary-foreground whitespace-pre-wrap font-medium shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.6)]"
+                      ? isVip
+                        ? "rounded-2xl rounded-br-sm whitespace-pre-wrap font-medium text-amber-50 bg-gradient-to-br from-amber-500 via-amber-600 to-yellow-700 shadow-[0_8px_24px_-8px_rgba(217,119,6,0.7)] ring-1 ring-amber-300/60"
+                        : "rounded-2xl rounded-br-sm bg-primary text-primary-foreground whitespace-pre-wrap font-medium shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.6)]"
                       : "rounded-2xl rounded-bl-sm bg-card border-2 border-border text-foreground shadow-sm",
                   )}
                 >
