@@ -400,6 +400,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
               <div className="space-y-1 text-xs text-muted-foreground">
                 <p>· Lyrics generation: <b className="text-foreground">{lyricsCost}</b></p>
                 <p>· Preview sample: <b className="text-foreground">{previewCost}</b></p>
+                <p>· Full HQ unlock: <b className="text-foreground">{fullUnlockCost}</b></p>
               </div>
               <Button asChild variant="outline" size="sm" className="w-full">
                 <Link to="/buy-coins">Top up</Link>
