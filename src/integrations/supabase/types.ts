@@ -354,6 +354,8 @@ export type Database = {
           display_name: string | null
           email: string | null
           id: string
+          telegram_chat_id: number | null
+          telegram_username: string | null
           total_bot_interactions: number
           updated_at: string
           widget_deployed_domains: string[]
@@ -365,6 +367,8 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           id: string
+          telegram_chat_id?: number | null
+          telegram_username?: string | null
           total_bot_interactions?: number
           updated_at?: string
           widget_deployed_domains?: string[]
@@ -376,6 +380,8 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           id?: string
+          telegram_chat_id?: number | null
+          telegram_username?: string | null
           total_bot_interactions?: number
           updated_at?: string
           widget_deployed_domains?: string[]
