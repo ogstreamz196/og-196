@@ -1,72 +1,51 @@
-# Full-Sweep Refactor Plan
+## What I found
 
-Goal: smaller files, fewer copies of the same logic, and a clearer client/server boundary — with no behavioral or visual change.
+Most of this is already half-built:
 
-## 1. Component splits (large files → focused pieces)
+- `library.index.tsx` already maps the four cards (From scratch / From a memory / Dedication / With OG) to `setOpenFlow(...)` and opens `CreateSongDialog`. The buttons aren't broken — they open a Dialog. You asked for a side-sheet/drawer instead.
+- `CreateSongDialog` already has per-flow copy and chip pickers for mood/genre/style/language/relationship.
+- `OgBotWidget` exists (floating draggable orb that hides itself on `/messenger`) but is **not mounted anywhere**, so it's currently invisible.
+- `OgChat` already persists history to `localStorage` and broadcasts updates across tabs, so widget ↔ messenger share memory in the same browser. Cross-device sync needs a DB-backed messages table.
+- `user_preferences.foul_mouth` exists and is shared via DB, but defaults to `true` in both the migration and every `?? true` fallback in code. You want default = OFF.
 
-Hottest files broken into folders. Each parent becomes a thin orchestrator.
+## What I'll change
 
-- `routes/_authenticated/admin.users.tsx` (643 LOC)
-  → `components/admin/users/{UsersTable, UserRow, UserFilters, UserActions}.tsx`
-- `routes/portal.$slug.tsx` (634 LOC)
-  → `components/portal/{PortalHero, PortalSections, PortalFooter}.tsx` + `lib/portal-data.functions.ts`
-- `routes/welcome.tsx` (596 LOC)
-  → `components/welcome/{Hero, FeatureGrid, EconomySection, CTASection}.tsx`
-- `components/messenger/OgChat.tsx` (616 LOC)
-  → `components/messenger/chat/{MessageList, Composer, ChatHeader}.tsx` + `hooks/use-og-chat.tsx`
-- `routes/_authenticated/admin.index.tsx`, `library.index.tsx`, `library.$songId.tsx`, `settings.tsx`, `developer.tsx`, `buy-coins.index.tsx`
-  → extract section components into `components/<route>/` siblings; route file keeps loader + composition only.
-- `components/admin/{PortalManager, AdminEditMode, MintCoinsPanel, BulkReconcilePanel, WidgetAccessAudit}.tsx`
-  → split form/table/dialog subcomponents per file.
+### 1. Library entry-point buttons → side sheet (drawer)
+- Convert `CreateSongDialog` to use shadcn `Sheet` (right side, scroll inside). Keep all existing fields, chip sections and "Add more details" block — only the shell changes.
+- Rename export to `CreateSongSheet` (keep a thin re-export named `CreateSongDialog` so nothing else breaks).
+- Flows `scratch`, `memory`, `tribute` all open the sheet with their existing per-flow copy and the right relevant prompts (memory + tribute get the "Who it's for" relationship chips; scratch doesn't).
 
-UI primitives in `components/ui/*` (sidebar, chart, carousel, menubar) are left alone — they are shadcn vendored files.
+### 2. "With OG" button → opens the floating widget for free
+- Remove the `messenger` branch from the sheet. The "With OG" card instead opens `OgBotWidget` in expanded state and seeds it with a starter prompt like "Let's co-write a song together — what's the vibe?".
+- Exposed via a tiny `useOgWidget()` store (zustand-style with `useSyncExternalStore`) so any page can call `ogWidget.open({ seed })`.
+- Already free of charge — `OgChat` calls the AI gateway, no coin deduction in that path.
 
-## 2. Shared hooks & lib consolidation
+### 3. Mount the widget on every authenticated page except /messenger
+- Mount `<OgBotWidget />` inside `_authenticated/route.tsx` next to `<Outlet />`. The widget already self-hides when `pathname === "/messenger"`.
 
-- New `hooks/use-coin-balance.tsx` — single source for balance reads (currently duplicated in buy-coins, settings, admin, og-widget).
-- New `hooks/use-admin-action.tsx` — wraps the `useMutation` + toast + `invalidateQueries` pattern repeated across admin panels.
-- New `lib/format.ts` — `formatCoins`, `formatDate`, `formatRelative`, `truncate` (replace ad-hoc inline formatters).
-- New `lib/query-keys.ts` — central typed query-key factory; replace string-literal keys.
-- Move `og-persona.ts` constants → `lib/og/persona.ts`; split runtime helpers out of the 242-LOC file.
-- Collapse `stripe.ts` + `stripe.server.ts` boundaries: keep `stripe.server.ts` as-is, move client-only helpers into `lib/stripe-client.ts`.
+### 4. Shared memory + settings sync
+- Add `og_messages` table (`id`, `user_id`, `role`, `content`, `created_at`) with RLS + GRANTs scoped to `auth.uid()`, plus realtime publication.
+- Update `OgChat` to:
+  - Load the last ~50 messages from `og_messages` on mount (fallback to localStorage if offline).
+  - Insert each user + assistant message into `og_messages`.
+  - Subscribe to `postgres_changes` so messenger and widget reflect new messages instantly (cross-device).
+- `foul_mouth` is already DB-backed. Add a realtime subscription in `useFoulMouth` so toggling it in widget settings instantly updates messenger settings and vice versa.
 
-## 3. Server functions & edge cleanup
+### 5. Default foul-mouth = OFF
+- Migration: `ALTER TABLE user_preferences ALTER COLUMN foul_mouth SET DEFAULT false;` and `UPDATE user_preferences SET foul_mouth = false WHERE foul_mouth IS NOT DISTINCT FROM true AND updated_at = created_at;` (only rows users never explicitly toggled — detected by no update since insert).
+- Code: change every `?? true` fallback for `foul_mouth` to `?? false` (`use-foul-mouth.tsx`, `og-messenger.functions.ts`, and any persona helper that reads it).
+- Users who already turned it ON keep it on.
 
-- Edge functions `reveal-variation`, `song-url`, `unlock-full-song`, `suno-generate`, `suno-callback`, `admin-mint-coins`, `admin-reprocess`, `generate-lyrics` all currently re-declare CORS + Supabase clients. The `_shared/{cors,clients}.ts` helpers already exist — finish migrating every function to use them, delete the local copies.
-- Standardize edge-function response helper: `_shared/respond.ts` with `ok()`, `fail(status, code, msg)`.
-- Standardize auth check: `_shared/require-user.ts` returning `{ user, supabase }` or throwing a 401 Response.
-- TanStack server functions: ensure none statically import `client.server`; audit `*.functions.ts` for top-level admin imports and move into handler bodies via `await import(...)`.
-- Centralize `invoke-error` parsing — already present, route every `supabase.functions.invoke` call through it; remove inline try/catch boilerplate.
+### 6. Out of scope (ask if you want these too)
+- Building a new settings UI for foul-mouth (a toggle already exists in `/settings`).
+- Migrating existing localStorage chat history into the new `og_messages` table.
 
-## 4. Types & dead code
-
-- New `types/` barrel: `types/{song, coin, profile, og-bot}.ts`. Replace duplicated inline interfaces (Song, Variation, Profile, CoinTransaction repeated across 8+ files) with imports.
-- Delete unused exports flagged by a `ts-prune`-style scan (we will run it as part of the refactor).
-- Remove now-unused legacy files after splits land (e.g. old monolithic component bodies, the duplicate `Blobs` once `WelcomeBackdrop` is wired everywhere — already partly done).
-- Strip dev-only `console.log`s left in production paths (keep `console.error`).
-- Tighten `any` usages flagged in `routes/_authenticated/*` and `components/admin/*` to concrete types from the new barrels.
-
-## 5. Verification
-
-After each phase:
-- Build passes (typecheck + Vite).
-- `bunx vitest run` for `generation-watch.test.ts` and `widget-visibility.test.ts`.
-- Smoke routes: `/`, `/welcome`, `/buy-coins`, `/library`, `/admin/users`, `/portal/$slug` — visual diff via preview.
-
-## Risk
-
-High — full restructure touches ~40 files. Behavior preserved by keeping every extracted component a pure move (no prop shape changes), and every shared hook a drop-in replacement returning the same data. No DB, RLS, or auth changes. No design changes.
-
-## Out of scope
-
-- Visual / design changes (theme repaint already shipped).
-- New features.
-- Schema / RLS / migrations.
-- UI primitive rewrites (`components/ui/*`).
-
-## Order of execution
-
-1. Shared lib (`format`, `query-keys`, `types/*`, hooks) — no consumers change yet.
-2. Edge function `_shared` migration — backend isolated.
-3. Component splits, one route at a time, verified after each.
-4. Dead-code sweep last, once imports have settled.
+## Files touched
+- `src/components/library/CreateSongDialog.tsx` → convert shell to `Sheet`, drop messenger flow.
+- `src/routes/_authenticated/library.index.tsx` → "With OG" calls widget instead of opening sheet.
+- `src/routes/_authenticated/route.tsx` → mount `<OgBotWidget />`.
+- `src/components/messenger/OgBotWidget.tsx` → accept external open + seed via store.
+- `src/components/messenger/OgChat.tsx` → DB-backed history + realtime subscribe.
+- `src/hooks/use-foul-mouth.tsx` → default `false`, realtime subscribe.
+- `src/lib/og-messenger.functions.ts` → default `false`.
+- New: `src/stores/og-widget.ts`, migration for `og_messages` + `foul_mouth` default.
