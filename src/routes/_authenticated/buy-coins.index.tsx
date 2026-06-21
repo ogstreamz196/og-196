@@ -29,14 +29,35 @@ type Selection =
   | { type: "vip" };
 
 export const Route = createFileRoute("/_authenticated/buy-coins/")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    edit: s.edit === "1" || s.edit === 1 || s.edit === true ? 1 : undefined,
+  }),
   component: BuyCoinsPage,
 });
 
 function BuyCoinsPage() {
   const { data: profile } = useProfile();
-  const { isVip } = useRole();
+  const { isVip, isDev, isLoading: roleLoading } = useRole();
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
   const [selected, setSelected] = useState<Selection | null>(null);
   const [stage, setStage] = useState<"confirm" | "pay">("confirm");
+
+  // Friendly bounce if a non-dev/admin opens the page in edit mode
+  // (e.g. shared `?edit=1` link). The actual edit gate is enforced
+  // server-side and in <AdminEditModeProvider>; this just gives the
+  // user a clear message instead of a silently inert UI.
+  useEffect(() => {
+    if (search.edit !== 1) return;
+    if (roleLoading) return; // wait for role resolution before deciding
+    if (isDev) return; // dev/admin: leave them in edit mode
+    toast.info("Edit mode is for the OG Studio team only — showing you the normal store view.", {
+      duration: 4500,
+    });
+    navigate({ to: "/buy-coins", search: {}, replace: true });
+  }, [search.edit, isDev, roleLoading, navigate]);
+
+
 
   // Restore previous selection (e.g. after a canceled Stripe checkout).
   useEffect(() => {
