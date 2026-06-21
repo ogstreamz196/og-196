@@ -427,14 +427,21 @@ export function SongWorkspace({ song, onSaved }: Props) {
                 </p>
               )}
               {isPending && (
-                <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                <div
+                  role="status"
+                  aria-live="polite"
+                  className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground"
+                >
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" aria-hidden="true" />
                   Generating preview — refreshes automatically.
                 </div>
               )}
               {isFailed && (
-                <div className="flex items-center gap-2 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                  <AlertCircle className="h-4 w-4" /> {song.error_message || "Generation failed."}
+                <div
+                  role="alert"
+                  className="flex items-center gap-2 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+                >
+                  <AlertCircle className="h-4 w-4" aria-hidden="true" /> {song.error_message || "Generation failed."}
                 </div>
               )}
               {isReady && (
