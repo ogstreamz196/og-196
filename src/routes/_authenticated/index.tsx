@@ -84,16 +84,16 @@ function DashboardHome() {
 
         <div className="relative grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 sm:flex sm:flex-wrap sm:items-end sm:justify-between">
           <div className="min-w-0 rounded-3xl bg-background/35 p-5 backdrop-blur-md ring-2 ring-white/10 sm:p-7">
-            <p className="text-lg uppercase tracking-[0.28em] text-muted-foreground sm:text-xl">
+            <p className="text-sm uppercase tracking-[0.28em] text-muted-foreground sm:text-xl">
               👋 Welcome back
             </p>
-            <h1 className="font-display mt-4 text-7xl font-black leading-[0.95] tracking-[-0.03em] text-foreground [overflow-wrap:anywhere] [text-shadow:0_4px_28px_rgba(0,0,0,0.75)] sm:text-9xl">
+            <h1 className="font-display mt-3 text-[clamp(2rem,9vw,6rem)] font-black leading-[1.02] tracking-[-0.03em] text-foreground break-words [text-shadow:0_4px_28px_rgba(0,0,0,0.75)]">
               Hello,{" "}
-              <em className="inline-block italic text-gradient-brand [overflow-wrap:anywhere] animate-[wiggle_3s_ease-in-out_infinite] origin-bottom">
+              <em className="inline italic text-gradient-brand break-words animate-[wiggle_3s_ease-in-out_infinite] origin-bottom">
                 {displayName}
               </em>
             </h1>
-            <p className="mt-6 max-w-2xl text-xl leading-[1.45] text-foreground [text-shadow:0_1px_12px_rgba(0,0,0,0.75)] sm:text-2xl md:text-3xl">
+            <p className="mt-4 max-w-2xl text-base leading-[1.45] text-foreground [text-shadow:0_1px_12px_rgba(0,0,0,0.75)] sm:text-2xl md:text-3xl">
               Jump back into your music workspace or pick up a chat with OG Bot.
             </p>
           </div>
