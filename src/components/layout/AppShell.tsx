@@ -75,7 +75,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <AppSidebar />
 
           <div className="flex min-w-0 flex-1 flex-col">
-            <header className="sticky top-0 z-30 grid h-16 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 border-b border-white/8 bg-background/70 px-3 backdrop-blur-xl sm:px-5 lg:px-7">
+            <header className="sticky top-0 z-30 grid h-14 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 border-b border-white/8 bg-background/70 px-2 backdrop-blur-xl sm:h-16 sm:gap-3 sm:px-5 lg:px-7">
               <SidebarTrigger className="shrink-0" />
 
               <div className="flex min-w-0 items-center gap-3">
@@ -88,10 +88,10 @@ export function AppShell({ children }: { children: ReactNode }) {
                   />
                 )}
                 <div className="min-w-0">
-                  <p className="truncate text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                  <p className="hidden truncate text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground sm:block">
                     OG Streamz
                   </p>
-                  <h1 className="font-display truncate text-2xl font-black leading-tight tracking-tight text-gradient-brand sm:text-3xl">
+                  <h1 className="font-display truncate text-lg font-black leading-tight tracking-tight text-gradient-brand sm:text-2xl lg:text-3xl">
                     {title}
                   </h1>
                 </div>
@@ -110,16 +110,16 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </div>
               </div>
 
-              <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+              <div className="flex shrink-0 items-center gap-1 sm:gap-2">
                 {!roleLoading && isAdmin && (
-                  <div className="hidden items-center gap-1.5 rounded-full border border-primary/40 bg-gradient-brand px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow-glow sm:flex">
+                  <div className="hidden items-center gap-1.5 rounded-full border border-primary/40 bg-gradient-brand px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow-glow md:flex">
                     <ShieldCheck className="h-3 w-3" />
                     Boss
                   </div>
                 )}
-                <AdminEditModeToggle className="hidden sm:inline-flex" />
+                <AdminEditModeToggle className="hidden md:inline-flex" />
                 <HighContrastToggle />
-                <CoinBalance className="hidden sm:inline-flex" />
+                <CoinBalance />
                 <Button
                   type="button"
                   variant="ghost"
