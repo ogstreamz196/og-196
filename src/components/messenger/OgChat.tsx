@@ -409,7 +409,7 @@ export function OgChat({
         )}
         {messages.map((msg, i) => {
           const isUser = msg.role === "user";
-          const initial = (profile?.display_name || user?.email || "Y").trim().charAt(0).toUpperCase();
+          const initial = dev.isDev ? "D" : (profile?.display_name || user?.email || "Y").trim().charAt(0).toUpperCase();
           return (
             <div
               key={i}
