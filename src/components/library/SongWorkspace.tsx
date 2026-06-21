@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   Loader2, FileText, MessageSquareMore, Wand2, ExternalLink,
@@ -13,27 +13,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSettings } from "@/hooks/use-settings";
 import { useProfile } from "@/hooks/use-profile";
+import { useVariations } from "@/hooks/use-variations";
+import { invokeError } from "@/lib/invoke-error";
 import { cn } from "@/lib/utils";
-import type { Song } from "@/components/SongCard";
-
-/** Extract the human-readable error from a Supabase functions.invoke() failure. */
-function invokeError(err: unknown, fallback: string): string {
-  if (!err) return fallback;
-  if (typeof err === "object") {
-    const e = err as { context?: { error?: string }; message?: string };
-    return e.context?.error || e.message || fallback;
-  }
-  return fallback;
-}
-
-type WorkspaceSong = Song & { lyrics?: string | null; unlocked?: boolean | null };
+import { StageStepper, type Stage } from "./song-workspace/StageStepper";
+import { VariationsCard } from "./song-workspace/VariationsCard";
+import type { WorkspaceSong } from "./song-workspace/types";
 
 interface Props {
   song: WorkspaceSong;
   onSaved?: () => void;
 }
-
-type Stage = 1 | 2 | 3;
 
 /**
  * 3-stage music creation workflow:
@@ -58,85 +48,16 @@ export function SongWorkspace({ song, onSaved }: Props) {
   const [genPreview, setGenPreview] = useState(false);
   const [unlocking, setUnlocking] = useState(false);
 
-  // Hidden Suno alt-takes for this song. Suno returns 2 clips per generation;
-  // the first becomes the visible sample, the rest stay hidden until the user
-  // pays half-price (ceil(previewCost / divisor)) to reveal them.
-  type Variation = { id: string; title: string | null; cover_url: string | null; revealed: boolean };
-  const [variations, setVariations] = useState<Variation[]>([]);
-  // Mirrors the server-side formula in supabase/functions/reveal-variation.
-  const variationDivisor = Math.max(1, settings?.coins_per_variation_divisor ?? 2);
-  const variationCost = useMemo(
-    () => Math.max(1, Math.ceil(previewCost / variationDivisor)),
-    [previewCost, variationDivisor],
-  );
-  const [basket, setBasket] = useState<Set<string>>(() => new Set());
-  const [busyVariation, setBusyVariation] = useState<string | null>(null);
-  const [checkingOut, setCheckingOut] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      // Step 1 — grab this song's suno task id so we can find siblings.
-      const { data: self } = await supabase
-        .from("songs").select("suno_task_id").eq("id", song.id).maybeSingle();
-      const task = (self as { suno_task_id?: string | null })?.suno_task_id;
-      if (!task) { if (!cancelled) setVariations([]); return; }
-      const { data: sibs } = await supabase
-        .from("songs")
-        .select("id, title, cover_url, revealed")
-        .eq("suno_task_id", task)
-        .eq("is_variation", true)
-        .neq("id", song.id);
-      if (!cancelled) setVariations((sibs ?? []) as Variation[]);
-    })();
-    return () => { cancelled = true; };
-  }, [song.id, song.status]);
-
-  async function revealOne(id: string) {
-    setBusyVariation(id);
-    try {
-      const { data, error } = await supabase.functions.invoke("reveal-variation", { body: { song_id: id } });
-      if (error) {
-        throw new Error(invokeError(error, "Reveal failed"));
-      }
-      if (!data?.already) toast.success(`Alt take revealed · -${data?.cost ?? variationCost} coins`);
-      setVariations((vs) => vs.map((v) => v.id === id ? { ...v, revealed: true } : v));
-      onSaved?.();
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Reveal failed");
-      throw e;
-    } finally {
-      setBusyVariation(null);
-    }
-  }
-
-  function toggleBasket(id: string) {
-    setBasket((b) => {
-      const next = new Set(b);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
-  }
-
-  async function checkoutBasket() {
-    const ids = Array.from(basket);
-    const total = ids.length * variationCost;
-    if (ids.length === 0) return;
-    if (balance < total) { toast.error(`Need ${total} coins — current balance ${balance}`); return; }
-    setCheckingOut(true);
-    try {
-      for (const id of ids) {
-        // Sequential so the deduct_coins RPC sees a consistent running balance.
-        await revealOne(id).catch(() => { throw new Error(`Stopped at ${id.slice(0, 6)}`); });
-      }
-      setBasket(new Set());
-      toast.success(`Basket checked out · -${total} coins`);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Checkout interrupted");
-    } finally {
-      setCheckingOut(false);
-    }
-  }
+  const {
+    variations, basket, busyVariation, checkingOut, variationCost,
+    revealOne, toggleBasket, clearBasket, checkoutBasket,
+  } = useVariations({
+    songId: song.id,
+    songStatus: song.status,
+    balance,
+    previewCost,
+    onChanged: onSaved,
+  });
 
   const hasLyrics = !!(lyrics && lyrics.trim().length > 20);
   const isPending = song.status === "pending" || song.status === "processing";
@@ -149,7 +70,6 @@ export function SongWorkspace({ song, onSaved }: Props) {
   const lastStatus = useRef(song.status);
   useEffect(() => {
     if (!isPending) {
-      // Surface terminal transitions for the user.
       if (lastStatus.current === "pending" || lastStatus.current === "processing") {
         if (isReady) toast.success("Sample ready — full track unlocked");
         else if (isFailed) toast.error(song.error_message || "Generation failed — coins refunded");
@@ -171,7 +91,6 @@ export function SongWorkspace({ song, onSaved }: Props) {
       )
       .subscribe();
 
-    // Polling fallback in case realtime drops a message.
     const poll = setInterval(() => onSaved?.(), 4000);
 
     return () => {
@@ -221,7 +140,6 @@ export function SongWorkspace({ song, onSaved }: Props) {
     }
     setGenLyrics(true);
     try {
-      // Persist latest brief/title first so the server has the up-to-date prompt.
       if (dirty) await persist({ title: title.trim() || null, prompt: brief });
 
       const { data, error } = await supabase.functions.invoke("generate-lyrics", {
@@ -327,7 +245,6 @@ export function SongWorkspace({ song, onSaved }: Props) {
 
   return (
     <div className="space-y-6">
-      {/* Stepper */}
       <StageStepper current={stage} sampleSeconds={settings?.sample_seconds ?? 30} />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -516,85 +433,18 @@ export function SongWorkspace({ song, onSaved }: Props) {
             </CardContent>
           </Card>
 
-          {/* Alt takes — Suno returns 2 clips; show locked siblings here. */}
-          {variations.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Sparkles className="h-4 w-4 text-primary" /> Alternate takes
-                </CardTitle>
-                <CardDescription>
-                  Same lyrics, different sample. Reveal each for {variationCost} coin{variationCost === 1 ? "" : "s"} (half of a fresh generation), or basket them and check out with OG Coins.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <ul className="space-y-2" aria-label="Alternate takes">
-                  {variations.map((v) => {
-                    const inBasket = basket.has(v.id);
-                    const busy = busyVariation === v.id;
-                    return (
-                      <li key={v.id} className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-card/40 p-3">
-                        <div className="min-w-0">
-                          <div className="truncate text-sm font-medium">
-                            {v.revealed ? (v.title || "Alt take") : "Locked alt take"}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {v.revealed ? "Revealed" : `${variationCost} coins to reveal`}
-                          </div>
-                        </div>
-                        {v.revealed ? (
-                          <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">Unlocked</span>
-                        ) : (
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              variant={inBasket ? "default" : "outline"}
-                              onClick={() => toggleBasket(v.id)}
-                              disabled={busy || checkingOut}
-                              aria-pressed={inBasket}
-                            >
-                              {inBasket ? <Check className="h-3.5 w-3.5" aria-hidden="true" /> : <Coins className="h-3.5 w-3.5" aria-hidden="true" />}
-                              {inBasket ? "In basket" : "Add"}
-                            </Button>
-                            <Button
-                              size="sm"
-                              onClick={() => revealOne(v.id)}
-                              disabled={busy || checkingOut || balance < variationCost}
-                            >
-                              {busy
-                                ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
-                                : <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />}
-                              Reveal
-                            </Button>
-                          </div>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
-                {basket.size > 0 && (
-                  <div className="flex items-center justify-between gap-3 rounded-lg border border-primary/40 bg-primary/5 p-3">
-                    <div className="text-sm">
-                      <b>{basket.size}</b> in basket · <b>{basket.size * variationCost}</b> coins total
-                    </div>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="ghost" onClick={() => setBasket(new Set())} disabled={checkingOut}>
-                        Clear
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={checkoutBasket}
-                        disabled={checkingOut || balance < basket.size * variationCost}
-                      >
-                        {checkingOut ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Coins className="h-3.5 w-3.5" />}
-                        Checkout
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
+          <VariationsCard
+            variations={variations}
+            variationCost={variationCost}
+            basket={basket}
+            busyVariation={busyVariation}
+            checkingOut={checkingOut}
+            balance={balance}
+            onToggleBasket={toggleBasket}
+            onRevealOne={revealOne}
+            onClearBasket={clearBasket}
+            onCheckoutBasket={checkoutBasket}
+          />
         </div>
 
         {/* Side rail */}
@@ -650,42 +500,6 @@ export function SongWorkspace({ song, onSaved }: Props) {
           </Card>
         </div>
       </div>
-    </div>
-  );
-}
-
-function StageStepper({ current, sampleSeconds }: { current: Stage; sampleSeconds: number }) {
-  const steps: { id: Stage; label: string; sub: string }[] = [
-    { id: 1, label: "Lyrics", sub: "Craft the words" },
-    { id: 2, label: "Sample", sub: `${sampleSeconds}s preview` },
-    { id: 3, label: "Full song", sub: "Final track" },
-  ];
-  return (
-    <div className="grid grid-cols-3 gap-2 rounded-2xl border border-border bg-card p-3">
-      {steps.map((s, i) => {
-        const done = current > s.id;
-        const active = current === s.id;
-        return (
-          <div key={s.id} className="flex items-start gap-3">
-            <div
-              className={cn(
-                "grid h-8 w-8 shrink-0 place-items-center rounded-full text-xs font-bold transition",
-                done && "bg-emerald-500 text-white",
-                active && "bg-gradient-brand text-primary-foreground shadow-glow",
-                !done && !active && "bg-muted text-muted-foreground",
-              )}
-            >
-              {done ? <Check className="h-4 w-4" /> : i + 1}
-            </div>
-            <div className="min-w-0">
-              <p className={cn("truncate text-sm font-semibold", !active && !done && "text-muted-foreground")}>
-                {s.label}
-              </p>
-              <p className="truncate text-[11px] text-muted-foreground">{s.sub}</p>
-            </div>
-          </div>
-        );
-      })}
     </div>
   );
 }
