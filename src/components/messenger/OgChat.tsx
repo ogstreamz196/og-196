@@ -159,12 +159,13 @@ export function OgChat({
   }, [userId]);
 
   const m = useMutation({
-    mutationFn: async (history: OgChatMessage[]) =>
+    mutationFn: async (args: { history: OgChatMessage[]; attachmentDataUrl?: string }) =>
       chat({
         data: {
-          messages: history,
+          messages: args.history,
           mode,
           pageContext: typeof window !== "undefined" ? window.location.pathname : "",
+          attachmentDataUrl: args.attachmentDataUrl,
         },
       }),
     onSuccess: (res) => {
@@ -188,18 +189,23 @@ export function OgChat({
 
   function sendText(text: string) {
     const t = text.trim();
-    if (!t || m.isPending) return;
+    const att = attachment;
+    if (!t && !att) return;
+    if (m.isPending) return;
     if (!user) return toast.error("Sign in to chat with OG Bot.");
     if ((profile?.coin_balance ?? 0) <= 0) {
       return toast.error("You're out of OG coins. Top up to keep chatting.");
     }
-    const next = [...messages, { role: "user" as const, content: t }];
+    const visibleText = t || (att ? `📎 ${att.name}` : "");
+    const next = [...messages, { role: "user" as const, content: visibleText }];
     setMessages(next);
     selfSyncRef.current = true;
     window.dispatchEvent(new Event(SYNC_EVENT));
     setInput("");
-    m.mutate(next);
+    setAttachment(null);
+    m.mutate({ history: next, attachmentDataUrl: att?.dataUrl });
   }
+
 
   function clearChat() {
     setMessages([]);
