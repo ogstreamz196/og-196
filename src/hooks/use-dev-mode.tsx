@@ -1,7 +1,7 @@
 import { useAuth } from "./use-auth";
+import { DEV_DISPLAY_NAME, DEV_EMAIL, isDevEmail } from "@/lib/dev-identity";
 
-// Single source of truth for the dev account. Mirrors handle_new_user() in SQL.
-export const DEV_EMAIL = "ogstreamz196@gmail.com";
+export { DEV_EMAIL };
 
 /**
  * Returns whether the current signed-in user is the dev / project owner.
@@ -10,11 +10,11 @@ export const DEV_EMAIL = "ogstreamz196@gmail.com";
  */
 export function useDevMode() {
   const { user } = useAuth();
-  const isDev = !!user?.email && user.email.toLowerCase() === DEV_EMAIL;
+  const isDev = isDevEmail(user?.email);
   return {
     isDev,
     // Drop-in replacements
-    displayName: isDev ? "Developer" : null,
+    displayName: isDev ? DEV_DISPLAY_NAME : null,
     shortLabel: isDev ? "Dev mode" : null,
     avatarInitial: isDev ? "D" : null,
   };
