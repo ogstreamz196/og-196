@@ -221,6 +221,7 @@
     background-repeat: no-repeat;
   }
   /* Smoky tint for legibility over the wallpaper */
+  /* Smoky tint + carbon-fibre micro-weave for legibility + premium texture */
   body::after {
     content: "";
     position: fixed;
@@ -228,6 +229,13 @@
     z-index: -1;
     pointer-events: none;
     background:
+      /* carbon fibre weave — diagonal hairlines */
+      repeating-linear-gradient(45deg,
+        oklch(1 0 0 / 0.018) 0px, oklch(1 0 0 / 0.018) 1px,
+        transparent 1px, transparent 3px),
+      repeating-linear-gradient(-45deg,
+        oklch(0 0 0 / 0.05) 0px, oklch(0 0 0 / 0.05) 1px,
+        transparent 1px, transparent 3px),
       radial-gradient(ellipse 90% 60% at 50% -10%, oklch(0.35 0.18 268 / 0.3), transparent 60%),
       radial-gradient(ellipse 70% 50% at 100% 100%, oklch(0.3 0.14 270 / 0.3), transparent 65%),
       linear-gradient(180deg, oklch(0.1 0.04 265 / 0.55), oklch(0.1 0.04 265 / 0.72));
