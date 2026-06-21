@@ -291,6 +291,8 @@ function LibraryPage() {
           styleTags,
           language: selections.language,
           foulMouth,
+          personalDetails: personalDetails.trim() || undefined,
+          extraContext: extraContext.trim() || undefined,
         },
       });
       if (error) {
