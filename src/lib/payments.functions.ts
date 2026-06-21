@@ -184,7 +184,7 @@ export const createCustomCoinCheckoutSession = createServerFn({ method: "POST" }
     try {
       const stripe = createStripeClient(data.environment);
       const coins = data.units * CUSTOM_COIN_UNIT.coins;
-      const amount = data.units * CUSTOM_COIN_UNIT.priceCents;
+
 
       let email: string | undefined;
       try {
