@@ -240,7 +240,7 @@ function BuyCoinsPage() {
               <span className="inline-flex items-center gap-1.5 rounded-full border border-coin/40 bg-coin/15 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-coin">
                 <Sparkles className="h-3 w-3" /> OG Coins Store
               </span>
-              <h1 className="mt-4 font-display text-5xl font-black leading-[0.95] tracking-tight text-gradient-brand sm:text-6xl">
+              <h1 className="mt-4 break-words font-display text-[clamp(2rem,7vw,3.75rem)] font-black leading-[1.02] tracking-tight text-gradient-brand">
                 <EditableContent contentKey="buyCoins.heading" defaultValue="Top up. Create more." />
               </h1>
               <p className="mt-3 max-w-xl text-base font-medium text-muted-foreground sm:text-lg">
