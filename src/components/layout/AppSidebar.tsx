@@ -53,6 +53,7 @@ export function AppSidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { setOpenMobile, isMobile } = useSidebar();
   const { user } = useAuth();
+  const dev = useDevMode();
   const { isAdmin } = useRole();
   const qc = useQueryClient();
 
