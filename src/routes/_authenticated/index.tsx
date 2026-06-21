@@ -13,6 +13,7 @@ import {
   Circle,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { useDevMode } from "@/hooks/use-dev-mode";
 import { useProfile } from "@/hooks/use-profile";
 import { useRole } from "@/hooks/use-role";
 import { useRecentSongs, type RecentSong } from "@/hooks/use-recent-songs";
