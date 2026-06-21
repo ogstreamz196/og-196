@@ -99,10 +99,10 @@ function BuyCoinsPage() {
               </div>
             </div>
             <div className="sm:text-right">
-              <h1 className="text-2xl font-black tracking-tight sm:text-3xl">
+              <h1 className="font-display text-4xl font-black leading-[0.95] tracking-tight text-gradient-brand sm:text-5xl">
                 <EditableContent contentKey="buyCoins.heading" defaultValue="Buy OG Coins" />
               </h1>
-              <p className="mt-1 text-sm text-muted-foreground">
+              <p className="mt-2 text-sm font-semibold text-muted-foreground">
                 <EditableContent
                   contentKey="buyCoins.subtitle"
                   defaultValue="1 OG Coin = 1 message, 1 generation. New users get 5 OG Coins free."
