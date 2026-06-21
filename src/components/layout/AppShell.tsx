@@ -103,22 +103,26 @@ export function AppShell({ children }: { children: ReactNode }) {
               <SidebarTrigger className="shrink-0" />
 
               <div className="flex min-w-0 items-center gap-3">
-                {pathname.startsWith("/messenger") && (
-                  <img
-                    src="/og-bot-avatar.png"
-                    onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = "none")}
-                    alt=""
-                    className="wc-bounce-soft hidden h-9 w-9 rounded-full ring-2 ring-primary/50 sm:block"
-                  />
-                )}
-                <div className="min-w-0">
-                  <p className="hidden truncate text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground sm:block">
-                    OG Streamz
-                  </p>
+                <BrandLockup compact />
+                <div className="hidden min-w-0 md:block">
                   <h1 className="font-display truncate text-lg font-black leading-tight tracking-tight text-gradient-brand sm:text-2xl lg:text-3xl">
                     {title}
                   </h1>
                 </div>
+                <div className="relative ml-2 hidden w-full max-w-xs lg:block">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    type="search"
+                    placeholder="Search songs"
+                    className="h-9 border-white/10 bg-white/5 pl-9"
+                    onChange={(event) => {
+                      window.dispatchEvent(
+                        new CustomEvent("sonix:search", { detail: event.target.value }),
+                      );
+                    }}
+                  />
+                </div>
+              </div>
                 <div className="relative ml-2 hidden w-full max-w-xs lg:block">
                   <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
