@@ -38,7 +38,7 @@ type Stage = 1 | 2 | 3;
 /**
  * 3-stage music creation workflow:
  *   1. Lyrics       — user crafts a brief and generates lyrics (charged)
- *   2. Sample       — generate a 30s preview of the full song (charged)
+ *   2. Sample       — generate a short preview of the full song (charged)
  *   3. Final song   — full track ready to play / download (uses preview unlock)
  * Edits at any stage can be re-sent and re-cost coins, same as every other AI message.
  */
