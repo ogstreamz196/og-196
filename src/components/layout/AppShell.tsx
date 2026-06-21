@@ -12,6 +12,7 @@ import {
 } from "@/components/admin/AdminEditMode";
 import { CoinBalance } from "@/components/dashboard/CoinBalance";
 import { useAuth } from "@/hooks/use-auth";
+import { useDevMode } from "@/hooks/use-dev-mode";
 import { useRole } from "@/hooks/use-role";
 import { supabase } from "@/integrations/supabase/client";
 import { AppSidebar } from "./AppSidebar";
