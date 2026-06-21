@@ -2,12 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import ReactMarkdown from "react-markdown";
-import { Send, Trash2, Sparkles, Skull, ShieldCheck, UploadCloud, Mic, MicOff, RotateCcw, Crown, X, Loader2 } from "lucide-react";
+import { Send, Trash2, Sparkles, Skull, ShieldCheck, Paperclip, Mic, MicOff, Crown, X, Loader2 } from "lucide-react";
 import { chatOgBot, type OgChatMessage } from "@/lib/og-messenger.functions";
 import { transcribeOgAudio } from "@/lib/og-transcribe.functions";
 import { QUICK_STARTS } from "@/lib/og-persona";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
@@ -91,7 +89,7 @@ export function OgChat({
   const [messages, setMessages] = useState<OgChatMessage[]>(() => loadThread(userId));
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const selfSyncRef = useRef(false);
   const chat = useServerFn(chatOgBot);
   const qc = useQueryClient();
@@ -498,11 +496,11 @@ export function OgChat({
           e.preventDefault();
           sendText(input);
         }}
-        className="flex flex-col gap-2 border-t border-border p-3"
+        className="border-t border-border bg-card/95 px-3 py-2.5 backdrop-blur supports-[backdrop-filter]:bg-card/70 sm:px-4"
       >
         {attachment && (
-          <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 p-2">
-            <img src={attachment.dataUrl} alt="" className="h-12 w-12 rounded object-cover" />
+          <div className="mb-2 flex items-center gap-2 rounded-xl border border-border bg-muted/40 p-2">
+            <img src={attachment.dataUrl} alt="" className="h-10 w-10 rounded-md object-cover" />
             <span className="flex-1 truncate text-xs text-muted-foreground">{attachment.name}</span>
             <button
               type="button"
@@ -525,77 +523,89 @@ export function OgChat({
             e.target.value = "";
           }}
         />
-        <Input
-          ref={inputRef}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder={
-            transcribing
-              ? "Transcribing…"
-              : recording
-                ? "Listening… tap mic to stop"
-                : isOut
-                  ? "Out of coins — top up to chat"
-                  : foulActive
-                    ? "Go on then, type something…"
-                    : "Message OG Bot…"
-          }
-          disabled={m.isPending || isOut || !user || transcribing}
-          maxLength={2000}
-          autoFocus
-        />
-        <div className="flex items-center gap-2">
-          <Button
+        {/* Unified composer pill — attachment | mic | textarea | send (Telegram/WhatsApp pattern) */}
+        <div
+          className={cn(
+            "flex items-end gap-1 rounded-3xl border border-border bg-background px-2 py-1.5 shadow-sm transition focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/20",
+            (isOut || !user) && "opacity-70",
+          )}
+        >
+          <button
             type="button"
-            variant="outline"
-            size="icon"
             onClick={() => fileInputRef.current?.click()}
             disabled={!user || m.isPending}
             aria-label="Attach image"
             title="Attach image"
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:opacity-40"
           >
-            <UploadCloud className="h-4 w-4" />
-          </Button>
-          <Button
+            <Paperclip className="h-[18px] w-[18px]" />
+          </button>
+          <button
             type="button"
-            variant={recording ? "destructive" : "outline"}
-            size="icon"
             onClick={recording ? stopRecording : startRecording}
             disabled={!user || m.isPending || transcribing}
             aria-label={recording ? "Stop recording" : "Voice input"}
             title={recording ? "Stop recording" : "Voice input"}
+            className={cn(
+              "grid h-9 w-9 shrink-0 place-items-center rounded-full transition disabled:opacity-40",
+              recording
+                ? "bg-destructive text-destructive-foreground hover:bg-destructive/90 animate-pulse"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground",
+            )}
           >
             {transcribing ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-[18px] w-[18px] animate-spin" />
             ) : recording ? (
-              <MicOff className="h-4 w-4" />
+              <MicOff className="h-[18px] w-[18px]" />
             ) : (
-              <Mic className="h-4 w-4" />
+              <Mic className="h-[18px] w-[18px]" />
             )}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={clearChat}
-            disabled={messages.length === 0}
-            aria-label="Reset chat"
-            title="Reset chat"
-            className="border-destructive/40 text-destructive hover:bg-destructive/10"
+          </button>
+          <textarea
+            ref={inputRef}
+            value={input}
+            onChange={(e) => {
+              setInput(e.target.value);
+              const el = e.currentTarget;
+              el.style.height = "0px";
+              el.style.height = Math.min(el.scrollHeight, 160) + "px";
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                sendText(input);
+              }
+            }}
+            rows={1}
+            placeholder={
+              transcribing
+                ? "Transcribing…"
+                : recording
+                  ? "Listening… tap mic to stop"
+                  : isOut
+                    ? "Out of coins — top up to chat"
+                    : foulActive
+                      ? "Go on then, type something…"
+                      : "Message OG Bot…"
+            }
+            disabled={m.isPending || isOut || !user || transcribing}
+            maxLength={2000}
+            autoFocus
+            className="min-h-[36px] max-h-[160px] flex-1 resize-none bg-transparent px-2 py-1.5 text-[15px] leading-snug placeholder:text-muted-foreground/70 focus:outline-none disabled:cursor-not-allowed"
+          />
+          <button
+            type="submit"
+            disabled={m.isPending || (!input.trim() && !attachment) || isOut || !user}
+            aria-label="Send"
+            title="Send"
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground shadow-[0_4px_12px_-4px_hsl(var(--primary)/0.5)] transition hover:scale-105 active:scale-95 disabled:bg-muted disabled:text-muted-foreground disabled:shadow-none"
           >
-            <RotateCcw className="h-4 w-4" />
-          </Button>
-          <div className="ml-auto">
-            <Button
-              type="submit"
-              disabled={m.isPending || (!input.trim() && !attachment) || isOut || !user}
-              aria-label="Send"
-              className="gap-2"
-            >
-              <Send className="h-4 w-4" /> Send
-            </Button>
-          </div>
+            {m.isPending ? <Loader2 className="h-[18px] w-[18px] animate-spin" /> : <Send className="h-[18px] w-[18px]" />}
+          </button>
         </div>
+        <p className="mt-1.5 px-2 text-[10px] text-muted-foreground/70">
+          Enter to send · Shift+Enter for newline · {balance} coin{balance === 1 ? "" : "s"} left
+        </p>
       </form>
 
 
