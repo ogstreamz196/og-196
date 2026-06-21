@@ -88,43 +88,55 @@ const albumCovers = [
   },
 ];
 
+function useRedirectIfSignedIn() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    let cancelled = false;
+    supabase.auth.getSession().then(({ data }) => {
+      if (!cancelled && data.session) navigate({ to: "/", replace: true });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [navigate]);
+}
+
 function useOAuthSignIn() {
   const navigate = useNavigate();
   const [pending, setPending] = useState<OAuthProvider | null>(null);
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/", replace: true });
-    });
-  }, [navigate]);
-
-  async function signIn(provider: OAuthProvider) {
-    setPending(provider);
-    try {
-      const result = await lovable.auth.signInWithOAuth(provider, {
-        redirect_uri: window.location.origin,
-        extraParams: provider === "google" ? { prompt: "select_account" } : undefined,
-      });
-      if (result.error) {
-        const raw = (result.error.message ?? "").toLowerCase();
+  const signIn = useCallback(
+    async (provider: OAuthProvider) => {
+      setPending(provider);
+      try {
+        const result = await lovable.auth.signInWithOAuth(provider, {
+          redirect_uri: window.location.origin,
+          extraParams: provider === "google" ? { prompt: "select_account" } : undefined,
+        });
+        if (result.error) {
+          const raw = (result.error.message ?? "").toLowerCase();
+          const transient =
+            raw.includes("authorization code") || raw.includes("code verifier") || raw.includes("pkce");
+          if (!transient) toast.error(result.error.message || `${provider} sign-in failed`);
+          return;
+        }
+        if (result.redirected) return;
+        navigate({ to: "/", replace: true });
+      } catch (e) {
+        const raw = (e instanceof Error ? e.message : "").toLowerCase();
         const transient =
           raw.includes("authorization code") || raw.includes("code verifier") || raw.includes("pkce");
-        if (!transient) toast.error(result.error.message || `${provider} sign-in failed`);
-        return;
+        if (!transient) toast.error(e instanceof Error ? e.message : "Sign-in failed");
+      } finally {
+        setPending(null);
       }
-      if (result.redirected) return;
-      navigate({ to: "/", replace: true });
-    } catch (e) {
-      const raw = (e instanceof Error ? e.message : "").toLowerCase();
-      const transient =
-        raw.includes("authorization code") || raw.includes("code verifier") || raw.includes("pkce");
-      if (!transient) toast.error(e instanceof Error ? e.message : "Sign-in failed");
-    } finally {
-      setPending(null);
-    }
-  }
+    },
+    [navigate],
+  );
+
   return { signIn, pending };
 }
+
 
 function GoogleIcon({ className }: { className?: string }) {
   return (
