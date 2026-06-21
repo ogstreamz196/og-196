@@ -172,11 +172,9 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <RemoteAuthProvider>
-          <SiteContentRealtimeBridge />
-          <Outlet />
-          <Toaster />
-        </RemoteAuthProvider>
+        <SiteContentRealtimeBridge />
+        <Outlet />
+        <Toaster />
       </AuthProvider>
     </QueryClientProvider>
   );
