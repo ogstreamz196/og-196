@@ -73,17 +73,24 @@ export function AppShell({ children }: { children: ReactNode }) {
             <header className="sticky top-0 z-30 grid h-16 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 border-b border-white/8 bg-background/70 px-3 backdrop-blur-xl sm:px-5 lg:px-7">
               <SidebarTrigger className="shrink-0" />
 
-              <div className="flex min-w-0 items-center gap-4">
+              <div className="flex min-w-0 items-center gap-3">
+                {pathname.startsWith("/messenger") && (
+                  <img
+                    src="/og-bot-avatar.png"
+                    onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = "none")}
+                    alt=""
+                    className="wc-bounce-soft hidden h-9 w-9 rounded-full ring-2 ring-primary/50 sm:block"
+                  />
+                )}
                 <div className="min-w-0">
                   <p className="truncate text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
                     OG Streamz
                   </p>
-                  <h1 className="font-display truncate text-lg font-normal leading-tight tracking-tight sm:text-xl">
+                  <h1 className="font-display truncate text-xl font-normal leading-tight tracking-tight sm:text-2xl">
                     {title}
                   </h1>
                 </div>
-
-                <div className="relative hidden w-full max-w-xs lg:block">
+                <div className="relative ml-2 hidden w-full max-w-xs lg:block">
                   <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     type="search"

@@ -32,7 +32,7 @@ type NavItem = { title: string; url: AppRoute; icon: typeof Home; adminOnly?: bo
 const primaryNav: NavItem[] = [
   { title: "Home", url: "/", icon: Home },
   { title: "Music Hub", url: "/library", icon: Music2 },
-  { title: "Messenger", url: "/messenger", icon: MessagesSquare },
+  { title: "OG Messenger", url: "/messenger", icon: MessagesSquare },
   { title: "Portals", url: "/portals", icon: DoorOpen, adminOnly: true },
 ];
 
@@ -54,27 +54,45 @@ export function AppSidebar() {
   const visible = (items: NavItem[]) => items.filter((i) => !i.adminOnly || isAdmin);
 
   const renderItems = (items: NavItem[]) =>
-    visible(items).map((item) => (
-      <SidebarMenuItem key={item.url}>
-        <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-          <Link to={item.url} onClick={() => isMobile && setOpenMobile(false)} className="flex items-center gap-2">
-            <item.icon className="h-4 w-4 shrink-0" />
-            <span className="truncate">{item.title}</span>
-          </Link>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-    ));
+    visible(items).map((item) => {
+      const active = isActive(item.url);
+      const isMessenger = item.url === "/messenger";
+      return (
+        <SidebarMenuItem key={item.url}>
+          <SidebarMenuButton
+            asChild
+            isActive={active}
+            tooltip={item.title}
+            className={`font-display text-[15px] tracking-tight transition-all duration-200 hover:translate-x-0.5 hover:scale-[1.02] ${
+              active
+                ? "bg-gradient-brand text-primary-foreground shadow-glow hover:bg-gradient-brand"
+                : ""
+            } ${isMessenger ? "hover:text-primary" : ""}`}
+          >
+            <Link to={item.url} onClick={() => isMobile && setOpenMobile(false)} className="flex items-center gap-2">
+              <item.icon className={`h-4 w-4 shrink-0 ${isMessenger && !active ? "text-primary" : ""}`} />
+              <span className="truncate">{item.title}</span>
+              {isMessenger && (
+                <span className="ml-auto rounded-full bg-primary/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary">
+                  Bot
+                </span>
+              )}
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      );
+    });
 
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border">
         <div className="flex items-center gap-2 px-2 py-2">
-          <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-gradient-to-br from-primary to-accent text-primary-foreground font-black">
+          <div className="wc-bounce-soft grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-brand text-primary-foreground font-display text-base shadow-glow">
             OG
           </div>
           <div className="flex min-w-0 flex-col">
-            <span className="truncate text-sm font-semibold">PORTAL</span>
-            <span className="truncate text-xs text-muted-foreground">by OG Streamz</span>
+            <span className="font-display truncate text-base leading-none tracking-tight">PORTAL</span>
+            <span className="truncate text-[10px] uppercase tracking-[0.18em] text-muted-foreground">by OG Streamz</span>
           </div>
         </div>
       </SidebarHeader>
