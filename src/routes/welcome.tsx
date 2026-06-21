@@ -88,9 +88,18 @@ const albumCovers = [
   },
 ];
 
+const PENDING_REF_KEY = "og_pending_ref";
+
 function useRedirectIfSignedIn() {
   const navigate = useNavigate();
   useEffect(() => {
+    // Capture ?ref=<uuid> from URL and stash for post-signup claim
+    if (typeof window !== "undefined") {
+      const ref = new URLSearchParams(window.location.search).get("ref");
+      if (ref && /^[0-9a-f-]{36}$/i.test(ref)) {
+        try { localStorage.setItem(PENDING_REF_KEY, ref); } catch { /* ignore */ }
+      }
+    }
     let cancelled = false;
     supabase.auth.getSession().then(({ data }) => {
       if (!cancelled && data.session) navigate({ to: "/", replace: true });
