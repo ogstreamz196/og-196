@@ -113,6 +113,11 @@ export function OgChat({
   const recorderRef = useRef<MediaRecorder | null>(null);
   const recordChunksRef = useRef<Blob[]>([]);
 
+  // Anti-flicker skeleton: stays visible at least 600ms once shown so quick
+  // replies don't pop in and out (matches Suno-style "cooking" feel).
+  const [showSkeleton, setShowSkeleton] = useState(false);
+  const recordChunksRef = useRef<Blob[]>([]);
+
 
 
 
