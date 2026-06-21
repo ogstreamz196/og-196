@@ -397,11 +397,29 @@ export function SongWorkspace({ song, onSaved }: Props) {
                       ? "Full HQ unlocked. Download as many times as you like."
                       : "Sample plays in the player above. Unlock once to download the full HQ track."}
                   </p>
+
+                  {!song.unlocked && balance < fullUnlockCost && (
+                    <div className="flex items-start gap-3 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
+                      <Coins className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+                      <div className="flex-1">
+                        <p className="font-semibold text-amber-100">
+                          You need {fullUnlockCost - balance} more coin{fullUnlockCost - balance === 1 ? "" : "s"} to unlock
+                        </p>
+                        <p className="text-xs text-amber-200/80">
+                          Balance: {balance} · Cost: {fullUnlockCost}
+                        </p>
+                      </div>
+                      <Button asChild size="sm" className="shrink-0">
+                        <Link to="/buy-coins">Top up</Link>
+                      </Button>
+                    </div>
+                  )}
+
                   <div className="flex flex-wrap justify-end gap-2">
                     <Button
                       variant="outline"
                       onClick={generatePreview}
-                      disabled={genPreview || isPending}
+                      disabled={genPreview || isPending || unlocking}
                     >
                       {genPreview ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
                       Regenerate sample
@@ -409,15 +427,26 @@ export function SongWorkspace({ song, onSaved }: Props) {
                         <Coins className="h-3 w-3" /> {previewCost}
                       </span>
                     </Button>
-                    <Button onClick={unlockFull} disabled={unlocking}>
-                      {unlocking ? <Loader2 className="h-4 w-4 animate-spin" /> : <Music2 className="h-4 w-4" />}
-                      {song.unlocked ? "Download full HQ" : `Unlock & download · ${fullUnlockCost}`}
+                    <Button
+                      onClick={unlockFull}
+                      disabled={unlocking || (!song.unlocked && balance < fullUnlockCost)}
+                      className="gap-2"
+                      aria-live="polite"
+                    >
+                      {unlocking ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          {song.unlocked ? "Preparing download…" : "Processing payment…"}
+                        </>
+                      ) : (
+                        <>
+                          <Music2 className="h-4 w-4" />
+                          {song.unlocked
+                            ? "Download full HQ"
+                            : `Unlock & download · ${fullUnlockCost} coins`}
+                        </>
+                      )}
                     </Button>
-                    {balance < fullUnlockCost && !song.unlocked && (
-                      <Button asChild variant="ghost" size="sm">
-                        <Link to="/buy-coins"><Coins className="h-4 w-4" /> Top up</Link>
-                      </Button>
-                    )}
                   </div>
                 </>
               )}
