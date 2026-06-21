@@ -464,6 +464,13 @@ function Pillars() {
   return (
     <section id="studio" className="relative">
       <div className="mx-auto max-w-6xl px-5 py-24 sm:px-8 lg:py-32">
+        <div id="sign-in" className="mx-auto mb-16 max-w-3xl scroll-mt-24">
+          <AuthButtons size="xl" />
+          <p className="mt-6 text-center text-lg font-bold text-foreground sm:text-xl">
+            Free to start — no card required
+          </p>
+        </div>
+
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-sm font-semibold uppercase tracking-[0.25em] text-muted-foreground">
             Prompt playground
