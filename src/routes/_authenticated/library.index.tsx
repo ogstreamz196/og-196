@@ -505,6 +505,12 @@ function LibraryPage() {
                 "Summer rooftop", "Last train home", "Glow-up season",
                 "City lights blur", "Toxic ex anthem", "Underdog story",
               ];
+              const LYRICS_SAMPLES = [
+                "[Verse]\nNeon on the windshield, city talking back\nMidnight running engines on the same old track\n\n[Chorus]\nDrive, drive, don't look behind\nLeave the noise, leave it all behind",
+                "[Verse]\nWoke up with the curtains screaming sunlight\nLast night's promises evaporate, alright\n\n[Chorus]\nSunday hangover, holding my head\nReplay the things that we should've said",
+                "[Verse]\nSpotlight hits, the crowd goes silent waiting\nEvery heartbeat in the room participating\n\n[Chorus]\nHands up, this is our anthem now\nWe rise, we shake, we take a bow",
+                "[Verse]\nI wrote your name on every page I'm turning\nStill the candle of your memory keeps burning\n\n[Chorus]\nLetter never sent, I read it every night\nWords I never said, the love I couldn't write",
+              ];
               const pick = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
               setTitle(pick(TITLES));
               setSelections({
@@ -514,6 +520,8 @@ function LibraryPage() {
                 theme: pick(POOLS.theme),
                 tempo: pick(POOLS.tempo),
               });
+              setLyrics(pick(LYRICS_SAMPLES));
+              setFoulMouth(Math.random() < 0.5);
               toast.success("Surprise prompt loaded");
             }}
             className="shrink-0 gap-1.5"
