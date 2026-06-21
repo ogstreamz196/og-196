@@ -162,7 +162,9 @@ export function AppShell({ children }: { children: ReactNode }) {
               </div>
             </main>
 
-            <OgFloatingWidget />
+            {/* OG chat lives in <OgBotWidget /> mounted by _authenticated/route.tsx.
+                The legacy <OgFloatingWidget /> was a UI-only scaffold and caused a
+                duplicate "failing to load" orb on every page. */}
           </div>
         </div>
       </SidebarProvider>
