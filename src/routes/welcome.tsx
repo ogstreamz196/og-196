@@ -273,21 +273,21 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
 
   return (
     <div className="w-full space-y-5">
-      <div className="relative mx-auto max-w-xl overflow-hidden rounded-3xl border-2 border-primary/50 bg-linear-to-br from-primary/25 via-primary/10 to-transparent px-5 py-5 text-center shadow-[0_12px_40px_-12px_rgba(59,130,246,0.55)]">
+      <div className="relative mx-auto max-w-xl overflow-hidden rounded-3xl border-2 border-primary/50 bg-linear-to-br from-primary/25 via-primary/10 to-transparent px-3 py-5 text-center shadow-[0_12px_40px_-12px_rgba(59,130,246,0.55)] sm:px-5">
         <div className="pointer-events-none absolute inset-x-0 -top-1/2 h-full animate-pulse bg-linear-to-b from-primary/20 to-transparent blur-2xl" aria-hidden />
-        <span className="relative inline-flex items-center gap-2 rounded-full border border-primary/60 bg-primary/20 px-3 py-1 text-xs font-black uppercase tracking-[0.2em] text-primary-foreground">
-          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[11px] font-black text-primary-foreground">1</span>
+        <span className="relative inline-flex items-center gap-1.5 rounded-full border border-primary/60 bg-primary/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-primary-foreground sm:gap-2 sm:px-3 sm:text-xs sm:tracking-[0.2em]">
+          <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-black text-primary-foreground sm:h-5 sm:w-5 sm:text-[11px]">1</span>
           Step 1
         </span>
-        <p className="relative mt-2 font-display text-3xl font-black uppercase leading-tight tracking-[0.04em] text-foreground sm:text-4xl md:text-5xl">
+        <p className="relative mt-2 font-display text-[clamp(1.6rem,8vw,3rem)] font-black uppercase leading-[1.05] tracking-[0.02em] text-foreground sm:text-4xl sm:tracking-[0.04em] md:text-5xl">
           <span aria-hidden>👇 </span>Select Your Device
         </p>
         <div className="relative mt-3 flex justify-center">
-          <span className="relative inline-flex items-center gap-2 rounded-full bg-amber-400 px-6 py-2.5 font-display text-2xl font-black uppercase tracking-[0.08em] text-black shadow-[0_0_0_4px_rgba(0,0,0,0.5),0_8px_24px_-4px_rgba(251,191,36,0.8)] ring-2 ring-amber-300 animate-pulse sm:text-3xl">
+          <span className="relative inline-flex max-w-full items-center gap-2 whitespace-nowrap rounded-full bg-amber-400 px-4 py-2 font-display text-[clamp(1.25rem,6.5vw,1.875rem)] font-black uppercase tracking-[0.04em] text-black shadow-[0_0_0_4px_rgba(0,0,0,0.5),0_8px_24px_-4px_rgba(251,191,36,0.8)] ring-2 ring-amber-300 animate-pulse sm:px-6 sm:py-2.5 sm:text-3xl sm:tracking-[0.08em]">
             <span aria-hidden>🚀</span> Start Now
           </span>
         </div>
-        <p className="relative mt-3 text-sm font-semibold uppercase tracking-[0.18em] text-foreground/80 sm:text-base">
+        <p className="relative mt-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-foreground/80 sm:text-base sm:tracking-[0.18em]">
           Pick the one you're using to sign in
         </p>
         <p className="relative mt-4 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-2.5 text-center text-sm font-bold text-amber-200">
