@@ -352,21 +352,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
                   <AlertCircle className="h-4 w-4" aria-hidden="true" /> {song.error_message || "Generation failed."}
                 </div>
               )}
-              {isReady && (
-                <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200">
-                  <span className="inline-flex items-center gap-2">
-                    <Check className="h-4 w-4" /> Preview ready
-                  </span>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                  >
-                    Jump to sample player
-                  </Button>
-                </div>
-              )}
+              {isReady && <InlineSamplePlayer songId={song.id} />}
               <div className="flex flex-wrap items-center justify-end gap-2">
                 <Button
                   onClick={generatePreview}
@@ -628,3 +614,82 @@ function GeneratingProgress({ sampleSeconds }: { sampleSeconds: number }) {
   );
 }
 
+
+/**
+ * Inline mini-player shown directly under the "Generate preview" button so
+ * the user can hear the freshly generated sample without scrolling up.
+ * Auto-loads the signed preview URL when the song becomes ready.
+ */
+function InlineSamplePlayer({ songId }: { songId: string }) {
+  const { data: settings } = useSettings();
+  const sampleSeconds = settings?.sample_seconds ?? 30;
+  const [url, setUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setError(null);
+    setUrl(null);
+    setLoading(true);
+    (async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke("song-url", {
+          body: { song_id: songId, mode: "preview" },
+        });
+        if (cancelled) return;
+        if (error || !data?.url) {
+          setError(invokeError(error, "Could not load preview"));
+        } else {
+          setUrl(data.url as string);
+        }
+      } catch (e) {
+        if (!cancelled) setError(e instanceof Error ? e.message : "Could not load preview");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [songId]);
+
+  // Enforce the sample-seconds cap so the inline player matches the top one.
+  useEffect(() => {
+    const el = audioRef.current;
+    if (!el) return;
+    const onTime = () => {
+      if (el.currentTime >= sampleSeconds) {
+        el.pause();
+        el.currentTime = sampleSeconds;
+      }
+    };
+    el.addEventListener("timeupdate", onTime);
+    return () => el.removeEventListener("timeupdate", onTime);
+  }, [sampleSeconds, url]);
+
+  return (
+    <div className="space-y-2 rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-3">
+      <div className="flex items-center gap-2 text-sm font-medium text-emerald-200">
+        <Check className="h-4 w-4" /> Preview ready · {sampleSeconds}s sample
+      </div>
+      {loading && (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading sample…
+        </div>
+      )}
+      {error && (
+        <div className="text-xs text-destructive">{error}</div>
+      )}
+      {url && (
+        <audio
+          ref={audioRef}
+          src={url}
+          controls
+          preload="auto"
+          className="w-full rounded-lg bg-black/30"
+          aria-label="Sample preview"
+        />
+      )}
+    </div>
+  );
+}
