@@ -198,13 +198,20 @@ export const createCustomCoinCheckoutSession = createServerFn({ method: "POST" }
       const description = `${coins} OG Coins (Custom)`;
       const session = await stripe.checkout.sessions.create({
         line_items: [{
+          // Use quantity = units so Stripe Checkout shows the line as
+          // "<units> × £0.99" (per-unit pricing) instead of a single
+          // opaque amount. The total still equals units * priceCents.
           price_data: {
             currency: "gbp",
-            product_data: { name: description },
-            unit_amount: amount,
+            product_data: {
+              name: `${CUSTOM_COIN_UNIT.coins}-coin top-up`,
+              description: `Each unit = ${CUSTOM_COIN_UNIT.coins} OG Coins`,
+            },
+            unit_amount: CUSTOM_COIN_UNIT.priceCents,
           },
-          quantity: 1,
+          quantity: data.units,
         }],
+
         mode: "payment",
         ui_mode: "embedded_page",
         return_url: data.returnUrl,
