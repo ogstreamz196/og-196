@@ -27,11 +27,14 @@ export const Route = createFileRoute("/_authenticated/")({
 
 function DashboardHome() {
   const { user } = useAuth();
+  const dev = useDevMode();
   const { data: profile } = useProfile();
   const { isVip } = useRole();
   const { data: recentSongs = [], isLoading: songsLoading } = useRecentSongs(user?.id);
 
-  const displayName = profile?.display_name?.trim() || user?.email?.split("@")[0] || "there";
+  const displayName = dev.isDev
+    ? "Developer"
+    : (profile?.display_name?.trim() || user?.email?.split("@")[0] || "there");
   const balance = profile?.coin_balance ?? 0;
   const hasSongs = recentSongs.length > 0;
 
