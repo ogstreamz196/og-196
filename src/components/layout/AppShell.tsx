@@ -56,6 +56,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const dev = useDevMode();
   const { isAdmin, isLoading: roleLoading } = useRole();
 
   async function handleSignOut() {
