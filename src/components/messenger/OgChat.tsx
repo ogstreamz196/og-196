@@ -484,10 +484,10 @@ export function OgChat({
             </div>
           );
         })}
-        {m.isPending && (
+        {showSkeleton && (
           <div className="flex items-end gap-3">
             <OgAvatar size={40} className="shrink-0 animate-pulse" />
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1.5 min-w-[60%] max-w-[78%]">
               <span className="px-2 text-[10px] font-black uppercase tracking-[0.18em] text-foreground/70">
                 OG Bot
               </span>
@@ -495,6 +495,12 @@ export function OgChat({
                 <span className="h-2 w-2 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]" />
                 <span className="h-2 w-2 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]" />
                 <span className="h-2 w-2 rounded-full bg-primary animate-bounce" />
+              </div>
+              {/* Shimmering bubble skeletons — Suno-style "still cooking" placeholders */}
+              <div className="space-y-1.5">
+                <div className="h-3 w-[85%] rounded-md bg-gradient-to-r from-muted via-muted/40 to-muted bg-[length:200%_100%] animate-[shimmer_1.6s_linear_infinite]" />
+                <div className="h-3 w-[70%] rounded-md bg-gradient-to-r from-muted via-muted/40 to-muted bg-[length:200%_100%] animate-[shimmer_1.6s_linear_infinite]" />
+                <div className="h-3 w-[55%] rounded-md bg-gradient-to-r from-muted via-muted/40 to-muted bg-[length:200%_100%] animate-[shimmer_1.6s_linear_infinite]" />
               </div>
             </div>
           </div>
