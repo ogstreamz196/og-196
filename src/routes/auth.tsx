@@ -128,9 +128,9 @@ function AuthPage() {
         <section className="flex items-center justify-center p-6 sm:p-12">
           <div className="w-full max-w-sm">
             <div className="mb-8 text-center lg:text-left">
-              <h2 className="text-2xl font-semibold tracking-tight">Welcome back</h2>
+              <h2 className="text-2xl font-semibold tracking-tight">Jump in</h2>
               <p className="mt-2 text-sm text-muted-foreground">
-                Sign in to access Music Hub, OG Messenger and your assistant.
+                One tap and you're in — 5 free coins waiting on the other side.
               </p>
             </div>
 
@@ -145,7 +145,7 @@ function AuthPage() {
                 ) : (
                   <GoogleIcon />
                 )}
-                  Sign in with Google
+                  Continue with Google
               </Button>
 
               <Button
@@ -172,11 +172,13 @@ function AuthPage() {
               </div>
             )}
 
-            <div className="mt-8 flex items-start gap-2 text-xs text-muted-foreground">
-              <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-              <p>
-                By continuing, you agree to our Terms and acknowledge our Privacy Policy.
-                No passwords. No spam.
+            <div className="mt-8 space-y-2 text-xs text-muted-foreground">
+              <div className="flex items-start gap-2">
+                <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                <p>We only see your name and email. No posting, no contacts, no nonsense.</p>
+              </div>
+              <p className="pl-5 text-[11px] opacity-70">
+                Continuing means you're cool with our Terms &amp; Privacy.
               </p>
             </div>
           </div>
