@@ -175,62 +175,53 @@ function IPhoneIcon({ className }: { className?: string }) {
 
 function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
   const { signIn, pending } = useOAuthSignIn();
-  const h = size === "xl" ? "h-28" : "h-24";
+  const h = size === "xl" ? "h-32" : "h-28";
   const silver =
     "bg-[linear-gradient(180deg,#fdfdfd_0%,#e8eaed_50%,#c8ccd1_100%)] border border-[#b5b9be] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_2px_6px_rgba(0,0,0,0.25)] hover:brightness-[1.03] active:brightness-95";
+
+  const devices: Array<{
+    key: string;
+    label: string;
+    provider: OAuthProvider;
+    Icon: (p: { className?: string }) => JSX.Element;
+    iconClass?: string;
+  }> = [
+    { key: "google", label: "Google", provider: "google", Icon: GoogleIcon },
+    { key: "android", label: "Android", provider: "google", Icon: AndroidIcon },
+    { key: "samsung", label: "Samsung", provider: "google", Icon: SamsungIcon },
+    { key: "apple", label: "Apple ID", provider: "apple", Icon: (p) => <AppleIcon {...p} />, iconClass: "text-[#1f1f1f]" },
+    { key: "iphone", label: "iPhone / iPad", provider: "apple", Icon: IPhoneIcon },
+  ];
+
   return (
     <div className="w-full space-y-3">
       <p className="text-center text-sm font-bold uppercase tracking-[0.2em] text-foreground/80">
-        Pick your device to continue
+        Tap your device to continue
       </p>
-      <div className="grid w-full gap-3 sm:grid-cols-2">
-        <button
-          onClick={() => signIn("google")}
-          disabled={pending !== null}
-          style={{ fontFamily: '"Roboto", "Helvetica Neue", Arial, sans-serif' }}
-          className={`${h} ${silver} group inline-flex flex-col items-center justify-center gap-1.5 rounded-2xl px-5 text-[#1f1f1f] transition disabled:opacity-70 disabled:cursor-wait`}
-          aria-label="Sign in with Google for Android, Samsung and Pixel phones"
-        >
-          <div className="flex h-10 items-center justify-center gap-3">
-            {pending === "google" ? (
-              <Loader2 className="h-9 w-9 animate-spin" />
-            ) : (
-              <>
-                <GoogleIcon className="h-9 w-9" />
-                <span className="h-7 w-px bg-[#b5b9be]" />
-                <AndroidIcon className="h-9 w-9" />
-                <SamsungIcon className="h-9 w-9" />
-              </>
-            )}
-          </div>
-          <span className="text-base font-semibold tracking-tight">Sign in with Google</span>
-          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#5f6368]">
-            Android · Samsung · Pixel
-          </span>
-        </button>
-        <button
-          onClick={() => signIn("apple")}
-          disabled={pending !== null}
-          style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif' }}
-          className={`${h} ${silver} group inline-flex flex-col items-center justify-center gap-1.5 rounded-2xl px-5 text-[#1f1f1f] transition disabled:opacity-70 disabled:cursor-wait`}
-          aria-label="Sign in with Apple for iPhone and iPad"
-        >
-          <div className="flex h-10 items-center justify-center gap-3">
-            {pending === "apple" ? (
-              <Loader2 className="h-9 w-9 animate-spin" />
-            ) : (
-              <>
-                <AppleIcon className="h-9 w-9 text-[#1f1f1f]" />
-                <span className="h-7 w-px bg-[#b5b9be]" />
-                <IPhoneIcon className="h-9 w-9" />
-              </>
-            )}
-          </div>
-          <span className="text-base font-semibold tracking-tight">Sign in with Apple</span>
-          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#5f6368]">
-            iPhone · iPad
-          </span>
-        </button>
+      <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-5">
+        {devices.map((d) => {
+          const isPending = pending === d.provider;
+          const sub = d.provider === "google" ? "Sign in with Google" : "Sign in with Apple";
+          return (
+            <button
+              key={d.key}
+              onClick={() => signIn(d.provider)}
+              disabled={pending !== null}
+              aria-label={`${d.label} — ${sub}`}
+              className={`${h} ${silver} group inline-flex flex-col items-center justify-center gap-1.5 rounded-2xl px-3 text-[#1f1f1f] transition disabled:opacity-70 disabled:cursor-wait`}
+            >
+              {isPending ? (
+                <Loader2 className="h-9 w-9 animate-spin" />
+              ) : (
+                <d.Icon className={`h-10 w-10 ${d.iconClass ?? ""}`} />
+              )}
+              <span className="text-sm font-bold tracking-tight">{d.label}</span>
+              <span className="text-[9px] font-semibold uppercase tracking-[0.16em] text-[#5f6368]">
+                {sub}
+              </span>
+            </button>
+          );
+        })}
       </div>
       <p className="rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-2.5 text-center text-sm font-bold text-amber-200">
         ⚠️ Tap <span className="underline">Allow</span> / <span className="underline">Accept</span> on every prompt that appears after picking your device.
