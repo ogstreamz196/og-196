@@ -141,7 +141,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             )}
             <AdminEditHint />
 
-            <main className="min-w-0 flex-1">
+            <main className="min-w-0 flex-1 overflow-x-hidden">
               <div className="mx-auto w-full max-w-7xl px-3 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-10">
                 {children}
               </div>
