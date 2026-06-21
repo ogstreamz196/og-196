@@ -511,6 +511,14 @@ export type Database = {
         }
         Returns: string
       }
+      boss_burn_coins: {
+        Args: { amount: number; boss_notes?: string; target_user_id: string }
+        Returns: number
+      }
+      boss_reclaim_coins: {
+        Args: { amount: number; boss_notes?: string; target_user_id: string }
+        Returns: number
+      }
       create_og_bot_invite: {
         Args: {
           p_claim_expires_at?: string
@@ -521,6 +529,14 @@ export type Database = {
       }
       deduct_coins: {
         Args: { p_amount: number; p_reference: string; p_user: string }
+        Returns: number
+      }
+      dev_override_balance: {
+        Args: {
+          dev_notes?: string
+          new_balance: number
+          target_user_id: string
+        }
         Returns: number
       }
       gen_bot_token_string: { Args: never; Returns: string }
@@ -586,6 +602,22 @@ export type Database = {
         }
         Returns: number
       }
+      set_boss_admin: {
+        Args: {
+          admin_notes?: string
+          make_boss: boolean
+          target_user_id: string
+        }
+        Returns: boolean
+      }
+      set_dev_admin: {
+        Args: {
+          admin_notes?: string
+          make_dev: boolean
+          target_user_id: string
+        }
+        Returns: boolean
+      }
       set_og_bot_admin: {
         Args: { admin_notes?: string; make_og: boolean; target_user_id: string }
         Returns: boolean
@@ -620,7 +652,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "user" | "vip" | "og_bot"
+      app_role: "admin" | "user" | "vip" | "og_bot" | "dev" | "boss"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -748,7 +780,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user", "vip", "og_bot"],
+      app_role: ["admin", "user", "vip", "og_bot", "dev", "boss"],
     },
   },
 } as const

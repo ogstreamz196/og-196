@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { UserAuditTrail } from "@/components/admin/UserAuditTrail";
+import { DevBossPanel } from "@/components/admin/DevBossPanel";
+import { Wrench, Flame } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/users/$userId")({
@@ -254,6 +256,29 @@ function UserSettingsPage() {
             paramKey="make_og"
           />
 
+          <RoleToggleRow
+            icon={<Wrench className="h-5 w-5 text-sky-500" />}
+            title="Dev"
+            description="Can manually override any user's coin balance."
+            checked={roles.includes("dev")}
+            userId={profile.id}
+            role="dev"
+            rpc="set_dev_admin"
+            paramKey="make_dev"
+          />
+
+          <RoleToggleRow
+            icon={<Flame className="h-5 w-5 text-orange-500" />}
+            title="Boss"
+            description="Can burn or reclaim OG coins from any user."
+            checked={roles.includes("boss")}
+            userId={profile.id}
+            role="boss"
+            rpc="set_boss_admin"
+            paramKey="make_boss"
+          />
+
+
           <div className="flex items-center justify-between rounded-xl border border-border bg-background/40 p-4 opacity-80">
             <div className="flex items-center gap-3">
               <ShieldCheck className="h-5 w-5 text-primary" />
@@ -336,6 +361,8 @@ function UserSettingsPage() {
         </section>
 
         {/* Audit */}
+        <DevBossPanel targetUserId={profile.id} currentBalance={profile.coin_balance ?? 0} />
+
         <UserAuditTrail userId={profile.id} email={profile.email} />
       </div>
     </DashboardShell>
@@ -358,8 +385,8 @@ interface RoleToggleRowProps {
   checked: boolean;
   userId: string;
   role: string;
-  rpc: "set_vip_admin" | "set_og_bot_admin";
-  paramKey: "make_vip" | "make_og";
+  rpc: "set_vip_admin" | "set_og_bot_admin" | "set_dev_admin" | "set_boss_admin";
+  paramKey: "make_vip" | "make_og" | "make_dev" | "make_boss";
 }
 
 function RoleToggleRow({ icon, title, description, checked, userId, role: _role, rpc, paramKey }: RoleToggleRowProps) {
