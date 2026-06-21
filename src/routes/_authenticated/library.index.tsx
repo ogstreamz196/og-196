@@ -16,6 +16,7 @@ import {
   Gauge,
   Mic2,
   Music4,
+  Shuffle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
