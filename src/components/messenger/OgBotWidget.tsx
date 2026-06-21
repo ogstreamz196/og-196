@@ -49,6 +49,8 @@ function buildQuickPrompts(
     { label: "🎚️ Suno prompt only", prompt: "I just need a Suno-ready prompt. Ask key details, then output one tight prompt." },
   ];
 }
+/**
+ * Floating, draggable OG Bot widget. Mounted site-wide on authenticated
  * routes. Drag the orb anywhere; position is remembered for the session.
  * Hidden on the dedicated /messenger page so we don't stack two chats.
  * Can be opened from anywhere via `ogWidget.open(seed?)`.
