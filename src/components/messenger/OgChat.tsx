@@ -98,6 +98,8 @@ export function OgChat({
   const { foulMouth } = useFoulMouth();
   const setFoulMouth = useSetFoulMouth();
   const { mode, toggle: toggleMode } = useOgMode();
+  const { isVip } = useRole();
+
 
   useEffect(() => {
     setMessages(loadThread(userId));
