@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2, ShieldCheck, RefreshCw, Lock, Unlock, Music2, Save, Coins } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { maskDevIdentity } from "@/lib/dev-identity";
 import { useRole } from "@/hooks/use-role";
 import { useSettings } from "@/hooks/use-settings";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
@@ -61,7 +62,10 @@ function AdminPanel() {
       if (userIds.length) {
         const { data: profs } = await supabase
           .from("profiles").select("id, email, display_name, coin_balance").in("id", userIds);
-        map = new Map((profs ?? []).map((p: any) => [p.id, { email: p.email, display_name: p.display_name, coin_balance: p.coin_balance }]));
+        map = new Map((profs ?? []).map((p: any) => {
+          const m = maskDevIdentity({ email: p.email, display_name: p.display_name });
+          return [p.id, { email: m.email, display_name: m.display_name, coin_balance: p.coin_balance }];
+        }));
       }
       return list.map((s) => ({
         ...s,

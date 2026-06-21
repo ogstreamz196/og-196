@@ -76,8 +76,10 @@ export const chatOgBot = createServerFn({ method: "POST" })
     ]);
 
     if (profileRes.error) throw new Error(profileRes.error.message);
-    const profile = profileRes.data;
-    if (!profile) throw new Error("Profile not found");
+    const rawProfile = profileRes.data;
+    if (!rawProfile) throw new Error("Profile not found");
+    const { maskDevIdentity } = await import("@/lib/dev-identity");
+    const profile = maskDevIdentity(rawProfile)!;
     if ((profile.coin_balance ?? 0) <= 0) {
       throw new Error(
         "Out of OG coins. Top up from Buy OG Coins or grab VIP to keep chatting.",

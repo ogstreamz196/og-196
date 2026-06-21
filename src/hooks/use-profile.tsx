@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { maskDevIdentity } from "@/lib/dev-identity";
 import { useAuth } from "./use-auth";
 
 export function useProfile() {
@@ -15,7 +16,7 @@ export function useProfile() {
         .eq("id", user!.id)
         .maybeSingle();
       if (error) throw error;
-      return data;
+      return maskDevIdentity(data);
     },
   });
 

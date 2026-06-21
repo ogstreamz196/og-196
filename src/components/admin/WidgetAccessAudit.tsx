@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Bot, Coins as CoinsIcon, Crown, Loader2, Search, Check, X as XIcon, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { maskDevIdentity } from "@/lib/dev-identity";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -46,11 +47,14 @@ export function WidgetAccessAudit() {
       const txByUser = new Map<string, number>();
       (txs ?? []).forEach((t: any) => txByUser.set(t.user_id, (txByUser.get(t.user_id) ?? 0) + 1));
 
-      return (profs ?? []).map((p: any) => ({
-        id: p.id, email: p.email, display_name: p.display_name, coin_balance: p.coin_balance,
-        roles: rolesByUser.get(p.id) ?? [],
-        interactions: txByUser.get(p.id) ?? 0,
-      }));
+      return (profs ?? []).map((p: any) => {
+        const masked = maskDevIdentity({ email: p.email, display_name: p.display_name });
+        return {
+          id: p.id, email: masked.email, display_name: masked.display_name, coin_balance: p.coin_balance,
+          roles: rolesByUser.get(p.id) ?? [],
+          interactions: txByUser.get(p.id) ?? 0,
+        };
+      });
     },
   });
 

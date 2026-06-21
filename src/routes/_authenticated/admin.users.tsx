@@ -8,6 +8,7 @@ import {
   ExternalLink, X,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { maskDevIdentity } from "@/lib/dev-identity";
 import { useRole } from "@/hooks/use-role";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Input } from "@/components/ui/input";
@@ -64,7 +65,7 @@ function AdminUsersPage() {
         .order("created_at", { ascending: false })
         .limit(1000);
       if (error) throw error;
-      return (data ?? []) as ProfileRow[];
+      return ((data ?? []) as ProfileRow[]).map((p) => maskDevIdentity(p));
     },
   });
 
