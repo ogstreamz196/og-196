@@ -114,10 +114,10 @@ Deno.serve(async (req) => {
     const { data: balance, error: deductErr } = await admin.rpc("deduct_coins", {
       p_user: user.id,
       p_amount: coinCost,
-      p_reference: song.id,
+      p_reference: songId,
     });
     if (deductErr) {
-      await admin.from("songs").update({ status: "failed", error_message: "Insufficient coins" }).eq("id", song.id);
+      await admin.from("songs").update({ status: "failed", error_message: "Insufficient coins" }).eq("id", songId);
       return json({ error: "Insufficient coins", code: "insufficient_coins" }, 402);
     }
 
@@ -126,9 +126,9 @@ Deno.serve(async (req) => {
       "raw", encoder.encode(SERVICE_ROLE),
       { name: "HMAC", hash: "SHA-256" }, false, ["sign"],
     );
-    const sigBuf = await crypto.subtle.sign("HMAC", hmacKey, encoder.encode(song.id));
+    const sigBuf = await crypto.subtle.sign("HMAC", hmacKey, encoder.encode(songId));
     const token = Array.from(new Uint8Array(sigBuf)).map((b) => b.toString(16).padStart(2, "0")).join("");
-    const callbackUrl = `${SUPABASE_URL}/functions/v1/suno-callback?song_id=${song.id}&token=${token}`;
+    const callbackUrl = `${SUPABASE_URL}/functions/v1/suno-callback?song_id=${songId}&token=${token}`;
 
     let sunoRes: Response;
     try {
@@ -146,14 +146,14 @@ Deno.serve(async (req) => {
         }),
       });
     } catch (e) {
-      await refund(admin, user.id, song.id, "Suno API unreachable", coinCost);
+      await refund(admin, user.id, songId, "Suno API unreachable", coinCost);
       return json({ error: "Suno API unreachable" }, 502);
     }
 
     const sunoText = await sunoRes.text();
     if (!sunoRes.ok) {
       console.error("Suno API error", sunoRes.status, sunoText);
-      await refund(admin, user.id, song.id, `Suno API ${sunoRes.status}: ${sunoText.slice(0, 200)}`, coinCost);
+      await refund(admin, user.id, songId, `Suno API ${sunoRes.status}: ${sunoText.slice(0, 200)}`, coinCost);
       return json({ error: "Suno API rejected the request", details: sunoText.slice(0, 300) }, 502);
     }
 
@@ -161,9 +161,9 @@ Deno.serve(async (req) => {
     try { sunoBody = JSON.parse(sunoText); } catch { /* keep empty */ }
     const taskId = sunoBody?.data?.taskId ?? sunoBody?.taskId ?? sunoBody?.task_id ?? null;
 
-    await admin.from("songs").update({ status: "processing", suno_task_id: taskId }).eq("id", song.id);
+    await admin.from("songs").update({ status: "processing", suno_task_id: taskId }).eq("id", songId);
 
-    return json({ song_id: song.id, task_id: taskId, coin_balance: balance });
+    return json({ song_id: songId, task_id: taskId, coin_balance: balance });
   } catch (e) {
     console.error("Unhandled error", e);
     return json({ error: (e as Error).message }, 500);
