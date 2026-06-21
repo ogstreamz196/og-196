@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import ReactMarkdown from "react-markdown";
-import { Send, Trash2, Sparkles, Skull, ShieldCheck, UploadCloud, Mic, RotateCcw, Crown } from "lucide-react";
+import { Send, Trash2, Sparkles, Skull, ShieldCheck, UploadCloud, Mic, MicOff, RotateCcw, Crown, X, Loader2 } from "lucide-react";
 import { chatOgBot, type OgChatMessage } from "@/lib/og-messenger.functions";
+import { transcribeOgAudio } from "@/lib/og-transcribe.functions";
 import { QUICK_STARTS } from "@/lib/og-persona";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -99,6 +100,17 @@ export function OgChat({
   const setFoulMouth = useSetFoulMouth();
   const { mode, toggle: toggleMode } = useOgMode();
   const { isVip } = useRole();
+  const transcribe = useServerFn(transcribeOgAudio);
+
+  // Attachment + mic state
+  const [attachment, setAttachment] = useState<{ dataUrl: string; name: string } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [recording, setRecording] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const recordChunksRef = useRef<Blob[]>([]);
+
+
 
 
   useEffect(() => {
@@ -147,12 +159,13 @@ export function OgChat({
   }, [userId]);
 
   const m = useMutation({
-    mutationFn: async (history: OgChatMessage[]) =>
+    mutationFn: async (args: { history: OgChatMessage[]; attachmentDataUrl?: string }) =>
       chat({
         data: {
-          messages: history,
+          messages: args.history,
           mode,
           pageContext: typeof window !== "undefined" ? window.location.pathname : "",
+          attachmentDataUrl: args.attachmentDataUrl,
         },
       }),
     onSuccess: (res) => {
@@ -176,18 +189,23 @@ export function OgChat({
 
   function sendText(text: string) {
     const t = text.trim();
-    if (!t || m.isPending) return;
+    const att = attachment;
+    if (!t && !att) return;
+    if (m.isPending) return;
     if (!user) return toast.error("Sign in to chat with OG Bot.");
     if ((profile?.coin_balance ?? 0) <= 0) {
       return toast.error("You're out of OG coins. Top up to keep chatting.");
     }
-    const next = [...messages, { role: "user" as const, content: t }];
+    const visibleText = t || (att ? `📎 ${att.name}` : "");
+    const next = [...messages, { role: "user" as const, content: visibleText }];
     setMessages(next);
     selfSyncRef.current = true;
     window.dispatchEvent(new Event(SYNC_EVENT));
     setInput("");
-    m.mutate(next);
+    setAttachment(null);
+    m.mutate({ history: next, attachmentDataUrl: att?.dataUrl });
   }
+
 
   function clearChat() {
     setMessages([]);
@@ -205,6 +223,82 @@ export function OgChat({
       toast.error((e as Error).message);
     }
   }
+
+  async function handleFile(file: File) {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      return toast.error("Only images are supported right now.");
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      return toast.error("Image too large (max 5MB).");
+    }
+    const dataUrl: string = await new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(String(r.result));
+      r.onerror = () => reject(new Error("Could not read file"));
+      r.readAsDataURL(file);
+    });
+    setAttachment({ dataUrl, name: file.name });
+  }
+
+  async function startRecording() {
+    if (recording || transcribing) return;
+    if (!user) return toast.error("Sign in to use voice.");
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mimeType = ["audio/webm", "audio/mp4"].find((t) => MediaRecorder.isTypeSupported(t)) ?? "";
+      const rec = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+      recordChunksRef.current = [];
+      rec.ondataavailable = (e) => e.data.size > 0 && recordChunksRef.current.push(e.data);
+      rec.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        const blob = new Blob(recordChunksRef.current, { type: rec.mimeType || "audio/webm" });
+        recordChunksRef.current = [];
+        if (blob.size < 1024) {
+          toast.error("That clip was empty — try again.");
+          return;
+        }
+        setTranscribing(true);
+        try {
+          const buf = await blob.arrayBuffer();
+          // Browser-safe base64 encode
+          let binary = "";
+          const bytes = new Uint8Array(buf);
+          const chunk = 0x8000;
+          for (let i = 0; i < bytes.length; i += chunk) {
+            binary += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + chunk)));
+          }
+          const audioBase64 = btoa(binary);
+          const res = await transcribe({ data: { audioBase64, mime: blob.type } });
+          const text = res.text?.trim();
+          if (text) {
+            setInput((cur) => (cur ? `${cur} ${text}` : text));
+            setTimeout(() => inputRef.current?.focus(), 0);
+          } else {
+            toast.message("Didn't catch that — try again.");
+          }
+        } catch (e) {
+          toast.error((e as Error).message);
+        } finally {
+          setTranscribing(false);
+        }
+      };
+      rec.start();
+      recorderRef.current = rec;
+      setRecording(true);
+    } catch {
+      toast.error("Microphone access denied.");
+    }
+  }
+
+  function stopRecording() {
+    const rec = recorderRef.current;
+    if (rec && rec.state !== "inactive") rec.stop();
+    recorderRef.current = null;
+    setRecording(false);
+  }
+
+
 
   const balance = profile?.coin_balance ?? 0;
   const isOut = balance <= 0;
@@ -406,18 +500,47 @@ export function OgChat({
         }}
         className="flex flex-col gap-2 border-t border-border p-3"
       >
+        {attachment && (
+          <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 p-2">
+            <img src={attachment.dataUrl} alt="" className="h-12 w-12 rounded object-cover" />
+            <span className="flex-1 truncate text-xs text-muted-foreground">{attachment.name}</span>
+            <button
+              type="button"
+              onClick={() => setAttachment(null)}
+              className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+              aria-label="Remove attachment"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) handleFile(f);
+            e.target.value = "";
+          }}
+        />
         <Input
           ref={inputRef}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={
-            isOut
-              ? "Out of coins — top up to chat"
-              : foulActive
-                ? "Go on then, type something…"
-                : "Message OG Bot…"
+            transcribing
+              ? "Transcribing…"
+              : recording
+                ? "Listening… tap mic to stop"
+                : isOut
+                  ? "Out of coins — top up to chat"
+                  : foulActive
+                    ? "Go on then, type something…"
+                    : "Message OG Bot…"
           }
-          disabled={m.isPending || isOut || !user}
+          disabled={m.isPending || isOut || !user || transcribing}
           maxLength={2000}
           autoFocus
         />
@@ -426,21 +549,29 @@ export function OgChat({
             type="button"
             variant="outline"
             size="icon"
-            onClick={() => toast.message("Attachments coming soon")}
-            aria-label="Attach file"
-            title="Attach file"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={!user || m.isPending}
+            aria-label="Attach image"
+            title="Attach image"
           >
             <UploadCloud className="h-4 w-4" />
           </Button>
           <Button
             type="button"
-            variant="outline"
+            variant={recording ? "destructive" : "outline"}
             size="icon"
-            onClick={() => toast.message("Voice input coming soon")}
-            aria-label="Voice input"
-            title="Voice input"
+            onClick={recording ? stopRecording : startRecording}
+            disabled={!user || m.isPending || transcribing}
+            aria-label={recording ? "Stop recording" : "Voice input"}
+            title={recording ? "Stop recording" : "Voice input"}
           >
-            <Mic className="h-4 w-4" />
+            {transcribing ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : recording ? (
+              <MicOff className="h-4 w-4" />
+            ) : (
+              <Mic className="h-4 w-4" />
+            )}
           </Button>
           <Button
             type="button"
@@ -457,7 +588,7 @@ export function OgChat({
           <div className="ml-auto">
             <Button
               type="submit"
-              disabled={m.isPending || !input.trim() || isOut || !user}
+              disabled={m.isPending || (!input.trim() && !attachment) || isOut || !user}
               aria-label="Send"
               className="gap-2"
             >
@@ -466,6 +597,7 @@ export function OgChat({
           </div>
         </div>
       </form>
+
 
     </div>
   );

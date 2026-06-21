@@ -22,7 +22,7 @@ interface ChatReply {
  */
 export const chatOgBot = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { messages: OgChatMessage[]; pageContext?: string; mode?: "safe" | "og" }) => {
+  .inputValidator((data: { messages: OgChatMessage[]; pageContext?: string; mode?: "safe" | "og"; attachmentDataUrl?: string }) => {
     if (!data || !Array.isArray(data.messages)) throw new Error("messages required");
     const messages = data.messages.slice(-30).map((m) => ({
       role: m.role === "assistant" ? "assistant" as const : "user" as const,
@@ -32,7 +32,12 @@ export const chatOgBot = createServerFn({ method: "POST" })
     const pageContext =
       typeof data.pageContext === "string" ? data.pageContext.slice(0, 200) : "";
     const mode: "safe" | "og" = data.mode === "safe" ? "safe" : "og";
-    return { messages, pageContext, mode };
+    let attachmentDataUrl: string | undefined;
+    if (typeof data.attachmentDataUrl === "string" && data.attachmentDataUrl.startsWith("data:image/")) {
+      if (data.attachmentDataUrl.length > 8_000_000) throw new Error("Image too large (max ~6MB).");
+      attachmentDataUrl = data.attachmentDataUrl;
+    }
+    return { messages, pageContext, mode, attachmentDataUrl };
   })
   .handler(async ({ data, context }): Promise<ChatReply> => {
     const apiKey = process.env.LOVABLE_API_KEY;
@@ -162,7 +167,18 @@ export const chatOgBot = createServerFn({ method: "POST" })
           temperature: data.mode === "og" && foulMouth ? 0.9 : data.mode === "og" ? 0.75 : 0.6,
           messages: [
             { role: "system", content: system },
-            ...outgoing,
+            ...outgoing.slice(0, -1),
+            // Last user message: if an image attachment was sent, build a
+            // multimodal content array so Gemini can actually see the image.
+            data.attachmentDataUrl && outgoing.at(-1)?.role === "user"
+              ? {
+                  role: "user" as const,
+                  content: [
+                    { type: "text", text: outgoing.at(-1)!.content || "What's in this image?" },
+                    { type: "image_url", image_url: { url: data.attachmentDataUrl } },
+                  ],
+                }
+              : outgoing.at(-1)!,
           ],
         }),
       });
