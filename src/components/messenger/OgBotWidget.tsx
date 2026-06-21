@@ -142,7 +142,7 @@ export function OgBotWidget() {
               <span className="text-sm font-semibold">OG Bot</span>
             </div>
             <button
-              onClick={() => setOpen(false)}
+              onClick={() => { setOpen(false); ogWidget.close(); }}
               className="rounded-md p-1 transition-colors hover:bg-white/10"
               aria-label="Close OG Bot"
             >
@@ -150,7 +150,7 @@ export function OgBotWidget() {
             </button>
           </div>
           <div className="h-[calc(100%-44px)]">
-            <OgChat compact showHeader />
+            <OgChat compact showHeader seed={external.open ? external.seed : null} />
           </div>
         </div>
       )}
