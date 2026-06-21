@@ -136,9 +136,38 @@ function AppleIcon({ className }: { className?: string }) {
   );
 }
 
+function AndroidIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden fill="#3DDC84">
+      <path d="M17.6 9.48l1.84-3.18c.16-.31.04-.69-.26-.85-.29-.15-.65-.06-.83.22l-1.88 3.24a11.43 11.43 0 0 0-8.94 0L5.65 5.67a.61.61 0 0 0-.83-.22c-.3.16-.42.54-.26.85L6.4 9.48A10.78 10.78 0 0 0 1 18h22a10.78 10.78 0 0 0-5.4-8.52zM7 15.25a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5zm10 0a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5z"/>
+    </svg>
+  );
+}
+
+function SamsungIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden>
+      <rect x="6" y="2" width="12" height="20" rx="2.5" fill="#1428A0"/>
+      <rect x="7.25" y="4" width="9.5" height="14" rx="0.6" fill="#0a1a6e"/>
+      <circle cx="12" cy="20" r="0.7" fill="#fff"/>
+    </svg>
+  );
+}
+
+function IPhoneIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden>
+      <rect x="6" y="2" width="12" height="20" rx="2.8" fill="#1a1a1a" stroke="#444" strokeWidth="0.5"/>
+      <rect x="7.25" y="4.5" width="9.5" height="13.5" rx="0.6" fill="#0d1117"/>
+      <rect x="10.5" y="3" width="3" height="0.7" rx="0.35" fill="#2a2a2a"/>
+      <circle cx="12" cy="20.2" r="0.6" fill="#2a2a2a"/>
+    </svg>
+  );
+}
+
 function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
   const { signIn, pending } = useOAuthSignIn();
-  const h = size === "xl" ? "h-24" : "h-20";
+  const h = size === "xl" ? "h-28" : "h-24";
   const silver =
     "bg-[linear-gradient(180deg,#fdfdfd_0%,#e8eaed_50%,#c8ccd1_100%)] border border-[#b5b9be] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_2px_6px_rgba(0,0,0,0.25)] hover:brightness-[1.03] active:brightness-95";
   return (
@@ -151,36 +180,47 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
           onClick={() => signIn("google")}
           disabled={pending !== null}
           style={{ fontFamily: '"Roboto", "Helvetica Neue", Arial, sans-serif' }}
-          className={`${h} ${silver} group inline-flex flex-col items-center justify-center gap-1 rounded-2xl px-5 text-[#1f1f1f] transition disabled:opacity-70 disabled:cursor-wait`}
+          className={`${h} ${silver} group inline-flex flex-col items-center justify-center gap-1.5 rounded-2xl px-5 text-[#1f1f1f] transition disabled:opacity-70 disabled:cursor-wait`}
+          aria-label="Sign in with Google for Android, Samsung and Pixel phones"
         >
-          <div className="flex items-center gap-3">
+          <div className="flex h-10 items-center justify-center gap-3">
             {pending === "google" ? (
-              <Loader2 className="h-8 w-8 animate-spin" />
+              <Loader2 className="h-9 w-9 animate-spin" />
             ) : (
-              <GoogleIcon className="h-9 w-9" />
+              <>
+                <GoogleIcon className="h-9 w-9" />
+                <span className="h-7 w-px bg-[#b5b9be]" />
+                <AndroidIcon className="h-9 w-9" />
+                <SamsungIcon className="h-9 w-9" />
+              </>
             )}
-            <span className="text-xl font-semibold tracking-tight">Sign in with Google</span>
           </div>
-          <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#5f6368]">
-            Android phone
+          <span className="text-base font-semibold tracking-tight">Sign in with Google</span>
+          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#5f6368]">
+            Android · Samsung · Pixel
           </span>
         </button>
         <button
           onClick={() => signIn("apple")}
           disabled={pending !== null}
           style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif' }}
-          className={`${h} ${silver} group inline-flex flex-col items-center justify-center gap-1 rounded-2xl px-5 text-[#1f1f1f] transition disabled:opacity-70 disabled:cursor-wait`}
+          className={`${h} ${silver} group inline-flex flex-col items-center justify-center gap-1.5 rounded-2xl px-5 text-[#1f1f1f] transition disabled:opacity-70 disabled:cursor-wait`}
+          aria-label="Sign in with Apple for iPhone and iPad"
         >
-          <div className="flex items-center gap-3">
+          <div className="flex h-10 items-center justify-center gap-3">
             {pending === "apple" ? (
-              <Loader2 className="h-8 w-8 animate-spin" />
+              <Loader2 className="h-9 w-9 animate-spin" />
             ) : (
-              <AppleIcon className="h-9 w-9" />
+              <>
+                <AppleIcon className="h-9 w-9 text-[#1f1f1f]" />
+                <span className="h-7 w-px bg-[#b5b9be]" />
+                <IPhoneIcon className="h-9 w-9" />
+              </>
             )}
-            <span className="text-xl font-semibold tracking-tight">Sign in with Apple</span>
           </div>
-          <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#5f6368]">
-            iPhone / iPad
+          <span className="text-base font-semibold tracking-tight">Sign in with Apple</span>
+          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#5f6368]">
+            iPhone · iPad
           </span>
         </button>
       </div>
@@ -190,6 +230,7 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
     </div>
   );
 }
+
 
 
 function WelcomePage() {
