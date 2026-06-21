@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Coins, Check, ArrowLeft, Crown, Star, Zap, ShieldCheck, Lock, Sparkles } from "lucide-react";
+import { Coins, Check, ArrowLeft, Crown, Star, Zap, ShieldCheck, Lock, Sparkles, MessageSquare, Music2, Wand2, Infinity as InfinityIcon, TrendingDown, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { EditableContent } from "@/components/admin/EditableContent";
