@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
 import { ensureCurrentUserBootstrap } from "@/lib/user-bootstrap.functions";
 import { useSiteContentRealtime } from "@/hooks/use-site-content";
+import { DisplayPrefsBridge } from "@/hooks/use-display-prefs";
 
 function NotFoundComponent() {
   return (
@@ -177,6 +178,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <SiteContentRealtimeBridge />
+        <DisplayPrefsBridge />
         <Outlet />
         <Toaster />
       </AuthProvider>

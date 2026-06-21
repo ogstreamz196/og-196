@@ -93,7 +93,7 @@ function DashboardHome() {
                 {displayName}
               </em>
             </h1>
-            <p className="mt-6 max-w-2xl text-2xl leading-relaxed text-foreground/90 [text-shadow:0_1px_12px_rgba(0,0,0,0.7)] sm:text-3xl">
+            <p className="mt-6 max-w-2xl text-xl leading-[1.45] text-foreground [text-shadow:0_1px_12px_rgba(0,0,0,0.75)] sm:text-2xl md:text-3xl">
               Jump back into your music workspace or pick up a chat with OG Bot.
             </p>
           </div>
