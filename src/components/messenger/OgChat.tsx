@@ -261,7 +261,7 @@ export function OgChat({
         </div>
       )}
 
-      <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto p-4">
+      <div ref={scrollRef} className="flex-1 space-y-6 overflow-y-auto px-4 py-6 sm:px-6">
         {messages.length === 0 && (
           <div className="grid h-full place-items-center text-center">
             <div className="w-full max-w-sm space-y-3">
@@ -300,31 +300,36 @@ export function OgChat({
             <div
               key={i}
               className={cn(
-                "flex items-end gap-2.5 animate-[pop_0.25s_ease-out]",
+                "flex items-end gap-3 animate-[pop_0.25s_ease-out]",
                 isUser ? "flex-row-reverse" : "flex-row",
               )}
             >
               {isUser ? (
-                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-brand text-sm font-black text-primary-foreground shadow-glow">
+                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-brand text-sm font-black text-primary-foreground shadow-glow">
                   {initial}
                 </div>
               ) : (
-                <OgAvatar size={36} className="shrink-0" />
+                <OgAvatar size={40} className="shrink-0" />
               )}
-              <div className={cn("flex max-w-[78%] flex-col gap-1", isUser ? "items-end" : "items-start")}>
-                <span className="px-1 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+              <div className={cn("flex max-w-[75%] flex-col gap-1.5", isUser ? "items-end" : "items-start")}>
+                <span
+                  className={cn(
+                    "px-2 text-[10px] font-black uppercase tracking-[0.18em]",
+                    isUser ? "text-primary" : "text-foreground/70",
+                  )}
+                >
                   {isUser ? "You" : "OG Bot"}
                 </span>
                 <div
                   className={cn(
-                    "px-4 py-2.5 text-sm break-words transition-transform hover:scale-[1.01]",
+                    "px-4 py-3 text-[15px] leading-relaxed break-words",
                     isUser
-                      ? "rounded-[22px] rounded-br-md bg-primary text-primary-foreground whitespace-pre-wrap font-semibold shadow-[0_6px_0_-2px_hsl(var(--primary)/0.45),0_12px_30px_-8px_hsl(var(--primary)/0.55)]"
-                      : "rounded-[22px] rounded-bl-md bg-muted text-foreground shadow-[0_4px_0_-2px_hsl(var(--muted)/0.6)]",
+                      ? "rounded-2xl rounded-br-sm bg-primary text-primary-foreground whitespace-pre-wrap font-medium shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.6)]"
+                      : "rounded-2xl rounded-bl-sm bg-card border-2 border-border text-foreground shadow-sm",
                   )}
                 >
                   {msg.role === "assistant" ? (
-                    <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-headings:my-2">
+                    <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1.5 prose-p:leading-relaxed prose-ul:my-2 prose-ol:my-2 prose-headings:my-2 prose-code:text-primary">
                       <ReactMarkdown>{msg.content}</ReactMarkdown>
                     </div>
                   ) : (
@@ -336,16 +341,16 @@ export function OgChat({
           );
         })}
         {m.isPending && (
-          <div className="flex items-end gap-2.5">
-            <OgAvatar size={36} className="shrink-0 animate-pulse" />
-            <div className="flex flex-col gap-1">
-              <span className="px-1 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+          <div className="flex items-end gap-3">
+            <OgAvatar size={40} className="shrink-0 animate-pulse" />
+            <div className="flex flex-col gap-1.5">
+              <span className="px-2 text-[10px] font-black uppercase tracking-[0.18em] text-foreground/70">
                 OG Bot
               </span>
-              <div className="rounded-[22px] rounded-bl-md bg-muted px-4 py-3 text-sm text-muted-foreground inline-flex items-center gap-1">
-                <span className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]" />
-                <span className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]" />
-                <span className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce" />
+              <div className="rounded-2xl rounded-bl-sm bg-card border-2 border-border px-4 py-3 inline-flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]" />
+                <span className="h-2 w-2 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]" />
+                <span className="h-2 w-2 rounded-full bg-primary animate-bounce" />
               </div>
             </div>
           </div>
@@ -353,6 +358,7 @@ export function OgChat({
 
 
       </div>
+
 
       <form
         onSubmit={(e) => {
