@@ -1,13 +1,54 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Bot, X, GripVertical } from "lucide-react";
 import { useRouterState } from "@tanstack/react-router";
 import { OgChat } from "./OgChat";
 import { useAuth } from "@/hooks/use-auth";
+import { useFoulMouth } from "@/hooks/use-foul-mouth";
+import { useOgMode } from "@/hooks/use-og-mode";
 import { cn } from "@/lib/utils";
 import { ogWidget, useOgWidgetState } from "@/stores/og-widget";
 
 /**
- * Floating, draggable OG Bot widget. Mounted site-wide on authenticated
+ * Page-aware quick-prompt chips for the floating widget. Tuned to the
+ * route the user is on plus their saved OG settings (mode + foul mouth).
+ */
+function buildQuickPrompts(
+  pathname: string,
+  mode: "safe" | "savage" | string,
+  foulMouth: boolean,
+): { label: string; prompt: string }[] {
+  const spice = foulMouth ? "Don't hold back — keep it raw." : "Keep it clean.";
+  const tone = mode === "savage" ? "Savage mode — roast me a little." : "Friendly tone.";
+
+  if (pathname.startsWith("/library")) {
+    return [
+      { label: "🎵 New song from scratch", prompt: `Help me start a brand new song from scratch. Ask me mood, genre, and vibe first. ${tone}` },
+      { label: "💌 Song from a memory", prompt: `I want to turn a memory into a song. Ask me whose memory, when, and the feeling. ${spice}` },
+      { label: "🎚️ Suno prompt please", prompt: "I just need a ready-to-paste Suno prompt. Ask the key details, then output one tight prompt." },
+      { label: "🪝 Sticky chorus", prompt: "Help me write a sticky chorus. Start by asking what the song is about." },
+    ];
+  }
+  if (pathname.startsWith("/portal") || pathname.startsWith("/dashboard")) {
+    return [
+      { label: "📈 What should I do next?", prompt: "Look at my recent activity and suggest the next 3 things I should do in OG today." },
+      { label: "💡 Title ideas", prompt: "Give me 5 fresh song title ideas. Ask me mood and genre first." },
+      { label: "🎵 Co-write with me", prompt: `Let's co-write a song together. Ask me what's on my mind. ${tone}` },
+    ];
+  }
+  if (pathname.startsWith("/settings")) {
+    return [
+      { label: "⚙️ Explain my settings", prompt: "Walk me through what each OG setting does and which ones you'd recommend for me." },
+      { label: "🪙 How do coins work?", prompt: "Explain how OG coins work, what costs what, and how I can earn more." },
+    ];
+  }
+  // Generic fallback (home, auth, anywhere else).
+  return [
+    { label: "🎵 Write me a song", prompt: `Help me write a personalised song. Ask me the questions you need to get started. ${tone}` },
+    { label: "💡 Title ideas", prompt: "Give me 5 fresh song title ideas. Ask me mood and genre first." },
+    { label: "🪝 Sticky chorus", prompt: "Help me write a sticky chorus. Start by asking what the song is about." },
+    { label: "🎚️ Suno prompt only", prompt: "I just need a Suno-ready prompt. Ask key details, then output one tight prompt." },
+  ];
+}
  * routes. Drag the orb anywhere; position is remembered for the session.
  * Hidden on the dedicated /messenger page so we don't stack two chats.
  * Can be opened from anywhere via `ogWidget.open(seed?)`.
