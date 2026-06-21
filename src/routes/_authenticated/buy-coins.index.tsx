@@ -237,37 +237,38 @@ function BuyCoinsPage() {
               />
             </p>
           </div>
-          <div className="relative overflow-hidden rounded-2xl border border-coin/40 bg-gradient-to-br from-coin/10 via-card to-card p-6 shadow-card">
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="grid h-14 w-14 place-items-center rounded-2xl bg-coin/15">
+          <div className="relative overflow-hidden rounded-2xl border border-coin/40 bg-gradient-to-br from-coin/10 via-card to-card p-5 shadow-card sm:p-6">
+            <div className="grid gap-5 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center">
+              <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-coin/15 shadow-glow">
                 <Crown className="h-7 w-7 text-coin" />
               </div>
-              <div className="min-w-[220px] flex-1">
-                <div className="flex items-center gap-2">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
                   <h3 className="text-lg font-semibold">OG VIP</h3>
                   {isVip && (
-                    <span className="rounded-full bg-coin/15 px-2 py-0.5 text-xs font-medium text-coin">
+                    <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400 ring-1 ring-emerald-500/30">
                       Active
                     </span>
                   )}
                 </div>
-                <ul className="mt-2 grid gap-1 text-sm text-muted-foreground sm:grid-cols-2">
-                  <li className="flex items-center gap-2"><Star className="h-3.5 w-3.5 text-coin" /> Priority OG Messenger replies</li>
-                  <li className="flex items-center gap-2"><Star className="h-3.5 w-3.5 text-coin" /> VIP badge across the hub</li>
-                  <li className="flex items-center gap-2"><Star className="h-3.5 w-3.5 text-coin" /> Early access to new portals</li>
-                  <li className="flex items-center gap-2"><Zap className="h-3.5 w-3.5 text-coin" /> Bonus monthly OG Coin drops</li>
+                <ul className="mt-2 grid gap-1.5 text-sm text-muted-foreground sm:grid-cols-2">
+                  <li className="flex items-center gap-2"><Star className="h-3.5 w-3.5 shrink-0 text-coin" /> Priority OG Messenger replies</li>
+                  <li className="flex items-center gap-2"><Star className="h-3.5 w-3.5 shrink-0 text-coin" /> VIP badge across the hub</li>
+                  <li className="flex items-center gap-2"><Star className="h-3.5 w-3.5 shrink-0 text-coin" /> Early access to new portals</li>
+                  <li className="flex items-center gap-2"><Zap className="h-3.5 w-3.5 shrink-0 text-coin" /> Bonus monthly OG Coin drops</li>
                 </ul>
               </div>
-              <div className="text-right">
-                <div className="text-2xl font-black tabular-nums">
+              <div className="flex items-center justify-between gap-3 sm:flex-col sm:items-end sm:justify-center">
+                <div className="text-2xl font-black tabular-nums leading-none">
                   {CURRENCY_SYMBOL}
                   {(VIP_PLAN.priceCents / 100).toFixed(0)}
                   <span className="ml-1 text-sm font-normal text-muted-foreground">/ year</span>
                 </div>
                 <Button
+                  size="lg"
                   disabled={isVip}
                   onClick={() => setSelected({ type: "vip" })}
-                  className="mt-2 bg-gradient-brand font-bold text-primary-foreground"
+                  className="bg-gradient-brand font-bold text-primary-foreground shadow-glow transition-transform hover:-translate-y-0.5 hover:opacity-90 active:translate-y-0"
                 >
                   {isVip ? "You're VIP" : (
                     <><Crown className="mr-2 h-4 w-4" /> Join VIP</>
