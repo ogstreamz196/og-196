@@ -51,10 +51,23 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: "Insufficient coins", code: "insufficient_coins" }, 402);
     }
 
-    const systemPrompt =
-      `You are a professional songwriter. Write original song lyrics in ${language}. ` +
-      `Use clear section markers like [Verse 1], [Chorus], [Verse 2], [Bridge], [Outro]. ` +
-      `Keep the song between 200 and 400 words. Output ONLY the lyrics, no explanations.`;
+    // Check user's foul-mouth preference — if on, lyrics go full explicit.
+    const { data: pref } = await admin
+      .from("user_preferences")
+      .select("foul_mouth")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    const foulMouth = (pref as { foul_mouth?: boolean } | null)?.foul_mouth ?? false;
+
+    const systemPrompt = foulMouth
+      ? `You are a foul-mouthed, no-holds-barred songwriter writing EXPLICIT adult song lyrics in ${language}. ` +
+        `Lean into raw, gritty, street-level language: profanity, swearing, slang and unfiltered attitude are encouraged and expected — make it sound like a parental-advisory track, not a radio edit. ` +
+        `Do NOT self-censor, do NOT use asterisks or bleeps, and do NOT add disclaimers. Avoid slurs, sexual content involving minors, and incitement to real-world violence — everything else is fair game. ` +
+        `Use clear section markers like [Verse 1], [Chorus], [Verse 2], [Bridge], [Outro]. ` +
+        `Keep the song between 200 and 400 words. Output ONLY the lyrics, no explanations.`
+      : `You are a professional songwriter. Write original song lyrics in ${language}. ` +
+        `Use clear section markers like [Verse 1], [Chorus], [Verse 2], [Bridge], [Outro]. ` +
+        `Keep the song between 200 and 400 words. Output ONLY the lyrics, no explanations.`;
     const userPrompt =
       `Song title: ${songName || "(untitled)"}\n` +
       `Theme / description: ${description || "(none)"}\n` +
