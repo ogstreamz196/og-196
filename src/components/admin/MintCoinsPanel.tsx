@@ -48,7 +48,7 @@ export function MintCoinsPanel() {
         .order("email", { ascending: true })
         .limit(500);
       if (error) throw error;
-      return (data ?? []) as ProfileLite[];
+      return ((data ?? []) as ProfileLite[]).map((p) => maskDevIdentity(p));
     },
   });
 
