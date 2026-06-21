@@ -211,7 +211,13 @@ export function OgChat({
   const foulActive = mode === "og" && foulMouth;
 
   return (
-    <div className={cn("flex h-full flex-col", compact ? "" : "rounded-xl border border-border bg-card")}>
+    <div
+      style={TELEGRAM_FONT_STYLE}
+      className={cn(
+        "flex h-full flex-col text-[15px] antialiased",
+        compact ? "" : "rounded-xl border border-border bg-card",
+      )}
+    >
       {showHeader && (
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 px-3 py-2 text-xs">
           <div className="flex items-center gap-2 text-muted-foreground">
