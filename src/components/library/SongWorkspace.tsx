@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   Loader2, FileText, MessageSquareMore, Wand2, ExternalLink,
@@ -16,6 +16,16 @@ import { useProfile } from "@/hooks/use-profile";
 import { cn } from "@/lib/utils";
 import type { Song } from "@/components/SongCard";
 
+/** Extract the human-readable error from a Supabase functions.invoke() failure. */
+function invokeError(err: unknown, fallback: string): string {
+  if (!err) return fallback;
+  if (typeof err === "object") {
+    const e = err as { context?: { error?: string }; message?: string };
+    return e.context?.error || e.message || fallback;
+  }
+  return fallback;
+}
+
 type WorkspaceSong = Song & { lyrics?: string | null; unlocked?: boolean | null };
 
 interface Props {
@@ -28,7 +38,7 @@ type Stage = 1 | 2 | 3;
 /**
  * 3-stage music creation workflow:
  *   1. Lyrics       — user crafts a brief and generates lyrics (charged)
- *   2. Sample       — generate a 30s preview of the full song (charged)
+ *   2. Sample       — generate a short preview of the full song (charged)
  *   3. Final song   — full track ready to play / download (uses preview unlock)
  * Edits at any stage can be re-sent and re-cost coins, same as every other AI message.
  */
@@ -53,7 +63,12 @@ export function SongWorkspace({ song, onSaved }: Props) {
   // pays half-price (ceil(previewCost / divisor)) to reveal them.
   type Variation = { id: string; title: string | null; cover_url: string | null; revealed: boolean };
   const [variations, setVariations] = useState<Variation[]>([]);
-  const variationCost = Math.max(1, Math.ceil(previewCost / 2));
+  // Mirrors the server-side formula in supabase/functions/reveal-variation.
+  const variationDivisor = Math.max(1, settings?.coins_per_variation_divisor ?? 2);
+  const variationCost = useMemo(
+    () => Math.max(1, Math.ceil(previewCost / variationDivisor)),
+    [previewCost, variationDivisor],
+  );
   const [basket, setBasket] = useState<Set<string>>(() => new Set());
   const [busyVariation, setBusyVariation] = useState<string | null>(null);
   const [checkingOut, setCheckingOut] = useState(false);
@@ -82,8 +97,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
     try {
       const { data, error } = await supabase.functions.invoke("reveal-variation", { body: { song_id: id } });
       if (error) {
-        const msg = (error as { context?: { error?: string } })?.context?.error || error.message;
-        throw new Error(msg);
+        throw new Error(invokeError(error, "Reveal failed"));
       }
       if (!data?.already) toast.success(`Alt take revealed · -${data?.cost ?? variationCost} coins`);
       setVariations((vs) => vs.map((v) => v.id === id ? { ...v, revealed: true } : v));
@@ -219,12 +233,10 @@ export function SongWorkspace({ song, onSaved }: Props) {
         },
       });
       if (error) {
-        const msg = (error as { context?: { error?: string } })?.context?.error || error.message;
-        if (msg?.toLowerCase().includes("insufficient")) {
-          toast.error("Not enough coins for a lyrics generation");
-        } else {
-          toast.error(msg || "Lyrics generation failed");
-        }
+        const msg = invokeError(error, "Lyrics generation failed");
+        toast.error(msg.toLowerCase().includes("insufficient")
+          ? "Not enough coins for a lyrics generation"
+          : msg);
         return;
       }
       const next = (data?.lyrics ?? "").toString();
@@ -267,8 +279,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
         },
       });
       if (error) {
-        const msg = (error as { context?: { error?: string } })?.context?.error || error.message;
-        toast.error(msg || "Could not start generation");
+        toast.error(invokeError(error, "Could not start generation"));
         return;
       }
       toast.success(`Generating · -${previewCost} coins`);
@@ -293,8 +304,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
           body: { song_id: song.id },
         });
         if (error) {
-          const msg = (error as { context?: { error?: string } })?.context?.error || error.message;
-          toast.error(msg || "Could not unlock");
+          toast.error(invokeError(error, "Could not unlock"));
           return;
         }
         if (!data?.already) toast.success(`Unlocked · -${data?.cost ?? fullUnlockCost} coins`);
@@ -318,7 +328,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
   return (
     <div className="space-y-6">
       {/* Stepper */}
-      <StageStepper current={stage} />
+      <StageStepper current={stage} sampleSeconds={settings?.sample_seconds ?? 30} />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
@@ -417,14 +427,21 @@ export function SongWorkspace({ song, onSaved }: Props) {
                 </p>
               )}
               {isPending && (
-                <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                <div
+                  role="status"
+                  aria-live="polite"
+                  className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground"
+                >
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" aria-hidden="true" />
                   Generating preview — refreshes automatically.
                 </div>
               )}
               {isFailed && (
-                <div className="flex items-center gap-2 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                  <AlertCircle className="h-4 w-4" /> {song.error_message || "Generation failed."}
+                <div
+                  role="alert"
+                  className="flex items-center gap-2 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+                >
+                  <AlertCircle className="h-4 w-4" aria-hidden="true" /> {song.error_message || "Generation failed."}
                 </div>
               )}
               {isReady && (
@@ -511,45 +528,50 @@ export function SongWorkspace({ song, onSaved }: Props) {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
-                {variations.map((v) => {
-                  const inBasket = basket.has(v.id);
-                  const busy = busyVariation === v.id;
-                  return (
-                    <div key={v.id} className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-card/40 p-3">
-                      <div className="min-w-0">
-                        <div className="truncate text-sm font-medium">
-                          {v.revealed ? (v.title || "Alt take") : "Locked alt take"}
+                <ul className="space-y-2" aria-label="Alternate takes">
+                  {variations.map((v) => {
+                    const inBasket = basket.has(v.id);
+                    const busy = busyVariation === v.id;
+                    return (
+                      <li key={v.id} className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-card/40 p-3">
+                        <div className="min-w-0">
+                          <div className="truncate text-sm font-medium">
+                            {v.revealed ? (v.title || "Alt take") : "Locked alt take"}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {v.revealed ? "Revealed" : `${variationCost} coins to reveal`}
+                          </div>
                         </div>
-                        <div className="text-xs text-muted-foreground">
-                          {v.revealed ? "Revealed" : `${variationCost} coins to reveal`}
-                        </div>
-                      </div>
-                      {v.revealed ? (
-                        <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">Unlocked</span>
-                      ) : (
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant={inBasket ? "default" : "outline"}
-                            onClick={() => toggleBasket(v.id)}
-                            disabled={busy || checkingOut}
-                          >
-                            {inBasket ? <Check className="h-3.5 w-3.5" /> : <Coins className="h-3.5 w-3.5" />}
-                            {inBasket ? "In basket" : "Add"}
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => revealOne(v.id)}
-                            disabled={busy || checkingOut || balance < variationCost}
-                          >
-                            {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-                            Reveal
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                        {v.revealed ? (
+                          <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">Unlocked</span>
+                        ) : (
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant={inBasket ? "default" : "outline"}
+                              onClick={() => toggleBasket(v.id)}
+                              disabled={busy || checkingOut}
+                              aria-pressed={inBasket}
+                            >
+                              {inBasket ? <Check className="h-3.5 w-3.5" aria-hidden="true" /> : <Coins className="h-3.5 w-3.5" aria-hidden="true" />}
+                              {inBasket ? "In basket" : "Add"}
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={() => revealOne(v.id)}
+                              disabled={busy || checkingOut || balance < variationCost}
+                            >
+                              {busy
+                                ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                                : <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />}
+                              Reveal
+                            </Button>
+                          </div>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
                 {basket.size > 0 && (
                   <div className="flex items-center justify-between gap-3 rounded-lg border border-primary/40 bg-primary/5 p-3">
                     <div className="text-sm">
@@ -632,10 +654,10 @@ export function SongWorkspace({ song, onSaved }: Props) {
   );
 }
 
-function StageStepper({ current }: { current: Stage }) {
+function StageStepper({ current, sampleSeconds }: { current: Stage; sampleSeconds: number }) {
   const steps: { id: Stage; label: string; sub: string }[] = [
     { id: 1, label: "Lyrics", sub: "Craft the words" },
-    { id: 2, label: "Sample", sub: "30s preview" },
+    { id: 2, label: "Sample", sub: `${sampleSeconds}s preview` },
     { id: 3, label: "Full song", sub: "Final track" },
   ];
   return (
