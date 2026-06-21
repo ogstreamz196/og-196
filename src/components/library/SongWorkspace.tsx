@@ -37,6 +37,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
   const { data: profile } = useProfile();
   const lyricsCost = settings?.coins_per_lyrics_generation ?? 1;
   const previewCost = settings?.coins_per_generation ?? 3;
+  const fullUnlockCost = settings?.coins_per_full_unlock ?? 5;
   const balance = profile?.coin_balance ?? 0;
 
   const [title, setTitle] = useState(song.title ?? "");
@@ -45,6 +46,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
   const [saving, setSaving] = useState(false);
   const [genLyrics, setGenLyrics] = useState(false);
   const [genPreview, setGenPreview] = useState(false);
+  const [unlocking, setUnlocking] = useState(false);
 
   const hasLyrics = !!(lyrics && lyrics.trim().length > 20);
   const isPending = song.status === "pending" || song.status === "processing";
@@ -161,6 +163,41 @@ export function SongWorkspace({ song, onSaved }: Props) {
       toast.error(e instanceof Error ? e.message : "Could not start generation");
     } finally {
       setGenPreview(false);
+    }
+  }
+
+  async function unlockFull() {
+    if (!isReady) return;
+    if (!song.unlocked && balance < fullUnlockCost) {
+      toast.error(`Need ${fullUnlockCost} coins to unlock the HQ version — current balance ${balance}`);
+      return;
+    }
+    setUnlocking(true);
+    try {
+      if (!song.unlocked) {
+        const { data, error } = await supabase.functions.invoke("unlock-full-song", {
+          body: { song_id: song.id },
+        });
+        if (error) {
+          const msg = (error as { context?: { error?: string } })?.context?.error || error.message;
+          toast.error(msg || "Could not unlock");
+          return;
+        }
+        if (!data?.already) toast.success(`Unlocked · -${data?.cost ?? fullUnlockCost} coins`);
+        onSaved?.();
+      }
+      const { data: urlData, error: urlErr } = await supabase.functions.invoke("song-url", {
+        body: { song_id: song.id, mode: "full" },
+      });
+      if (urlErr || !urlData?.url) {
+        toast.error("Unlocked, but download link failed — try again in a moment");
+        return;
+      }
+      window.open(urlData.url, "_blank", "noopener");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not unlock");
+    } finally {
+      setUnlocking(false);
     }
   }
 
