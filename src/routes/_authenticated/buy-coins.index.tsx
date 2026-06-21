@@ -321,7 +321,7 @@ function BuyCoinsPage() {
                 <Button
                   size="lg"
                   disabled={isVip}
-                  onClick={() => setSelected({ type: "vip" })}
+                  onClick={() => pickSelection({ type: "vip" })}
                   className="bg-gradient-brand font-bold text-primary-foreground shadow-glow transition-transform hover:-translate-y-0.5 hover:opacity-90 active:translate-y-0"
                 >
                   {isVip ? "You're VIP" : (
