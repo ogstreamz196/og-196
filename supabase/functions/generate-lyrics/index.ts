@@ -51,13 +51,18 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: "Insufficient coins", code: "insufficient_coins" }, 402);
     }
 
-    // Check user's foul-mouth preference — if on, lyrics go full explicit.
-    const { data: pref } = await admin
-      .from("user_preferences")
-      .select("foul_mouth")
-      .eq("user_id", user.id)
-      .maybeSingle();
-    const foulMouth = (pref as { foul_mouth?: boolean } | null)?.foul_mouth ?? false;
+    // Per-request override wins; otherwise fall back to the user's saved preference.
+    let foulMouth: boolean;
+    if (typeof body.foulMouth === "boolean") {
+      foulMouth = body.foulMouth;
+    } else {
+      const { data: pref } = await admin
+        .from("user_preferences")
+        .select("foul_mouth")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      foulMouth = (pref as { foul_mouth?: boolean } | null)?.foul_mouth ?? false;
+    }
 
     const isEnglish = language.trim().toLowerCase() === "english";
     const bilingualRule = isEnglish
