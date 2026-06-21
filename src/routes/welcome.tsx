@@ -397,10 +397,12 @@ function Hero() {
         </div>
 
         <p className="mx-auto mt-10 max-w-4xl text-balance text-lg font-semibold leading-[1.25] text-foreground/90 sm:mt-14 sm:text-3xl sm:leading-[1.15] md:text-4xl lg:text-5xl">
-          Type a wild idea, a name, a mood, a memory.
+          A name, a mood, a memory — built into a song that's only yours.
           <br className="hidden sm:block" />
-          {" "}Pick rap, afrobeats, pop, drill, heartbreak or party. <span className="inline-block wc-wiggle">🎧</span>
+          {" "}Rap, afrobeats, pop, drill, heartbreak or party. <span className="inline-block wc-wiggle">🎧</span>
         </p>
+
+
 
 
         <AlbumCoverShowcase />
