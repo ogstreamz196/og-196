@@ -53,6 +53,14 @@ export function AppSidebar() {
   const { setOpenMobile, isMobile } = useSidebar();
   const { user } = useAuth();
   const { isAdmin } = useRole();
+  const qc = useQueryClient();
+
+  const handleSignOut = async () => {
+    await qc.cancelQueries();
+    qc.clear();
+    await supabase.auth.signOut();
+    window.location.replace("/auth");
+  };
 
   const isActive = (url: string) =>
     url === "/" ? pathname === "/" : pathname === url || pathname.startsWith(url + "/");
