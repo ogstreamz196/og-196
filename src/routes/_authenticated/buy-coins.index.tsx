@@ -623,19 +623,6 @@ function PackCard({
   );
 }
 
-function ValueProp({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
-  return (
-    <div className="flex items-start gap-3 rounded-2xl border border-border bg-card/60 p-4">
-      <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/15 text-primary">
-        {icon}
-      </div>
-      <div className="min-w-0">
-        <p className="text-sm font-bold">{title}</p>
-        <p className="text-xs text-muted-foreground">{body}</p>
-      </div>
-    </div>
-  );
-}
 
 function TrustItem({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
   return (
