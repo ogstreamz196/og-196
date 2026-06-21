@@ -9,7 +9,15 @@ import {
   Star,
   Wand2,
   Mic2,
+  Pencil,
 } from "lucide-react";
+import { EditableContent } from "@/components/admin/EditableContent";
+import {
+  AdminEditModeProvider,
+  AdminEditModeToggle,
+  useAdminEditMode,
+} from "@/components/admin/AdminEditMode";
+import { useRole } from "@/hooks/use-role";
 import { Button } from "@/components/ui/button";
 import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
@@ -235,15 +243,34 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
 
 function WelcomePage() {
   return (
-    <main className="relative min-h-screen overflow-x-hidden text-foreground">
-      <Blobs />
-      <TopNav />
-      <Hero />
-      <Pillars />
-      <HowItWorks />
-      <ClosingCta />
-      <Footer />
-    </main>
+    <AdminEditModeProvider>
+      <main className="relative min-h-screen overflow-x-hidden text-foreground">
+        <Blobs />
+        <TopNav />
+        <Hero />
+        <Pillars />
+        <HowItWorks />
+        <ClosingCta />
+        <Footer />
+        <div className="fixed bottom-4 right-4 z-50">
+          <AdminEditModeToggle />
+        </div>
+      </main>
+    </AdminEditModeProvider>
+  );
+}
+
+function CardEditBadge() {
+  const { enabled } = useAdminEditMode();
+  const { isAdmin } = useRole();
+  if (!enabled || !isAdmin) return null;
+  return (
+    <div
+      className="pointer-events-none absolute left-3 top-3 z-20 grid h-7 w-7 place-items-center rounded-full bg-primary text-primary-foreground shadow-glow ring-2 ring-background"
+      title="This card is editable — click any text to edit"
+    >
+      <Pencil className="h-3.5 w-3.5" />
+    </div>
   );
 }
 
@@ -356,6 +383,7 @@ function AlbumCoverShowcase() {
           className="group relative overflow-hidden rounded-3xl border-2 border-white/15 bg-card/80 shadow-card transition-all duration-300 hover:-translate-y-2 hover:rotate-0 hover:border-primary/50 hover:shadow-glow"
           style={{ transform: `rotate(${[-3, 2, -1, 3][i]}deg)` }}
         >
+          <CardEditBadge />
           <img
             src={cover.image}
             alt={`${cover.title} album cover`}
@@ -366,9 +394,13 @@ function AlbumCoverShowcase() {
             className="aspect-square w-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
           <div className="absolute inset-x-0 bottom-0 bg-background/75 p-3 text-left backdrop-blur-md">
-            <p className="font-display text-xl leading-none tracking-tight sm:text-2xl">{cover.title}</p>
-            <p className="mt-1 text-xs font-black uppercase tracking-[0.16em] text-primary">{cover.style}</p>
-            <p className="mt-2 hidden text-xs font-bold leading-tight text-foreground/85 sm:block">{cover.prompt}</p>
+            <EditableContent as="p" contentKey={`welcome.album.${i}.title`} defaultValue={cover.title}
+              className="font-display text-xl leading-none tracking-tight sm:text-2xl" />
+            <EditableContent as="p" contentKey={`welcome.album.${i}.style`} defaultValue={cover.style}
+              className="mt-1 text-xs font-black uppercase tracking-[0.16em] text-primary" />
+            <EditableContent as="p" contentKey={`welcome.album.${i}.prompt`} defaultValue={cover.prompt}
+              multiline
+              className="mt-2 hidden text-xs font-bold leading-tight text-foreground/85 sm:block" />
           </div>
         </article>
       ))}
@@ -450,16 +482,26 @@ function Pillars() {
               style={{ transform: `rotate(${it.tilt}deg)` }}
               className="group relative rounded-3xl border-2 border-white/12 bg-card/80 p-8 backdrop-blur-xl transition-all duration-200 hover:-translate-y-2 hover:rotate-0 hover:border-primary/40 hover:shadow-glow"
             >
+              <CardEditBadge />
               <div className="flex items-center gap-3">
                 <span className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-brand text-primary-foreground shadow-glow transition-transform duration-200 group-hover:scale-110 group-hover:rotate-6">
                   {it.icon}
                 </span>
                 <span className="text-3xl">{it.emoji}</span>
               </div>
-              <h3 className="font-display mt-6 text-4xl font-semibold tracking-tight sm:text-5xl">
-                {it.title}
-              </h3>
-              <p className="mt-4 text-lg leading-relaxed text-muted-foreground sm:text-xl">{it.body}</p>
+              <EditableContent
+                as="h3"
+                contentKey={`welcome.pillar.${it.key}.title`}
+                defaultValue={String(it.title)}
+                className="font-display mt-6 block text-4xl font-semibold tracking-tight sm:text-5xl"
+              />
+              <EditableContent
+                as="p"
+                multiline
+                contentKey={`welcome.pillar.${it.key}.body`}
+                defaultValue={it.body}
+                className="mt-4 block text-lg leading-relaxed text-muted-foreground sm:text-xl"
+              />
             </article>
           ))}
         </div>
@@ -494,12 +536,15 @@ function HowItWorks() {
               className="group relative rounded-3xl border-2 border-white/12 bg-card/70 p-8 text-center backdrop-blur-xl transition hover:-translate-y-1 hover:border-primary/40"
               style={{ animationDelay: `${i * 120}ms` }}
             >
+              <CardEditBadge />
               <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-gradient-brand text-4xl font-black text-primary-foreground shadow-glow wc-bounce-soft">
                 {s.n}
               </div>
               <div className="mt-5 text-6xl">{s.emoji}</div>
-              <h3 className="font-display mt-4 text-3xl font-semibold sm:text-4xl">{s.title}</h3>
-              <p className="mt-3 text-lg text-muted-foreground sm:text-xl">{s.body}</p>
+              <EditableContent as="h3" contentKey={`welcome.step.${s.n}.title`} defaultValue={s.title}
+                className="font-display mt-4 block text-3xl font-semibold sm:text-4xl" />
+              <EditableContent as="p" multiline contentKey={`welcome.step.${s.n}.body`} defaultValue={s.body}
+                className="mt-3 block text-lg text-muted-foreground sm:text-xl" />
             </div>
           ))}
         </div>
@@ -511,20 +556,16 @@ function HowItWorks() {
 function ClosingCta() {
   return (
     <section id="how" className="relative border-t border-white/10">
-      <div className="mx-auto max-w-4xl px-5 py-28 text-center sm:px-8 lg:py-32">
-        <p className="text-sm font-medium uppercase tracking-[0.25em] text-muted-foreground">
-          Ready?
-        </p>
-        <h2 className="font-display mt-5 text-7xl font-semibold leading-[0.95] tracking-[-0.045em] sm:text-8xl md:text-9xl">
-          Your next prompt
-          <br />
-          <em className="italic text-gradient-brand wc-bounce-soft inline-block">
-            could be a hit.
-          </em>
-        </h2>
-        <p className="mx-auto mt-8 max-w-2xl text-2xl text-muted-foreground sm:text-3xl">
-          Sign in. Type the idea. Pick the vibe. Get the cover and the song. <span className="inline-block wc-wiggle">🎉</span>
-        </p>
+      <div className="relative mx-auto max-w-4xl px-5 py-28 text-center sm:px-8 lg:py-32">
+        <CardEditBadge />
+        <EditableContent as="p" contentKey="welcome.closing.eyebrow" defaultValue="Ready?"
+          className="block text-sm font-medium uppercase tracking-[0.25em] text-muted-foreground" />
+        <EditableContent as="h2" contentKey="welcome.closing.title" defaultValue="Your next prompt could be a hit."
+          multiline
+          className="font-display mt-5 block text-7xl font-semibold leading-[0.95] tracking-[-0.045em] sm:text-8xl md:text-9xl" />
+        <EditableContent as="p" multiline contentKey="welcome.closing.body"
+          defaultValue="Sign in. Type the idea. Pick the vibe. Get the cover and the song. 🎉"
+          className="mx-auto mt-8 block max-w-2xl text-2xl text-muted-foreground sm:text-3xl" />
 
         <div className="mx-auto mt-12 max-w-2xl">
           <AuthButtons size="xl" />
