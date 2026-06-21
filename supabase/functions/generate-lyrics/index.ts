@@ -59,14 +59,19 @@ Deno.serve(async (req) => {
       .maybeSingle();
     const foulMouth = (pref as { foul_mouth?: boolean } | null)?.foul_mouth ?? false;
 
+    const isEnglish = language.trim().toLowerCase() === "english";
+    const bilingualRule = isEnglish
+      ? ""
+      : ` Write each line TWICE: first in ${language} using the Latin alphabet (romanised / transliterated — no native script, no Cyrillic, no kanji, no Arabic script, etc.), then on the very next line the English translation in italics-style parentheses, e.g. "Mi corazón late fuerte / (My heart beats strong)". Keep section markers in English.`;
+
     const systemPrompt = foulMouth
       ? `You are a foul-mouthed, no-holds-barred songwriter writing EXPLICIT adult song lyrics in ${language}. ` +
         `Lean into raw, gritty, street-level language: profanity, swearing, slang and unfiltered attitude are encouraged and expected — make it sound like a parental-advisory track, not a radio edit. ` +
         `Do NOT self-censor, do NOT use asterisks or bleeps, and do NOT add disclaimers. Avoid slurs, sexual content involving minors, and incitement to real-world violence — everything else is fair game. ` +
-        `Use clear section markers like [Verse 1], [Chorus], [Verse 2], [Bridge], [Outro]. ` +
+        `Use clear section markers like [Verse 1], [Chorus], [Verse 2], [Bridge], [Outro].${bilingualRule} ` +
         `Keep the song between 200 and 400 words. Output ONLY the lyrics, no explanations.`
       : `You are a professional songwriter. Write original song lyrics in ${language}. ` +
-        `Use clear section markers like [Verse 1], [Chorus], [Verse 2], [Bridge], [Outro]. ` +
+        `Use clear section markers like [Verse 1], [Chorus], [Verse 2], [Bridge], [Outro].${bilingualRule} ` +
         `Keep the song between 200 and 400 words. Output ONLY the lyrics, no explanations.`;
     const userPrompt =
       `Song title: ${songName || "(untitled)"}\n` +
