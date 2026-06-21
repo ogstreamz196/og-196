@@ -349,17 +349,20 @@ function TopNav() {
   return (
     <header className="sticky top-0 z-30 border-b border-white/10 bg-background/40 backdrop-blur-xl">
       <nav aria-label="Primary" className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:h-20 sm:px-8">
-        <Link to="/welcome" aria-label="OG Studio — home" className="group flex min-w-0 items-center gap-3">
+        <Link to="/welcome" aria-label="OG Streamz — home" className="group flex min-w-0 items-center gap-3">
           <span aria-hidden className="wc-wiggle grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-gradient-brand text-primary-foreground shadow-glow sm:h-11 sm:w-11">
             <Sparkles className="h-5 w-5" />
           </span>
           <div className="min-w-0 leading-none">
-            <p className="font-display truncate text-lg font-semibold tracking-tight sm:text-xl">OG Studio</p>
-            <p className="mt-1 text-[10px] uppercase tracking-[0.25em] text-muted-foreground sm:text-[11px]">
-              Music Hub
+            <p className="font-display truncate text-lg font-black uppercase tracking-tight sm:text-xl">OG Streamz</p>
+            <p className="mt-1 inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:text-[11px]">
+              <span>Powered by</span>
+              <OgBotLogo className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
+              <span>OG Bot</span>
             </p>
           </div>
         </Link>
+
       </nav>
     </header>
 
