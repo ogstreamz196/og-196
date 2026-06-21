@@ -159,80 +159,14 @@ function BuyCoinsPage() {
             </span>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-            {COIN_PACKS.map((t) => {
-              const perCoin = t.priceCents / 100 / t.coins;
-              const savingsPct = basePerCoin > 0
-                ? Math.round((1 - perCoin / basePerCoin) * 100)
-                : 0;
-              const accent = t.bestValue || t.popular;
-              return (
-                <button
-                  key={t.bundleId}
-                  type="button"
-                  onClick={() => setSelected({ type: "coins", pack: t })}
-                  aria-label={`Buy ${t.coins} OG Coins for ${CURRENCY_SYMBOL}${(t.priceCents / 100).toFixed(2)}`}
-                  className={cn(
-                    "group relative flex flex-col rounded-2xl border bg-card p-5 text-left shadow-card transition-all",
-                    "hover:-translate-y-1 hover:shadow-glow",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-                    "active:translate-y-0",
-                    accent ? "border-primary shadow-glow" : "border-border hover:border-primary/40",
-                  )}
-                >
-                  {t.popular && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-gradient-brand px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-primary-foreground shadow whitespace-nowrap">
-                      <Sparkles className="h-3 w-3" /> Most popular
-                    </div>
-                  )}
-                  {t.bestValue && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-coin px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-background shadow whitespace-nowrap">
-                      <Crown className="h-3 w-3" /> Best value
-                    </div>
-                  )}
-                  {savingsPct > 0 && (
-                    <div className="absolute right-3 top-3 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400 ring-1 ring-emerald-500/30">
-                      Save {savingsPct}%
-                    </div>
-                  )}
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                    {t.label}
-                  </div>
-                  <div className="mt-3 flex items-center gap-2.5">
-                    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-coin/15 transition-transform group-hover:scale-110 group-hover:-rotate-6">
-                      <Coins className="h-6 w-6 text-coin" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="flex items-baseline gap-1.5 leading-none">
-                        <span className="text-3xl font-black tabular-nums text-foreground">{t.coins}</span>
-                        <span className="text-xs font-bold text-coin">Coins</span>
-                      </div>
-                      <div className="mt-1 text-[11px] text-muted-foreground">
-                        {CURRENCY_SYMBOL}{perCoin.toFixed(3)} / coin
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-4 flex items-baseline gap-1">
-                    <span className="text-2xl font-black tracking-tight">
-                      {CURRENCY_SYMBOL}{(t.priceCents / 100).toFixed(2)}
-                    </span>
-                    <span className="text-xs text-muted-foreground">one-time</span>
-                  </div>
-                  <p className="mt-3 flex-1 text-xs leading-relaxed text-muted-foreground">
-                    {t.description}
-                  </p>
-                  <div
-                    className={cn(
-                      "mt-5 inline-flex h-10 w-full items-center justify-center rounded-md px-3 text-sm font-bold transition-all",
-                      accent
-                        ? "bg-gradient-brand text-primary-foreground shadow-glow group-hover:opacity-90"
-                        : "border border-border bg-background/50 text-foreground group-hover:border-primary group-hover:bg-primary group-hover:text-primary-foreground",
-                    )}
-                  >
-                    Buy now
-                  </div>
-                </button>
-              );
-            })}
+            {COIN_PACKS.map((t) => (
+              <PackCard
+                key={t.bundleId}
+                pack={t}
+                basePerCoin={basePerCoin}
+                onBuy={(effective) => setSelected({ type: "coins", pack: effective })}
+              />
+            ))}
           </div>
           <p className="mt-4 flex items-center justify-center gap-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
             <Lock className="h-3 w-3" /> Secure checkout · Apple Pay · Google Pay · Card
@@ -313,6 +247,241 @@ function BuyCoinsPage() {
         </p>
       </div>
     </DashboardShell>
+  );
+}
+
+// ---------- Pack card with admin inline edit ----------
+
+interface PackOverride {
+  label?: string;
+  description?: string;
+  priceCents?: number;
+  coins?: number;
+}
+
+function packOverrideKey(bundleId: string) {
+  return `buyCoins.pack.${bundleId}`;
+}
+
+function parseOverride(raw: string | undefined): PackOverride {
+  if (!raw) return {};
+  try {
+    const v = JSON.parse(raw);
+    return v && typeof v === "object" ? (v as PackOverride) : {};
+  } catch {
+    return {};
+  }
+}
+
+function PackCard({
+  pack,
+  basePerCoin,
+  onBuy,
+}: {
+  pack: CoinPack;
+  basePerCoin: number;
+  onBuy: (effective: CoinPack) => void;
+}) {
+  const { isAdmin } = useRole();
+  const { enabled } = useAdminEditMode();
+  const { get } = useSiteContent();
+  const setMut = useSetSiteContent();
+  const canEdit = isAdmin && enabled;
+
+  const raw = get(packOverrideKey(pack.bundleId), "");
+  const override = useMemo(() => parseOverride(raw), [raw]);
+
+  const effective: CoinPack = {
+    ...pack,
+    label: override.label ?? pack.label,
+    description: override.description ?? pack.description,
+    priceCents: override.priceCents ?? pack.priceCents,
+    coins: override.coins ?? pack.coins,
+  };
+
+  const perCoin = effective.priceCents / 100 / effective.coins;
+  const savingsPct = basePerCoin > 0 ? Math.round((1 - perCoin / basePerCoin) * 100) : 0;
+  const accent = pack.bestValue || pack.popular;
+
+  const [editing, setEditing] = useState(false);
+  const [draftLabel, setDraftLabel] = useState(effective.label);
+  const [draftDesc, setDraftDesc] = useState(effective.description);
+  const [draftPrice, setDraftPrice] = useState((effective.priceCents / 100).toFixed(2));
+  const [draftCoins, setDraftCoins] = useState(String(effective.coins));
+
+  function startEdit(e: React.MouseEvent) {
+    e.stopPropagation();
+    setDraftLabel(effective.label);
+    setDraftDesc(effective.description);
+    setDraftPrice((effective.priceCents / 100).toFixed(2));
+    setDraftCoins(String(effective.coins));
+    setEditing(true);
+  }
+
+  function save() {
+    const priceNum = Number.parseFloat(draftPrice);
+    const coinsNum = Number.parseInt(draftCoins, 10);
+    if (!draftLabel.trim()) return toast.error("Label required");
+    if (!Number.isFinite(priceNum) || priceNum < 0.5) return toast.error("Price must be ≥ 0.50");
+    if (!Number.isInteger(coinsNum) || coinsNum < 1) return toast.error("Coins must be a positive integer");
+    const payload: PackOverride = {
+      label: draftLabel.trim(),
+      description: draftDesc.trim() || pack.description,
+      priceCents: Math.round(priceNum * 100),
+      coins: coinsNum,
+    };
+    setMut.mutate(
+      { key: packOverrideKey(pack.bundleId), value: JSON.stringify(payload) },
+      {
+        onSuccess: () => {
+          toast.success("Pack saved site-wide");
+          setEditing(false);
+        },
+        onError: (e: Error) => toast.error(e.message),
+      },
+    );
+  }
+
+  if (editing) {
+    return (
+      <div
+        className={cn(
+          "relative flex flex-col rounded-2xl border-2 border-primary bg-card p-5 shadow-glow",
+        )}
+      >
+        <div className="mb-3 inline-flex w-fit items-center gap-1.5 rounded-full bg-primary/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+          <Pencil className="h-3 w-3" /> Editing pack
+        </div>
+        <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Label</label>
+        <Input value={draftLabel} onChange={(e) => setDraftLabel(e.target.value)} maxLength={40} className="mt-1 h-9" />
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <div>
+            <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Coins</label>
+            <Input type="number" min={1} value={draftCoins} onChange={(e) => setDraftCoins(e.target.value)} className="mt-1 h-9 tabular-nums" />
+          </div>
+          <div>
+            <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Price ({CURRENCY_SYMBOL})</label>
+            <Input type="number" step="0.01" min={0.5} value={draftPrice} onChange={(e) => setDraftPrice(e.target.value)} className="mt-1 h-9 tabular-nums" />
+          </div>
+        </div>
+        <label className="mt-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Description</label>
+        <textarea
+          value={draftDesc}
+          onChange={(e) => setDraftDesc(e.target.value)}
+          rows={3}
+          maxLength={240}
+          className="mt-1 rounded-md border border-input bg-background px-2 py-1.5 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        />
+        <p className="mt-2 text-[10px] leading-snug text-muted-foreground">
+          Display only — Stripe still charges the original price for{" "}
+          <code className="rounded bg-muted px-1 py-0.5 text-[10px]">{pack.priceId}</code>.
+        </p>
+        <div className="mt-4 flex items-center justify-end gap-2">
+          <Button
+            type="button"
+            size="icon"
+            variant="outline"
+            className="h-10 w-10 border-red-500/40 text-red-500 hover:bg-red-500/10 hover:text-red-500"
+            onClick={() => setEditing(false)}
+            title="Cancel"
+            aria-label="Cancel"
+          >
+            <X className="h-5 w-5" />
+          </Button>
+          <Button
+            type="button"
+            size="icon"
+            className="h-10 w-10 bg-emerald-500 text-white hover:bg-emerald-600"
+            disabled={setMut.isPending}
+            onClick={save}
+            title="Save"
+            aria-label="Save"
+          >
+            {setMut.isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Check className="h-5 w-5" />}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => onBuy(effective)}
+        aria-label={`Buy ${effective.coins} OG Coins for ${CURRENCY_SYMBOL}${(effective.priceCents / 100).toFixed(2)}`}
+        className={cn(
+          "group relative flex w-full flex-col rounded-2xl border bg-card p-5 text-left shadow-card transition-all",
+          "hover:-translate-y-1 hover:shadow-glow",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+          "active:translate-y-0",
+          accent ? "border-primary shadow-glow" : "border-border hover:border-primary/40",
+        )}
+      >
+        {pack.popular && (
+          <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-gradient-brand px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-primary-foreground shadow whitespace-nowrap">
+            <Sparkles className="h-3 w-3" /> Most popular
+          </div>
+        )}
+        {pack.bestValue && (
+          <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-coin px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-background shadow whitespace-nowrap">
+            <Crown className="h-3 w-3" /> Best value
+          </div>
+        )}
+        {savingsPct > 0 && (
+          <div className="absolute right-3 top-3 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400 ring-1 ring-emerald-500/30">
+            Save {savingsPct}%
+          </div>
+        )}
+        <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          {effective.label}
+        </div>
+        <div className="mt-3 flex items-center gap-2.5">
+          <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-coin/15 transition-transform group-hover:scale-110 group-hover:-rotate-6">
+            <Coins className="h-6 w-6 text-coin" />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-baseline gap-1.5 leading-none">
+              <span className="text-3xl font-black tabular-nums text-foreground">{effective.coins}</span>
+              <span className="text-xs font-bold text-coin">Coins</span>
+            </div>
+            <div className="mt-1 text-[11px] text-muted-foreground">
+              {CURRENCY_SYMBOL}{perCoin.toFixed(3)} / coin
+            </div>
+          </div>
+        </div>
+        <div className="mt-4 flex items-baseline gap-1">
+          <span className="text-2xl font-black tracking-tight">
+            {CURRENCY_SYMBOL}{(effective.priceCents / 100).toFixed(2)}
+          </span>
+          <span className="text-xs text-muted-foreground">one-time</span>
+        </div>
+        <p className="mt-3 flex-1 text-xs leading-relaxed text-muted-foreground">
+          {effective.description}
+        </p>
+        <div
+          className={cn(
+            "mt-5 inline-flex h-10 w-full items-center justify-center rounded-md px-3 text-sm font-bold transition-all",
+            accent
+              ? "bg-gradient-brand text-primary-foreground shadow-glow group-hover:opacity-90"
+              : "border border-border bg-background/50 text-foreground group-hover:border-primary group-hover:bg-primary group-hover:text-primary-foreground",
+          )}
+        >
+          Buy now
+        </div>
+      </button>
+      {canEdit && (
+        <button
+          type="button"
+          onClick={startEdit}
+          title="Edit pack (boss)"
+          aria-label="Edit pack"
+          className="absolute left-3 top-3 z-10 grid h-8 w-8 place-items-center rounded-full border border-primary/40 bg-background/90 text-primary shadow-sm transition hover:bg-primary hover:text-primary-foreground"
+        >
+          <Pencil className="h-3.5 w-3.5" />
+        </button>
+      )}
+    </div>
   );
 }
 
