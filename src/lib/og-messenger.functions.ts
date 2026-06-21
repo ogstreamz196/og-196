@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { buildSystemPrompt, type UserContextSummary } from "@/lib/og-persona";
+import { extractInsults } from "@/lib/insult-learner";
 
 export type OgChatMessage = { role: "user" | "assistant"; content: string };
 
@@ -8,6 +9,7 @@ export type OgChatMessage = { role: "user" | "assistant"; content: string };
 interface ChatReply {
   reply: string;
   coin_balance: number;
+  learned_insults?: string[];
 }
 
 /**
@@ -45,8 +47,8 @@ export const chatOgBot = createServerFn({ method: "POST" })
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    // 1. Load user context in parallel (profile, role flags, foul pref, persona overrides).
-    const [profileRes, rolesRes, prefRes, siteRes] = await Promise.all([
+    // 1. Load user context in parallel (profile, role flags, foul pref, persona overrides, learned insults).
+    const [profileRes, rolesRes, prefRes, siteRes, learnedRes] = await Promise.all([
       supabaseAdmin
         .from("profiles")
         .select("display_name, email, coin_balance")
@@ -65,6 +67,12 @@ export const chatOgBot = createServerFn({ method: "POST" })
         .from("site_content")
         .select("key, value")
         .in("key", ["og_persona.script", "og_persona.voice", "og_persona.dictionary"]),
+      supabaseAdmin
+        .from("og_learned_insults")
+        .select("phrase, uses")
+        .eq("user_id", context.userId)
+        .order("last_seen_at", { ascending: false })
+        .limit(40),
     ]);
 
     if (profileRes.error) throw new Error(profileRes.error.message);
@@ -91,14 +99,40 @@ export const chatOgBot = createServerFn({ method: "POST" })
       page_context: data.pageContext || undefined,
     };
 
+    const learnedInsults = (learnedRes.data ?? []).map((r: { phrase: string }) => r.phrase);
+
     const system = buildSystemPrompt({
       mode: data.mode,
       foulMouth,
       bossScript: personaMap.get("og_persona.script") ?? null,
       bossVoice: personaMap.get("og_persona.voice") ?? null,
       bossDictionary: personaMap.get("og_persona.dictionary") ?? null,
+      learnedInsults,
       user: userCtx,
     });
+
+    // 1b. Learn fresh insults from the latest user message (fire-and-forget upsert).
+    let newlyLearned: string[] = [];
+    if (data.mode === "og" && foulMouth) {
+      const latestUser = [...data.messages].reverse().find((m) => m.role === "user");
+      if (latestUser) {
+        const candidates = extractInsults(latestUser.content);
+        if (candidates.length) {
+          newlyLearned = candidates;
+          // Upsert each phrase, bumping uses + last_seen_at.
+          await Promise.all(
+            candidates.map((phrase) =>
+              (supabaseAdmin.rpc as unknown as (fn: string, args: Record<string, unknown>) => Promise<{ error: { message: string } | null }>)("og_learn_insult", {
+                p_user_id: context.userId,
+                p_phrase: phrase,
+              }).then((r) => {
+                if (r.error) console.warn("learn insult failed:", r.error.message);
+              }),
+            ),
+          ).catch(() => {});
+        }
+      }
+    }
 
     // 2. Deduct 1 coin atomically BEFORE the AI call to avoid double-spend on retry.
     const { data: newBalance, error: deductErr } = await supabaseAdmin.rpc("deduct_coins", {
@@ -199,6 +233,7 @@ export const chatOgBot = createServerFn({ method: "POST" })
       return {
         reply,
         coin_balance: (newBalance as number | null) ?? userCtx.coin_balance - 1,
+        learned_insults: newlyLearned,
       };
     } catch (err) {
       // Refund the coin on hard AI failure so the user isn't charged for nothing.

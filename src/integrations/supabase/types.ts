@@ -247,6 +247,33 @@ export type Database = {
         }
         Relationships: []
       }
+      og_learned_insults: {
+        Row: {
+          created_at: string
+          id: string
+          last_seen_at: string
+          phrase: string
+          user_id: string
+          uses: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_seen_at?: string
+          phrase: string
+          user_id: string
+          uses?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_seen_at?: string
+          phrase?: string
+          user_id?: string
+          uses?: number
+        }
+        Relationships: []
+      }
       og_messages: {
         Row: {
           content: string
@@ -575,6 +602,10 @@ export type Database = {
       mint_coins_admin: {
         Args: { admin_notes: string; amount: number; target_user_id: string }
         Returns: number
+      }
+      og_learn_insult: {
+        Args: { p_phrase: string; p_user_id: string }
+        Returns: undefined
       }
       purchase_bot_token: {
         Args: { p_allowed_domain?: string }
