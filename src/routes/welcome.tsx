@@ -175,62 +175,77 @@ function IPhoneIcon({ className }: { className?: string }) {
 
 function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
   const { signIn, pending } = useOAuthSignIn();
-  const h = size === "xl" ? "h-36" : "h-32";
+  const h = size === "xl" ? "h-44" : "h-40";
   const tile =
-    "bg-white/5 backdrop-blur-md border-2 border-white/40 hover:border-white/80 hover:bg-white/10 active:scale-[0.98] shadow-[0_4px_16px_rgba(0,0,0,0.15)]";
+    "bg-white/[0.04] backdrop-blur-md border border-white/15 hover:border-white/50 hover:bg-white/[0.08] active:scale-[0.98] transition";
 
-  const devices: Array<{
+  type Device = {
     key: string;
     label: string;
     provider: OAuthProvider;
     Icon: (p: { className?: string }) => ReactElement;
     iconClass?: string;
-  }> = [
+  };
+
+  const primary: Device[] = [
     { key: "google", label: "Google", provider: "google", Icon: GoogleIcon },
     { key: "apple", label: "Apple ID", provider: "apple", Icon: (p) => <AppleIcon {...p} />, iconClass: "text-black" },
+  ];
+
+  const secondary: Device[] = [
     { key: "android", label: "Android", provider: "google", Icon: AndroidIcon, iconClass: "text-[#3ddc84]" },
     { key: "samsung", label: "Samsung", provider: "google", Icon: SamsungIcon, iconClass: "text-[#1428a0]" },
     { key: "iphone", label: "iPhone / iPad", provider: "apple", Icon: IPhoneIcon, iconClass: "text-black" },
   ];
 
+  function renderTile(d: Device) {
+    const isPending = pending === d.provider;
+    const sub = d.provider === "google" ? "Sign in with Google" : "Sign in with Apple";
+    return (
+      <button
+        key={d.key}
+        onClick={() => signIn(d.provider)}
+        disabled={pending !== null}
+        aria-label={`${d.label} — ${sub}`}
+        className={`${h} ${tile} group relative flex flex-col items-center justify-between gap-3 rounded-3xl px-3 pt-5 pb-3 text-foreground disabled:opacity-70 disabled:cursor-wait`}
+      >
+        <div className="flex flex-1 items-center justify-center">
+          {isPending ? (
+            <Loader2 className="h-16 w-16 animate-spin text-foreground" />
+          ) : (
+            <div className="grid h-24 w-24 place-items-center rounded-3xl bg-white shadow-[0_8px_24px_rgba(0,0,0,0.45)] ring-2 ring-white/90 transition group-hover:scale-105">
+              <d.Icon className={`h-16 w-16 ${d.iconClass ?? "text-black"}`} />
+            </div>
+          )}
+        </div>
+        <div className="w-full space-y-1">
+          <span className="block w-full rounded-md bg-white px-2 py-1.5 text-center text-sm font-extrabold uppercase tracking-wide text-black">
+            {d.label}
+          </span>
+          <span className="block text-center text-[10px] font-semibold uppercase tracking-[0.16em] text-foreground/70">
+            {sub}
+          </span>
+        </div>
+      </button>
+    );
+  }
+
   return (
-    <div className="w-full space-y-3">
+    <div className="w-full space-y-4">
       <p className="text-center text-sm font-bold uppercase tracking-[0.2em] text-foreground/80">
         Tap your device to continue
       </p>
-      <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-5">
-        {devices.map((d) => {
-          const isPending = pending === d.provider;
-          const sub = d.provider === "google" ? "Sign in with Google" : "Sign in with Apple";
-          return (
-            <button
-              key={d.key}
-              onClick={() => signIn(d.provider)}
-              disabled={pending !== null}
-              aria-label={`${d.label} — ${sub}`}
-              className={`${h} ${tile} group relative inline-flex flex-col items-center justify-between gap-2 rounded-2xl px-3 pt-4 pb-2 text-foreground transition disabled:opacity-70 disabled:cursor-wait`}
-            >
-              <div className="flex flex-1 items-center justify-center">
-                {isPending ? (
-                  <Loader2 className="h-12 w-12 animate-spin text-foreground" />
-                ) : (
-                  <div className="grid h-16 w-16 place-items-center rounded-2xl bg-white shadow-[0_4px_12px_rgba(0,0,0,0.35)] ring-2 ring-white/80">
-                    <d.Icon className={`h-11 w-11 ${d.iconClass ?? "text-black"}`} />
-                  </div>
-                )}
-              </div>
 
-              <div className="w-full space-y-1">
-                <span className="block w-full rounded-md bg-foreground/90 px-2 py-1 text-center text-xs font-extrabold uppercase tracking-wide text-background">
-                  {d.label}
-                </span>
-                <span className="block text-center text-[9px] font-semibold uppercase tracking-[0.14em] text-foreground/60">
-                  {sub}
-                </span>
-              </div>
-            </button>
-          );
-        })}
+      <div className="relative overflow-hidden rounded-[28px] border border-white/15 bg-white/[0.04] p-5 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)] backdrop-blur-xl">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/[0.06] via-transparent to-transparent" />
+        <div className="relative space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            {primary.map(renderTile)}
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {secondary.map(renderTile)}
+          </div>
+        </div>
       </div>
 
       <p className="rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-2.5 text-center text-sm font-bold text-amber-200">
@@ -238,6 +253,7 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
       </p>
     </div>
   );
+
 }
 
 
