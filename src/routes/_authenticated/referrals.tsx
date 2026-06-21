@@ -32,9 +32,9 @@ function ReferralsPage() {
 
   const link = useMemo(() => {
     if (!user) return "";
-    const origin =
-      typeof window !== "undefined" ? window.location.origin : "https://ogstreamz.co.uk";
-    return `${origin}/welcome?ref=${user.id}`;
+    // Short, clean link on the canonical domain — resolves to /welcome?ref=<id>
+    // and ships an OG image preview when pasted to WhatsApp/iMessage/etc.
+    return `https://ogstreamz.co.uk/r/${user.id}`;
   }, [user]);
 
   const summaryQ = useQuery({
