@@ -174,7 +174,7 @@ function PrimaryCard({
   return (
     <Link
       to={to}
-      className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-card/70 p-7 shadow-card backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-glow"
+      className="group relative flex min-h-[340px] flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-card/70 p-7 shadow-card backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-glow sm:min-h-[420px]"
     >
       <div
         className={
