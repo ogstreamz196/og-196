@@ -17,11 +17,13 @@ import {
   Bot,
   AudioLines,
 } from "lucide-react";
+import { useRef } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useDevMode } from "@/hooks/use-dev-mode";
 import { useProfile } from "@/hooks/use-profile";
 import { useRole } from "@/hooks/use-role";
 import { useRecentSongs, type RecentSong } from "@/hooks/use-recent-songs";
+import { useAdaptiveOverlay } from "@/hooks/use-adaptive-overlay";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -42,11 +44,21 @@ function DashboardHome() {
     : (profile?.display_name?.trim() || user?.email?.split("@")[0] || "there");
   const balance = profile?.coin_balance ?? 0;
   const hasSongs = recentSongs.length > 0;
+  const welcomeRef = useRef<HTMLElement | null>(null);
+  const scrimOpacity = useAdaptiveOverlay(welcomeRef, { min: 0.3, max: 0.85 });
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-10">
       {/* Welcome */}
-      <section className="relative flex flex-col gap-3 overflow-hidden rounded-3xl border border-white/10 bg-card/55 p-6 shadow-card backdrop-blur-2xl sm:p-8">
+      <section
+        ref={welcomeRef}
+        className="relative flex flex-col gap-3 overflow-hidden rounded-3xl border border-white/10 bg-card/55 p-6 shadow-card backdrop-blur-2xl sm:p-8"
+      >
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-background transition-opacity duration-500"
+          style={{ opacity: scrimOpacity }}
+        />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,oklch(0.55_0.22_268/0.22),transparent_60%)]" />
         <div className="relative grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 sm:flex sm:flex-wrap sm:items-end sm:justify-between">
           <div className="min-w-0">
