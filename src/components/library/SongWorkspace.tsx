@@ -642,10 +642,10 @@ export function SongWorkspace({ song, onSaved }: Props) {
   );
 }
 
-function StageStepper({ current }: { current: Stage }) {
+function StageStepper({ current, sampleSeconds }: { current: Stage; sampleSeconds: number }) {
   const steps: { id: Stage; label: string; sub: string }[] = [
     { id: 1, label: "Lyrics", sub: "Craft the words" },
-    { id: 2, label: "Sample", sub: "30s preview" },
+    { id: 2, label: "Sample", sub: `${sampleSeconds}s preview` },
     { id: 3, label: "Full song", sub: "Final track" },
   ];
   return (
