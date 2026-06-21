@@ -121,7 +121,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         systemInstruction: { role: "system", parts: [{ text: systemPrompt }] },
         contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-        generationConfig: { temperature: 0.9, maxOutputTokens: 1200 },
+        generationConfig: { temperature: 0.9, maxOutputTokens: 2400 },
       }),
     });
 
