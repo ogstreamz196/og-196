@@ -773,24 +773,3 @@ function CustomPackCard({ onBuy }: { onBuy: (units: number) => void }) {
   );
 }
 
-
-        <div className="flex items-center justify-between gap-3 sm:flex-col sm:items-end sm:justify-center">
-          <div className="text-right">
-            <div className="text-[clamp(1.5rem,5vw,2rem)] font-black tabular-nums leading-none">
-              {CURRENCY_SYMBOL}{(totalCents / 100).toFixed(2)}
-            </div>
-            <div className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">one-time</div>
-          </div>
-          <Button
-            size="lg"
-            onClick={() => onBuy(units)}
-            className="bg-gradient-brand font-bold text-primary-foreground shadow-glow transition-transform hover:-translate-y-0.5 hover:opacity-90 active:translate-y-0"
-          >
-            <CreditCard className="mr-2 h-4 w-4" /> Buy {coins} coins
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
