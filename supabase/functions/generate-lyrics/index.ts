@@ -31,6 +31,8 @@ Deno.serve(async (req) => {
     const description = (body.description ?? "").toString().trim().slice(0, 1000);
     const styleTags = Array.isArray(body.styleTags) ? body.styleTags.slice(0, 10).map(String) : [];
     const language = (body.language ?? "English").toString().trim().slice(0, 50);
+    const personalDetails = (body.personalDetails ?? "").toString().trim().slice(0, 500);
+    const extraContext = (body.extraContext ?? "").toString().trim().slice(0, 1000);
 
     if (!songName && !description) {
       return jsonResponse({ error: "Provide a song name or description" }, 400);
