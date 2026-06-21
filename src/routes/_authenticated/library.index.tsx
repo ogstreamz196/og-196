@@ -208,6 +208,7 @@ function initialChips(): Record<Category, string[]> {
 
 function LibraryPage() {
   const { user } = useAuth();
+  const dev = useDevMode();
   const { isAdmin } = useRole();
   const { data: profile } = useProfile();
   const { data: settings } = useSettings();
