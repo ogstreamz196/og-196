@@ -3,11 +3,14 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/telegram";
 
-async function assertAdmin(context: {
-  supabase: { rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }> };
-  userId: string;
-}) {
-  const { data, error } = await context.supabase.rpc("has_role", {
+async function assertAdmin(context: { supabase: unknown; userId: string }) {
+  const supabase = context.supabase as {
+    rpc: (
+      fn: "has_role",
+      args: { _user_id: string; _role: "admin" },
+    ) => Promise<{ data: boolean | null; error: { message: string } | null }>;
+  };
+  const { data, error } = await supabase.rpc("has_role", {
     _user_id: context.userId,
     _role: "admin",
   });
