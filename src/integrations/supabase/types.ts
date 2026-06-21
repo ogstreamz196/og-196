@@ -602,6 +602,22 @@ export type Database = {
         }
         Returns: number
       }
+      set_boss_admin: {
+        Args: {
+          admin_notes?: string
+          make_boss: boolean
+          target_user_id: string
+        }
+        Returns: boolean
+      }
+      set_dev_admin: {
+        Args: {
+          admin_notes?: string
+          make_dev: boolean
+          target_user_id: string
+        }
+        Returns: boolean
+      }
       set_og_bot_admin: {
         Args: { admin_notes?: string; make_og: boolean; target_user_id: string }
         Returns: boolean
