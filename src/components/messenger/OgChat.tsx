@@ -500,18 +500,47 @@ export function OgChat({
         }}
         className="flex flex-col gap-2 border-t border-border p-3"
       >
+        {attachment && (
+          <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 p-2">
+            <img src={attachment.dataUrl} alt="" className="h-12 w-12 rounded object-cover" />
+            <span className="flex-1 truncate text-xs text-muted-foreground">{attachment.name}</span>
+            <button
+              type="button"
+              onClick={() => setAttachment(null)}
+              className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+              aria-label="Remove attachment"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) handleFile(f);
+            e.target.value = "";
+          }}
+        />
         <Input
           ref={inputRef}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={
-            isOut
-              ? "Out of coins — top up to chat"
-              : foulActive
-                ? "Go on then, type something…"
-                : "Message OG Bot…"
+            transcribing
+              ? "Transcribing…"
+              : recording
+                ? "Listening… tap mic to stop"
+                : isOut
+                  ? "Out of coins — top up to chat"
+                  : foulActive
+                    ? "Go on then, type something…"
+                    : "Message OG Bot…"
           }
-          disabled={m.isPending || isOut || !user}
+          disabled={m.isPending || isOut || !user || transcribing}
           maxLength={2000}
           autoFocus
         />
@@ -520,21 +549,29 @@ export function OgChat({
             type="button"
             variant="outline"
             size="icon"
-            onClick={() => toast.message("Attachments coming soon")}
-            aria-label="Attach file"
-            title="Attach file"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={!user || m.isPending}
+            aria-label="Attach image"
+            title="Attach image"
           >
             <UploadCloud className="h-4 w-4" />
           </Button>
           <Button
             type="button"
-            variant="outline"
+            variant={recording ? "destructive" : "outline"}
             size="icon"
-            onClick={() => toast.message("Voice input coming soon")}
-            aria-label="Voice input"
-            title="Voice input"
+            onClick={recording ? stopRecording : startRecording}
+            disabled={!user || m.isPending || transcribing}
+            aria-label={recording ? "Stop recording" : "Voice input"}
+            title={recording ? "Stop recording" : "Voice input"}
           >
-            <Mic className="h-4 w-4" />
+            {transcribing ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : recording ? (
+              <MicOff className="h-4 w-4" />
+            ) : (
+              <Mic className="h-4 w-4" />
+            )}
           </Button>
           <Button
             type="button"
@@ -551,7 +588,7 @@ export function OgChat({
           <div className="ml-auto">
             <Button
               type="submit"
-              disabled={m.isPending || !input.trim() || isOut || !user}
+              disabled={m.isPending || (!input.trim() && !attachment) || isOut || !user}
               aria-label="Send"
               className="gap-2"
             >
@@ -560,6 +597,7 @@ export function OgChat({
           </div>
         </div>
       </form>
+
 
     </div>
   );
