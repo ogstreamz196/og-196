@@ -368,9 +368,6 @@ function UserSettingsPage() {
           </div>
         </section>
 
-        {/* Audit */}
-        <DevBossPanel targetUserId={profile.id} currentBalance={profile.coin_balance ?? 0} />
-
         {/* Direct message via OG Bot */}
         <TelegramDmCard
           userId={profile.id}
