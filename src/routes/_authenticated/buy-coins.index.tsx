@@ -231,53 +231,61 @@ function BuyCoinsPage() {
     <DashboardShell title="OG Coins Store">
       <PaymentTestModeBanner />
       <div className="mx-auto w-full max-w-6xl space-y-10">
-        {/* Hero */}
-        <section className="relative overflow-hidden rounded-3xl border border-coin/40 bg-gradient-to-br from-coin/25 via-card to-card p-6 shadow-card sm:p-10">
-          <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-coin/30 blur-3xl" />
-          <div className="pointer-events-none absolute -left-16 -bottom-16 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
-          <div className="relative grid gap-8 sm:grid-cols-[1fr_auto] sm:items-center">
-            <div>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-coin/40 bg-coin/15 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-coin">
-                <Sparkles className="h-3 w-3" /> OG Coins Store
-              </span>
-              <h1 className="mt-4 break-words font-display text-[clamp(2rem,7vw,3.75rem)] font-black leading-[1.02] tracking-tight text-gradient-brand">
-                <EditableContent contentKey="buyCoins.heading" defaultValue="Top up. Create more." />
-              </h1>
-              <p className="mt-3 max-w-xl text-base font-medium text-muted-foreground sm:text-lg">
-                <EditableContent
-                  contentKey="buyCoins.subtitle"
-                  defaultValue="1 OG Coin = 1 message or 1 generation across Music Hub & OG Messenger. New here? You got 5 OG Coins free."
-                  multiline
-                />
-              </p>
-              <div className="mt-5 flex flex-wrap items-center gap-4 text-xs font-semibold text-muted-foreground">
-                <span className="inline-flex items-center gap-1.5"><InfinityIcon className="h-4 w-4 text-coin" /> Never expire</span>
-                <span className="inline-flex items-center gap-1.5"><Zap className="h-4 w-4 text-coin" /> Instant top-up</span>
-                <span className="inline-flex items-center gap-1.5"><Lock className="h-4 w-4 text-coin" /> Secure checkout</span>
-                <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-coin" /> Apple / Google Pay</span>
-              </div>
-            </div>
-            <div className="rounded-2xl border border-coin/30 bg-background/60 p-5 backdrop-blur-sm sm:min-w-[220px]">
-              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-                Your balance
-              </p>
-              <div className="mt-2 flex items-baseline gap-2">
-                <Coins className="h-7 w-7 text-coin" />
-                <span className="text-[clamp(2.25rem,8vw,3rem)] font-black tabular-nums leading-none text-foreground">
-                  {profile?.coin_balance ?? 0}
+        {/* Cartoon storefront hero */}
+        <section className="relative overflow-hidden rounded-[28px] border-2 border-coin/50 bg-gradient-to-b from-primary/20 via-card to-card shadow-card">
+          {/* Awning */}
+          <div
+            aria-hidden
+            className="relative h-10 w-full sm:h-14"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(90deg, hsl(var(--primary)) 0 28px, hsl(var(--coin)) 28px 56px)",
+            }}
+          >
+            <div className="absolute inset-x-0 bottom-0 h-3 bg-gradient-to-b from-black/0 to-black/40" />
+            {/* scalloped edge */}
+            <svg className="absolute -bottom-3 left-0 h-4 w-full text-card" viewBox="0 0 100 4" preserveAspectRatio="none">
+              <path d="M0 0 Q 2.5 4 5 0 T 10 0 T 15 0 T 20 0 T 25 0 T 30 0 T 35 0 T 40 0 T 45 0 T 50 0 T 55 0 T 60 0 T 65 0 T 70 0 T 75 0 T 80 0 T 85 0 T 90 0 T 95 0 T 100 0 V 4 H 0 Z" fill="currentColor"/>
+            </svg>
+          </div>
+
+          <div className="relative px-5 pb-8 pt-8 sm:px-10 sm:pb-10 sm:pt-10">
+            <div className="pointer-events-none absolute -right-16 -top-4 h-56 w-56 rounded-full bg-coin/25 blur-3xl" />
+            <div className="pointer-events-none absolute -left-16 bottom-0 h-56 w-56 rounded-full bg-primary/25 blur-3xl" />
+
+            <div className="relative grid gap-6 sm:grid-cols-[1fr_auto] sm:items-center">
+              <div>
+                <span className="inline-flex items-center gap-1.5 rounded-full border-2 border-coin/50 bg-coin/15 px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-coin">
+                  <Sparkles className="h-3 w-3" /> The Coin Shop
                 </span>
+                <h1 className="mt-4 font-display text-[clamp(2.5rem,9vw,4.5rem)] font-black uppercase leading-[0.95] tracking-[-0.02em] text-gradient-brand drop-shadow-[0_4px_18px_rgba(80,60,255,0.35)]">
+                  <EditableContent contentKey="buyCoins.heading" defaultValue="Grab some coins." />
+                </h1>
+                <p className="mt-3 max-w-md text-base font-semibold text-foreground/80 sm:text-lg">
+                  <EditableContent
+                    contentKey="buyCoins.subtitle"
+                    defaultValue="1 coin = 1 message or 1 track. Coins never expire."
+                    multiline
+                  />
+                </p>
               </div>
-              <p className="mt-1 text-xs font-bold text-coin">OG Coins</p>
+
+              {/* Balance chip — coin-shaped */}
+              <div className="relative mx-auto flex h-32 w-32 shrink-0 items-center justify-center rounded-full border-4 border-coin bg-gradient-to-br from-coin/40 to-coin/10 text-center shadow-[0_8px_0_0_hsl(var(--coin)/0.35),0_18px_36px_-12px_hsl(var(--coin)/0.6)] sm:h-40 sm:w-40">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-coin">Balance</p>
+                  <p className="mt-1 text-[clamp(2rem,6vw,2.75rem)] font-black tabular-nums leading-none text-foreground">
+                    {profile?.coin_balance ?? 0}
+                  </p>
+                  <p className="mt-1 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-coin">
+                    <Coins className="h-3 w-3" /> OG Coins
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* What you can do */}
-        <section className="grid gap-3 sm:grid-cols-3">
-          <ValueProp icon={<MessageSquare className="h-5 w-5" />} title="Message OGs" body="Spend 1 coin per reply in OG Messenger." />
-          <ValueProp icon={<Music2 className="h-5 w-5" />} title="Generate tracks" body="Lyrics, beats & full songs in Music Hub." />
-          <ValueProp icon={<Wand2 className="h-5 w-5" />} title="Unlock portals" body="Spin up custom AI portals on demand." />
-        </section>
 
         {/* Live coin economy snapshot */}
         <CirculatingCoins />
