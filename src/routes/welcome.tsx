@@ -385,11 +385,19 @@ function Hero() {
           </span>
         </h1>
 
-        <p className="mx-auto mt-6 max-w-4xl text-balance text-lg font-semibold leading-[1.25] text-foreground/90 sm:mt-10 sm:text-3xl sm:leading-[1.15] md:text-4xl lg:text-5xl">
+        <div id="sign-in" className="mx-auto mt-10 max-w-3xl scroll-mt-24 sm:mt-14">
+          <AuthButtons size="xl" />
+          <p className="mt-5 text-center text-base font-bold text-foreground sm:mt-6 sm:text-xl">
+            Free to start — no card required
+          </p>
+        </div>
+
+        <p className="mx-auto mt-10 max-w-4xl text-balance text-lg font-semibold leading-[1.25] text-foreground/90 sm:mt-14 sm:text-3xl sm:leading-[1.15] md:text-4xl lg:text-5xl">
           Type a wild idea, a name, a mood, a memory.
           <br className="hidden sm:block" />
           {" "}Pick rap, afrobeats, pop, drill, heartbreak or party. <span className="inline-block wc-wiggle">🎧</span>
         </p>
+
 
         <AlbumCoverShowcase />
       </div>
