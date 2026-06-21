@@ -343,16 +343,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
                   Generate lyrics in stage 1 first.
                 </p>
               )}
-              {isPending && (
-                <div
-                  role="status"
-                  aria-live="polite"
-                  className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground"
-                >
-                  <Loader2 className="h-4 w-4 animate-spin text-primary" aria-hidden="true" />
-                  Generating preview — refreshes automatically.
-                </div>
-              )}
+              {isPending && <GeneratingProgress sampleSeconds={settings?.sample_seconds ?? 30} />}
               {isFailed && (
                 <div
                   role="alert"
