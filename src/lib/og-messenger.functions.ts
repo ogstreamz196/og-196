@@ -122,7 +122,7 @@ export const chatOgBot = createServerFn({ method: "POST" })
           // Upsert each phrase, bumping uses + last_seen_at.
           await Promise.all(
             candidates.map((phrase) =>
-              supabaseAdmin.rpc("og_learn_insult", {
+              (supabaseAdmin.rpc as unknown as (fn: string, args: Record<string, unknown>) => Promise<{ error: { message: string } | null }>)("og_learn_insult", {
                 p_user_id: context.userId,
                 p_phrase: phrase,
               }).then((r) => {
