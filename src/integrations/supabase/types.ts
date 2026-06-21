@@ -361,9 +361,11 @@ export type Database = {
           duration_seconds: number | null
           error_message: string | null
           id: string
+          is_variation: boolean
           lyrics: string | null
           portal_id: string | null
           prompt: string
+          revealed: boolean
           sample_path: string | null
           status: string
           style: string | null
@@ -382,9 +384,11 @@ export type Database = {
           duration_seconds?: number | null
           error_message?: string | null
           id?: string
+          is_variation?: boolean
           lyrics?: string | null
           portal_id?: string | null
           prompt: string
+          revealed?: boolean
           sample_path?: string | null
           status?: string
           style?: string | null
@@ -403,9 +407,11 @@ export type Database = {
           duration_seconds?: number | null
           error_message?: string | null
           id?: string
+          is_variation?: boolean
           lyrics?: string | null
           portal_id?: string | null
           prompt?: string
+          revealed?: boolean
           sample_path?: string | null
           status?: string
           style?: string | null
