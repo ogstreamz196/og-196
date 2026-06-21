@@ -211,7 +211,7 @@ function LibraryPage() {
 
   const lyricsCost = settings?.coins_per_lyrics_generation ?? 1;
   const previewCost = settings?.coins_per_generation ?? 3;
-  const downloadCost = settings?.coins_per_full_unlock ?? 5;
+  // download cost is configured via settings.coins_per_full_unlock when needed
   const balance = profile?.coin_balance ?? 0;
   const firstName = useMemo(() => {
     const raw = profile?.display_name?.trim() || user?.email?.split("@")[0] || "";
