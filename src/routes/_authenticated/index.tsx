@@ -130,11 +130,12 @@ function DashboardHome() {
               <CardTitle className="text-lg">Recent songs</CardTitle>
               <CardDescription>Pick up where you left off.</CardDescription>
             </div>
-            <Button asChild variant="ghost" size="sm" className="gap-1">
-              <Link to="/library">
-                View all <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </Button>
+            <Link
+              to="/library"
+              className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "gap-1")}
+            >
+              View all <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
           </CardHeader>
           <CardContent>
             {songsLoading ? (
