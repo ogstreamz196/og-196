@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Music2, Bot } from "lucide-react";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
+import { AdminSection } from "./AdminSection";
 
 interface ToggleDef {
   key: string;
@@ -74,17 +75,10 @@ function SettingsGroup({
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
-      <div className="mb-4 flex items-center gap-3">
-        <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/15">{icon}</div>
-        <div>
-          <h3 className="font-semibold">{title}</h3>
-          <p className="text-sm text-muted-foreground">{subtitle}</p>
-        </div>
-      </div>
+    <AdminSection icon={icon} title={title} subtitle={subtitle} flush>
       <div className="divide-y divide-border/60">
         {toggles.map((t) => (
-          <div key={t.key} className="flex items-start justify-between gap-4 py-3">
+          <div key={t.key} className="flex items-start justify-between gap-4 py-3 first:pt-0 last:pb-0">
             <div className="min-w-0">
               <p className="font-medium">{t.label}</p>
               <p className="text-sm text-muted-foreground">{t.desc}</p>
@@ -97,6 +91,6 @@ function SettingsGroup({
           </div>
         ))}
       </div>
-    </div>
+    </AdminSection>
   );
 }

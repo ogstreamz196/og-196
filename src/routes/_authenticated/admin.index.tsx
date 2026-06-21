@@ -15,6 +15,7 @@ import { BossNav } from "@/components/admin/BossNav";
 import { HardwiredCapabilities } from "@/components/admin/HardwiredCapabilities";
 import { AppToggles } from "@/components/admin/AppToggles";
 import { OgBotPing } from "@/components/admin/OgBotPing";
+import { AdminSection } from "@/components/admin/AdminSection";
 import { AdminEditableLabel, AdminEditableBalance } from "@/components/admin/AdminEditMode";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -122,26 +123,29 @@ function AdminPanel() {
     <DashboardShell title="Admin Controls">
       <BossNav />
       <div className="mx-auto max-w-6xl">
-        <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-card p-4">
-          <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-brand">
-            <ShieldCheck className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <div className="flex-1">
-            <h2 className="font-semibold">Admin controls</h2>
-            <p className="text-sm text-muted-foreground">Pricing, portals, app toggles, recent generations, manual unlocks, and retries.</p>
-          </div>
-          <Link to="/admin/users">
-            <Button size="sm" variant="outline">
-              <ShieldCheck className="mr-2 h-4 w-4" /> Manage users
-            </Button>
-          </Link>
-          <Link to="/admin/og-persona">
-            <Button size="sm" variant="outline">OG Bot Persona</Button>
-          </Link>
-          <Link to="/admin/user-settings">
-            <Button size="sm" variant="outline">User Settings</Button>
-          </Link>
-        </div>
+        <AdminSection
+          padding="p-4"
+          icon={<ShieldCheck className="h-5 w-5 text-primary-foreground" />}
+          title="Admin controls"
+          subtitle="Pricing, portals, app toggles, recent generations, manual unlocks, and retries."
+          action={
+            <div className="flex flex-wrap gap-2">
+              <Link to="/admin/users">
+                <Button size="sm" variant="outline">
+                  <ShieldCheck className="mr-2 h-4 w-4" /> Manage users
+                </Button>
+              </Link>
+              <Link to="/admin/og-persona">
+                <Button size="sm" variant="outline">OG Bot Persona</Button>
+              </Link>
+              <Link to="/admin/user-settings">
+                <Button size="sm" variant="outline">User Settings</Button>
+              </Link>
+            </div>
+          }
+        >
+          {null}
+        </AdminSection>
 
 
         <OgCoinsPanel />
