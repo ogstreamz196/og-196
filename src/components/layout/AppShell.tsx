@@ -18,7 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppSidebar } from "./AppSidebar";
 import { HighContrastToggle } from "./HighContrastToggle";
 import { WelcomeBackdrop } from "./WelcomeBackdrop";
-import { OgFloatingWidget } from "@/components/og-widget/OgFloatingWidget";
+// OgFloatingWidget intentionally not imported — see comment below near <main>.
 import ogStreamzLogo from "@/assets/ogstreamz-logo.jpg.asset.json";
 import ogBotLogo from "@/assets/ogbot.png.asset.json";
 
@@ -162,7 +162,9 @@ export function AppShell({ children }: { children: ReactNode }) {
               </div>
             </main>
 
-            <OgFloatingWidget />
+            {/* OG chat lives in <OgBotWidget /> mounted by _authenticated/route.tsx.
+                The legacy <OgFloatingWidget /> was a UI-only scaffold and caused a
+                duplicate "failing to load" orb on every page. */}
           </div>
         </div>
       </SidebarProvider>
