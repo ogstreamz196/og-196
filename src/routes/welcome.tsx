@@ -348,9 +348,9 @@ function CardEditBadge() {
 function TopNav() {
   return (
     <header className="sticky top-0 z-30 border-b border-white/10 bg-background/40 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:h-20 sm:px-8">
-        <Link to="/welcome" className="group flex min-w-0 items-center gap-3">
-          <span className="wc-wiggle grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-gradient-brand text-primary-foreground shadow-glow sm:h-11 sm:w-11">
+      <nav aria-label="Primary" className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:h-20 sm:px-8">
+        <Link to="/welcome" aria-label="OG Studio — home" className="group flex min-w-0 items-center gap-3">
+          <span aria-hidden className="wc-wiggle grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-gradient-brand text-primary-foreground shadow-glow sm:h-11 sm:w-11">
             <Sparkles className="h-5 w-5" />
           </span>
           <div className="min-w-0 leading-none">
@@ -360,8 +360,9 @@ function TopNav() {
             </p>
           </div>
         </Link>
-      </div>
+      </nav>
     </header>
+
   );
 }
 
