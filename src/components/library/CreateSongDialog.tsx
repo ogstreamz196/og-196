@@ -46,6 +46,7 @@ export interface SongBriefDraft {
   mood: string;
   genre: string;
   lyricalStyle: string;
+  language: string;
   theme: string;
 }
 
@@ -65,6 +66,7 @@ const EMPTY: Omit<SongBriefDraft, "flow"> = {
   mood: "",
   genre: "",
   lyricalStyle: "",
+  language: "English",
   theme: "",
 };
 
@@ -72,6 +74,7 @@ const MOODS = ["Warm", "Hopeful", "Heartfelt", "Hype", "Sad", "Romantic", "Nosta
 const GENRES = ["Rap", "Drill", "Pop", "Afrobeats", "R&B", "Dance", "Acoustic", "Ballad", "Reggae", "Indie"];
 const STYLES = ["Story-driven", "Punchy bars", "Sing-along hook", "Spoken word", "Anthem", "Lullaby"];
 const RELATIONSHIPS = ["Mum", "Dad", "Partner", "Best friend", "Sibling", "Kids", "Crew", "Myself"];
+const LANGUAGES = ["English", "Spanish", "French", "Portuguese", "Hindi", "Urdu", "Punjabi", "Arabic", "Swahili", "Patois", "Yoruba", "German", "Italian", "Tagalog"];
 
 export function CreateSongDialog({ flow, onClose, onSubmit }: CreateSongDialogProps) {
   const [state, setState] = useState(EMPTY);
@@ -134,6 +137,15 @@ export function CreateSongDialog({ flow, onClose, onSubmit }: CreateSongDialogPr
             value={state.lyricalStyle}
             onChange={(v) => update("lyricalStyle", v)}
             customPlaceholder="Add your own style…"
+          />
+
+          <ChipSection
+            label="Language"
+            hint="What language should the lyrics be in?"
+            options={LANGUAGES}
+            value={state.language}
+            onChange={(v) => update("language", v)}
+            customPlaceholder="Add another language…"
           />
 
           {(flow === "memory" || flow === "tribute") && (
@@ -272,5 +284,6 @@ export function composePromptFromDraft(d: SongBriefDraft): string {
     );
   }
   if (d.theme) lines.push(`Message: ${d.theme}`);
+  if (d.language) lines.push(`Language: write the lyrics in ${d.language}`);
   return lines.join("\n");
 }
