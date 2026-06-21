@@ -184,14 +184,34 @@ function PrimaryCard({
             : "bg-[radial-gradient(circle_at_top_right,oklch(0.55_0.22_268/0.22),transparent_60%)]")
         }
       />
-      <div className="relative">
+      <div className="relative flex flex-1 flex-col">
         <div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-background/40 text-primary">
           {icon}
         </div>
         <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">{eyebrow}</p>
-        <h3 className="font-display mt-2 text-2xl font-normal tracking-tight">{title}</h3>
-        <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">{body}</p>
+        <h3 className="font-display mt-3 flex-1 text-[clamp(2.25rem,7vw,4.5rem)] font-black uppercase leading-[0.9] tracking-[-0.035em] drop-shadow-[0_6px_24px_rgba(80,60,255,0.35)]">
+          {title.split(" ").map((word, i, arr) => {
+            const isLast = i === arr.length - 1;
+            return (
+              <span
+                key={`${word}-${i}`}
+                className={
+                  "wc-pop block " +
+                  (isLast
+                    ? "italic text-gradient-brand wc-bounce-soft"
+                    : "")
+                }
+                style={{ animationDelay: `${i * 0.12}s` }}
+              >
+                {word}
+                {isLast ? "." : ""}
+              </span>
+            );
+          })}
+        </h3>
+        <p className="mt-4 max-w-md text-sm leading-relaxed text-muted-foreground">{body}</p>
       </div>
+
       <div className="relative mt-8 inline-flex items-center gap-1.5 text-sm font-medium text-primary">
         {cta}
         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
