@@ -131,75 +131,96 @@ function BuyCoinsPage() {
             <span className="text-xs font-medium text-muted-foreground">Coins never expire</span>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            {COIN_PACKS.map((t) => {
-              const perCoin = t.priceCents / 100 / t.coins;
-              return (
-                <div
-                  key={t.bundleId}
-                  className={cn(
-                    "relative flex flex-col rounded-2xl border bg-card p-6 shadow-card transition hover:-translate-y-0.5 hover:shadow-glow",
-                    t.popular ? "border-primary shadow-glow" : "border-border",
-                  )}
-                >
-                  {t.popular && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-brand px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-primary-foreground shadow">
-                      ⭐ Best value
-                    </div>
-                  )}
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                    {t.label}
-                  </div>
-                  {/* Big OG Coins front and centre */}
-                  <div className="mt-3 flex items-center gap-2.5">
-                    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-coin/15">
-                      <Coins className="h-6 w-6 text-coin" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="flex items-baseline gap-1.5 leading-none">
-                        <span className="text-4xl font-black tabular-nums text-foreground">{t.coins}</span>
-                        <span className="text-sm font-bold text-coin">OG Coins</span>
-                      </div>
-                      <div className="mt-1 text-[11px] text-muted-foreground">
-                        {CURRENCY_SYMBOL}
-                        {perCoin.toFixed(2)} per coin
-                      </div>
-                    </div>
-                  </div>
-                  {/* Price */}
-                  <div className="mt-5 flex items-baseline gap-1">
-                    <span className="text-3xl font-black tracking-tight">
-                      {CURRENCY_SYMBOL}
-                      {(t.priceCents / 100).toFixed(2)}
-                    </span>
-                    <span className="text-xs text-muted-foreground">one-time</span>
-                  </div>
-                  <ul className="mt-4 flex-1 space-y-2 text-sm text-muted-foreground">
-                    <li className="flex items-start gap-2">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                      {t.description}
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" /> Works across Music Hub &amp; OG Messenger
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" /> Instant top-up, never expire
-                    </li>
-                  </ul>
-                  <Button
-                    size="lg"
-                    className={cn(
-                      "mt-6 w-full font-bold",
-                      t.popular && "bg-gradient-brand text-primary-foreground shadow-glow hover:opacity-90",
-                    )}
-                    variant={t.popular ? "default" : "outline"}
+            {(() => {
+              const basePerCoin = COIN_PACKS[0]
+                ? COIN_PACKS[0].priceCents / 100 / COIN_PACKS[0].coins
+                : 0;
+              return COIN_PACKS.map((t) => {
+                const perCoin = t.priceCents / 100 / t.coins;
+                const savingsPct = basePerCoin > 0
+                  ? Math.round((1 - perCoin / basePerCoin) * 100)
+                  : 0;
+                return (
+                  <button
+                    key={t.bundleId}
+                    type="button"
                     onClick={() => setSelected({ type: "coins", pack: t })}
+                    aria-label={`Buy ${t.coins} OG Coins for ${CURRENCY_SYMBOL}${(t.priceCents / 100).toFixed(2)}`}
+                    className={cn(
+                      "group relative flex flex-col rounded-2xl border bg-card p-6 text-left shadow-card transition-all",
+                      "hover:-translate-y-1 hover:shadow-glow",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                      "active:translate-y-0",
+                      t.popular ? "border-primary shadow-glow" : "border-border hover:border-primary/40",
+                    )}
                   >
-                    <Coins className="mr-2 h-4 w-4" /> Buy {t.coins} OG Coins
-                  </Button>
-                </div>
-              );
-            })}
+                    {t.popular && (
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-gradient-brand px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-primary-foreground shadow">
+                        <Sparkles className="h-3 w-3" /> Best value
+                      </div>
+                    )}
+                    {savingsPct > 0 && (
+                      <div className="absolute right-4 top-4 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400 ring-1 ring-emerald-500/30">
+                        Save {savingsPct}%
+                      </div>
+                    )}
+                    <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                      {t.label}
+                    </div>
+                    {/* Big OG Coins front and centre */}
+                    <div className="mt-3 flex items-center gap-2.5">
+                      <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-coin/15 transition-transform group-hover:scale-110 group-hover:rotate-[-6deg]">
+                        <Coins className="h-6 w-6 text-coin" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-baseline gap-1.5 leading-none">
+                          <span className="text-4xl font-black tabular-nums text-foreground">{t.coins}</span>
+                          <span className="text-sm font-bold text-coin">OG Coins</span>
+                        </div>
+                        <div className="mt-1 text-[11px] text-muted-foreground">
+                          {CURRENCY_SYMBOL}
+                          {perCoin.toFixed(2)} per coin
+                        </div>
+                      </div>
+                    </div>
+                    {/* Price */}
+                    <div className="mt-5 flex items-baseline gap-1">
+                      <span className="text-3xl font-black tracking-tight">
+                        {CURRENCY_SYMBOL}
+                        {(t.priceCents / 100).toFixed(2)}
+                      </span>
+                      <span className="text-xs text-muted-foreground">one-time</span>
+                    </div>
+                    <ul className="mt-4 flex-1 space-y-2 text-sm text-muted-foreground">
+                      <li className="flex items-start gap-2">
+                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                        {t.description}
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" /> Works across Music Hub &amp; OG Messenger
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" /> Instant top-up, never expire
+                      </li>
+                    </ul>
+                    <div
+                      className={cn(
+                        "mt-6 inline-flex h-11 w-full items-center justify-center rounded-md px-4 text-sm font-bold transition-all",
+                        t.popular
+                          ? "bg-gradient-brand text-primary-foreground shadow-glow group-hover:opacity-90"
+                          : "border border-border bg-background/50 text-foreground group-hover:border-primary group-hover:bg-primary group-hover:text-primary-foreground",
+                      )}
+                    >
+                      <Coins className="mr-2 h-4 w-4" /> Buy {t.coins} OG Coins
+                    </div>
+                  </button>
+                );
+              });
+            })()}
           </div>
+          <p className="mt-3 flex items-center justify-center gap-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+            <Lock className="h-3 w-3" /> Secure checkout · Apple Pay · Google Pay · Card
+          </p>
         </section>
 
         {/* VIP yearly subscription */}
