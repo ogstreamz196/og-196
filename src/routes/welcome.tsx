@@ -316,12 +316,6 @@ function TopNav() {
             </p>
           </div>
         </Link>
-
-        <a href="#sign-in">
-          <Button className="h-11 rounded-xl px-5 text-sm font-semibold bg-gradient-brand text-primary-foreground shadow-glow hover:opacity-95">
-            Sign in
-          </Button>
-        </a>
       </div>
     </header>
   );
