@@ -19,6 +19,31 @@ import { AppSidebar } from "./AppSidebar";
 import { HighContrastToggle } from "./HighContrastToggle";
 import { WelcomeBackdrop } from "./WelcomeBackdrop";
 import { OgFloatingWidget } from "@/components/og-widget/OgFloatingWidget";
+import ogStreamzLogo from "@/assets/ogstreamz-logo.jpg.asset.json";
+import ogBotLogo from "@/assets/ogbot.png.asset.json";
+
+function BrandLockup({ compact = false }: { compact?: boolean }) {
+  return (
+    <div
+      className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2 py-1 shadow-sm backdrop-blur-md"
+      aria-label="OG Streamz powered by OG Bot"
+    >
+      <img
+        src={ogStreamzLogo.url}
+        alt="OG Streamz"
+        className={`${compact ? "h-6" : "h-7"} w-auto rounded-md object-contain`}
+      />
+      <span className="text-[8px] font-semibold uppercase tracking-[0.18em] text-muted-foreground leading-tight">
+        Powered by
+      </span>
+      <img
+        src={ogBotLogo.url}
+        alt="OG Bot"
+        className={`${compact ? "h-6 w-6" : "h-7 w-7"} rounded-full object-cover ring-1 ring-primary/40`}
+      />
+    </div>
+  );
+}
 
 const routeTitles: Record<string, string> = {
   "/": "Music Hub",
