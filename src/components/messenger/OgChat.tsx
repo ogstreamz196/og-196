@@ -89,7 +89,7 @@ export function OgChat({
   const [messages, setMessages] = useState<OgChatMessage[]>(() => loadThread(userId));
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const selfSyncRef = useRef(false);
   const chat = useServerFn(chatOgBot);
   const qc = useQueryClient();
