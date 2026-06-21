@@ -134,7 +134,7 @@ function BuyCoinsPage() {
                     Order summary
                   </p>
                   <p className="truncate text-base font-bold">
-                    {isVipFlow ? VIP_PLAN.label : `${selected.pack.coins} OG Coins · ${selected.pack.label}`}
+                    {labelForOrder}
                   </p>
                 </div>
               </div>
@@ -158,8 +158,11 @@ function BuyCoinsPage() {
                   Confirm your order
                 </p>
                 <div className="mt-3 grid gap-2 rounded-2xl border border-border bg-background/40 p-4 text-sm">
-                  <Row label={isVipFlow ? "Plan" : "Pack"} value={isVipFlow ? VIP_PLAN.label : selected.pack.label} />
-                  {!isVipFlow && <Row label="Coins" value={`${selected.pack.coins} OG Coins`} />}
+                  <Row
+                    label={isVipFlow ? "Plan" : "Pack"}
+                    value={isVipFlow ? VIP_PLAN.label : isCustomFlow ? "Custom" : (selected as { pack: CoinPack }).pack.label}
+                  />
+                  {!isVipFlow && <Row label="Coins" value={`${coinsForOrder} OG Coins`} />}
                   {!isVipFlow && (
                     <Row
                       label="Per coin"
@@ -198,6 +201,8 @@ function BuyCoinsPage() {
               <div className="p-4 sm:p-5">
                 {selected.type === "coins" ? (
                   <StripeEmbeddedCheckoutInline priceId={selected.pack.priceId} returnUrl={returnUrl} />
+                ) : selected.type === "custom" ? (
+                  <StripeEmbeddedCheckoutInline type="custom" customUnits={selected.units} returnUrl={returnUrl} />
                 ) : (
                   <StripeEmbeddedCheckoutInline type="vip" returnUrl={returnUrl} />
                 )}
