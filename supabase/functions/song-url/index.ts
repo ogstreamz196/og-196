@@ -42,12 +42,12 @@ Deno.serve(async (req) => {
     if (!song.audio_path) return j({ error: "Full track still downloading", code: "full_pending" }, 409);
   }
 
-  // Preview prefers the small sample; falls back to full audio if the sample
-  // hasn't been written yet (older rows) or after the full track has landed.
-  const path = mode === "full"
-    ? song.audio_path!
-    : (song.sample_path || song.audio_path);
-  if (!path) return j({ error: "Not ready" }, 409);
+  // Preview ALWAYS serves the compressed sample. Full audio is never exposed
+  // to the client unless the song has been explicitly unlocked.
+  const path = mode === "full" ? song.audio_path! : song.sample_path;
+  if (!path) {
+    return j({ error: mode === "full" ? "Not ready" : "Sample not ready", code: "sample_pending" }, 409);
+  }
 
   const ttl = mode === "full" ? 60 * 5 : 60 * 15;
   const { data, error } = await admin.storage.from("song-files")
