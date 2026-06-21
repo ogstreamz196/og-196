@@ -32,6 +32,8 @@ interface ProfileRow {
   display_name: string | null;
   coin_balance: number;
   created_at: string;
+  telegram_chat_id: number | null;
+  telegram_username: string | null;
 }
 
 function UserSettingsPage() {
@@ -45,7 +47,7 @@ function UserSettingsPage() {
     queryFn: async (): Promise<ProfileRow | null> => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, email, display_name, coin_balance, created_at")
+        .select("id, email, display_name, coin_balance, created_at, telegram_chat_id, telegram_username")
         .eq("id", userId)
         .maybeSingle();
       if (error) throw error;
