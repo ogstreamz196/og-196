@@ -44,7 +44,7 @@ function UserSettingsPage() {
         .eq("id", userId)
         .maybeSingle();
       if (error) throw error;
-      return (data ?? null) as ProfileRow | null;
+      return maskDevIdentity((data ?? null) as ProfileRow | null);
     },
   });
 
