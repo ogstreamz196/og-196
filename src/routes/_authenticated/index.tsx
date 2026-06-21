@@ -323,12 +323,12 @@ function QuickAction({
   return (
     <Link
       to={to}
-      className="group flex h-auto items-center justify-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-5 py-4 backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-white/[0.06] hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="group flex h-auto items-center justify-start gap-4 rounded-2xl border-2 border-white/10 bg-white/[0.03] px-6 py-5 backdrop-blur-md transition-all duration-200 hover:-translate-y-1 hover:border-primary/50 hover:bg-white/[0.07] hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-gradient-brand-soft text-primary transition-transform duration-200 group-hover:scale-110">
+      <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-gradient-brand-soft text-primary shadow-glow transition-transform duration-200 group-hover:scale-110 group-hover:rotate-6">
         {icon}
       </span>
-      <span className="text-base font-semibold">{label}</span>
+      <span className="text-lg font-bold">{label}</span>
     </Link>
   );
 }
@@ -339,17 +339,17 @@ function PromptCard({ prompt }: { prompt: PromptIdea }) {
       <Link
         to="/library"
         preload="intent"
-        className="group flex h-full flex-col gap-2 rounded-xl border border-white/10 bg-white/[0.03] p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-white/[0.06] hover:shadow-glow"
+        className="group flex h-full flex-col gap-2 rounded-2xl border-2 border-white/10 bg-white/[0.03] p-5 transition-all duration-200 hover:-translate-y-1 hover:rotate-[-0.5deg] hover:border-primary/50 hover:bg-white/[0.07] hover:shadow-glow"
       >
         <div className="flex items-center justify-between gap-2">
-          <p className="text-base font-semibold text-foreground">{prompt.title}</p>
-          <Badge variant="outline" className="shrink-0 border-white/10 bg-white/[0.04] text-xs">
+          <p className="text-lg font-bold text-foreground">{prompt.title}</p>
+          <Badge variant="outline" className="shrink-0 rounded-full border-2 border-white/15 bg-white/[0.04] text-xs">
             {prompt.vibe}
           </Badge>
         </div>
-        <p className="text-sm leading-relaxed text-muted-foreground">{prompt.description}</p>
-        <span className="mt-auto inline-flex items-center gap-1 pt-2 text-sm font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100">
-          Use this prompt <ArrowRight className="h-3.5 w-3.5" />
+        <p className="text-base leading-relaxed text-muted-foreground">{prompt.description}</p>
+        <span className="mt-auto inline-flex items-center gap-1 pt-2 text-sm font-semibold text-primary opacity-0 transition-opacity group-hover:opacity-100">
+          Use this prompt <ArrowRight className="h-4 w-4" />
         </span>
       </Link>
     </li>
