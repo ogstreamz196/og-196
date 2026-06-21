@@ -178,6 +178,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <SiteContentRealtimeBridge />
+        <DisplayPrefsBridge />
         <Outlet />
         <Toaster />
       </AuthProvider>
