@@ -167,7 +167,18 @@ export const chatOgBot = createServerFn({ method: "POST" })
           temperature: data.mode === "og" && foulMouth ? 0.9 : data.mode === "og" ? 0.75 : 0.6,
           messages: [
             { role: "system", content: system },
-            ...outgoing,
+            ...outgoing.slice(0, -1),
+            // Last user message: if an image attachment was sent, build a
+            // multimodal content array so Gemini can actually see the image.
+            data.attachmentDataUrl && outgoing.at(-1)?.role === "user"
+              ? {
+                  role: "user" as const,
+                  content: [
+                    { type: "text", text: outgoing.at(-1)!.content || "What's in this image?" },
+                    { type: "image_url", image_url: { url: data.attachmentDataUrl } },
+                  ],
+                }
+              : outgoing.at(-1)!,
           ],
         }),
       });
