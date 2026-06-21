@@ -228,7 +228,7 @@ export function OgChat({
     if (m.isPending) return;
     if (!user) return toast.error("Sign in to chat with OG Bot.");
     if ((profile?.coin_balance ?? 0) <= 0) {
-      return toast.error("You're out of OG coins. Top up to keep chatting.");
+      return toast.error("Out of OG coins — resets to 5 tomorrow, or top up to keep going.");
     }
     const visibleText = t || (att ? `📎 ${att.name}` : "");
     const next = [...messages, { role: "user" as const, content: visibleText }];
