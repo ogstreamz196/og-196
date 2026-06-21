@@ -233,6 +233,7 @@ export const chatOgBot = createServerFn({ method: "POST" })
       return {
         reply,
         coin_balance: (newBalance as number | null) ?? userCtx.coin_balance - 1,
+        learned_insults: newlyLearned,
       };
     } catch (err) {
       // Refund the coin on hard AI failure so the user isn't charged for nothing.
