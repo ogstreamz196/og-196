@@ -47,8 +47,8 @@ export const chatOgBot = createServerFn({ method: "POST" })
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    // 1. Load user context in parallel (profile, role flags, foul pref, persona overrides).
-    const [profileRes, rolesRes, prefRes, siteRes] = await Promise.all([
+    // 1. Load user context in parallel (profile, role flags, foul pref, persona overrides, learned insults).
+    const [profileRes, rolesRes, prefRes, siteRes, learnedRes] = await Promise.all([
       supabaseAdmin
         .from("profiles")
         .select("display_name, email, coin_balance")
@@ -67,6 +67,12 @@ export const chatOgBot = createServerFn({ method: "POST" })
         .from("site_content")
         .select("key, value")
         .in("key", ["og_persona.script", "og_persona.voice", "og_persona.dictionary"]),
+      supabaseAdmin
+        .from("og_learned_insults")
+        .select("phrase, uses")
+        .eq("user_id", context.userId)
+        .order("last_seen_at", { ascending: false })
+        .limit(40),
     ]);
 
     if (profileRes.error) throw new Error(profileRes.error.message);
