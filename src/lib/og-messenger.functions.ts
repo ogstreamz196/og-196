@@ -22,7 +22,7 @@ interface ChatReply {
  */
 export const chatOgBot = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { messages: OgChatMessage[]; pageContext?: string; mode?: "safe" | "og" }) => {
+  .inputValidator((data: { messages: OgChatMessage[]; pageContext?: string; mode?: "safe" | "og"; attachmentDataUrl?: string }) => {
     if (!data || !Array.isArray(data.messages)) throw new Error("messages required");
     const messages = data.messages.slice(-30).map((m) => ({
       role: m.role === "assistant" ? "assistant" as const : "user" as const,
@@ -32,7 +32,12 @@ export const chatOgBot = createServerFn({ method: "POST" })
     const pageContext =
       typeof data.pageContext === "string" ? data.pageContext.slice(0, 200) : "";
     const mode: "safe" | "og" = data.mode === "safe" ? "safe" : "og";
-    return { messages, pageContext, mode };
+    let attachmentDataUrl: string | undefined;
+    if (typeof data.attachmentDataUrl === "string" && data.attachmentDataUrl.startsWith("data:image/")) {
+      if (data.attachmentDataUrl.length > 8_000_000) throw new Error("Image too large (max ~6MB).");
+      attachmentDataUrl = data.attachmentDataUrl;
+    }
+    return { messages, pageContext, mode, attachmentDataUrl };
   })
   .handler(async ({ data, context }): Promise<ChatReply> => {
     const apiKey = process.env.LOVABLE_API_KEY;
