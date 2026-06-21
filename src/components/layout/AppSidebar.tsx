@@ -87,12 +87,12 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border">
         <div className="flex items-center gap-2 px-2 py-2">
-          <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-gradient-to-br from-primary to-accent text-primary-foreground font-black">
+          <div className="wc-bounce-soft grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-brand text-primary-foreground font-display text-base shadow-glow">
             OG
           </div>
           <div className="flex min-w-0 flex-col">
-            <span className="truncate text-sm font-semibold">PORTAL</span>
-            <span className="truncate text-xs text-muted-foreground">by OG Streamz</span>
+            <span className="font-display truncate text-base leading-none tracking-tight">PORTAL</span>
+            <span className="truncate text-[10px] uppercase tracking-[0.18em] text-muted-foreground">by OG Streamz</span>
           </div>
         </div>
       </SidebarHeader>
