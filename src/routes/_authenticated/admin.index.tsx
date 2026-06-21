@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2, ShieldCheck, RefreshCw, Lock, Unlock, Music2, Save, Coins } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { maskDevIdentity } from "@/lib/dev-identity";
 import { useRole } from "@/hooks/use-role";
 import { useSettings } from "@/hooks/use-settings";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
