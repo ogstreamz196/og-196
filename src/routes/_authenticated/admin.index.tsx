@@ -252,36 +252,57 @@ function AdminPanel() {
   );
 }
 
+type FieldRule = { min: number; max: number; integer?: boolean; label: string; help?: string };
+const PRICING_RULES: Record<string, FieldRule> = {
+  signup_credits: { min: 0, max: 1000, integer: true, label: "Free-tier signup OG Coins", help: "Granted once on first sign-in." },
+  coins_per_generation: { min: 0, max: 10000, integer: true, label: "Coins per generation" },
+  songs_per_generation: { min: 1, max: 4, integer: true, label: "Songs per generation" },
+  sample_seconds: { min: 5, max: 600, integer: true, label: "Sample length (seconds)", help: "Max preview duration the player will stream." },
+  coins_per_full_unlock: { min: 0, max: 100000, integer: true, label: "Coins to unlock full song", help: "Charged when a user downloads the HQ full version." },
+};
+
+function validatePricing(key: string, raw: string): string | null {
+  const rule = PRICING_RULES[key];
+  if (!rule) return null;
+  if (raw.trim() === "") return "Required";
+  const n = Number(raw);
+  if (!Number.isFinite(n)) return "Must be a number";
+  if (rule.integer && !Number.isInteger(n)) return "Must be a whole number";
+  if (n < rule.min) return `Must be ≥ ${rule.min}`;
+  if (n > rule.max) return `Must be ≤ ${rule.max}`;
+  return null;
+}
+
 function PricingControls() {
   const { data: settings } = useSettings();
   const qc = useQueryClient();
-  const [coins, setCoins] = useState<string>("");
-  const [songs, setSongs] = useState<string>("");
-  const [sample, setSample] = useState<string>("");
-  const [signup, setSignup] = useState<string>("");
-  const [unlock, setUnlock] = useState<string>("");
+  const [values, setValues] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (settings) {
-      setCoins(String(settings.coins_per_generation));
-      setSongs(String(settings.songs_per_generation));
-      setSample(String(settings.sample_seconds));
-      setSignup(String(settings.signup_credits));
-      setUnlock(String(settings.coins_per_full_unlock));
+      setValues({
+        signup_credits: String(settings.signup_credits),
+        coins_per_generation: String(settings.coins_per_generation),
+        songs_per_generation: String(settings.songs_per_generation),
+        sample_seconds: String(settings.sample_seconds),
+        coins_per_full_unlock: String(settings.coins_per_full_unlock),
+      });
     }
   }, [settings]);
 
+  const errors: Record<string, string | null> = Object.fromEntries(
+    Object.keys(PRICING_RULES).map((k) => [k, validatePricing(k, values[k] ?? "")]),
+  );
+  const hasErrors = Object.values(errors).some((e) => e !== null);
+  const dirty = !!settings && Object.keys(PRICING_RULES).some(
+    (k) => String((settings as any)[k]) !== (values[k] ?? ""),
+  );
+
   const save = useMutation({
     mutationFn: async () => {
-      const updates = [
-        { key: "coins_per_generation", value: Number(coins) },
-        { key: "songs_per_generation", value: Number(songs) },
-        { key: "sample_seconds", value: Number(sample) },
-        { key: "signup_credits", value: Number(signup) },
-        { key: "coins_per_full_unlock", value: Number(unlock) },
-      ];
+      if (hasErrors) throw new Error("Fix validation errors first");
+      const updates = Object.keys(PRICING_RULES).map((k) => ({ key: k, value: Number(values[k]) }));
       for (const u of updates) {
-        if (!Number.isFinite(u.value) || u.value < 0) throw new Error(`Invalid ${u.key}`);
         const { error } = await supabase
           .from("app_settings")
           .upsert({ key: u.key, value: u.value as any }, { onConflict: "key" });
@@ -290,10 +311,34 @@ function PricingControls() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["app-settings"] });
-      toast.success("Pricing updated");
+      toast.success("Pricing updated — applies to new generations immediately");
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  const renderField = (key: string) => {
+    const rule = PRICING_RULES[key];
+    const err = errors[key];
+    return (
+      <div key={key}>
+        <Label htmlFor={key}>{rule.label}</Label>
+        <Input
+          id={key}
+          type="number"
+          min={rule.min}
+          max={rule.max}
+          step={rule.integer ? 1 : "any"}
+          value={values[key] ?? ""}
+          onChange={(e) => setValues((v) => ({ ...v, [key]: e.target.value }))}
+          className={cn("mt-2", err && "border-destructive focus-visible:ring-destructive")}
+          aria-invalid={!!err}
+        />
+        {err
+          ? <p className="mt-1 text-xs text-destructive">{err}</p>
+          : rule.help ? <p className="mt-1 text-xs text-muted-foreground">{rule.help}</p> : null}
+      </div>
+    );
+  };
 
   return (
     <div className="mb-6 rounded-2xl border border-border bg-card p-5 shadow-card">
@@ -301,32 +346,14 @@ function PricingControls() {
         <Coins className="h-4 w-4 text-coin" />
         <h3 className="font-semibold">Pricing & limits</h3>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div>
-          <Label htmlFor="signup">Free-tier signup OG Coins</Label>
-          <Input id="signup" type="number" min={0} max={1000} value={signup} onChange={(e) => setSignup(e.target.value)} className="mt-2" />
-          <p className="mt-1 text-xs text-muted-foreground">Granted once on first sign-in. 1 OG Coin = 1 OG Bot message.</p>
-        </div>
-        <div>
-          <Label htmlFor="coins">Coins per generation</Label>
-          <Input id="coins" type="number" min={0} value={coins} onChange={(e) => setCoins(e.target.value)} className="mt-2" />
-        </div>
-        <div>
-          <Label htmlFor="songs">Songs per generation</Label>
-          <Input id="songs" type="number" min={1} max={4} value={songs} onChange={(e) => setSongs(e.target.value)} className="mt-2" />
-        </div>
-        <div>
-          <Label htmlFor="sample">Sample length (seconds)</Label>
-          <Input id="sample" type="number" min={5} max={600} value={sample} onChange={(e) => setSample(e.target.value)} className="mt-2" />
-        </div>
-        <div>
-          <Label htmlFor="unlock">Coins to unlock full song</Label>
-          <Input id="unlock" type="number" min={0} value={unlock} onChange={(e) => setUnlock(e.target.value)} className="mt-2" />
-          <p className="mt-1 text-xs text-muted-foreground">Charged when a user downloads the HQ full version.</p>
-        </div>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {Object.keys(PRICING_RULES).map(renderField)}
       </div>
+      <p className="mt-3 text-xs text-muted-foreground">
+        Changes take effect for the next generation. In-flight jobs keep the pricing captured at request time.
+      </p>
       <div className="mt-4 flex justify-end">
-        <Button onClick={() => save.mutate()} disabled={save.isPending}>
+        <Button onClick={() => save.mutate()} disabled={save.isPending || hasErrors || !dirty}>
           {save.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
           Save pricing
         </Button>
