@@ -379,9 +379,12 @@ function EmptyRecent() {
           Generate your first personalised track in Music Hub.
         </p>
       </div>
-      <Button asChild size="sm" variant="premium" className="mt-2 rounded-full">
-        <Link to="/library">Create a song</Link>
-      </Button>
+      <Link
+        to="/library"
+        className={cn(buttonVariants({ size: "sm", variant: "premium" }), "mt-2 rounded-full")}
+      >
+        Create a song
+      </Link>
     </div>
   );
 }
