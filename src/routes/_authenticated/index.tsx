@@ -230,10 +230,16 @@ function QuickAction({
   label: string;
 }) {
   return (
-    <Button asChild variant="outline" className="h-auto justify-start gap-2 py-3">
+    <Button
+      asChild
+      variant="outline"
+      className="group h-auto justify-start gap-3 rounded-xl border-white/10 bg-white/[0.03] px-4 py-3.5 backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-white/[0.06] hover:shadow-glow"
+    >
       <Link to={to}>
-        <span className="text-primary">{icon}</span>
-        <span className="text-sm">{label}</span>
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-gradient-brand-soft text-primary transition-transform duration-200 group-hover:scale-110">
+          {icon}
+        </span>
+        <span className="text-sm font-medium">{label}</span>
       </Link>
     </Button>
   );
