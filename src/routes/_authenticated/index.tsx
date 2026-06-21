@@ -256,7 +256,7 @@ function PrimaryCard({
           <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">{eyebrow}</p>
           <span className="h-px flex-1 bg-gradient-to-r from-white/15 to-transparent" />
         </div>
-        <h3 className="font-display mt-3 text-[clamp(2.25rem,6.5vw,4.25rem)] font-black uppercase leading-[0.9] tracking-[-0.035em] drop-shadow-[0_6px_24px_rgba(80,60,255,0.35)]">
+        <h3 className="font-display mt-4 text-[clamp(3.25rem,11vw,6.5rem)] font-black uppercase leading-[0.88] tracking-[-0.035em] drop-shadow-[0_6px_24px_rgba(80,60,255,0.35)]">
           {title.split(" ").map((word, i, arr) => {
             const isLast = i === arr.length - 1;
             return (
