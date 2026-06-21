@@ -17,26 +17,15 @@ export const getCoinStats = createServerFn({ method: "GET" }).handler(async () =
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
   const [mintedRes, walletsRes] = await Promise.all([
-    supabaseAdmin.rpc("get_minted_coins").single<number>().then(
-      (r) => (r.error ? null : r.data),
-      () => null,
-    ),
-    supabaseAdmin
-      .from("profiles")
-      .select("coin_balance")
-      .then((r) => (r.error ? null : r.data)),
+    supabaseAdmin.from("coin_transactions").select("amount").gt("amount", 0),
+    supabaseAdmin.from("profiles").select("coin_balance"),
   ]);
 
-  // Fallback: aggregate client-side if the RPC isn't present.
-  let minted = mintedRes ?? 0;
-  if (mintedRes === null) {
-    const { data } = await supabaseAdmin
-      .from("coin_transactions")
-      .select("amount")
-      .gt("amount", 0);
-    minted = (data ?? []).reduce((sum, row) => sum + (row.amount ?? 0), 0);
-  }
-  const inWallets = (walletsRes ?? []).reduce(
+  const minted = (mintedRes.data ?? []).reduce(
+    (sum, row) => sum + (row.amount ?? 0),
+    0,
+  );
+  const inWallets = (walletsRes.data ?? []).reduce(
     (sum, row) => sum + (row.coin_balance ?? 0),
     0,
   );
