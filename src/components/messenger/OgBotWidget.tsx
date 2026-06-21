@@ -1,11 +1,54 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Bot, X, GripVertical } from "lucide-react";
 import { useRouterState } from "@tanstack/react-router";
 import { OgChat } from "./OgChat";
 import { useAuth } from "@/hooks/use-auth";
+import { useFoulMouth } from "@/hooks/use-foul-mouth";
+import { useOgMode } from "@/hooks/use-og-mode";
 import { cn } from "@/lib/utils";
 import { ogWidget, useOgWidgetState } from "@/stores/og-widget";
 
+/**
+ * Page-aware quick-prompt chips for the floating widget. Tuned to the
+ * route the user is on plus their saved OG settings (mode + foul mouth).
+ */
+function buildQuickPrompts(
+  pathname: string,
+  mode: "safe" | "savage" | string,
+  foulMouth: boolean,
+): { label: string; prompt: string }[] {
+  const spice = foulMouth ? "Don't hold back — keep it raw." : "Keep it clean.";
+  const tone = mode === "savage" ? "Savage mode — roast me a little." : "Friendly tone.";
+
+  if (pathname.startsWith("/library")) {
+    return [
+      { label: "🎵 New song from scratch", prompt: `Help me start a brand new song from scratch. Ask me mood, genre, and vibe first. ${tone}` },
+      { label: "💌 Song from a memory", prompt: `I want to turn a memory into a song. Ask me whose memory, when, and the feeling. ${spice}` },
+      { label: "🎚️ Suno prompt please", prompt: "I just need a ready-to-paste Suno prompt. Ask the key details, then output one tight prompt." },
+      { label: "🪝 Sticky chorus", prompt: "Help me write a sticky chorus. Start by asking what the song is about." },
+    ];
+  }
+  if (pathname.startsWith("/portal") || pathname.startsWith("/dashboard")) {
+    return [
+      { label: "📈 What should I do next?", prompt: "Look at my recent activity and suggest the next 3 things I should do in OG today." },
+      { label: "💡 Title ideas", prompt: "Give me 5 fresh song title ideas. Ask me mood and genre first." },
+      { label: "🎵 Co-write with me", prompt: `Let's co-write a song together. Ask me what's on my mind. ${tone}` },
+    ];
+  }
+  if (pathname.startsWith("/settings")) {
+    return [
+      { label: "⚙️ Explain my settings", prompt: "Walk me through what each OG setting does and which ones you'd recommend for me." },
+      { label: "🪙 How do coins work?", prompt: "Explain how OG coins work, what costs what, and how I can earn more." },
+    ];
+  }
+  // Generic fallback (home, auth, anywhere else).
+  return [
+    { label: "🎵 Write me a song", prompt: `Help me write a personalised song. Ask me the questions you need to get started. ${tone}` },
+    { label: "💡 Title ideas", prompt: "Give me 5 fresh song title ideas. Ask me mood and genre first." },
+    { label: "🪝 Sticky chorus", prompt: "Help me write a sticky chorus. Start by asking what the song is about." },
+    { label: "🎚️ Suno prompt only", prompt: "I just need a Suno-ready prompt. Ask key details, then output one tight prompt." },
+  ];
+}
 /**
  * Floating, draggable OG Bot widget. Mounted site-wide on authenticated
  * routes. Drag the orb anywhere; position is remembered for the session.
@@ -54,6 +97,18 @@ export function OgBotWidget() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user } = useAuth();
   const external = useOgWidgetState();
+  const { foulMouth } = useFoulMouth();
+  const { mode } = useOgMode();
+  const [chipsHidden, setChipsHidden] = useState(false);
+  const quickPrompts = useMemo(
+    () => buildQuickPrompts(pathname, mode, foulMouth),
+    [pathname, mode, foulMouth],
+  );
+
+  // Re-show chips whenever the panel opens fresh.
+  useEffect(() => {
+    if (open) setChipsHidden(false);
+  }, [open]);
 
   // Open from external store (e.g. "With OG" button on /library).
   useEffect(() => {
@@ -149,7 +204,24 @@ export function OgBotWidget() {
               <X className="h-4 w-4" />
             </button>
           </div>
-          <div className="h-[calc(100%-44px)]">
+          {!chipsHidden && (
+            <div className="flex gap-1.5 overflow-x-auto border-b border-border/60 bg-muted/30 px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {quickPrompts.map((q) => (
+                <button
+                  key={q.label}
+                  type="button"
+                  onClick={() => {
+                    ogWidget.open(q.prompt);
+                    setChipsHidden(true);
+                  }}
+                  className="shrink-0 rounded-full border border-border bg-background px-3 py-1 text-xs font-medium hover:bg-primary hover:text-primary-foreground transition-colors"
+                >
+                  {q.label}
+                </button>
+              ))}
+            </div>
+          )}
+          <div className={cn(chipsHidden ? "h-[calc(100%-44px)]" : "h-[calc(100%-86px)]")}>
             <OgChat compact showHeader seed={external.open ? external.seed : null} />
           </div>
         </div>
