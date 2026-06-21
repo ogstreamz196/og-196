@@ -16,7 +16,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { cn } from "@/lib/utils";
 import type { Song } from "@/components/SongCard";
 
-type WorkspaceSong = Song & { lyrics?: string | null };
+type WorkspaceSong = Song & { lyrics?: string | null; unlocked?: boolean | null };
 
 interface Props {
   song: WorkspaceSong;
