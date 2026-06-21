@@ -227,6 +227,8 @@ function LibraryPage() {
   const [lyrics, setLyrics] = useState("");
   const [genLyrics, setGenLyrics] = useState(false);
   const [foulMouth, setFoulMouth] = useState(false);
+  const [personalDetails, setPersonalDetails] = useState("");
+  const [extraContext, setExtraContext] = useState("");
   const [genSong, setGenSong] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<Song | null>(null);
   const [deleting, setDeleting] = useState(false);
