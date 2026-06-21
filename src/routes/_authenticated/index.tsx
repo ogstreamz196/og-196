@@ -11,6 +11,11 @@ import {
   Headphones,
   CheckCircle2,
   Circle,
+  Disc3,
+  Mic2,
+  Radio,
+  Bot,
+  AudioLines,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useDevMode } from "@/hooks/use-dev-mode";
@@ -171,25 +176,53 @@ function PrimaryCard({
   cta: string;
   variant?: "primary" | "accent";
 }) {
+  const isAccent = variant === "accent";
   return (
     <Link
       to={to}
-      className="group relative flex min-h-[340px] flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-card/70 p-7 shadow-card backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-glow sm:min-h-[420px]"
+      className="group relative flex min-h-[360px] flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-card/70 p-7 shadow-card backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-glow sm:min-h-[440px]"
     >
+      {/* Ambient gradient layers */}
       <div
         className={
-          "pointer-events-none absolute inset-0 opacity-50 transition-opacity duration-500 group-hover:opacity-100 " +
-          (variant === "accent"
-            ? "bg-[radial-gradient(circle_at_top_right,oklch(0.86_0.012_255/0.18),transparent_60%)]"
-            : "bg-[radial-gradient(circle_at_top_right,oklch(0.55_0.22_268/0.22),transparent_60%)]")
+          "pointer-events-none absolute inset-0 opacity-70 transition-opacity duration-500 group-hover:opacity-100 " +
+          (isAccent
+            ? "bg-[radial-gradient(circle_at_top_right,oklch(0.65_0.18_310/0.28),transparent_55%),radial-gradient(circle_at_bottom_left,oklch(0.55_0.22_268/0.22),transparent_60%)]"
+            : "bg-[radial-gradient(circle_at_top_right,oklch(0.55_0.22_268/0.32),transparent_55%),radial-gradient(circle_at_bottom_left,oklch(0.65_0.18_200/0.18),transparent_60%)]")
         }
       />
+      {/* Decorative graphic right side */}
+      <div className="pointer-events-none absolute -right-10 -top-10 h-56 w-56 rounded-full bg-primary/10 blur-3xl transition-transform duration-700 group-hover:scale-110" />
+      <div className="pointer-events-none absolute right-4 top-6 opacity-[0.07] transition-all duration-700 group-hover:rotate-12 group-hover:opacity-[0.14] sm:right-8 sm:top-10">
+        {isAccent ? (
+          <Bot className="h-48 w-48 sm:h-64 sm:w-64" strokeWidth={1.25} />
+        ) : (
+          <Disc3 className="h-48 w-48 animate-[spin_18s_linear_infinite] sm:h-64 sm:w-64" strokeWidth={1.25} />
+        )}
+      </div>
+      {/* Equalizer bars bottom-right accent */}
+      <div className="pointer-events-none absolute bottom-6 right-6 flex items-end gap-1 opacity-40 transition-opacity duration-300 group-hover:opacity-90">
+        {[0.4, 0.7, 0.5, 0.9, 0.6, 0.8, 0.45].map((h, i) => (
+          <span
+            key={i}
+            className="w-1 rounded-full bg-gradient-to-t from-primary/60 to-primary"
+            style={{
+              height: `${h * 36}px`,
+              animation: `eqPulse 1.${(i % 6) + 2}s ease-in-out ${i * 0.1}s infinite alternate`,
+            }}
+          />
+        ))}
+      </div>
+
       <div className="relative flex flex-1 flex-col">
-        <div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-background/40 text-primary">
+        <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-gradient-brand-soft text-primary shadow-glow">
           {icon}
         </div>
-        <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">{eyebrow}</p>
-        <h3 className="font-display mt-3 flex-1 text-[clamp(2.25rem,7vw,4.5rem)] font-black uppercase leading-[0.9] tracking-[-0.035em] drop-shadow-[0_6px_24px_rgba(80,60,255,0.35)]">
+        <div className="flex items-center gap-2">
+          <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">{eyebrow}</p>
+          <span className="h-px flex-1 bg-gradient-to-r from-white/15 to-transparent" />
+        </div>
+        <h3 className="font-display mt-3 text-[clamp(2.25rem,6.5vw,4.25rem)] font-black uppercase leading-[0.9] tracking-[-0.035em] drop-shadow-[0_6px_24px_rgba(80,60,255,0.35)]">
           {title.split(" ").map((word, i, arr) => {
             const isLast = i === arr.length - 1;
             return (
@@ -197,9 +230,7 @@ function PrimaryCard({
                 key={`${word}-${i}`}
                 className={
                   "wc-pop block " +
-                  (isLast
-                    ? "italic text-gradient-brand wc-bounce-soft"
-                    : "")
+                  (isLast ? "italic text-gradient-brand wc-bounce-soft" : "")
                 }
                 style={{ animationDelay: `${i * 0.12}s` }}
               >
@@ -210,10 +241,36 @@ function PrimaryCard({
           })}
         </h3>
         <p className="mt-4 max-w-md text-sm leading-relaxed text-muted-foreground">{body}</p>
+
+        {/* Feature chips */}
+        <div className="mt-5 flex flex-wrap gap-2">
+          {(isAccent
+            ? [
+                { icon: <Sparkles className="h-3 w-3" />, label: "AI co-producer" },
+                { icon: <MessageSquareMore className="h-3 w-3" />, label: "Lyric brainstorm" },
+                { icon: <Wand2 className="h-3 w-3" />, label: "Voice ideas" },
+              ]
+            : [
+                { icon: <Mic2 className="h-3 w-3" />, label: "Lyrics" },
+                { icon: <AudioLines className="h-3 w-3" />, label: "Beats" },
+                { icon: <Radio className="h-3 w-3" />, label: "Remix" },
+              ]
+          ).map((chip) => (
+            <span
+              key={chip.label}
+              className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] font-medium text-foreground/80 backdrop-blur-sm"
+            >
+              {chip.icon}
+              {chip.label}
+            </span>
+          ))}
+        </div>
       </div>
 
-      <div className="relative mt-8 inline-flex items-center gap-1.5 text-sm font-medium text-primary">
-        {cta}
+      <div className="relative mt-8 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
+        <span className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 backdrop-blur-sm transition-colors group-hover:bg-primary/20">
+          {cta}
+        </span>
         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
       </div>
     </Link>
