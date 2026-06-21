@@ -175,9 +175,9 @@ function IPhoneIcon({ className }: { className?: string }) {
 
 function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
   const { signIn, pending } = useOAuthSignIn();
-  const h = size === "xl" ? "h-32" : "h-28";
-  const silver =
-    "bg-[linear-gradient(180deg,#fdfdfd_0%,#e8eaed_50%,#c8ccd1_100%)] border border-[#b5b9be] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_2px_6px_rgba(0,0,0,0.25)] hover:brightness-[1.03] active:brightness-95";
+  const h = size === "xl" ? "h-36" : "h-32";
+  const tile =
+    "bg-white/5 backdrop-blur-md border-2 border-white/40 hover:border-white/80 hover:bg-white/10 active:scale-[0.98] shadow-[0_4px_16px_rgba(0,0,0,0.15)]";
 
   const devices: Array<{
     key: string;
@@ -187,10 +187,10 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
     iconClass?: string;
   }> = [
     { key: "google", label: "Google", provider: "google", Icon: GoogleIcon },
-    { key: "android", label: "Android", provider: "google", Icon: AndroidIcon },
-    { key: "samsung", label: "Samsung", provider: "google", Icon: SamsungIcon },
-    { key: "apple", label: "Apple ID", provider: "apple", Icon: (p) => <AppleIcon {...p} />, iconClass: "text-[#1f1f1f]" },
-    { key: "iphone", label: "iPhone / iPad", provider: "apple", Icon: IPhoneIcon },
+    { key: "android", label: "Android", provider: "google", Icon: AndroidIcon, iconClass: "text-[#3ddc84]" },
+    { key: "samsung", label: "Samsung", provider: "google", Icon: SamsungIcon, iconClass: "text-[#1428a0]" },
+    { key: "apple", label: "Apple ID", provider: "apple", Icon: (p) => <AppleIcon {...p} />, iconClass: "text-white" },
+    { key: "iphone", label: "iPhone / iPad", provider: "apple", Icon: IPhoneIcon, iconClass: "text-white" },
   ];
 
   return (
@@ -208,21 +208,28 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
               onClick={() => signIn(d.provider)}
               disabled={pending !== null}
               aria-label={`${d.label} — ${sub}`}
-              className={`${h} ${silver} group inline-flex flex-col items-center justify-center gap-1.5 rounded-2xl px-3 text-[#1f1f1f] transition disabled:opacity-70 disabled:cursor-wait`}
+              className={`${h} ${tile} group relative inline-flex flex-col items-center justify-between gap-2 rounded-2xl px-3 pt-4 pb-2 text-foreground transition disabled:opacity-70 disabled:cursor-wait`}
             >
-              {isPending ? (
-                <Loader2 className="h-9 w-9 animate-spin" />
-              ) : (
-                <d.Icon className={`h-10 w-10 ${d.iconClass ?? ""}`} />
-              )}
-              <span className="text-sm font-bold tracking-tight">{d.label}</span>
-              <span className="text-[9px] font-semibold uppercase tracking-[0.16em] text-[#5f6368]">
-                {sub}
-              </span>
+              <div className="flex flex-1 items-center justify-center">
+                {isPending ? (
+                  <Loader2 className="h-12 w-12 animate-spin" />
+                ) : (
+                  <d.Icon className={`h-14 w-14 drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)] ${d.iconClass ?? ""}`} />
+                )}
+              </div>
+              <div className="w-full space-y-1">
+                <span className="block w-full rounded-md bg-foreground/90 px-2 py-1 text-center text-xs font-extrabold uppercase tracking-wide text-background">
+                  {d.label}
+                </span>
+                <span className="block text-center text-[9px] font-semibold uppercase tracking-[0.14em] text-foreground/60">
+                  {sub}
+                </span>
+              </div>
             </button>
           );
         })}
       </div>
+
       <p className="rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-2.5 text-center text-sm font-bold text-amber-200">
         ⚠️ Tap <span className="underline">Allow</span> / <span className="underline">Accept</span> on every prompt that appears after picking your device.
       </p>
