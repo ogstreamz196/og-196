@@ -123,7 +123,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   variant="ghost"
                   size="icon"
                   onClick={handleSignOut}
-                  title={`Sign out${user?.email ? ` ${user.email}` : ""}`}
+                  title={dev.isDev ? "Sign out (Dev mode)" : `Sign out${user?.email ? ` ${user.email}` : ""}`}
                   className="h-9 w-9 hover:bg-white/5"
                 >
                   <LogOut className="h-4 w-4" />
