@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -5,7 +6,8 @@ import { useAuth } from "@/hooks/use-auth";
 /**
  * Single source of truth for the per-user "foul mouth" preference.
  * Reads and writes the `user_preferences.foul_mouth` row for the signed-in user.
- * Defaults to ON when no row exists.
+ * Defaults to OFF — users must opt in.
+ * Realtime subscribed so widget ↔ messenger toggle stays in sync across surfaces & devices.
  */
 export function foulMouthQueryKey(userId: string | null | undefined) {
   return ["user-preferences", "foul_mouth", userId ?? "anon"] as const;
@@ -14,6 +16,7 @@ export function foulMouthQueryKey(userId: string | null | undefined) {
 export function useFoulMouth() {
   const { user } = useAuth();
   const uid = user?.id ?? null;
+  const qc = useQueryClient();
 
   const query = useQuery({
     queryKey: foulMouthQueryKey(uid),
@@ -25,12 +28,32 @@ export function useFoulMouth() {
         .eq("user_id", uid!)
         .maybeSingle();
       if (error) throw new Error(error.message);
-      return (data?.foul_mouth ?? true) as boolean;
+      return (data?.foul_mouth ?? false) as boolean;
     },
   });
 
+  useEffect(() => {
+    if (!uid) return;
+    const channel = supabase
+      .channel(`user-prefs:${uid}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "user_preferences", filter: `user_id=eq.${uid}` },
+        (payload) => {
+          const row = (payload.new ?? payload.old) as { foul_mouth?: boolean } | null;
+          if (row && typeof row.foul_mouth === "boolean") {
+            qc.setQueryData(foulMouthQueryKey(uid), row.foul_mouth);
+          }
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [uid, qc]);
+
   return {
-    foulMouth: query.data ?? true,
+    foulMouth: query.data ?? false,
     isLoading: query.isLoading,
     isReady: !!uid && query.isFetched,
   };
