@@ -256,6 +256,29 @@ function UserSettingsPage() {
             paramKey="make_og"
           />
 
+          <RoleToggleRow
+            icon={<Wrench className="h-5 w-5 text-sky-500" />}
+            title="Dev"
+            description="Can manually override any user's coin balance."
+            checked={roles.includes("dev")}
+            userId={profile.id}
+            role="dev"
+            rpc="set_dev_admin"
+            paramKey="make_dev"
+          />
+
+          <RoleToggleRow
+            icon={<Flame className="h-5 w-5 text-orange-500" />}
+            title="Boss"
+            description="Can burn or reclaim OG coins from any user."
+            checked={roles.includes("boss")}
+            userId={profile.id}
+            role="boss"
+            rpc="set_boss_admin"
+            paramKey="make_boss"
+          />
+
+
           <div className="flex items-center justify-between rounded-xl border border-border bg-background/40 p-4 opacity-80">
             <div className="flex items-center gap-3">
               <ShieldCheck className="h-5 w-5 text-primary" />
