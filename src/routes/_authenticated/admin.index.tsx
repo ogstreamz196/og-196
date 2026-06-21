@@ -156,6 +156,8 @@ function AdminPanel() {
 
         <BossAuditLog />
 
+        <OgBotPing />
+
         <HardwiredCapabilities />
 
 
