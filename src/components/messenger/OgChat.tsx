@@ -161,6 +161,14 @@ export function OgChat({
     inputRef.current?.focus();
   }, [userId]);
 
+  // Apply seeded prompt (e.g. from "With OG" CTA on /library).
+  useEffect(() => {
+    if (seed && seed.trim()) {
+      setInput((prev) => (prev.trim() ? prev : seed));
+      setTimeout(() => inputRef.current?.focus(), 0);
+    }
+  }, [seed]);
+
   const m = useMutation({
     mutationFn: async (args: { history: OgChatMessage[]; attachmentDataUrl?: string }) =>
       chat({
