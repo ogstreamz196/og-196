@@ -9,7 +9,15 @@ import {
   Star,
   Wand2,
   Mic2,
+  Pencil,
 } from "lucide-react";
+import { EditableContent } from "@/components/admin/EditableContent";
+import {
+  AdminEditModeProvider,
+  AdminEditModeToggle,
+  useAdminEditMode,
+} from "@/components/admin/AdminEditMode";
+import { useRole } from "@/hooks/use-role";
 import { Button } from "@/components/ui/button";
 import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
