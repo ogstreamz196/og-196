@@ -24,6 +24,7 @@ function CheckoutReturn() {
   // Webhooks credit coins asynchronously — poll the profile a few times.
   useEffect(() => {
     if (!session_id) return;
+    try { sessionStorage.removeItem("buyCoins.lastSelection"); } catch { /* ignore */ }
     const id = setInterval(() => {
       qc.invalidateQueries({ queryKey: ["profile"] });
       setWaited((w) => w + 1);
