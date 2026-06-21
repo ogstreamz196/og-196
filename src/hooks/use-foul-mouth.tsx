@@ -34,8 +34,13 @@ export function useFoulMouth() {
 
   useEffect(() => {
     if (!uid) return;
-    const channel = supabase
-      .channel(`user-prefs:${uid}`)
+    // Unique channel name per mount avoids "cannot add postgres_changes callbacks
+    // after subscribe()" when React StrictMode / fast-refresh re-runs the effect
+    // and the previous channel is still in the teardown queue.
+    const channel = supabase.channel(
+      `user-prefs:${uid}:${Math.random().toString(36).slice(2, 10)}`,
+    );
+    channel
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "user_preferences", filter: `user_id=eq.${uid}` },
