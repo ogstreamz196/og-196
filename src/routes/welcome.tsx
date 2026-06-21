@@ -383,6 +383,7 @@ function AlbumCoverShowcase() {
           className="group relative overflow-hidden rounded-3xl border-2 border-white/15 bg-card/80 shadow-card transition-all duration-300 hover:-translate-y-2 hover:rotate-0 hover:border-primary/50 hover:shadow-glow"
           style={{ transform: `rotate(${[-3, 2, -1, 3][i]}deg)` }}
         >
+          <CardEditBadge />
           <img
             src={cover.image}
             alt={`${cover.title} album cover`}
@@ -393,9 +394,13 @@ function AlbumCoverShowcase() {
             className="aspect-square w-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
           <div className="absolute inset-x-0 bottom-0 bg-background/75 p-3 text-left backdrop-blur-md">
-            <p className="font-display text-xl leading-none tracking-tight sm:text-2xl">{cover.title}</p>
-            <p className="mt-1 text-xs font-black uppercase tracking-[0.16em] text-primary">{cover.style}</p>
-            <p className="mt-2 hidden text-xs font-bold leading-tight text-foreground/85 sm:block">{cover.prompt}</p>
+            <EditableContent as="p" contentKey={`welcome.album.${i}.title`} defaultValue={cover.title}
+              className="font-display text-xl leading-none tracking-tight sm:text-2xl" />
+            <EditableContent as="p" contentKey={`welcome.album.${i}.style`} defaultValue={cover.style}
+              className="mt-1 text-xs font-black uppercase tracking-[0.16em] text-primary" />
+            <EditableContent as="p" contentKey={`welcome.album.${i}.prompt`} defaultValue={cover.prompt}
+              multiline
+              className="mt-2 hidden text-xs font-bold leading-tight text-foreground/85 sm:block" />
           </div>
         </article>
       ))}
