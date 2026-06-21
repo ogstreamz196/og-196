@@ -183,7 +183,7 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
     key: string;
     label: string;
     provider: OAuthProvider;
-    Icon: (p: { className?: string }) => React.ReactElement;
+    Icon: (p: { className?: string }) => ReactElement;
     iconClass?: string;
   }> = [
     { key: "google", label: "Google", provider: "google", Icon: GoogleIcon },
