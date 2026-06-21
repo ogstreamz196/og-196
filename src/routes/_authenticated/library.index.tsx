@@ -287,6 +287,7 @@ function LibraryPage() {
           description,
           styleTags,
           language: selections.language,
+          foulMouth,
         },
       });
       if (error) {
