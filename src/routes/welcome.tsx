@@ -556,20 +556,16 @@ function HowItWorks() {
 function ClosingCta() {
   return (
     <section id="how" className="relative border-t border-white/10">
-      <div className="mx-auto max-w-4xl px-5 py-28 text-center sm:px-8 lg:py-32">
-        <p className="text-sm font-medium uppercase tracking-[0.25em] text-muted-foreground">
-          Ready?
-        </p>
-        <h2 className="font-display mt-5 text-7xl font-semibold leading-[0.95] tracking-[-0.045em] sm:text-8xl md:text-9xl">
-          Your next prompt
-          <br />
-          <em className="italic text-gradient-brand wc-bounce-soft inline-block">
-            could be a hit.
-          </em>
-        </h2>
-        <p className="mx-auto mt-8 max-w-2xl text-2xl text-muted-foreground sm:text-3xl">
-          Sign in. Type the idea. Pick the vibe. Get the cover and the song. <span className="inline-block wc-wiggle">🎉</span>
-        </p>
+      <div className="relative mx-auto max-w-4xl px-5 py-28 text-center sm:px-8 lg:py-32">
+        <CardEditBadge />
+        <EditableContent as="p" contentKey="welcome.closing.eyebrow" defaultValue="Ready?"
+          className="block text-sm font-medium uppercase tracking-[0.25em] text-muted-foreground" />
+        <EditableContent as="h2" contentKey="welcome.closing.title" defaultValue="Your next prompt could be a hit."
+          multiline
+          className="font-display mt-5 block text-7xl font-semibold leading-[0.95] tracking-[-0.045em] sm:text-8xl md:text-9xl" />
+        <EditableContent as="p" multiline contentKey="welcome.closing.body"
+          defaultValue="Sign in. Type the idea. Pick the vibe. Get the cover and the song. 🎉"
+          className="mx-auto mt-8 block max-w-2xl text-2xl text-muted-foreground sm:text-3xl" />
 
         <div className="mx-auto mt-12 max-w-2xl">
           <AuthButtons size="xl" />
