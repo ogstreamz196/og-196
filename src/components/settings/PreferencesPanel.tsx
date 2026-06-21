@@ -20,9 +20,92 @@ export function PreferencesPanel() {
   const setFoulMouth = useSetFoulMouth();
   const { mode, setMode } = useOgMode();
   const { prefs, update } = useAppPreferences();
+  const display = useDisplayPrefs();
+  const setDisplay = useSetDisplayPrefs();
+
+  const SCALE_STEP = 0.05;
+  const scalePct = Math.round(display.textScale * 100);
+  const bumpScale = (delta: number) =>
+    setDisplay.mutate({ textScale: clampScale(display.textScale + delta) });
 
   return (
     <div className="space-y-6">
+      {/* Display — saved to your account */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Type className="h-4 w-4 text-primary" /> Display
+          </CardTitle>
+          <CardDescription>
+            Text size and spacing — saved to your account and used on every device.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          <div className="space-y-2">
+            <div className="flex items-end justify-between gap-3">
+              <Label htmlFor="text-scale">Text size</Label>
+              <span className="text-xs tabular-nums text-muted-foreground">{scalePct}%</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                aria-label="Decrease text size"
+                disabled={display.textScale <= 0.85 || setDisplay.isPending}
+                onClick={() => bumpScale(-SCALE_STEP)}
+              >
+                <Minus className="h-4 w-4" />
+              </Button>
+              <input
+                id="text-scale"
+                type="range"
+                min={85}
+                max={150}
+                step={5}
+                value={scalePct}
+                onChange={(e) => setDisplay.mutate({ textScale: Number(e.target.value) / 100 })}
+                className="h-2 flex-1 cursor-pointer appearance-none rounded-full bg-muted accent-primary"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                aria-label="Increase text size"
+                disabled={display.textScale >= 1.5 || setDisplay.isPending}
+                onClick={() => bumpScale(SCALE_STEP)}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label="Reset to default"
+                disabled={display.textScale === 1 || setDisplay.isPending}
+                onClick={() => setDisplay.mutate({ textScale: 1 })}
+              >
+                <RotateCcw className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2"><Rows3 className="h-4 w-4" /> Layout density</Label>
+            <RadioGroup
+              value={display.density}
+              onValueChange={(v) => setDisplay.mutate({ density: v as Density })}
+              className="grid grid-cols-3 gap-2"
+            >
+              <ModeOption value="compact" title="Compact" body="Tighter rows." />
+              <ModeOption value="comfortable" title="Comfortable" body="Default rhythm." />
+              <ModeOption value="spacious" title="Spacious" body="More breathing room." />
+            </RadioGroup>
+          </div>
+        </CardContent>
+      </Card>
+
+
       {/* Assistant */}
       <Card>
         <CardHeader>
