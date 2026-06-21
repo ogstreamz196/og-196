@@ -13,6 +13,7 @@ import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as RCodeRouteImport } from './routes/r.$code'
 import { Route as PortalSlugRouteImport } from './routes/portal.$slug'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedReferralsRouteImport } from './routes/_authenticated/referrals'
@@ -48,6 +49,11 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const RCodeRoute = RCodeRouteImport.update({
+  id: '/r/$code',
+  path: '/r/$code',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PortalSlugRoute = PortalSlugRouteImport.update({
   id: '/portal/$slug',
@@ -148,6 +154,7 @@ export interface FileRoutesByFullPath {
   '/referrals': typeof AuthenticatedReferralsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/portal/$slug': typeof PortalSlugRoute
+  '/r/$code': typeof RCodeRoute
   '/admin/og-persona': typeof AuthenticatedAdminOgPersonaRoute
   '/admin/user-settings': typeof AuthenticatedAdminUserSettingsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
@@ -168,6 +175,7 @@ export interface FileRoutesByTo {
   '/referrals': typeof AuthenticatedReferralsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/portal/$slug': typeof PortalSlugRoute
+  '/r/$code': typeof RCodeRoute
   '/': typeof AuthenticatedIndexRoute
   '/admin/og-persona': typeof AuthenticatedAdminOgPersonaRoute
   '/admin/user-settings': typeof AuthenticatedAdminUserSettingsRoute
@@ -191,6 +199,7 @@ export interface FileRoutesById {
   '/_authenticated/referrals': typeof AuthenticatedReferralsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/portal/$slug': typeof PortalSlugRoute
+  '/r/$code': typeof RCodeRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/admin/og-persona': typeof AuthenticatedAdminOgPersonaRoute
   '/_authenticated/admin/user-settings': typeof AuthenticatedAdminUserSettingsRoute
@@ -215,6 +224,7 @@ export interface FileRouteTypes {
     | '/referrals'
     | '/settings'
     | '/portal/$slug'
+    | '/r/$code'
     | '/admin/og-persona'
     | '/admin/user-settings'
     | '/admin/users'
@@ -235,6 +245,7 @@ export interface FileRouteTypes {
     | '/referrals'
     | '/settings'
     | '/portal/$slug'
+    | '/r/$code'
     | '/'
     | '/admin/og-persona'
     | '/admin/user-settings'
@@ -257,6 +268,7 @@ export interface FileRouteTypes {
     | '/_authenticated/referrals'
     | '/_authenticated/settings'
     | '/portal/$slug'
+    | '/r/$code'
     | '/_authenticated/'
     | '/_authenticated/admin/og-persona'
     | '/_authenticated/admin/user-settings'
@@ -275,6 +287,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   WelcomeRoute: typeof WelcomeRoute
   PortalSlugRoute: typeof PortalSlugRoute
+  RCodeRoute: typeof RCodeRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
@@ -307,6 +320,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/r/$code': {
+      id: '/r/$code'
+      path: '/r/$code'
+      fullPath: '/r/$code'
+      preLoaderRoute: typeof RCodeRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/portal/$slug': {
       id: '/portal/$slug'
@@ -479,6 +499,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   WelcomeRoute: WelcomeRoute,
   PortalSlugRoute: PortalSlugRoute,
+  RCodeRoute: RCodeRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
