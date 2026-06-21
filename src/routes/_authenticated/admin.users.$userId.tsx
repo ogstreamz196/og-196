@@ -5,6 +5,7 @@ import {
   Loader2, ShieldCheck, ArrowLeft, Crown, Coins, Plus, Minus, UserCog, Mail, Calendar, Fingerprint, Bot,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { maskDevIdentity } from "@/lib/dev-identity";
 import { useRole } from "@/hooks/use-role";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Input } from "@/components/ui/input";
