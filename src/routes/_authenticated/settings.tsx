@@ -270,6 +270,9 @@ function SettingsPage() {
           </section>
         )}
 
+        {/* Connect Telegram */}
+        <TelegramConnectSection userId={user?.id ?? ""} />
+
 
         {/* Session */}
         <section className="rounded-2xl border border-border bg-card p-6 shadow-card flex items-center justify-between">
