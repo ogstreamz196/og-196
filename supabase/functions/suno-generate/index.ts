@@ -109,6 +109,7 @@ Deno.serve(async (req) => {
       if (songErr) return json({ error: songErr.message }, 500);
       song = inserted;
     }
+    const songId = song!.id;
 
     const { data: balance, error: deductErr } = await admin.rpc("deduct_coins", {
       p_user: user.id,
