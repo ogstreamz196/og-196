@@ -368,11 +368,11 @@ function Hero() {
 
         <div className="wc-pop mt-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] backdrop-blur-xl sm:mt-12 sm:px-5 sm:text-base">
           <span className="h-2 w-2 animate-pulse rounded-full bg-primary shadow-glow" />
-          <span>Prompt Lab · song styles by</span>
+          <span>Bespoke tracks · made for you by</span>
           <OgBotLogo className="h-5 w-5 sm:h-6 sm:w-6" />
         </div>
 
-        <h1 className="font-display mt-6 text-[clamp(2.75rem,12vw,13rem)] font-black leading-[0.88] tracking-[-0.055em] drop-shadow-[0_8px_30px_rgba(80,60,255,0.35)] sm:mt-10 sm:leading-[0.85]">
+        <h1 className="font-display mt-6 text-[clamp(2.5rem,11vw,12rem)] font-black leading-[0.88] tracking-[-0.055em] drop-shadow-[0_8px_30px_rgba(80,60,255,0.35)] sm:mt-10 sm:leading-[0.85]">
           <span className="wc-pop block">PROMPT IT.</span>
           <span className="wc-pop block" style={{ animationDelay: "0.15s" }}>
             MAKE A{" "}
@@ -380,10 +380,14 @@ function Hero() {
               className="italic text-gradient-brand wc-bounce-soft inline-block"
               style={{ animationDelay: "0.3s" }}
             >
-              BANGER.
+              PERSONAL
             </span>
           </span>
+          <span className="wc-pop block" style={{ animationDelay: "0.3s" }}>
+            MUSIC TRACK.
+          </span>
         </h1>
+
 
         <div id="sign-in" className="mx-auto mt-10 max-w-3xl scroll-mt-24 sm:mt-14">
           <AuthButtons size="xl" />
