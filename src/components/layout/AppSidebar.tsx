@@ -6,7 +6,6 @@ import {
   DoorOpen,
   Coins,
   Settings,
-  Code2,
   Shield,
   LogOut,
 } from "lucide-react";
@@ -46,7 +45,6 @@ const primaryNav: NavItem[] = [
 const accountNav: NavItem[] = [
   { title: "Store", url: "/buy-coins", icon: Coins },
   { title: "Settings", url: "/settings", icon: Settings },
-  { title: "Developer", url: "/developer", icon: Code2, adminOnly: true },
 ];
 
 export function AppSidebar() {

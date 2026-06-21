@@ -27,8 +27,7 @@ const routeTitles: Record<string, string> = {
   "/portals": "Portals",
   "/buy-coins": "Buy Coins",
   "/settings": "Settings",
-  "/developer": "Developer",
-  "/admin": "Admin",
+  "/admin": "Admin Controls",
 };
 
 function getRouteTitle(pathname: string) {

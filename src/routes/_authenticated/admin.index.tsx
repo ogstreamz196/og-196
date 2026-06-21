@@ -13,6 +13,7 @@ import { BossAuditLog } from "@/components/admin/BossAuditLog";
 import { BossNav } from "@/components/admin/BossNav";
 
 import { HardwiredCapabilities } from "@/components/admin/HardwiredCapabilities";
+import { AppToggles } from "@/components/admin/AppToggles";
 import { AdminEditableLabel, AdminEditableBalance } from "@/components/admin/AdminEditMode";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -109,7 +110,7 @@ function AdminPanel() {
 
   if (roleLoading) {
     return (
-      <DashboardShell title="Boss Panel">
+      <DashboardShell title="Admin Controls">
         <div className="grid place-items-center py-16"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
       </DashboardShell>
     );
@@ -117,7 +118,7 @@ function AdminPanel() {
   if (!isAdmin) return <Navigate to="/" />;
 
   return (
-    <DashboardShell title="Boss Panel">
+    <DashboardShell title="Admin Controls">
       <BossNav />
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-card p-4">
@@ -126,7 +127,7 @@ function AdminPanel() {
           </div>
           <div className="flex-1">
             <h2 className="font-semibold">Admin controls</h2>
-            <p className="text-sm text-muted-foreground">Pricing, portals, recent generations, manual unlocks, and retries.</p>
+            <p className="text-sm text-muted-foreground">Pricing, portals, app toggles, recent generations, manual unlocks, and retries.</p>
           </div>
           <Link to="/admin/users">
             <Button size="sm" variant="outline">
@@ -145,6 +146,8 @@ function AdminPanel() {
         <OgCoinsPanel />
 
         <PricingControls />
+
+        <AppToggles />
 
         <MintCoinsPanel />
 
