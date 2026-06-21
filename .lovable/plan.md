@@ -1,51 +1,52 @@
-## What I found
+## Goal
+Apply a cohesive premium pass across the whole app using a Midnight Indigo palette at medium density (3/5). Improve spacing rhythm, responsive behavior, loading/empty/error states, and visual polish — without changing business logic.
 
-Most of this is already half-built:
+## Creative direction
+- **Palette (tokens in `src/styles.css`)**
+  - `--background: oklch(0.12 0.04 270)` (deep navy `#0a0a1a` feel)
+  - `--card / --popover: oklch(0.17 0.05 268)` (`#141432`)
+  - `--muted / --secondary: oklch(0.22 0.07 268)` (`#1e1e5a`)
+  - `--primary: oklch(0.58 0.22 274)` (electric indigo `#4f46e5`)
+  - `--primary-glow: oklch(0.72 0.20 280)`
+  - `--accent: oklch(0.75 0.18 295)` (violet highlight)
+  - `--ring: var(--primary)`; refine `--border` to a low-opacity indigo
+  - New gradients: `--gradient-brand`, `--gradient-surface`, `--gradient-aurora`
+  - New shadows: `--shadow-glow` (indigo bloom), `--shadow-elevated`
+- **Typography**: keep current display + body, tighten tracking on h1/h2, use `text-balance`/`text-pretty`.
+- **Motion**: standardize `fade-in`, `scale-in`, `hover-scale`; add a subtle aurora background blob behind hero areas.
 
-- `library.index.tsx` already maps the four cards (From scratch / From a memory / Dedication / With OG) to `setOpenFlow(...)` and opens `CreateSongDialog`. The buttons aren't broken — they open a Dialog. You asked for a side-sheet/drawer instead.
-- `CreateSongDialog` already has per-flow copy and chip pickers for mood/genre/style/language/relationship.
-- `OgBotWidget` exists (floating draggable orb that hides itself on `/messenger`) but is **not mounted anywhere**, so it's currently invisible.
-- `OgChat` already persists history to `localStorage` and broadcasts updates across tabs, so widget ↔ messenger share memory in the same browser. Cross-device sync needs a DB-backed messages table.
-- `user_preferences.foul_mouth` exists and is shared via DB, but defaults to `true` in both the migration and every `?? true` fallback in code. You want default = OFF.
+## Scope of changes (UI/presentation only)
+1. **Design tokens** — `src/styles.css`
+   - Rewrite color tokens for Midnight Indigo (light + dark).
+   - Add gradient + shadow tokens, `bg-gradient-brand`, `bg-gradient-surface`, `shadow-glow` utilities via `@utility`.
+2. **App shell** — `src/components/layout/AppShell.tsx`, `AppSidebar.tsx`, `WelcomeBackdrop.tsx`
+   - Sidebar: refine active state (indigo pill + glow), consistent 12/16/24 spacing, better mobile sheet behavior.
+   - Top bar: backdrop blur, subtle border, coin balance polished pill.
+   - Add ambient aurora gradient backdrop (very subtle, fixed, behind content).
+3. **Home / dashboard** — `src/routes/_authenticated/index.tsx` + `src/components/home/*`
+   - HomeHero: stronger gradient text, breathing-room padding, responsive clamp sizes.
+   - HubCard / FeatureGrid: unified card recipe (glass surface, hover lift, focus ring), 1/2/3 col responsive grid.
+   - RecentCreations / CoinsCta: skeleton loading, empty state illustration text, consistent radius.
+4. **Music hub** — `src/routes/_authenticated/library.index.tsx`
+   - Keep current structure; tighten spacing scale, align category cards to a uniform height, improve chip wrap + touch targets, add skeletons during generate, disabled-state clarity, success toast polish.
+5. **Auth + welcome** — `src/routes/auth.tsx`, `src/routes/welcome.tsx`
+   - Centered card on aurora backdrop, consistent button hierarchy, mobile-safe paddings.
+6. **Shared primitives** — light variant tweaks only
+   - `button.tsx`: add `premium` variant (gradient + glow on hover). Existing variants untouched.
+   - `card.tsx`: add `glass` className recipe via utility (no API change).
+   - `skeleton.tsx`: indigo shimmer.
 
-## What I'll change
+## Out of scope
+- No DB, server function, edge function, auth, or business-logic changes.
+- No new routes or features.
+- No copy/content rewrites beyond microcopy on empty/error states.
 
-### 1. Library entry-point buttons → side sheet (drawer)
-- Convert `CreateSongDialog` to use shadcn `Sheet` (right side, scroll inside). Keep all existing fields, chip sections and "Add more details" block — only the shell changes.
-- Rename export to `CreateSongSheet` (keep a thin re-export named `CreateSongDialog` so nothing else breaks).
-- Flows `scratch`, `memory`, `tribute` all open the sheet with their existing per-flow copy and the right relevant prompts (memory + tribute get the "Who it's for" relationship chips; scratch doesn't).
+## Verification
+- Visual check at desktop (1440), tablet (820), mobile (390) via `browser--view_preview`.
+- Confirm no hardcoded color classes were added (`text-white`, `bg-black`, hex literals).
+- Confirm dark mode is the default and contrast passes on primary surfaces.
 
-### 2. "With OG" button → opens the floating widget for free
-- Remove the `messenger` branch from the sheet. The "With OG" card instead opens `OgBotWidget` in expanded state and seeds it with a starter prompt like "Let's co-write a song together — what's the vibe?".
-- Exposed via a tiny `useOgWidget()` store (zustand-style with `useSyncExternalStore`) so any page can call `ogWidget.open({ seed })`.
-- Already free of charge — `OgChat` calls the AI gateway, no coin deduction in that path.
-
-### 3. Mount the widget on every authenticated page except /messenger
-- Mount `<OgBotWidget />` inside `_authenticated/route.tsx` next to `<Outlet />`. The widget already self-hides when `pathname === "/messenger"`.
-
-### 4. Shared memory + settings sync
-- Add `og_messages` table (`id`, `user_id`, `role`, `content`, `created_at`) with RLS + GRANTs scoped to `auth.uid()`, plus realtime publication.
-- Update `OgChat` to:
-  - Load the last ~50 messages from `og_messages` on mount (fallback to localStorage if offline).
-  - Insert each user + assistant message into `og_messages`.
-  - Subscribe to `postgres_changes` so messenger and widget reflect new messages instantly (cross-device).
-- `foul_mouth` is already DB-backed. Add a realtime subscription in `useFoulMouth` so toggling it in widget settings instantly updates messenger settings and vice versa.
-
-### 5. Default foul-mouth = OFF
-- Migration: `ALTER TABLE user_preferences ALTER COLUMN foul_mouth SET DEFAULT false;` and `UPDATE user_preferences SET foul_mouth = false WHERE foul_mouth IS NOT DISTINCT FROM true AND updated_at = created_at;` (only rows users never explicitly toggled — detected by no update since insert).
-- Code: change every `?? true` fallback for `foul_mouth` to `?? false` (`use-foul-mouth.tsx`, `og-messenger.functions.ts`, and any persona helper that reads it).
-- Users who already turned it ON keep it on.
-
-### 6. Out of scope (ask if you want these too)
-- Building a new settings UI for foul-mouth (a toggle already exists in `/settings`).
-- Migrating existing localStorage chat history into the new `og_messages` table.
-
-## Files touched
-- `src/components/library/CreateSongDialog.tsx` → convert shell to `Sheet`, drop messenger flow.
-- `src/routes/_authenticated/library.index.tsx` → "With OG" calls widget instead of opening sheet.
-- `src/routes/_authenticated/route.tsx` → mount `<OgBotWidget />`.
-- `src/components/messenger/OgBotWidget.tsx` → accept external open + seed via store.
-- `src/components/messenger/OgChat.tsx` → DB-backed history + realtime subscribe.
-- `src/hooks/use-foul-mouth.tsx` → default `false`, realtime subscribe.
-- `src/lib/og-messenger.functions.ts` → default `false`.
-- New: `src/stores/og-widget.ts`, migration for `og_messages` + `foul_mouth` default.
+## Technical notes
+- All colors via semantic tokens; no hex in components.
+- Use `clamp()` for hero typography; use `min-w-0` + `truncate` on flex rows with mixed content (per responsive-layout guidance).
+- Animations reuse existing keyframes in `styles.css`/Tailwind config; only add `aurora-pan` if needed.
