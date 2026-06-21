@@ -166,9 +166,9 @@ export function AppSidebar() {
         <div className="flex min-w-0 flex-col gap-2 px-2 py-2">
           <div className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
             <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-muted text-[10px] font-bold uppercase">
-              {user?.email?.[0] ?? "U"}
+              {dev.isDev ? "D" : (user?.email?.[0] ?? "U")}
             </div>
-            <span className="truncate">{user?.email ?? "Signed in"}</span>
+            <span className="truncate">{dev.isDev ? "Dev mode" : (user?.email ?? "Signed in")}</span>
           </div>
           <Button
             variant="outline"
