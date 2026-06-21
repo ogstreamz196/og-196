@@ -16,7 +16,14 @@ export const Route = createFileRoute("/_authenticated/referrals")({
 type Summary = {
   total_referred: number;
   total_earned: number;
-  recent: { id: string; amount: number; reference: string | null; created_at: string }[];
+  recent: {
+    id: string;
+    amount: number;
+    reference: string | null;
+    created_at: string;
+    referee_id: string | null;
+    referee_name: string | null;
+  }[];
 };
 
 function ReferralsPage() {
