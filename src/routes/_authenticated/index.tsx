@@ -327,6 +327,29 @@ function QuickAction({
   );
 }
 
+function PromptCard({ prompt }: { prompt: PromptIdea }) {
+  return (
+    <li>
+      <Link
+        to="/library"
+        preload="intent"
+        className="group flex h-full flex-col gap-2 rounded-xl border border-white/10 bg-white/[0.03] p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-white/[0.06] hover:shadow-glow"
+      >
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-base font-semibold text-foreground">{prompt.title}</p>
+          <Badge variant="outline" className="shrink-0 border-white/10 bg-white/[0.04] text-xs">
+            {prompt.vibe}
+          </Badge>
+        </div>
+        <p className="text-sm leading-relaxed text-muted-foreground">{prompt.description}</p>
+        <span className="mt-auto inline-flex items-center gap-1 pt-2 text-sm font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100">
+          Use this prompt <ArrowRight className="h-3.5 w-3.5" />
+        </span>
+      </Link>
+    </li>
+  );
+}
+
 function RecentRow({ song }: { song: RecentSong }) {
   const title = song.title?.trim() || song.prompt?.slice(0, 60) || "Untitled";
   return (
