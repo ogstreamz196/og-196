@@ -219,9 +219,10 @@ function LibraryPage() {
   // download cost is configured via settings.coins_per_full_unlock when needed
   const balance = profile?.coin_balance ?? 0;
   const firstName = useMemo(() => {
+    if (dev.isDev) return "Developer";
     const raw = profile?.display_name?.trim() || user?.email?.split("@")[0] || "";
     return raw.split(/\s|\./)[0] || "there";
-  }, [profile?.display_name, user?.email]);
+  }, [profile?.display_name, user?.email, dev.isDev]);
 
   const [title, setTitle] = useState("");
   const [selections, setSelections] = useState<Selections>({});
