@@ -186,18 +186,6 @@ function IPhoneIcon({ className }: { className?: string }) {
   );
 }
 
-function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
-  const { signIn, pending } = useOAuthSignIn();
-  const h = size === "xl" ? "h-36 sm:h-44 md:h-48" : "h-32 sm:h-40 md:h-44";
-  const tile =
-    "group relative bg-white/[0.06] backdrop-blur-md border-2 border-white/15 rounded-[28px] " +
-    "shadow-[0_10px_0_0_hsl(var(--primary)/0.35),0_24px_44px_-12px_hsl(var(--primary)/0.45)] " +
-    "transition-all duration-150 ease-out " +
-    "hover:-translate-y-1 hover:border-white/40 hover:bg-white/[0.1] " +
-    "hover:shadow-[0_12px_0_0_hsl(var(--primary)/0.5),0_28px_50px_-10px_hsl(var(--primary)/0.6)] " +
-    "active:translate-y-1 active:shadow-[0_4px_0_0_hsl(var(--primary)/0.35),0_10px_20px_-6px_hsl(var(--primary)/0.4)] " +
-    "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background " +
-    "disabled:opacity-70 disabled:cursor-wait disabled:translate-y-0 cursor-pointer";
 
 type Device = {
   key: string;
