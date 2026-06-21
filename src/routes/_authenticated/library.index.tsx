@@ -163,7 +163,7 @@ function LibraryPage() {
           <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
             Your studio
           </p>
-          <h1 className="font-display mt-3 text-4xl font-light leading-[1.05] tracking-[-0.02em] sm:text-5xl">
+          <h1 className="font-display mt-3 text-3xl font-light leading-[1.05] tracking-[-0.02em] [overflow-wrap:anywhere] sm:text-5xl">
             Music <em className="italic text-gradient-brand">Hub</em>
           </h1>
           <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">

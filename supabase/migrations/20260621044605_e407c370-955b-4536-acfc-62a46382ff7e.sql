@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.daily_coin_floor() FROM PUBLIC, anon, authenticated;
