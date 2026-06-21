@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { COIN_PACKS, CURRENCY_SYMBOL, VIP_PLAN, type CoinPack } from "@/lib/coin-packs";
 import { StripeEmbeddedCheckoutInline } from "@/components/StripeEmbeddedCheckout";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+import { CirculatingCoins } from "@/components/CirculatingCoins";
 
 type Selection =
   | { type: "coins"; pack: CoinPack }
@@ -111,6 +112,9 @@ function BuyCoinsPage() {
             </div>
           </div>
         </section>
+
+        {/* Live coin economy snapshot */}
+        <CirculatingCoins />
 
         {/* Coin packs */}
         <section>
