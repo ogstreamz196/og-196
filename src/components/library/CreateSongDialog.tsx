@@ -2,13 +2,13 @@ import { useState } from "react";
 import { Loader2, Sparkles, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -101,92 +101,93 @@ export function CreateSongDialog({ flow, onClose, onSubmit }: CreateSongDialogPr
   }
 
   return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+    <Sheet open onOpenChange={(o) => !o && onClose()}>
+      <SheetContent side="right" className="flex w-full max-w-xl flex-col gap-0 overflow-hidden p-0 sm:max-w-xl">
+        <SheetHeader className="border-b border-border bg-card/60 px-6 py-4">
+          <SheetTitle className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary" />
             {copy.title}
-          </DialogTitle>
-          <DialogDescription>{copy.description}</DialogDescription>
-        </DialogHeader>
+          </SheetTitle>
+          <SheetDescription>{copy.description}</SheetDescription>
+        </SheetHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6 pt-2">
-          <ChipSection
-            label="Mood"
-            hint="How should it feel?"
-            options={MOODS}
-            value={state.mood}
-            onChange={(v) => update("mood", v)}
-            customPlaceholder="Add your own mood…"
-          />
-
-          <ChipSection
-            label="Genre"
-            hint="Pick a sound"
-            options={GENRES}
-            value={state.genre}
-            onChange={(v) => update("genre", v)}
-            customPlaceholder="Add your own genre…"
-          />
-
-          <ChipSection
-            label="Lyrical style"
-            hint="How should it tell the story?"
-            options={STYLES}
-            value={state.lyricalStyle}
-            onChange={(v) => update("lyricalStyle", v)}
-            customPlaceholder="Add your own style…"
-          />
-
-          <ChipSection
-            label="Language"
-            hint="What language should the lyrics be in?"
-            options={LANGUAGES}
-            value={state.language}
-            onChange={(v) => update("language", v)}
-            customPlaceholder="Add another language…"
-          />
-
-          {(flow === "memory" || flow === "tribute") && (
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+          <div className="flex-1 space-y-6 overflow-y-auto px-6 py-5">
             <ChipSection
-              label="Who it's for"
-              hint="Tap one or type a name below"
-              options={RELATIONSHIPS}
-              value={state.relationship}
-              onChange={(v) => update("relationship", v)}
-              customPlaceholder="Or someone else…"
+              label="Mood"
+              hint="How should it feel?"
+              options={MOODS}
+              value={state.mood}
+              onChange={(v) => update("mood", v)}
+              customPlaceholder="Add your own mood…"
             />
-          )}
 
-          {/* Optional extra details — collapsed by default */}
-          <button
-            type="button"
-            onClick={() => setShowDetails((v) => !v)}
-            className="flex w-full items-center justify-between rounded-xl border border-dashed border-border bg-background/30 px-4 py-3 text-left text-sm font-semibold transition hover:bg-background/50"
-          >
-            <span>Add more details (optional)</span>
-            <ChevronDown className={cn("h-4 w-4 transition-transform", showDetails && "rotate-180")} />
-          </button>
+            <ChipSection
+              label="Genre"
+              hint="Pick a sound"
+              options={GENRES}
+              value={state.genre}
+              onChange={(v) => update("genre", v)}
+              customPlaceholder="Add your own genre…"
+            />
 
-          {showDetails && (
-            <div className="space-y-4 rounded-2xl border border-border bg-background/30 p-4">
-              <Field id="title" label="Working title" placeholder="e.g. For Nan" value={state.title} onChange={(v) => update("title", v)} />
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <Field id="focusPerson" label="About who" placeholder="Name or 'me'" value={state.focusPerson} onChange={(v) => update("focusPerson", v)} />
-                <Field id="places" label="Places" placeholder="Where it lives" value={state.places} onChange={(v) => update("places", v)} />
+            <ChipSection
+              label="Lyrical style"
+              hint="How should it tell the story?"
+              options={STYLES}
+              value={state.lyricalStyle}
+              onChange={(v) => update("lyricalStyle", v)}
+              customPlaceholder="Add your own style…"
+            />
+
+            <ChipSection
+              label="Language"
+              hint="What language should the lyrics be in?"
+              options={LANGUAGES}
+              value={state.language}
+              onChange={(v) => update("language", v)}
+              customPlaceholder="Add another language…"
+            />
+
+            {(flow === "memory" || flow === "tribute") && (
+              <ChipSection
+                label="Who it's for"
+                hint="Tap one or type a name below"
+                options={RELATIONSHIPS}
+                value={state.relationship}
+                onChange={(v) => update("relationship", v)}
+                customPlaceholder="Or someone else…"
+              />
+            )}
+
+            <button
+              type="button"
+              onClick={() => setShowDetails((v) => !v)}
+              className="flex w-full items-center justify-between rounded-xl border border-dashed border-border bg-background/30 px-4 py-3 text-left text-sm font-semibold transition hover:bg-background/50"
+            >
+              <span>Add more details (optional)</span>
+              <ChevronDown className={cn("h-4 w-4 transition-transform", showDetails && "rotate-180")} />
+            </button>
+
+            {showDetails && (
+              <div className="space-y-4 rounded-2xl border border-border bg-background/30 p-4">
+                <Field id="title" label="Working title" placeholder="e.g. For Nan" value={state.title} onChange={(v) => update("title", v)} />
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <Field id="focusPerson" label="About who" placeholder="Name or 'me'" value={state.focusPerson} onChange={(v) => update("focusPerson", v)} />
+                  <Field id="places" label="Places" placeholder="Where it lives" value={state.places} onChange={(v) => update("places", v)} />
+                </div>
+                <Area id="memories" label="Memories or moments" placeholder="Specific scenes, dates…" value={state.memories} onChange={(v) => update("memories", v)} />
+                <Field id="family" label="People to reference" placeholder="Names to mention" value={state.family} onChange={(v) => update("family", v)} />
+                <Area id="theme" label="Message or theme" placeholder="What should this song say?" value={state.theme} onChange={(v) => update("theme", v)} />
               </div>
-              <Area id="memories" label="Memories or moments" placeholder="Specific scenes, dates…" value={state.memories} onChange={(v) => update("memories", v)} />
-              <Field id="family" label="People to reference" placeholder="Names to mention" value={state.family} onChange={(v) => update("family", v)} />
-              <Area id="theme" label="Message or theme" placeholder="What should this song say?" value={state.theme} onChange={(v) => update("theme", v)} />
-            </div>
-          )}
+            )}
 
-          <p className="text-center text-[11px] text-muted-foreground">
-            Everything is optional — even an empty brief works.
-          </p>
+            <p className="text-center text-[11px] text-muted-foreground">
+              Everything is optional — even an empty brief works.
+            </p>
+          </div>
 
-          <DialogFooter>
+          <SheetFooter className="border-t border-border bg-card/60 px-6 py-3">
             <Button type="button" variant="ghost" onClick={onClose} disabled={submitting}>
               Cancel
             </Button>
@@ -195,10 +196,10 @@ export function CreateSongDialog({ flow, onClose, onSubmit }: CreateSongDialogPr
                 <><Sparkles className="mr-2 h-4 w-4" /> Save draft</>
               )}
             </Button>
-          </DialogFooter>
+          </SheetFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }
 
