@@ -53,10 +53,12 @@ Deno.serve(async (req) => {
   const { error: upErr } = await admin.from("songs")
     .update({ revealed: true }).eq("id", song_id);
   if (upErr) {
-    // Best-effort refund.
+    // Best-effort refund — mirrors suno-callback pattern.
     await admin.from("coin_transactions").insert({
       user_id: user.id, amount: cost, type: "refund", reference: `variation_refund:${song_id}`,
     });
+    const { data: prof } = await admin.from("profiles").select("coin_balance").eq("id", user.id).single();
+    await admin.from("profiles").update({ coin_balance: (prof?.coin_balance ?? 0) + cost }).eq("id", user.id);
     return j({ error: upErr.message }, 500);
   }
 
