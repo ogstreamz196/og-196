@@ -33,12 +33,23 @@ export const Route = createFileRoute("/_authenticated/")({
   component: DashboardHome,
 });
 
+type PromptIdea = { title: string; description: string; vibe: string };
+
+const EXAMPLE_PROMPTS: PromptIdea[] = [
+  { title: "Late night drive", description: "Synthwave with moody vocals and neon city energy.", vibe: "Synthwave" },
+  { title: "Sunday hangover", description: "Lo-fi acoustic ballad about regretting last night.", vibe: "Lo-fi" },
+  { title: "Gym warm-up", description: "Hard-hitting trap beat with chant-style hooks.", vibe: "Trap" },
+  { title: "Festival anthem", description: "Big-room house drop, euphoric chorus, hands in the air.", vibe: "House" },
+  { title: "Heartbreak letter", description: "Slow piano ballad with raw, emotional lyrics.", vibe: "Ballad" },
+  { title: "Pirate radio cypher", description: "UK drill instrumental with sliding 808s and dark keys.", vibe: "Drill" },
+];
+
 function DashboardHome() {
   const { user } = useAuth();
   const dev = useDevMode();
   const { data: profile } = useProfile();
   const { isVip } = useRole();
-  const { data: recentSongs = [], isLoading: songsLoading } = useRecentSongs(user?.id);
+  const { data: recentSongs = [] } = useRecentSongs(user?.id);
 
   const displayName = dev.isDev
     ? "Developer"
@@ -129,33 +140,27 @@ function DashboardHome() {
       </section>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Recent */}
+        {/* Example prompts */}
         <Card className="lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-2xl">Recent songs</CardTitle>
-              <CardDescription className="text-base">Pick up where you left off.</CardDescription>
+              <CardTitle className="text-2xl">Try a prompt</CardTitle>
+              <CardDescription className="text-base">Tap one to start a song in seconds.</CardDescription>
             </div>
             <Link
               to="/library"
               preload="intent"
               className={cn(buttonVariants({ variant: "ghost", size: "default" }), "gap-1.5 text-base")}
             >
-              View all <ArrowRight className="h-4 w-4" />
+              Open studio <ArrowRight className="h-4 w-4" />
             </Link>
           </CardHeader>
           <CardContent>
-            {songsLoading ? (
-              <RecentSkeleton />
-            ) : hasSongs ? (
-              <ul className="divide-y divide-border">
-                {recentSongs.slice(0, 5).map((s) => (
-                  <RecentRow key={s.id} song={s} />
-                ))}
-              </ul>
-            ) : (
-              <EmptyRecent />
-            )}
+            <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {EXAMPLE_PROMPTS.map((p) => (
+                <PromptCard key={p.title} prompt={p} />
+              ))}
+            </ul>
           </CardContent>
         </Card>
 
@@ -319,6 +324,29 @@ function QuickAction({
       </span>
       <span className="text-base font-semibold">{label}</span>
     </Link>
+  );
+}
+
+function PromptCard({ prompt }: { prompt: PromptIdea }) {
+  return (
+    <li>
+      <Link
+        to="/library"
+        preload="intent"
+        className="group flex h-full flex-col gap-2 rounded-xl border border-white/10 bg-white/[0.03] p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-white/[0.06] hover:shadow-glow"
+      >
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-base font-semibold text-foreground">{prompt.title}</p>
+          <Badge variant="outline" className="shrink-0 border-white/10 bg-white/[0.04] text-xs">
+            {prompt.vibe}
+          </Badge>
+        </div>
+        <p className="text-sm leading-relaxed text-muted-foreground">{prompt.description}</p>
+        <span className="mt-auto inline-flex items-center gap-1 pt-2 text-sm font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100">
+          Use this prompt <ArrowRight className="h-3.5 w-3.5" />
+        </span>
+      </Link>
+    </li>
   );
 }
 
