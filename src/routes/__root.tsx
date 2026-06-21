@@ -154,6 +154,18 @@ function RootComponent() {
           ]);
           router.invalidate();
         }
+
+        // Claim pending referral (set on /welcome?ref=<uuid> before sign-in)
+        try {
+          const pending = typeof window !== "undefined" ? localStorage.getItem("og_pending_ref") : null;
+          if (pending && pending !== data.user.id) {
+            const { data: claimed, error } = await supabase.rpc("claim_referral", { p_referrer: pending });
+            if (!error && claimed === true) {
+              queryClient.invalidateQueries({ queryKey: ["referral-summary"] });
+            }
+          }
+          if (typeof window !== "undefined") localStorage.removeItem("og_pending_ref");
+        } catch { /* non-blocking */ }
       } catch (error) {
         console.error("user bootstrap failed", error);
       }
