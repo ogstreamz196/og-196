@@ -69,24 +69,24 @@ function DashboardHome() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,oklch(0.55_0.22_268/0.22),transparent_60%)]" />
         <div className="relative grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 sm:flex sm:flex-wrap sm:items-end sm:justify-between">
           <div className="min-w-0 rounded-2xl bg-background/35 p-4 backdrop-blur-md ring-1 ring-white/10 sm:p-5">
-            <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+            <p className="text-sm uppercase tracking-[0.24em] text-muted-foreground sm:text-base">
               Welcome back
             </p>
-            <h1 className="font-display mt-3 text-3xl font-light leading-[1.05] tracking-[-0.02em] text-foreground [overflow-wrap:anywhere] [text-shadow:0_2px_24px_rgba(0,0,0,0.75)] sm:text-5xl">
+            <h1 className="font-display mt-3 text-5xl font-light leading-[1.05] tracking-[-0.02em] text-foreground [overflow-wrap:anywhere] [text-shadow:0_2px_24px_rgba(0,0,0,0.75)] sm:text-7xl">
               Hello, <em className="italic text-gradient-brand [overflow-wrap:anywhere]">{displayName}</em>
             </h1>
-            <p className="mt-4 max-w-xl text-sm leading-relaxed text-foreground/90 [text-shadow:0_1px_12px_rgba(0,0,0,0.7)]">
+            <p className="mt-5 max-w-xl text-lg leading-relaxed text-foreground/90 [text-shadow:0_1px_12px_rgba(0,0,0,0.7)] sm:text-xl">
               Jump back into your music workspace or pick up a conversation with OG Messenger.
             </p>
           </div>
-          <div className="flex shrink-0 items-center gap-2 text-sm">
+          <div className="flex shrink-0 items-center gap-2 text-base">
             {isVip && (
-              <Badge variant="secondary" className="gap-1">
-                <Sparkles className="h-3 w-3" /> VIP
+              <Badge variant="secondary" className="gap-1.5 px-3 py-1.5 text-sm">
+                <Sparkles className="h-4 w-4" /> VIP
               </Badge>
             )}
-            <Badge variant="outline" className="gap-1.5 border-white/15 bg-white/5">
-              <Coins className="h-3.5 w-3.5 text-primary" />
+            <Badge variant="outline" className="gap-2 border-white/15 bg-white/5 px-3 py-1.5 text-sm">
+              <Coins className="h-4 w-4 text-primary" />
               {balance} coins
             </Badge>
           </div>
@@ -117,14 +117,14 @@ function DashboardHome() {
 
       {/* Quick actions */}
       <section>
-        <h2 className="mb-4 text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+        <h2 className="mb-4 text-sm uppercase tracking-[0.24em] text-muted-foreground sm:text-base">
           Quick actions
         </h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <QuickAction to="/library" icon={<Plus className="h-4 w-4" />} label="New song" />
-          <QuickAction to="/library" icon={<Library className="h-4 w-4" />} label="My library" />
-          <QuickAction to="/messenger" icon={<Wand2 className="h-4 w-4" />} label="Ask OG" />
-          <QuickAction to="/buy-coins" icon={<Coins className="h-4 w-4" />} label="Buy coins" />
+          <QuickAction to="/library" icon={<Plus className="h-5 w-5" />} label="New song" />
+          <QuickAction to="/library" icon={<Library className="h-5 w-5" />} label="My library" />
+          <QuickAction to="/messenger" icon={<Wand2 className="h-5 w-5" />} label="Ask OG" />
+          <QuickAction to="/buy-coins" icon={<Coins className="h-5 w-5" />} label="Buy coins" />
         </div>
       </section>
 
@@ -133,15 +133,15 @@ function DashboardHome() {
         <Card className="lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-lg">Recent songs</CardTitle>
-              <CardDescription>Pick up where you left off.</CardDescription>
+              <CardTitle className="text-2xl">Recent songs</CardTitle>
+              <CardDescription className="text-base">Pick up where you left off.</CardDescription>
             </div>
             <Link
               to="/library"
               preload="intent"
-              className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "gap-1")}
+              className={cn(buttonVariants({ variant: "ghost", size: "default" }), "gap-1.5 text-base")}
             >
-              View all <ArrowRight className="h-3.5 w-3.5" />
+              View all <ArrowRight className="h-4 w-4" />
             </Link>
           </CardHeader>
           <CardContent>
@@ -162,8 +162,8 @@ function DashboardHome() {
         {/* Next steps */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Next steps</CardTitle>
-            <CardDescription>Get the most out of OG Studio.</CardDescription>
+            <CardTitle className="text-2xl">Next steps</CardTitle>
+            <CardDescription className="text-base">Get the most out of OG Studio.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <ChecklistItem
@@ -312,12 +312,12 @@ function QuickAction({
   return (
     <Link
       to={to}
-      className="group flex h-auto items-center justify-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3.5 backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-white/[0.06] hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="group flex h-auto items-center justify-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-5 py-4 backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-white/[0.06] hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-gradient-brand-soft text-primary transition-transform duration-200 group-hover:scale-110">
+      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-gradient-brand-soft text-primary transition-transform duration-200 group-hover:scale-110">
         {icon}
       </span>
-      <span className="text-sm font-medium">{label}</span>
+      <span className="text-base font-semibold">{label}</span>
     </Link>
   );
 }
@@ -329,9 +329,9 @@ function RecentRow({ song }: { song: RecentSong }) {
       <Link
         to="/library/$songId"
         params={{ songId: song.id }}
-        className="group flex items-center gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.04]"
+        className="group flex items-center gap-4 rounded-lg px-2 py-4 transition-colors hover:bg-white/[0.04]"
       >
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-gradient-brand-soft shadow-card">
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-gradient-brand-soft shadow-card">
           {song.cover_url ? (
             <img
               src={song.cover_url}
@@ -341,19 +341,19 @@ function RecentRow({ song }: { song: RecentSong }) {
               className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
             />
           ) : (
-            <Headphones className="h-4 w-4 text-primary" />
+            <Headphones className="h-5 w-5 text-primary" />
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium">{title}</p>
-          <p className="truncate text-xs text-muted-foreground">
+          <p className="truncate text-base font-semibold">{title}</p>
+          <p className="truncate text-sm text-muted-foreground">
             {new Date(song.created_at).toLocaleDateString()}
           </p>
         </div>
-        <Badge variant="outline" className="shrink-0 border-white/10 bg-white/[0.04] text-xs capitalize">
+        <Badge variant="outline" className="shrink-0 border-white/10 bg-white/[0.04] text-sm capitalize">
           {song.status}
         </Badge>
-        <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+        <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
       </Link>
     </li>
   );
@@ -378,18 +378,18 @@ function RecentSkeleton() {
 function EmptyRecent() {
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
-      <div className="grid h-14 w-14 place-items-center rounded-2xl border border-dashed border-white/15 bg-gradient-brand-soft text-primary">
-        <Music2 className="h-6 w-6" />
+      <div className="grid h-16 w-16 place-items-center rounded-2xl border border-dashed border-white/15 bg-gradient-brand-soft text-primary">
+        <Music2 className="h-7 w-7" />
       </div>
       <div>
-        <p className="text-sm font-semibold">No songs yet</p>
-        <p className="mt-1 text-xs text-muted-foreground">
+        <p className="text-base font-semibold">No songs yet</p>
+        <p className="mt-1 text-sm text-muted-foreground">
           Generate your first personalised track in Music Hub.
         </p>
       </div>
       <Link
         to="/library"
-        className={cn(buttonVariants({ size: "sm", variant: "premium" }), "mt-2 rounded-full")}
+        className={cn(buttonVariants({ size: "lg", variant: "premium" }), "mt-2 rounded-full text-base")}
       >
         Create a song
       </Link>
@@ -409,17 +409,17 @@ function ChecklistItem({
   return (
     <Link
       to={to}
-      className="flex items-center gap-3 rounded-md border border-transparent px-2 py-2 transition-colors hover:border-border hover:bg-muted/40"
+      className="flex items-center gap-3 rounded-md border border-transparent px-2 py-3 transition-colors hover:border-border hover:bg-muted/40"
     >
       {done ? (
-        <CheckCircle2 className="h-4 w-4 text-primary" />
+        <CheckCircle2 className="h-5 w-5 text-primary" />
       ) : (
-        <Circle className="h-4 w-4 text-muted-foreground" />
+        <Circle className="h-5 w-5 text-muted-foreground" />
       )}
-      <span className={"text-sm " + (done ? "text-muted-foreground line-through" : "")}>
+      <span className={"text-base font-medium " + (done ? "text-muted-foreground line-through" : "")}>
         {label}
       </span>
-      <ArrowRight className="ml-auto h-3.5 w-3.5 text-muted-foreground" />
+      <ArrowRight className="ml-auto h-4 w-4 text-muted-foreground" />
     </Link>
   );
 }
