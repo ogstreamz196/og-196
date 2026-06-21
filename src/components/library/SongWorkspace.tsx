@@ -304,8 +304,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
           body: { song_id: song.id },
         });
         if (error) {
-          const msg = (error as { context?: { error?: string } })?.context?.error || error.message;
-          toast.error(msg || "Could not unlock");
+          toast.error(invokeError(error, "Could not unlock"));
           return;
         }
         if (!data?.already) toast.success(`Unlocked · -${data?.cost ?? fullUnlockCost} coins`);
