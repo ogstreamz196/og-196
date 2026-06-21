@@ -507,6 +507,56 @@ export type Database = {
           },
         ]
       }
+      telegram_dm_queue: {
+        Row: {
+          attempts: number
+          body: string
+          created_at: string
+          id: string
+          last_error: string | null
+          sent_at: string | null
+          sent_by: string | null
+          status: string
+          target_user_id: string
+          telegram_message_id: number | null
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          body: string
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          sent_at?: string | null
+          sent_by?: string | null
+          status?: string
+          target_user_id: string
+          telegram_message_id?: number | null
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          body?: string
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          sent_at?: string | null
+          sent_by?: string | null
+          status?: string
+          target_user_id?: string
+          telegram_message_id?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "telegram_dm_queue_target_user_id_fkey"
+            columns: ["target_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_preferences: {
         Row: {
           created_at: string
