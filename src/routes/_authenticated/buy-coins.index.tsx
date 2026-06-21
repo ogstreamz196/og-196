@@ -396,8 +396,6 @@ function BuyCoinsPage() {
 interface PackOverride {
   label?: string;
   description?: string;
-  priceCents?: number;
-  coins?: number;
 }
 
 function packOverrideKey(bundleId: string) {
@@ -408,7 +406,13 @@ function parseOverride(raw: string | undefined): PackOverride {
   if (!raw) return {};
   try {
     const v = JSON.parse(raw);
-    return v && typeof v === "object" ? (v as PackOverride) : {};
+    if (!v || typeof v !== "object") return {};
+    // Intentionally ignore any legacy priceCents / coins fields — price and
+    // coin counts are the source of truth in Stripe and must never be
+    // overridden from the UI, otherwise displayed price could drift from the
+    // amount actually charged at checkout.
+    const { label, description } = v as PackOverride;
+    return { label, description };
   } catch {
     return {};
   }
@@ -423,21 +427,23 @@ function PackCard({
   basePerCoin: number;
   onBuy: (effective: CoinPack) => void;
 }) {
-  const { isAdmin } = useRole();
+  const { isDev } = useRole();
   const { enabled } = useAdminEditMode();
   const { get } = useSiteContent();
   const setMut = useSetSiteContent();
-  const canEdit = isAdmin && enabled;
+  // Edit mode is gated to dev/admin (isDev already includes admin) AND the
+  // global admin edit-mode toggle. The server RPC re-checks the role.
+  const canEdit = isDev && enabled;
 
   const raw = get(packOverrideKey(pack.bundleId), "");
   const override = useMemo(() => parseOverride(raw), [raw]);
 
+  // Only label + description can be overridden. Coins and price always come
+  // from the canonical pack definition (which mirrors Stripe).
   const effective: CoinPack = {
     ...pack,
     label: override.label ?? pack.label,
     description: override.description ?? pack.description,
-    priceCents: override.priceCents ?? pack.priceCents,
-    coins: override.coins ?? pack.coins,
   };
 
   const perCoin = effective.priceCents / 100 / effective.coins;
@@ -447,35 +453,30 @@ function PackCard({
   const [editing, setEditing] = useState(false);
   const [draftLabel, setDraftLabel] = useState(effective.label);
   const [draftDesc, setDraftDesc] = useState(effective.description);
-  const [draftPrice, setDraftPrice] = useState((effective.priceCents / 100).toFixed(2));
-  const [draftCoins, setDraftCoins] = useState(String(effective.coins));
 
   function startEdit(e: React.MouseEvent) {
     e.stopPropagation();
+    if (!canEdit) return;
     setDraftLabel(effective.label);
     setDraftDesc(effective.description);
-    setDraftPrice((effective.priceCents / 100).toFixed(2));
-    setDraftCoins(String(effective.coins));
     setEditing(true);
   }
 
   function save() {
-    const priceNum = Number.parseFloat(draftPrice);
-    const coinsNum = Number.parseInt(draftCoins, 10);
+    if (!canEdit) {
+      toast.error("Not authorized");
+      return;
+    }
     if (!draftLabel.trim()) return toast.error("Label required");
-    if (!Number.isFinite(priceNum) || priceNum < 0.5) return toast.error("Price must be ≥ 0.50");
-    if (!Number.isInteger(coinsNum) || coinsNum < 1) return toast.error("Coins must be a positive integer");
     const payload: PackOverride = {
       label: draftLabel.trim(),
       description: draftDesc.trim() || pack.description,
-      priceCents: Math.round(priceNum * 100),
-      coins: coinsNum,
     };
     setMut.mutate(
       { key: packOverrideKey(pack.bundleId), value: JSON.stringify(payload) },
       {
         onSuccess: () => {
-          toast.success("Pack saved site-wide");
+          toast.success("Pack label saved site-wide");
           setEditing(false);
         },
         onError: (e: Error) => toast.error(e.message),
@@ -483,28 +484,14 @@ function PackCard({
     );
   }
 
-  if (editing) {
+  if (editing && canEdit) {
     return (
-      <div
-        className={cn(
-          "relative flex flex-col rounded-2xl border-2 border-primary bg-card p-5 shadow-glow",
-        )}
-      >
+      <div className="relative flex flex-col rounded-2xl border-2 border-primary bg-card p-5 shadow-glow">
         <div className="mb-3 inline-flex w-fit items-center gap-1.5 rounded-full bg-primary/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
-          <Pencil className="h-3 w-3" /> Editing pack
+          <Pencil className="h-3 w-3" /> Editing label
         </div>
         <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Label</label>
         <Input value={draftLabel} onChange={(e) => setDraftLabel(e.target.value)} maxLength={40} className="mt-1 h-9" />
-        <div className="mt-3 grid grid-cols-2 gap-2">
-          <div>
-            <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Coins</label>
-            <Input type="number" min={1} value={draftCoins} onChange={(e) => setDraftCoins(e.target.value)} className="mt-1 h-9 tabular-nums" />
-          </div>
-          <div>
-            <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Price ({CURRENCY_SYMBOL})</label>
-            <Input type="number" step="0.01" min={0.5} value={draftPrice} onChange={(e) => setDraftPrice(e.target.value)} className="mt-1 h-9 tabular-nums" />
-          </div>
-        </div>
         <label className="mt-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Description</label>
         <textarea
           value={draftDesc}
@@ -513,10 +500,11 @@ function PackCard({
           maxLength={240}
           className="mt-1 rounded-md border border-input bg-background px-2 py-1.5 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         />
-        <p className="mt-2 text-[10px] leading-snug text-muted-foreground">
-          Display only — Stripe still charges the original price for{" "}
-          <code className="rounded bg-muted px-1 py-0.5 text-[10px]">{pack.priceId}</code>.
-        </p>
+        <div className="mt-3 rounded-md border border-border/60 bg-background/40 p-2.5 text-[11px] leading-snug text-muted-foreground">
+          <div className="font-semibold text-foreground">Locked to Stripe</div>
+          {effective.coins} coins · {CURRENCY_SYMBOL}{(effective.priceCents / 100).toFixed(2)} · <code className="rounded bg-muted px-1 py-0.5 text-[10px]">{pack.priceId}</code>
+          <div className="mt-1">Price and coin count are managed in Stripe and cannot be edited here.</div>
+        </div>
         <div className="mt-4 flex items-center justify-end gap-2">
           <Button
             type="button"
@@ -544,6 +532,7 @@ function PackCard({
       </div>
     );
   }
+
 
   return (
     <div className="relative">
