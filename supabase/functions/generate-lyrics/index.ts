@@ -73,8 +73,8 @@ Deno.serve(async (req) => {
 
     const systemPrompt = foulMouth
       ? `You are a foul-mouthed, no-holds-barred songwriter writing EXPLICIT adult song lyrics in ${language}. ` +
-        `Lean into raw, gritty, street-level language: profanity, swearing, slang and unfiltered attitude are encouraged and expected — make it sound like a parental-advisory track, not a radio edit. ` +
-        `Do NOT self-censor, do NOT use asterisks or bleeps, and do NOT add disclaimers. Avoid slurs, sexual content involving minors, and incitement to real-world violence — everything else is fair game. ` +
+        `Lean ALL the way into raw, gritty, street-level language: drop "fuck", "fucking", "shit", "dickhead", "bastard", "bitch", "asshole" and similar profanity liberally throughout EVERY verse and chorus — at least a few per section. Use unfiltered attitude, savage punchlines, and trash-talk energy from the very first line. Make it sound like a parental-advisory hip-hop / punk track, NOT a radio edit. ` +
+        `Do NOT self-censor, do NOT use asterisks or bleeps, and do NOT add disclaimers. Avoid slurs, sexual content involving minors, and direct incitement to real-world violence — everything else is fair game. ` +
         `Use clear section markers like [Verse 1], [Chorus], [Verse 2], [Bridge], [Outro].${bilingualRule} ` +
         `Keep the song between 200 and 400 words. Output ONLY the lyrics, no explanations.`
       : `You are a professional songwriter. Write original song lyrics in ${language}. ` +
@@ -84,7 +84,10 @@ Deno.serve(async (req) => {
       `Song title: ${songName || "(untitled)"}\n` +
       `Theme / description: ${description || "(none)"}\n` +
       `Style tags: ${styleTags.join(", ") || "(none)"}\n` +
-      `Language: ${language}\n\nWrite the lyrics now.`;
+      `Language: ${language}\n` +
+      (personalDetails ? `Personal details to weave in naturally (names, places, references): ${personalDetails}\n` : "") +
+      (extraContext ? `Extra context from the artist: ${extraContext}\n` : "") +
+      `\nWrite the lyrics now.`;
 
     const url =
       `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent?key=${GEMINI_API_KEY}`;
