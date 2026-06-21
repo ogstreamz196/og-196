@@ -133,7 +133,7 @@ function SettingsPage() {
             <div className="min-w-0">
               <h2 className="font-semibold">Profile</h2>
               <p className="truncate text-xs text-muted-foreground flex items-center gap-1.5">
-                <Mail className="h-3 w-3" /> {user?.email}
+                <Mail className="h-3 w-3" /> {dev.isDev ? "developer@local" : user?.email}
               </p>
             </div>
           </header>
