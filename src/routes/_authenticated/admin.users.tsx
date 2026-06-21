@@ -244,6 +244,8 @@ function AdminUsersPage() {
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
             ) : filtered.length > 0 ? (
+              <div className="-mx-px overflow-x-auto">
+                <div className="min-w-[640px]">
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/30 hover:bg-muted/30">
