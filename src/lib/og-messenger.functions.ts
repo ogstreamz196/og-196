@@ -4,32 +4,6 @@ import { buildSystemPrompt, type UserContextSummary } from "@/lib/og-persona";
 
 export type OgChatMessage = { role: "user" | "assistant"; content: string };
 
-/**
- * Legacy: returns the signed-in user's active OG Bot token if any.
- * The unified messenger no longer requires this token — chat is auth-only.
- * Kept so existing settings/admin UI that reads it still compiles.
- */
-export const getMyActiveOgBotToken = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context }): Promise<{
-    token: string | null;
-    expires_at: string | null;
-    reason: "ok" | "missing" | "revoked" | "expired";
-  }> => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: row, error } = await supabaseAdmin
-      .from("og_bot_tokens")
-      .select("token, expires_at, revoked_at")
-      .eq("user_id", context.userId)
-      .maybeSingle();
-    if (error) throw new Error(error.message);
-    if (!row) return { token: null, expires_at: null, reason: "missing" };
-    if (row.revoked_at) return { token: null, expires_at: row.expires_at, reason: "revoked" };
-    if (row.expires_at && new Date(row.expires_at).getTime() < Date.now()) {
-      return { token: null, expires_at: row.expires_at, reason: "expired" };
-    }
-    return { token: row.token, expires_at: row.expires_at, reason: "ok" };
-  });
 
 interface ChatReply {
   reply: string;
