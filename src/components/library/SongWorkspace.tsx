@@ -53,6 +53,44 @@ export function SongWorkspace({ song, onSaved }: Props) {
   const isReady = song.status === "completed";
   const isFailed = song.status === "failed";
 
+  // Realtime + polling fallback: while the song is generating, listen for the row
+  // flipping to completed/failed and ask the parent to refetch so the UI moves
+  // from "Sample" → "Full ready" automatically.
+  const lastStatus = useRef(song.status);
+  useEffect(() => {
+    if (!isPending) {
+      // Surface terminal transitions for the user.
+      if (lastStatus.current === "pending" || lastStatus.current === "processing") {
+        if (isReady) toast.success("Sample ready — full track unlocked");
+        else if (isFailed) toast.error(song.error_message || "Generation failed — coins refunded");
+      }
+      lastStatus.current = song.status;
+      return;
+    }
+    lastStatus.current = song.status;
+
+    const channel = supabase
+      .channel(`song-${song.id}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "songs", filter: `id=eq.${song.id}` },
+        (payload) => {
+          const next = (payload.new as { status?: string })?.status;
+          if (next && next !== lastStatus.current) onSaved?.();
+        },
+      )
+      .subscribe();
+
+    // Polling fallback in case realtime drops a message.
+    const poll = setInterval(() => onSaved?.(), 4000);
+
+    return () => {
+      supabase.removeChannel(channel);
+      clearInterval(poll);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [song.id, song.status]);
+
   const stage: Stage = isReady ? 3 : hasLyrics ? 2 : 1;
 
   const dirty =
