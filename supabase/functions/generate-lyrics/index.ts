@@ -71,15 +71,38 @@ Deno.serve(async (req) => {
       ? ""
       : ` Write each line TWICE: first in ${language} using the Latin alphabet (romanised / transliterated — no native script, no Cyrillic, no kanji, no Arabic script, etc.), then on the very next line the English translation in italics-style parentheses, e.g. "Mi corazón late fuerte / (My heart beats strong)". Keep section markers in English.`;
 
+    // Pick a full-song structure driven by the chosen style tags so the
+    // output reads as a complete, performable track — not a few stray verses.
+    const tagsLower = styleTags.map((t) => t.toLowerCase()).join(" ");
+    const isRap = /(rap|hip[- ]?hop|drill|trap|grime|afro\s*drill)/.test(tagsLower);
+    const isBallad = /(ballad|acoustic|piano|folk|country|singer[- ]songwriter)/.test(tagsLower);
+    const isDance = /(dance|edm|house|techno|club|electro|pop)/.test(tagsLower);
+    const isRock = /(rock|metal|punk|indie|alt)/.test(tagsLower);
+
+    const structure = isRap
+      ? "[Intro] (4 lines) → [Verse 1] (16 bars) → [Hook] (8 bars, catchy repeatable) → [Verse 2] (16 bars) → [Hook] → [Bridge] (8 bars) → [Hook] → [Outro] (4 lines, ad-libs ok)"
+      : isBallad
+      ? "[Intro] (2-4 lines, scene-setting) → [Verse 1] (8 lines) → [Chorus] (4-6 lines, memorable hook) → [Verse 2] (8 lines) → [Chorus] → [Bridge] (4-6 lines, emotional turn) → [Final Chorus] (lifted, optional key change cue in parentheses) → [Outro] (2-4 lines)"
+      : isDance
+      ? "[Intro] (2 lines, vibe-setter) → [Verse 1] (8 lines) → [Pre-Chorus] (4 lines, build-up) → [Chorus] (4-6 lines, anthemic hook) → [Verse 2] (8 lines) → [Pre-Chorus] → [Chorus] → [Drop] (2-4 lines or 'instrumental drop' note) → [Bridge] (4 lines) → [Chorus] (x2) → [Outro] (2 lines)"
+      : isRock
+      ? "[Intro] (2 lines) → [Verse 1] (8 lines) → [Chorus] (4-6 lines) → [Verse 2] (8 lines) → [Chorus] → [Bridge / Guitar Solo cue] (4 lines) → [Chorus] (x2) → [Outro] (2-4 lines)"
+      : "[Intro] (2-4 lines) → [Verse 1] (8 lines) → [Pre-Chorus] (2-4 lines) → [Chorus] (4-6 lines, hook) → [Verse 2] (8 lines) → [Pre-Chorus] → [Chorus] → [Bridge] (4-6 lines) → [Chorus] (final, lifted) → [Outro] (2-4 lines)";
+
+    const structureRule =
+      ` Deliver a COMPLETE, performable song that follows this exact structure for the chosen style: ${structure}.` +
+      ` Use the bracketed section markers verbatim (e.g. [Verse 1], [Chorus], [Bridge], [Outro]). Every section must have lyrics — no placeholders, no "(instrumental)" unless the structure explicitly says so.` +
+      ` Make the chorus/hook genuinely repeatable and tied to the song title or central theme.`;
+
     const systemPrompt = foulMouth
       ? `You are a foul-mouthed, no-holds-barred songwriter writing EXPLICIT adult song lyrics in ${language}. ` +
         `Lean ALL the way into raw, gritty, street-level language: drop "fuck", "fucking", "shit", "dickhead", "bastard", "bitch", "asshole" and similar profanity liberally throughout EVERY verse and chorus — at least a few per section. Use unfiltered attitude, savage punchlines, and trash-talk energy from the very first line. Make it sound like a parental-advisory hip-hop / punk track, NOT a radio edit. ` +
-        `Do NOT self-censor, do NOT use asterisks or bleeps, and do NOT add disclaimers. Avoid slurs, sexual content involving minors, and direct incitement to real-world violence — everything else is fair game. ` +
-        `Use clear section markers like [Verse 1], [Chorus], [Verse 2], [Bridge], [Outro].${bilingualRule} ` +
-        `Keep the song between 200 and 400 words. Output ONLY the lyrics, no explanations.`
-      : `You are a professional songwriter. Write original song lyrics in ${language}. ` +
-        `Use clear section markers like [Verse 1], [Chorus], [Verse 2], [Bridge], [Outro].${bilingualRule} ` +
-        `Keep the song between 200 and 400 words. Output ONLY the lyrics, no explanations.`;
+        `Do NOT self-censor, do NOT use asterisks or bleeps, and do NOT add disclaimers. Avoid slurs, sexual content involving minors, and direct incitement to real-world violence — everything else is fair game.` +
+        structureRule + bilingualRule +
+        ` Target 280–450 words. Output ONLY the lyrics, no explanations.`
+      : `You are a professional songwriter. Write original song lyrics in ${language}.` +
+        structureRule + bilingualRule +
+        ` Target 250–400 words. Output ONLY the lyrics, no explanations.`;
     const userPrompt =
       `Song title: ${songName || "(untitled)"}\n` +
       `Theme / description: ${description || "(none)"}\n` +
@@ -98,7 +121,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         systemInstruction: { role: "system", parts: [{ text: systemPrompt }] },
         contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-        generationConfig: { temperature: 0.9, maxOutputTokens: 1200 },
+        generationConfig: { temperature: 0.9, maxOutputTokens: 2400 },
       }),
     });
 
