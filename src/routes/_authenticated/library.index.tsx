@@ -574,39 +574,72 @@ function LibraryPage() {
                   Personal details <span className="font-normal normal-case">(optional)</span>
                 </Label>
                 <p className="mt-1 text-[11px] text-muted-foreground">
-                  Add your own personal touch — tap an example to load it, or build your own with the chips.
+                  Add your own personal touch — hit Surprise me, tap an example, or build your own with the chips.
                 </p>
                 <div className="mt-2 flex flex-wrap gap-1.5">
-                  {[
-                    {
-                      label: "🎂 Birthday roast",
-                      text: "Their name: Aaliyah\nOccasion: 30th birthday\nInside joke: still can't parallel park\nWhat they love: oat-milk lattes",
-                    },
-                    {
-                      label: "💔 Breakup anthem",
-                      text: "Their name: Marcus\nStory: ghosted me after 2 years\nCity: Manchester\nInside joke: \"I'll text you back\" — never did",
-                    },
-                    {
-                      label: "💍 Wedding toast",
-                      text: "Their name: Sam & Jordan\nOccasion: wedding day\nWhat they love: late-night taco runs\nInside joke: the karaoke night we don't talk about",
-                    },
-                    {
-                      label: "🏆 Hype song",
-                      text: "Their name: Dre\nOccasion: promotion at work\nCity: Brooklyn\nWhat they love: never missing leg day",
-                    },
-                  ].map((ex) => (
-                    <button
-                      key={ex.label}
-                      type="button"
-                      onClick={() => {
-                        setPersonalDetails(ex.text.slice(0, 500));
-                        toast.success(`${ex.label} loaded`);
-                      }}
-                      className="rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-foreground transition hover:border-primary hover:bg-primary/20"
-                    >
-                      {ex.label}
-                    </button>
-                  ))}
+                  {(() => {
+                    const EXAMPLES = [
+                      {
+                        label: "🎂 Birthday roast",
+                        text: "Their name: Aaliyah\nOccasion: 30th birthday\nInside joke: still can't parallel park\nWhat they love: oat-milk lattes",
+                      },
+                      {
+                        label: "💔 Breakup anthem",
+                        text: "Their name: Marcus\nStory: ghosted me after 2 years\nCity: Manchester\nInside joke: \"I'll text you back\" — never did",
+                      },
+                      {
+                        label: "💍 Wedding toast",
+                        text: "Their name: Sam & Jordan\nOccasion: wedding day\nWhat they love: late-night taco runs\nInside joke: the karaoke night we don't talk about",
+                      },
+                      {
+                        label: "🏆 Hype song",
+                        text: "Their name: Dre\nOccasion: promotion at work\nCity: Brooklyn\nWhat they love: never missing leg day",
+                      },
+                    ];
+                    const NAMES = ["Aaliyah", "Marcus", "Sam", "Dre", "Kai", "Imani", "Leo", "Zara", "Tomi", "Naomi", "Reece", "Mika"];
+                    const OCCASIONS = ["30th birthday", "graduation", "promotion at work", "engagement", "leaving do", "housewarming", "anniversary"];
+                    const CITIES = ["London", "Manchester", "Brooklyn", "Lagos", "Toronto", "Berlin", "Dublin", "Lisbon"];
+                    const LOVES = ["oat-milk lattes", "matcha runs", "vintage Jordans", "late-night taco runs", "never missing leg day", "Sunday roasts"];
+                    const JOKES = ["still can't parallel park", "always 20 mins late", "owns 14 hoodies in black", "lost the karaoke crown", "can't say 'specific'"];
+                    const STORIES = ["ghosted me after 2 years", "stole my fries on a first date", "called me by their ex's name", "left mid-movie to 'grab water'"];
+                    const pick = <T,>(a: T[]) => a[Math.floor(Math.random() * a.length)];
+                    const surprise = () => {
+                      const base = pick(EXAMPLES);
+                      const text = base.text
+                        .replace(/Their name: [^\n]+/, `Their name: ${pick(NAMES)}`)
+                        .replace(/Occasion: [^\n]+/, `Occasion: ${pick(OCCASIONS)}`)
+                        .replace(/City: [^\n]+/, `City: ${pick(CITIES)}`)
+                        .replace(/What they love: [^\n]+/, `What they love: ${pick(LOVES)}`)
+                        .replace(/Inside joke: [^\n]+/, `Inside joke: ${pick(JOKES)}`)
+                        .replace(/Story: [^\n]+/, `Story: ${pick(STORIES)}`);
+                      setPersonalDetails(text.slice(0, 500));
+                      toast.success(`Surprise! ${base.label} loaded`);
+                    };
+                    return (
+                      <>
+                        <button
+                          type="button"
+                          onClick={surprise}
+                          className="rounded-full border border-primary bg-primary/20 px-2.5 py-1 text-[11px] font-bold text-foreground transition hover:bg-primary/30"
+                        >
+                          🎲 Surprise me
+                        </button>
+                        {EXAMPLES.map((ex) => (
+                          <button
+                            key={ex.label}
+                            type="button"
+                            onClick={() => {
+                              setPersonalDetails(ex.text.slice(0, 500));
+                              toast.success(`${ex.label} loaded`);
+                            }}
+                            className="rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-foreground transition hover:border-primary hover:bg-primary/20"
+                          >
+                            {ex.label}
+                          </button>
+                        ))}
+                      </>
+                    );
+                  })()}
                 </div>
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {[
