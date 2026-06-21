@@ -172,6 +172,8 @@ function AdminPanel() {
           {songsQuery.isLoading ? (
             <div className="grid place-items-center py-16"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
           ) : songsQuery.data && songsQuery.data.length > 0 ? (
+            <div className="overflow-x-auto">
+              <div className="min-w-[720px]">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -250,6 +252,8 @@ function AdminPanel() {
                 ))}
               </TableBody>
             </Table>
+              </div>
+            </div>
           ) : (
             <div className="grid place-items-center gap-2 py-16 text-muted-foreground">
               <Music2 className="h-8 w-8" />
