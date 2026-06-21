@@ -252,19 +252,19 @@ function RecentRow({ song }: { song: RecentSong }) {
       <Link
         to="/library/$songId"
         params={{ songId: song.id }}
-        className="flex items-center gap-3 py-3 transition-colors hover:bg-muted/40"
+        className="group flex items-center gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.04]"
       >
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border bg-muted">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-gradient-brand-soft shadow-card">
           {song.cover_url ? (
             <img
               src={song.cover_url}
               alt=""
               loading="lazy"
               decoding="async"
-              className="h-full w-full object-cover"
+              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
             />
           ) : (
-            <Headphones className="h-4 w-4 text-muted-foreground" />
+            <Headphones className="h-4 w-4 text-primary" />
           )}
         </div>
         <div className="min-w-0 flex-1">
@@ -273,9 +273,10 @@ function RecentRow({ song }: { song: RecentSong }) {
             {new Date(song.created_at).toLocaleDateString()}
           </p>
         </div>
-        <Badge variant="outline" className="text-xs capitalize">
+        <Badge variant="outline" className="shrink-0 border-white/10 bg-white/[0.04] text-xs capitalize">
           {song.status}
         </Badge>
+        <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
       </Link>
     </li>
   );
@@ -283,13 +284,13 @@ function RecentRow({ song }: { song: RecentSong }) {
 
 function RecentSkeleton() {
   return (
-    <ul className="divide-y divide-border">
+    <ul className="divide-y divide-border/40">
       {Array.from({ length: 3 }).map((_, i) => (
-        <li key={i} className="flex items-center gap-3 py-3">
-          <div className="h-10 w-10 animate-pulse rounded-md bg-muted" />
+        <li key={i} className="flex items-center gap-3 px-2 py-3">
+          <div className="h-11 w-11 animate-pulse rounded-lg bg-white/5" />
           <div className="flex-1 space-y-2">
-            <div className="h-3 w-2/3 animate-pulse rounded bg-muted" />
-            <div className="h-2 w-1/3 animate-pulse rounded bg-muted" />
+            <div className="h-3 w-2/3 animate-pulse rounded bg-white/5" />
+            <div className="h-2 w-1/3 animate-pulse rounded bg-white/5" />
           </div>
         </li>
       ))}
@@ -299,17 +300,17 @@ function RecentSkeleton() {
 
 function EmptyRecent() {
   return (
-    <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
-      <div className="flex h-12 w-12 items-center justify-center rounded-full border border-dashed border-border text-muted-foreground">
-        <Music2 className="h-5 w-5" />
+    <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+      <div className="grid h-14 w-14 place-items-center rounded-2xl border border-dashed border-white/15 bg-gradient-brand-soft text-primary">
+        <Music2 className="h-6 w-6" />
       </div>
       <div>
-        <p className="text-sm font-medium">No songs yet</p>
+        <p className="text-sm font-semibold">No songs yet</p>
         <p className="mt-1 text-xs text-muted-foreground">
           Generate your first personalised track in Music Hub.
         </p>
       </div>
-      <Button asChild size="sm" className="mt-1">
+      <Button asChild size="sm" variant="premium" className="mt-2 rounded-full">
         <Link to="/library">Create a song</Link>
       </Button>
     </div>
