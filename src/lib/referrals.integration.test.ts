@@ -13,7 +13,20 @@ import { randomUUID } from "crypto";
  * developer machine without DB credentials).
  */
 
-const HAS_DB = !!process.env.PGHOST;
+function canSeed(): boolean {
+  if (!process.env.PGHOST) return false;
+  try {
+    const out = execFileSync(
+      "psql",
+      ["-tA", "-c", "SELECT has_schema_privilege(current_user, 'auth', 'USAGE')"],
+      { encoding: "utf8" },
+    ).trim();
+    return out === "t";
+  } catch {
+    return false;
+  }
+}
+const HAS_DB = canSeed();
 
 function psql(sql: string): string {
   return execFileSync("psql", ["-tA", "-v", "ON_ERROR_STOP=1", "-c", sql], {
