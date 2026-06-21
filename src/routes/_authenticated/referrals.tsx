@@ -91,6 +91,22 @@ function ReferralsPage() {
           </p>
         </header>
 
+        {/* Running totals — top of page */}
+        <section className="grid gap-3 sm:grid-cols-2">
+          <StatCard
+            icon={<Users className="h-5 w-5" />}
+            label="People you referred"
+            value={summary.total_referred}
+            hint="Confirmed sign-ups via your link"
+          />
+          <StatCard
+            icon={<Coins className="h-5 w-5 text-primary" />}
+            label="Total cashback earned"
+            value={summary.total_earned}
+            hint="OG Coins from 10% on referee burns"
+          />
+        </section>
+
         {/* Share card */}
         <section className="rounded-2xl border border-white/10 bg-card/60 p-5 shadow-glow">
           <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
@@ -103,10 +119,13 @@ function ReferralsPage() {
               onFocus={(e) => e.currentTarget.select()}
               className="font-mono text-xs"
             />
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button onClick={copy} className="gap-2">
                 {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 {copied ? "Copied" : "Copy"}
+              </Button>
+              <Button variant="secondary" onClick={copy} className="gap-2">
+                <Gift className="h-4 w-4" /> Invite again
               </Button>
               <Button variant="outline" onClick={share} className="gap-2">
                 <Share2 className="h-4 w-4" /> Share
@@ -118,26 +137,10 @@ function ReferralsPage() {
           </p>
         </section>
 
-        {/* Stats */}
-        <section className="grid gap-3 sm:grid-cols-2">
-          <StatCard
-            icon={<Users className="h-5 w-5" />}
-            label="People you referred"
-            value={summary.total_referred}
-            hint="Confirmed sign-ups"
-          />
-          <StatCard
-            icon={<Coins className="h-5 w-5 text-primary" />}
-            label="Total cashback earned"
-            value={summary.total_earned}
-            hint="OG Coins from 10% on burns"
-          />
-        </section>
-
         {/* Recent earnings */}
         <section className="rounded-2xl border border-white/10 bg-card/60 p-5">
           <div className="flex items-center justify-between">
-            <h2 className="font-display text-lg font-bold">Recent cashback</h2>
+            <h2 className="font-display text-lg font-bold">Cashback history</h2>
             <span className="text-xs text-muted-foreground">Last 20 events</span>
           </div>
           <div className="mt-3 divide-y divide-white/5">
@@ -149,21 +152,34 @@ function ReferralsPage() {
                 No cashback yet. Share your link to start earning.
               </div>
             )}
-            {summary.recent.map((tx) => (
-              <div key={tx.id} className="flex items-center justify-between py-3">
-                <div className="min-w-0">
-                  <div className="text-sm font-semibold">+{tx.amount} OG Coins</div>
-                  <div className="truncate text-xs text-muted-foreground">
-                    {formatRef(tx.reference)}
+            {summary.recent.map((tx) => {
+              const burned = tx.reference?.match(/burn:(\d+)/)?.[1];
+              const when = new Date(tx.created_at);
+              return (
+                <div key={tx.id} className="flex items-center justify-between gap-3 py-3">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary/15 text-xs font-bold uppercase text-primary">
+                      {(tx.referee_name ?? "?").slice(0, 1)}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="truncate text-sm font-semibold">
+                        {tx.referee_name ?? "Referred user"}
+                      </div>
+                      <div className="truncate text-xs text-muted-foreground">
+                        Burned {burned ?? "?"} coins · you earned +{tx.amount}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right text-xs text-muted-foreground">
+                    <div>{when.toLocaleDateString()}</div>
+                    <div>{when.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
                   </div>
                 </div>
-                <div className="text-xs text-muted-foreground">
-                  {new Date(tx.created_at).toLocaleString()}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
+
       </div>
     </DashboardShell>
   );
