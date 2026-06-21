@@ -14,6 +14,7 @@ import { BossNav } from "@/components/admin/BossNav";
 
 import { HardwiredCapabilities } from "@/components/admin/HardwiredCapabilities";
 import { AppToggles } from "@/components/admin/AppToggles";
+import { OgBotPing } from "@/components/admin/OgBotPing";
 import { AdminEditableLabel, AdminEditableBalance } from "@/components/admin/AdminEditMode";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -154,6 +155,8 @@ function AdminPanel() {
         <PortalManager />
 
         <BossAuditLog />
+
+        <OgBotPing />
 
         <HardwiredCapabilities />
 
