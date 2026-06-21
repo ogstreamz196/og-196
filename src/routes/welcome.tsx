@@ -306,6 +306,8 @@ const TUTORIAL_STEPS: TutorialStep[] = [
 ];
 
 function WelcomePage() {
+  // Single session check for the whole page (AuthButtons is mounted twice).
+  useRedirectIfSignedIn();
   return (
     <AdminEditModeProvider>
       <main className="relative min-h-dvh overflow-x-hidden text-foreground">
@@ -324,6 +326,7 @@ function WelcomePage() {
     </AdminEditModeProvider>
   );
 }
+
 
 function CardEditBadge() {
   const { enabled } = useAdminEditMode();
