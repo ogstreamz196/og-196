@@ -86,6 +86,7 @@ export function OgChat({
   showQuickStarts = true,
 }: OgChatProps) {
   const { user } = useAuth();
+  const dev = useDevMode();
   const userId = user?.id ?? null;
   const [messages, setMessages] = useState<OgChatMessage[]>(() => loadThread(userId));
   const [input, setInput] = useState("");
