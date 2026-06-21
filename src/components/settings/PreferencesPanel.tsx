@@ -1,13 +1,15 @@
-import { Sparkles, MessageSquareMore, Music2, Palette, Bell } from "lucide-react";
+import { Sparkles, MessageSquareMore, Music2, Palette, Bell, Type, Rows3, Minus, Plus, RotateCcw } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { useOgMode } from "@/hooks/use-og-mode";
 import { useAppPreferences } from "@/hooks/use-app-preferences";
+import { useDisplayPrefs, useSetDisplayPrefs, clampScale, type Density } from "@/hooks/use-display-prefs";
 
 /**
  * Drop-in preferences card group for /settings.
