@@ -266,7 +266,7 @@ function BuyCoinsPage() {
                 key={t.bundleId}
                 pack={t}
                 basePerCoin={basePerCoin}
-                onBuy={(effective) => setSelected({ type: "coins", pack: effective })}
+                onBuy={(effective) => pickSelection({ type: "coins", pack: effective })}
               />
             ))}
           </div>
