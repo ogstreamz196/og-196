@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Coins, Check, ArrowLeft, Crown, Star, Zap, ShieldCheck, Lock, Sparkles, MessageSquare, Music2, Wand2, Infinity as InfinityIcon, TrendingDown, Gift, Pencil, X, Loader2 } from "lucide-react";
+import { Coins, Check, ArrowLeft, Crown, Star, Zap, ShieldCheck, Lock, Sparkles, MessageSquare, Music2, Wand2, Infinity as InfinityIcon, TrendingDown, Gift, Pencil, X, Loader2, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
@@ -10,11 +10,17 @@ import { useProfile } from "@/hooks/use-profile";
 import { useRole } from "@/hooks/use-role";
 import { useSiteContent, useSetSiteContent } from "@/hooks/use-site-content";
 import { cn } from "@/lib/utils";
-import { COIN_PACKS, CURRENCY_SYMBOL, VIP_PLAN, type CoinPack } from "@/lib/coin-packs";
+import { COIN_PACKS, CURRENCY_SYMBOL, VIP_PLAN, findCoinPackByBundleId, type CoinPack } from "@/lib/coin-packs";
 import { StripeEmbeddedCheckoutInline } from "@/components/StripeEmbeddedCheckout";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { CirculatingCoins } from "@/components/CirculatingCoins";
 import { toast } from "sonner";
+
+const SELECTION_STORAGE_KEY = "buyCoins.lastSelection";
+
+type StoredSelection =
+  | { type: "coins"; bundleId: string }
+  | { type: "vip" };
 
 type Selection =
   | { type: "coins"; pack: CoinPack }
