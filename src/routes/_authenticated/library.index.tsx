@@ -15,7 +15,6 @@ import {
   Heart,
   Gauge,
   Mic2,
-  Download,
   Music4,
 } from "lucide-react";
 import { toast } from "sonner";
