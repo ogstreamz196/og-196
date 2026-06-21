@@ -233,12 +233,10 @@ export function SongWorkspace({ song, onSaved }: Props) {
         },
       });
       if (error) {
-        const msg = (error as { context?: { error?: string } })?.context?.error || error.message;
-        if (msg?.toLowerCase().includes("insufficient")) {
-          toast.error("Not enough coins for a lyrics generation");
-        } else {
-          toast.error(msg || "Lyrics generation failed");
-        }
+        const msg = invokeError(error, "Lyrics generation failed");
+        toast.error(msg.toLowerCase().includes("insufficient")
+          ? "Not enough coins for a lyrics generation"
+          : msg);
         return;
       }
       const next = (data?.lyrics ?? "").toString();
