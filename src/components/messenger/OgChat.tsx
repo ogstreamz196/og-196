@@ -73,6 +73,8 @@ interface OgChatProps {
   showHeader?: boolean;
   /** Show quick-start chips on empty state. */
   showQuickStarts?: boolean;
+  /** Optional seeded text to drop in the input (e.g. when opened via "With OG"). */
+  seed?: string | null;
 }
 
 /**
@@ -84,6 +86,7 @@ export function OgChat({
   compact = false,
   showHeader = false,
   showQuickStarts = true,
+  seed = null,
 }: OgChatProps) {
   const { user } = useAuth();
   const dev = useDevMode();
