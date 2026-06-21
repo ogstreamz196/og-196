@@ -214,7 +214,7 @@ function PrimaryCard({
     <Link
       to={to}
       preload="intent"
-      className="group relative flex min-h-[360px] flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-card/70 p-7 shadow-card backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-glow sm:min-h-[440px]"
+      className="group relative flex min-h-[560px] flex-col justify-between overflow-hidden rounded-[2rem] border-2 border-white/15 bg-card/70 p-8 shadow-card backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-glow sm:min-h-[720px] sm:p-12"
     >
       {/* Ambient gradient layers */}
       <div
@@ -249,14 +249,14 @@ function PrimaryCard({
       </div>
 
       <div className="relative flex flex-1 flex-col">
-        <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-gradient-brand-soft text-primary shadow-glow">
+        <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-white/15 bg-gradient-brand-soft text-primary shadow-glow sm:h-20 sm:w-20">
           {icon}
         </div>
         <div className="flex items-center gap-2">
-          <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">{eyebrow}</p>
+          <p className="text-sm uppercase tracking-[0.24em] text-muted-foreground sm:text-base">{eyebrow}</p>
           <span className="h-px flex-1 bg-gradient-to-r from-white/15 to-transparent" />
         </div>
-        <h3 className="font-display mt-3 text-[clamp(2.25rem,6.5vw,4.25rem)] font-black uppercase leading-[0.9] tracking-[-0.035em] drop-shadow-[0_6px_24px_rgba(80,60,255,0.35)]">
+        <h3 className="font-display mt-4 text-[clamp(3.25rem,11vw,6.5rem)] font-black uppercase leading-[0.88] tracking-[-0.035em] drop-shadow-[0_6px_24px_rgba(80,60,255,0.35)]">
           {title.split(" ").map((word, i, arr) => {
             const isLast = i === arr.length - 1;
             return (
@@ -274,25 +274,25 @@ function PrimaryCard({
             );
           })}
         </h3>
-        <p className="mt-4 max-w-md text-sm leading-relaxed text-muted-foreground">{body}</p>
+        <p className="mt-6 max-w-md text-lg leading-relaxed text-muted-foreground sm:text-xl">{body}</p>
 
         {/* Feature chips */}
-        <div className="mt-5 flex flex-wrap gap-2">
+        <div className="mt-7 flex flex-wrap gap-2.5">
           {(isAccent
             ? [
-                { icon: <Sparkles className="h-3 w-3" />, label: "AI co-producer" },
-                { icon: <MessageSquareMore className="h-3 w-3" />, label: "Lyric brainstorm" },
-                { icon: <Wand2 className="h-3 w-3" />, label: "Voice ideas" },
+                { icon: <Sparkles className="h-4 w-4" />, label: "AI co-producer" },
+                { icon: <MessageSquareMore className="h-4 w-4" />, label: "Lyric brainstorm" },
+                { icon: <Wand2 className="h-4 w-4" />, label: "Voice ideas" },
               ]
             : [
-                { icon: <Mic2 className="h-3 w-3" />, label: "Lyrics" },
-                { icon: <AudioLines className="h-3 w-3" />, label: "Beats" },
-                { icon: <Radio className="h-3 w-3" />, label: "Remix" },
+                { icon: <Mic2 className="h-4 w-4" />, label: "Lyrics" },
+                { icon: <AudioLines className="h-4 w-4" />, label: "Beats" },
+                { icon: <Radio className="h-4 w-4" />, label: "Remix" },
               ]
           ).map((chip) => (
             <span
               key={chip.label}
-              className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] font-medium text-foreground/80 backdrop-blur-sm"
+              className="inline-flex items-center gap-1.5 rounded-full border-2 border-white/15 bg-white/[0.04] px-3.5 py-1.5 text-sm font-semibold text-foreground/80 backdrop-blur-sm"
             >
               {chip.icon}
               {chip.label}
@@ -301,11 +301,11 @@ function PrimaryCard({
         </div>
       </div>
 
-      <div className="relative mt-8 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
-        <span className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 backdrop-blur-sm transition-colors group-hover:bg-primary/20">
+      <div className="relative mt-10 inline-flex items-center gap-2 text-lg font-bold text-primary">
+        <span className="rounded-full border-2 border-primary/40 bg-primary/15 px-5 py-2.5 backdrop-blur-sm transition-colors group-hover:bg-primary/25">
           {cta}
         </span>
-        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+        <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
       </div>
     </Link>
   );
