@@ -176,7 +176,7 @@ function IPhoneIcon({ className }: { className?: string }) {
 
 function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
   const { signIn, pending } = useOAuthSignIn();
-  const h = size === "xl" ? "h-48" : "h-44";
+  const h = size === "xl" ? "h-36 sm:h-44 md:h-48" : "h-32 sm:h-40 md:h-44";
   const tile =
     "group relative bg-white/[0.06] backdrop-blur-md border-2 border-white/15 rounded-[28px] " +
     "shadow-[0_10px_0_0_hsl(var(--primary)/0.35),0_24px_44px_-12px_hsl(var(--primary)/0.45)] " +
@@ -184,6 +184,7 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
     "hover:-translate-y-1 hover:border-white/40 hover:bg-white/[0.1] " +
     "hover:shadow-[0_12px_0_0_hsl(var(--primary)/0.5),0_28px_50px_-10px_hsl(var(--primary)/0.6)] " +
     "active:translate-y-1 active:shadow-[0_4px_0_0_hsl(var(--primary)/0.35),0_10px_20px_-6px_hsl(var(--primary)/0.4)] " +
+    "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background " +
     "disabled:opacity-70 disabled:cursor-wait disabled:translate-y-0 cursor-pointer";
 
   type Device = {
@@ -218,10 +219,10 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
       >
         <div className="flex flex-1 items-center justify-center">
           {isPending ? (
-            <Loader2 className="h-16 w-16 animate-spin text-foreground" />
+            <Loader2 className="h-12 w-12 animate-spin text-foreground sm:h-16 sm:w-16" />
           ) : (
-            <div className="grid h-24 w-24 place-items-center rounded-3xl bg-white shadow-[0_8px_24px_rgba(0,0,0,0.45)] ring-2 ring-white/90 transition-transform duration-200 group-hover:scale-110 group-hover:rotate-[-3deg] group-active:scale-95">
-              <d.Icon className={`h-[88px] w-[88px] ${d.iconClass ?? "text-black"}`} />
+            <div className="grid h-16 w-16 place-items-center rounded-2xl bg-white shadow-[0_8px_24px_rgba(0,0,0,0.45)] ring-2 ring-white/90 transition-transform duration-200 group-hover:scale-110 group-hover:rotate-[-3deg] group-active:scale-95 sm:h-20 sm:w-20 sm:rounded-3xl md:h-24 md:w-24">
+              <d.Icon className={`h-12 w-12 sm:h-16 sm:w-16 md:h-[88px] md:w-[88px] ${d.iconClass ?? "text-black"}`} />
             </div>
           )}
         </div>
@@ -243,13 +244,13 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
         Tap your device to continue
       </p>
 
-      <div className="relative overflow-hidden rounded-[28px] border border-white/15 bg-white/[0.04] p-5 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)] backdrop-blur-xl">
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/[0.06] via-transparent to-transparent" />
-        <div className="relative space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+      <div className="relative overflow-hidden rounded-[28px] border border-white/15 bg-white/[0.04] p-3 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)] backdrop-blur-xl sm:p-5">
+        <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-white/[0.06] via-transparent to-transparent" />
+        <div className="relative space-y-3 sm:space-y-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
             {primary.map(renderTile)}
           </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-3 gap-3 sm:gap-4">
             {secondary.map(renderTile)}
           </div>
         </div>
@@ -322,14 +323,14 @@ function CardEditBadge() {
 function TopNav() {
   return (
     <header className="sticky top-0 z-30 border-b border-white/10 bg-background/40 backdrop-blur-xl">
-      <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-5 sm:px-8">
-        <Link to="/welcome" className="group flex items-center gap-3">
-          <span className="wc-wiggle grid h-11 w-11 place-items-center rounded-2xl bg-gradient-brand text-primary-foreground shadow-glow">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:h-20 sm:px-8">
+        <Link to="/welcome" className="group flex min-w-0 items-center gap-3">
+          <span className="wc-wiggle grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-gradient-brand text-primary-foreground shadow-glow sm:h-11 sm:w-11">
             <Sparkles className="h-5 w-5" />
           </span>
-          <div className="leading-none">
-            <p className="font-display text-xl font-semibold tracking-tight">OG Studio</p>
-            <p className="mt-1 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
+          <div className="min-w-0 leading-none">
+            <p className="font-display truncate text-lg font-semibold tracking-tight sm:text-xl">OG Studio</p>
+            <p className="mt-1 text-[10px] uppercase tracking-[0.25em] text-muted-foreground sm:text-[11px]">
               Music Hub
             </p>
           </div>
@@ -341,7 +342,7 @@ function TopNav() {
 
 function Hero() {
   return (
-    <section className="relative mx-auto flex min-h-[calc(100vh-5rem)] max-w-7xl flex-col justify-center px-5 pt-10 pb-16 sm:px-8">
+    <section className="relative mx-auto flex min-h-[calc(100dvh-4rem)] max-w-7xl flex-col justify-center px-4 pt-8 pb-12 sm:min-h-[calc(100vh-5rem)] sm:px-8 sm:pt-10 sm:pb-16">
       {/* Floating stickers */}
       <Sticker className="left-[4%] top-10 wc-float" rotate="-12">
         <Heart className="h-6 w-6 text-pink-400" />
@@ -358,13 +359,13 @@ function Hero() {
 
       <div className="relative mx-auto w-full max-w-6xl text-center">
 
-        <div className="wc-pop mt-12 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2 text-base font-semibold uppercase tracking-[0.18em] backdrop-blur-xl">
+        <div className="wc-pop mt-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] backdrop-blur-xl sm:mt-12 sm:px-5 sm:text-base">
           <span className="h-2 w-2 animate-pulse rounded-full bg-primary shadow-glow" />
           <span>Prompt Lab · song styles by</span>
-          <OgBotLogo className="h-6 w-6" />
+          <OgBotLogo className="h-5 w-5 sm:h-6 sm:w-6" />
         </div>
 
-        <h1 className="font-display mt-10 text-[clamp(5rem,16vw,13rem)] font-black leading-[0.85] tracking-[-0.055em] drop-shadow-[0_8px_30px_rgba(80,60,255,0.35)]">
+        <h1 className="font-display mt-6 text-[clamp(2.75rem,12vw,13rem)] font-black leading-[0.88] tracking-[-0.055em] drop-shadow-[0_8px_30px_rgba(80,60,255,0.35)] sm:mt-10 sm:leading-[0.85]">
           <span className="wc-pop block">PROMPT IT.</span>
           <span className="wc-pop block" style={{ animationDelay: "0.15s" }}>
             MAKE A{" "}
@@ -377,10 +378,10 @@ function Hero() {
           </span>
         </h1>
 
-        <p className="mx-auto mt-10 max-w-4xl text-3xl font-semibold leading-[1.15] text-foreground/90 sm:text-4xl md:text-5xl">
+        <p className="mx-auto mt-6 max-w-4xl text-balance text-lg font-semibold leading-[1.25] text-foreground/90 sm:mt-10 sm:text-3xl sm:leading-[1.15] md:text-4xl lg:text-5xl">
           Type a wild idea, a name, a mood, a memory.
           <br className="hidden sm:block" />
-          Pick rap, afrobeats, pop, drill, heartbreak or party. <span className="inline-block wc-wiggle">🎧</span>
+          {" "}Pick rap, afrobeats, pop, drill, heartbreak or party. <span className="inline-block wc-wiggle">🎧</span>
         </p>
 
         <AlbumCoverShowcase />
@@ -393,12 +394,12 @@ function Hero() {
 
 function AlbumCoverShowcase() {
   return (
-    <div className="mx-auto mt-12 grid max-w-5xl grid-cols-2 gap-4 sm:grid-cols-4">
+    <div className="mx-auto mt-10 grid max-w-5xl grid-cols-2 gap-3 px-1 sm:mt-12 sm:grid-cols-4 sm:gap-4 sm:px-0">
       {albumCovers.map((cover, i) => (
         <article
           key={cover.title}
-          className="group relative overflow-hidden rounded-3xl border-2 border-white/15 bg-card/80 shadow-card transition-all duration-300 hover:-translate-y-2 hover:rotate-0 hover:border-primary/50 hover:shadow-glow"
-          style={{ transform: `rotate(${[-3, 2, -1, 3][i]}deg)` }}
+          className="group relative overflow-hidden rounded-2xl border-2 border-white/15 bg-card/80 shadow-card transition-all duration-300 hover:-translate-y-2 hover:rotate-0 hover:border-primary/50 hover:shadow-glow sm:rounded-3xl"
+          style={{ transform: `rotate(${[-1.5, 1, -0.5, 1.5][i]}deg)` }}
         >
           <CardEditBadge />
           <img
@@ -410,11 +411,11 @@ function AlbumCoverShowcase() {
             decoding="async"
             className="aspect-square w-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
-          <div className="absolute inset-x-0 bottom-0 bg-background/75 p-3 text-left backdrop-blur-md">
+          <div className="absolute inset-x-0 bottom-0 bg-background/75 p-2.5 text-left backdrop-blur-md sm:p-3">
             <EditableContent as="p" contentKey={`welcome.album.${i}.title`} defaultValue={cover.title}
-              className="font-display text-xl leading-none tracking-tight sm:text-2xl" />
+              className="font-display text-base leading-none tracking-tight sm:text-2xl" />
             <EditableContent as="p" contentKey={`welcome.album.${i}.style`} defaultValue={cover.style}
-              className="mt-1 text-xs font-black uppercase tracking-[0.16em] text-primary" />
+              className="mt-1 text-[10px] font-black uppercase tracking-[0.16em] text-primary sm:text-xs" />
             <EditableContent as="p" contentKey={`welcome.album.${i}.prompt`} defaultValue={cover.prompt}
               multiline
               className="mt-2 hidden text-xs font-bold leading-tight text-foreground/85 sm:block" />
@@ -480,51 +481,51 @@ function Pillars() {
   ];
 
   return (
-    <section id="studio" className="relative">
-      <div className="mx-auto max-w-6xl px-5 py-24 sm:px-8 lg:py-32">
-        <div id="sign-in" className="mx-auto mb-16 max-w-3xl scroll-mt-24">
+    <section id="studio" className="relative scroll-mt-24">
+      <div className="mx-auto max-w-6xl px-4 py-16 sm:px-8 sm:py-24 lg:py-32">
+        <div id="sign-in" className="mx-auto mb-12 max-w-3xl scroll-mt-24 sm:mb-16">
           <AuthButtons size="xl" />
-          <p className="mt-6 text-center text-lg font-bold text-foreground sm:text-xl">
+          <p className="mt-5 text-center text-base font-bold text-foreground sm:mt-6 sm:text-xl">
             Free to start — no card required
           </p>
         </div>
 
         <div className="mx-auto max-w-3xl text-center">
-          <p className="text-sm font-semibold uppercase tracking-[0.25em] text-muted-foreground">
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground sm:text-sm">
             Prompt playground
           </p>
-          <h2 className="font-display mt-4 flex flex-wrap items-center justify-center gap-4 text-6xl font-semibold leading-[1] tracking-[-0.035em] sm:text-7xl md:text-8xl">
+          <h2 className="font-display mt-3 flex flex-wrap items-center justify-center gap-3 text-balance text-4xl font-semibold leading-[1.05] tracking-[-0.035em] sm:mt-4 sm:gap-4 sm:text-6xl md:text-7xl lg:text-8xl">
             <span>Different songs</span>
-            <OgBotLogo className="h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28" />
+            <OgBotLogo className="h-12 w-12 sm:h-20 sm:w-20 md:h-24 md:w-24 lg:h-28 lg:w-28" />
           </h2>
         </div>
 
-        <div className="mt-16 grid gap-6 md:grid-cols-3">
+        <div className="mt-12 grid gap-5 sm:mt-16 sm:gap-6 md:grid-cols-3">
           {items.map((it) => (
             <article
               key={it.key}
               style={{ transform: `rotate(${it.tilt}deg)` }}
-              className="group relative rounded-3xl border-2 border-white/12 bg-card/80 p-8 backdrop-blur-xl transition-all duration-200 hover:-translate-y-2 hover:rotate-0 hover:border-primary/40 hover:shadow-glow"
+              className="group relative rounded-3xl border-2 border-white/12 bg-card/80 p-6 backdrop-blur-xl transition-all duration-200 hover:-translate-y-2 hover:rotate-0 hover:border-primary/40 hover:shadow-glow sm:p-8"
             >
               <CardEditBadge />
               <div className="flex items-center gap-3">
-                <span className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-brand text-primary-foreground shadow-glow transition-transform duration-200 group-hover:scale-110 group-hover:rotate-6">
+                <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-brand text-primary-foreground shadow-glow transition-transform duration-200 group-hover:scale-110 group-hover:rotate-6 sm:h-14 sm:w-14">
                   {it.icon}
                 </span>
-                <span className="text-3xl">{it.emoji}</span>
+                <span className="text-2xl sm:text-3xl">{it.emoji}</span>
               </div>
               <EditableContent
                 as="h3"
                 contentKey={`welcome.pillar.${it.key}.title`}
                 defaultValue={String(it.title)}
-                className="font-display mt-6 block text-4xl font-semibold tracking-tight sm:text-5xl"
+                className="font-display mt-5 block text-2xl font-semibold tracking-tight sm:mt-6 sm:text-4xl md:text-5xl"
               />
               <EditableContent
                 as="p"
                 multiline
                 contentKey={`welcome.pillar.${it.key}.body`}
                 defaultValue={it.body}
-                className="mt-4 block text-lg leading-relaxed text-muted-foreground sm:text-xl"
+                className="mt-3 block text-base leading-relaxed text-muted-foreground sm:mt-4 sm:text-lg md:text-xl"
               />
             </article>
           ))}
@@ -543,32 +544,32 @@ function HowItWorks() {
   ];
   return (
     <section className="relative border-t border-white/10">
-      <div className="mx-auto max-w-6xl px-5 py-24 sm:px-8">
+      <div className="mx-auto max-w-6xl px-4 py-16 sm:px-8 sm:py-24">
         <div className="mx-auto max-w-3xl text-center">
-          <p className="text-sm font-medium uppercase tracking-[0.25em] text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-[0.25em] text-muted-foreground sm:text-sm">
             How it works
           </p>
-          <h2 className="font-display mt-4 text-6xl font-semibold tracking-[-0.035em] sm:text-7xl md:text-8xl">
+          <h2 className="font-display mt-3 text-balance text-4xl font-semibold tracking-[-0.035em] sm:mt-4 sm:text-6xl md:text-7xl lg:text-8xl">
             Easy as <em className="italic text-gradient-brand">1 · 2 · 3</em>
           </h2>
         </div>
 
-        <div className="mt-14 grid gap-6 md:grid-cols-3">
+        <div className="mt-10 grid gap-5 sm:mt-14 sm:gap-6 md:grid-cols-3">
           {steps.map((s, i) => (
             <div
               key={s.n}
-              className="group relative rounded-3xl border-2 border-white/12 bg-card/70 p-8 text-center backdrop-blur-xl transition hover:-translate-y-1 hover:border-primary/40"
+              className="group relative rounded-3xl border-2 border-white/12 bg-card/70 p-6 text-center backdrop-blur-xl transition hover:-translate-y-1 hover:border-primary/40 sm:p-8"
               style={{ animationDelay: `${i * 120}ms` }}
             >
               <CardEditBadge />
-              <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-gradient-brand text-4xl font-black text-primary-foreground shadow-glow wc-bounce-soft">
+              <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-gradient-brand text-3xl font-black text-primary-foreground shadow-glow wc-bounce-soft sm:h-20 sm:w-20 sm:text-4xl">
                 {s.n}
               </div>
-              <div className="mt-5 text-6xl">{s.emoji}</div>
+              <div className="mt-4 text-5xl sm:mt-5 sm:text-6xl">{s.emoji}</div>
               <EditableContent as="h3" contentKey={`welcome.step.${s.n}.title`} defaultValue={s.title}
-                className="font-display mt-4 block text-3xl font-semibold sm:text-4xl" />
+                className="font-display mt-3 block text-2xl font-semibold sm:mt-4 sm:text-3xl md:text-4xl" />
               <EditableContent as="p" multiline contentKey={`welcome.step.${s.n}.body`} defaultValue={s.body}
-                className="mt-3 block text-lg text-muted-foreground sm:text-xl" />
+                className="mt-2 block text-base text-muted-foreground sm:mt-3 sm:text-lg md:text-xl" />
             </div>
           ))}
         </div>
@@ -580,18 +581,18 @@ function HowItWorks() {
 function ClosingCta() {
   return (
     <section id="how" className="relative border-t border-white/10">
-      <div className="relative mx-auto max-w-4xl px-5 py-28 text-center sm:px-8 lg:py-32">
+      <div className="relative mx-auto max-w-4xl px-4 py-20 text-center sm:px-8 sm:py-28 lg:py-32">
         <CardEditBadge />
         <EditableContent as="p" contentKey="welcome.closing.eyebrow" defaultValue="Ready?"
-          className="block text-sm font-medium uppercase tracking-[0.25em] text-muted-foreground" />
+          className="block text-xs font-medium uppercase tracking-[0.25em] text-muted-foreground sm:text-sm" />
         <EditableContent as="h2" contentKey="welcome.closing.title" defaultValue="Your next prompt could be a hit."
           multiline
-          className="font-display mt-5 block text-7xl font-semibold leading-[0.95] tracking-[-0.045em] sm:text-8xl md:text-9xl" />
+          className="font-display mt-4 block text-balance text-5xl font-semibold leading-[0.95] tracking-[-0.045em] sm:mt-5 sm:text-7xl md:text-8xl lg:text-9xl" />
         <EditableContent as="p" multiline contentKey="welcome.closing.body"
           defaultValue="Sign in. Type the idea. Pick the vibe. Get the cover and the song. 🎉"
-          className="mx-auto mt-8 block max-w-2xl text-2xl text-muted-foreground sm:text-3xl" />
+          className="mx-auto mt-6 block max-w-2xl text-lg text-muted-foreground sm:mt-8 sm:text-2xl md:text-3xl" />
 
-        <div className="mx-auto mt-12 max-w-2xl">
+        <div className="mx-auto mt-10 max-w-2xl sm:mt-12">
           <AuthButtons size="xl" />
         </div>
       </div>
