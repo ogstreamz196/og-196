@@ -139,6 +139,15 @@ export function CreateSongDialog({ flow, onClose, onSubmit }: CreateSongDialogPr
             customPlaceholder="Add your own style…"
           />
 
+          <ChipSection
+            label="Language"
+            hint="What language should the lyrics be in?"
+            options={LANGUAGES}
+            value={state.language}
+            onChange={(v) => update("language", v)}
+            customPlaceholder="Add another language…"
+          />
+
           {(flow === "memory" || flow === "tribute") && (
             <ChipSection
               label="Who it's for"
