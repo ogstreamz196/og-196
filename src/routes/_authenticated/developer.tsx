@@ -25,21 +25,6 @@ export const Route = createFileRoute("/_authenticated/developer")({
   component: DeveloperCenter,
 });
 
-const TOKEN_COST = 25;
-const WIDGET_CDN = "https://cdn.ogstreamz.co.uk/widget.js";
-
-interface BotToken {
-  id: string;
-  token_string: string;
-  status: string;
-  allowed_domain: string | null;
-  created_at: string;
-}
-
-function mask(token: string) {
-  if (token.length < 12) return token;
-  return `${token.slice(0, 8)}${"•".repeat(10)}${token.slice(-4)}`;
-}
 
 function DeveloperCenter() {
   const { isAdmin } = useRole();
