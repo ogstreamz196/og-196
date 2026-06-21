@@ -536,12 +536,15 @@ function HowItWorks() {
               className="group relative rounded-3xl border-2 border-white/12 bg-card/70 p-8 text-center backdrop-blur-xl transition hover:-translate-y-1 hover:border-primary/40"
               style={{ animationDelay: `${i * 120}ms` }}
             >
+              <CardEditBadge />
               <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-gradient-brand text-4xl font-black text-primary-foreground shadow-glow wc-bounce-soft">
                 {s.n}
               </div>
               <div className="mt-5 text-6xl">{s.emoji}</div>
-              <h3 className="font-display mt-4 text-3xl font-semibold sm:text-4xl">{s.title}</h3>
-              <p className="mt-3 text-lg text-muted-foreground sm:text-xl">{s.body}</p>
+              <EditableContent as="h3" contentKey={`welcome.step.${s.n}.title`} defaultValue={s.title}
+                className="font-display mt-4 block text-3xl font-semibold sm:text-4xl" />
+              <EditableContent as="p" multiline contentKey={`welcome.step.${s.n}.body`} defaultValue={s.body}
+                className="mt-3 block text-lg text-muted-foreground sm:text-xl" />
             </div>
           ))}
         </div>
