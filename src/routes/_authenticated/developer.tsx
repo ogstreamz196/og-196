@@ -48,12 +48,9 @@ function DeveloperCenter() {
     <DashboardShell title="Developer Center">
       <div className="mx-auto max-w-6xl">
         <Tabs defaultValue="settings" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="settings" className="gap-2">
               <SettingsIcon className="h-4 w-4" /> Settings
-            </TabsTrigger>
-            <TabsTrigger value="tokens" className="gap-2">
-              <Code2 className="h-4 w-4" /> OG Bot Tokens
             </TabsTrigger>
             <TabsTrigger value="users" disabled={!isAdmin} className="gap-2">
               <UsersIcon className="h-4 w-4" /> Manage Users
@@ -63,10 +60,6 @@ function DeveloperCenter() {
 
           <TabsContent value="settings" className="space-y-6">
             <SettingsTab />
-          </TabsContent>
-
-          <TabsContent value="tokens" className="space-y-6">
-            <TokensTab />
           </TabsContent>
 
           <TabsContent value="users" className="space-y-6">
