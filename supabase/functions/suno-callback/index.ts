@@ -158,6 +158,8 @@ Deno.serve(async (req) => {
           status: "processing",
           suno_task_id: parentSong.suno_task_id,
           portal_id: parentSong.portal_id ?? null,
+          is_variation: true,
+          revealed: false,
         }).select("id").single();
         if (sibErr) throw sibErr;
         targetId = sib.id;
