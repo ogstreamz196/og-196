@@ -198,9 +198,3 @@ function StatCard({
     </div>
   );
 }
-
-function formatRef(ref: string | null): string {
-  if (!ref) return "Referral cashback";
-  const burn = ref.match(/burn:(\d+)/)?.[1];
-  return burn ? `Referee burned ${burn} coins` : "Referral cashback";
-}
