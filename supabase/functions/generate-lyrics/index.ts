@@ -6,6 +6,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!;
 const GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") ?? "gemini-2.5-flash";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const SUPABASE_ANON_KEY =
   Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ?? Deno.env.get("SUPABASE_ANON_KEY")!;
 
@@ -14,6 +15,14 @@ const cors = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
+
+async function getSetting(admin: ReturnType<typeof createClient>, key: string, fallback: number): Promise<number> {
+  const { data } = await admin.from("app_settings").select("value").eq("key", key).maybeSingle();
+  const v = (data as { value?: unknown } | null)?.value;
+  if (typeof v === "number") return v;
+  if (typeof v === "string" && Number.isFinite(Number(v))) return Number(v);
+  return fallback;
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
@@ -39,6 +48,22 @@ Deno.serve(async (req) => {
       return json({ error: "Provide a song name or description" }, 400);
     }
 
+    const songId = body.song_id ? String(body.song_id) : null;
+
+    // Charge coins — same as every other generation message.
+    const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
+    const coinCost = await getSetting(admin, "coins_per_lyrics_generation", 1);
+
+    const reference = songId ?? `lyrics:${crypto.randomUUID()}`;
+    const { data: balance, error: deductErr } = await admin.rpc("deduct_coins", {
+      p_user: user.id,
+      p_amount: coinCost,
+      p_reference: reference,
+    });
+    if (deductErr) {
+      return json({ error: "Insufficient coins", code: "insufficient_coins" }, 402);
+    }
+
     const systemPrompt =
       `You are a professional songwriter. Write original song lyrics in ${language}. ` +
       `Use clear section markers like [Verse 1], [Chorus], [Verse 2], [Bridge], [Outro]. ` +
@@ -62,8 +87,15 @@ Deno.serve(async (req) => {
       }),
     });
 
-    if (res.status === 429) return json({ error: "Gemini rate limit, try again shortly" }, 429);
     if (!res.ok) {
+      // Refund on failure
+      await admin.from("coin_transactions").insert({
+        user_id: user.id, amount: coinCost, type: "refund", reference,
+      });
+      const { data: prof } = await admin.from("profiles").select("coin_balance").eq("id", user.id).single();
+      await admin.from("profiles").update({ coin_balance: ((prof as { coin_balance?: number } | null)?.coin_balance ?? 0) + coinCost }).eq("id", user.id);
+
+      if (res.status === 429) return json({ error: "Gemini rate limit, try again shortly" }, 429);
       const txt = await res.text();
       console.error("Gemini API error", res.status, txt);
       return json({ error: "Lyrics generation failed", detail: txt.slice(0, 500) }, 502);
@@ -76,7 +108,12 @@ Deno.serve(async (req) => {
         .join("")
         .trim() ?? "";
 
-    return json({ lyrics });
+    // If a song_id is provided and the caller owns it, persist the lyrics
+    if (songId) {
+      await admin.from("songs").update({ lyrics }).eq("id", songId).eq("user_id", user.id);
+    }
+
+    return json({ lyrics, coin_balance: balance, coin_cost: coinCost });
   } catch (e) {
     console.error(e);
     return json({ error: (e as Error).message }, 500);
