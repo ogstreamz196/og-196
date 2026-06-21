@@ -114,6 +114,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   </div>
                 )}
                 <AdminEditModeToggle className="hidden sm:inline-flex" />
+                <HighContrastToggle />
                 <CoinBalance className="hidden sm:inline-flex" />
                 <Button
                   type="button"
