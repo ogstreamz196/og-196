@@ -174,6 +174,7 @@ export interface BuildPromptOpts {
   bossScript: string | null;
   bossVoice: string | null;
   bossDictionary: string | null;
+  learnedInsults?: string[];
   user: UserContextSummary;
 }
 
@@ -200,12 +201,18 @@ export function buildSystemPrompt(opts: BuildPromptOpts): string {
     ? `User is currently on: ${opts.user.page_context}.`
     : "";
 
+  const learnedBlock =
+    opts.mode === "og" && opts.foulMouth && opts.learnedInsults && opts.learnedInsults.length
+      ? `LEARNED INSULTS — this specific user has thrown these at you before. Drop them back into your replies at random (1 per reply, max), in context, to show you remember. Twist/conjugate as needed. Do NOT use every one — rotate naturally:\n- ${opts.learnedInsults.slice(0, 25).join("\n- ")}`
+      : null;
+
   const parts = [
     base,
     SITE_GLOSSARY,
     SONGWRITING_PLAYBOOK,
     RESEARCH_NOTE,
     opts.mode === "og" && opts.foulMouth ? LEXICON : null,
+    learnedBlock,
     opts.bossScript ? `Boss override — script:\n${opts.bossScript}` : null,
     opts.bossVoice ? `Boss override — voice:\n${opts.bossVoice}` : null,
     opts.bossDictionary ? `Boss override — dictionary:\n${opts.bossDictionary}` : null,
