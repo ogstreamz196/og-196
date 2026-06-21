@@ -100,6 +100,17 @@ export function OgChat({
   const setFoulMouth = useSetFoulMouth();
   const { mode, toggle: toggleMode } = useOgMode();
   const { isVip } = useRole();
+  const transcribe = useServerFn(transcribeOgAudio);
+
+  // Attachment + mic state
+  const [attachment, setAttachment] = useState<{ dataUrl: string; name: string } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [recording, setRecording] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const recordChunksRef = useRef<Blob[]>([]);
+
+
 
 
   useEffect(() => {
