@@ -209,7 +209,7 @@ function ReferralsPage() {
                 {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 {copied ? "Copied" : "Copy"}
               </Button>
-              <Button variant="secondary" onClick={copy} className="gap-2">
+              <Button variant="secondary" onClick={inviteAgain} className="gap-2">
                 <Gift className="h-4 w-4" /> Invite again
               </Button>
               <Button variant="outline" onClick={share} className="gap-2">
