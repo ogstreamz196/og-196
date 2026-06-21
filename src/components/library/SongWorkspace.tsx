@@ -279,8 +279,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
         },
       });
       if (error) {
-        const msg = (error as { context?: { error?: string } })?.context?.error || error.message;
-        toast.error(msg || "Could not start generation");
+        toast.error(invokeError(error, "Could not start generation"));
         return;
       }
       toast.success(`Generating · -${previewCost} coins`);
