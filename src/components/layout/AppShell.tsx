@@ -71,7 +71,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     <AdminEditModeProvider>
       <SidebarProvider>
         <WelcomeBackdrop />
-        <div className="relative flex min-h-screen w-full bg-background/80 text-foreground">
+        <div className="relative flex min-h-dvh w-full bg-background/80 text-foreground">
           <AppSidebar />
 
           <div className="flex min-w-0 flex-1 flex-col">

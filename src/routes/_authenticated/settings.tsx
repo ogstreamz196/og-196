@@ -201,12 +201,12 @@ function SettingsPage() {
                 <div className="flex gap-2">
                   <Input id="adj-bal" type="number" min={1} value={adjust}
                     onChange={(e) => setAdjust(e.target.value)} placeholder="0" />
-                  <Button variant="outline" size="icon"
+                  <Button variant="outline" size="icon" aria-label="Add coins"
                     onClick={() => adjustCoins.mutate(Number.parseInt(adjust, 10))}
                     disabled={!adjust || adjustCoins.isPending}>
                     <Plus className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="icon"
+                  <Button variant="outline" size="icon" aria-label="Subtract coins"
                     onClick={() => adjustCoins.mutate(-Number.parseInt(adjust, 10))}
                     disabled={!adjust || adjustCoins.isPending}>
                     <Minus className="h-4 w-4" />
@@ -348,7 +348,7 @@ function TelegramConnectSection({ userId }: { userId: string }) {
         </Label>
         <div className="mt-1 flex items-center gap-2">
           <Input readOnly value={link} className="font-mono text-xs" />
-          <Button type="button" variant="outline" size="icon" onClick={copy} title="Copy link">
+          <Button type="button" variant="outline" size="icon" onClick={copy} title="Copy link" aria-label="Copy connect link">
             <Copy className="h-4 w-4" />
           </Button>
         </div>
