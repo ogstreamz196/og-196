@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Crown, Bot, ShieldCheck, Coins, Plus, Minus, LogOut, UserCog, Mail, Fingerprint, KeyRound } from "lucide-react";
+import { Loader2, Crown, Bot, ShieldCheck, Coins, Plus, Minus, LogOut, UserCog, Mail, Fingerprint, KeyRound, Send, Copy, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
@@ -270,6 +270,9 @@ function SettingsPage() {
           </section>
         )}
 
+        {/* Connect Telegram */}
+        <TelegramConnectSection userId={user?.id ?? ""} />
+
 
         {/* Session */}
         <section className="rounded-2xl border border-border bg-card p-6 shadow-card flex items-center justify-between">
@@ -304,6 +307,70 @@ function RoleRow({ icon, title, description, checked, pending, onChange }: {
         <Switch checked={checked} disabled={pending} onCheckedChange={onChange} />
       </div>
     </div>
+  );
+}
+
+const TELEGRAM_BOT_USERNAME = "OGStreamzBot";
+
+function TelegramConnectSection({ userId }: { userId: string }) {
+  const token = userId ? userId.replace(/-/g, "").slice(0, 24) : "";
+  const link = userId
+    ? `https://t.me/${TELEGRAM_BOT_USERNAME}?start=${token}`
+    : "";
+
+  const copy = async () => {
+    if (!link) return;
+    try {
+      await navigator.clipboard.writeText(link);
+      toast.success("Link copied — paste it into Telegram");
+    } catch {
+      toast.error("Couldn't copy. Long-press to copy instead.");
+    }
+  };
+
+  return (
+    <section className="rounded-2xl border border-border bg-card p-6 shadow-card">
+      <div className="flex items-start gap-3">
+        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/15 text-primary">
+          <Send className="h-5 w-5" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <h2 className="font-semibold">Connect Telegram</h2>
+          <p className="text-xs text-muted-foreground">
+            Chat with OG Bot from Telegram about literally anything — random shit, lyrics, life advice, 3am thoughts. Tap the button, hit Start, you're in.
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-xl border border-dashed border-border bg-background/40 p-3">
+        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          Your personal connect link
+        </Label>
+        <div className="mt-1 flex items-center gap-2">
+          <Input readOnly value={link} className="font-mono text-xs" />
+          <Button type="button" variant="outline" size="icon" onClick={copy} title="Copy link">
+            <Copy className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+        <Button
+          asChild
+          disabled={!link}
+          className="bg-[#229ED9] font-semibold text-white hover:bg-[#229ED9]/90"
+        >
+          <a href={link || "#"} target="_blank" rel="noreferrer">
+            <Send className="mr-2 h-4 w-4" /> Open in Telegram
+          </a>
+        </Button>
+        <Button asChild variant="outline">
+          <a href={`https://t.me/${TELEGRAM_BOT_USERNAME}`} target="_blank" rel="noreferrer">
+            <ExternalLink className="mr-2 h-4 w-4" /> Find @{TELEGRAM_BOT_USERNAME}
+          </a>
+        </Button>
+      </div>
+    </section>
   );
 }
 

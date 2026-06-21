@@ -8,7 +8,11 @@ import {
   Settings,
   Code2,
   Shield,
+  LogOut,
 } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
@@ -49,6 +53,14 @@ export function AppSidebar() {
   const { setOpenMobile, isMobile } = useSidebar();
   const { user } = useAuth();
   const { isAdmin } = useRole();
+  const qc = useQueryClient();
+
+  const handleSignOut = async () => {
+    await qc.cancelQueries();
+    qc.clear();
+    await supabase.auth.signOut();
+    window.location.replace("/auth");
+  };
 
   const isActive = (url: string) =>
     url === "/" ? pathname === "/" : pathname === url || pathname.startsWith(url + "/");
@@ -151,13 +163,24 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border">
-        <div className="flex min-w-0 items-center gap-2 px-2 py-2 text-xs text-muted-foreground">
-          <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-muted text-[10px] font-bold uppercase">
-            {user?.email?.[0] ?? "U"}
+        <div className="flex min-w-0 flex-col gap-2 px-2 py-2">
+          <div className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
+            <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-muted text-[10px] font-bold uppercase">
+              {user?.email?.[0] ?? "U"}
+            </div>
+            <span className="truncate">{user?.email ?? "Signed in"}</span>
           </div>
-          <span className="truncate">{user?.email ?? "Signed in"}</span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSignOut}
+            className="w-full justify-center gap-2 text-xs font-semibold"
+          >
+            <LogOut className="h-3.5 w-3.5" /> Sign out
+          </Button>
         </div>
       </SidebarFooter>
+
       <SidebarRail />
     </Sidebar>
   );
