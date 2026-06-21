@@ -157,7 +157,7 @@ export function OgFloatingWidget() {
             mode · <span className="text-primary uppercase">{mode}</span>
           </p>
         </div>
-        <Button asChild variant="ghost" size="icon" className="h-7 w-7" title="Open full Messenger">
+        <Button asChild variant="ghost" size="icon" className="h-7 w-7" title="Open full Messenger" aria-label="Open full Messenger">
           <Link to="/messenger" onClick={() => setOpen(false)}>
             <ExternalLink className="h-3.5 w-3.5" />
           </Link>
@@ -169,6 +169,7 @@ export function OgFloatingWidget() {
             className="h-7 w-7"
             onClick={() => setCompact((c) => !c)}
             title={compact ? "Expand" : "Compact"}
+            aria-label={compact ? "Expand widget" : "Compact widget"}
           >
             {compact ? <Maximize2 className="h-3.5 w-3.5" /> : <Minimize2 className="h-3.5 w-3.5" />}
           </Button>
@@ -179,6 +180,7 @@ export function OgFloatingWidget() {
           className="h-7 w-7"
           onClick={() => setOpen(false)}
           title="Close"
+          aria-label="Close widget"
         >
           <X className="h-4 w-4" />
         </Button>

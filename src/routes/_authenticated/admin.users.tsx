@@ -330,7 +330,7 @@ function UserRow({ user, roles }: { user: ProfileRow; roles: string[] }) {
           <Tooltip>
             <TooltipTrigger asChild>
               <Link to="/admin/users/$userId" params={{ userId: user.id }}>
-                <Button size="icon" variant="ghost" className="h-8 w-8">
+                <Button size="icon" variant="ghost" className="h-8 w-8" aria-label="Open full user settings">
                   <ExternalLink className="h-3.5 w-3.5" />
                 </Button>
               </Link>
@@ -417,7 +417,7 @@ function CoinsPopover({ userId, balance }: { userId: string; balance: number }) 
       <Tooltip>
         <TooltipTrigger asChild>
           <PopoverTrigger asChild>
-            <Button size="icon" variant="ghost" className="h-8 w-8">
+            <Button size="icon" variant="ghost" className="h-8 w-8" aria-label="Grant or remove coins">
               <Coins className="h-3.5 w-3.5 text-coin" />
             </Button>
           </PopoverTrigger>
