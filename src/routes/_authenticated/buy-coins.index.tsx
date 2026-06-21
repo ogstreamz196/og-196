@@ -64,7 +64,11 @@ function BuyCoinsPage() {
 
   const pickSelection = (s: Selection) => {
     const stored: StoredSelection =
-      s.type === "vip" ? { type: "vip" } : { type: "coins", bundleId: s.pack.bundleId };
+      s.type === "vip"
+        ? { type: "vip" }
+        : s.type === "custom"
+        ? { type: "custom", units: s.units }
+        : { type: "coins", bundleId: s.pack.bundleId };
     try { sessionStorage.setItem(SELECTION_STORAGE_KEY, JSON.stringify(stored)); } catch { /* ignore */ }
     setSelected(s);
     setStage("confirm");
@@ -84,14 +88,31 @@ function BuyCoinsPage() {
 
   if (selected) {
     const isVipFlow = selected.type === "vip";
-    const returnUrl =
-      selected.type === "coins"
-        ? `${window.location.origin}/buy-coins/return?session_id={CHECKOUT_SESSION_ID}&pack=${selected.pack.bundleId}`
-        : `${window.location.origin}/buy-coins/return?session_id={CHECKOUT_SESSION_ID}&pack=${VIP_PLAN.bundleId}`;
-    const headline = isVipFlow ? "Join OG VIP" : `Buy ${selected.pack.coins} OG Coins`;
-    const totalCents = isVipFlow ? VIP_PLAN.priceCents : selected.pack.priceCents;
-    const perCoin = !isVipFlow ? selected.pack.priceCents / 100 / selected.pack.coins : 0;
-    const savingsPct = !isVipFlow && basePerCoin > 0
+    const isCustomFlow = selected.type === "custom";
+    const coinsForOrder = isVipFlow
+      ? 0
+      : isCustomFlow
+      ? selected.units * CUSTOM_COIN_UNIT.coins
+      : selected.pack.coins;
+    const labelForOrder = isVipFlow
+      ? VIP_PLAN.label
+      : isCustomFlow
+      ? `Custom · ${coinsForOrder} OG Coins`
+      : `${selected.pack.coins} OG Coins · ${selected.pack.label}`;
+    const totalCents = isVipFlow
+      ? VIP_PLAN.priceCents
+      : isCustomFlow
+      ? selected.units * CUSTOM_COIN_UNIT.priceCents
+      : selected.pack.priceCents;
+    const returnUrlPack = isVipFlow
+      ? VIP_PLAN.bundleId
+      : isCustomFlow
+      ? "coins_custom"
+      : selected.pack.bundleId;
+    const returnUrl = `${window.location.origin}/buy-coins/return?session_id={CHECKOUT_SESSION_ID}&pack=${returnUrlPack}`;
+    const headline = isVipFlow ? "Join OG VIP" : `Buy ${coinsForOrder} OG Coins`;
+    const perCoin = !isVipFlow && coinsForOrder > 0 ? totalCents / 100 / coinsForOrder : 0;
+    const savingsPct = !isVipFlow && basePerCoin > 0 && perCoin > 0
       ? Math.round((1 - perCoin / basePerCoin) * 100)
       : 0;
 
