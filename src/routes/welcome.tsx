@@ -239,10 +239,17 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
   }
 
   return (
-    <div className="w-full space-y-4">
-      <p className="text-center text-sm font-bold uppercase tracking-[0.2em] text-foreground/80">
-        Tap your device to continue
-      </p>
+    <div className="w-full space-y-5">
+      <div className="relative mx-auto max-w-xl overflow-hidden rounded-3xl border-2 border-primary/50 bg-linear-to-br from-primary/25 via-primary/10 to-transparent px-5 py-5 text-center shadow-[0_12px_40px_-12px_rgba(59,130,246,0.55)]">
+        <div className="pointer-events-none absolute inset-x-0 -top-1/2 h-full animate-pulse bg-linear-to-b from-primary/20 to-transparent blur-2xl" />
+        <p className="relative font-display text-2xl font-black uppercase tracking-[0.08em] text-foreground sm:text-3xl md:text-4xl">
+          👇 Tap Your Device Below
+        </p>
+        <p className="relative mt-1 text-sm font-semibold uppercase tracking-[0.18em] text-foreground/80 sm:text-base">
+          Pick the one you're using to sign in
+        </p>
+      </div>
+
 
       <div className="relative overflow-hidden rounded-[28px] border border-white/15 bg-white/[0.04] p-3 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)] backdrop-blur-xl sm:p-5">
         <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-white/[0.06] via-transparent to-transparent" />
