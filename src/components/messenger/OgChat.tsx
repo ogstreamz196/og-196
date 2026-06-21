@@ -533,6 +533,19 @@ export function OgChat({
       </div>
 
 
+      {isOut && user && (
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive sm:px-4">
+          <span className="min-w-0 break-words font-semibold">
+            You're out of OG coins. Don't sweat — your balance resets to 5 tomorrow.
+          </span>
+          <a
+            href="/buy-coins"
+            className="shrink-0 rounded-full border border-destructive/40 bg-destructive/10 px-3 py-1 font-bold uppercase tracking-wide hover:bg-destructive/20"
+          >
+            Top up
+          </a>
+        </div>
+      )}
       <form
         onSubmit={(e) => {
           e.preventDefault();
