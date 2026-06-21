@@ -385,11 +385,19 @@ function Hero() {
           </span>
         </h1>
 
-        <p className="mx-auto mt-6 max-w-4xl text-balance text-lg font-semibold leading-[1.25] text-foreground/90 sm:mt-10 sm:text-3xl sm:leading-[1.15] md:text-4xl lg:text-5xl">
+        <div id="sign-in" className="mx-auto mt-10 max-w-3xl scroll-mt-24 sm:mt-14">
+          <AuthButtons size="xl" />
+          <p className="mt-5 text-center text-base font-bold text-foreground sm:mt-6 sm:text-xl">
+            Free to start — no card required
+          </p>
+        </div>
+
+        <p className="mx-auto mt-10 max-w-4xl text-balance text-lg font-semibold leading-[1.25] text-foreground/90 sm:mt-14 sm:text-3xl sm:leading-[1.15] md:text-4xl lg:text-5xl">
           Type a wild idea, a name, a mood, a memory.
           <br className="hidden sm:block" />
           {" "}Pick rap, afrobeats, pop, drill, heartbreak or party. <span className="inline-block wc-wiggle">🎧</span>
         </p>
+
 
         <AlbumCoverShowcase />
       </div>
@@ -490,12 +498,6 @@ function Pillars() {
   return (
     <section id="studio" className="relative scroll-mt-24">
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-8 sm:py-24 lg:py-32">
-        <div id="sign-in" className="mx-auto mb-12 max-w-3xl scroll-mt-24 sm:mb-16">
-          <AuthButtons size="xl" />
-          <p className="mt-5 text-center text-base font-bold text-foreground sm:mt-6 sm:text-xl">
-            Free to start — no card required
-          </p>
-        </div>
 
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground sm:text-sm">
