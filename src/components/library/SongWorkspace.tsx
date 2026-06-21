@@ -97,8 +97,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
     try {
       const { data, error } = await supabase.functions.invoke("reveal-variation", { body: { song_id: id } });
       if (error) {
-        const msg = (error as { context?: { error?: string } })?.context?.error || error.message;
-        throw new Error(msg);
+        throw new Error(invokeError(error, "Reveal failed"));
       }
       if (!data?.already) toast.success(`Alt take revealed · -${data?.cost ?? variationCost} coins`);
       setVariations((vs) => vs.map((v) => v.id === id ? { ...v, revealed: true } : v));
