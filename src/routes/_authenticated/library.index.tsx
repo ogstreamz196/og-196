@@ -7,9 +7,16 @@ import {
   Sparkles,
   RefreshCw,
   Wand2,
-  Music2,
   Coins,
   Trash2,
+  Languages,
+  Disc3,
+  Smile,
+  Heart,
+  Gauge,
+  Mic2,
+  Download,
+  Music4,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,7 +28,6 @@ import { invokeError } from "@/lib/invoke-error";
 import { SongCard, type Song } from "@/components/SongCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -75,23 +81,47 @@ const POOLS: Record<Category, string[]> = {
   ],
 };
 
-const LABEL: Record<Category, string> = {
-  language: "Language",
-  genre: "Genre",
-  mood: "Mood",
-  theme: "Theme",
-  tempo: "Tempo",
+const META: Record<
+  Category,
+  { label: string; placeholder: string; icon: typeof Languages; gradient: string; emoji: string }
+> = {
+  language: {
+    label: "Language",
+    placeholder: "Pick a language",
+    icon: Languages,
+    gradient: "from-sky-500/40 via-cyan-500/20 to-transparent",
+    emoji: "🌍",
+  },
+  genre: {
+    label: "Genre",
+    placeholder: "Pick a genre",
+    icon: Disc3,
+    gradient: "from-fuchsia-500/40 via-purple-500/20 to-transparent",
+    emoji: "🎧",
+  },
+  mood: {
+    label: "Mood",
+    placeholder: "Pick a mood",
+    icon: Smile,
+    gradient: "from-amber-500/40 via-orange-500/20 to-transparent",
+    emoji: "✨",
+  },
+  theme: {
+    label: "Theme",
+    placeholder: "Pick a theme",
+    icon: Heart,
+    gradient: "from-rose-500/40 via-pink-500/20 to-transparent",
+    emoji: "💭",
+  },
+  tempo: {
+    label: "Tempo",
+    placeholder: "Pick a tempo",
+    icon: Gauge,
+    gradient: "from-emerald-500/40 via-teal-500/20 to-transparent",
+    emoji: "⚡",
+  },
 };
 
-const PLACEHOLDER: Record<Category, string> = {
-  language: "Pick a language",
-  genre: "Pick a genre",
-  mood: "Pick a mood",
-  theme: "Pick a theme",
-  tempo: "Pick a tempo",
-};
-
-// Light affinity bias so contextual replacements feel coherent.
 const GENRE_MOOD_BIAS: Record<string, string[]> = {
   Drill: ["Dark", "Angry", "Confident", "Rebellious"],
   Trap: ["Hype", "Confident", "Dark", "Triumphant"],
@@ -123,9 +153,6 @@ function pickFresh(
 ): string[] {
   const pool = POOLS[cat].filter((v) => !exclude.has(v));
   if (pool.length === 0) return [];
-
-  // Smart bias: when picking mood replacements and a genre is set,
-  // prefer moods from the genre's affinity list.
   if (cat === "mood" && context.genre && GENRE_MOOD_BIAS[context.genre]) {
     const preferred = GENRE_MOOD_BIAS[context.genre].filter((v) => !exclude.has(v));
     const rest = pool.filter((v) => !preferred.includes(v));
@@ -203,6 +230,10 @@ function LibraryPage() {
     (selections.mood ? 1 : 0) +
     (selections.theme ? 1 : 0) +
     (selections.tempo ? 1 : 0);
+
+  const totalFilled =
+    (title.trim() ? 1 : 0) + (selections.language ? 1 : 0) + filledExtras;
+  const progress = Math.min(100, Math.round((totalFilled / 6) * 100));
 
   const canGenerateLyrics =
     !!title.trim() && !!selections.language && filledExtras >= 1 && balance >= lyricsCost;
@@ -312,7 +343,6 @@ function LibraryPage() {
     }
   }
 
-  // Past songs list
   const library = useQuery({
     queryKey: ["library", user?.id],
     enabled: !!user,
@@ -360,37 +390,85 @@ function LibraryPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-10">
-      {/* Welcome */}
-      <header className="space-y-2">
-        <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Music Hub</p>
-        <h1 className="font-display text-3xl font-light leading-[1.05] tracking-[-0.02em] sm:text-5xl">
-          Welcome back, <em className="italic text-gradient-brand">{firstName}</em>
-        </h1>
-        <p className="max-w-xl text-sm leading-relaxed text-muted-foreground">
-          Let's create your lyrics. Tap a vibe in any row, hit refresh for more, or pick from the
-          dropdown.
-        </p>
-        <div className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-muted-foreground">
-          <Coins className="h-3.5 w-3.5 text-primary" /> {balance} coins
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-1 pb-12 sm:px-0">
+      {/* Hero */}
+      <header className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-primary/25 via-fuchsia-500/15 to-background p-6 shadow-card sm:p-10">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-primary/30 blur-3xl"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -bottom-24 -left-10 h-72 w-72 rounded-full bg-fuchsia-500/20 blur-3xl"
+        />
+        <div className="relative grid gap-5 sm:grid-cols-[1fr_auto] sm:items-end">
+          <div className="min-w-0 space-y-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground backdrop-blur">
+              <Music4 className="h-3 w-3 text-primary" /> Music Hub
+            </div>
+            <h1 className="font-display text-4xl font-black leading-[0.95] tracking-[-0.03em] sm:text-6xl">
+              Yo <em className="not-italic text-gradient-brand">{firstName}</em>,
+              <br className="hidden sm:block" /> let's cook a banger.
+            </h1>
+            <p className="max-w-md text-sm leading-relaxed text-muted-foreground sm:text-base">
+              Tap a vibe, hit refresh, mix &amp; match. We'll write the lyrics and Suno makes
+              the sound.
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-2 self-start sm:self-end">
+            <div className="inline-flex items-center gap-2 rounded-2xl border border-primary/30 bg-background/60 px-4 py-2.5 shadow-glow backdrop-blur">
+              <Coins className="h-5 w-5 text-primary" />
+              <div className="leading-tight">
+                <div className="text-base font-black">{balance}</div>
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  OG coins
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Progress */}
+        <div className="relative mt-6 space-y-1.5">
+          <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+            <span>Song recipe</span>
+            <span>{totalFilled}/6 set</span>
+          </div>
+          <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+            <div
+              className="h-full rounded-full bg-gradient-brand transition-all duration-500"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
         </div>
       </header>
 
-      {/* Composer */}
-      <section className="space-y-5 rounded-2xl border border-white/10 bg-card/60 p-5 shadow-card backdrop-blur-xl sm:p-7">
-        <div className="grid gap-3 sm:grid-cols-[160px_1fr] sm:items-center">
-          <Label htmlFor="song-title" className="text-sm font-medium">Title</Label>
-          <Input
-            id="song-title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Name this song"
-            maxLength={120}
-          />
+      {/* Title card */}
+      <section className="rounded-3xl border border-white/10 bg-card/60 p-5 shadow-card backdrop-blur-xl sm:p-7">
+        <div className="flex items-center gap-3">
+          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-primary/30 to-fuchsia-500/20 text-xl">
+            🎙️
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+              Track title
+            </div>
+            <Input
+              id="song-title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Name this song..."
+              maxLength={120}
+              className="border-0 bg-transparent px-0 text-xl font-bold focus-visible:ring-0 sm:text-2xl"
+            />
+          </div>
         </div>
+      </section>
 
+      {/* Category bento */}
+      <section className="grid gap-4 sm:grid-cols-2">
         {(["language", "genre", "mood", "theme", "tempo"] as Category[]).map((cat) => (
-          <CategoryRow
+          <CategoryCard
             key={cat}
             cat={cat}
             value={selections[cat]}
@@ -401,69 +479,98 @@ function LibraryPage() {
           />
         ))}
 
-        <div className="flex flex-wrap items-center gap-3 pt-2">
-          <Button
-            onClick={generateLyrics}
-            disabled={!canGenerateLyrics || genLyrics}
-            size="lg"
-            className="gap-2 bg-gradient-brand text-primary-foreground shadow-glow"
-          >
-            {genLyrics ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Sparkles className="h-4 w-4" />
-            )}
-            {lyrics ? "Regenerate lyrics" : "Generate lyrics"} · -{lyricsCost}
-          </Button>
-          {!canGenerateLyrics && !lyrics && (
-            <p className="text-xs text-muted-foreground">
-              Add a title, pick a language, and at least one more vibe to start.
-            </p>
-          )}
-        </div>
-
-        {lyrics && (
-          <div className="space-y-4 rounded-xl border border-primary/30 bg-background/40 p-4">
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-sm font-semibold text-primary">Your lyrics</p>
-              <Button variant="ghost" size="sm" onClick={generateLyrics} disabled={genLyrics}>
-                <RefreshCw className={`h-3.5 w-3.5 ${genLyrics ? "animate-spin" : ""}`} />
-                New version
-              </Button>
-            </div>
-            <Textarea
-              value={lyrics}
-              onChange={(e) => setLyrics(e.target.value)}
-              className="min-h-[280px] font-mono text-sm leading-relaxed"
-            />
-            <div className="flex flex-wrap items-center gap-3">
-              <Button
-                onClick={generateSong}
-                disabled={genSong || balance < previewCost}
-                size="lg"
-                className="gap-2"
-              >
-                {genSong ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Wand2 className="h-4 w-4" />
-                )}
-                Generate my song · -{previewCost}
-              </Button>
-              <p className="text-xs text-muted-foreground">
-                Suno builds a compressed sample. Download the full track for{" "}
-                <span className="font-semibold text-foreground">{downloadCost} OG coins</span>.
+        {/* CTA card matches grid */}
+        <div className="relative overflow-hidden rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/25 via-fuchsia-500/15 to-background p-5 shadow-glow sm:p-6">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/30 blur-3xl"
+          />
+          <div className="relative flex h-full flex-col justify-between gap-4">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em]">
+                <Sparkles className="h-3 w-3 text-primary" /> Step 1
+              </div>
+              <h3 className="mt-3 font-display text-2xl font-black leading-tight tracking-tight">
+                Write the lyrics
+              </h3>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Needs a title, language &amp; one more vibe.
               </p>
             </div>
+            <Button
+              onClick={generateLyrics}
+              disabled={!canGenerateLyrics || genLyrics}
+              size="lg"
+              className="w-full gap-2 bg-gradient-brand text-primary-foreground shadow-glow"
+            >
+              {genLyrics ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="h-4 w-4" />
+              )}
+              {lyrics ? "Regenerate" : "Generate lyrics"} · -{lyricsCost}
+            </Button>
           </div>
-        )}
+        </div>
       </section>
+
+      {/* Lyrics result */}
+      {lyrics && (
+        <section className="space-y-4 rounded-3xl border border-primary/30 bg-card/60 p-5 shadow-glow backdrop-blur-xl sm:p-7">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary/20 text-primary">
+                <Mic2 className="h-4 w-4" />
+              </div>
+              <div>
+                <p className="text-sm font-bold">Your lyrics</p>
+                <p className="text-[11px] text-muted-foreground">Edit freely before generating</p>
+              </div>
+            </div>
+            <Button variant="ghost" size="sm" onClick={generateLyrics} disabled={genLyrics} className="gap-1.5">
+              <RefreshCw className={`h-3.5 w-3.5 ${genLyrics ? "animate-spin" : ""}`} />
+              New version
+            </Button>
+          </div>
+          <Textarea
+            value={lyrics}
+            onChange={(e) => setLyrics(e.target.value)}
+            className="min-h-[280px] resize-y rounded-2xl border-white/10 bg-background/40 font-mono text-sm leading-relaxed"
+          />
+          <div className="grid gap-3 rounded-2xl border border-white/10 bg-background/40 p-4 sm:grid-cols-[1fr_auto] sm:items-center">
+            <div className="min-w-0">
+              <p className="text-sm font-semibold">Ready to hear it?</p>
+              <p className="text-xs text-muted-foreground">
+                Suno builds a compressed sample. Full download:{" "}
+                <span className="inline-flex items-center gap-1 font-bold text-foreground">
+                  <Download className="h-3 w-3" /> {downloadCost} coins
+                </span>
+              </p>
+            </div>
+            <Button
+              onClick={generateSong}
+              disabled={genSong || balance < previewCost}
+              size="lg"
+              className="gap-2 bg-gradient-brand text-primary-foreground shadow-glow"
+            >
+              {genSong ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Wand2 className="h-4 w-4" />
+              )}
+              Generate song · -{previewCost}
+            </Button>
+          </div>
+        </section>
+      )}
 
       {/* Past songs */}
       <section>
-        <h2 className="mb-4 text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-          Your recent songs
-        </h2>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+            Your recent songs
+          </h2>
+        </div>
         {library.isLoading ? (
           <div className="grid place-items-center py-10 text-muted-foreground">
             <Loader2 className="h-5 w-5 animate-spin" />
@@ -498,13 +605,13 @@ function LibraryPage() {
             ))}
           </div>
         ) : (
-          <div className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center">
-            <div className="mx-auto grid h-12 w-12 place-items-center rounded-full border border-border bg-background">
-              <LibraryIcon className="h-5 w-5 text-muted-foreground" />
+          <div className="rounded-3xl border border-dashed border-white/10 bg-card/40 p-10 text-center">
+            <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-primary/20 to-fuchsia-500/10">
+              <LibraryIcon className="h-6 w-6 text-primary" />
             </div>
-            <p className="mt-4 text-sm font-medium">No songs yet</p>
+            <p className="mt-4 text-base font-bold">No songs yet</p>
             <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
-              Fill in the form above and hit Generate my song.
+              Pick your vibes above and tap Generate.
             </p>
           </div>
         )}
@@ -531,7 +638,7 @@ function LibraryPage() {
   );
 }
 
-function CategoryRow({
+function CategoryCard({
   cat,
   value,
   chips,
@@ -546,13 +653,42 @@ function CategoryRow({
   onPickChip: (v: string) => void;
   onRefresh: () => void;
 }) {
+  const meta = META[cat];
+  const Icon = meta.icon;
   return (
-    <div className="grid gap-3 sm:grid-cols-[160px_1fr] sm:items-center">
-      <Label className="text-sm font-medium">{LABEL[cat]}</Label>
-      <div className="flex flex-wrap items-center gap-2">
+    <div className="group relative overflow-hidden rounded-3xl border border-white/10 bg-card/60 p-5 shadow-card backdrop-blur-xl transition-all hover:border-white/20 sm:p-6">
+      <div
+        aria-hidden
+        className={`pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-gradient-to-br ${meta.gradient} blur-2xl`}
+      />
+      <div className="relative space-y-4">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5">
+            <div className="grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-base">
+              <Icon className="h-4 w-4 text-foreground/80" />
+            </div>
+            <div className="leading-tight">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                {meta.emoji} Pick a vibe
+              </div>
+              <div className="text-base font-bold">{meta.label}</div>
+            </div>
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={onRefresh}
+            aria-label={`Refresh ${meta.label}`}
+            className="h-8 w-8 shrink-0 text-muted-foreground hover:text-primary"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+
         <Select value={value ?? ""} onValueChange={onSelect}>
-          <SelectTrigger className="h-9 w-[180px] shrink-0">
-            <SelectValue placeholder={PLACEHOLDER[cat]} />
+          <SelectTrigger className="h-10 w-full rounded-xl">
+            <SelectValue placeholder={meta.placeholder} />
           </SelectTrigger>
           <SelectContent className="max-h-72">
             {POOLS[cat].map((opt) => (
@@ -563,35 +699,26 @@ function CategoryRow({
           </SelectContent>
         </Select>
 
-        {chips.map((chip) => {
-          const active = value === chip;
-          return (
-            <button
-              key={chip}
-              type="button"
-              onClick={() => onPickChip(chip)}
-              className={
-                "rounded-full border px-3 py-1 text-xs font-medium transition-all hover:-translate-y-0.5 " +
-                (active
-                  ? "border-primary bg-primary/20 text-primary shadow-glow"
-                  : "border-white/10 bg-white/5 text-foreground/80 hover:border-primary/40 hover:bg-white/10")
-              }
-            >
-              {chip}
-            </button>
-          );
-        })}
-
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          onClick={onRefresh}
-          aria-label={`Refresh ${LABEL[cat]} suggestions`}
-          className="h-8 w-8 shrink-0 text-muted-foreground hover:text-primary"
-        >
-          <RefreshCw className="h-4 w-4" />
-        </Button>
+        <div className="flex flex-wrap gap-1.5">
+          {chips.map((chip) => {
+            const active = value === chip;
+            return (
+              <button
+                key={chip}
+                type="button"
+                onClick={() => onPickChip(chip)}
+                className={
+                  "rounded-full border px-2.5 py-1 text-xs font-medium transition-all hover:-translate-y-0.5 " +
+                  (active
+                    ? "border-primary bg-primary/20 text-primary shadow-glow"
+                    : "border-white/10 bg-white/5 text-foreground/80 hover:border-primary/40 hover:bg-white/10")
+                }
+              >
+                {chip}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
