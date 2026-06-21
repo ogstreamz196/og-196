@@ -382,6 +382,24 @@ export type Database = {
         }
         Relationships: []
       }
+      referrals: {
+        Row: {
+          created_at: string
+          referee_id: string
+          referrer_id: string
+        }
+        Insert: {
+          created_at?: string
+          referee_id: string
+          referrer_id: string
+        }
+        Update: {
+          created_at?: string
+          referee_id?: string
+          referrer_id?: string
+        }
+        Relationships: []
+      }
       site_content: {
         Row: {
           key: string
@@ -552,6 +570,7 @@ export type Database = {
         Args: { amount: number; boss_notes?: string; target_user_id: string }
         Returns: number
       }
+      claim_referral: { Args: { p_referrer: string }; Returns: boolean }
       create_og_bot_invite: {
         Args: {
           p_claim_expires_at?: string
@@ -576,6 +595,7 @@ export type Database = {
       gen_bot_token_string: { Args: never; Returns: string }
       gen_og_bot_invite_code: { Args: never; Returns: string }
       gen_og_bot_token: { Args: never; Returns: string }
+      get_referral_summary: { Args: never; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
