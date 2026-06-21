@@ -99,14 +99,40 @@ export const chatOgBot = createServerFn({ method: "POST" })
       page_context: data.pageContext || undefined,
     };
 
+    const learnedInsults = (learnedRes.data ?? []).map((r: { phrase: string }) => r.phrase);
+
     const system = buildSystemPrompt({
       mode: data.mode,
       foulMouth,
       bossScript: personaMap.get("og_persona.script") ?? null,
       bossVoice: personaMap.get("og_persona.voice") ?? null,
       bossDictionary: personaMap.get("og_persona.dictionary") ?? null,
+      learnedInsults,
       user: userCtx,
     });
+
+    // 1b. Learn fresh insults from the latest user message (fire-and-forget upsert).
+    let newlyLearned: string[] = [];
+    if (data.mode === "og" && foulMouth) {
+      const latestUser = [...data.messages].reverse().find((m) => m.role === "user");
+      if (latestUser) {
+        const candidates = extractInsults(latestUser.content);
+        if (candidates.length) {
+          newlyLearned = candidates;
+          // Upsert each phrase, bumping uses + last_seen_at.
+          await Promise.all(
+            candidates.map((phrase) =>
+              supabaseAdmin.rpc("og_learn_insult", {
+                p_user_id: context.userId,
+                p_phrase: phrase,
+              }).then((r) => {
+                if (r.error) console.warn("learn insult failed:", r.error.message);
+              }),
+            ),
+          ).catch(() => {});
+        }
+      }
+    }
 
     // 2. Deduct 1 coin atomically BEFORE the AI call to avoid double-spend on retry.
     const { data: newBalance, error: deductErr } = await supabaseAdmin.rpc("deduct_coins", {
