@@ -113,6 +113,10 @@ export function OgChat({
   const recorderRef = useRef<MediaRecorder | null>(null);
   const recordChunksRef = useRef<Blob[]>([]);
 
+  // Anti-flicker skeleton: stays visible at least 600ms once shown so quick
+  // replies don't pop in and out (matches Suno-style "cooking" feel).
+  const [showSkeleton, setShowSkeleton] = useState(false);
+
 
 
 
@@ -169,6 +173,13 @@ export function OgChat({
     }
   }, [seed]);
 
+  // Re-scroll while skeleton is mounted so it stays in view.
+  useEffect(() => {
+    if (showSkeleton) {
+      scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    }
+  }, [showSkeleton]);
+
   const m = useMutation({
     mutationFn: async (args: { history: OgChatMessage[]; attachmentDataUrl?: string }) =>
       chat({
@@ -197,6 +208,18 @@ export function OgChat({
       qc.invalidateQueries({ queryKey: ["profile"] });
     },
   });
+
+  // Skeleton stays visible at least 600ms once shown — kills flicker on
+  // very fast replies and gives a Suno-style "still cooking" feel.
+  useEffect(() => {
+    if (m.isPending) {
+      setShowSkeleton(true);
+      return;
+    }
+    if (!showSkeleton) return;
+    const t = setTimeout(() => setShowSkeleton(false), 600);
+    return () => clearTimeout(t);
+  }, [m.isPending, showSkeleton]);
 
   function sendText(text: string) {
     const t = text.trim();
@@ -484,10 +507,10 @@ export function OgChat({
             </div>
           );
         })}
-        {m.isPending && (
+        {showSkeleton && (
           <div className="flex items-end gap-3">
             <OgAvatar size={40} className="shrink-0 animate-pulse" />
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1.5 min-w-[60%] max-w-[78%]">
               <span className="px-2 text-[10px] font-black uppercase tracking-[0.18em] text-foreground/70">
                 OG Bot
               </span>
@@ -495,6 +518,12 @@ export function OgChat({
                 <span className="h-2 w-2 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]" />
                 <span className="h-2 w-2 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]" />
                 <span className="h-2 w-2 rounded-full bg-primary animate-bounce" />
+              </div>
+              {/* Shimmering bubble skeletons — Suno-style "still cooking" placeholders */}
+              <div className="space-y-1.5">
+                <div className="h-3 w-[85%] rounded-md bg-gradient-to-r from-muted via-muted/40 to-muted bg-[length:200%_100%] animate-[shimmer_1.6s_linear_infinite]" />
+                <div className="h-3 w-[70%] rounded-md bg-gradient-to-r from-muted via-muted/40 to-muted bg-[length:200%_100%] animate-[shimmer_1.6s_linear_infinite]" />
+                <div className="h-3 w-[55%] rounded-md bg-gradient-to-r from-muted via-muted/40 to-muted bg-[length:200%_100%] animate-[shimmer_1.6s_linear_infinite]" />
               </div>
             </div>
           </div>
