@@ -528,45 +528,50 @@ export function SongWorkspace({ song, onSaved }: Props) {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
-                {variations.map((v) => {
-                  const inBasket = basket.has(v.id);
-                  const busy = busyVariation === v.id;
-                  return (
-                    <div key={v.id} className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-card/40 p-3">
-                      <div className="min-w-0">
-                        <div className="truncate text-sm font-medium">
-                          {v.revealed ? (v.title || "Alt take") : "Locked alt take"}
+                <ul className="space-y-2" aria-label="Alternate takes">
+                  {variations.map((v) => {
+                    const inBasket = basket.has(v.id);
+                    const busy = busyVariation === v.id;
+                    return (
+                      <li key={v.id} className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-card/40 p-3">
+                        <div className="min-w-0">
+                          <div className="truncate text-sm font-medium">
+                            {v.revealed ? (v.title || "Alt take") : "Locked alt take"}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {v.revealed ? "Revealed" : `${variationCost} coins to reveal`}
+                          </div>
                         </div>
-                        <div className="text-xs text-muted-foreground">
-                          {v.revealed ? "Revealed" : `${variationCost} coins to reveal`}
-                        </div>
-                      </div>
-                      {v.revealed ? (
-                        <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">Unlocked</span>
-                      ) : (
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant={inBasket ? "default" : "outline"}
-                            onClick={() => toggleBasket(v.id)}
-                            disabled={busy || checkingOut}
-                          >
-                            {inBasket ? <Check className="h-3.5 w-3.5" /> : <Coins className="h-3.5 w-3.5" />}
-                            {inBasket ? "In basket" : "Add"}
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => revealOne(v.id)}
-                            disabled={busy || checkingOut || balance < variationCost}
-                          >
-                            {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-                            Reveal
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                        {v.revealed ? (
+                          <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">Unlocked</span>
+                        ) : (
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant={inBasket ? "default" : "outline"}
+                              onClick={() => toggleBasket(v.id)}
+                              disabled={busy || checkingOut}
+                              aria-pressed={inBasket}
+                            >
+                              {inBasket ? <Check className="h-3.5 w-3.5" aria-hidden="true" /> : <Coins className="h-3.5 w-3.5" aria-hidden="true" />}
+                              {inBasket ? "In basket" : "Add"}
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={() => revealOne(v.id)}
+                              disabled={busy || checkingOut || balance < variationCost}
+                            >
+                              {busy
+                                ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                                : <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />}
+                              Reveal
+                            </Button>
+                          </div>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
                 {basket.size > 0 && (
                   <div className="flex items-center justify-between gap-3 rounded-lg border border-primary/40 bg-primary/5 p-3">
                     <div className="text-sm">
