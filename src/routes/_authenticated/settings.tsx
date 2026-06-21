@@ -22,6 +22,7 @@ export const Route = createFileRoute("/_authenticated/settings")({
 
 function SettingsPage() {
   const { user } = useAuth();
+  const dev = useDevMode();
   const { data: profile, refetch } = useProfile();
   const { isAdmin, isVip, roles } = useRole();
   const qc = useQueryClient();
