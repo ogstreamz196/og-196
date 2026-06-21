@@ -27,6 +27,7 @@ import partyCoverAsset from "@/assets/album-party-anthem.jpg.asset.json";
 import heartbreakCoverAsset from "@/assets/album-heartbreak.jpg.asset.json";
 import drillCoverAsset from "@/assets/album-drill.jpg.asset.json";
 import afrobeatsCoverAsset from "@/assets/album-afrobeats.jpg.asset.json";
+import { WelcomeBackdrop } from "@/components/layout/WelcomeBackdrop";
 
 function OgBotLogo({ className = "h-8 w-8" }: { className?: string }) {
   return (
@@ -261,8 +262,8 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
 function WelcomePage() {
   return (
     <AdminEditModeProvider>
-      <main className="relative min-h-screen overflow-x-hidden text-foreground">
-        <Blobs />
+      <main className="relative min-h-dvh overflow-x-hidden text-foreground">
+        <WelcomeBackdrop />
         <TopNav />
         <Hero />
         <Pillars />
@@ -291,21 +292,8 @@ function CardEditBadge() {
   );
 }
 
-function Blobs() {
-  return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-      <div className="wc-blob absolute -left-32 top-10 h-[420px] w-[420px] rounded-full bg-gradient-brand opacity-40 blur-3xl" />
-      <div
-        className="wc-blob absolute -right-24 top-40 h-[360px] w-[360px] rounded-full bg-gradient-brand-soft opacity-60 blur-3xl"
-        style={{ animationDelay: "-5s" }}
-      />
-      <div
-        className="wc-blob absolute left-1/3 bottom-0 h-[480px] w-[480px] rounded-full bg-gradient-brand opacity-30 blur-3xl"
-        style={{ animationDelay: "-9s" }}
-      />
-    </div>
-  );
-}
+
+
 
 function TopNav() {
   return (
