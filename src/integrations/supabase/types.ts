@@ -554,6 +554,7 @@ export type Database = {
         }
         Returns: string
       }
+      daily_coin_floor: { Args: never; Returns: number }
       deduct_coins: {
         Args: { p_amount: number; p_reference: string; p_user: string }
         Returns: number
