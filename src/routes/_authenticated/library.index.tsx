@@ -434,15 +434,13 @@ function LibraryPage() {
         <div className="relative grid gap-5 sm:grid-cols-[1fr_auto] sm:items-end">
           <div className="min-w-0 space-y-3">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground backdrop-blur">
-              <Music4 className="h-3 w-3 text-primary" /> Music Hub
+              <Music4 className="h-3 w-3 text-primary" /> Create a song
             </div>
             <h1 className="font-display text-4xl font-black leading-[0.95] tracking-[-0.03em] sm:text-6xl">
-              Yo <em className="not-italic text-gradient-brand">{firstName}</em>,
-              <br className="hidden sm:block" /> let's cook a banger.
+              Hey <em className="not-italic text-gradient-brand">{firstName}</em>.
             </h1>
-            <p className="max-w-md text-sm leading-relaxed text-muted-foreground sm:text-base">
-              Tap a vibe, hit refresh, mix &amp; match. We'll write the lyrics and Suno makes
-              the sound.
+            <p className="text-base text-muted-foreground sm:text-lg">
+              Pick your vibe. We'll do the rest.
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2 self-start sm:self-end">
@@ -451,7 +449,7 @@ function LibraryPage() {
               <div className="leading-tight">
                 <div className="text-base font-black">{balance}</div>
                 <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                  OG coins
+                  coins
                 </div>
               </div>
             </div>
@@ -461,8 +459,8 @@ function LibraryPage() {
         {/* Progress */}
         <div className="relative mt-6 space-y-1.5">
           <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-            <span>Song recipe</span>
-            <span>{totalFilled}/6 set</span>
+            <span>Progress</span>
+            <span>{totalFilled}/6</span>
           </div>
           <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
             <div
@@ -521,11 +519,8 @@ function LibraryPage() {
                 <Sparkles className="h-3 w-3 text-primary" /> Step 1
               </div>
               <h3 className="mt-3 font-display text-2xl font-black leading-tight tracking-tight">
-                Write the lyrics
+                Write lyrics
               </h3>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Needs a title, language &amp; one more vibe.
-              </p>
             </div>
             <Button
               onClick={generateLyrics}
@@ -567,16 +562,7 @@ function LibraryPage() {
             onChange={(e) => setLyrics(e.target.value)}
             className="min-h-[280px] resize-y rounded-2xl border-white/10 bg-background/40 font-mono text-sm leading-relaxed"
           />
-          <div className="grid gap-3 rounded-2xl border border-white/10 bg-background/40 p-4 sm:grid-cols-[1fr_auto] sm:items-center">
-            <div className="min-w-0">
-              <p className="text-sm font-semibold">Ready to hear it?</p>
-              <p className="text-xs text-muted-foreground">
-                Suno builds a compressed sample. Full download:{" "}
-                <span className="inline-flex items-center gap-1 font-bold text-foreground">
-                  <Download className="h-3 w-3" /> {downloadCost} coins
-                </span>
-              </p>
-            </div>
+          <div className="flex flex-wrap items-center justify-end gap-3 rounded-2xl border border-white/10 bg-background/40 p-4">
             <Button
               onClick={generateSong}
               disabled={genSong || balance < previewCost}
@@ -588,7 +574,7 @@ function LibraryPage() {
               ) : (
                 <Wand2 className="h-4 w-4" />
               )}
-              Generate song · -{previewCost}
+              Make the song · -{previewCost}
             </Button>
           </div>
         </section>
@@ -640,9 +626,6 @@ function LibraryPage() {
               <LibraryIcon className="h-6 w-6 text-primary" />
             </div>
             <p className="mt-4 text-base font-bold">No songs yet</p>
-            <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
-              Pick your vibes above and tap Generate.
-            </p>
           </div>
         )}
       </section>
