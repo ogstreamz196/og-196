@@ -48,6 +48,82 @@ export function SongWorkspace({ song, onSaved }: Props) {
   const [genPreview, setGenPreview] = useState(false);
   const [unlocking, setUnlocking] = useState(false);
 
+  // Hidden Suno alt-takes for this song. Suno returns 2 clips per generation;
+  // the first becomes the visible sample, the rest stay hidden until the user
+  // pays half-price (ceil(previewCost / divisor)) to reveal them.
+  type Variation = { id: string; title: string | null; cover_url: string | null; revealed: boolean };
+  const [variations, setVariations] = useState<Variation[]>([]);
+  const variationCost = Math.max(1, Math.ceil(previewCost / 2));
+  const [basket, setBasket] = useState<Set<string>>(() => new Set());
+  const [busyVariation, setBusyVariation] = useState<string | null>(null);
+  const [checkingOut, setCheckingOut] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      // Step 1 — grab this song's suno task id so we can find siblings.
+      const { data: self } = await supabase
+        .from("songs").select("suno_task_id").eq("id", song.id).maybeSingle();
+      const task = (self as { suno_task_id?: string | null })?.suno_task_id;
+      if (!task) { if (!cancelled) setVariations([]); return; }
+      const { data: sibs } = await supabase
+        .from("songs")
+        .select("id, title, cover_url, revealed")
+        .eq("suno_task_id", task)
+        .eq("is_variation", true)
+        .neq("id", song.id);
+      if (!cancelled) setVariations((sibs ?? []) as Variation[]);
+    })();
+    return () => { cancelled = true; };
+  }, [song.id, song.status]);
+
+  async function revealOne(id: string) {
+    setBusyVariation(id);
+    try {
+      const { data, error } = await supabase.functions.invoke("reveal-variation", { body: { song_id: id } });
+      if (error) {
+        const msg = (error as { context?: { error?: string } })?.context?.error || error.message;
+        throw new Error(msg);
+      }
+      if (!data?.already) toast.success(`Alt take revealed · -${data?.cost ?? variationCost} coins`);
+      setVariations((vs) => vs.map((v) => v.id === id ? { ...v, revealed: true } : v));
+      onSaved?.();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Reveal failed");
+      throw e;
+    } finally {
+      setBusyVariation(null);
+    }
+  }
+
+  function toggleBasket(id: string) {
+    setBasket((b) => {
+      const next = new Set(b);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
+  async function checkoutBasket() {
+    const ids = Array.from(basket);
+    const total = ids.length * variationCost;
+    if (ids.length === 0) return;
+    if (balance < total) { toast.error(`Need ${total} coins — current balance ${balance}`); return; }
+    setCheckingOut(true);
+    try {
+      for (const id of ids) {
+        // Sequential so the deduct_coins RPC sees a consistent running balance.
+        await revealOne(id).catch(() => { throw new Error(`Stopped at ${id.slice(0, 6)}`); });
+      }
+      setBasket(new Set());
+      toast.success(`Basket checked out · -${total} coins`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Checkout interrupted");
+    } finally {
+      setCheckingOut(false);
+    }
+  }
+
   const hasLyrics = !!(lyrics && lyrics.trim().length > 20);
   const isPending = song.status === "pending" || song.status === "processing";
   const isReady = song.status === "completed";
