@@ -352,21 +352,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
                   <AlertCircle className="h-4 w-4" aria-hidden="true" /> {song.error_message || "Generation failed."}
                 </div>
               )}
-              {isReady && (
-                <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200">
-                  <span className="inline-flex items-center gap-2">
-                    <Check className="h-4 w-4" /> Preview ready
-                  </span>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                  >
-                    Jump to sample player
-                  </Button>
-                </div>
-              )}
+              {isReady && <InlineSamplePlayer songId={song.id} />}
               <div className="flex flex-wrap items-center justify-end gap-2">
                 <Button
                   onClick={generatePreview}
