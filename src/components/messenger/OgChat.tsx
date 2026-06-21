@@ -393,7 +393,7 @@ export function OgChat({
               ) : (
                 <Skull className="h-3 w-3" />
               )}
-              {foulActive ? "Foul" : "Clean"}
+              {foulActive ? "Foul" : "Turn on OG MODE"}
             </button>
             {messages.length > 0 && (
               <button
