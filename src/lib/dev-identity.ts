@@ -14,21 +14,25 @@ export function isDevEmail(email?: string | null): boolean {
 export type MaskableProfile = {
   email?: string | null;
   display_name?: string | null;
-  [key: string]: unknown;
 };
 
 /**
  * Return a copy of the profile-like object with the dev's identity masked.
  * Safe to pass null/undefined.
  */
-export function maskDevIdentity<T extends MaskableProfile | null | undefined>(
-  profile: T,
-): T {
+export function maskDevIdentity<T extends MaskableProfile>(profile: T): T;
+export function maskDevIdentity<T extends MaskableProfile>(profile: T | null): T | null;
+export function maskDevIdentity<T extends MaskableProfile>(
+  profile: T | null | undefined,
+): T | null | undefined;
+export function maskDevIdentity<T extends MaskableProfile>(
+  profile: T | null | undefined,
+): T | null | undefined {
   if (!profile) return profile;
   if (!isDevEmail(profile.email)) return profile;
   return {
     ...profile,
     email: DEV_EMAIL_MASK,
     display_name: DEV_DISPLAY_NAME,
-  } as T;
+  };
 }
