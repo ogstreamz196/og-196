@@ -603,6 +603,10 @@ export type Database = {
         Args: { admin_notes: string; amount: number; target_user_id: string }
         Returns: number
       }
+      og_learn_insult: {
+        Args: { p_phrase: string; p_user_id: string }
+        Returns: undefined
+      }
       purchase_bot_token: {
         Args: { p_allowed_domain?: string }
         Returns: {
