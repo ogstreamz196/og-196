@@ -60,11 +60,11 @@ function DashboardHome() {
   const scrimOpacity = useAdaptiveOverlay(welcomeRef, { min: 0.55, max: 0.92 });
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-10">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-14 px-2 sm:px-4">
       {/* Welcome */}
       <section
         ref={welcomeRef}
-        className="relative flex flex-col gap-3 overflow-hidden rounded-3xl border border-white/10 bg-card/55 p-6 shadow-card backdrop-blur-2xl sm:p-8"
+        className="relative flex flex-col gap-3 overflow-hidden rounded-[2.5rem] border-2 border-white/15 bg-card/55 p-8 shadow-[0_24px_60px_-20px_rgba(80,60,255,0.45)] backdrop-blur-2xl sm:p-12"
       >
         {/* Adaptive dark scrim */}
         <div
@@ -77,27 +77,34 @@ function DashboardHome() {
           aria-hidden
           className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/30"
         />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,oklch(0.55_0.22_268/0.22),transparent_60%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,oklch(0.55_0.22_268/0.28),transparent_60%)]" />
+        {/* Cartoon floating blobs */}
+        <div aria-hidden className="pointer-events-none absolute -right-10 top-8 h-40 w-40 rounded-full bg-primary/30 blur-2xl animate-[float_6s_ease-in-out_infinite]" />
+        <div aria-hidden className="pointer-events-none absolute -left-12 bottom-0 h-32 w-32 rounded-full bg-accent/30 blur-2xl animate-[float_8s_ease-in-out_infinite_reverse]" />
+
         <div className="relative grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 sm:flex sm:flex-wrap sm:items-end sm:justify-between">
-          <div className="min-w-0 rounded-2xl bg-background/35 p-4 backdrop-blur-md ring-1 ring-white/10 sm:p-5">
-            <p className="text-sm uppercase tracking-[0.24em] text-muted-foreground sm:text-base">
-              Welcome back
+          <div className="min-w-0 rounded-3xl bg-background/35 p-5 backdrop-blur-md ring-2 ring-white/10 sm:p-7">
+            <p className="text-base uppercase tracking-[0.28em] text-muted-foreground sm:text-lg">
+              👋 Welcome back
             </p>
-            <h1 className="font-display mt-3 text-5xl font-light leading-[1.05] tracking-[-0.02em] text-foreground [overflow-wrap:anywhere] [text-shadow:0_2px_24px_rgba(0,0,0,0.75)] sm:text-7xl">
-              Hello, <em className="italic text-gradient-brand [overflow-wrap:anywhere]">{displayName}</em>
+            <h1 className="font-display mt-4 text-6xl font-black leading-[0.95] tracking-[-0.03em] text-foreground [overflow-wrap:anywhere] [text-shadow:0_4px_28px_rgba(0,0,0,0.75)] sm:text-8xl">
+              Hello,{" "}
+              <em className="inline-block italic text-gradient-brand [overflow-wrap:anywhere] animate-[wiggle_3s_ease-in-out_infinite] origin-bottom">
+                {displayName}
+              </em>
             </h1>
-            <p className="mt-5 max-w-xl text-lg leading-relaxed text-foreground/90 [text-shadow:0_1px_12px_rgba(0,0,0,0.7)] sm:text-xl">
-              Jump back into your music workspace or pick up a conversation with OG Messenger.
+            <p className="mt-6 max-w-2xl text-xl leading-relaxed text-foreground/90 [text-shadow:0_1px_12px_rgba(0,0,0,0.7)] sm:text-2xl">
+              Jump back into your music workspace or pick up a chat with OG Bot.
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2 text-base">
             {isVip && (
-              <Badge variant="secondary" className="gap-1.5 px-3 py-1.5 text-sm">
-                <Sparkles className="h-4 w-4" /> VIP
+              <Badge variant="secondary" className="gap-1.5 rounded-full border-2 border-white/20 px-4 py-2 text-base shadow-glow">
+                <Sparkles className="h-5 w-5" /> VIP
               </Badge>
             )}
-            <Badge variant="outline" className="gap-2 border-white/15 bg-white/5 px-3 py-1.5 text-sm">
-              <Coins className="h-4 w-4 text-primary" />
+            <Badge variant="outline" className="gap-2 rounded-full border-2 border-white/20 bg-white/5 px-4 py-2 text-base">
+              <Coins className="h-5 w-5 text-primary animate-[bounce_2s_ease-in-out_infinite]" />
               {balance} coins
             </Badge>
           </div>
@@ -105,10 +112,10 @@ function DashboardHome() {
       </section>
 
       {/* Primary CTAs */}
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <section className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <PrimaryCard
           to="/library"
-          icon={<Music2 className="h-5 w-5" />}
+          icon={<Music2 className="h-6 w-6" />}
           eyebrow="Music Hub"
           title="Create a song"
           body="Generate, refine and remix tracks tailored to your taste with the OG engine."
@@ -116,47 +123,46 @@ function DashboardHome() {
         />
         <PrimaryCard
           to="/messenger"
-          icon={<MessageSquareMore className="h-5 w-5" />}
+          icon={<MessageSquareMore className="h-6 w-6" />}
           eyebrow="OG Messenger"
           title="Chat to OG Bot"
           body="Talk to your AI co-producer, brainstorm lyrics, or just shoot the breeze."
           cta="Open Messenger"
           variant="accent"
         />
-
       </section>
 
       {/* Quick actions */}
       <section>
-        <h2 className="mb-4 text-sm uppercase tracking-[0.24em] text-muted-foreground sm:text-base">
-          Quick actions
+        <h2 className="mb-5 text-base uppercase tracking-[0.28em] text-muted-foreground sm:text-lg">
+          ⚡ Quick actions
         </h2>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <QuickAction to="/library" icon={<Plus className="h-5 w-5" />} label="New song" />
-          <QuickAction to="/library" icon={<Library className="h-5 w-5" />} label="My library" />
-          <QuickAction to="/messenger" icon={<Wand2 className="h-5 w-5" />} label="Ask OG" />
-          <QuickAction to="/buy-coins" icon={<Coins className="h-5 w-5" />} label="Buy coins" />
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <QuickAction to="/library" icon={<Plus className="h-6 w-6" />} label="New song" />
+          <QuickAction to="/library" icon={<Library className="h-6 w-6" />} label="My library" />
+          <QuickAction to="/messenger" icon={<Wand2 className="h-6 w-6" />} label="Ask OG" />
+          <QuickAction to="/buy-coins" icon={<Coins className="h-6 w-6" />} label="Buy coins" />
         </div>
       </section>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Example prompts */}
-        <Card className="lg:col-span-2">
+        <Card className="rounded-[2rem] border-2 border-white/15 shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)] lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-2xl">Try a prompt</CardTitle>
+              <CardTitle className="text-3xl font-black">🎤 Try a prompt</CardTitle>
               <CardDescription className="text-base">Tap one to start a song in seconds.</CardDescription>
             </div>
             <Link
               to="/library"
               preload="intent"
-              className={cn(buttonVariants({ variant: "ghost", size: "default" }), "gap-1.5 text-base")}
+              className={cn(buttonVariants({ variant: "ghost", size: "lg" }), "gap-1.5 rounded-full text-base")}
             >
-              Open studio <ArrowRight className="h-4 w-4" />
+              Open studio <ArrowRight className="h-5 w-5" />
             </Link>
           </CardHeader>
           <CardContent>
-            <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {EXAMPLE_PROMPTS.map((p) => (
                 <PromptCard key={p.title} prompt={p} />
               ))}
@@ -165,9 +171,9 @@ function DashboardHome() {
         </Card>
 
         {/* Next steps */}
-        <Card>
+        <Card className="rounded-[2rem] border-2 border-white/15 shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)]">
           <CardHeader>
-            <CardTitle className="text-2xl">Next steps</CardTitle>
+            <CardTitle className="text-3xl font-black">✅ Next steps</CardTitle>
             <CardDescription className="text-base">Get the most out of OG Studio.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
