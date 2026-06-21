@@ -28,6 +28,8 @@ import { SongCard, type Song } from "@/components/SongCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -223,6 +225,7 @@ function LibraryPage() {
   const [chips, setChips] = useState<Record<Category, string[]>>(() => initialChips());
   const [lyrics, setLyrics] = useState("");
   const [genLyrics, setGenLyrics] = useState(false);
+  const [foulMouth, setFoulMouth] = useState(false);
   const [genSong, setGenSong] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<Song | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -284,6 +287,7 @@ function LibraryPage() {
           description,
           styleTags,
           language: selections.language,
+          foulMouth,
         },
       });
       if (error) {
@@ -520,6 +524,22 @@ function LibraryPage() {
               <h3 className="mt-3 font-display text-2xl font-black leading-tight tracking-tight">
                 Write lyrics
               </h3>
+            </div>
+            <div className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2.5">
+              <div className="flex flex-col">
+                <Label htmlFor="foul-mouth-toggle" className="text-sm font-semibold">
+                  OG Foul Mouth
+                </Label>
+                <span className="text-xs text-muted-foreground">
+                  {foulMouth ? "Explicit — full swearing on" : "Clean version"}
+                </span>
+              </div>
+              <Switch
+                id="foul-mouth-toggle"
+                checked={foulMouth}
+                onCheckedChange={setFoulMouth}
+                disabled={genLyrics}
+              />
             </div>
             <Button
               onClick={generateLyrics}
