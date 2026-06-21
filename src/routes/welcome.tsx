@@ -199,89 +199,104 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
     "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background " +
     "disabled:opacity-70 disabled:cursor-wait disabled:translate-y-0 cursor-pointer";
 
-  type Device = {
-    key: string;
-    label: string;
-    provider: OAuthProvider;
-    Icon: (p: { className?: string }) => ReactElement;
-    iconClass?: string;
-  };
+type Device = {
+  key: string;
+  label: string;
+  provider: OAuthProvider;
+  Icon: (p: { className?: string }) => ReactElement;
+  iconClass?: string;
+};
 
-  const primary: Device[] = [
-    { key: "google", label: "Google", provider: "google", Icon: GoogleIcon },
-    { key: "apple", label: "Apple ID", provider: "apple", Icon: (p) => <AppleIcon {...p} />, iconClass: "text-black" },
-  ];
+const TILE_CLASS =
+  "group relative bg-white/[0.06] backdrop-blur-md border-2 border-white/15 rounded-[28px] " +
+  "shadow-[0_10px_0_0_hsl(var(--primary)/0.35),0_24px_44px_-12px_hsl(var(--primary)/0.45)] " +
+  "transition-all duration-150 ease-out " +
+  "hover:-translate-y-1 hover:border-white/40 hover:bg-white/[0.1] " +
+  "hover:shadow-[0_12px_0_0_hsl(var(--primary)/0.5),0_28px_50px_-10px_hsl(var(--primary)/0.6)] " +
+  "active:translate-y-1 active:shadow-[0_4px_0_0_hsl(var(--primary)/0.35),0_10px_20px_-6px_hsl(var(--primary)/0.4)] " +
+  "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background " +
+  "disabled:opacity-70 disabled:cursor-wait disabled:translate-y-0 cursor-pointer";
 
-  const secondary: Device[] = [
-    { key: "android", label: "Android", provider: "google", Icon: AndroidIcon, iconClass: "text-[#3ddc84]" },
-    { key: "samsung", label: "Samsung", provider: "google", Icon: SamsungIcon, iconClass: "text-[#1428a0]" },
-    { key: "iphone", label: "iPhone / iPad", provider: "apple", Icon: IPhoneIcon, iconClass: "text-black" },
-  ];
+const PRIMARY_DEVICES: Device[] = [
+  { key: "google", label: "Google", provider: "google", Icon: GoogleIcon },
+  { key: "apple", label: "Apple ID", provider: "apple", Icon: AppleIcon, iconClass: "text-black" },
+];
 
-  function renderTile(d: Device) {
-    const isPending = pending === d.provider;
-    const sub = d.provider === "google" ? "Sign in with Google" : "Sign in with Apple";
-    return (
-      <button
-        key={d.key}
-        onClick={() => signIn(d.provider)}
-        disabled={pending !== null}
-        aria-label={`${d.label} — ${sub}`}
-        className={`${h} ${tile} flex flex-col items-center justify-between gap-2 px-2 pt-4 pb-2 text-foreground sm:gap-3 sm:px-3 sm:pt-5 sm:pb-3`}
-      >
-        <div className="flex flex-1 items-center justify-center">
-          {isPending ? (
-            <Loader2 className="h-10 w-10 animate-spin text-foreground sm:h-16 sm:w-16" />
-          ) : (
-            <div className="grid h-12 w-12 place-items-center rounded-2xl bg-white shadow-[0_8px_24px_rgba(0,0,0,0.45)] ring-2 ring-white/90 transition-transform duration-200 group-hover:scale-110 group-hover:rotate-[-3deg] group-active:scale-95 sm:h-20 sm:w-20 sm:rounded-3xl md:h-24 md:w-24">
-              <d.Icon className={`h-9 w-9 sm:h-16 sm:w-16 md:h-[88px] md:w-[88px] ${d.iconClass ?? "text-black"}`} />
-            </div>
-          )}
-        </div>
-        <div className="w-full min-w-0 space-y-1">
-          <span className="font-display block w-full rounded-xl bg-white px-1.5 py-1.5 text-center text-[11px] font-bold uppercase leading-tight tracking-wide text-black shadow-[0_3px_0_0_rgba(0,0,0,0.15)] break-words sm:px-2 sm:py-2 sm:text-base sm:tracking-wider">
-            {d.label}
-          </span>
-          <span className="block text-center text-[9px] font-semibold uppercase leading-tight tracking-[0.12em] text-foreground/70 break-words sm:text-[10px] sm:tracking-[0.16em]">
-            {sub}
-          </span>
-        </div>
-      </button>
-    );
-  }
+const SECONDARY_DEVICES: Device[] = [
+  { key: "android", label: "Android", provider: "google", Icon: AndroidIcon, iconClass: "text-[#3ddc84]" },
+  { key: "samsung", label: "Samsung", provider: "google", Icon: SamsungIcon, iconClass: "text-[#1428a0]" },
+  { key: "iphone", label: "iPhone / iPad", provider: "apple", Icon: IPhoneIcon, iconClass: "text-black" },
+];
+
+function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
+  const { signIn, pending } = useOAuthSignIn();
+  const h = size === "xl" ? "h-36 sm:h-44 md:h-48" : "h-32 sm:h-40 md:h-44";
+
+  const renderTile = useCallback(
+    (d: Device) => {
+      const isPending = pending === d.provider;
+      const sub = d.provider === "google" ? "Sign in with Google" : "Sign in with Apple";
+      return (
+        <button
+          key={d.key}
+          onClick={() => signIn(d.provider)}
+          disabled={pending !== null}
+          aria-label={`${d.label} — ${sub}`}
+          className={`${h} ${TILE_CLASS} flex flex-col items-center justify-between gap-2 px-2 pt-4 pb-2 text-foreground sm:gap-3 sm:px-3 sm:pt-5 sm:pb-3`}
+        >
+          <div className="flex flex-1 items-center justify-center">
+            {isPending ? (
+              <Loader2 className="h-10 w-10 animate-spin text-foreground sm:h-16 sm:w-16" aria-hidden />
+            ) : (
+              <div className="grid h-12 w-12 place-items-center rounded-2xl bg-white shadow-[0_8px_24px_rgba(0,0,0,0.45)] ring-2 ring-white/90 transition-transform duration-200 group-hover:scale-110 group-hover:rotate-[-3deg] group-active:scale-95 sm:h-20 sm:w-20 sm:rounded-3xl md:h-24 md:w-24">
+                <d.Icon className={`h-9 w-9 sm:h-16 sm:w-16 md:h-[88px] md:w-[88px] ${d.iconClass ?? "text-black"}`} />
+              </div>
+            )}
+          </div>
+          <div className="w-full min-w-0 space-y-1">
+            <span className="font-display block w-full rounded-xl bg-white px-1.5 py-1.5 text-center text-[11px] font-bold uppercase leading-tight tracking-wide text-black shadow-[0_3px_0_0_rgba(0,0,0,0.15)] break-words sm:px-2 sm:py-2 sm:text-base sm:tracking-wider">
+              {d.label}
+            </span>
+            <span className="block text-center text-[9px] font-semibold uppercase leading-tight tracking-[0.12em] text-foreground/70 break-words sm:text-[10px] sm:tracking-[0.16em]">
+              {sub}
+            </span>
+          </div>
+        </button>
+      );
+    },
+    [pending, signIn, h],
+  );
+
+  const primaryTiles = useMemo(() => PRIMARY_DEVICES.map(renderTile), [renderTile]);
+  const secondaryTiles = useMemo(() => SECONDARY_DEVICES.map(renderTile), [renderTile]);
 
   return (
     <div className="w-full space-y-5">
       <div className="relative mx-auto max-w-xl overflow-hidden rounded-3xl border-2 border-primary/50 bg-linear-to-br from-primary/25 via-primary/10 to-transparent px-5 py-5 text-center shadow-[0_12px_40px_-12px_rgba(59,130,246,0.55)]">
-        <div className="pointer-events-none absolute inset-x-0 -top-1/2 h-full animate-pulse bg-linear-to-b from-primary/20 to-transparent blur-2xl" />
+        <div className="pointer-events-none absolute inset-x-0 -top-1/2 h-full animate-pulse bg-linear-to-b from-primary/20 to-transparent blur-2xl" aria-hidden />
         <p className="relative font-display text-2xl font-black uppercase tracking-[0.08em] text-foreground sm:text-3xl md:text-4xl">
-          👇 Tap Your Device Below
+          <span aria-hidden>👇 </span>Tap Your Device Below
         </p>
         <p className="relative mt-1 text-sm font-semibold uppercase tracking-[0.18em] text-foreground/80 sm:text-base">
           Pick the one you're using to sign in
         </p>
       </div>
 
-
       <div className="relative overflow-hidden rounded-[28px] border border-white/15 bg-white/[0.04] p-3 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)] backdrop-blur-xl sm:p-5">
-        <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-white/[0.06] via-transparent to-transparent" />
+        <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-white/[0.06] via-transparent to-transparent" aria-hidden />
         <div className="relative space-y-3 sm:space-y-4">
-          <div className="grid grid-cols-2 gap-3 sm:gap-4">
-            {primary.map(renderTile)}
-          </div>
-          <div className="grid grid-cols-3 gap-3 sm:gap-4">
-            {secondary.map(renderTile)}
-          </div>
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">{primaryTiles}</div>
+          <div className="grid grid-cols-3 gap-3 sm:gap-4">{secondaryTiles}</div>
         </div>
       </div>
 
       <p className="rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-2.5 text-center text-sm font-bold text-amber-200">
-        ⚠️ Tap <span className="underline">Allow</span> / <span className="underline">Accept</span> on every prompt that appears after picking your device.
+        <span aria-hidden>⚠️ </span>Tap <span className="underline">Allow</span> / <span className="underline">Accept</span> on every prompt that appears after picking your device.
       </p>
     </div>
   );
-
 }
+
 
 
 
