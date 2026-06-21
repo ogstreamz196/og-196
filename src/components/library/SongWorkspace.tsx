@@ -16,7 +16,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { cn } from "@/lib/utils";
 import type { Song } from "@/components/SongCard";
 
-type WorkspaceSong = Song & { lyrics?: string | null };
+type WorkspaceSong = Song & { lyrics?: string | null; unlocked?: boolean | null };
 
 interface Props {
   song: WorkspaceSong;
@@ -37,6 +37,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
   const { data: profile } = useProfile();
   const lyricsCost = settings?.coins_per_lyrics_generation ?? 1;
   const previewCost = settings?.coins_per_generation ?? 3;
+  const fullUnlockCost = settings?.coins_per_full_unlock ?? 5;
   const balance = profile?.coin_balance ?? 0;
 
   const [title, setTitle] = useState(song.title ?? "");
@@ -45,6 +46,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
   const [saving, setSaving] = useState(false);
   const [genLyrics, setGenLyrics] = useState(false);
   const [genPreview, setGenPreview] = useState(false);
+  const [unlocking, setUnlocking] = useState(false);
 
   const hasLyrics = !!(lyrics && lyrics.trim().length > 20);
   const isPending = song.status === "pending" || song.status === "processing";
@@ -161,6 +163,41 @@ export function SongWorkspace({ song, onSaved }: Props) {
       toast.error(e instanceof Error ? e.message : "Could not start generation");
     } finally {
       setGenPreview(false);
+    }
+  }
+
+  async function unlockFull() {
+    if (!isReady) return;
+    if (!song.unlocked && balance < fullUnlockCost) {
+      toast.error(`Need ${fullUnlockCost} coins to unlock the HQ version — current balance ${balance}`);
+      return;
+    }
+    setUnlocking(true);
+    try {
+      if (!song.unlocked) {
+        const { data, error } = await supabase.functions.invoke("unlock-full-song", {
+          body: { song_id: song.id },
+        });
+        if (error) {
+          const msg = (error as { context?: { error?: string } })?.context?.error || error.message;
+          toast.error(msg || "Could not unlock");
+          return;
+        }
+        if (!data?.already) toast.success(`Unlocked · -${data?.cost ?? fullUnlockCost} coins`);
+        onSaved?.();
+      }
+      const { data: urlData, error: urlErr } = await supabase.functions.invoke("song-url", {
+        body: { song_id: song.id, mode: "full" },
+      });
+      if (urlErr || !urlData?.url) {
+        toast.error("Unlocked, but download link failed — try again in a moment");
+        return;
+      }
+      window.open(urlData.url, "_blank", "noopener");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not unlock");
+    } finally {
+      setUnlocking(false);
     }
   }
 
@@ -306,7 +343,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
                 Stage 3 · Create the full song
               </CardTitle>
               <CardDescription>
-                Built from your stage-1 lyrics, style and brief. Unlock to download HQ.
+                Preview is a fast compressed sample. Pay {fullUnlockCost} coins once to unlock and download the full HQ version, or regenerate the sample for {previewCost}.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -317,14 +354,31 @@ export function SongWorkspace({ song, onSaved }: Props) {
               ) : (
                 <>
                   <p className="text-sm text-muted-foreground">
-                    The full track is rendered. Use the player above to preview, or unlock it to download the HQ version.
+                    {song.unlocked
+                      ? "Full HQ unlocked. Download as many times as you like."
+                      : "Sample plays in the player above. Unlock once to download the full HQ track."}
                   </p>
                   <div className="flex flex-wrap justify-end gap-2">
-                    <Button asChild variant="outline">
-                      <Link to="/buy-coins">
-                        <Coins className="h-4 w-4" /> Top up coins
-                      </Link>
+                    <Button
+                      variant="outline"
+                      onClick={generatePreview}
+                      disabled={genPreview || isPending}
+                    >
+                      {genPreview ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                      Regenerate sample
+                      <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-background/30 px-1.5 py-0.5 text-[10px] font-semibold">
+                        <Coins className="h-3 w-3" /> {previewCost}
+                      </span>
                     </Button>
+                    <Button onClick={unlockFull} disabled={unlocking}>
+                      {unlocking ? <Loader2 className="h-4 w-4 animate-spin" /> : <Music2 className="h-4 w-4" />}
+                      {song.unlocked ? "Download full HQ" : `Unlock & download · ${fullUnlockCost}`}
+                    </Button>
+                    {balance < fullUnlockCost && !song.unlocked && (
+                      <Button asChild variant="ghost" size="sm">
+                        <Link to="/buy-coins"><Coins className="h-4 w-4" /> Top up</Link>
+                      </Button>
+                    )}
                   </div>
                 </>
               )}
@@ -346,6 +400,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
               <div className="space-y-1 text-xs text-muted-foreground">
                 <p>· Lyrics generation: <b className="text-foreground">{lyricsCost}</b></p>
                 <p>· Preview sample: <b className="text-foreground">{previewCost}</b></p>
+                <p>· Full HQ unlock: <b className="text-foreground">{fullUnlockCost}</b></p>
               </div>
               <Button asChild variant="outline" size="sm" className="w-full">
                 <Link to="/buy-coins">Top up</Link>

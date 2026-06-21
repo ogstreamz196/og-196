@@ -259,6 +259,7 @@ function PricingControls() {
   const [songs, setSongs] = useState<string>("");
   const [sample, setSample] = useState<string>("");
   const [signup, setSignup] = useState<string>("");
+  const [unlock, setUnlock] = useState<string>("");
 
   useEffect(() => {
     if (settings) {
@@ -266,6 +267,7 @@ function PricingControls() {
       setSongs(String(settings.songs_per_generation));
       setSample(String(settings.sample_seconds));
       setSignup(String(settings.signup_credits));
+      setUnlock(String(settings.coins_per_full_unlock));
     }
   }, [settings]);
 
@@ -276,6 +278,7 @@ function PricingControls() {
         { key: "songs_per_generation", value: Number(songs) },
         { key: "sample_seconds", value: Number(sample) },
         { key: "signup_credits", value: Number(signup) },
+        { key: "coins_per_full_unlock", value: Number(unlock) },
       ];
       for (const u of updates) {
         if (!Number.isFinite(u.value) || u.value < 0) throw new Error(`Invalid ${u.key}`);
@@ -315,6 +318,11 @@ function PricingControls() {
         <div>
           <Label htmlFor="sample">Sample length (seconds)</Label>
           <Input id="sample" type="number" min={5} max={600} value={sample} onChange={(e) => setSample(e.target.value)} className="mt-2" />
+        </div>
+        <div>
+          <Label htmlFor="unlock">Coins to unlock full song</Label>
+          <Input id="unlock" type="number" min={0} value={unlock} onChange={(e) => setUnlock(e.target.value)} className="mt-2" />
+          <p className="mt-1 text-xs text-muted-foreground">Charged when a user downloads the HQ full version.</p>
         </div>
       </div>
       <div className="mt-4 flex justify-end">
