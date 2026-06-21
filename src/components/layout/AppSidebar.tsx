@@ -6,7 +6,6 @@ import {
   DoorOpen,
   Coins,
   Settings,
-  Code2,
   Shield,
   LogOut,
 } from "lucide-react";
