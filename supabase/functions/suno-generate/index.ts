@@ -45,6 +45,7 @@ Deno.serve(async (req) => {
     const title = (body.title ?? "").toString().trim() || null;
     const instrumental = !!body.instrumental;
     const portalId = body.portal_id ? String(body.portal_id) : null;
+    const existingSongId = body.song_id ? String(body.song_id) : null;
 
     if (!prompt && !lyrics) return json({ error: "Provide a prompt or lyrics" }, 400);
 
@@ -71,12 +72,43 @@ Deno.serve(async (req) => {
       ? `[Language: ${portalLanguage}] ${prompt}`
       : prompt;
 
-    const { data: song, error: songErr } = await admin
-      .from("songs")
-      .insert({ user_id: user.id, prompt: effectivePrompt, style, lyrics: effectiveLyrics, title, status: "pending", portal_id: portalId })
-      .select()
-      .single();
-    if (songErr) return json({ error: songErr.message }, 500);
+    let song: { id: string } | null = null;
+    if (existingSongId) {
+      // Reuse the draft so the same song row progresses through the workflow stages.
+      const { data: existing, error: exErr } = await admin
+        .from("songs")
+        .select("id, user_id")
+        .eq("id", existingSongId)
+        .maybeSingle();
+      if (exErr) return json({ error: exErr.message }, 500);
+      if (!existing || existing.user_id !== user.id) return json({ error: "Song not found" }, 404);
+      const { data: upd, error: updErr } = await admin
+        .from("songs")
+        .update({
+          prompt: effectivePrompt,
+          style,
+          lyrics: effectiveLyrics,
+          title,
+          status: "pending",
+          portal_id: portalId,
+          audio_path: null,
+          sample_path: null,
+          error_message: null,
+        })
+        .eq("id", existingSongId)
+        .select("id")
+        .single();
+      if (updErr) return json({ error: updErr.message }, 500);
+      song = upd;
+    } else {
+      const { data: inserted, error: songErr } = await admin
+        .from("songs")
+        .insert({ user_id: user.id, prompt: effectivePrompt, style, lyrics: effectiveLyrics, title, status: "pending", portal_id: portalId })
+        .select("id")
+        .single();
+      if (songErr) return json({ error: songErr.message }, 500);
+      song = inserted;
+    }
 
     const { data: balance, error: deductErr } = await admin.rpc("deduct_coins", {
       p_user: user.id,
