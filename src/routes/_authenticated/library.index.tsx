@@ -573,16 +573,44 @@ function LibraryPage() {
                 <Label htmlFor="personal-details" className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                   Personal details <span className="font-normal normal-case">(optional)</span>
                 </Label>
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  Add your own personal touch — tap a chip to add a prompt, then fill it in.
+                </p>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {[
+                    { label: "👤 Their name", snippet: "Their name: " },
+                    { label: "🎂 Occasion", snippet: "Occasion: " },
+                    { label: "💛 What they love", snippet: "What they love: " },
+                    { label: "🤫 Inside joke", snippet: "Inside joke: " },
+                    { label: "📍 City / place", snippet: "City: " },
+                    { label: "💔 Drama / story", snippet: "Story: " },
+                  ].map((chip) => (
+                    <button
+                      key={chip.label}
+                      type="button"
+                      onClick={() =>
+                        setPersonalDetails((v) => {
+                          const sep = v.length === 0 ? "" : v.endsWith("\n") ? "" : "\n";
+                          return (v + sep + chip.snippet).slice(0, 500);
+                        })
+                      }
+                      className="rounded-full border border-white/15 bg-white/[0.04] px-2.5 py-1 text-[11px] font-semibold text-foreground/85 transition hover:border-primary/50 hover:bg-primary/15 hover:text-foreground"
+                    >
+                      {chip.label}
+                    </button>
+                  ))}
+                </div>
                 <Textarea
                   id="personal-details"
                   value={personalDetails}
                   onChange={(e) => setPersonalDetails(e.target.value)}
-                  placeholder="Your name, your ex's name, your city, an inside joke…"
+                  placeholder="Their name: Aaliyah&#10;Occasion: 30th birthday&#10;Inside joke: the karaoke night we don't talk about"
                   maxLength={500}
-                  rows={2}
-                  className="mt-1 resize-none rounded-xl border-white/10 bg-background/40 text-sm"
+                  rows={4}
+                  className="mt-2 resize-none rounded-xl border-white/10 bg-background/40 text-sm"
                 />
               </div>
+
               <div>
                 <Label htmlFor="extra-context" className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                   Extra context <span className="font-normal normal-case">(optional)</span>
