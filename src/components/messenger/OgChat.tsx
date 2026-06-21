@@ -173,6 +173,13 @@ export function OgChat({
     }
   }, [seed]);
 
+  // Re-scroll while skeleton is mounted so it stays in view.
+  useEffect(() => {
+    if (showSkeleton) {
+      scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    }
+  }, [showSkeleton]);
+
   const m = useMutation({
     mutationFn: async (args: { history: OgChatMessage[]; attachmentDataUrl?: string }) =>
       chat({
