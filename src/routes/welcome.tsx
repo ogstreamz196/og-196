@@ -214,7 +214,7 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
             <Loader2 className="h-16 w-16 animate-spin text-foreground" />
           ) : (
             <div className="grid h-24 w-24 place-items-center rounded-3xl bg-white shadow-[0_8px_24px_rgba(0,0,0,0.45)] ring-2 ring-white/90 transition group-hover:scale-105">
-              <d.Icon className={`h-16 w-16 ${d.iconClass ?? "text-black"}`} />
+              <d.Icon className={`h-[88px] w-[88px] ${d.iconClass ?? "text-black"}`} />
             </div>
           )}
         </div>
