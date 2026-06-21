@@ -129,33 +129,27 @@ function DashboardHome() {
       </section>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Recent */}
+        {/* Example prompts */}
         <Card className="lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-2xl">Recent songs</CardTitle>
-              <CardDescription className="text-base">Pick up where you left off.</CardDescription>
+              <CardTitle className="text-2xl">Try a prompt</CardTitle>
+              <CardDescription className="text-base">Tap one to start a song in seconds.</CardDescription>
             </div>
             <Link
               to="/library"
               preload="intent"
               className={cn(buttonVariants({ variant: "ghost", size: "default" }), "gap-1.5 text-base")}
             >
-              View all <ArrowRight className="h-4 w-4" />
+              Open studio <ArrowRight className="h-4 w-4" />
             </Link>
           </CardHeader>
           <CardContent>
-            {songsLoading ? (
-              <RecentSkeleton />
-            ) : hasSongs ? (
-              <ul className="divide-y divide-border">
-                {recentSongs.slice(0, 5).map((s) => (
-                  <RecentRow key={s.id} song={s} />
-                ))}
-              </ul>
-            ) : (
-              <EmptyRecent />
-            )}
+            <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {EXAMPLE_PROMPTS.map((p) => (
+                <PromptCard key={p.title} prompt={p} />
+              ))}
+            </ul>
           </CardContent>
         </Card>
 
