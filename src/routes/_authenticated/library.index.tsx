@@ -16,6 +16,7 @@ import {
   Gauge,
   Mic2,
   Music4,
+  Shuffle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -493,6 +494,33 @@ function LibraryPage() {
               className="border-0 bg-transparent px-0 text-xl font-bold focus-visible:ring-0 sm:text-2xl"
             />
           </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const TITLES = [
+                "Late night drive", "Sunday hangover", "Gym warm-up",
+                "Festival anthem", "Heartbreak letter", "Pirate radio cypher",
+                "Summer rooftop", "Last train home", "Glow-up season",
+                "City lights blur", "Toxic ex anthem", "Underdog story",
+              ];
+              const pick = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
+              setTitle(pick(TITLES));
+              setSelections({
+                language: pick(POOLS.language),
+                genre: pick(POOLS.genre),
+                mood: pick(POOLS.mood),
+                theme: pick(POOLS.theme),
+                tempo: pick(POOLS.tempo),
+              });
+              toast.success("Surprise prompt loaded");
+            }}
+            className="shrink-0 gap-1.5"
+          >
+            <Shuffle className="h-4 w-4" />
+            Surprise me
+          </Button>
         </div>
       </section>
 
