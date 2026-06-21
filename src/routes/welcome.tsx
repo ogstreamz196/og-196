@@ -176,9 +176,15 @@ function IPhoneIcon({ className }: { className?: string }) {
 
 function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
   const { signIn, pending } = useOAuthSignIn();
-  const h = size === "xl" ? "h-44" : "h-40";
+  const h = size === "xl" ? "h-48" : "h-44";
   const tile =
-    "bg-white/[0.04] backdrop-blur-md border border-white/15 hover:border-white/50 hover:bg-white/[0.08] active:scale-[0.98] transition";
+    "group relative bg-white/[0.06] backdrop-blur-md border-2 border-white/15 rounded-[28px] " +
+    "shadow-[0_10px_0_0_hsl(var(--primary)/0.35),0_24px_44px_-12px_hsl(var(--primary)/0.45)] " +
+    "transition-all duration-150 ease-out " +
+    "hover:-translate-y-1 hover:border-white/40 hover:bg-white/[0.1] " +
+    "hover:shadow-[0_12px_0_0_hsl(var(--primary)/0.5),0_28px_50px_-10px_hsl(var(--primary)/0.6)] " +
+    "active:translate-y-1 active:shadow-[0_4px_0_0_hsl(var(--primary)/0.35),0_10px_20px_-6px_hsl(var(--primary)/0.4)] " +
+    "disabled:opacity-70 disabled:cursor-wait disabled:translate-y-0 cursor-pointer";
 
   type Device = {
     key: string;
@@ -208,19 +214,19 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
         onClick={() => signIn(d.provider)}
         disabled={pending !== null}
         aria-label={`${d.label} — ${sub}`}
-        className={`${h} ${tile} group relative flex flex-col items-center justify-between gap-3 rounded-3xl px-3 pt-5 pb-3 text-foreground disabled:opacity-70 disabled:cursor-wait`}
+        className={`${h} ${tile} flex flex-col items-center justify-between gap-3 px-3 pt-5 pb-3 text-foreground`}
       >
         <div className="flex flex-1 items-center justify-center">
           {isPending ? (
             <Loader2 className="h-16 w-16 animate-spin text-foreground" />
           ) : (
-            <div className="grid h-24 w-24 place-items-center rounded-3xl bg-white shadow-[0_8px_24px_rgba(0,0,0,0.45)] ring-2 ring-white/90 transition group-hover:scale-105">
+            <div className="grid h-24 w-24 place-items-center rounded-3xl bg-white shadow-[0_8px_24px_rgba(0,0,0,0.45)] ring-2 ring-white/90 transition-transform duration-200 group-hover:scale-110 group-hover:rotate-[-3deg] group-active:scale-95">
               <d.Icon className={`h-[88px] w-[88px] ${d.iconClass ?? "text-black"}`} />
             </div>
           )}
         </div>
         <div className="w-full space-y-1">
-          <span className="block w-full rounded-md bg-white px-2 py-1.5 text-center text-sm font-extrabold uppercase tracking-wide text-black">
+          <span className="font-display block w-full rounded-xl bg-white px-2 py-2 text-center text-base font-bold uppercase tracking-wider text-black shadow-[0_3px_0_0_rgba(0,0,0,0.15)]">
             {d.label}
           </span>
           <span className="block text-center text-[10px] font-semibold uppercase tracking-[0.16em] text-foreground/70">
