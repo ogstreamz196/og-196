@@ -6,13 +6,23 @@ import { cn } from "@/lib/utils";
 const KEY = "og:high-contrast";
 
 export function HighContrastToggle({ className }: { className?: string }) {
-  const [on, setOn] = useState(false);
+  const [on, setOn] = useState(() => {
+    if (typeof document === "undefined") return false;
+    return document.documentElement.classList.contains("hc");
+  });
 
   useEffect(() => {
-    const saved = typeof window !== "undefined" && localStorage.getItem(KEY) === "1";
-    setOn(saved);
-    document.documentElement.classList.toggle("hc", saved);
+    // Sync if another tab toggled it
+    function onStorage(e: StorageEvent) {
+      if (e.key !== KEY) return;
+      const next = e.newValue === "1";
+      setOn(next);
+      document.documentElement.classList.toggle("hc", next);
+    }
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
   }, []);
+
 
   function toggle() {
     const next = !on;
