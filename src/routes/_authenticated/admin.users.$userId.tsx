@@ -402,15 +402,44 @@ function TelegramDmCard({
   const token = userId.replace(/-/g, "").slice(0, 24);
   const connectLink = `https://t.me/${TELEGRAM_BOT_USERNAME}?start=${token}`;
   const [text, setText] = useState("");
+  const qc = useQueryClient();
   const sendFn = useServerFn(sendTelegramDm);
+  const retryFn = useServerFn(retryTelegramDm);
+  const listFn = useServerFn(listTelegramDmsForUser);
+
+  const queueQ = useQuery({
+    queryKey: ["telegram-dm-queue", userId],
+    queryFn: async () => listFn({ data: { userId } }) as Promise<TelegramQueueRow[]>,
+  });
+
+  const invalidate = () =>
+    qc.invalidateQueries({ queryKey: ["telegram-dm-queue", userId] });
+
   const send = useMutation({
     mutationFn: async () => sendFn({ data: { userId, text } }),
     onSuccess: () => {
       toast.success("Sent via OG Bot ✅");
       setText("");
+      invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => {
+      toast.error(e.message);
+      invalidate();
+    },
   });
+
+  const retry = useMutation({
+    mutationFn: async (queueId: string) => retryFn({ data: { queueId } }),
+    onSuccess: () => {
+      toast.success("Retry succeeded ✅");
+      invalidate();
+    },
+    onError: (e: Error) => {
+      toast.error(`Retry failed: ${e.message}`);
+      invalidate();
+    },
+  });
+
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(connectLink);
@@ -487,6 +516,78 @@ function TelegramDmCard({
           </p>
         </div>
       )}
+
+      <div className="space-y-2 border-t border-border pt-4">
+        <div className="flex items-center justify-between">
+          <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Recent DM attempts
+          </Label>
+          {queueQ.isFetching ? (
+            <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+          ) : null}
+        </div>
+        {queueQ.data && queueQ.data.length > 0 ? (
+          <ul className="space-y-2">
+            {queueQ.data.map((row) => {
+              const StatusIcon =
+                row.status === "sent"
+                  ? CheckCircle2
+                  : row.status === "failed"
+                  ? AlertTriangle
+                  : Clock;
+              const tone =
+                row.status === "sent"
+                  ? "text-emerald-400"
+                  : row.status === "failed"
+                  ? "text-red-400"
+                  : "text-amber-400";
+              return (
+                <li
+                  key={row.id}
+                  className="rounded-lg border border-border bg-background/40 p-3 text-xs"
+                >
+                  <div className="flex items-start gap-2">
+                    <StatusIcon className={`mt-0.5 h-3.5 w-3.5 shrink-0 ${tone}`} />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+                        <span className={`font-semibold ${tone}`}>{row.status}</span>
+                        <span>· attempt {row.attempts}</span>
+                        <span>· {new Date(row.created_at).toLocaleString()}</span>
+                      </div>
+                      <p className="mt-1 whitespace-pre-wrap break-words text-foreground">
+                        {row.body.length > 240 ? `${row.body.slice(0, 240)}…` : row.body}
+                      </p>
+                      {row.status === "failed" && row.last_error ? (
+                        <p className="mt-1 text-[11px] text-red-400">
+                          ⚠ {row.last_error}
+                        </p>
+                      ) : null}
+                    </div>
+                    {row.status === "failed" ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 shrink-0 gap-1 text-[11px]"
+                        disabled={retry.isPending && retry.variables === row.id}
+                        onClick={() => retry.mutate(row.id)}
+                      >
+                        {retry.isPending && retry.variables === row.id ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <RotateCw className="h-3 w-3" />
+                        )}
+                        Retry
+                      </Button>
+                    ) : null}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <p className="text-[11px] text-muted-foreground">No DM attempts yet.</p>
+        )}
+      </div>
     </section>
   );
 }
