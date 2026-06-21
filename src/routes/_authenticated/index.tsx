@@ -82,18 +82,18 @@ function DashboardHome() {
         <div aria-hidden className="pointer-events-none absolute -right-10 top-8 h-40 w-40 rounded-full bg-primary/30 blur-2xl animate-[float_6s_ease-in-out_infinite]" />
         <div aria-hidden className="pointer-events-none absolute -left-12 bottom-0 h-32 w-32 rounded-full bg-accent/30 blur-2xl animate-[float_8s_ease-in-out_infinite_reverse]" />
 
-        <div className="relative grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 sm:flex sm:flex-wrap sm:items-end sm:justify-between">
-          <div className="min-w-0 rounded-3xl bg-background/35 p-5 backdrop-blur-md ring-2 ring-white/10 sm:p-7">
-            <p className="text-sm uppercase tracking-[0.28em] text-muted-foreground sm:text-xl">
+        <div className="relative flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
+          <div className="min-w-0 flex-1 rounded-3xl bg-background/35 p-5 backdrop-blur-md ring-2 ring-white/10 sm:p-7">
+            <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground sm:text-xl">
               👋 Welcome back
             </p>
-            <h1 className="font-display mt-3 text-[clamp(2rem,9vw,6rem)] font-black leading-[1.02] tracking-[-0.03em] text-foreground break-words [text-shadow:0_4px_28px_rgba(0,0,0,0.75)]">
+            <h1 className="font-display mt-3 text-[clamp(2rem,11vw,6rem)] font-black leading-[1.02] tracking-[-0.02em] text-foreground [text-shadow:0_4px_28px_rgba(0,0,0,0.75)] [overflow-wrap:break-word] [word-break:normal] [hyphens:auto]">
               Hello,{" "}
-              <em className="inline italic text-gradient-brand break-words animate-[wiggle_3s_ease-in-out_infinite] origin-bottom">
+              <em className="inline italic text-gradient-brand animate-[wiggle_3s_ease-in-out_infinite] origin-bottom [overflow-wrap:break-word] [word-break:normal]">
                 {displayName}
               </em>
             </h1>
-            <p className="mt-4 max-w-2xl text-base leading-[1.45] text-foreground [text-shadow:0_1px_12px_rgba(0,0,0,0.75)] sm:text-2xl md:text-3xl">
+            <p className="mt-4 max-w-2xl text-sm leading-[1.45] text-foreground [text-shadow:0_1px_12px_rgba(0,0,0,0.75)] sm:text-2xl md:text-3xl">
               Jump back into your music workspace or pick up a chat with OG Bot.
             </p>
           </div>
