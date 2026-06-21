@@ -265,6 +265,8 @@ function AdminUsersPage() {
                   })}
                 </TableBody>
               </Table>
+                </div>
+              </div>
             ) : (
               <div className="grid place-items-center gap-2 py-16 text-muted-foreground">
                 <UsersIcon className="h-8 w-8" />
