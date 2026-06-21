@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   Loader2, FileText, MessageSquareMore, Wand2, ExternalLink,
@@ -15,6 +15,16 @@ import { useSettings } from "@/hooks/use-settings";
 import { useProfile } from "@/hooks/use-profile";
 import { cn } from "@/lib/utils";
 import type { Song } from "@/components/SongCard";
+
+/** Extract the human-readable error from a Supabase functions.invoke() failure. */
+function invokeError(err: unknown, fallback: string): string {
+  if (!err) return fallback;
+  if (typeof err === "object") {
+    const e = err as { context?: { error?: string }; message?: string };
+    return e.context?.error || e.message || fallback;
+  }
+  return fallback;
+}
 
 type WorkspaceSong = Song & { lyrics?: string | null; unlocked?: boolean | null };
 
