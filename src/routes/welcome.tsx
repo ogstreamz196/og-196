@@ -18,7 +18,7 @@ import {
   useAdminEditMode,
 } from "@/components/admin/AdminEditMode";
 import { useRole } from "@/hooks/use-role";
-import { Button } from "@/components/ui/button";
+import { TutorialBubbles, type TutorialStep } from "@/components/TutorialBubbles";
 import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -265,6 +265,23 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
 
 
 
+const TUTORIAL_STEPS: TutorialStep[] = [
+  {
+    id: "tap-device",
+    selector: "#sign-in",
+    title: "Start here 👇",
+    body: "Tap the tile that matches your device — Google, Apple, Android, Samsung or iPhone — to sign in.",
+    placement: "top",
+  },
+  {
+    id: "scroll-styles",
+    selector: "#studio",
+    title: "Scroll down",
+    body: "See the song styles you can prompt — drill, afrobeats, pop, R&B and more.",
+    placement: "bottom",
+  },
+];
+
 function WelcomePage() {
   return (
     <AdminEditModeProvider>
@@ -276,6 +293,7 @@ function WelcomePage() {
         <HowItWorks />
         <ClosingCta />
         <Footer />
+        <TutorialBubbles steps={TUTORIAL_STEPS} storageKey="welcome.tutorial.dismissed" />
         <div className="fixed bottom-4 right-4 z-50">
           <AdminEditModeToggle />
         </div>
@@ -316,12 +334,6 @@ function TopNav() {
             </p>
           </div>
         </Link>
-
-        <a href="#sign-in">
-          <Button className="h-11 rounded-xl px-5 text-sm font-semibold bg-gradient-brand text-primary-foreground shadow-glow hover:opacity-95">
-            Sign in
-          </Button>
-        </a>
       </div>
     </header>
   );
@@ -345,12 +357,6 @@ function Hero() {
       </Sticker>
 
       <div className="relative mx-auto w-full max-w-6xl text-center">
-        <div id="sign-in" className="mx-auto max-w-3xl scroll-mt-24">
-          <AuthButtons size="xl" />
-          <p className="mt-6 text-lg font-bold text-foreground sm:text-xl">
-            Free to start — no card required
-          </p>
-        </div>
 
         <div className="wc-pop mt-12 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2 text-base font-semibold uppercase tracking-[0.18em] backdrop-blur-xl">
           <span className="h-2 w-2 animate-pulse rounded-full bg-primary shadow-glow" />
@@ -476,6 +482,13 @@ function Pillars() {
   return (
     <section id="studio" className="relative">
       <div className="mx-auto max-w-6xl px-5 py-24 sm:px-8 lg:py-32">
+        <div id="sign-in" className="mx-auto mb-16 max-w-3xl scroll-mt-24">
+          <AuthButtons size="xl" />
+          <p className="mt-6 text-center text-lg font-bold text-foreground sm:text-xl">
+            Free to start — no card required
+          </p>
+        </div>
+
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-sm font-semibold uppercase tracking-[0.25em] text-muted-foreground">
             Prompt playground
