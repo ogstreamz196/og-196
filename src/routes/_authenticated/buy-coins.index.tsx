@@ -10,7 +10,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { useRole } from "@/hooks/use-role";
 import { useSiteContent, useSetSiteContent } from "@/hooks/use-site-content";
 import { cn } from "@/lib/utils";
-import { COIN_PACKS, CURRENCY_SYMBOL, VIP_PLAN, findCoinPackByBundleId, type CoinPack } from "@/lib/coin-packs";
+import { COIN_PACKS, CURRENCY_SYMBOL, VIP_PLAN, CUSTOM_COIN_UNIT, findCoinPackByBundleId, type CoinPack } from "@/lib/coin-packs";
 import { StripeEmbeddedCheckoutInline } from "@/components/StripeEmbeddedCheckout";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { CirculatingCoins } from "@/components/CirculatingCoins";
@@ -20,10 +20,12 @@ const SELECTION_STORAGE_KEY = "buyCoins.lastSelection";
 
 type StoredSelection =
   | { type: "coins"; bundleId: string }
+  | { type: "custom"; units: number }
   | { type: "vip" };
 
 type Selection =
   | { type: "coins"; pack: CoinPack }
+  | { type: "custom"; units: number }
   | { type: "vip" };
 
 export const Route = createFileRoute("/_authenticated/buy-coins/")({
