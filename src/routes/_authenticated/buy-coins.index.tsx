@@ -263,7 +263,7 @@ function BuyCoinsPage() {
               </p>
               <div className="mt-2 flex items-baseline gap-2">
                 <Coins className="h-7 w-7 text-coin" />
-                <span className="text-5xl font-black tabular-nums leading-none text-foreground">
+                <span className="text-[clamp(2.25rem,8vw,3rem)] font-black tabular-nums leading-none text-foreground">
                   {profile?.coin_balance ?? 0}
                 </span>
               </div>
