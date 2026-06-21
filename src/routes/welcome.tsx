@@ -482,16 +482,26 @@ function Pillars() {
               style={{ transform: `rotate(${it.tilt}deg)` }}
               className="group relative rounded-3xl border-2 border-white/12 bg-card/80 p-8 backdrop-blur-xl transition-all duration-200 hover:-translate-y-2 hover:rotate-0 hover:border-primary/40 hover:shadow-glow"
             >
+              <CardEditBadge />
               <div className="flex items-center gap-3">
                 <span className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-brand text-primary-foreground shadow-glow transition-transform duration-200 group-hover:scale-110 group-hover:rotate-6">
                   {it.icon}
                 </span>
                 <span className="text-3xl">{it.emoji}</span>
               </div>
-              <h3 className="font-display mt-6 text-4xl font-semibold tracking-tight sm:text-5xl">
-                {it.title}
-              </h3>
-              <p className="mt-4 text-lg leading-relaxed text-muted-foreground sm:text-xl">{it.body}</p>
+              <EditableContent
+                as="h3"
+                contentKey={`welcome.pillar.${it.key}.title`}
+                defaultValue={String(it.title)}
+                className="font-display mt-6 block text-4xl font-semibold tracking-tight sm:text-5xl"
+              />
+              <EditableContent
+                as="p"
+                multiline
+                contentKey={`welcome.pillar.${it.key}.body`}
+                defaultValue={it.body}
+                className="mt-4 block text-lg leading-relaxed text-muted-foreground sm:text-xl"
+              />
             </article>
           ))}
         </div>
