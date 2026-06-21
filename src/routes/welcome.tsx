@@ -339,12 +339,6 @@ function Hero() {
       </Sticker>
 
       <div className="relative mx-auto w-full max-w-6xl text-center">
-        <div id="sign-in" className="mx-auto max-w-3xl scroll-mt-24">
-          <AuthButtons size="xl" />
-          <p className="mt-6 text-lg font-bold text-foreground sm:text-xl">
-            Free to start — no card required
-          </p>
-        </div>
 
         <div className="wc-pop mt-12 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2 text-base font-semibold uppercase tracking-[0.18em] backdrop-blur-xl">
           <span className="h-2 w-2 animate-pulse rounded-full bg-primary shadow-glow" />
