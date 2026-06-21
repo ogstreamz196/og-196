@@ -265,24 +265,6 @@ function SettingsPage() {
             </div>
 
             <Separator />
-
-            <div className="space-y-2">
-              <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">OG Bot token issuance</p>
-              <CreateOgBotTokenPanel />
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Unclaimed invite codes</p>
-              <IssueOgBotInvitePanel />
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Active OG Bot tokens</p>
-              <ManageOgBotTokensPanel />
-            </div>
-
-
-            <Separator />
             <div className="flex flex-wrap gap-2">
               <Link to="/admin"><Button variant="outline" size="sm">Admin home</Button></Link>
               <Link to="/admin/users"><Button variant="outline" size="sm">Manage users</Button></Link>
@@ -290,12 +272,6 @@ function SettingsPage() {
           </section>
         )}
 
-
-        {/* Redeem an invite — visible to anyone signed in */}
-        <RedeemOgBotInvitePanel />
-
-        {/* My OG Bot tokens — visible to anyone who has one issued */}
-        <MyOgBotTokensSection />
 
         {/* Session */}
         <section className="rounded-2xl border border-border bg-card p-6 shadow-card flex items-center justify-between">
