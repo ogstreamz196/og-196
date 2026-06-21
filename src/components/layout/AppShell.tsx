@@ -17,6 +17,7 @@ import { useRole } from "@/hooks/use-role";
 import { supabase } from "@/integrations/supabase/client";
 import { AppSidebar } from "./AppSidebar";
 import { HighContrastToggle } from "./HighContrastToggle";
+import { WelcomeBackdrop } from "./WelcomeBackdrop";
 import { OgFloatingWidget } from "@/components/og-widget/OgFloatingWidget";
 
 const routeTitles: Record<string, string> = {
@@ -69,7 +70,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <AdminEditModeProvider>
       <SidebarProvider>
-        <div className="flex min-h-screen w-full bg-background text-foreground">
+        <WelcomeBackdrop />
+        <div className="relative flex min-h-screen w-full bg-background/80 text-foreground">
           <AppSidebar />
 
           <div className="flex min-w-0 flex-1 flex-col">
@@ -86,10 +88,10 @@ export function AppShell({ children }: { children: ReactNode }) {
                   />
                 )}
                 <div className="min-w-0">
-                  <p className="truncate text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                  <p className="truncate text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                     OG Streamz
                   </p>
-                  <h1 className="font-display truncate text-xl font-normal leading-tight tracking-tight sm:text-2xl">
+                  <h1 className="font-display truncate text-2xl font-black leading-tight tracking-tight text-gradient-brand sm:text-3xl">
                     {title}
                   </h1>
                 </div>
