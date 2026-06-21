@@ -59,7 +59,7 @@ export function AppSidebar() {
     await qc.cancelQueries();
     qc.clear();
     await supabase.auth.signOut();
-    window.location.replace("/auth");
+    window.location.replace("/welcome");
   };
 
   const isActive = (url: string) =>

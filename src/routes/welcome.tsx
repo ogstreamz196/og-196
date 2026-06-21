@@ -323,11 +323,11 @@ function TopNav() {
           </div>
         </Link>
 
-        <Link to="/auth">
+        <a href="#sign-in">
           <Button className="h-11 rounded-xl px-5 text-sm font-semibold bg-gradient-brand text-primary-foreground shadow-glow hover:opacity-95">
             Sign in
           </Button>
-        </Link>
+        </a>
       </div>
     </header>
   );
@@ -351,7 +351,7 @@ function Hero() {
       </Sticker>
 
       <div className="relative mx-auto w-full max-w-6xl text-center">
-        <div className="mx-auto max-w-3xl">
+        <div id="sign-in" className="mx-auto max-w-3xl scroll-mt-24">
           <AuthButtons size="xl" />
           <p className="mt-6 text-lg font-bold text-foreground sm:text-xl">
             Free to start — no card required
