@@ -56,16 +56,15 @@ export const COIN_PACKS: readonly CoinPack[] = [
     description: "Serious sessions across Music Hub & Messenger.",
     bestValue: true,
   },
-  {
-    bundleId: "coins_750",
-    priceId: "coins_750_gbp",
-    coins: 750,
-    priceCents: 7999,
-    currency: "gbp",
-    label: "Mega",
-    description: "Biggest stash — best price per coin, bar none.",
-  },
 ] as const;
+
+// Custom pack — 5 coins per £0.99 unit, configurable in the UI.
+export const CUSTOM_COIN_UNIT = {
+  coins: 5,
+  priceCents: 99,
+  minUnits: 1,
+  maxUnits: 200, // up to 1000 coins / £198
+} as const;
 
 export interface VipPlan {
   bundleId: "vip_yearly";
