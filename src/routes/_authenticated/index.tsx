@@ -84,27 +84,27 @@ function DashboardHome() {
 
         <div className="relative grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 sm:flex sm:flex-wrap sm:items-end sm:justify-between">
           <div className="min-w-0 rounded-3xl bg-background/35 p-5 backdrop-blur-md ring-2 ring-white/10 sm:p-7">
-            <p className="text-base uppercase tracking-[0.28em] text-muted-foreground sm:text-lg">
+            <p className="text-lg uppercase tracking-[0.28em] text-muted-foreground sm:text-xl">
               👋 Welcome back
             </p>
-            <h1 className="font-display mt-4 text-6xl font-black leading-[0.95] tracking-[-0.03em] text-foreground [overflow-wrap:anywhere] [text-shadow:0_4px_28px_rgba(0,0,0,0.75)] sm:text-8xl">
+            <h1 className="font-display mt-4 text-7xl font-black leading-[0.95] tracking-[-0.03em] text-foreground [overflow-wrap:anywhere] [text-shadow:0_4px_28px_rgba(0,0,0,0.75)] sm:text-9xl">
               Hello,{" "}
               <em className="inline-block italic text-gradient-brand [overflow-wrap:anywhere] animate-[wiggle_3s_ease-in-out_infinite] origin-bottom">
                 {displayName}
               </em>
             </h1>
-            <p className="mt-6 max-w-2xl text-xl leading-relaxed text-foreground/90 [text-shadow:0_1px_12px_rgba(0,0,0,0.7)] sm:text-2xl">
+            <p className="mt-6 max-w-2xl text-2xl leading-relaxed text-foreground/90 [text-shadow:0_1px_12px_rgba(0,0,0,0.7)] sm:text-3xl">
               Jump back into your music workspace or pick up a chat with OG Bot.
             </p>
           </div>
-          <div className="flex shrink-0 items-center gap-2 text-base">
+          <div className="flex shrink-0 items-center gap-2 text-lg">
             {isVip && (
-              <Badge variant="secondary" className="gap-1.5 rounded-full border-2 border-white/20 px-4 py-2 text-base shadow-glow">
-                <Sparkles className="h-5 w-5" /> VIP
+              <Badge variant="secondary" className="gap-1.5 rounded-full border-2 border-white/20 px-5 py-2.5 text-lg shadow-glow">
+                <Sparkles className="h-6 w-6" /> VIP
               </Badge>
             )}
-            <Badge variant="outline" className="gap-2 rounded-full border-2 border-white/20 bg-white/5 px-4 py-2 text-base">
-              <Coins className="h-5 w-5 text-primary animate-[bounce_2s_ease-in-out_infinite]" />
+            <Badge variant="outline" className="gap-2 rounded-full border-2 border-white/20 bg-white/5 px-5 py-2.5 text-lg">
+              <Coins className="h-6 w-6 text-primary animate-[bounce_2s_ease-in-out_infinite]" />
               {balance} coins
             </Badge>
           </div>
@@ -134,7 +134,7 @@ function DashboardHome() {
 
       {/* Quick actions */}
       <section>
-        <h2 className="mb-5 text-base uppercase tracking-[0.28em] text-muted-foreground sm:text-lg">
+        <h2 className="mb-5 text-lg uppercase tracking-[0.28em] text-muted-foreground sm:text-xl">
           ⚡ Quick actions
         </h2>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -150,15 +150,15 @@ function DashboardHome() {
         <Card className="rounded-[2rem] border-2 border-white/15 shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)] lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-3xl font-black">🎤 Try a prompt</CardTitle>
-              <CardDescription className="text-base">Tap one to start a song in seconds.</CardDescription>
+              <CardTitle className="text-4xl font-black sm:text-5xl">🎤 Try a prompt</CardTitle>
+              <CardDescription className="text-lg">Tap one to start a song in seconds.</CardDescription>
             </div>
             <Link
               to="/library"
               preload="intent"
-              className={cn(buttonVariants({ variant: "ghost", size: "lg" }), "gap-1.5 rounded-full text-base")}
+              className={cn(buttonVariants({ variant: "ghost", size: "lg" }), "gap-1.5 rounded-full text-lg")}
             >
-              Open studio <ArrowRight className="h-5 w-5" />
+              Open studio <ArrowRight className="h-6 w-6" />
             </Link>
           </CardHeader>
           <CardContent>
@@ -173,8 +173,8 @@ function DashboardHome() {
         {/* Next steps */}
         <Card className="rounded-[2rem] border-2 border-white/15 shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)]">
           <CardHeader>
-            <CardTitle className="text-3xl font-black">✅ Next steps</CardTitle>
-            <CardDescription className="text-base">Get the most out of OG Studio.</CardDescription>
+            <CardTitle className="text-4xl font-black sm:text-5xl">✅ Next steps</CardTitle>
+            <CardDescription className="text-lg">Get the most out of OG Studio.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <ChecklistItem
@@ -328,7 +328,7 @@ function QuickAction({
       <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-gradient-brand-soft text-primary shadow-glow transition-transform duration-200 group-hover:scale-110 group-hover:rotate-6">
         {icon}
       </span>
-      <span className="text-lg font-bold">{label}</span>
+      <span className="text-xl font-bold">{label}</span>
     </Link>
   );
 }
@@ -342,14 +342,14 @@ function PromptCard({ prompt }: { prompt: PromptIdea }) {
         className="group flex h-full flex-col gap-2 rounded-2xl border-2 border-white/10 bg-white/[0.03] p-5 transition-all duration-200 hover:-translate-y-1 hover:rotate-[-0.5deg] hover:border-primary/50 hover:bg-white/[0.07] hover:shadow-glow"
       >
         <div className="flex items-center justify-between gap-2">
-          <p className="text-lg font-bold text-foreground">{prompt.title}</p>
-          <Badge variant="outline" className="shrink-0 rounded-full border-2 border-white/15 bg-white/[0.04] text-xs">
+          <p className="text-xl font-bold text-foreground">{prompt.title}</p>
+          <Badge variant="outline" className="shrink-0 rounded-full border-2 border-white/15 bg-white/[0.04] text-sm">
             {prompt.vibe}
           </Badge>
         </div>
-        <p className="text-base leading-relaxed text-muted-foreground">{prompt.description}</p>
-        <span className="mt-auto inline-flex items-center gap-1 pt-2 text-sm font-semibold text-primary opacity-0 transition-opacity group-hover:opacity-100">
-          Use this prompt <ArrowRight className="h-4 w-4" />
+        <p className="text-lg leading-relaxed text-muted-foreground">{prompt.description}</p>
+        <span className="mt-auto inline-flex items-center gap-1 pt-2 text-base font-semibold text-primary opacity-0 transition-opacity group-hover:opacity-100">
+          Use this prompt <ArrowRight className="h-5 w-5" />
         </span>
       </Link>
     </li>
@@ -446,14 +446,14 @@ function ChecklistItem({
       className="flex items-center gap-3 rounded-md border border-transparent px-2 py-3 transition-colors hover:border-border hover:bg-muted/40"
     >
       {done ? (
-        <CheckCircle2 className="h-5 w-5 text-primary" />
+        <CheckCircle2 className="h-6 w-6 text-primary" />
       ) : (
-        <Circle className="h-5 w-5 text-muted-foreground" />
+        <Circle className="h-6 w-6 text-muted-foreground" />
       )}
-      <span className={"text-base font-medium " + (done ? "text-muted-foreground line-through" : "")}>
+      <span className={"text-lg font-medium " + (done ? "text-muted-foreground line-through" : "")}>
         {label}
       </span>
-      <ArrowRight className="ml-auto h-4 w-4 text-muted-foreground" />
+      <ArrowRight className="ml-auto h-5 w-5 text-muted-foreground" />
     </Link>
   );
 }
