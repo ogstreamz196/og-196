@@ -46,16 +46,17 @@ function DashboardHome() {
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-10">
       {/* Welcome */}
-      <section className="flex flex-col gap-3">
-        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 sm:flex sm:flex-wrap sm:items-end sm:justify-between">
+      <section className="relative flex flex-col gap-3 overflow-hidden rounded-3xl border border-white/10 bg-card/55 p-6 shadow-card backdrop-blur-2xl sm:p-8">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,oklch(0.55_0.22_268/0.22),transparent_60%)]" />
+        <div className="relative grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 sm:flex sm:flex-wrap sm:items-end sm:justify-between">
           <div className="min-w-0">
             <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
               Welcome back
             </p>
-            <h1 className="font-display mt-3 text-3xl font-light leading-[1.05] tracking-[-0.02em] [overflow-wrap:anywhere] sm:text-5xl">
+            <h1 className="font-display mt-3 text-3xl font-light leading-[1.05] tracking-[-0.02em] text-foreground [overflow-wrap:anywhere] [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] sm:text-5xl">
               Hello, <em className="italic text-gradient-brand [overflow-wrap:anywhere]">{displayName}</em>
             </h1>
-            <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">
+            <p className="mt-4 max-w-xl text-sm leading-relaxed text-foreground/80 [text-shadow:0_1px_12px_rgba(0,0,0,0.5)]">
               Jump back into your music workspace or pick up a conversation with OG Messenger.
             </p>
           </div>
