@@ -243,15 +243,34 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
 
 function WelcomePage() {
   return (
-    <main className="relative min-h-screen overflow-x-hidden text-foreground">
-      <Blobs />
-      <TopNav />
-      <Hero />
-      <Pillars />
-      <HowItWorks />
-      <ClosingCta />
-      <Footer />
-    </main>
+    <AdminEditModeProvider>
+      <main className="relative min-h-screen overflow-x-hidden text-foreground">
+        <Blobs />
+        <TopNav />
+        <Hero />
+        <Pillars />
+        <HowItWorks />
+        <ClosingCta />
+        <Footer />
+        <div className="fixed bottom-4 right-4 z-50">
+          <AdminEditModeToggle />
+        </div>
+      </main>
+    </AdminEditModeProvider>
+  );
+}
+
+function CardEditBadge() {
+  const { enabled } = useAdminEditMode();
+  const { isAdmin } = useRole();
+  if (!enabled || !isAdmin) return null;
+  return (
+    <div
+      className="pointer-events-none absolute left-3 top-3 z-20 grid h-7 w-7 place-items-center rounded-full bg-primary text-primary-foreground shadow-glow ring-2 ring-background"
+      title="This card is editable — click any text to edit"
+    >
+      <Pencil className="h-3.5 w-3.5" />
+    </div>
   );
 }
 
