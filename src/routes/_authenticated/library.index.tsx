@@ -83,42 +83,72 @@ const POOLS: Record<Category, string[]> = {
 
 const META: Record<
   Category,
-  { label: string; placeholder: string; icon: typeof Languages; gradient: string; emoji: string }
+  {
+    label: string;
+    helper: string;
+    placeholder: string;
+    icon: typeof Languages;
+    gradient: string;
+    emoji: string;
+    accent: string; // tailwind text/border accent class fragment
+    chipActive: string;
+    iconBg: string;
+  }
 > = {
   language: {
     label: "Language",
+    helper: "What language do you want to sing in?",
     placeholder: "Pick a language",
     icon: Languages,
-    gradient: "from-sky-500/40 via-cyan-500/20 to-transparent",
+    gradient: "from-sky-500/50 via-cyan-500/25 to-transparent",
     emoji: "🌍",
+    accent: "text-sky-300",
+    chipActive: "border-sky-400 bg-sky-500/25 text-sky-100 shadow-[0_0_24px_-6px_theme(colors.sky.400)]",
+    iconBg: "bg-sky-500/20 text-sky-300 border-sky-400/30",
   },
   genre: {
     label: "Genre",
+    helper: "What sound are we cooking?",
     placeholder: "Pick a genre",
     icon: Disc3,
-    gradient: "from-fuchsia-500/40 via-purple-500/20 to-transparent",
+    gradient: "from-fuchsia-500/50 via-purple-500/25 to-transparent",
     emoji: "🎧",
+    accent: "text-fuchsia-300",
+    chipActive: "border-fuchsia-400 bg-fuchsia-500/25 text-fuchsia-100 shadow-[0_0_24px_-6px_theme(colors.fuchsia.400)]",
+    iconBg: "bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-400/30",
   },
   mood: {
     label: "Mood",
+    helper: "How should it feel?",
     placeholder: "Pick a mood",
     icon: Smile,
-    gradient: "from-amber-500/40 via-orange-500/20 to-transparent",
+    gradient: "from-amber-500/50 via-orange-500/25 to-transparent",
     emoji: "✨",
+    accent: "text-amber-300",
+    chipActive: "border-amber-400 bg-amber-500/25 text-amber-100 shadow-[0_0_24px_-6px_theme(colors.amber.400)]",
+    iconBg: "bg-amber-500/20 text-amber-300 border-amber-400/30",
   },
   theme: {
     label: "Theme",
+    helper: "What's the song about?",
     placeholder: "Pick a theme",
     icon: Heart,
-    gradient: "from-rose-500/40 via-pink-500/20 to-transparent",
+    gradient: "from-rose-500/50 via-pink-500/25 to-transparent",
     emoji: "💭",
+    accent: "text-rose-300",
+    chipActive: "border-rose-400 bg-rose-500/25 text-rose-100 shadow-[0_0_24px_-6px_theme(colors.rose.400)]",
+    iconBg: "bg-rose-500/20 text-rose-300 border-rose-400/30",
   },
   tempo: {
     label: "Tempo",
+    helper: "How fast should it hit?",
     placeholder: "Pick a tempo",
     icon: Gauge,
-    gradient: "from-emerald-500/40 via-teal-500/20 to-transparent",
+    gradient: "from-emerald-500/50 via-teal-500/25 to-transparent",
     emoji: "⚡",
+    accent: "text-emerald-300",
+    chipActive: "border-emerald-400 bg-emerald-500/25 text-emerald-100 shadow-[0_0_24px_-6px_theme(colors.emerald.400)]",
+    iconBg: "bg-emerald-500/20 text-emerald-300 border-emerald-400/30",
   },
 };
 
@@ -656,38 +686,48 @@ function CategoryCard({
   const meta = META[cat];
   const Icon = meta.icon;
   return (
-    <div className="group relative overflow-hidden rounded-3xl border border-white/10 bg-card/60 p-5 shadow-card backdrop-blur-xl transition-all hover:border-white/20 sm:p-6">
+    <div className="group relative overflow-hidden rounded-3xl border border-white/10 bg-card/70 p-5 shadow-card backdrop-blur-xl transition-all hover:border-white/20 sm:p-6">
       <div
         aria-hidden
-        className={`pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-gradient-to-br ${meta.gradient} blur-2xl`}
+        className={`pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-gradient-to-br ${meta.gradient} blur-2xl`}
       />
       <div className="relative space-y-4">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2.5">
-            <div className="grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-base">
-              <Icon className="h-4 w-4 text-foreground/80" />
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl border text-lg ${meta.iconBg}`}>
+              <Icon className="h-5 w-5" />
             </div>
-            <div className="leading-tight">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                {meta.emoji} Pick a vibe
+            <div className="min-w-0 leading-tight">
+              <div className={`text-[10px] font-bold uppercase tracking-[0.2em] ${meta.accent}`}>
+                {meta.emoji} {meta.label}
               </div>
-              <div className="text-base font-bold">{meta.label}</div>
+              <div className="mt-1 text-sm font-semibold text-foreground">
+                {value ? (
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className={`inline-block h-1.5 w-1.5 rounded-full bg-current ${meta.accent}`} />
+                    {value}
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground">{meta.helper}</span>
+                )}
+              </div>
             </div>
           </div>
           <Button
             type="button"
             variant="ghost"
-            size="icon"
+            size="sm"
             onClick={onRefresh}
-            aria-label={`Refresh ${meta.label}`}
-            className="h-8 w-8 shrink-0 text-muted-foreground hover:text-primary"
+            aria-label={`Shuffle ${meta.label} suggestions`}
+            className={`h-8 shrink-0 gap-1.5 px-2.5 text-xs font-semibold ${meta.accent} hover:bg-white/5`}
           >
             <RefreshCw className="h-3.5 w-3.5" />
+            Shuffle
           </Button>
         </div>
 
         <Select value={value ?? ""} onValueChange={onSelect}>
-          <SelectTrigger className="h-10 w-full rounded-xl">
+          <SelectTrigger className="h-11 w-full rounded-xl border-white/10 bg-background/50 text-sm font-medium">
             <SelectValue placeholder={meta.placeholder} />
           </SelectTrigger>
           <SelectContent className="max-h-72">
@@ -699,25 +739,30 @@ function CategoryCard({
           </SelectContent>
         </Select>
 
-        <div className="flex flex-wrap gap-1.5">
-          {chips.map((chip) => {
-            const active = value === chip;
-            return (
-              <button
-                key={chip}
-                type="button"
-                onClick={() => onPickChip(chip)}
-                className={
-                  "rounded-full border px-2.5 py-1 text-xs font-medium transition-all hover:-translate-y-0.5 " +
-                  (active
-                    ? "border-primary bg-primary/20 text-primary shadow-glow"
-                    : "border-white/10 bg-white/5 text-foreground/80 hover:border-primary/40 hover:bg-white/10")
-                }
-              >
-                {chip}
-              </button>
-            );
-          })}
+        <div className="space-y-2">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            Quick picks
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {chips.map((chip) => {
+              const active = value === chip;
+              return (
+                <button
+                  key={chip}
+                  type="button"
+                  onClick={() => onPickChip(chip)}
+                  className={
+                    "rounded-full border px-3 py-1.5 text-xs font-semibold transition-all hover:-translate-y-0.5 " +
+                    (active
+                      ? meta.chipActive
+                      : "border-white/10 bg-white/[0.04] text-foreground/85 hover:border-white/25 hover:bg-white/10")
+                  }
+                >
+                  {chip}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>
