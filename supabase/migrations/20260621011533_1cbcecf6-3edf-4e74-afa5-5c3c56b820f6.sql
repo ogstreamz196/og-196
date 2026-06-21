@@ -1,0 +1,1 @@
+INSERT INTO public.app_settings (key, value) VALUES ('coins_per_full_unlock', to_jsonb(5)) ON CONFLICT (key) DO NOTHING;
