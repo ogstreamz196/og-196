@@ -34,6 +34,7 @@ import {
   type CreationFlow,
   type SongBriefDraft,
 } from "@/components/library/CreateSongDialog";
+import { ogWidget } from "@/stores/og-widget";
 
 export const Route = createFileRoute("/_authenticated/library/")({
   component: LibraryPage,
@@ -188,7 +189,15 @@ function LibraryPage() {
             <button
               key={e.flow}
               type="button"
-              onClick={() => setOpenFlow(e.flow)}
+              onClick={() => {
+                if (e.flow === "messenger") {
+                  ogWidget.open(
+                    "Yo OG — help me co-write a song. Hit me with some starter ideas and questions to get going.",
+                  );
+                } else {
+                  setOpenFlow(e.flow);
+                }
+              }}
               className="group flex flex-col items-start gap-3 rounded-2xl border border-white/10 bg-card/70 p-5 text-left shadow-card backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-glow"
             >
               <span className="grid h-9 w-9 place-items-center rounded-lg border border-white/10 bg-gradient-brand-soft text-primary">

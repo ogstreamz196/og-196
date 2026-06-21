@@ -4,11 +4,13 @@ import { useRouterState } from "@tanstack/react-router";
 import { OgChat } from "./OgChat";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
+import { ogWidget, useOgWidgetState } from "@/stores/og-widget";
 
 /**
  * Floating, draggable OG Bot widget. Mounted site-wide on authenticated
  * routes. Drag the orb anywhere; position is remembered for the session.
  * Hidden on the dedicated /messenger page so we don't stack two chats.
+ * Can be opened from anywhere via `ogWidget.open(seed?)`.
  */
 
 const POS_KEY = "og-bot:widget-pos";
@@ -51,6 +53,12 @@ export function OgBotWidget() {
   const dragRef = useRef<{ startX: number; startY: number; origX: number; origY: number; moved: boolean } | null>(null);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user } = useAuth();
+  const external = useOgWidgetState();
+
+  // Open from external store (e.g. "With OG" button on /library).
+  useEffect(() => {
+    if (external.open && !open) setOpen(true);
+  }, [external.open, open]);
 
   // Persist position (per-session) and re-clamp on resize.
   useEffect(() => {
@@ -134,7 +142,7 @@ export function OgBotWidget() {
               <span className="text-sm font-semibold">OG Bot</span>
             </div>
             <button
-              onClick={() => setOpen(false)}
+              onClick={() => { setOpen(false); ogWidget.close(); }}
               className="rounded-md p-1 transition-colors hover:bg-white/10"
               aria-label="Close OG Bot"
             >
@@ -142,7 +150,7 @@ export function OgBotWidget() {
             </button>
           </div>
           <div className="h-[calc(100%-44px)]">
-            <OgChat compact showHeader />
+            <OgChat compact showHeader seed={external.open ? external.seed : null} />
           </div>
         </div>
       )}

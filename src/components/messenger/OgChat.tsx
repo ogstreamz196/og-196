@@ -73,6 +73,8 @@ interface OgChatProps {
   showHeader?: boolean;
   /** Show quick-start chips on empty state. */
   showQuickStarts?: boolean;
+  /** Optional seeded text to drop in the input (e.g. when opened via "With OG"). */
+  seed?: string | null;
 }
 
 /**
@@ -84,6 +86,7 @@ export function OgChat({
   compact = false,
   showHeader = false,
   showQuickStarts = true,
+  seed = null,
 }: OgChatProps) {
   const { user } = useAuth();
   const dev = useDevMode();
@@ -157,6 +160,14 @@ export function OgChat({
   useEffect(() => {
     inputRef.current?.focus();
   }, [userId]);
+
+  // Apply seeded prompt (e.g. from "With OG" CTA on /library).
+  useEffect(() => {
+    if (seed && seed.trim()) {
+      setInput((prev) => (prev.trim() ? prev : seed));
+      setTimeout(() => inputRef.current?.focus(), 0);
+    }
+  }, [seed]);
 
   const m = useMutation({
     mutationFn: async (args: { history: OgChatMessage[]; attachmentDataUrl?: string }) =>
