@@ -97,6 +97,18 @@ export function OgBotWidget() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user } = useAuth();
   const external = useOgWidgetState();
+  const { foulMouth } = useFoulMouth();
+  const { mode } = useOgMode();
+  const [chipsHidden, setChipsHidden] = useState(false);
+  const quickPrompts = useMemo(
+    () => buildQuickPrompts(pathname, mode, foulMouth),
+    [pathname, mode, foulMouth],
+  );
+
+  // Re-show chips whenever the panel opens fresh.
+  useEffect(() => {
+    if (open) setChipsHidden(false);
+  }, [open]);
 
   // Open from external store (e.g. "With OG" button on /library).
   useEffect(() => {
