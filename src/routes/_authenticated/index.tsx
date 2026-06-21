@@ -11,6 +11,11 @@ import {
   Headphones,
   CheckCircle2,
   Circle,
+  Disc3,
+  Mic2,
+  Radio,
+  Bot,
+  AudioLines,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useDevMode } from "@/hooks/use-dev-mode";
