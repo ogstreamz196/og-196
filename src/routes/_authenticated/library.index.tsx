@@ -574,8 +574,40 @@ function LibraryPage() {
                   Personal details <span className="font-normal normal-case">(optional)</span>
                 </Label>
                 <p className="mt-1 text-[11px] text-muted-foreground">
-                  Add your own personal touch — tap a chip to add a prompt, then fill it in.
+                  Add your own personal touch — tap an example to load it, or build your own with the chips.
                 </p>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {[
+                    {
+                      label: "🎂 Birthday roast",
+                      text: "Their name: Aaliyah\nOccasion: 30th birthday\nInside joke: still can't parallel park\nWhat they love: oat-milk lattes",
+                    },
+                    {
+                      label: "💔 Breakup anthem",
+                      text: "Their name: Marcus\nStory: ghosted me after 2 years\nCity: Manchester\nInside joke: \"I'll text you back\" — never did",
+                    },
+                    {
+                      label: "💍 Wedding toast",
+                      text: "Their name: Sam & Jordan\nOccasion: wedding day\nWhat they love: late-night taco runs\nInside joke: the karaoke night we don't talk about",
+                    },
+                    {
+                      label: "🏆 Hype song",
+                      text: "Their name: Dre\nOccasion: promotion at work\nCity: Brooklyn\nWhat they love: never missing leg day",
+                    },
+                  ].map((ex) => (
+                    <button
+                      key={ex.label}
+                      type="button"
+                      onClick={() => {
+                        setPersonalDetails(ex.text.slice(0, 500));
+                        toast.success(`${ex.label} loaded`);
+                      }}
+                      className="rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-foreground transition hover:border-primary hover:bg-primary/20"
+                    >
+                      {ex.label}
+                    </button>
+                  ))}
+                </div>
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {[
                     { label: "👤 Their name", snippet: "Their name: " },
