@@ -65,7 +65,7 @@ function AdminUsersPage() {
         .order("created_at", { ascending: false })
         .limit(1000);
       if (error) throw error;
-      return (data ?? []).map((p) => maskDevIdentity(p as ProfileRow)) as ProfileRow[];
+      return ((data ?? []) as ProfileRow[]).map((p) => maskDevIdentity(p));
     },
   });
 
