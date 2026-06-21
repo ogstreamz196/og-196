@@ -282,10 +282,12 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
         <p className="relative mt-2 font-display text-3xl font-black uppercase leading-tight tracking-[0.04em] text-foreground sm:text-4xl md:text-5xl">
           <span aria-hidden>👇 </span>Select Your Device
         </p>
-        <p className="relative mt-1 font-display text-2xl font-black uppercase tracking-[0.06em] text-primary sm:text-3xl">
-          Start Now
-        </p>
-        <p className="relative mt-2 text-sm font-semibold uppercase tracking-[0.18em] text-foreground/80 sm:text-base">
+        <div className="relative mt-3 flex justify-center">
+          <span className="relative inline-flex items-center gap-2 rounded-full bg-amber-400 px-6 py-2.5 font-display text-2xl font-black uppercase tracking-[0.08em] text-black shadow-[0_0_0_4px_rgba(0,0,0,0.5),0_8px_24px_-4px_rgba(251,191,36,0.8)] ring-2 ring-amber-300 animate-pulse sm:text-3xl">
+            <span aria-hidden>🚀</span> Start Now
+          </span>
+        </div>
+        <p className="relative mt-3 text-sm font-semibold uppercase tracking-[0.18em] text-foreground/80 sm:text-base">
           Pick the one you're using to sign in
         </p>
         <p className="relative mt-4 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-2.5 text-center text-sm font-bold text-amber-200">
