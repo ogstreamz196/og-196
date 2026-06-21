@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
-  Loader2, ShieldCheck, ArrowLeft, Crown, Coins, Plus, Minus, UserCog, Mail, Calendar, Fingerprint, Bot, Send, Copy, MessageCircle,
+  Loader2, ShieldCheck, ArrowLeft, Crown, Coins, Plus, Minus, UserCog, Mail, Calendar, Fingerprint, Bot, Send, Copy, MessageCircle, RotateCw, CheckCircle2, AlertTriangle, Clock,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { maskDevIdentity } from "@/lib/dev-identity";
@@ -16,7 +16,12 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { UserAuditTrail } from "@/components/admin/UserAuditTrail";
 import { DevBossPanel } from "@/components/admin/DevBossPanel";
-import { sendTelegramDm } from "@/lib/telegram-admin.functions";
+import {
+  sendTelegramDm,
+  retryTelegramDm,
+  listTelegramDmsForUser,
+  type TelegramQueueRow,
+} from "@/lib/telegram-admin.functions";
 import { Wrench, Flame } from "lucide-react";
 import { toast } from "sonner";
 
