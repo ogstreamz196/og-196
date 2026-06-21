@@ -284,5 +284,6 @@ export function composePromptFromDraft(d: SongBriefDraft): string {
     );
   }
   if (d.theme) lines.push(`Message: ${d.theme}`);
+  if (d.language) lines.push(`Language: write the lyrics in ${d.language}`);
   return lines.join("\n");
 }
