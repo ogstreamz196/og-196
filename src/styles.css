@@ -173,8 +173,9 @@
   }
   html {
     background-color: var(--color-background);
-    /* Responsive base font-size — scales smoothly between mobile (15px) and desktop (17px) */
-    font-size: clamp(15px, 0.55vw + 13.5px, 17px);
+    /* Responsive base font-size — scales smoothly between mobile (15px) and desktop (17px),
+       then multiplied by the user's saved text-scale (0.85 → 1.50). */
+    font-size: calc(clamp(15px, 0.55vw + 13.5px, 17px) * var(--text-scale, 1));
   }
   body {
     background-color: var(--color-background);
@@ -186,9 +187,16 @@
     position: relative;
     min-height: 100vh;
     /* Comfortable reading rhythm */
-    line-height: 1.65;
+    line-height: 1.7;
     letter-spacing: 0.005em;
   }
+  /* Density tokens — consumed by surfaces that opt in via `var(--space-y)` etc. */
+  :root,
+  html[data-density="comfortable"] { --density-scale: 1; --line-height-body: 1.7; }
+  html[data-density="compact"]     { --density-scale: 0.85; --line-height-body: 1.55; }
+  html[data-density="spacious"]    { --density-scale: 1.15; --line-height-body: 1.85; }
+  html[data-density] body { line-height: var(--line-height-body); }
+
   /* Responsive typography scale — never overlaps on small screens */
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
@@ -200,7 +208,7 @@
   h2 { font-size: clamp(1.4rem, 1.6vw + 0.9rem, 2.25rem); line-height: 1.15; }
   h3 { font-size: clamp(1.15rem, 1vw + 0.8rem, 1.65rem); line-height: 1.2; }
   h4 { font-size: clamp(1rem, 0.6vw + 0.8rem, 1.25rem); line-height: 1.25; text-transform: none; letter-spacing: 0; }
-  p  { line-height: 1.7; }
+  p  { line-height: var(--line-height-body, 1.7); }
   .prose p + p { margin-top: 0.75em; }
 
   .font-display {
