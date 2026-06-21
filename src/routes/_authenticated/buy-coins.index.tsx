@@ -36,7 +36,7 @@ export const Route = createFileRoute("/_authenticated/buy-coins/")({
 });
 
 function BuyCoinsPage() {
-  const { data: profile, isLoading: profileLoading } = useProfile();
+  const { data: profile } = useProfile();
   const { isVip, isDev, isLoading: roleLoading } = useRole();
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
