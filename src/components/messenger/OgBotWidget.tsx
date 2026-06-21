@@ -204,7 +204,24 @@ export function OgBotWidget() {
               <X className="h-4 w-4" />
             </button>
           </div>
-          <div className="h-[calc(100%-44px)]">
+          {!chipsHidden && (
+            <div className="flex gap-1.5 overflow-x-auto border-b border-border/60 bg-muted/30 px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {quickPrompts.map((q) => (
+                <button
+                  key={q.label}
+                  type="button"
+                  onClick={() => {
+                    ogWidget.open(q.prompt);
+                    setChipsHidden(true);
+                  }}
+                  className="shrink-0 rounded-full border border-border bg-background px-3 py-1 text-xs font-medium hover:bg-primary hover:text-primary-foreground transition-colors"
+                >
+                  {q.label}
+                </button>
+              ))}
+            </div>
+          )}
+          <div className={cn(chipsHidden ? "h-[calc(100%-44px)]" : "h-[calc(100%-86px)]")}>
             <OgChat compact showHeader seed={external.open ? external.seed : null} />
           </div>
         </div>
