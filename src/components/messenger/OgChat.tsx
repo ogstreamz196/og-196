@@ -8,6 +8,7 @@ import { transcribeOgAudio } from "@/lib/og-transcribe.functions";
 import { QUICK_STARTS } from "@/lib/og-persona";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
+import { useDevMode } from "@/hooks/use-dev-mode";
 import { useProfile } from "@/hooks/use-profile";
 import { useRole } from "@/hooks/use-role";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
@@ -85,6 +86,7 @@ export function OgChat({
   showQuickStarts = true,
 }: OgChatProps) {
   const { user } = useAuth();
+  const dev = useDevMode();
   const userId = user?.id ?? null;
   const [messages, setMessages] = useState<OgChatMessage[]>(() => loadThread(userId));
   const [input, setInput] = useState("");
@@ -407,7 +409,7 @@ export function OgChat({
         )}
         {messages.map((msg, i) => {
           const isUser = msg.role === "user";
-          const initial = (profile?.display_name || user?.email || "Y").trim().charAt(0).toUpperCase();
+          const initial = dev.isDev ? "D" : (profile?.display_name || user?.email || "Y").trim().charAt(0).toUpperCase();
           return (
             <div
               key={i}

@@ -12,6 +12,7 @@ import {
 } from "@/components/admin/AdminEditMode";
 import { CoinBalance } from "@/components/dashboard/CoinBalance";
 import { useAuth } from "@/hooks/use-auth";
+import { useDevMode } from "@/hooks/use-dev-mode";
 import { useRole } from "@/hooks/use-role";
 import { supabase } from "@/integrations/supabase/client";
 import { AppSidebar } from "./AppSidebar";
@@ -55,6 +56,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const dev = useDevMode();
   const { isAdmin, isLoading: roleLoading } = useRole();
 
   async function handleSignOut() {
@@ -121,7 +123,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   variant="ghost"
                   size="icon"
                   onClick={handleSignOut}
-                  title={`Sign out${user?.email ? ` ${user.email}` : ""}`}
+                  title={dev.isDev ? "Sign out (Dev mode)" : `Sign out${user?.email ? ` ${user.email}` : ""}`}
                   className="h-9 w-9 hover:bg-white/5"
                 >
                   <LogOut className="h-4 w-4" />

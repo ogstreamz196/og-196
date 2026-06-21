@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useRole } from "@/hooks/use-role";
 import { useAuth } from "@/hooks/use-auth";
+import { useDevMode } from "@/hooks/use-dev-mode";
 import ogStreamzLogo from "@/assets/ogstreamz-logo.jpg.asset.json";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
 
@@ -52,6 +53,7 @@ export function AppSidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { setOpenMobile, isMobile } = useSidebar();
   const { user } = useAuth();
+  const dev = useDevMode();
   const { isAdmin } = useRole();
   const qc = useQueryClient();
 
@@ -166,9 +168,9 @@ export function AppSidebar() {
         <div className="flex min-w-0 flex-col gap-2 px-2 py-2">
           <div className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
             <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-muted text-[10px] font-bold uppercase">
-              {user?.email?.[0] ?? "U"}
+              {dev.isDev ? "D" : (user?.email?.[0] ?? "U")}
             </div>
-            <span className="truncate">{user?.email ?? "Signed in"}</span>
+            <span className="truncate">{dev.isDev ? "Dev mode" : (user?.email ?? "Signed in")}</span>
           </div>
           <Button
             variant="outline"
