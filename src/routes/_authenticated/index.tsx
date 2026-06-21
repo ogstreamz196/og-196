@@ -33,12 +33,23 @@ export const Route = createFileRoute("/_authenticated/")({
   component: DashboardHome,
 });
 
+type PromptIdea = { title: string; description: string; vibe: string };
+
+const EXAMPLE_PROMPTS: PromptIdea[] = [
+  { title: "Late night drive", description: "Synthwave with moody vocals and neon city energy.", vibe: "Synthwave" },
+  { title: "Sunday hangover", description: "Lo-fi acoustic ballad about regretting last night.", vibe: "Lo-fi" },
+  { title: "Gym warm-up", description: "Hard-hitting trap beat with chant-style hooks.", vibe: "Trap" },
+  { title: "Festival anthem", description: "Big-room house drop, euphoric chorus, hands in the air.", vibe: "House" },
+  { title: "Heartbreak letter", description: "Slow piano ballad with raw, emotional lyrics.", vibe: "Ballad" },
+  { title: "Pirate radio cypher", description: "UK drill instrumental with sliding 808s and dark keys.", vibe: "Drill" },
+];
+
 function DashboardHome() {
   const { user } = useAuth();
   const dev = useDevMode();
   const { data: profile } = useProfile();
   const { isVip } = useRole();
-  const { data: recentSongs = [], isLoading: songsLoading } = useRecentSongs(user?.id);
+  const { data: recentSongs = [] } = useRecentSongs(user?.id);
 
   const displayName = dev.isDev
     ? "Developer"
