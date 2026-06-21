@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Crown, Bot, ShieldCheck, Coins, Plus, Minus, LogOut, UserCog, Mail, Fingerprint, KeyRound, Send, Copy, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { useDevMode } from "@/hooks/use-dev-mode";
 import { useProfile } from "@/hooks/use-profile";
 import { useRole } from "@/hooks/use-role";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
@@ -21,6 +22,7 @@ export const Route = createFileRoute("/_authenticated/settings")({
 
 function SettingsPage() {
   const { user } = useAuth();
+  const dev = useDevMode();
   const { data: profile, refetch } = useProfile();
   const { isAdmin, isVip, roles } = useRole();
   const qc = useQueryClient();
@@ -32,8 +34,8 @@ function SettingsPage() {
   const [adjust, setAdjust] = useState("");
 
   useEffect(() => {
-    if (profile && !nameDirty) setName(profile.display_name ?? "");
-  }, [profile?.display_name, nameDirty]);
+    if (profile && !nameDirty) setName(dev.isDev ? "Developer" : (profile.display_name ?? ""));
+  }, [profile?.display_name, nameDirty, dev.isDev]);
   useEffect(() => {
     if (profile && !balanceDirty) setBalance(String(profile.coin_balance ?? 0));
   }, [profile?.coin_balance, balanceDirty]);
@@ -131,7 +133,7 @@ function SettingsPage() {
             <div className="min-w-0">
               <h2 className="font-semibold">Profile</h2>
               <p className="truncate text-xs text-muted-foreground flex items-center gap-1.5">
-                <Mail className="h-3 w-3" /> {user?.email}
+                <Mail className="h-3 w-3" /> {dev.isDev ? "developer@local" : user?.email}
               </p>
             </div>
           </header>
