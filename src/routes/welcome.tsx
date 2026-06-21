@@ -271,11 +271,21 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
     <div className="w-full space-y-5">
       <div className="relative mx-auto max-w-xl overflow-hidden rounded-3xl border-2 border-primary/50 bg-linear-to-br from-primary/25 via-primary/10 to-transparent px-5 py-5 text-center shadow-[0_12px_40px_-12px_rgba(59,130,246,0.55)]">
         <div className="pointer-events-none absolute inset-x-0 -top-1/2 h-full animate-pulse bg-linear-to-b from-primary/20 to-transparent blur-2xl" aria-hidden />
-        <p className="relative font-display text-2xl font-black uppercase tracking-[0.08em] text-foreground sm:text-3xl md:text-4xl">
-          <span aria-hidden>👇 </span>Tap Your Device Below
+        <span className="relative inline-flex items-center gap-2 rounded-full border border-primary/60 bg-primary/20 px-3 py-1 text-xs font-black uppercase tracking-[0.2em] text-primary-foreground">
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[11px] font-black text-primary-foreground">1</span>
+          Step 1
+        </span>
+        <p className="relative mt-2 font-display text-3xl font-black uppercase leading-tight tracking-[0.04em] text-foreground sm:text-4xl md:text-5xl">
+          <span aria-hidden>👇 </span>Select Your Device
         </p>
-        <p className="relative mt-1 text-sm font-semibold uppercase tracking-[0.18em] text-foreground/80 sm:text-base">
+        <p className="relative mt-1 font-display text-2xl font-black uppercase tracking-[0.06em] text-primary sm:text-3xl">
+          Start Now
+        </p>
+        <p className="relative mt-2 text-sm font-semibold uppercase tracking-[0.18em] text-foreground/80 sm:text-base">
           Pick the one you're using to sign in
+        </p>
+        <p className="relative mt-4 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-2.5 text-center text-sm font-bold text-amber-200">
+          <span aria-hidden>⚠️ </span>Tap <span className="underline">Allow</span> / <span className="underline">Accept</span> on every prompt that appears after picking your device.
         </p>
       </div>
 
@@ -286,10 +296,6 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
           <div className="grid grid-cols-3 gap-3 sm:gap-4">{secondaryTiles}</div>
         </div>
       </div>
-
-      <p className="rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-2.5 text-center text-sm font-bold text-amber-200">
-        <span aria-hidden>⚠️ </span>Tap <span className="underline">Allow</span> / <span className="underline">Accept</span> on every prompt that appears after picking your device.
-      </p>
     </div>
   );
 }
