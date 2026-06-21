@@ -19,6 +19,31 @@ import { AppSidebar } from "./AppSidebar";
 import { HighContrastToggle } from "./HighContrastToggle";
 import { WelcomeBackdrop } from "./WelcomeBackdrop";
 import { OgFloatingWidget } from "@/components/og-widget/OgFloatingWidget";
+import ogStreamzLogo from "@/assets/ogstreamz-logo.jpg.asset.json";
+import ogBotLogo from "@/assets/ogbot.png.asset.json";
+
+function BrandLockup({ compact = false }: { compact?: boolean }) {
+  return (
+    <div
+      className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2 py-1 shadow-sm backdrop-blur-md"
+      aria-label="OG Streamz powered by OG Bot"
+    >
+      <img
+        src={ogStreamzLogo.url}
+        alt="OG Streamz"
+        className={`${compact ? "h-6" : "h-7"} w-auto rounded-md object-contain`}
+      />
+      <span className="text-[8px] font-semibold uppercase tracking-[0.18em] text-muted-foreground leading-tight">
+        Powered by
+      </span>
+      <img
+        src={ogBotLogo.url}
+        alt="OG Bot"
+        className={`${compact ? "h-6 w-6" : "h-7 w-7"} rounded-full object-cover ring-1 ring-primary/40`}
+      />
+    </div>
+  );
+}
 
 const routeTitles: Record<string, string> = {
   "/": "Music Hub",
@@ -78,18 +103,8 @@ export function AppShell({ children }: { children: ReactNode }) {
               <SidebarTrigger className="shrink-0" />
 
               <div className="flex min-w-0 items-center gap-3">
-                {pathname.startsWith("/messenger") && (
-                  <img
-                    src="/og-bot-avatar.png"
-                    onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = "none")}
-                    alt=""
-                    className="wc-bounce-soft hidden h-9 w-9 rounded-full ring-2 ring-primary/50 sm:block"
-                  />
-                )}
-                <div className="min-w-0">
-                  <p className="hidden truncate text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground sm:block">
-                    OG Streamz
-                  </p>
+                <BrandLockup compact />
+                <div className="hidden min-w-0 md:block">
                   <h1 className="font-display truncate text-lg font-black leading-tight tracking-tight text-gradient-brand sm:text-2xl lg:text-3xl">
                     {title}
                   </h1>
