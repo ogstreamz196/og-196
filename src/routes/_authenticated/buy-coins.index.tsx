@@ -612,3 +612,15 @@ function TrustItem({ icon, title, body }: { icon: React.ReactNode; title: string
     </div>
   );
 }
+
+function Row({ label, value, hint }: { label: string; value: string; hint?: string }) {
+  return (
+    <div className="flex items-baseline justify-between gap-3">
+      <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</span>
+      <span className="text-right">
+        <span className="text-sm font-bold tabular-nums">{value}</span>
+        {hint && <span className="ml-2 text-[10px] font-bold uppercase tracking-wider text-emerald-400">{hint}</span>}
+      </span>
+    </div>
+  );
+}
