@@ -498,12 +498,6 @@ function Pillars() {
   return (
     <section id="studio" className="relative scroll-mt-24">
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-8 sm:py-24 lg:py-32">
-        <div id="sign-in" className="mx-auto mb-12 max-w-3xl scroll-mt-24 sm:mb-16">
-          <AuthButtons size="xl" />
-          <p className="mt-5 text-center text-base font-bold text-foreground sm:mt-6 sm:text-xl">
-            Free to start — no card required
-          </p>
-        </div>
 
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground sm:text-sm">
