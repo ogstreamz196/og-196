@@ -300,9 +300,9 @@ function PricingControls() {
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <Label htmlFor="signup">Free-tier signup credits</Label>
+          <Label htmlFor="signup">Free-tier signup OG Coins</Label>
           <Input id="signup" type="number" min={0} max={1000} value={signup} onChange={(e) => setSignup(e.target.value)} className="mt-2" />
-          <p className="mt-1 text-xs text-muted-foreground">Granted once on first sign-in. 1 credit = 1 OG Bot message.</p>
+          <p className="mt-1 text-xs text-muted-foreground">Granted once on first sign-in. 1 OG Coin = 1 OG Bot message.</p>
         </div>
         <div>
           <Label htmlFor="coins">Coins per generation</Label>
