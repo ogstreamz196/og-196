@@ -15,6 +15,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useRole } from "@/hooks/use-role";
 import { supabase } from "@/integrations/supabase/client";
 import { AppSidebar } from "./AppSidebar";
+import { HighContrastToggle } from "./HighContrastToggle";
 import { OgFloatingWidget } from "@/components/og-widget/OgFloatingWidget";
 
 const routeTitles: Record<string, string> = {
@@ -113,6 +114,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   </div>
                 )}
                 <AdminEditModeToggle className="hidden sm:inline-flex" />
+                <HighContrastToggle />
                 <CoinBalance className="hidden sm:inline-flex" />
                 <Button
                   type="button"
