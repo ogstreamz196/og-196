@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import ReactMarkdown from "react-markdown";
-import { Send, Trash2, Sparkles, Skull, ShieldCheck, UploadCloud, Mic, RotateCcw } from "lucide-react";
+import { Send, Trash2, Sparkles, Skull, ShieldCheck, UploadCloud, Mic, RotateCcw, Crown } from "lucide-react";
 import { chatOgBot, type OgChatMessage } from "@/lib/og-messenger.functions";
 import { QUICK_STARTS } from "@/lib/og-persona";
 import { Button } from "@/components/ui/button";
@@ -10,9 +10,21 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
+import { useRole } from "@/hooks/use-role";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { useOgMode } from "@/hooks/use-og-mode";
 import { cn } from "@/lib/utils";
+
+/** Telegram-style premium font stack — SF on Apple, Segoe on Windows, Roboto on Android. */
+const TELEGRAM_FONT_STACK =
+  '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif';
+const TELEGRAM_FONT_STYLE: React.CSSProperties = {
+  fontFamily: TELEGRAM_FONT_STACK,
+  fontFeatureSettings: '"ss01", "cv11", "kern"',
+  letterSpacing: "-0.01em",
+  WebkitFontSmoothing: "antialiased",
+  MozOsxFontSmoothing: "grayscale",
+};
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
 
 function OgAvatar({ size = 36, className = "" }: { size?: number; className?: string }) {
@@ -86,6 +98,8 @@ export function OgChat({
   const { foulMouth } = useFoulMouth();
   const setFoulMouth = useSetFoulMouth();
   const { mode, toggle: toggleMode } = useOgMode();
+  const { isVip } = useRole();
+
 
   useEffect(() => {
     setMessages(loadThread(userId));
@@ -197,7 +211,13 @@ export function OgChat({
   const foulActive = mode === "og" && foulMouth;
 
   return (
-    <div className={cn("flex h-full flex-col", compact ? "" : "rounded-xl border border-border bg-card")}>
+    <div
+      style={TELEGRAM_FONT_STYLE}
+      className={cn(
+        "flex h-full flex-col text-[15px] antialiased",
+        compact ? "" : "rounded-xl border border-border bg-card",
+      )}
+    >
       {showHeader && (
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 px-3 py-2 text-xs">
           <div className="flex items-center gap-2 text-muted-foreground">
@@ -305,8 +325,19 @@ export function OgChat({
               )}
             >
               {isUser ? (
-                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-brand text-sm font-black text-primary-foreground shadow-glow">
+                <div
+                  className={cn(
+                    "relative grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-brand text-sm font-black text-primary-foreground shadow-glow",
+                    isVip && "ring-2 ring-amber-300 ring-offset-2 ring-offset-background shadow-[0_0_18px_rgba(251,191,36,0.55)]",
+                  )}
+                >
                   {initial}
+                  {isVip && (
+                    <Crown
+                      className="absolute -top-2 -right-1 h-4 w-4 rotate-[18deg] fill-amber-300 text-amber-500 drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]"
+                      aria-label="VIP"
+                    />
+                  )}
                 </div>
               ) : (
                 <OgAvatar size={40} className="shrink-0" />
@@ -314,17 +345,25 @@ export function OgChat({
               <div className={cn("flex max-w-[75%] flex-col gap-1.5", isUser ? "items-end" : "items-start")}>
                 <span
                   className={cn(
-                    "px-2 text-[10px] font-black uppercase tracking-[0.18em]",
-                    isUser ? "text-primary" : "text-foreground/70",
+                    "inline-flex items-center gap-1 px-2 text-[10px] font-black uppercase tracking-[0.18em]",
+                    isUser ? (isVip ? "text-amber-400" : "text-primary") : "text-foreground/70",
                   )}
                 >
                   {isUser ? "You" : "OG Bot"}
+                  {isUser && isVip && (
+                    <>
+                      <Crown className="h-3 w-3 fill-amber-300 text-amber-500" />
+                      <span className="text-amber-400">VIP</span>
+                    </>
+                  )}
                 </span>
                 <div
                   className={cn(
-                    "px-4 py-3 text-[15px] leading-relaxed break-words",
+                    "px-4 py-2.5 text-[15px] leading-[1.45] break-words",
                     isUser
-                      ? "rounded-2xl rounded-br-sm bg-primary text-primary-foreground whitespace-pre-wrap font-medium shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.6)]"
+                      ? isVip
+                        ? "rounded-2xl rounded-br-sm whitespace-pre-wrap font-medium text-amber-50 bg-gradient-to-br from-amber-500 via-amber-600 to-yellow-700 shadow-[0_8px_24px_-8px_rgba(217,119,6,0.7)] ring-1 ring-amber-300/60"
+                        : "rounded-2xl rounded-br-sm bg-primary text-primary-foreground whitespace-pre-wrap font-medium shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.6)]"
                       : "rounded-2xl rounded-bl-sm bg-card border-2 border-border text-foreground shadow-sm",
                   )}
                 >
