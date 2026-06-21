@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./use-auth";
 
-export type AppRole = "admin" | "user" | "vip";
+export type AppRole = "admin" | "user" | "vip" | "og_bot" | "dev" | "boss";
 
 export function useRole() {
   const { user, loading: authLoading } = useAuth();
@@ -16,11 +16,14 @@ export function useRole() {
         .eq("user_id", user!.id);
       if (error) throw error;
       const roles = (data ?? []).map((r) => r.role as AppRole);
+      const isAdmin = roles.includes("admin");
       return {
         roles,
-        isAdmin: roles.includes("admin"),
+        isAdmin,
         isUser: roles.includes("user"),
         isVip: roles.includes("vip"),
+        isDev: roles.includes("dev") || isAdmin,
+        isBoss: roles.includes("boss") || isAdmin,
       };
     },
   });
@@ -29,6 +32,8 @@ export function useRole() {
     isLoading: authLoading || query.isLoading,
     isAdmin: query.data?.isAdmin ?? false,
     isVip: query.data?.isVip ?? false,
+    isDev: query.data?.isDev ?? false,
+    isBoss: query.data?.isBoss ?? false,
     roles: query.data?.roles ?? [],
   };
 }
