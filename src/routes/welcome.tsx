@@ -215,22 +215,22 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
         onClick={() => signIn(d.provider)}
         disabled={pending !== null}
         aria-label={`${d.label} — ${sub}`}
-        className={`${h} ${tile} flex flex-col items-center justify-between gap-3 px-3 pt-5 pb-3 text-foreground`}
+        className={`${h} ${tile} flex flex-col items-center justify-between gap-2 px-2 pt-4 pb-2 text-foreground sm:gap-3 sm:px-3 sm:pt-5 sm:pb-3`}
       >
         <div className="flex flex-1 items-center justify-center">
           {isPending ? (
-            <Loader2 className="h-12 w-12 animate-spin text-foreground sm:h-16 sm:w-16" />
+            <Loader2 className="h-10 w-10 animate-spin text-foreground sm:h-16 sm:w-16" />
           ) : (
-            <div className="grid h-16 w-16 place-items-center rounded-2xl bg-white shadow-[0_8px_24px_rgba(0,0,0,0.45)] ring-2 ring-white/90 transition-transform duration-200 group-hover:scale-110 group-hover:rotate-[-3deg] group-active:scale-95 sm:h-20 sm:w-20 sm:rounded-3xl md:h-24 md:w-24">
-              <d.Icon className={`h-12 w-12 sm:h-16 sm:w-16 md:h-[88px] md:w-[88px] ${d.iconClass ?? "text-black"}`} />
+            <div className="grid h-12 w-12 place-items-center rounded-2xl bg-white shadow-[0_8px_24px_rgba(0,0,0,0.45)] ring-2 ring-white/90 transition-transform duration-200 group-hover:scale-110 group-hover:rotate-[-3deg] group-active:scale-95 sm:h-20 sm:w-20 sm:rounded-3xl md:h-24 md:w-24">
+              <d.Icon className={`h-9 w-9 sm:h-16 sm:w-16 md:h-[88px] md:w-[88px] ${d.iconClass ?? "text-black"}`} />
             </div>
           )}
         </div>
-        <div className="w-full space-y-1">
-          <span className="font-display block w-full rounded-xl bg-white px-2 py-2 text-center text-base font-bold uppercase tracking-wider text-black shadow-[0_3px_0_0_rgba(0,0,0,0.15)]">
+        <div className="w-full min-w-0 space-y-1">
+          <span className="font-display block w-full rounded-xl bg-white px-1.5 py-1.5 text-center text-[11px] font-bold uppercase leading-tight tracking-wide text-black shadow-[0_3px_0_0_rgba(0,0,0,0.15)] break-words sm:px-2 sm:py-2 sm:text-base sm:tracking-wider">
             {d.label}
           </span>
-          <span className="block text-center text-[10px] font-semibold uppercase tracking-[0.16em] text-foreground/70">
+          <span className="block text-center text-[9px] font-semibold uppercase leading-tight tracking-[0.12em] text-foreground/70 break-words sm:text-[10px] sm:tracking-[0.16em]">
             {sub}
           </span>
         </div>
