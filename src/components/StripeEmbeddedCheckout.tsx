@@ -2,28 +2,38 @@ import { useCallback, useState } from "react";
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
 import { AlertTriangle, RotateCw } from "lucide-react";
 import { getStripe, getStripeEnvironment } from "@/lib/stripe";
-import { createCoinCheckoutSession, createVipCheckoutSession } from "@/lib/payments.functions";
+import {
+  createCoinCheckoutSession,
+  createVipCheckoutSession,
+  createCustomCoinCheckoutSession,
+} from "@/lib/payments.functions";
 import { Button } from "@/components/ui/button";
 
 interface Props {
   priceId?: string;
   returnUrl: string;
-  type?: "coins" | "vip";
+  type?: "coins" | "vip" | "custom";
+  customUnits?: number;
 }
 
-export function StripeEmbeddedCheckoutInline({ priceId, returnUrl, type = "coins" }: Props) {
+export function StripeEmbeddedCheckoutInline({ priceId, returnUrl, type = "coins", customUnits }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
 
   const fetchClientSecret = useCallback(async (): Promise<string> => {
     try {
-      const result = type === "vip"
-        ? await createVipCheckoutSession({
-            data: { returnUrl, environment: getStripeEnvironment() },
-          })
-        : await createCoinCheckoutSession({
-            data: { priceId: priceId!, returnUrl, environment: getStripeEnvironment() },
-          });
+      const result =
+        type === "vip"
+          ? await createVipCheckoutSession({
+              data: { returnUrl, environment: getStripeEnvironment() },
+            })
+          : type === "custom"
+          ? await createCustomCoinCheckoutSession({
+              data: { units: customUnits!, returnUrl, environment: getStripeEnvironment() },
+            })
+          : await createCoinCheckoutSession({
+              data: { priceId: priceId!, returnUrl, environment: getStripeEnvironment() },
+            });
       if ("error" in result) throw new Error(result.error);
       if (!result.clientSecret) throw new Error("Stripe did not return a client secret");
       return result.clientSecret;
@@ -32,7 +42,7 @@ export function StripeEmbeddedCheckoutInline({ priceId, returnUrl, type = "coins
       setError(msg);
       throw e;
     }
-  }, [priceId, returnUrl, type, attempt]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [priceId, returnUrl, type, customUnits, attempt]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (error) {
     return (
