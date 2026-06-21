@@ -383,8 +383,8 @@ interface RoleToggleRowProps {
   checked: boolean;
   userId: string;
   role: string;
-  rpc: "set_vip_admin" | "set_og_bot_admin";
-  paramKey: "make_vip" | "make_og";
+  rpc: "set_vip_admin" | "set_og_bot_admin" | "set_dev_admin" | "set_boss_admin";
+  paramKey: "make_vip" | "make_og" | "make_dev" | "make_boss";
 }
 
 function RoleToggleRow({ icon, title, description, checked, userId, role: _role, rpc, paramKey }: RoleToggleRowProps) {
