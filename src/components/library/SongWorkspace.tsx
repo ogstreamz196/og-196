@@ -343,7 +343,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
                 Stage 3 · Create the full song
               </CardTitle>
               <CardDescription>
-                Built from your stage-1 lyrics, style and brief. Unlock to download HQ.
+                Preview is a fast compressed sample. Pay {fullUnlockCost} coins once to unlock and download the full HQ version, or regenerate the sample for {previewCost}.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -354,14 +354,31 @@ export function SongWorkspace({ song, onSaved }: Props) {
               ) : (
                 <>
                   <p className="text-sm text-muted-foreground">
-                    The full track is rendered. Use the player above to preview, or unlock it to download the HQ version.
+                    {song.unlocked
+                      ? "Full HQ unlocked. Download as many times as you like."
+                      : "Sample plays in the player above. Unlock once to download the full HQ track."}
                   </p>
                   <div className="flex flex-wrap justify-end gap-2">
-                    <Button asChild variant="outline">
-                      <Link to="/buy-coins">
-                        <Coins className="h-4 w-4" /> Top up coins
-                      </Link>
+                    <Button
+                      variant="outline"
+                      onClick={generatePreview}
+                      disabled={genPreview || isPending}
+                    >
+                      {genPreview ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                      Regenerate sample
+                      <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-background/30 px-1.5 py-0.5 text-[10px] font-semibold">
+                        <Coins className="h-3 w-3" /> {previewCost}
+                      </span>
                     </Button>
+                    <Button onClick={unlockFull} disabled={unlocking}>
+                      {unlocking ? <Loader2 className="h-4 w-4 animate-spin" /> : <Music2 className="h-4 w-4" />}
+                      {song.unlocked ? "Download full HQ" : `Unlock & download · ${fullUnlockCost}`}
+                    </Button>
+                    {balance < fullUnlockCost && !song.unlocked && (
+                      <Button asChild variant="ghost" size="sm">
+                        <Link to="/buy-coins"><Coins className="h-4 w-4" /> Top up</Link>
+                      </Button>
+                    )}
                   </div>
                 </>
               )}
