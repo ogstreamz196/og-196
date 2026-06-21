@@ -216,7 +216,7 @@ function ManageUsersTab() {
         <div className="flex-1">
           <h3 className="text-lg font-semibold">Manage users</h3>
           <p className="text-sm text-muted-foreground">
-            View signed-in and newly created users. Grant credits, toggle VIP, edit labels,
+            View signed-in and newly created users. Grant OG Coins, toggle VIP, edit labels,
             or open a full per-user settings page.
           </p>
         </div>
