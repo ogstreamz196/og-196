@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Copy, Check, Gift, Users, Coins, Share2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -26,20 +26,54 @@ type Summary = {
   }[];
 };
 
+/**
+ * Copy text to the clipboard with a graceful fallback for browsers/contexts
+ * (insecure origin, iframe sandboxing, Safari quirks) that block
+ * navigator.clipboard. Returns true on success.
+ */
+async function copyTextWithFallback(text: string): Promise<boolean> {
+  try {
+    if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {
+    /* fall through */
+  }
+  try {
+    if (typeof document === "undefined") return false;
+    const el = document.createElement("textarea");
+    el.value = text;
+    el.setAttribute("readonly", "");
+    el.style.position = "fixed";
+    el.style.opacity = "0";
+    document.body.appendChild(el);
+    el.select();
+    const ok = document.execCommand("copy");
+    document.body.removeChild(el);
+    return ok;
+  } catch {
+    return false;
+  }
+}
+
 function ReferralsPage() {
   const { user } = useAuth();
+  const qc = useQueryClient();
   const [copied, setCopied] = useState(false);
 
   const link = useMemo(() => {
     if (!user) return "";
-    // Short, clean link on the canonical domain — resolves to /welcome?ref=<id>
-    // and ships an OG image preview when pasted to WhatsApp/iMessage/etc.
     return `https://ogstreamz.co.uk/r/${user.id}`;
   }, [user]);
 
   const summaryQ = useQuery({
     queryKey: ["referral-summary", user?.id],
     enabled: !!user,
+    // Poll as a safety net so new cashback events appear without a reload,
+    // even if Realtime is rate-limited or temporarily down.
+    refetchInterval: 15_000,
+    refetchOnWindowFocus: true,
     queryFn: async (): Promise<Summary> => {
       const { data, error } = await supabase.rpc("get_referral_summary");
       if (error) throw error;
@@ -47,16 +81,64 @@ function ReferralsPage() {
     },
   });
 
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(link);
+  // Live updates: invalidate the summary whenever a new cashback or referral
+  // row lands for this user.
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel(`referrals-${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "coin_transactions",
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const row = payload.new as { type?: string; amount?: number } | null;
+          if (row?.type === "referral_cashback") {
+            qc.invalidateQueries({ queryKey: ["referral-summary", user.id] });
+            if (typeof row.amount === "number" && row.amount > 0) {
+              toast.success(`+${row.amount} OG Coins cashback`, {
+                description: "A referee just burned coins — your share is in.",
+              });
+            }
+          }
+        },
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "referrals",
+          filter: `referrer_id=eq.${user.id}`,
+        },
+        () => {
+          qc.invalidateQueries({ queryKey: ["referral-summary", user.id] });
+          toast.success("New referral signed up 🎉");
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, qc]);
+
+  const handleCopy = async (label = "Referral link copied") => {
+    const ok = await copyTextWithFallback(link);
+    if (ok) {
       setCopied(true);
-      toast.success("Referral link copied");
+      toast.success(label);
       setTimeout(() => setCopied(false), 1500);
-    } catch {
-      toast.error("Copy failed — select and copy manually");
+    } else {
+      toast.error("Couldn't copy — long-press the link to copy it manually");
     }
   };
+
+  const copy = () => handleCopy("Referral link copied");
+  const inviteAgain = () => handleCopy("Link copied — paste it to invite again 🎁");
 
   const share = async () => {
     if (typeof navigator !== "undefined" && "share" in navigator) {
@@ -66,12 +148,15 @@ function ReferralsPage() {
           text: "Make AI songs on OG Streamz — sign up with my link:",
           url: link,
         });
-      } catch {
-        /* user cancelled */
+        toast.success("Shared — thanks for spreading the word!");
+        return;
+      } catch (e) {
+        // AbortError = user cancelled, stay silent.
+        if (e instanceof Error && e.name === "AbortError") return;
+        toast.message("Share sheet unavailable — copying instead");
       }
-    } else {
-      copy();
     }
+    await handleCopy("Link copied — paste it anywhere to share");
   };
 
   const summary = summaryQ.data ?? { total_referred: 0, total_earned: 0, recent: [] };
@@ -124,7 +209,7 @@ function ReferralsPage() {
                 {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 {copied ? "Copied" : "Copy"}
               </Button>
-              <Button variant="secondary" onClick={copy} className="gap-2">
+              <Button variant="secondary" onClick={inviteAgain} className="gap-2">
                 <Gift className="h-4 w-4" /> Invite again
               </Button>
               <Button variant="outline" onClick={share} className="gap-2">
