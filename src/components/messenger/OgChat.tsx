@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import ReactMarkdown from "react-markdown";
-import { Send, Trash2, Sparkles, Skull, ShieldCheck } from "lucide-react";
+import { Send, Trash2, Sparkles, Skull, ShieldCheck, UploadCloud, Mic, RotateCcw } from "lucide-react";
 import { chatOgBot, type OgChatMessage } from "@/lib/og-messenger.functions";
 import { QUICK_STARTS } from "@/lib/og-persona";
 import { Button } from "@/components/ui/button";
@@ -365,7 +365,7 @@ export function OgChat({
           e.preventDefault();
           sendText(input);
         }}
-        className="flex items-center gap-2 border-t border-border p-3"
+        className="flex flex-col gap-2 border-t border-border p-3"
       >
         <Input
           ref={inputRef}
@@ -382,15 +382,52 @@ export function OgChat({
           maxLength={2000}
           autoFocus
         />
-        <Button
-          type="submit"
-          size="icon"
-          disabled={m.isPending || !input.trim() || isOut || !user}
-          aria-label="Send"
-        >
-          <Send className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={() => toast.message("Attachments coming soon")}
+            aria-label="Attach file"
+            title="Attach file"
+          >
+            <UploadCloud className="h-4 w-4" />
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={() => toast.message("Voice input coming soon")}
+            aria-label="Voice input"
+            title="Voice input"
+          >
+            <Mic className="h-4 w-4" />
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={clearChat}
+            disabled={messages.length === 0}
+            aria-label="Reset chat"
+            title="Reset chat"
+            className="border-destructive/40 text-destructive hover:bg-destructive/10"
+          >
+            <RotateCcw className="h-4 w-4" />
+          </Button>
+          <div className="ml-auto">
+            <Button
+              type="submit"
+              disabled={m.isPending || !input.trim() || isOut || !user}
+              aria-label="Send"
+              className="gap-2"
+            >
+              <Send className="h-4 w-4" /> Send
+            </Button>
+          </div>
+        </div>
       </form>
+
     </div>
   );
 }
