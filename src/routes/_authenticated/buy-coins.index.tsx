@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Coins, Check, Sparkles, ArrowLeft, Crown, Star, Zap } from "lucide-react";
+import { Coins, Check, ArrowLeft, Crown, Star, Zap, ShieldCheck, Lock, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { EditableContent } from "@/components/admin/EditableContent";
@@ -30,44 +30,52 @@ function BuyCoinsPage() {
       selected.type === "coins"
         ? `${window.location.origin}/buy-coins/return?session_id={CHECKOUT_SESSION_ID}&pack=${selected.pack.bundleId}`
         : `${window.location.origin}/buy-coins/return?session_id={CHECKOUT_SESSION_ID}&pack=${VIP_PLAN.bundleId}`;
+    const isVipFlow = selected.type === "vip";
+    const headline = isVipFlow ? "Join OG VIP" : `Buy ${selected.pack.coins} OG Coins`;
+    const totalCents = isVipFlow ? VIP_PLAN.priceCents : selected.pack.priceCents;
     return (
-      <DashboardShell title={selected.type === "vip" ? "Join OG VIP" : `Buy ${selected.pack.coins} OG Coins`}>
+      <DashboardShell title={headline}>
         <PaymentTestModeBanner />
         <div className="mx-auto max-w-2xl">
-          <Button variant="ghost" className="mb-4" onClick={() => setSelected(null)}>
+          <Button variant="ghost" className="mb-4 -ml-2" onClick={() => setSelected(null)}>
             <ArrowLeft className="mr-2 h-4 w-4" /> Back to coin packs
           </Button>
-          <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
-            <div className="mb-4 flex items-center justify-between">
+          <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-card">
+            <div className="flex items-center justify-between gap-3 border-b border-border/60 bg-gradient-to-br from-coin/15 via-card to-card px-5 py-4">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-coin/20 text-coin shadow-glow">
+                  {isVipFlow ? <Crown className="h-5 w-5" /> : <Coins className="h-5 w-5" />}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                    Order summary
+                  </p>
+                  <p className="truncate text-base font-bold">
+                    {isVipFlow ? VIP_PLAN.label : `${selected.pack.coins} OG Coins · ${selected.pack.label}`}
+                  </p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-black tabular-nums leading-none">
+                  {CURRENCY_SYMBOL}{(totalCents / 100).toFixed(2)}
+                </div>
+                <div className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  {isVipFlow ? "billed yearly" : "one-time"}
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center justify-center gap-4 border-b border-border/60 bg-background/40 px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5"><Lock className="h-3 w-3" /> Secure checkout</span>
+              <span aria-hidden>·</span>
+              <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-3 w-3" /> Apple / Google Pay</span>
+            </div>
+            <div className="p-4 sm:p-5">
               {selected.type === "coins" ? (
-                <>
-                  <div>
-                    <div className="text-sm text-muted-foreground">{selected.pack.label}</div>
-                    <div className="text-lg font-semibold">
-                      {selected.pack.coins} OG Coins · {CURRENCY_SYMBOL}
-                      {(selected.pack.priceCents / 100).toFixed(2)}
-                    </div>
-                  </div>
-                  <Coins className="h-6 w-6 text-coin" />
-                </>
+                <StripeEmbeddedCheckoutInline priceId={selected.pack.priceId} returnUrl={returnUrl} />
               ) : (
-                <>
-                  <div>
-                    <div className="text-sm text-muted-foreground">{VIP_PLAN.label}</div>
-                    <div className="text-lg font-semibold">
-                      {CURRENCY_SYMBOL}
-                      {(VIP_PLAN.priceCents / 100).toFixed(2)} / year
-                    </div>
-                  </div>
-                  <Crown className="h-6 w-6 text-coin" />
-                </>
+                <StripeEmbeddedCheckoutInline type="vip" returnUrl={returnUrl} />
               )}
             </div>
-            {selected.type === "coins" ? (
-              <StripeEmbeddedCheckoutInline priceId={selected.pack.priceId} returnUrl={returnUrl} />
-            ) : (
-              <StripeEmbeddedCheckoutInline type="vip" returnUrl={returnUrl} />
-            )}
           </div>
         </div>
       </DashboardShell>
