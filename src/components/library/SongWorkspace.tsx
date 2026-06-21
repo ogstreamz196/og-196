@@ -63,7 +63,12 @@ export function SongWorkspace({ song, onSaved }: Props) {
   // pays half-price (ceil(previewCost / divisor)) to reveal them.
   type Variation = { id: string; title: string | null; cover_url: string | null; revealed: boolean };
   const [variations, setVariations] = useState<Variation[]>([]);
-  const variationCost = Math.max(1, Math.ceil(previewCost / 2));
+  // Mirrors the server-side formula in supabase/functions/reveal-variation.
+  const variationDivisor = Math.max(1, settings?.coins_per_variation_divisor ?? 2);
+  const variationCost = useMemo(
+    () => Math.max(1, Math.ceil(previewCost / variationDivisor)),
+    [previewCost, variationDivisor],
+  );
   const [basket, setBasket] = useState<Set<string>>(() => new Set());
   const [busyVariation, setBusyVariation] = useState<string | null>(null);
   const [checkingOut, setCheckingOut] = useState(false);
