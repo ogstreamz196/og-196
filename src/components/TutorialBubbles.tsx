@@ -91,24 +91,28 @@ export function TutorialBubbles({
         const r = rects[s.id];
         if (!r) return null;
         const placement = s.placement ?? "bottom";
-        const pos = computePosition(r, placement);
+        const vw = typeof window !== "undefined" ? window.innerWidth : 360;
+        const vh = typeof window !== "undefined" ? window.innerHeight : 640;
+        // Narrower bubble on small screens so it never blankets the target
+        const bubbleW = Math.min(vw < 480 ? 220 : 280, vw - 24);
+        const pos = computePosition(r, placement, bubbleW, vw, vh);
         return (
           <button
             key={s.id}
             type="button"
             onClick={() => pop(s.id)}
             aria-label={`Got it — dismiss tip: ${s.title}`}
-            className="pointer-events-auto absolute w-[min(280px,80vw)] -translate-x-1/2 animate-fade-in cursor-pointer text-left"
+            className="pointer-events-auto absolute animate-fade-in cursor-pointer text-left"
             style={{
               top: pos.top,
               left: pos.left,
+              width: bubbleW,
+              transform: pos.transform,
               animationDelay: `${i * 120}ms`,
             }}
           >
             <div
-              className={`relative rounded-2xl border-2 border-primary/50 bg-card/95 px-4 py-3 shadow-glow backdrop-blur-xl ring-1 ring-primary/20 transition-transform hover:scale-[1.03] active:scale-95 ${
-                placement === "top" ? "mb-3" : placement === "bottom" ? "mt-3" : ""
-              }`}
+              className="relative rounded-2xl border-2 border-primary/50 bg-card/95 px-3 py-2.5 shadow-glow backdrop-blur-xl ring-1 ring-primary/20 transition-transform hover:scale-[1.03] active:scale-95 sm:px-4 sm:py-3"
             >
               <span
                 className={`absolute h-3 w-3 rotate-45 border-primary/50 bg-card/95 ${
@@ -125,13 +129,13 @@ export function TutorialBubbles({
               <span className="absolute -right-2 -top-2 grid h-6 w-6 place-items-center rounded-full bg-primary text-primary-foreground shadow ring-2 ring-background">
                 <X className="h-3 w-3" />
               </span>
-              <p className="font-display text-sm font-bold uppercase tracking-wider text-primary">
+              <p className="font-display text-xs font-bold uppercase tracking-wider text-primary sm:text-sm">
                 {s.title}
               </p>
-              <p className="mt-1 text-sm font-medium leading-snug text-foreground">
+              <p className="mt-1 text-xs font-medium leading-snug text-foreground sm:text-sm">
                 {s.body}
               </p>
-              <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 Tap to pop ✨
               </p>
             </div>
@@ -142,14 +146,61 @@ export function TutorialBubbles({
   );
 }
 
-function computePosition(r: Rect, placement: "top" | "bottom" | "left" | "right") {
+function computePosition(
+  r: Rect,
+  placement: "top" | "bottom" | "left" | "right",
+  bubbleW: number,
+  vw: number,
+  vh: number,
+) {
+  const GAP = 14;
+  const MARGIN = 8;
   const cx = r.left + r.width / 2;
   const cy = r.top + r.height / 2;
+
+  let top = 0;
+  let left = 0;
+  let transform = "";
+
   switch (placement) {
-    case "top":    return { top: r.top - 8,           left: cx };
-    case "left":   return { top: cy,                  left: r.left - 8 };
-    case "right":  return { top: cy,                  left: r.left + r.width + 8 };
+    case "top":
+      top = r.top - GAP;
+      left = cx;
+      transform = "translate(-50%, -100%)";
+      break;
+    case "left":
+      top = cy;
+      left = r.left - GAP;
+      transform = "translate(-100%, -50%)";
+      break;
+    case "right":
+      top = cy;
+      left = r.left + r.width + GAP;
+      transform = "translate(0, -50%)";
+      break;
     case "bottom":
-    default:       return { top: r.top + r.height + 8, left: cx };
+    default:
+      top = r.top + r.height + GAP;
+      left = cx;
+      transform = "translate(-50%, 0)";
+      break;
   }
+
+  // Clamp horizontally so the bubble stays inside the viewport.
+  if (placement === "top" || placement === "bottom") {
+    const minLeft = MARGIN + bubbleW / 2;
+    const maxLeft = vw - MARGIN - bubbleW / 2;
+    if (minLeft <= maxLeft) left = Math.min(Math.max(left, minLeft), maxLeft);
+  } else if (placement === "right") {
+    const maxLeft = vw - MARGIN - bubbleW;
+    if (left > maxLeft) left = Math.max(MARGIN, maxLeft);
+  } else if (placement === "left") {
+    if (left < MARGIN + bubbleW) left = MARGIN + bubbleW;
+  }
+
+  // Clamp vertically to keep the bubble on screen.
+  if (placement === "top" && top < MARGIN) top = MARGIN;
+  if (placement === "bottom" && top > vh - MARGIN) top = vh - MARGIN;
+
+  return { top, left, transform };
 }
