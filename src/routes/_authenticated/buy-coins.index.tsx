@@ -34,20 +34,70 @@ function BuyCoinsPage() {
   const { data: profile } = useProfile();
   const { isVip } = useRole();
   const [selected, setSelected] = useState<Selection | null>(null);
+  const [stage, setStage] = useState<"confirm" | "pay">("confirm");
+
+  // Restore previous selection (e.g. after a canceled Stripe checkout).
+  useEffect(() => {
+    if (selected) return;
+    try {
+      const raw = sessionStorage.getItem(SELECTION_STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as StoredSelection;
+      if (parsed.type === "vip") {
+        setSelected({ type: "vip" });
+        setStage("confirm");
+        toast.info("We brought you back to your last selection.");
+      } else if (parsed.type === "coins") {
+        const pack = findCoinPackByBundleId(parsed.bundleId);
+        if (pack) {
+          setSelected({ type: "coins", pack });
+          setStage("confirm");
+          toast.info("We brought you back to your last selection.");
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+  }, [selected]);
+
+  const pickSelection = (s: Selection) => {
+    const stored: StoredSelection =
+      s.type === "vip" ? { type: "vip" } : { type: "coins", bundleId: s.pack.bundleId };
+    try { sessionStorage.setItem(SELECTION_STORAGE_KEY, JSON.stringify(stored)); } catch { /* ignore */ }
+    setSelected(s);
+    setStage("confirm");
+  };
+
+  const clearSelection = () => {
+    try { sessionStorage.removeItem(SELECTION_STORAGE_KEY); } catch { /* ignore */ }
+    setSelected(null);
+    setStage("confirm");
+  };
+
+  // Anchor savings calc against the worst per-coin price (the smallest pack).
+  const basePerCoin = COIN_PACKS.reduce(
+    (max, p) => Math.max(max, p.priceCents / 100 / p.coins),
+    0,
+  );
 
   if (selected) {
+    const isVipFlow = selected.type === "vip";
     const returnUrl =
       selected.type === "coins"
         ? `${window.location.origin}/buy-coins/return?session_id={CHECKOUT_SESSION_ID}&pack=${selected.pack.bundleId}`
         : `${window.location.origin}/buy-coins/return?session_id={CHECKOUT_SESSION_ID}&pack=${VIP_PLAN.bundleId}`;
-    const isVipFlow = selected.type === "vip";
     const headline = isVipFlow ? "Join OG VIP" : `Buy ${selected.pack.coins} OG Coins`;
     const totalCents = isVipFlow ? VIP_PLAN.priceCents : selected.pack.priceCents;
+    const perCoin = !isVipFlow ? selected.pack.priceCents / 100 / selected.pack.coins : 0;
+    const savingsPct = !isVipFlow && basePerCoin > 0
+      ? Math.round((1 - perCoin / basePerCoin) * 100)
+      : 0;
+
     return (
       <DashboardShell title={headline}>
         <PaymentTestModeBanner />
         <div className="mx-auto max-w-2xl">
-          <Button variant="ghost" className="mb-4 -ml-2" onClick={() => setSelected(null)}>
+          <Button variant="ghost" className="mb-4 -ml-2" onClick={clearSelection}>
             <ArrowLeft className="mr-2 h-4 w-4" /> Back to coin packs
           </Button>
           <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-card">
@@ -79,24 +129,70 @@ function BuyCoinsPage() {
               <span aria-hidden>·</span>
               <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-3 w-3" /> Apple / Google Pay</span>
             </div>
-            <div className="p-4 sm:p-5">
-              {selected.type === "coins" ? (
-                <StripeEmbeddedCheckoutInline priceId={selected.pack.priceId} returnUrl={returnUrl} />
-              ) : (
-                <StripeEmbeddedCheckoutInline type="vip" returnUrl={returnUrl} />
-              )}
-            </div>
+            {stage === "confirm" ? (
+              <div className="p-5 sm:p-6">
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                  Confirm your order
+                </p>
+                <div className="mt-3 grid gap-2 rounded-2xl border border-border bg-background/40 p-4 text-sm">
+                  <Row label={isVipFlow ? "Plan" : "Pack"} value={isVipFlow ? VIP_PLAN.label : selected.pack.label} />
+                  {!isVipFlow && <Row label="Coins" value={`${selected.pack.coins} OG Coins`} />}
+                  {!isVipFlow && (
+                    <Row
+                      label="Per coin"
+                      value={`${CURRENCY_SYMBOL}${perCoin.toFixed(3)}`}
+                      hint={savingsPct > 0 ? `Save ${savingsPct}% vs smallest pack` : undefined}
+                    />
+                  )}
+                  <Row
+                    label="Billing"
+                    value={isVipFlow ? "Yearly subscription" : "One-time payment"}
+                  />
+                  <div className="mt-1 flex items-baseline justify-between border-t border-border/60 pt-3">
+                    <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Total today</span>
+                    <span className="text-2xl font-black tabular-nums">
+                      {CURRENCY_SYMBOL}{(totalCents / 100).toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+                <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
+                  {isVipFlow
+                    ? "You'll be charged yearly. Cancel anytime from Settings."
+                    : "One-time charge. Coins are credited to your balance within seconds and never expire."}
+                </p>
+                <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                  <Button variant="outline" onClick={clearSelection}>Cancel</Button>
+                  <Button
+                    onClick={() => setStage("pay")}
+                    className="bg-gradient-brand font-bold text-primary-foreground shadow-glow hover:opacity-90"
+                  >
+                    <CreditCard className="mr-2 h-4 w-4" />
+                    Continue to payment · {CURRENCY_SYMBOL}{(totalCents / 100).toFixed(2)}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="p-4 sm:p-5">
+                {selected.type === "coins" ? (
+                  <StripeEmbeddedCheckoutInline priceId={selected.pack.priceId} returnUrl={returnUrl} />
+                ) : (
+                  <StripeEmbeddedCheckoutInline type="vip" returnUrl={returnUrl} />
+                )}
+                <button
+                  type="button"
+                  onClick={() => setStage("confirm")}
+                  className="mt-3 text-xs font-medium text-muted-foreground underline-offset-4 hover:underline"
+                >
+                  ← Change selection
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </DashboardShell>
     );
   }
 
-  // Anchor savings calc against the worst per-coin price (the smallest pack).
-  const basePerCoin = COIN_PACKS.reduce(
-    (max, p) => Math.max(max, p.priceCents / 100 / p.coins),
-    0,
-  );
 
   return (
     <DashboardShell title="OG Coins Store">
