@@ -18,7 +18,7 @@ import {
   useAdminEditMode,
 } from "@/components/admin/AdminEditMode";
 import { useRole } from "@/hooks/use-role";
-import { Button } from "@/components/ui/button";
+import { TutorialBubbles, type TutorialStep } from "@/components/TutorialBubbles";
 import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
