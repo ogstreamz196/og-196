@@ -134,32 +134,38 @@ function AuthPage() {
               </p>
             </div>
 
-            <div className="space-y-3">
+            <div className="mb-4 rounded-lg border border-primary/40 bg-primary/10 px-4 py-2.5 text-center">
+              <p className="text-sm font-semibold tracking-tight text-foreground">
+                Sign in with any of the following now
+              </p>
+            </div>
+
+            <div className="flex flex-col items-center gap-3">
               <Button
                 onClick={() => handleOAuth("google")}
                 disabled={pending !== null}
-                className="h-11 w-full justify-center gap-3 bg-foreground text-background hover:bg-foreground/90"
+                className="h-11 w-auto justify-center gap-3 px-5 bg-foreground text-background hover:bg-foreground/90"
               >
                 {pending === "google" ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <GoogleIcon />
                 )}
-                  Continue with Google
+                <span className="font-semibold">Continue with Google</span>
               </Button>
 
               <Button
                 onClick={() => handleOAuth("apple")}
                 disabled={pending !== null}
                 variant="outline"
-                className="h-11 w-full justify-center gap-3"
+                className="h-11 w-auto justify-center gap-3 px-5"
               >
                 {pending === "apple" ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <AppleIcon />
                 )}
-                Continue with Apple
+                <span className="font-semibold">Continue with Apple</span>
               </Button>
             </div>
 
