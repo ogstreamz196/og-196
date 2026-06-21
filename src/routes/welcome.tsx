@@ -187,10 +187,10 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
     iconClass?: string;
   }> = [
     { key: "google", label: "Google", provider: "google", Icon: GoogleIcon },
+    { key: "apple", label: "Apple ID", provider: "apple", Icon: (p) => <AppleIcon {...p} />, iconClass: "text-black" },
     { key: "android", label: "Android", provider: "google", Icon: AndroidIcon, iconClass: "text-[#3ddc84]" },
     { key: "samsung", label: "Samsung", provider: "google", Icon: SamsungIcon, iconClass: "text-[#1428a0]" },
-    { key: "apple", label: "Apple ID", provider: "apple", Icon: (p) => <AppleIcon {...p} />, iconClass: "text-white" },
-    { key: "iphone", label: "iPhone / iPad", provider: "apple", Icon: IPhoneIcon, iconClass: "text-white" },
+    { key: "iphone", label: "iPhone / iPad", provider: "apple", Icon: IPhoneIcon, iconClass: "text-black" },
   ];
 
   return (
@@ -212,11 +212,14 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
             >
               <div className="flex flex-1 items-center justify-center">
                 {isPending ? (
-                  <Loader2 className="h-12 w-12 animate-spin" />
+                  <Loader2 className="h-12 w-12 animate-spin text-foreground" />
                 ) : (
-                  <d.Icon className={`h-14 w-14 drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)] ${d.iconClass ?? ""}`} />
+                  <div className="grid h-16 w-16 place-items-center rounded-2xl bg-white shadow-[0_4px_12px_rgba(0,0,0,0.35)] ring-2 ring-white/80">
+                    <d.Icon className={`h-11 w-11 ${d.iconClass ?? "text-black"}`} />
+                  </div>
                 )}
               </div>
+
               <div className="w-full space-y-1">
                 <span className="block w-full rounded-md bg-foreground/90 px-2 py-1 text-center text-xs font-extrabold uppercase tracking-wide text-background">
                   {d.label}
