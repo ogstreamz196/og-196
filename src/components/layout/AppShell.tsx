@@ -123,20 +123,6 @@ export function AppShell({ children }: { children: ReactNode }) {
                   />
                 </div>
               </div>
-                <div className="relative ml-2 hidden w-full max-w-xs lg:block">
-                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    type="search"
-                    placeholder="Search songs"
-                    className="h-9 border-white/10 bg-white/5 pl-9"
-                    onChange={(event) => {
-                      window.dispatchEvent(
-                        new CustomEvent("sonix:search", { detail: event.target.value }),
-                      );
-                    }}
-                  />
-                </div>
-              </div>
 
               <div className="flex shrink-0 items-center gap-1 sm:gap-2">
                 {!roleLoading && isAdmin && (
