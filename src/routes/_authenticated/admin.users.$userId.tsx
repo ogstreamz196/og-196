@@ -371,9 +371,121 @@ function UserSettingsPage() {
         {/* Audit */}
         <DevBossPanel targetUserId={profile.id} currentBalance={profile.coin_balance ?? 0} />
 
+        {/* Direct message via OG Bot */}
+        <TelegramDmCard
+          userId={profile.id}
+          chatId={profile.telegram_chat_id}
+          tgUsername={profile.telegram_username}
+        />
+
+        {/* Audit */}
+        <DevBossPanel targetUserId={profile.id} currentBalance={profile.coin_balance ?? 0} />
+
         <UserAuditTrail userId={profile.id} email={profile.email} />
       </div>
     </DashboardShell>
+  );
+}
+
+function TelegramDmCard({
+  userId,
+  chatId,
+  tgUsername,
+}: {
+  userId: string;
+  chatId: number | null;
+  tgUsername: string | null;
+}) {
+  const linked = !!chatId;
+  const token = userId.replace(/-/g, "").slice(0, 24);
+  const connectLink = `https://t.me/${TELEGRAM_BOT_USERNAME}?start=${token}`;
+  const [text, setText] = useState("");
+  const sendFn = useServerFn(sendTelegramDm);
+  const send = useMutation({
+    mutationFn: async () => sendFn({ data: { userId, text } }),
+    onSuccess: () => {
+      toast.success("Sent via OG Bot ✅");
+      setText("");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(connectLink);
+      toast.success("Registration link copied");
+    } catch {
+      toast.error("Couldn't copy — long-press to copy");
+    }
+  };
+
+  return (
+    <section className="rounded-2xl border border-border bg-card p-6 shadow-card space-y-4">
+      <header className="flex items-start gap-3">
+        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/15 text-primary">
+          <MessageCircle className="h-5 w-5" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <h3 className="font-semibold">Message via OG Bot</h3>
+          <p className="text-xs text-muted-foreground">
+            {linked
+              ? `Telegram linked${tgUsername ? ` · @${tgUsername}` : ""}. Messages send straight to their DMs.`
+              : "User hasn't linked Telegram yet — copy their personal registration link and share it."}
+          </p>
+        </div>
+        <span
+          className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
+            linked
+              ? "bg-emerald-500/15 text-emerald-400"
+              : "bg-muted text-muted-foreground"
+          }`}
+        >
+          {linked ? "Linked" : "Not linked"}
+        </span>
+      </header>
+
+      {linked ? (
+        <div className="space-y-2">
+          <Label htmlFor="og-bot-msg" className="text-xs">Message</Label>
+          <Textarea
+            id="og-bot-msg"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Type a message — supports basic HTML (<b>, <i>, <a href>)…"
+            rows={4}
+            maxLength={4000}
+          />
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] text-muted-foreground">{text.length}/4000</span>
+            <Button
+              onClick={() => send.mutate()}
+              disabled={send.isPending || text.trim().length === 0}
+            >
+              {send.isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="mr-2 h-4 w-4" />
+              )}
+              Send via OG Bot
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="rounded-xl border border-dashed border-border bg-background/40 p-3">
+          <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Personal registration link
+          </Label>
+          <div className="mt-1 flex items-center gap-2">
+            <Input readOnly value={connectLink} className="font-mono text-xs" onFocus={(e) => e.currentTarget.select()} />
+            <Button type="button" variant="outline" size="icon" onClick={copy} title="Copy link" aria-label="Copy registration link">
+              <Copy className="h-4 w-4" />
+            </Button>
+          </div>
+          <p className="mt-2 text-[11px] text-muted-foreground">
+            Send this to the user — once they tap Start in Telegram, OG Bot will be able to DM them here.
+          </p>
+        </div>
+      )}
+    </section>
   );
 }
 
