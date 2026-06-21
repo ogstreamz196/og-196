@@ -79,17 +79,17 @@ export function AppSidebar() {
             asChild
             isActive={active}
             tooltip={item.title}
-            className={`font-display text-[15px] tracking-tight transition-all duration-200 hover:translate-x-0.5 hover:scale-[1.02] ${
+            className={`group/nav font-display h-12 rounded-2xl border-2 px-3 text-[17px] tracking-wide uppercase transition-all duration-150 ease-out hover:-translate-y-0.5 active:translate-y-0.5 ${
               active
-                ? "bg-gradient-brand text-primary-foreground shadow-glow hover:bg-gradient-brand"
-                : ""
+                ? "border-primary/40 bg-gradient-brand text-primary-foreground shadow-[0_6px_0_0_hsl(var(--primary)/0.4),0_14px_28px_-10px_hsl(var(--primary)/0.6)] hover:bg-gradient-brand active:shadow-[0_2px_0_0_hsl(var(--primary)/0.4)]"
+                : "border-transparent hover:border-white/10 hover:bg-white/[0.04] hover:shadow-[0_4px_0_0_hsl(var(--primary)/0.25)] active:shadow-[0_1px_0_0_hsl(var(--primary)/0.2)]"
             } ${isMessenger ? "hover:text-primary" : ""}`}
           >
-            <Link to={item.url} onClick={() => isMobile && setOpenMobile(false)} className="flex items-center gap-2">
-              <item.icon className={`h-4 w-4 shrink-0 ${isMessenger && !active ? "text-primary" : ""}`} />
+            <Link to={item.url} onClick={() => isMobile && setOpenMobile(false)} className="flex items-center gap-3">
+              <item.icon className={`h-5 w-5 shrink-0 transition-transform duration-200 group-hover/nav:scale-110 group-hover/nav:-rotate-6 ${isMessenger && !active ? "text-primary" : ""}`} />
               <span className="truncate">{item.title}</span>
               {isMessenger && (
-                <span className="ml-auto rounded-full bg-primary/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary">
+                <span className="font-display ml-auto rounded-full bg-primary/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary shadow-[0_2px_0_0_hsl(var(--primary)/0.4)]">
                   Bot
                 </span>
               )}
