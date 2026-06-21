@@ -209,6 +209,18 @@ export function OgChat({
     },
   });
 
+  // Skeleton stays visible at least 600ms once shown — kills flicker on
+  // very fast replies and gives a Suno-style "still cooking" feel.
+  useEffect(() => {
+    if (m.isPending) {
+      setShowSkeleton(true);
+      return;
+    }
+    if (!showSkeleton) return;
+    const t = setTimeout(() => setShowSkeleton(false), 600);
+    return () => clearTimeout(t);
+  }, [m.isPending, showSkeleton]);
+
   function sendText(text: string) {
     const t = text.trim();
     const att = attachment;
