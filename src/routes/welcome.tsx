@@ -55,6 +55,10 @@ export const Route = createFileRoute("/welcome")({
         property: "og:description",
         content: "Prompt rap, pop, drill, afrobeats, heartbreak and party songs with cover art.",
       },
+      { property: "og:image", content: "https://ogstreamz.co.uk/__l5e/assets-v1/c71b8b8a-3ff4-448e-ad15-3446b8fe5e88/ogbot.png" },
+      { property: "og:image:alt", content: "OG Streamz bot" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: "https://ogstreamz.co.uk/__l5e/assets-v1/c71b8b8a-3ff4-448e-ad15-3446b8fe5e88/ogbot.png" },
     ],
   }),
 });
