@@ -89,6 +89,9 @@ export function useSetFoulMouth() {
     onError: (_e, _next, ctx) => {
       if (ctx) qc.setQueryData(foulMouthQueryKey(uid), ctx.prev);
     },
+    onSuccess: (next) => {
+      toast.success(next ? "OG Foul Mouth on" : "Clean mode on", { id: "settings-saved" });
+    },
     onSettled: () => {
       qc.invalidateQueries({ queryKey: foulMouthQueryKey(uid) });
     },
