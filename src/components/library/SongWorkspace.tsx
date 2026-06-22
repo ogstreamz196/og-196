@@ -769,9 +769,23 @@ function GeneratingProgress({
             <p className="truncate text-xs text-muted-foreground">{status.headline}</p>
           </div>
         </div>
-        <div className="shrink-0 rounded-full border border-primary/40 bg-background/70 px-3 py-1.5 text-right text-xs font-bold text-foreground shadow-[0_0_18px_-4px_hsl(var(--primary)/0.7)]">
-          <span className="block tabular-nums">ETA {etaLabel}</span>
-          <span className="block text-[10px] font-medium text-muted-foreground tabular-nums">{mm}:{ss} elapsed</span>
+        <div className="flex shrink-0 items-center gap-2">
+          <div className="rounded-full border border-primary/40 bg-background/70 px-3 py-1.5 text-right text-xs font-bold text-foreground shadow-[0_0_18px_-4px_hsl(var(--primary)/0.7)]">
+            <span className="block tabular-nums">ETA {etaLabel}</span>
+            <span className="block text-[10px] font-medium text-muted-foreground tabular-nums">{mm}:{ss} elapsed</span>
+          </div>
+          {songId && (
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              onClick={handleCancel}
+              disabled={cancelling}
+              className="h-9 rounded-full px-3"
+            >
+              {cancelling ? <Loader2 className="h-4 w-4 animate-spin" /> : "Stop"}
+            </Button>
+          )}
         </div>
       </div>
 
