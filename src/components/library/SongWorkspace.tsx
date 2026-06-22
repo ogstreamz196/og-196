@@ -157,8 +157,10 @@ export function SongWorkspace({ song, onSaved }: Props) {
           songName: title.trim(),
           description: brief.trim(),
           styleTags: song.style ? song.style.split("·").map((s) => s.trim()).filter(Boolean) : [],
+          foulMouth,
         },
       });
+
       if (error) {
         const msg = invokeError(error, "Lyrics generation failed");
         toast.error(msg.toLowerCase().includes("insufficient")
