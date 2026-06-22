@@ -600,9 +600,17 @@ function PackCard({
             <Coins className="h-6 w-6 text-coin" />
           </div>
           <div className="min-w-0">
-            <div className="flex items-baseline gap-1.5 leading-none">
-              <span className="text-3xl font-black tabular-nums text-foreground">{effective.coins}</span>
+            <div className="flex items-baseline gap-2 leading-none">
+              <span className="text-lg font-bold tabular-nums text-muted-foreground/70 line-through decoration-2">
+                {Math.round(effective.coins / 2)}
+              </span>
+              <span className="flash-gold text-3xl font-black tabular-nums">
+                {effective.coins}
+              </span>
               <span className="text-xs font-bold text-coin">Coins</span>
+            </div>
+            <div className="mt-1 inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-coin">
+              <Sparkles className="h-2.5 w-2.5" /> 2× bonus
             </div>
             <div className="mt-1 text-[11px] text-muted-foreground">
               {CURRENCY_SYMBOL}{perCoin.toFixed(3)} / coin
