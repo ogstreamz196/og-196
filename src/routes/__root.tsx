@@ -200,6 +200,7 @@ function RootComponent() {
         <DisplayPrefsBridge />
         <Outlet />
         <Toaster />
+        <InstallAppPrompt />
       </AuthProvider>
     </QueryClientProvider>
   );
