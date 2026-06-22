@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { Download, X, Share, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import ogLogo from "@/assets/og-logo.png";
+import { X, Share, Plus } from "lucide-react";
+
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
