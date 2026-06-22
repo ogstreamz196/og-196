@@ -66,12 +66,28 @@ export const createCoinCheckoutSession = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<CheckoutSessionResult> => {
     const { userId, supabase } = context;
     try {
-      const pack = findCoinPackByPriceId(data.priceId)!;
+      const basePack = findCoinPackByPriceId(data.priceId)!;
       const stripe = createStripeClient(data.environment);
 
       const prices = await stripe.prices.list({ lookup_keys: [data.priceId] });
       if (!prices.data.length) throw new Error("Price not found");
       const stripePrice = prices.data[0];
+
+      // Read server-side admin override (label / desc / coins / price / bonus).
+      // The override row is only writable via the set_site_content RPC, which
+      // is gated to admin/dev — so trusting these values here is safe.
+      let override = parsePackOverride(null);
+      try {
+        const { data: row } = await supabase
+          .from("site_content")
+          .select("value")
+          .eq("key", packOverrideKey(basePack.bundleId))
+          .maybeSingle();
+        override = parsePackOverride(row?.value);
+      } catch { /* override is best-effort; fall back to canonical pack */ }
+
+      const pack = applyPackOverride(basePack, override);
+      const priceChanged = pack.priceCents !== basePack.priceCents;
 
       // Best-effort email lookup for receipt + Customer linking.
       let email: string | undefined;
@@ -87,15 +103,33 @@ export const createCoinCheckoutSession = createServerFn({ method: "POST" })
         ? stripePrice.product
         : stripePrice.product.id;
       const product = await stripe.products.retrieve(productId);
+      const productDescription = pack.label !== basePack.label
+        ? `${pack.label} · ${pack.coins} OG Coins`
+        : product.name;
+
+      // When the admin has changed the price, we cannot reuse the catalog
+      // price id (its unit_amount is fixed). Build a one-off price_data
+      // line pointing at the same Stripe Product so receipts and the
+      // dashboard still resolve the right product name.
+      const lineItem = priceChanged
+        ? {
+            price_data: {
+              currency: basePack.currency,
+              unit_amount: pack.priceCents,
+              product: productId,
+            },
+            quantity: 1,
+          }
+        : { price: stripePrice.id, quantity: 1 };
 
       const session = await stripe.checkout.sessions.create({
-        line_items: [{ price: stripePrice.id, quantity: 1 }],
+        line_items: [lineItem],
         mode: "payment",
         ui_mode: "embedded_page",
         return_url: data.returnUrl,
         customer: customerId,
         payment_intent_data: {
-          description: product.name,
+          description: productDescription,
           metadata: {
             userId,
             bundleId: pack.bundleId,
@@ -107,6 +141,7 @@ export const createCoinCheckoutSession = createServerFn({ method: "POST" })
           bundleId: pack.bundleId,
           coins: String(pack.coins),
           environment: data.environment,
+          ...(priceChanged ? { priceOverridden: "1" } : {}),
         },
       });
 
