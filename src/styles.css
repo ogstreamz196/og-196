@@ -196,9 +196,10 @@
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
     position: relative;
-    min-height: 100vh;
-    line-height: 1.65;
+    min-height: 100dvh;
+    line-height: 1.7;
     letter-spacing: 0.01em;
+    overflow-wrap: anywhere;
   }
   /* Buttons, labels, inputs, badges — keep on Fredoka with stronger weight for legibility. */
   button, [role="button"], label, input, textarea, select,
