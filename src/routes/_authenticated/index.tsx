@@ -174,8 +174,8 @@ function DashboardHome() {
         {/* Next steps */}
         <Card className="rounded-[2rem] border-2 border-white/15 shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)]">
           <CardHeader>
-            <CardTitle className="text-4xl font-black sm:text-5xl">✅ Next steps</CardTitle>
-            <CardDescription className="text-lg">Get the most out of OG Studio.</CardDescription>
+            <CardTitle className="text-2xl font-black sm:text-3xl">✅ Next steps</CardTitle>
+            <CardDescription className="text-sm sm:text-base">Get the most out of OG Studio.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <ChecklistItem
