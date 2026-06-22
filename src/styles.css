@@ -460,3 +460,27 @@
     opacity: 0.6;
   }
 }
+
+/* Generating-state shimmer + slow aura pulse */
+@keyframes generating-shimmer {
+  0%   { transform: translateX(-120%); }
+  100% { transform: translateX(380%); }
+}
+.generating-shimmer {
+  animation: generating-shimmer 1.8s linear infinite;
+  will-change: transform;
+}
+@keyframes generating-aura-pulse {
+  0%, 100% { box-shadow: 0 20px 60px -15px hsl(var(--primary) / 0.5),
+                         0 0 0 1px hsl(var(--primary) / 0.35); }
+  50%      { box-shadow: 0 25px 80px -10px hsl(var(--primary) / 0.8),
+                         0 0 0 2px hsl(var(--primary) / 0.6); }
+}
+.generating-aura {
+  animation: generating-aura-pulse 2.4s ease-in-out infinite;
+  will-change: box-shadow;
+}
+@media (prefers-reduced-motion: reduce) {
+  .generating-shimmer,
+  .generating-aura { animation: none; }
+}
