@@ -113,7 +113,7 @@ function DashboardHome() {
       </section>
 
       {/* Primary CTAs */}
-      <section className="grid grid-cols-1 gap-6 md:grid-cols-2">
+      <section className="grid grid-cols-1 items-stretch gap-4 sm:gap-6 md:grid-cols-2">
         <PrimaryCard
           to="/library"
           icon={<Music2 className="h-6 w-6" />}

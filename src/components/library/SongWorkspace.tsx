@@ -289,21 +289,31 @@ export function SongWorkspace({ song, onSaved }: Props) {
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="song-lyrics">Lyrics</Label>
-                  {hasLyrics && (
+                  {hasLyrics && !genLyrics && (
                     <span className="inline-flex items-center gap-1 text-[11px] text-emerald-500">
                       <Check className="h-3 w-3" /> Lyrics ready
                     </span>
                   )}
+                  {genLyrics && (
+                    <span className="inline-flex items-center gap-1 text-[11px] text-primary">
+                      <Loader2 className="h-3 w-3 animate-spin" /> Writing lyrics…
+                    </span>
+                  )}
                 </div>
-                <Textarea
-                  id="song-lyrics"
-                  value={lyrics}
-                  onChange={(e) => setLyrics(e.target.value)}
-                  rows={12}
-                  placeholder={"Tap Generate lyrics below — or paste your own.\n\n[Verse 1]\n…\n[Chorus]\n…"}
-                  className="font-mono text-sm"
-                />
+                {genLyrics ? (
+                  <LyricsSkeleton />
+                ) : (
+                  <Textarea
+                    id="song-lyrics"
+                    value={lyrics}
+                    onChange={(e) => setLyrics(e.target.value)}
+                    rows={12}
+                    placeholder={"Tap Generate lyrics below — or paste your own.\n\n[Verse 1]\n…\n[Chorus]\n…"}
+                    className="font-mono text-sm"
+                  />
+                )}
               </div>
+
 
               <div className="flex flex-wrap items-center justify-end gap-2">
                 {dirty && <span className="mr-auto text-xs text-muted-foreground">Unsaved changes</span>}
