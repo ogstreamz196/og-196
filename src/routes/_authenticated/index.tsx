@@ -60,11 +60,11 @@ function DashboardHome() {
   const scrimOpacity = useAdaptiveOverlay(welcomeRef, { min: 0.55, max: 0.92 });
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-14 px-2 sm:px-4">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-3 sm:gap-12 sm:px-6">
       {/* Welcome */}
       <section
         ref={welcomeRef}
-        className="relative flex flex-col gap-3 overflow-hidden rounded-[2.5rem] border-2 border-white/15 bg-card/55 p-8 shadow-[0_24px_60px_-20px_rgba(80,60,255,0.45)] backdrop-blur-2xl sm:p-12"
+        className="relative flex flex-col gap-3 overflow-hidden rounded-[2rem] border-2 border-white/15 bg-card/55 p-5 shadow-[0_24px_60px_-20px_rgba(80,60,255,0.45)] backdrop-blur-2xl sm:rounded-[2.5rem] sm:p-8 lg:p-10"
       >
         {/* Adaptive dark scrim */}
         <div
