@@ -145,6 +145,9 @@ function AdminPanel() {
               <Link to="/admin/user-settings">
                 <Button size="sm" variant="outline">User Settings</Button>
               </Link>
+              <Link to="/admin/api-keys">
+                <Button size="sm" variant="outline">API Keys</Button>
+              </Link>
             </div>
           }
         >
