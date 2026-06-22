@@ -252,6 +252,8 @@ export function SongWorkspace({ song, onSaved }: Props) {
             startedAt={song.generation_started_at ?? song.updated_at ?? song.created_at}
             taskId={song.suno_task_id}
             hasLivePreview={!!song.stream_audio_url}
+            songId={song.id}
+            onCancelled={onSaved}
           />
         </div>
       )}
@@ -370,6 +372,8 @@ export function SongWorkspace({ song, onSaved }: Props) {
                     startedAt={song.generation_started_at ?? song.updated_at ?? song.created_at}
                     taskId={song.suno_task_id}
                     hasLivePreview={!!song.stream_audio_url}
+                    songId={song.id}
+                    onCancelled={onSaved}
                   />
                   {song.stream_audio_url && (
                     <LiveStreamPreview streamUrl={song.stream_audio_url} limitSeconds={20} />
@@ -680,13 +684,36 @@ function GeneratingProgress({
   startedAt,
   taskId,
   hasLivePreview = false,
+  songId,
+  onCancelled,
 }: {
   sampleSeconds: number;
-  /** ISO timestamp of when generation kicked off. Lets elapsed resume after page refresh. */
   startedAt?: string | null;
   taskId?: string | null;
   hasLivePreview?: boolean;
+  songId?: string;
+  onCancelled?: () => void;
 }) {
+  const [cancelling, setCancelling] = useState(false);
+  async function handleCancel() {
+    if (!songId || cancelling) return;
+    setCancelling(true);
+    try {
+      const { error } = await supabase.functions.invoke("suno-cancel", {
+        body: { song_id: songId },
+      });
+      if (error) {
+        toast.error(invokeError(error, "Could not cancel"));
+        return;
+      }
+      toast.success("Generation cancelled — coins refunded");
+      onCancelled?.();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not cancel");
+    } finally {
+      setCancelling(false);
+    }
+  }
   // Anchor elapsed to the DB-side start time (song.updated_at when status flipped to
   // pending) so a hard refresh continues the timer mid-flight instead of restarting at 0.
   const startMs = useMemo(() => {
@@ -742,9 +769,23 @@ function GeneratingProgress({
             <p className="truncate text-xs text-muted-foreground">{status.headline}</p>
           </div>
         </div>
-        <div className="shrink-0 rounded-full border border-primary/40 bg-background/70 px-3 py-1.5 text-right text-xs font-bold text-foreground shadow-[0_0_18px_-4px_hsl(var(--primary)/0.7)]">
-          <span className="block tabular-nums">ETA {etaLabel}</span>
-          <span className="block text-[10px] font-medium text-muted-foreground tabular-nums">{mm}:{ss} elapsed</span>
+        <div className="flex shrink-0 items-center gap-2">
+          <div className="rounded-full border border-primary/40 bg-background/70 px-3 py-1.5 text-right text-xs font-bold text-foreground shadow-[0_0_18px_-4px_hsl(var(--primary)/0.7)]">
+            <span className="block tabular-nums">ETA {etaLabel}</span>
+            <span className="block text-[10px] font-medium text-muted-foreground tabular-nums">{mm}:{ss} elapsed</span>
+          </div>
+          {songId && (
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              onClick={handleCancel}
+              disabled={cancelling}
+              className="h-9 rounded-full px-3"
+            >
+              {cancelling ? <Loader2 className="h-4 w-4 animate-spin" /> : "Stop"}
+            </Button>
+          )}
         </div>
       </div>
 
