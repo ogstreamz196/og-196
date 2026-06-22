@@ -589,10 +589,28 @@ function LyricsSkeleton() {
     { label: "[Verse 2]", lines: 6 },
     { label: "[Bridge]", lines: 3 },
   ];
+  const STAGES = [
+    { at: 0, label: "Reading your brief…" },
+    { at: 20, label: "Finding the vibe…" },
+    { at: 40, label: "Writing verses…" },
+    { at: 65, label: "Dropping the hook…" },
+    { at: 85, label: "Polishing bars…" },
+    { at: 95, label: "Almost ready…" },
+  ];
+  const [progress, setProgress] = useState(4);
+  useEffect(() => {
+    const id = setInterval(() => {
+      // ease toward 95 — real completion will unmount this component
+      setProgress((p) => (p >= 95 ? 95 : p + Math.max(0.4, (95 - p) * 0.04)));
+    }, 250);
+    return () => clearInterval(id);
+  }, []);
+  const stage = STAGES.slice().reverse().find((s) => progress >= s.at) ?? STAGES[0];
   return (
     <div
       role="status"
       aria-label="Generating lyrics"
+      aria-live="polite"
       className="space-y-4 rounded-md border border-primary/30 bg-gradient-to-br from-primary/5 via-card to-card p-4 font-mono text-sm"
     >
       <div className="flex items-center gap-3 border-b border-primary/20 pb-3">
@@ -604,10 +622,21 @@ function LyricsSkeleton() {
             className="relative h-12 w-12 rounded-full ring-2 ring-primary/60 shadow-[0_0_24px_-4px_hsl(var(--primary)/0.9)] animate-bounce"
           />
         </div>
-        <div className="flex flex-col">
-          <span className="text-sm font-bold text-primary">OG Bot is cooking…</span>
+        <div className="flex flex-1 flex-col gap-1.5">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-bold text-primary">OG Bot is cooking…</span>
+            <span className="font-mono text-xs font-semibold tabular-nums text-primary">
+              {Math.round(progress)}%
+            </span>
+          </div>
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-primary via-primary/80 to-primary transition-[width] duration-300 ease-out"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
           <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
-            Writing your lyrics
+            {stage.label}
             <span className="inline-flex gap-0.5">
               <span className="h-1 w-1 animate-bounce rounded-full bg-primary [animation-delay:0ms]" />
               <span className="h-1 w-1 animate-bounce rounded-full bg-primary [animation-delay:150ms]" />
@@ -616,6 +645,7 @@ function LyricsSkeleton() {
           </span>
         </div>
       </div>
+
 
       {blocks.map((b, bi) => (
         <div key={bi} className="space-y-1.5">
