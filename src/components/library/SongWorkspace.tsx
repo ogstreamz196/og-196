@@ -663,10 +663,13 @@ function LyricsSkeleton({ songId }: { songId?: string }) {
           />
         </div>
         <div className="flex flex-1 flex-col gap-1.5">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <span className="text-sm font-bold text-primary">OG Bot is cooking…</span>
-            <span className="font-mono text-xs font-semibold tabular-nums text-primary">
-              {Math.round(progress)}%
+            <span className="flex items-center gap-2 font-mono text-xs font-semibold tabular-nums text-primary">
+              <span>{Math.round(progress)}%</span>
+              <span className="rounded-full border border-primary/30 bg-background/60 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                {etaLabel}
+              </span>
             </span>
           </div>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
@@ -676,7 +679,7 @@ function LyricsSkeleton({ songId }: { songId?: string }) {
             />
           </div>
           <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
-            {stage.label}
+            {stageLabel}
             <span className="inline-flex gap-0.5">
               <span className="h-1 w-1 animate-bounce rounded-full bg-primary [animation-delay:0ms]" />
               <span className="h-1 w-1 animate-bounce rounded-full bg-primary [animation-delay:150ms]" />
@@ -685,6 +688,7 @@ function LyricsSkeleton({ songId }: { songId?: string }) {
           </span>
         </div>
       </div>
+
 
 
       {blocks.map((b, bi) => (
