@@ -26,6 +26,7 @@ import { useRole } from "@/hooks/use-role";
 import { useProfile } from "@/hooks/use-profile";
 import { useSettings } from "@/hooks/use-settings";
 import { invokeError } from "@/lib/invoke-error";
+import { cn } from "@/lib/utils";
 import { SongCard, type Song } from "@/components/SongCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
