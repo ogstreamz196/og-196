@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 import { StageStepper, type Stage } from "./song-workspace/StageStepper";
 import { VariationsCard } from "./song-workspace/VariationsCard";
 import type { WorkspaceSong } from "./song-workspace/types";
+import ogBotAsset from "@/assets/ogbot.png.asset.json";
 
 interface Props {
   song: WorkspaceSong;
@@ -594,6 +595,28 @@ function LyricsSkeleton() {
       aria-label="Generating lyrics"
       className="space-y-4 rounded-md border border-primary/30 bg-gradient-to-br from-primary/5 via-card to-card p-4 font-mono text-sm"
     >
+      <div className="flex items-center gap-3 border-b border-primary/20 pb-3">
+        <div className="relative">
+          <div className="absolute inset-0 animate-ping rounded-full bg-primary/40" />
+          <img
+            src={ogBotAsset.url}
+            alt=""
+            className="relative h-12 w-12 rounded-full ring-2 ring-primary/60 shadow-[0_0_24px_-4px_hsl(var(--primary)/0.9)] animate-bounce"
+          />
+        </div>
+        <div className="flex flex-col">
+          <span className="text-sm font-bold text-primary">OG Bot is cooking…</span>
+          <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+            Writing your lyrics
+            <span className="inline-flex gap-0.5">
+              <span className="h-1 w-1 animate-bounce rounded-full bg-primary [animation-delay:0ms]" />
+              <span className="h-1 w-1 animate-bounce rounded-full bg-primary [animation-delay:150ms]" />
+              <span className="h-1 w-1 animate-bounce rounded-full bg-primary [animation-delay:300ms]" />
+            </span>
+          </span>
+        </div>
+      </div>
+
       {blocks.map((b, bi) => (
         <div key={bi} className="space-y-1.5">
           <div className="text-[11px] font-semibold text-primary/80">{b.label}</div>
