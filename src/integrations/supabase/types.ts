@@ -439,6 +439,9 @@ export type Database = {
           id: string
           is_variation: boolean
           lyrics: string | null
+          lyrics_progress: number | null
+          lyrics_stage: string | null
+          lyrics_started_at: string | null
           portal_id: string | null
           prompt: string
           revealed: boolean
@@ -464,6 +467,9 @@ export type Database = {
           id?: string
           is_variation?: boolean
           lyrics?: string | null
+          lyrics_progress?: number | null
+          lyrics_stage?: string | null
+          lyrics_started_at?: string | null
           portal_id?: string | null
           prompt: string
           revealed?: boolean
@@ -489,6 +495,9 @@ export type Database = {
           id?: string
           is_variation?: boolean
           lyrics?: string | null
+          lyrics_progress?: number | null
+          lyrics_stage?: string | null
+          lyrics_started_at?: string | null
           portal_id?: string | null
           prompt?: string
           revealed?: boolean
