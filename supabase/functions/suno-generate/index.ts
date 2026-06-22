@@ -196,12 +196,17 @@ Deno.serve(async (req) => {
 });
 
 async function refund(admin: any, userId: string, songId: string, reason: string, amount: number) {
-  await admin.from("songs").update({ status: "failed", error_message: reason }).eq("id", songId);
-  await admin.from("coin_transactions").insert({
-    user_id: userId, amount, type: "refund", reference: songId,
+  await admin.from("songs").update({
+    status: "failed",
+    error_message: reason,
+    suno_task_id: null,
+  }).eq("id", songId);
+  const { error } = await admin.rpc("refund_generation_charge", {
+    p_user: userId,
+    p_amount: amount,
+    p_reference: songId,
   });
-  const { data: prof } = await admin.from("profiles").select("coin_balance").eq("id", userId).single();
-  await admin.from("profiles").update({ coin_balance: (prof?.coin_balance ?? 0) + amount }).eq("id", userId);
+  if (error) console.error("Refund failed", error.message);
 }
 
 function json(body: unknown, status = 200) {
