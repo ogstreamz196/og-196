@@ -190,15 +190,25 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    /* Fredoka reads cleanest at 450–500 weight on dark surfaces — bumps AA contrast vs 400. */
+    font-weight: 450;
     font-feature-settings: "ss01", "cv11";
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
     position: relative;
     min-height: 100vh;
-    /* Comfortable reading rhythm */
-    line-height: 1.7;
+    line-height: 1.65;
+    letter-spacing: 0.01em;
+  }
+  /* Buttons, labels, inputs, badges — keep on Fredoka with stronger weight for legibility. */
+  button, [role="button"], label, input, textarea, select,
+  .badge, [data-slot="badge"], [data-slot="button"] {
+    font-family: var(--font-sans);
+    font-weight: 600;
     letter-spacing: 0.005em;
   }
+  /* Bagel Fat One has thin counters at tiny sizes — never let display drop below 14px. */
+  h5, h6 { font-size: max(0.95rem, 14px); line-height: 1.25; }
   /* Media never bursts its container at any zoom */
   img, video, svg, canvas, iframe {
     max-width: 100%;
