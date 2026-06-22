@@ -82,12 +82,23 @@ function DashboardHome() {
         <div aria-hidden className="pointer-events-none absolute -right-10 top-8 h-40 w-40 rounded-full bg-primary/30 blur-2xl animate-[float_6s_ease-in-out_infinite]" />
         <div aria-hidden className="pointer-events-none absolute -left-12 bottom-0 h-32 w-32 rounded-full bg-accent/30 blur-2xl animate-[float_8s_ease-in-out_infinite_reverse]" />
 
-        <div className="relative grid grid-cols-[minmax(0,1fr)_96px] items-start gap-3 sm:flex sm:flex-wrap sm:items-end sm:justify-between sm:gap-4">
-          <div className="min-w-0 rounded-3xl bg-background/35 p-5 backdrop-blur-md ring-2 ring-white/10 sm:flex-1 sm:p-7">
+        <div className="relative flex flex-col gap-3 sm:flex sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-4">
+          <div className="order-2 flex w-full flex-row items-center gap-2 sm:order-none sm:w-auto sm:flex-row sm:items-center sm:text-lg">
+            {isVip && (
+              <Badge variant="secondary" className="justify-center gap-1 rounded-full border-2 border-white/20 px-3 py-1.5 text-xs shadow-glow sm:gap-1.5 sm:px-5 sm:py-2.5 sm:text-lg">
+                <Sparkles className="h-4 w-4 sm:h-6 sm:w-6" /> VIP
+              </Badge>
+            )}
+            <Badge variant="outline" className="justify-center gap-1.5 rounded-full border-2 border-white/20 bg-white/5 px-3 py-1.5 text-xs sm:gap-2 sm:px-5 sm:py-2.5 sm:text-lg">
+              <Coins className="h-4 w-4 shrink-0 text-primary animate-[bounce_2s_ease-in-out_infinite] sm:h-6 sm:w-6" />
+              <span className="truncate">{balance} OG coins</span>
+            </Badge>
+          </div>
+          <div className="order-1 min-w-0 rounded-3xl bg-background/35 p-5 backdrop-blur-md ring-2 ring-white/10 sm:order-none sm:flex-1 sm:p-7">
             <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground sm:text-xl">
               👋 Welcome back
             </p>
-            <h1 className="font-display mt-3 text-[clamp(1.75rem,9vw,6rem)] font-black leading-[1.02] tracking-[-0.02em] text-foreground [text-shadow:0_4px_28px_rgba(0,0,0,0.75)] [overflow-wrap:break-word] [word-break:normal] [hyphens:auto]">
+            <h1 className="font-display mt-3 text-[clamp(2.25rem,12vw,6rem)] font-black leading-[1.02] tracking-[-0.02em] text-foreground [text-shadow:0_4px_28px_rgba(0,0,0,0.75)] [overflow-wrap:break-word] [word-break:normal]">
               Hello,{" "}
               <em className="inline italic text-gradient-brand animate-[wiggle_3s_ease-in-out_infinite] origin-bottom [overflow-wrap:break-word] [word-break:normal]">
                 {displayName}
@@ -97,18 +108,8 @@ function DashboardHome() {
               Jump back into your music workspace or pick up a chat with OG Bot.
             </p>
           </div>
-          <div className="flex w-full shrink-0 flex-col items-stretch gap-2 sm:w-auto sm:flex-row sm:items-center sm:text-lg">
-            {isVip && (
-              <Badge variant="secondary" className="justify-center gap-1 rounded-full border-2 border-white/20 px-2 py-1 text-[11px] shadow-glow sm:gap-1.5 sm:px-5 sm:py-2.5 sm:text-lg">
-                <Sparkles className="h-3.5 w-3.5 sm:h-6 sm:w-6" /> VIP
-              </Badge>
-            )}
-            <Badge variant="outline" className="justify-center gap-1 rounded-full border-2 border-white/20 bg-white/5 px-2 py-1 text-[11px] sm:gap-2 sm:px-5 sm:py-2.5 sm:text-lg">
-              <Coins className="h-3.5 w-3.5 shrink-0 text-primary animate-[bounce_2s_ease-in-out_infinite] sm:h-6 sm:w-6" />
-              <span className="truncate">{balance}</span>
-            </Badge>
-          </div>
         </div>
+
       </section>
 
       {/* Primary CTAs */}
@@ -214,7 +215,7 @@ function PrimaryCard({
     <Link
       to={to}
       preload="intent"
-      className="group relative flex min-h-[560px] flex-col justify-between overflow-hidden rounded-[2rem] border-2 border-white/15 bg-card/70 p-8 shadow-card backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-glow sm:min-h-[720px] sm:p-12"
+      className="group relative flex min-h-[420px] flex-col justify-between overflow-hidden rounded-[2rem] border-2 border-white/15 bg-card/70 p-6 shadow-card backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-glow sm:min-h-[720px] sm:p-12"
     >
       {/* Ambient gradient layers */}
       <div
@@ -229,9 +230,9 @@ function PrimaryCard({
       <div className="pointer-events-none absolute -right-10 -top-10 h-56 w-56 rounded-full bg-primary/10 blur-3xl transition-transform duration-700 group-hover:scale-110" />
       <div className="pointer-events-none absolute right-4 top-6 opacity-[0.07] transition-all duration-700 group-hover:rotate-12 group-hover:opacity-[0.14] sm:right-8 sm:top-10">
         {isAccent ? (
-          <Bot className="h-48 w-48 sm:h-64 sm:w-64" strokeWidth={1.25} />
+          <Bot className="h-28 w-28 sm:h-64 sm:w-64" strokeWidth={1.25} />
         ) : (
-          <Disc3 className="h-48 w-48 animate-[spin_18s_linear_infinite] sm:h-64 sm:w-64" strokeWidth={1.25} />
+          <Disc3 className="h-28 w-28 animate-[spin_18s_linear_infinite] sm:h-64 sm:w-64" strokeWidth={1.25} />
         )}
       </div>
       {/* Equalizer bars bottom-right accent */}
@@ -256,7 +257,7 @@ function PrimaryCard({
           <p className="text-sm uppercase tracking-[0.24em] text-muted-foreground sm:text-base">{eyebrow}</p>
           <span className="h-px flex-1 bg-gradient-to-r from-white/15 to-transparent" />
         </div>
-        <h3 className="font-display mt-4 text-[clamp(3.25rem,11vw,6.5rem)] font-black uppercase leading-[0.88] tracking-[-0.035em] drop-shadow-[0_6px_24px_rgba(80,60,255,0.35)]">
+        <h3 className="font-display mt-4 text-[clamp(2.25rem,8.5vw,6.5rem)] font-black uppercase leading-[0.92] tracking-[-0.035em] drop-shadow-[0_6px_24px_rgba(80,60,255,0.35)] [overflow-wrap:break-word]">
           {title.split(" ").map((word, i, arr) => {
             const isLast = i === arr.length - 1;
             return (
