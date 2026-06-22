@@ -398,6 +398,31 @@ function LibraryPage() {
     },
   });
 
+  const versionedLibrary = useMemo(() => {
+    const list = library.data ?? [];
+    const sortedAsc = [...list].sort(
+      (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+    );
+    const totals = new Map<string, number>();
+    const running = new Map<string, number>();
+    const versionOf = new Map<string, number>();
+    for (const s of sortedAsc) {
+      const key = (s.title || "Untitled").trim().toLowerCase();
+      totals.set(key, (totals.get(key) ?? 0) + 1);
+      const next = (running.get(key) ?? 0) + 1;
+      running.set(key, next);
+      versionOf.set(s.id, next);
+    }
+    return list.map((s) => {
+      const key = (s.title || "Untitled").trim().toLowerCase();
+      const total = totals.get(key) ?? 1;
+      const v = versionOf.get(s.id) ?? 1;
+      const base = s.title || "Untitled";
+      const display = total > 1 ? `${base} · Version ${v}` : base;
+      return { ...s, title: display };
+    });
+  }, [library.data]);
+
   useEffect(() => {
     if (!user) return;
     const ch = supabase
