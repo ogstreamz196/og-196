@@ -342,28 +342,18 @@ function BuyCoinsPage() {
 
 
         {/* VIP yearly subscription */}
-        <section>
-          <div className="mb-4">
-            <h2 className="font-display text-2xl font-black tracking-tight sm:text-3xl">
-              <EditableContent contentKey="buyCoins.vip.heading" defaultValue="Or go all-in with OG VIP" />
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              <EditableContent
-                contentKey="buyCoins.vip.subtitle"
-                defaultValue="Unlock exclusive privileges across OG Streamz for a full year."
-                multiline
-              />
-            </p>
-          </div>
-          <div className="relative overflow-hidden rounded-3xl border border-coin/40 bg-gradient-to-br from-coin/15 via-card to-card p-6 shadow-card sm:p-8">
-            <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-coin/25 blur-3xl" />
-            <div className="relative grid gap-6 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center">
-              <div className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-coin/20 shadow-glow">
-                <Crown className="h-8 w-8 text-coin" />
-              </div>
+        <SectionCard className="border-coin/40">
+          <SectionHeader
+            eyebrow="Yearly membership"
+            title={<EditableContent contentKey="buyCoins.vip.heading" defaultValue="Or go all-in with OG VIP" />}
+            subtitle={<EditableContent contentKey="buyCoins.vip.subtitle" defaultValue="Unlock exclusive privileges across OG Streamz for a full year." multiline />}
+            icon={<Crown className="h-5 w-5 text-coin" />}
+          />
+          <div className="px-5 pb-5 sm:px-6 sm:pb-6">
+            <div className="relative grid gap-4 rounded-2xl border border-coin/30 bg-gradient-to-br from-coin/10 via-card to-card p-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-6">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="text-xl font-bold">OG VIP</h3>
+                  <h3 className="text-lg font-bold">OG VIP</h3>
                   {isVip && (
                     <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400 ring-1 ring-emerald-500/30">
                       Active
@@ -390,21 +380,22 @@ function BuyCoinsPage() {
                   onClick={() => pickSelection({ type: "vip" })}
                   className="bg-gradient-brand font-bold text-primary-foreground shadow-glow transition-transform hover:-translate-y-0.5 hover:opacity-90 active:translate-y-0"
                 >
-                  {isVip ? "You're VIP" : (
-                    <><Crown className="mr-2 h-4 w-4" /> Join VIP</>
-                  )}
+                  {isVip ? "You're VIP" : (<><Crown className="mr-2 h-4 w-4" /> Join VIP</>)}
                 </Button>
               </div>
             </div>
           </div>
-        </section>
+        </SectionCard>
 
         {/* Trust strip */}
-        <section className="grid gap-3 rounded-2xl border border-border bg-card/60 p-5 sm:grid-cols-3">
-          <TrustItem icon={<ShieldCheck className="h-5 w-5 text-emerald-400" />} title="Secure by Stripe" body="PCI-compliant checkout, your card never touches our servers." />
-          <TrustItem icon={<InfinityIcon className="h-5 w-5 text-coin" />} title="Coins never expire" body="Top up once, use whenever — no monthly resets." />
-          <TrustItem icon={<Check className="h-5 w-5 text-primary" />} title="Instant credit" body="Coins land in your balance the moment payment clears." />
-        </section>
+        <SectionCard>
+          <div className="grid gap-3 p-5 sm:grid-cols-3 sm:p-6">
+            <TrustItem icon={<ShieldCheck className="h-5 w-5 text-emerald-400" />} title="Secure by Stripe" body="PCI-compliant checkout, your card never touches our servers." />
+            <TrustItem icon={<InfinityIcon className="h-5 w-5 text-coin" />} title="Coins never expire" body="Top up once, use whenever — no monthly resets." />
+            <TrustItem icon={<Check className="h-5 w-5 text-primary" />} title="Instant credit" body="Coins land in your balance the moment payment clears." />
+          </div>
+        </SectionCard>
+
 
         <p className="text-center text-xs text-muted-foreground">
           <EditableContent
