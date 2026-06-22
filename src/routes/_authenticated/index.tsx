@@ -149,17 +149,17 @@ function DashboardHome() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Example prompts */}
         <Card className="rounded-[2rem] border-2 border-white/15 shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)] lg:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="text-4xl font-black sm:text-5xl">🎤 Try a prompt</CardTitle>
-              <CardDescription className="text-lg">Tap one to start a song in seconds.</CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between gap-3">
+            <div className="min-w-0">
+              <CardTitle className="text-2xl font-black sm:text-3xl">🎤 Try a prompt</CardTitle>
+              <CardDescription className="text-sm sm:text-base">Tap one to start a song in seconds.</CardDescription>
             </div>
             <Link
               to="/library"
               preload="intent"
-              className={cn(buttonVariants({ variant: "ghost", size: "lg" }), "gap-1.5 rounded-full text-lg")}
+              className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "shrink-0 gap-1.5 rounded-full text-sm sm:text-base")}
             >
-              Open studio <ArrowRight className="h-6 w-6" />
+              Open studio <ArrowRight className="h-4 w-4" />
             </Link>
           </CardHeader>
           <CardContent>
