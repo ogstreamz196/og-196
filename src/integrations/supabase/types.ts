@@ -435,6 +435,7 @@ export type Database = {
           created_at: string
           duration_seconds: number | null
           error_message: string | null
+          generation_started_at: string | null
           id: string
           is_variation: boolean
           lyrics: string | null
@@ -458,6 +459,7 @@ export type Database = {
           created_at?: string
           duration_seconds?: number | null
           error_message?: string | null
+          generation_started_at?: string | null
           id?: string
           is_variation?: boolean
           lyrics?: string | null
@@ -481,6 +483,7 @@ export type Database = {
           created_at?: string
           duration_seconds?: number | null
           error_message?: string | null
+          generation_started_at?: string | null
           id?: string
           is_variation?: boolean
           lyrics?: string | null
