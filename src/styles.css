@@ -221,12 +221,22 @@
   html[data-density="spacious"]    { --density-scale: 1.15; --line-height-body: 1.85; }
   html[data-density] body { line-height: var(--line-height-body); }
 
+  /* Silver glow halo so dark/blue display text reads on dark backgrounds */
+  :root {
+    --silver-glow:
+      0 0 1px rgba(220, 230, 245, 0.95),
+      0 0 6px rgba(200, 215, 235, 0.55),
+      0 0 18px rgba(170, 190, 220, 0.35),
+      0 0 36px rgba(140, 165, 200, 0.22);
+  }
+
   /* Responsive typography scale — bubble/cartoon display face needs open tracking, not negative. */
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
     letter-spacing: 0.005em;
     font-weight: 400; /* Bagel Fat One is single-weight */
     text-transform: none;
+    text-shadow: var(--silver-glow);
   }
   h1 { font-size: clamp(2rem, 3vw + 1rem, 3.75rem); line-height: 1; }
   h2 { font-size: clamp(1.55rem, 1.8vw + 0.95rem, 2.625rem); line-height: 1.05; }
@@ -240,6 +250,7 @@
     font-optical-sizing: auto;
     letter-spacing: 0.005em;
     text-transform: none;
+    text-shadow: var(--silver-glow);
   }
   .font-graffiti {
     font-family: var(--font-graffiti);
@@ -247,6 +258,20 @@
     text-transform: none;
     transform: rotate(-1.5deg);
     display: inline-block;
+    text-shadow: var(--silver-glow);
+  }
+  /* Gradient-clipped text loses text-shadow (transparent fill).
+     Use a drop-shadow filter so the silver halo still reads against dark bg. */
+  .text-gradient-brand,
+  [class*="text-gradient-"] {
+    filter:
+      drop-shadow(0 0 1px rgba(220, 230, 245, 0.85))
+      drop-shadow(0 0 8px rgba(180, 200, 230, 0.55))
+      drop-shadow(0 0 22px rgba(140, 165, 200, 0.3));
+  }
+  /* Reusable utility for any other dark/blue text that needs lift */
+  .text-silver-glow {
+    text-shadow: var(--silver-glow);
   }
   /* Sitewide brand wallpaper, fixed and full-bleed */
   body::before {
