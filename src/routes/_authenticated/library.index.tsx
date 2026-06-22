@@ -781,22 +781,43 @@ function LibraryPage() {
                 />
               </div>
             </div>
-            <div className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2.5">
-              <div className="flex flex-col">
-                <Label htmlFor="foul-mouth-toggle" className="text-sm font-semibold">
-                  OG Foul Mouth
-                </Label>
-                <span className="text-xs text-muted-foreground">
-                  {foulMouth ? "Explicit — full swearing on" : "Clean version"}
-                </span>
+            <button
+              type="button"
+              onClick={() => !genLyrics && setFoulMouth((v) => !v)}
+              disabled={genLyrics}
+              aria-pressed={foulMouth}
+              className={cn(
+                "group flex w-full items-center justify-between gap-3 rounded-2xl border-2 px-4 py-3 text-left transition-all",
+                foulMouth
+                  ? "border-destructive bg-destructive/15 shadow-[0_0_24px_-6px_oklch(0.62_0.22_25_/_0.6)]"
+                  : "border-white/15 bg-white/[0.04] hover:border-white/25",
+              )}
+            >
+              <div className="flex items-center gap-3">
+                <div className={cn(
+                  "grid h-10 w-10 shrink-0 place-items-center rounded-xl text-lg transition",
+                  foulMouth ? "bg-destructive/30" : "bg-white/5",
+                )}>
+                  {foulMouth ? "🤬" : "🧼"}
+                </div>
+                <div>
+                  <div className="text-sm font-bold leading-tight">OG Foul Mouth</div>
+                  <div className={cn(
+                    "text-xs leading-tight",
+                    foulMouth ? "font-semibold text-destructive-foreground/90" : "text-muted-foreground",
+                  )}>
+                    {foulMouth ? "EXPLICIT — full swearing ON" : "Clean version — tap to go explicit"}
+                  </div>
+                </div>
               </div>
               <Switch
                 id="foul-mouth-toggle"
                 checked={foulMouth}
                 onCheckedChange={setFoulMouth}
                 disabled={genLyrics}
+                className="pointer-events-none scale-125 data-[state=checked]:bg-destructive"
               />
-            </div>
+            </button>
             <Button
               onClick={generateLyrics}
               disabled={!canGenerateLyrics || genLyrics}
