@@ -19,6 +19,8 @@ export interface Song {
   created_at: string;
   updated_at?: string | null;
   generation_started_at?: string | null;
+  suno_task_id?: string | null;
+  stream_audio_url?: string | null;
 }
 
 export function SongCard({ song }: { song: Song }) {

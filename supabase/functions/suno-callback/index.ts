@@ -117,12 +117,17 @@ Deno.serve(async (req) => {
 
   const clipsRaw = items.map((c: any) => ({
     audioUrl: c?.audio_url || c?.audioUrl || c?.source_audio_url,
-    streamUrl: c?.stream_audio_url || c?.streamAudioUrl || c?.source_stream_audio_url,
+    streamUrl: c?.stream_audio_url || c?.streamAudioUrl || c?.streamAudioURL || c?.source_stream_audio_url,
     coverUrl: c?.image_url || c?.imageUrl || c?.cover_url,
     title: c?.title,
     duration: c?.duration,
     clipId: c?.id || c?.clip_id,
   }));
+
+  const callbackTaskId = payload?.data?.task_id || payload?.data?.taskId || payload?.task_id || payload?.taskId || null;
+  if (callbackTaskId && !parentSong.suno_task_id) {
+    await admin.from("songs").update({ suno_task_id: callbackTaskId }).eq("id", songId);
+  }
 
   // Early "first"/"text" callback: Suno only has the stream URL, not the final
   // file. Persist the stream URL so the UI can offer a live Suno-style preview

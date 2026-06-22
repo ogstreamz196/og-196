@@ -247,7 +247,12 @@ export function SongWorkspace({ song, onSaved }: Props) {
     <div className="space-y-6">
       {isPending && (
         <div className="sticky top-2 z-30">
-          <GeneratingProgress sampleSeconds={settings?.sample_seconds ?? 30} startedAt={song.generation_started_at ?? song.updated_at ?? song.created_at} />
+          <GeneratingProgress
+            sampleSeconds={settings?.sample_seconds ?? 30}
+            startedAt={song.generation_started_at ?? song.updated_at ?? song.created_at}
+            taskId={song.suno_task_id}
+            hasLivePreview={!!song.stream_audio_url}
+          />
         </div>
       )}
       <StageStepper current={stage} sampleSeconds={settings?.sample_seconds ?? 30} />
@@ -360,7 +365,12 @@ export function SongWorkspace({ song, onSaved }: Props) {
               )}
               {isPending && (
                 <>
-                  <GeneratingProgress sampleSeconds={settings?.sample_seconds ?? 30} startedAt={song.generation_started_at ?? song.updated_at ?? song.created_at} />
+                  <GeneratingProgress
+                    sampleSeconds={settings?.sample_seconds ?? 30}
+                    startedAt={song.generation_started_at ?? song.updated_at ?? song.created_at}
+                    taskId={song.suno_task_id}
+                    hasLivePreview={!!song.stream_audio_url}
+                  />
                   {song.stream_audio_url && (
                     <LiveStreamPreview streamUrl={song.stream_audio_url} limitSeconds={20} />
                   )}
@@ -589,6 +599,76 @@ function CostBadge({ cost }: { cost: number }) {
   );
 }
 
+type GenerationStep = {
+  label: string;
+  detail: string;
+  state: "done" | "active" | "waiting";
+};
+
+function formatDuration(totalSeconds: number) {
+  const seconds = Math.max(0, Math.ceil(totalSeconds));
+  const minutes = Math.floor(seconds / 60);
+  const rest = seconds % 60;
+  if (minutes <= 0) return `${rest}s`;
+  return `${minutes}m ${String(rest).padStart(2, "0")}s`;
+}
+
+function getGenerationStatus(elapsed: number, hasTaskId: boolean, hasLivePreview: boolean): {
+  progress: number;
+  etaSeconds: number;
+  headline: string;
+  detail: string;
+  steps: GenerationStep[];
+} {
+  const targetSeconds = hasLivePreview ? 85 : hasTaskId ? 100 : 30;
+  const progress = !hasTaskId
+    ? Math.min(18, 8 + Math.floor(elapsed * 0.4))
+    : Math.min(96, Math.max(22, Math.round((elapsed / targetSeconds) * 88)));
+  const etaSeconds = !hasTaskId
+    ? Math.max(0, 35 - elapsed)
+    : Math.max(0, targetSeconds - elapsed);
+
+  if (!hasTaskId) {
+    return {
+      progress,
+      etaSeconds,
+      headline: "Starting the music job with the generator…",
+      detail: elapsed > 45 ? "Still waiting for the generator to accept the job — I won't fake 99%." : "Getting a real task ID before the mix begins.",
+      steps: [
+        { label: "Queued", detail: "Saving your prompt", state: "done" },
+        { label: "Accepted", detail: "Waiting for task ID", state: "active" },
+        { label: "Audio", detail: "Starts after acceptance", state: "waiting" },
+      ],
+    };
+  }
+
+  if (hasLivePreview) {
+    return {
+      progress: Math.max(progress, 68),
+      etaSeconds,
+      headline: "Live preview is ready — finishing the downloadable sample…",
+      detail: "You can listen now while the final sample file is being packaged.",
+      steps: [
+        { label: "Queued", detail: "Task accepted", state: "done" },
+        { label: "Preview", detail: "Streaming now", state: "done" },
+        { label: "Sample", detail: "Packaging audio", state: "active" },
+      ],
+    };
+  }
+
+  return {
+    progress,
+    etaSeconds,
+    headline: elapsed < 35 ? "Composing melody and beat…" : elapsed < 75 ? "Rendering vocals and mix…" : "Waiting for the first audio callback…",
+    detail: elapsed > 130 ? "This is taking longer than usual, but the job is still being watched." : "ETA is based on the real job start time, not a fake loading loop.",
+    steps: [
+      { label: "Queued", detail: "Task accepted", state: "done" },
+      { label: "Audio", detail: elapsed < 75 ? "Generating track" : "Awaiting callback", state: "active" },
+      { label: "Sample", detail: "Ready after callback", state: "waiting" },
+    ],
+  };
+}
+
 /**
  * Professional "generating" progress block — elapsed timer, animated waveform
  * skeleton, and rotating status copy so the wait feels intentional rather than
@@ -598,10 +678,14 @@ function CostBadge({ cost }: { cost: number }) {
 function GeneratingProgress({
   sampleSeconds,
   startedAt,
+  taskId,
+  hasLivePreview = false,
 }: {
   sampleSeconds: number;
   /** ISO timestamp of when generation kicked off. Lets elapsed resume after page refresh. */
   startedAt?: string | null;
+  taskId?: string | null;
+  hasLivePreview?: boolean;
 }) {
   // Anchor elapsed to the DB-side start time (song.updated_at when status flipped to
   // pending) so a hard refresh continues the timer mid-flight instead of restarting at 0.
@@ -621,20 +705,9 @@ function GeneratingProgress({
   }, [startMs]);
 
 
-  // Soft progress curve — 0→90% over ~90s, then crawls to 99%.
-  const target = 90;
-  const pct = Math.min(99, Math.round(100 * (1 - Math.exp(-elapsed / target))));
-
-  const phase =
-    elapsed < 8
-      ? "Sending lyrics to the model…"
-      : elapsed < 25
-        ? "Arranging the beat and melody…"
-        : elapsed < 55
-          ? "Recording vocals and mixing…"
-          : elapsed < 90
-            ? "Mastering the preview…"
-            : "Almost there — just polishing the final mix…";
+  const status = getGenerationStatus(elapsed, !!taskId, hasLivePreview);
+  const pct = status.progress;
+  const etaLabel = status.etaSeconds > 0 ? formatDuration(status.etaSeconds) : "any moment";
 
   const mm = String(Math.floor(elapsed / 60)).padStart(2, "0");
   const ss = String(elapsed % 60).padStart(2, "0");
@@ -666,12 +739,33 @@ function GeneratingProgress({
             <p className="truncate text-[15px] font-bold tracking-tight text-foreground">
               Cooking your {sampleSeconds}s preview
             </p>
-            <p className="truncate text-xs text-muted-foreground">{phase}</p>
+            <p className="truncate text-xs text-muted-foreground">{status.headline}</p>
           </div>
         </div>
-        <div className="shrink-0 rounded-full border border-primary/40 bg-background/70 px-3 py-1.5 text-xs font-bold tabular-nums text-foreground shadow-[0_0_18px_-4px_hsl(var(--primary)/0.7)]">
-          {mm}:{ss}
+        <div className="shrink-0 rounded-full border border-primary/40 bg-background/70 px-3 py-1.5 text-right text-xs font-bold text-foreground shadow-[0_0_18px_-4px_hsl(var(--primary)/0.7)]">
+          <span className="block tabular-nums">ETA {etaLabel}</span>
+          <span className="block text-[10px] font-medium text-muted-foreground tabular-nums">{mm}:{ss} elapsed</span>
         </div>
+      </div>
+
+      <div className="grid gap-2 text-xs text-muted-foreground sm:grid-cols-3">
+        {status.steps.map((step) => (
+          <div
+            key={step.label}
+            className={cn(
+              "rounded-lg border px-3 py-2",
+              step.state === "done" && "border-emerald-500/30 bg-emerald-500/10 text-emerald-100",
+              step.state === "active" && "border-primary/40 bg-primary/10 text-foreground shadow-[0_0_16px_-8px_hsl(var(--primary)/0.8)]",
+              step.state === "waiting" && "border-border bg-background/30",
+            )}
+          >
+            <div className="flex items-center gap-2 font-semibold">
+              {step.state === "done" ? <Check className="h-3.5 w-3.5" /> : step.state === "active" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <span className="h-3.5 w-3.5 rounded-full border border-current opacity-50" />}
+              {step.label}
+            </div>
+            <p className="mt-1 text-[11px] opacity-80">{step.detail}</p>
+          </div>
+        ))}
       </div>
 
       {/* Animated waveform skeleton */}
@@ -707,7 +801,7 @@ function GeneratingProgress({
           />
         </div>
         <div className="flex items-center justify-between text-[11px] font-medium text-muted-foreground">
-          <span>This usually takes 30–90 seconds.</span>
+          <span>{status.detail}</span>
           <span className="tabular-nums text-foreground/90">{pct}%</span>
         </div>
       </div>
