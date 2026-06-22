@@ -20,7 +20,7 @@ import { DisplayPrefsBridge } from "@/hooks/use-display-prefs";
 
 function NotFoundComponent() {
   return (
-    <div className="grid min-h-screen place-items-center bg-background px-4">
+    <div className="grid min-h-dvh place-items-center bg-background px-4">
       <div className="text-center">
         <h1 className="text-7xl font-bold text-gradient-brand">404</h1>
         <p className="mt-3 text-muted-foreground">This page doesn't exist.</p>
@@ -42,7 +42,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
   return (
-    <div className="grid min-h-screen place-items-center bg-background px-4">
+    <div className="grid min-h-dvh place-items-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-xl font-semibold">Something went wrong</h1>
         <p className="mt-2 text-sm text-muted-foreground">Try again or head home.</p>

@@ -45,7 +45,7 @@ function Section({
 
 function TrustPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-dvh bg-background text-foreground">
       <div className="mx-auto w-full max-w-3xl px-5 py-10 sm:py-14">
         <header className="mb-8 space-y-3">
           <Link
