@@ -252,6 +252,8 @@ export function SongWorkspace({ song, onSaved }: Props) {
             startedAt={song.generation_started_at ?? song.updated_at ?? song.created_at}
             taskId={song.suno_task_id}
             hasLivePreview={!!song.stream_audio_url}
+            songId={song.id}
+            onCancelled={onSaved}
           />
         </div>
       )}
