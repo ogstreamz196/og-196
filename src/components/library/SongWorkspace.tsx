@@ -247,7 +247,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
     <div className="space-y-6">
       {isPending && (
         <div className="sticky top-2 z-30">
-          <GeneratingProgress sampleSeconds={settings?.sample_seconds ?? 30} />
+          <GeneratingProgress sampleSeconds={settings?.sample_seconds ?? 30} startedAt={song.updated_at ?? song.created_at} />
         </div>
       )}
       <StageStepper current={stage} sampleSeconds={settings?.sample_seconds ?? 30} />
@@ -358,7 +358,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
                   Generate lyrics in stage 1 first.
                 </p>
               )}
-              {isPending && <GeneratingProgress sampleSeconds={settings?.sample_seconds ?? 30} />}
+              {isPending && <GeneratingProgress sampleSeconds={settings?.sample_seconds ?? 30} startedAt={song.updated_at ?? song.created_at} />}
               {isFailed && (
                 <div
                   role="alert"
