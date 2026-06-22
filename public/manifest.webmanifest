@@ -1,0 +1,25 @@
+{
+  "name": "OG Streamz — Portal",
+  "short_name": "OG Portal",
+  "description": "Generate full songs from a prompt and chat with OG. Powered by 0G-Streamz.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0a1a",
+  "theme_color": "#1e1e5a",
+  "icons": [
+    {
+      "src": "/__l5e/assets-v1/9244a89e-48af-4c0a-8a1c-a02790e9783b/og-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/__l5e/assets-v1/9244a89e-48af-4c0a-8a1c-a02790e9783b/og-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
