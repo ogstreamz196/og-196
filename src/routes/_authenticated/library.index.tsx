@@ -507,6 +507,64 @@ function LibraryPage() {
         </div>
       </header>
 
+      {/* Library — previews created (above creation options) */}
+      <section>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+            Your library · previews
+          </h2>
+          {versionedLibrary.length > 0 && (
+            <span className="text-[11px] text-muted-foreground">
+              {versionedLibrary.length} track{versionedLibrary.length === 1 ? "" : "s"}
+            </span>
+          )}
+        </div>
+        {library.isLoading ? (
+          <div className="grid place-items-center py-10 text-muted-foreground">
+            <Loader2 className="h-5 w-5 animate-spin" />
+          </div>
+        ) : versionedLibrary.length > 0 ? (
+          <div className="grid gap-3">
+            {versionedLibrary.map((s) => (
+              <div key={s.id} className="relative">
+                <Link
+                  to="/library/$songId"
+                  params={{ songId: s.id }}
+                  className="block rounded-2xl transition-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <SongCard song={s} />
+                </Link>
+                {isAdmin && (
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    className="absolute right-3 top-3 h-8 w-8 opacity-90"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setPendingDelete(s);
+                    }}
+                    aria-label="Delete track"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-3xl border border-dashed border-white/10 bg-card/40 p-8 text-center">
+            <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-primary/20 to-fuchsia-500/10">
+              <LibraryIcon className="h-5 w-5 text-primary" />
+            </div>
+            <p className="mt-3 text-sm font-bold">No previews yet</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Create your first track below — versions will appear here.
+            </p>
+          </div>
+        )}
+      </section>
+
       {/* Title card */}
       <section className="rounded-3xl border border-white/10 bg-card/60 p-5 shadow-card backdrop-blur-xl sm:p-7">
         <div className="flex items-center gap-3">
