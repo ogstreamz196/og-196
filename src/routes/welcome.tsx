@@ -293,7 +293,7 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
         </button>
       );
     },
-    [pending, signIn, h],
+    [pending, signIn, h, auraOn],
   );
 
   const primaryTiles = useMemo(() => PRIMARY_DEVICES.map(renderTile), [renderTile]);
