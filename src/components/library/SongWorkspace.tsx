@@ -245,6 +245,11 @@ export function SongWorkspace({ song, onSaved }: Props) {
 
   return (
     <div className="space-y-6">
+      {isPending && (
+        <div className="sticky top-2 z-30">
+          <GeneratingProgress sampleSeconds={settings?.sample_seconds ?? 30} />
+        </div>
+      )}
       <StageStepper current={stage} sampleSeconds={settings?.sample_seconds ?? 30} />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
