@@ -6,6 +6,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { Switch } from "@/components/ui/switch";
+import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -389,7 +391,8 @@ export function SongWorkspace({ song, onSaved }: Props) {
                 </div>
               )}
               {isReady && <InlineSamplePlayer songId={song.id} />}
-              <div className="flex flex-wrap items-center justify-end gap-2">
+              <div className="flex flex-wrap items-center justify-end gap-3">
+                <FoulMouthToggle />
                 <Button
                   onClick={generatePreview}
                   disabled={!hasLyrics || genPreview || isPending}
@@ -447,7 +450,8 @@ export function SongWorkspace({ song, onSaved }: Props) {
                     </div>
                   )}
 
-                  <div className="flex flex-wrap justify-end gap-2">
+                  <div className="flex flex-wrap items-center justify-end gap-3">
+                    <FoulMouthToggle />
                     <Button
                       variant="outline"
                       onClick={generatePreview}
@@ -1020,5 +1024,29 @@ function LiveStreamPreview({
         </div>
       )}
     </div>
+  );
+}
+
+function FoulMouthToggle() {
+  const { foulMouth } = useFoulMouth();
+  const setFoul = useSetFoulMouth();
+  return (
+    <label
+      className={cn(
+        "flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer select-none",
+        foulMouth
+          ? "border-destructive/60 bg-destructive/10 text-destructive"
+          : "border-border bg-muted/40 text-muted-foreground hover:text-foreground",
+      )}
+      title="When ON, OG Bot can swear in lyrics & replies. When OFF, lyrics stay clean."
+    >
+      <Switch
+        checked={foulMouth}
+        onCheckedChange={(v) => setFoul.mutate(v)}
+        disabled={setFoul.isPending}
+        aria-label="Foul mouth mode"
+      />
+      <span>🤬 Foul mouth {foulMouth ? "ON" : "OFF"}</span>
+    </label>
   );
 }
