@@ -233,6 +233,33 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
   const { signIn, pending } = useOAuthSignIn();
   const h = size === "xl" ? "h-36 sm:h-44 md:h-48" : "h-32 sm:h-40 md:h-44";
 
+  // Defer the flame aura until after the welcome screen has fully painted +
+  // gone idle so low-end phones aren't doing shadow compositing during the
+  // initial render. Falls back to a timeout when requestIdleCallback is absent.
+  const [auraOn, setAuraOn] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    const start = () => {
+      if (!cancelled) setAuraOn(true);
+    };
+    const raf = requestAnimationFrame(() => {
+      const w = window as typeof window & {
+        requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+        cancelIdleCallback?: (id: number) => void;
+      };
+      if (typeof w.requestIdleCallback === "function") {
+        const id = w.requestIdleCallback(start, { timeout: 1500 });
+        return () => w.cancelIdleCallback?.(id);
+      }
+      const t = window.setTimeout(start, 600);
+      return () => window.clearTimeout(t);
+    });
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+
   const renderTile = useCallback(
     (d: Device) => {
       const isPending = pending === d.provider;
@@ -243,8 +270,9 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
           onClick={() => signIn(d.provider)}
           disabled={pending !== null}
           aria-label={`${d.label} — ${sub}`}
-          className={`${h} ${TILE_CLASS} flame-aura flex flex-col items-center justify-between gap-2 px-2 pt-4 pb-2 text-foreground sm:gap-3 sm:px-3 sm:pt-5 sm:pb-3`}
+          className={`${h} ${TILE_CLASS} ${auraOn ? "flame-aura" : ""} flex flex-col items-center justify-between gap-2 px-2 pt-4 pb-2 text-foreground sm:gap-3 sm:px-3 sm:pt-5 sm:pb-3`}
         >
+
           <div className="flex flex-1 items-center justify-center">
             {isPending ? (
               <Loader2 className="h-10 w-10 animate-spin text-foreground sm:h-16 sm:w-16" aria-hidden />
@@ -265,7 +293,7 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
         </button>
       );
     },
-    [pending, signIn, h],
+    [pending, signIn, h, auraOn],
   );
 
   const primaryTiles = useMemo(() => PRIMARY_DEVICES.map(renderTile), [renderTile]);
