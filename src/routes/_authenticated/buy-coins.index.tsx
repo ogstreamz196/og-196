@@ -256,38 +256,20 @@ function BuyCoinsPage() {
   return (
     <DashboardShell title="OG Coins Store">
       <PaymentTestModeBanner />
-      <div className="mx-auto w-full max-w-6xl space-y-10">
-        {/* Cartoon storefront hero */}
-        <section className="relative overflow-hidden rounded-[28px] border-2 border-coin/50 bg-gradient-to-b from-primary/20 via-card to-card shadow-card">
-          {/* Awning */}
-          <div
-            aria-hidden
-            className="relative h-10 w-full sm:h-14"
-            style={{
-              backgroundImage:
-                "repeating-linear-gradient(90deg, hsl(var(--primary)) 0 28px, hsl(var(--coin)) 28px 56px)",
-            }}
-          >
-            <div className="absolute inset-x-0 bottom-0 h-3 bg-gradient-to-b from-black/0 to-black/40" />
-            {/* scalloped edge */}
-            <svg className="absolute -bottom-3 left-0 h-4 w-full text-card" viewBox="0 0 100 4" preserveAspectRatio="none">
-              <path d="M0 0 Q 2.5 4 5 0 T 10 0 T 15 0 T 20 0 T 25 0 T 30 0 T 35 0 T 40 0 T 45 0 T 50 0 T 55 0 T 60 0 T 65 0 T 70 0 T 75 0 T 80 0 T 85 0 T 90 0 T 95 0 T 100 0 V 4 H 0 Z" fill="currentColor"/>
-            </svg>
-          </div>
-
-          <div className="relative px-5 pb-8 pt-8 sm:px-10 sm:pb-10 sm:pt-10">
-            <div className="pointer-events-none absolute -right-16 -top-4 h-56 w-56 rounded-full bg-coin/25 blur-3xl" />
-            <div className="pointer-events-none absolute -left-16 bottom-0 h-56 w-56 rounded-full bg-primary/25 blur-3xl" />
-
-            <div className="relative grid gap-6 sm:grid-cols-[1fr_auto] sm:items-center">
-              <div>
-                <span className="inline-flex items-center gap-1.5 rounded-full border-2 border-coin/50 bg-coin/15 px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-coin">
-                  <Sparkles className="h-3 w-3" /> The Coin Shop
-                </span>
-                <h1 className="mt-4 font-display text-[clamp(2.5rem,9vw,4.5rem)] font-black uppercase leading-[0.95] tracking-[-0.02em] text-gradient-brand drop-shadow-[0_4px_18px_rgba(80,60,255,0.35)]">
+      <div className="mx-auto w-full max-w-6xl space-y-6">
+        {/* Compact, consistent hero */}
+        <SectionCard>
+          <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+            <div className="flex items-start gap-4 min-w-0">
+              <SectionIcon>
+                <Store className="h-5 w-5" />
+              </SectionIcon>
+              <div className="min-w-0">
+                <SectionEyebrow>The Coin Shop</SectionEyebrow>
+                <h1 className="mt-1 font-display text-3xl font-black tracking-tight sm:text-4xl">
                   <EditableContent contentKey="buyCoins.heading" defaultValue="Grab some coins." />
                 </h1>
-                <p className="mt-3 max-w-md text-base font-semibold text-foreground/80 sm:text-lg">
+                <p className="mt-1 max-w-xl text-sm text-muted-foreground sm:text-[15px]">
                   <EditableContent
                     contentKey="buyCoins.subtitle"
                     defaultValue="1 coin = 1 message or 1 track. Coins never expire."
@@ -295,58 +277,69 @@ function BuyCoinsPage() {
                   />
                 </p>
               </div>
-
-              {/* Balance chip — coin-shaped */}
-              <div className="relative mx-auto flex h-32 w-32 shrink-0 items-center justify-center rounded-full border-4 border-coin bg-gradient-to-br from-coin/40 to-coin/10 text-center shadow-[0_8px_0_0_hsl(var(--coin)/0.35),0_18px_36px_-12px_hsl(var(--coin)/0.6)] sm:h-40 sm:w-40">
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-coin">Balance</p>
-                  <p className="mt-1 text-[clamp(2rem,6vw,2.75rem)] font-black tabular-nums leading-none text-foreground">
-                    {profile?.coin_balance ?? 0}
-                  </p>
-                  <p className="mt-1 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-coin">
-                    <Coins className="h-3 w-3" /> OG Coins
-                  </p>
-                </div>
+            </div>
+            <div className="flex items-center gap-3 sm:flex-col sm:items-end">
+              <div className="inline-flex items-center gap-2 rounded-full border border-coin/40 bg-coin/10 px-3 py-1.5 text-coin shadow-sm">
+                <Coins className="h-4 w-4" />
+                <span className="text-base font-black tabular-nums leading-none">
+                  {profile?.coin_balance ?? 0}
+                </span>
+                <span className="text-[10px] font-bold uppercase tracking-wider">Balance</span>
               </div>
+              <AdminEditModeToggle />
             </div>
           </div>
-        </section>
-
+        </SectionCard>
 
         {/* Live coin economy snapshot */}
-        <CirculatingCoins />
+        <SectionCard>
+          <SectionHeader
+            eyebrow="Live economy"
+            title="Coins in circulation"
+            subtitle="How OG Coins move through the network right now."
+            icon={<TrendingDown className="h-5 w-5" />}
+          />
+          <div className="px-5 pb-5 sm:px-6 sm:pb-6">
+            <CirculatingCoins />
+          </div>
+        </SectionCard>
 
         {/* Coin packs */}
-        <section>
-          <div className="mb-5 flex flex-wrap items-end justify-between gap-2">
-            <div>
-              <h2 className="font-display text-xl font-black tracking-tight sm:text-2xl md:text-3xl">Pick your pack</h2>
-              <p className="text-sm text-muted-foreground">Bigger packs = better price per coin. Coins never expire.</p>
+        <SectionCard>
+          <SectionHeader
+            eyebrow="One-time top-ups"
+            title="Pick your pack"
+            subtitle="Bigger packs = better price per coin. Coins never expire."
+            icon={<Tag className="h-5 w-5" />}
+            action={
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-emerald-400 ring-1 ring-emerald-500/30">
+                <TrendingDown className="h-3.5 w-3.5" /> Save up to {Math.round((1 - (COIN_PACKS[COIN_PACKS.length - 1].priceCents / 100 / COIN_PACKS[COIN_PACKS.length - 1].coins) / basePerCoin) * 100)}%
+              </span>
+            }
+          />
+          <div className="px-5 pb-5 sm:px-6 sm:pb-6">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {COIN_PACKS.map((t) => (
+                <PackCard
+                  key={t.bundleId}
+                  pack={t}
+                  basePerCoin={basePerCoin}
+                  onBuy={(effective) => pickSelection({ type: "coins", pack: effective })}
+                />
+              ))}
             </div>
-            <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-emerald-400 ring-1 ring-emerald-500/30 sm:text-xs">
-              <TrendingDown className="h-3.5 w-3.5" /> Save up to {Math.round((1 - (COIN_PACKS[COIN_PACKS.length - 1].priceCents / 100 / COIN_PACKS[COIN_PACKS.length - 1].coins) / basePerCoin) * 100)}%
-            </span>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {COIN_PACKS.map((t) => (
-              <PackCard
-                key={t.bundleId}
-                pack={t}
-                basePerCoin={basePerCoin}
-                onBuy={(effective) => pickSelection({ type: "coins", pack: effective })}
-              />
-            ))}
-          </div>
 
-          {/* Custom pack */}
-          <div className="mt-6">
-            <CustomPackCard onBuy={(units) => pickSelection({ type: "custom", units })} />
-          </div>
+            {/* Custom pack */}
+            <div className="mt-5">
+              <CustomPackCard onBuy={(units) => pickSelection({ type: "custom", units })} />
+            </div>
 
-          <p className="mt-4 flex items-center justify-center gap-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-            <Lock className="h-3 w-3" /> Secure checkout · Apple Pay · Google Pay · Card
-          </p>
-        </section>
+            <p className="mt-4 flex items-center justify-center gap-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+              <Lock className="h-3 w-3" /> Secure checkout · Apple Pay · Google Pay · Card
+            </p>
+          </div>
+        </SectionCard>
+
 
         {/* VIP yearly subscription */}
         <section>
