@@ -1,4 +1,5 @@
 import { Sparkles, MessageSquareMore, Music2, Palette, Bell, Type, Rows3, Minus, Plus, RotateCcw } from "lucide-react";
+import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -8,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { useOgMode } from "@/hooks/use-og-mode";
-import { useAppPreferences } from "@/hooks/use-app-preferences";
+import { useAppPreferences, type AppPreferences } from "@/hooks/use-app-preferences";
 import { useDisplayPrefs, useSetDisplayPrefs, clampScale, type Density } from "@/hooks/use-display-prefs";
 
 /**
@@ -19,9 +20,17 @@ export function PreferencesPanel() {
   const { foulMouth, isLoading } = useFoulMouth();
   const setFoulMouth = useSetFoulMouth();
   const { mode, setMode } = useOgMode();
-  const { prefs, update } = useAppPreferences();
+  const { prefs, update: rawUpdate } = useAppPreferences();
+  const update = <K extends keyof AppPreferences>(key: K, value: AppPreferences[K]) => {
+    rawUpdate(key, value);
+    toast.success("Settings saved", { id: "settings-saved" });
+  };
   const display = useDisplayPrefs();
   const setDisplay = useSetDisplayPrefs();
+  const changeMode = (v: "og" | "safe") => {
+    setMode(v);
+    toast.success("Settings saved", { id: "settings-saved" });
+  };
 
   const SCALE_STEP = 0.05;
   const scalePct = Math.round(display.textScale * 100);
@@ -121,7 +130,7 @@ export function PreferencesPanel() {
             <Label>Default mode</Label>
             <RadioGroup
               value={mode}
-              onValueChange={(v) => setMode(v as "og" | "safe")}
+              onValueChange={(v) => changeMode(v as "og" | "safe")}
               className="grid grid-cols-2 gap-2"
             >
               <ModeOption value="og" title="OG" body="British banter, full personality." />

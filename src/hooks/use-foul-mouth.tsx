@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { toast } from "sonner";
 
 /**
  * Single source of truth for the per-user "foul mouth" preference.
@@ -87,6 +88,9 @@ export function useSetFoulMouth() {
     },
     onError: (_e, _next, ctx) => {
       if (ctx) qc.setQueryData(foulMouthQueryKey(uid), ctx.prev);
+    },
+    onSuccess: (next) => {
+      toast.success(next ? "OG Foul Mouth on" : "Clean mode on", { id: "settings-saved" });
     },
     onSettled: () => {
       qc.invalidateQueries({ queryKey: foulMouthQueryKey(uid) });

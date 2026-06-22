@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { toast } from "sonner";
 
 /**
  * Per-user display preferences stored in `user_preferences`.
@@ -135,6 +136,9 @@ export function useSetDisplayPrefs() {
         qc.setQueryData(displayPrefsKey(uid), ctx.prev);
         applyToDocument(ctx.prev);
       }
+    },
+    onSuccess: () => {
+      toast.success("Settings saved", { id: "settings-saved" });
     },
     onSettled: () => {
       qc.invalidateQueries({ queryKey: displayPrefsKey(uid) });
