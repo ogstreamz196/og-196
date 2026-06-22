@@ -684,13 +684,36 @@ function GeneratingProgress({
   startedAt,
   taskId,
   hasLivePreview = false,
+  songId,
+  onCancelled,
 }: {
   sampleSeconds: number;
-  /** ISO timestamp of when generation kicked off. Lets elapsed resume after page refresh. */
   startedAt?: string | null;
   taskId?: string | null;
   hasLivePreview?: boolean;
+  songId?: string;
+  onCancelled?: () => void;
 }) {
+  const [cancelling, setCancelling] = useState(false);
+  async function handleCancel() {
+    if (!songId || cancelling) return;
+    setCancelling(true);
+    try {
+      const { error } = await supabase.functions.invoke("suno-cancel", {
+        body: { song_id: songId },
+      });
+      if (error) {
+        toast.error(invokeError(error, "Could not cancel"));
+        return;
+      }
+      toast.success("Generation cancelled — coins refunded");
+      onCancelled?.();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not cancel");
+    } finally {
+      setCancelling(false);
+    }
+  }
   // Anchor elapsed to the DB-side start time (song.updated_at when status flipped to
   // pending) so a hard refresh continues the timer mid-flight instead of restarting at 0.
   const startMs = useMemo(() => {
