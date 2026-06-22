@@ -415,3 +415,54 @@
   0%, 100% { transform: rotate(-2deg); }
   50% { transform: rotate(2deg); }
 }
+
+/* Red & blue flame aura — slow flash on welcome device tiles */
+@keyframes flame-aura {
+  0%, 100% {
+    box-shadow:
+      0 0 0 2px rgba(239, 68, 68, 0.55),
+      0 0 18px 4px rgba(239, 68, 68, 0.45),
+      0 0 36px 10px rgba(59, 130, 246, 0.35),
+      0 0 64px 18px rgba(59, 130, 246, 0.25);
+    opacity: 0.85;
+  }
+  50% {
+    box-shadow:
+      0 0 0 3px rgba(59, 130, 246, 0.7),
+      0 0 28px 8px rgba(59, 130, 246, 0.6),
+      0 0 56px 16px rgba(239, 68, 68, 0.55),
+      0 0 90px 26px rgba(239, 68, 68, 0.35);
+    opacity: 1;
+  }
+}
+@keyframes flame-flicker {
+  0%, 100% { transform: scale(1) rotate(-1deg); opacity: 0.75; }
+  33%      { transform: scale(1.04) rotate(1deg); opacity: 1; }
+  66%      { transform: scale(0.98) rotate(-2deg); opacity: 0.9; }
+}
+.flame-aura {
+  position: relative;
+  isolation: isolate;
+}
+.flame-aura::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: inherit;
+  z-index: -1;
+  pointer-events: none;
+  animation: flame-aura 2.6s ease-in-out infinite;
+}
+.flame-aura::after {
+  content: "";
+  position: absolute;
+  inset: -14px;
+  border-radius: inherit;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 60% at 30% 40%, rgba(239, 68, 68, 0.55), transparent 70%),
+    radial-gradient(60% 60% at 70% 60%, rgba(59, 130, 246, 0.6), transparent 70%);
+  filter: blur(14px);
+  animation: flame-flicker 1.9s ease-in-out infinite;
+}
