@@ -18,9 +18,13 @@ async function creditCoinsForSession(session: any, env: StripeEnv) {
     return;
   }
 
-  // Trust server-defined pack catalog; metadata.coins is informational only.
+  // The server stamps the effective `coins` (after admin override) into
+  // session metadata at checkout creation. Trust it as the source of
+  // truth and fall back to the catalog only when metadata is missing
+  // (e.g. legacy sessions from before the override flow shipped).
+  const metaCoins = coinsRaw ? Number(coinsRaw) : 0;
   const pack = findCoinPackByBundleId(bundleId);
-  const coins = pack?.coins ?? (coinsRaw ? Number(coinsRaw) : 0);
+  const coins = Number.isFinite(metaCoins) && metaCoins > 0 ? metaCoins : (pack?.coins ?? 0);
   if (!coins || coins <= 0) {
     console.warn("payments webhook: unknown bundle or zero coins", { bundleId });
     return;

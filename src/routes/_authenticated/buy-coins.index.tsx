@@ -1,16 +1,21 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Coins, Check, ArrowLeft, Crown, Star, Zap, ShieldCheck, Lock, Sparkles, Infinity as InfinityIcon, TrendingDown, Gift, Pencil, X, Loader2, CreditCard, Plus, Minus, SlidersHorizontal } from "lucide-react";
+import { Coins, Check, ArrowLeft, Crown, Star, Zap, ShieldCheck, Lock, Sparkles, Infinity as InfinityIcon, TrendingDown, Gift, Pencil, X, Loader2, CreditCard, Plus, Minus, SlidersHorizontal, Store, Tag, ToggleLeft, ToggleRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { EditableContent } from "@/components/admin/EditableContent";
-import { useAdminEditMode } from "@/components/admin/AdminEditMode";
+import { useAdminEditMode, AdminEditModeToggle } from "@/components/admin/AdminEditMode";
 import { useProfile } from "@/hooks/use-profile";
 import { useRole } from "@/hooks/use-role";
 import { useSiteContent, useSetSiteContent } from "@/hooks/use-site-content";
 import { cn } from "@/lib/utils";
-import { COIN_PACKS, CURRENCY_SYMBOL, VIP_PLAN, CUSTOM_COIN_UNIT, findCoinPackByBundleId, type CoinPack } from "@/lib/coin-packs";
+import {
+  COIN_PACKS, CURRENCY_SYMBOL, VIP_PLAN, CUSTOM_COIN_UNIT,
+  findCoinPackByBundleId,
+  applyPackOverride, parsePackOverride, packOverrideKey, packShowsBonus,
+  type CoinPack, type PackOverride,
+} from "@/lib/coin-packs";
 import { StripeEmbeddedCheckoutInline } from "@/components/StripeEmbeddedCheckout";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { CirculatingCoins } from "@/components/CirculatingCoins";
@@ -251,38 +256,20 @@ function BuyCoinsPage() {
   return (
     <DashboardShell title="OG Coins Store">
       <PaymentTestModeBanner />
-      <div className="mx-auto w-full max-w-6xl space-y-10">
-        {/* Cartoon storefront hero */}
-        <section className="relative overflow-hidden rounded-[28px] border-2 border-coin/50 bg-gradient-to-b from-primary/20 via-card to-card shadow-card">
-          {/* Awning */}
-          <div
-            aria-hidden
-            className="relative h-10 w-full sm:h-14"
-            style={{
-              backgroundImage:
-                "repeating-linear-gradient(90deg, hsl(var(--primary)) 0 28px, hsl(var(--coin)) 28px 56px)",
-            }}
-          >
-            <div className="absolute inset-x-0 bottom-0 h-3 bg-gradient-to-b from-black/0 to-black/40" />
-            {/* scalloped edge */}
-            <svg className="absolute -bottom-3 left-0 h-4 w-full text-card" viewBox="0 0 100 4" preserveAspectRatio="none">
-              <path d="M0 0 Q 2.5 4 5 0 T 10 0 T 15 0 T 20 0 T 25 0 T 30 0 T 35 0 T 40 0 T 45 0 T 50 0 T 55 0 T 60 0 T 65 0 T 70 0 T 75 0 T 80 0 T 85 0 T 90 0 T 95 0 T 100 0 V 4 H 0 Z" fill="currentColor"/>
-            </svg>
-          </div>
-
-          <div className="relative px-5 pb-8 pt-8 sm:px-10 sm:pb-10 sm:pt-10">
-            <div className="pointer-events-none absolute -right-16 -top-4 h-56 w-56 rounded-full bg-coin/25 blur-3xl" />
-            <div className="pointer-events-none absolute -left-16 bottom-0 h-56 w-56 rounded-full bg-primary/25 blur-3xl" />
-
-            <div className="relative grid gap-6 sm:grid-cols-[1fr_auto] sm:items-center">
-              <div>
-                <span className="inline-flex items-center gap-1.5 rounded-full border-2 border-coin/50 bg-coin/15 px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-coin">
-                  <Sparkles className="h-3 w-3" /> The Coin Shop
-                </span>
-                <h1 className="mt-4 font-display text-[clamp(2.5rem,9vw,4.5rem)] font-black uppercase leading-[0.95] tracking-[-0.02em] text-gradient-brand drop-shadow-[0_4px_18px_rgba(80,60,255,0.35)]">
+      <div className="mx-auto w-full max-w-6xl space-y-6">
+        {/* Compact, consistent hero */}
+        <SectionCard>
+          <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+            <div className="flex items-start gap-4 min-w-0">
+              <SectionIcon>
+                <Store className="h-5 w-5" />
+              </SectionIcon>
+              <div className="min-w-0">
+                <SectionEyebrow>The Coin Shop</SectionEyebrow>
+                <h1 className="mt-1 font-display text-3xl font-black tracking-tight sm:text-4xl">
                   <EditableContent contentKey="buyCoins.heading" defaultValue="Grab some coins." />
                 </h1>
-                <p className="mt-3 max-w-md text-base font-semibold text-foreground/80 sm:text-lg">
+                <p className="mt-1 max-w-xl text-sm text-muted-foreground sm:text-[15px]">
                   <EditableContent
                     contentKey="buyCoins.subtitle"
                     defaultValue="1 coin = 1 message or 1 track. Coins never expire."
@@ -290,82 +277,83 @@ function BuyCoinsPage() {
                   />
                 </p>
               </div>
-
-              {/* Balance chip — coin-shaped */}
-              <div className="relative mx-auto flex h-32 w-32 shrink-0 items-center justify-center rounded-full border-4 border-coin bg-gradient-to-br from-coin/40 to-coin/10 text-center shadow-[0_8px_0_0_hsl(var(--coin)/0.35),0_18px_36px_-12px_hsl(var(--coin)/0.6)] sm:h-40 sm:w-40">
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-coin">Balance</p>
-                  <p className="mt-1 text-[clamp(2rem,6vw,2.75rem)] font-black tabular-nums leading-none text-foreground">
-                    {profile?.coin_balance ?? 0}
-                  </p>
-                  <p className="mt-1 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-coin">
-                    <Coins className="h-3 w-3" /> OG Coins
-                  </p>
-                </div>
+            </div>
+            <div className="flex items-center gap-3 sm:flex-col sm:items-end">
+              <div className="inline-flex items-center gap-2 rounded-full border border-coin/40 bg-coin/10 px-3 py-1.5 text-coin shadow-sm">
+                <Coins className="h-4 w-4" />
+                <span className="text-base font-black tabular-nums leading-none">
+                  {profile?.coin_balance ?? 0}
+                </span>
+                <span className="text-[10px] font-bold uppercase tracking-wider">Balance</span>
               </div>
+              <AdminEditModeToggle />
             </div>
           </div>
-        </section>
-
+        </SectionCard>
 
         {/* Live coin economy snapshot */}
-        <CirculatingCoins />
+        <SectionCard>
+          <SectionHeader
+            eyebrow="Live economy"
+            title="Coins in circulation"
+            subtitle="How OG Coins move through the network right now."
+            icon={<TrendingDown className="h-5 w-5" />}
+          />
+          <div className="px-5 pb-5 sm:px-6 sm:pb-6">
+            <CirculatingCoins />
+          </div>
+        </SectionCard>
 
         {/* Coin packs */}
-        <section>
-          <div className="mb-5 flex flex-wrap items-end justify-between gap-2">
-            <div>
-              <h2 className="font-display text-xl font-black tracking-tight sm:text-2xl md:text-3xl">Pick your pack</h2>
-              <p className="text-sm text-muted-foreground">Bigger packs = better price per coin. Coins never expire.</p>
+        <SectionCard>
+          <SectionHeader
+            eyebrow="One-time top-ups"
+            title="Pick your pack"
+            subtitle="Bigger packs = better price per coin. Coins never expire."
+            icon={<Tag className="h-5 w-5" />}
+            action={
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-emerald-400 ring-1 ring-emerald-500/30">
+                <TrendingDown className="h-3.5 w-3.5" /> Save up to {Math.round((1 - (COIN_PACKS[COIN_PACKS.length - 1].priceCents / 100 / COIN_PACKS[COIN_PACKS.length - 1].coins) / basePerCoin) * 100)}%
+              </span>
+            }
+          />
+          <div className="px-5 pb-5 sm:px-6 sm:pb-6">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {COIN_PACKS.map((t) => (
+                <PackCard
+                  key={t.bundleId}
+                  pack={t}
+                  basePerCoin={basePerCoin}
+                  onBuy={(effective) => pickSelection({ type: "coins", pack: effective })}
+                />
+              ))}
             </div>
-            <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-emerald-400 ring-1 ring-emerald-500/30 sm:text-xs">
-              <TrendingDown className="h-3.5 w-3.5" /> Save up to {Math.round((1 - (COIN_PACKS[COIN_PACKS.length - 1].priceCents / 100 / COIN_PACKS[COIN_PACKS.length - 1].coins) / basePerCoin) * 100)}%
-            </span>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {COIN_PACKS.map((t) => (
-              <PackCard
-                key={t.bundleId}
-                pack={t}
-                basePerCoin={basePerCoin}
-                onBuy={(effective) => pickSelection({ type: "coins", pack: effective })}
-              />
-            ))}
-          </div>
 
-          {/* Custom pack */}
-          <div className="mt-6">
-            <CustomPackCard onBuy={(units) => pickSelection({ type: "custom", units })} />
-          </div>
+            {/* Custom pack */}
+            <div className="mt-5">
+              <CustomPackCard onBuy={(units) => pickSelection({ type: "custom", units })} />
+            </div>
 
-          <p className="mt-4 flex items-center justify-center gap-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-            <Lock className="h-3 w-3" /> Secure checkout · Apple Pay · Google Pay · Card
-          </p>
-        </section>
-
-        {/* VIP yearly subscription */}
-        <section>
-          <div className="mb-4">
-            <h2 className="font-display text-2xl font-black tracking-tight sm:text-3xl">
-              <EditableContent contentKey="buyCoins.vip.heading" defaultValue="Or go all-in with OG VIP" />
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              <EditableContent
-                contentKey="buyCoins.vip.subtitle"
-                defaultValue="Unlock exclusive privileges across OG Streamz for a full year."
-                multiline
-              />
+            <p className="mt-4 flex items-center justify-center gap-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+              <Lock className="h-3 w-3" /> Secure checkout · Apple Pay · Google Pay · Card
             </p>
           </div>
-          <div className="relative overflow-hidden rounded-3xl border border-coin/40 bg-gradient-to-br from-coin/15 via-card to-card p-6 shadow-card sm:p-8">
-            <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-coin/25 blur-3xl" />
-            <div className="relative grid gap-6 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center">
-              <div className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-coin/20 shadow-glow">
-                <Crown className="h-8 w-8 text-coin" />
-              </div>
+        </SectionCard>
+
+
+        {/* VIP yearly subscription */}
+        <SectionCard className="border-coin/40">
+          <SectionHeader
+            eyebrow="Yearly membership"
+            title={<EditableContent contentKey="buyCoins.vip.heading" defaultValue="Or go all-in with OG VIP" />}
+            subtitle={<EditableContent contentKey="buyCoins.vip.subtitle" defaultValue="Unlock exclusive privileges across OG Streamz for a full year." multiline />}
+            icon={<Crown className="h-5 w-5 text-coin" />}
+          />
+          <div className="px-5 pb-5 sm:px-6 sm:pb-6">
+            <div className="relative grid gap-4 rounded-2xl border border-coin/30 bg-gradient-to-br from-coin/10 via-card to-card p-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-6">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="text-xl font-bold">OG VIP</h3>
+                  <h3 className="text-lg font-bold">OG VIP</h3>
                   {isVip && (
                     <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400 ring-1 ring-emerald-500/30">
                       Active
@@ -392,21 +380,22 @@ function BuyCoinsPage() {
                   onClick={() => pickSelection({ type: "vip" })}
                   className="bg-gradient-brand font-bold text-primary-foreground shadow-glow transition-transform hover:-translate-y-0.5 hover:opacity-90 active:translate-y-0"
                 >
-                  {isVip ? "You're VIP" : (
-                    <><Crown className="mr-2 h-4 w-4" /> Join VIP</>
-                  )}
+                  {isVip ? "You're VIP" : (<><Crown className="mr-2 h-4 w-4" /> Join VIP</>)}
                 </Button>
               </div>
             </div>
           </div>
-        </section>
+        </SectionCard>
 
         {/* Trust strip */}
-        <section className="grid gap-3 rounded-2xl border border-border bg-card/60 p-5 sm:grid-cols-3">
-          <TrustItem icon={<ShieldCheck className="h-5 w-5 text-emerald-400" />} title="Secure by Stripe" body="PCI-compliant checkout, your card never touches our servers." />
-          <TrustItem icon={<InfinityIcon className="h-5 w-5 text-coin" />} title="Coins never expire" body="Top up once, use whenever — no monthly resets." />
-          <TrustItem icon={<Check className="h-5 w-5 text-primary" />} title="Instant credit" body="Coins land in your balance the moment payment clears." />
-        </section>
+        <SectionCard>
+          <div className="grid gap-3 p-5 sm:grid-cols-3 sm:p-6">
+            <TrustItem icon={<ShieldCheck className="h-5 w-5 text-emerald-400" />} title="Secure by Stripe" body="PCI-compliant checkout, your card never touches our servers." />
+            <TrustItem icon={<InfinityIcon className="h-5 w-5 text-coin" />} title="Coins never expire" body="Top up once, use whenever — no monthly resets." />
+            <TrustItem icon={<Check className="h-5 w-5 text-primary" />} title="Instant credit" body="Coins land in your balance the moment payment clears." />
+          </div>
+        </SectionCard>
+
 
         <p className="text-center text-xs text-muted-foreground">
           <EditableContent
@@ -420,32 +409,61 @@ function BuyCoinsPage() {
   );
 }
 
-// ---------- Pack card with admin inline edit ----------
+// ---------- Reusable section chrome ----------
 
-interface PackOverride {
-  label?: string;
-  description?: string;
+function SectionCard({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <section className={cn("overflow-hidden rounded-3xl border border-border bg-card shadow-card", className)}>
+      {children}
+    </section>
+  );
 }
 
-function packOverrideKey(bundleId: string) {
-  return `buyCoins.pack.${bundleId}`;
+function SectionIcon({ children }: { children: ReactNode }) {
+  return (
+    <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary">
+      {children}
+    </div>
+  );
 }
 
-function parseOverride(raw: string | undefined): PackOverride {
-  if (!raw) return {};
-  try {
-    const v = JSON.parse(raw);
-    if (!v || typeof v !== "object") return {};
-    // Intentionally ignore any legacy priceCents / coins fields — price and
-    // coin counts are the source of truth in Stripe and must never be
-    // overridden from the UI, otherwise displayed price could drift from the
-    // amount actually charged at checkout.
-    const { label, description } = v as PackOverride;
-    return { label, description };
-  } catch {
-    return {};
-  }
+function SectionEyebrow({ children }: { children: ReactNode }) {
+  return (
+    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+      {children}
+    </p>
+  );
 }
+
+function SectionHeader({
+  icon, eyebrow, title, subtitle, action,
+}: {
+  icon?: ReactNode;
+  eyebrow?: ReactNode;
+  title: ReactNode;
+  subtitle?: ReactNode;
+  action?: ReactNode;
+}) {
+  return (
+    <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border/60 bg-background/30 p-5 sm:p-6">
+      <div className="flex min-w-0 items-start gap-3">
+        {icon ? <SectionIcon>{icon}</SectionIcon> : null}
+        <div className="min-w-0">
+          {eyebrow ? <SectionEyebrow>{eyebrow}</SectionEyebrow> : null}
+          <h2 className="font-display text-lg font-black tracking-tight sm:text-xl">{title}</h2>
+          {subtitle ? (
+            <p className="mt-0.5 text-xs text-muted-foreground sm:text-sm">{subtitle}</p>
+          ) : null}
+        </div>
+      </div>
+      {action ? <div className="ml-auto shrink-0">{action}</div> : null}
+    </div>
+  );
+}
+
+// ---------- Pack card with per-field admin inline edit ----------
+
+type EditingField = "label" | "description" | "coins" | "price" | null;
 
 function PackCard({
   pack,
@@ -456,201 +474,354 @@ function PackCard({
   basePerCoin: number;
   onBuy: (effective: CoinPack) => void;
 }) {
-  const { isDev } = useRole();
+  const { isAdmin } = useRole();
   const { enabled } = useAdminEditMode();
   const { get } = useSiteContent();
   const setMut = useSetSiteContent();
-  // Edit mode is gated to dev/admin (isDev already includes admin) AND the
-  // global admin edit-mode toggle. The server RPC re-checks the role.
-  const canEdit = isDev && enabled;
+  // Edit mode is admin-only (AdminEditModeProvider already enforces this).
+  // The set_site_content RPC re-checks the role server-side.
+  const canEdit = isAdmin && enabled;
 
   const raw = get(packOverrideKey(pack.bundleId), "");
-  const override = useMemo(() => parseOverride(raw), [raw]);
+  const override = useMemo(() => parsePackOverride(raw), [raw]);
 
-  // Only label + description can be overridden. Coins and price always come
-  // from the canonical pack definition (which mirrors Stripe).
-  const effective: CoinPack = {
-    ...pack,
-    label: override.label ?? pack.label,
-    description: override.description ?? pack.description,
-  };
+  const effective = applyPackOverride(pack, override);
+  const showBonus = packShowsBonus(override);
 
   const perCoin = effective.priceCents / 100 / effective.coins;
   const savingsPct = basePerCoin > 0 ? Math.round((1 - perCoin / basePerCoin) * 100) : 0;
   const accent = pack.bestValue || pack.popular;
 
-  const [editing, setEditing] = useState(false);
-  const [draftLabel, setDraftLabel] = useState(effective.label);
-  const [draftDesc, setDraftDesc] = useState(effective.description);
+  const [field, setField] = useState<EditingField>(null);
+  const [draft, setDraft] = useState("");
 
-  function startEdit(e: React.MouseEvent) {
-    e.stopPropagation();
-    if (!canEdit) return;
-    setDraftLabel(effective.label);
-    setDraftDesc(effective.description);
-    setEditing(true);
+  function startEdit(f: EditingField, currentValue: string) {
+    if (!canEdit || !f) return;
+    setField(f);
+    setDraft(currentValue);
   }
 
-  function save() {
+  function persist(next: PackOverride) {
     if (!canEdit) {
       toast.error("Not authorized");
       return;
     }
-    if (!draftLabel.trim()) return toast.error("Label required");
-    const payload: PackOverride = {
-      label: draftLabel.trim(),
-      description: draftDesc.trim() || pack.description,
-    };
     setMut.mutate(
-      { key: packOverrideKey(pack.bundleId), value: JSON.stringify(payload) },
+      { key: packOverrideKey(pack.bundleId), value: JSON.stringify(next) },
       {
         onSuccess: () => {
-          toast.success("Pack label saved site-wide");
-          setEditing(false);
+          toast.success("Saved — syncs to checkout", { id: "pack-saved" });
+          setField(null);
         },
         onError: (e: Error) => toast.error(e.message),
       },
     );
   }
 
-  if (editing && canEdit) {
-    return (
-      <div className="relative flex flex-col rounded-2xl border-2 border-primary bg-card p-5 shadow-glow">
-        <div className="mb-3 inline-flex w-fit items-center gap-1.5 rounded-full bg-primary/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
-          <Pencil className="h-3 w-3" /> Editing label
+  function commit() {
+    const next: PackOverride = { ...override };
+    if (field === "label") {
+      const v = draft.trim();
+      if (!v) return toast.error("Label required");
+      next.label = v;
+    } else if (field === "description") {
+      next.description = draft.trim() || undefined;
+    } else if (field === "coins") {
+      const n = Math.trunc(Number(draft));
+      if (!Number.isFinite(n) || n <= 0 || n > 1_000_000) return toast.error("Coins must be 1–1,000,000");
+      next.coins = n;
+    } else if (field === "price") {
+      const pounds = Number(draft);
+      if (!Number.isFinite(pounds) || pounds <= 0 || pounds > 10_000) return toast.error("Price must be > 0");
+      next.priceCents = Math.round(pounds * 100);
+    }
+    persist(next);
+  }
+
+  function toggleBonus() {
+    persist({ ...override, bonus: !showBonus });
+  }
+
+  function resetField(f: Exclude<EditingField, null>) {
+    const next: PackOverride = { ...override };
+    if (f === "label") delete next.label;
+    else if (f === "description") delete next.description;
+    else if (f === "coins") delete next.coins;
+    else if (f === "price") delete next.priceCents;
+    persist(next);
+  }
+
+  const isOverridden = (f: Exclude<EditingField, null>) => {
+    if (f === "label") return override.label !== undefined;
+    if (f === "description") return override.description !== undefined;
+    if (f === "coins") return override.coins !== undefined;
+    if (f === "price") return override.priceCents !== undefined;
+    return false;
+  };
+
+  return (
+    <div
+      className={cn(
+        "relative flex flex-col rounded-2xl border bg-card p-5 shadow-card transition-all",
+        accent ? "border-primary shadow-glow" : "border-border",
+        canEdit && "ring-1 ring-primary/30",
+      )}
+    >
+      {pack.popular && (
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-gradient-brand px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-primary-foreground shadow whitespace-nowrap">
+          <Sparkles className="h-3 w-3" /> Most popular
         </div>
-        <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Label</label>
-        <Input value={draftLabel} onChange={(e) => setDraftLabel(e.target.value)} maxLength={40} className="mt-1 h-9" />
-        <label className="mt-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Description</label>
-        <textarea
-          value={draftDesc}
-          onChange={(e) => setDraftDesc(e.target.value)}
-          rows={3}
-          maxLength={240}
-          className="mt-1 rounded-md border border-input bg-background px-2 py-1.5 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+      )}
+      {pack.bestValue && (
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-coin px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-background shadow whitespace-nowrap">
+          <Crown className="h-3 w-3" /> Best value
+        </div>
+      )}
+      {savingsPct > 0 && !canEdit && (
+        <div className="absolute right-3 top-3 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400 ring-1 ring-emerald-500/30">
+          Save {savingsPct}%
+        </div>
+      )}
+
+      {/* Label row */}
+      <EditableField
+        canEdit={canEdit}
+        editing={field === "label"}
+        overridden={isOverridden("label")}
+        onStart={() => startEdit("label", effective.label)}
+        onCancel={() => setField(null)}
+        onCommit={commit}
+        onReset={() => resetField("label")}
+        draft={draft}
+        setDraft={setDraft}
+        inputProps={{ maxLength: 40 }}
+        view={
+          <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            {effective.label}
+          </div>
+        }
+      />
+
+      {/* Coins + bonus */}
+      <div className="mt-3 flex items-center gap-2.5">
+        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-coin/15">
+          <Coins className="h-6 w-6 text-coin" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <EditableField
+            canEdit={canEdit}
+            editing={field === "coins"}
+            overridden={isOverridden("coins")}
+            onStart={() => startEdit("coins", String(effective.coins))}
+            onCancel={() => setField(null)}
+            onCommit={commit}
+            onReset={() => resetField("coins")}
+            draft={draft}
+            setDraft={setDraft}
+            inputProps={{ type: "number", min: 1, step: 1 }}
+            view={
+              <div className="flex items-baseline gap-2 leading-none">
+                {showBonus && (
+                  <span className="text-lg font-bold tabular-nums text-muted-foreground/70 line-through decoration-2">
+                    {Math.round(effective.coins / 2)}
+                  </span>
+                )}
+                <span className={cn("text-3xl font-black tabular-nums", showBonus && "flash-gold")}>
+                  {effective.coins}
+                </span>
+                <span className="text-xs font-bold text-coin">Coins</span>
+              </div>
+            }
+          />
+          <div className="mt-1 flex items-center gap-2">
+            {canEdit ? (
+              <button
+                type="button"
+                onClick={toggleBonus}
+                className={cn(
+                  "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wider transition",
+                  showBonus
+                    ? "bg-coin/15 text-coin hover:bg-coin/25"
+                    : "bg-muted text-muted-foreground hover:bg-muted/70",
+                )}
+                title="Toggle 2× bonus visual"
+              >
+                {showBonus ? <ToggleRight className="h-3 w-3" /> : <ToggleLeft className="h-3 w-3" />}
+                {showBonus ? "2× bonus on" : "2× bonus off"}
+              </button>
+            ) : showBonus ? (
+              <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-coin">
+                <Sparkles className="h-2.5 w-2.5" /> 2× bonus
+              </span>
+            ) : null}
+            <span className="text-[11px] text-muted-foreground">
+              {CURRENCY_SYMBOL}{perCoin.toFixed(3)} / coin
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Price */}
+      <div className="mt-4">
+        <EditableField
+          canEdit={canEdit}
+          editing={field === "price"}
+          overridden={isOverridden("price")}
+          onStart={() => startEdit("price", (effective.priceCents / 100).toFixed(2))}
+          onCancel={() => setField(null)}
+          onCommit={commit}
+          onReset={() => resetField("price")}
+          draft={draft}
+          setDraft={setDraft}
+          inputProps={{ type: "number", min: 0.01, step: 0.01, inputMode: "decimal" }}
+          prefix={CURRENCY_SYMBOL}
+          view={
+            <div className="flex items-baseline gap-1">
+              <span className="text-2xl font-black tracking-tight">
+                {CURRENCY_SYMBOL}{(effective.priceCents / 100).toFixed(2)}
+              </span>
+              <span className="text-xs text-muted-foreground">one-time</span>
+            </div>
+          }
         />
-        <div className="mt-3 rounded-md border border-border/60 bg-background/40 p-2.5 text-[11px] leading-snug text-muted-foreground">
-          <div className="font-semibold text-foreground">Locked to Stripe</div>
-          {effective.coins} coins · {CURRENCY_SYMBOL}{(effective.priceCents / 100).toFixed(2)} · <code className="rounded bg-muted px-1 py-0.5 text-[10px]">{pack.priceId}</code>
-          <div className="mt-1">Price and coin count are managed in Stripe and cannot be edited here.</div>
+      </div>
+
+      {/* Description */}
+      <div className="mt-3 flex-1">
+        <EditableField
+          canEdit={canEdit}
+          editing={field === "description"}
+          overridden={isOverridden("description")}
+          onStart={() => startEdit("description", effective.description)}
+          onCancel={() => setField(null)}
+          onCommit={commit}
+          onReset={() => resetField("description")}
+          draft={draft}
+          setDraft={setDraft}
+          multiline
+          inputProps={{ maxLength: 240 }}
+          view={
+            <p className="text-xs leading-relaxed text-muted-foreground">
+              {effective.description}
+            </p>
+          }
+        />
+      </div>
+
+      <button
+        type="button"
+        onClick={() => onBuy(effective)}
+        disabled={field !== null}
+        aria-label={`Buy ${effective.coins} OG Coins for ${CURRENCY_SYMBOL}${(effective.priceCents / 100).toFixed(2)}`}
+        className={cn(
+          "mt-5 inline-flex h-10 w-full items-center justify-center rounded-md px-3 text-sm font-bold transition-all disabled:opacity-50",
+          accent
+            ? "bg-gradient-brand text-primary-foreground shadow-glow hover:opacity-90"
+            : "border border-border bg-background/50 text-foreground hover:border-primary hover:bg-primary hover:text-primary-foreground",
+        )}
+      >
+        Buy now
+      </button>
+    </div>
+  );
+}
+
+// Inline editable field — pencil on hover, ✓/✗ to commit/cancel, ↺ to reset.
+function EditableField({
+  canEdit, editing, overridden,
+  onStart, onCancel, onCommit, onReset,
+  draft, setDraft,
+  view, multiline = false, prefix, inputProps,
+}: {
+  canEdit: boolean;
+  editing: boolean;
+  overridden: boolean;
+  onStart: () => void;
+  onCancel: () => void;
+  onCommit: () => void;
+  onReset: () => void;
+  draft: string;
+  setDraft: (v: string) => void;
+  view: ReactNode;
+  multiline?: boolean;
+  prefix?: string;
+  inputProps?: Record<string, unknown>;
+}) {
+  if (editing) {
+    return (
+      <div className="rounded-md border border-primary/50 bg-primary/5 p-2">
+        <div className="flex items-start gap-1.5">
+          {prefix ? <span className="pt-1.5 text-sm font-bold">{prefix}</span> : null}
+          {multiline ? (
+            <textarea
+              autoFocus
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              rows={3}
+              className="flex-1 rounded border border-input bg-background px-2 py-1 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              {...(inputProps as React.TextareaHTMLAttributes<HTMLTextAreaElement>)}
+            />
+          ) : (
+            <Input
+              autoFocus
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") { e.preventDefault(); onCommit(); }
+                if (e.key === "Escape") { e.preventDefault(); onCancel(); }
+              }}
+              className="h-8 flex-1 text-sm"
+              {...(inputProps as React.InputHTMLAttributes<HTMLInputElement>)}
+            />
+          )}
         </div>
-        <div className="mt-4 flex items-center justify-end gap-2">
-          <Button
-            type="button"
-            size="icon"
-            variant="outline"
-            className="h-10 w-10 border-red-500/40 text-red-500 hover:bg-red-500/10 hover:text-red-500"
-            onClick={() => setEditing(false)}
-            title="Cancel"
-            aria-label="Cancel"
-          >
-            <X className="h-5 w-5" />
+        <div className="mt-2 flex items-center justify-end gap-1">
+          <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={onCancel} title="Cancel">
+            <X className="h-3.5 w-3.5" />
           </Button>
-          <Button
-            type="button"
-            size="icon"
-            className="h-10 w-10 bg-emerald-500 text-white hover:bg-emerald-600"
-            disabled={setMut.isPending}
-            onClick={save}
-            title="Save"
-            aria-label="Save"
-          >
-            {setMut.isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Check className="h-5 w-5" />}
+          <Button type="button" size="icon" className="h-7 w-7 bg-emerald-500 text-white hover:bg-emerald-600" onClick={onCommit} title="Save">
+            <Check className="h-3.5 w-3.5" />
           </Button>
         </div>
       </div>
     );
   }
 
+  if (!canEdit) return <>{view}</>;
 
   return (
-    <div className="relative">
-      <button
-        type="button"
-        onClick={() => onBuy(effective)}
-        aria-label={`Buy ${effective.coins} OG Coins for ${CURRENCY_SYMBOL}${(effective.priceCents / 100).toFixed(2)}`}
-        className={cn(
-          "group relative flex w-full flex-col rounded-2xl border bg-card p-5 text-left shadow-card transition-all",
-          "hover:-translate-y-1 hover:shadow-glow",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-          "active:translate-y-0",
-          accent ? "border-primary shadow-glow" : "border-border hover:border-primary/40",
+    <div className="group/edit relative -mx-1 rounded px-1 outline-dashed outline-1 outline-transparent transition hover:outline-primary/40 hover:bg-primary/5">
+      {view}
+      <div className="pointer-events-none absolute right-0 top-0 flex items-center gap-0.5 opacity-0 transition-opacity group-hover/edit:opacity-100">
+        {overridden && (
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onReset(); }}
+            className="pointer-events-auto grid h-5 w-5 place-items-center rounded-full bg-background/90 text-muted-foreground shadow-sm hover:text-foreground"
+            title="Reset to default"
+            aria-label="Reset"
+          >
+            <X className="h-3 w-3" />
+          </button>
         )}
-      >
-        {pack.popular && (
-          <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-gradient-brand px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-primary-foreground shadow whitespace-nowrap">
-            <Sparkles className="h-3 w-3" /> Most popular
-          </div>
-        )}
-        {pack.bestValue && (
-          <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-coin px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-background shadow whitespace-nowrap">
-            <Crown className="h-3 w-3" /> Best value
-          </div>
-        )}
-        {savingsPct > 0 && (
-          <div className="absolute right-3 top-3 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400 ring-1 ring-emerald-500/30">
-            Save {savingsPct}%
-          </div>
-        )}
-        <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-          {effective.label}
-        </div>
-        <div className="mt-3 flex items-center gap-2.5">
-          <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-coin/15 transition-transform group-hover:scale-110 group-hover:-rotate-6">
-            <Coins className="h-6 w-6 text-coin" />
-          </div>
-          <div className="min-w-0">
-            <div className="flex items-baseline gap-2 leading-none">
-              <span className="text-lg font-bold tabular-nums text-muted-foreground/70 line-through decoration-2">
-                {Math.round(effective.coins / 2)}
-              </span>
-              <span className="flash-gold text-3xl font-black tabular-nums">
-                {effective.coins}
-              </span>
-              <span className="text-xs font-bold text-coin">Coins</span>
-            </div>
-            <div className="mt-1 inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-coin">
-              <Sparkles className="h-2.5 w-2.5" /> 2× bonus
-            </div>
-            <div className="mt-1 text-[11px] text-muted-foreground">
-              {CURRENCY_SYMBOL}{perCoin.toFixed(3)} / coin
-            </div>
-          </div>
-        </div>
-        <div className="mt-4 flex items-baseline gap-1">
-          <span className="text-2xl font-black tracking-tight">
-            {CURRENCY_SYMBOL}{(effective.priceCents / 100).toFixed(2)}
-          </span>
-          <span className="text-xs text-muted-foreground">one-time</span>
-        </div>
-        <p className="mt-3 flex-1 text-xs leading-relaxed text-muted-foreground">
-          {effective.description}
-        </p>
-        <div
-          className={cn(
-            "mt-5 inline-flex h-10 w-full items-center justify-center rounded-md px-3 text-sm font-bold transition-all",
-            accent
-              ? "bg-gradient-brand text-primary-foreground shadow-glow group-hover:opacity-90"
-              : "border border-border bg-background/50 text-foreground group-hover:border-primary group-hover:bg-primary group-hover:text-primary-foreground",
-          )}
-        >
-          Buy now
-        </div>
-      </button>
-      {canEdit && (
         <button
           type="button"
-          onClick={startEdit}
-          title="Edit pack (boss)"
-          aria-label="Edit pack"
-          className="absolute left-3 top-3 z-10 grid h-8 w-8 place-items-center rounded-full border border-primary/40 bg-background/90 text-primary shadow-sm transition hover:bg-primary hover:text-primary-foreground"
+          onClick={(e) => { e.stopPropagation(); onStart(); }}
+          className="pointer-events-auto grid h-5 w-5 place-items-center rounded-full bg-primary text-primary-foreground shadow-sm"
+          title="Edit"
+          aria-label="Edit"
         >
-          <Pencil className="h-3.5 w-3.5" />
+          <Pencil className="h-3 w-3" />
         </button>
+      </div>
+      {overridden && (
+        <span className="ml-1 inline-block align-middle text-[9px] font-bold uppercase tracking-wider text-primary">●</span>
       )}
     </div>
   );
 }
+
+
 
 
 function TrustItem({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
