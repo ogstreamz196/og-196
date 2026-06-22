@@ -412,26 +412,45 @@ export function OgChat({
       <div ref={scrollRef} className="flex-1 space-y-6 overflow-y-auto px-4 py-6 sm:px-6">
         {messages.length === 0 && (
           <div className="grid h-full place-items-center text-center">
-            <div className="w-full max-w-sm space-y-3">
-              <div className="relative mx-auto h-20 w-20">
-                <div className="absolute inset-0 rounded-full bg-primary/30 blur-2xl animate-pulse" />
-                <OgAvatar size={80} className="relative drop-shadow-[0_0_24px_hsl(var(--primary)/0.7)] animate-[bob_3s_ease-in-out_infinite]" />
+            <div className="w-full max-w-md space-y-6">
+              <div className="relative mx-auto h-56 w-56 sm:h-64 sm:w-64">
+                <div className="absolute inset-0 rounded-full bg-primary/40 blur-[60px] animate-pulse" />
+                <div
+                  aria-hidden="true"
+                  className="absolute -inset-6 -z-10 opacity-80"
+                  style={{
+                    background:
+                      "radial-gradient(45% 50% at 30% 30%, rgba(239,68,68,0.45), transparent 70%), radial-gradient(50% 55% at 70% 70%, rgba(59,130,246,0.55), transparent 70%)",
+                    filter: "blur(28px)",
+                  }}
+                />
+                <img
+                  src={ogBotAsset.url}
+                  alt="OG Bot"
+                  className="relative h-full w-full rounded-full object-cover ring-4 ring-primary/40 shadow-[0_0_60px_-10px_hsl(var(--primary)/0.9)] animate-[bob_3s_ease-in-out_infinite]"
+                />
               </div>
-              <p className="text-base font-black tracking-tight">OG Bot is online 🎤</p>
-              <p className="text-xs text-muted-foreground">
-                Drop a vibe, a joke, a memory — I'll spin lyrics, hooks &amp; Suno prompts.
-                <br />
-                <span className="opacity-70">1 coin per message · {balance} left</span>
-              </p>
+              <div className="space-y-2">
+                <h2 className="font-display text-3xl font-black tracking-tight sm:text-4xl">
+                  Welcome to <span className="text-gradient-brand">OG Bot</span> 🎤
+                </h2>
+                <p className="text-sm text-muted-foreground sm:text-base">
+                  Your AI studio sidekick. Drop a vibe, a joke, a memory —
+                  I'll spin lyrics, hooks &amp; full Suno prompts on demand.
+                </p>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary/80">
+                  1 coin per message · {balance} left
+                </p>
+              </div>
               {showQuickStarts && (
-                <div className="flex flex-wrap justify-center gap-1.5 pt-2">
+                <div className="flex flex-wrap justify-center gap-2 pt-2">
                   {QUICK_STARTS.map((q) => (
                     <button
                       key={q.label}
                       type="button"
                       onClick={() => sendText(q.prompt)}
                       disabled={m.isPending || isOut || !user}
-                      className="rounded-full border-2 border-primary/30 bg-primary/5 px-3 py-1 text-[11px] font-bold text-foreground transition hover:-translate-y-0.5 hover:rotate-[-1deg] hover:border-primary hover:bg-primary/15 active:translate-y-0 disabled:opacity-40"
+                      className="rounded-full border-2 border-primary/40 bg-primary/10 px-4 py-1.5 text-xs font-bold text-foreground transition hover:-translate-y-0.5 hover:rotate-[-1deg] hover:border-primary hover:bg-primary/20 active:translate-y-0 disabled:opacity-40"
                     >
                       {q.label}
                     </button>
