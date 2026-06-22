@@ -40,7 +40,7 @@ export function UserAuditTrail({ userId, email }: { userId: string; email?: stri
           {latestTx && <> · last change {new Date(latestTx.created_at).toLocaleString()}</>}
         </span>
         <Button size="icon" variant="ghost" className="h-7 w-7"
-          onClick={() => q.refetch()} disabled={q.isFetching} title="Refresh">
+          onClick={() => q.refetch()} disabled={q.isFetching} title="Refresh" aria-label="Refresh audit trail">
           <RefreshCw className={cn("h-3.5 w-3.5", q.isFetching && "animate-spin")} />
         </Button>
       </div>
