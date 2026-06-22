@@ -752,19 +752,63 @@ function LibraryPage() {
                     </button>
                   ))}
                 </div>
-                <Textarea
-                  id="personal-details"
-                  value={personalDetails}
-                  onChange={(e) => setPersonalDetails(e.target.value)}
-                  placeholder="✍️ Type here — Their name, occasion, inside jokes, anything personal…&#10;&#10;e.g.&#10;Their name: Aaliyah&#10;Occasion: 30th birthday&#10;Inside joke: the karaoke night we don't talk about"
-                  maxLength={500}
-                  rows={5}
-                  className="mt-2 resize-none rounded-xl border-primary/30 bg-background/60 text-sm placeholder:text-muted-foreground/70 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/40"
-                />
-                <div className="mt-1 flex items-center justify-between text-[10px] text-muted-foreground">
-                  <span>{personalDetails.length === 0 ? "👆 Type here to make it personal" : "Looking good — keep going"}</span>
-                  <span>{personalDetails.length}/500</span>
-                </div>
+                {(() => {
+                  const MAX = 500;
+                  const len = personalDetails.length;
+                  const trimmed = personalDetails.trim();
+                  const hasName = /name\s*[:\-]/i.test(trimmed) || /^[A-Z][a-z]+/m.test(trimmed);
+                  const hasDetail = /(occasion|love|joke|story|city|place)\s*[:\-]/i.test(trimmed);
+                  const pct = (len / MAX) * 100;
+                  let status: "empty" | "tiny" | "warn" | "good" | "near" | "full";
+                  let msg: string;
+                  if (len === 0) { status = "empty"; msg = "👆 Type here, or tap a chip / example above"; }
+                  else if (len < 20) { status = "tiny"; msg = "Add a name and an occasion for best results"; }
+                  else if (!hasName) { status = "warn"; msg = "💡 Add a name (e.g. \"Their name: Aaliyah\")"; }
+                  else if (!hasDetail) { status = "warn"; msg = "💡 Add an occasion, love, or inside joke"; }
+                  else if (len > MAX - 30) { status = "near"; msg = "Almost at the limit"; }
+                  else { status = "good"; msg = "✓ Looking good — the more specific, the better"; }
+                  if (len >= MAX) { status = "full"; msg = "Character limit reached"; }
+                  const tone =
+                    status === "good" ? "text-emerald-400" :
+                    status === "warn" || status === "tiny" ? "text-amber-400" :
+                    status === "near" || status === "full" ? "text-destructive" :
+                    "text-muted-foreground";
+                  const barTone =
+                    status === "full" || status === "near" ? "bg-destructive" :
+                    status === "good" ? "bg-emerald-500" :
+                    status === "warn" || status === "tiny" ? "bg-amber-500" :
+                    "bg-primary/40";
+                  return (
+                    <>
+                      <Textarea
+                        id="personal-details"
+                        aria-describedby="personal-details-help personal-details-count"
+                        aria-invalid={status === "full" || status === "near"}
+                        value={personalDetails}
+                        onChange={(e) => setPersonalDetails(e.target.value.slice(0, MAX))}
+                        placeholder="✍️ Type here — Their name, occasion, inside jokes, anything personal…&#10;&#10;e.g.&#10;Their name: Aaliyah&#10;Occasion: 30th birthday&#10;Inside joke: the karaoke night we don't talk about"
+                        maxLength={MAX}
+                        rows={5}
+                        className="mt-2 resize-none rounded-xl border-primary/30 bg-background/60 text-sm placeholder:text-muted-foreground/70 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/40 aria-[invalid=true]:border-destructive aria-[invalid=true]:focus-visible:ring-destructive/40"
+                      />
+                      <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-white/5">
+                        <div
+                          className={cn("h-full transition-all", barTone)}
+                          style={{ width: `${Math.min(100, pct)}%` }}
+                        />
+                      </div>
+                      <div className="mt-1 flex items-center justify-between gap-2 text-[11px]">
+                        <span id="personal-details-help" className={cn("min-w-0 truncate font-medium", tone)} aria-live="polite">{msg}</span>
+                        <span
+                          id="personal-details-count"
+                          className={cn("shrink-0 tabular-nums", tone)}
+                        >
+                          {len}/{MAX}
+                        </span>
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
 
               <div>
