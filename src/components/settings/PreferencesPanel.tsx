@@ -130,7 +130,7 @@ export function PreferencesPanel() {
             <Label>Default mode</Label>
             <RadioGroup
               value={mode}
-              onValueChange={(v) => setMode(v as "og" | "safe")}
+              onValueChange={(v) => changeMode(v as "og" | "safe")}
               className="grid grid-cols-2 gap-2"
             >
               <ModeOption value="og" title="OG" body="British banter, full personality." />
