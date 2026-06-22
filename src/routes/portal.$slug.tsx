@@ -68,7 +68,7 @@ export const Route = createFileRoute("/portal/$slug")({
   },
   component: PortalPage,
   notFoundComponent: () => (
-    <div className="grid min-h-screen place-items-center bg-background p-6 text-center">
+    <div className="grid min-h-dvh place-items-center bg-background p-6 text-center">
       <div>
         <h1 className="text-2xl font-bold">Portal not found</h1>
         <p className="mt-2 text-muted-foreground">This portal doesn't exist or has been removed.</p>
@@ -77,7 +77,7 @@ export const Route = createFileRoute("/portal/$slug")({
     </div>
   ),
   errorComponent: () => (
-    <div className="grid min-h-screen place-items-center bg-background p-6 text-center">
+    <div className="grid min-h-dvh place-items-center bg-background p-6 text-center">
       <p className="text-destructive">Something went wrong loading this portal.</p>
     </div>
   ),
@@ -107,7 +107,7 @@ function PortalPage() {
   // Maintenance gate — friendly screen, no generation possible
   if (portal.status === "maintenance") {
     return (
-      <div className="grid min-h-screen place-items-center bg-background p-6 text-center">
+      <div className="grid min-h-dvh place-items-center bg-background p-6 text-center">
         <div className="max-w-md">
           <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl" style={{ backgroundColor: themeColor }}>
             <Wand2 className="h-7 w-7 text-white" />
@@ -297,7 +297,7 @@ function PortalPage() {
   });
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-dvh bg-background">
       <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-border bg-background/80 px-4 backdrop-blur md:px-8">
         <Link to="/" className="flex items-center gap-2">
           <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-brand shadow-glow">
