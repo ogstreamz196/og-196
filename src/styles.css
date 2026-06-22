@@ -200,22 +200,22 @@
   /* Responsive typography scale — never overlaps on small screens */
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
-    letter-spacing: -0.01em;
-    text-transform: uppercase;
-    font-weight: 400; /* Archivo Black is single-weight */
+    letter-spacing: -0.015em;
+    font-weight: 400; /* DM Serif Display is single-weight */
+    text-transform: none;
   }
-  h1 { font-size: clamp(1.75rem, 2.5vw + 1rem, 3rem); line-height: 1.1; letter-spacing: -0.02em; }
-  h2 { font-size: clamp(1.4rem, 1.6vw + 0.9rem, 2.25rem); line-height: 1.15; }
-  h3 { font-size: clamp(1.15rem, 1vw + 0.8rem, 1.65rem); line-height: 1.2; }
-  h4 { font-size: clamp(1rem, 0.6vw + 0.8rem, 1.25rem); line-height: 1.25; text-transform: none; letter-spacing: 0; }
+  h1 { font-size: clamp(2rem, 3vw + 1rem, 3.75rem); line-height: 1.05; letter-spacing: -0.025em; }
+  h2 { font-size: clamp(1.55rem, 1.8vw + 0.95rem, 2.625rem); line-height: 1.1; letter-spacing: -0.02em; }
+  h3 { font-size: clamp(1.2rem, 1.05vw + 0.85rem, 1.75rem); line-height: 1.18; letter-spacing: -0.015em; }
+  h4 { font-size: clamp(1.05rem, 0.65vw + 0.85rem, 1.3rem); line-height: 1.25; letter-spacing: -0.01em; }
   p  { line-height: var(--line-height-body, 1.7); }
   .prose p + p { margin-top: 0.75em; }
 
   .font-display {
     font-family: var(--font-display);
     font-optical-sizing: auto;
-    letter-spacing: -0.01em;
-    text-transform: uppercase;
+    letter-spacing: -0.015em;
+    text-transform: none;
   }
   /* Sitewide brand wallpaper, fixed and full-bleed */
   body::before {
