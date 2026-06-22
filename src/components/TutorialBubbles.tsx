@@ -93,15 +93,15 @@ export function TutorialBubbles({
         const placement = s.placement ?? "bottom";
         const vw = typeof window !== "undefined" ? window.innerWidth : 360;
         const vh = typeof window !== "undefined" ? window.innerHeight : 640;
-        // Tiny pill — keep it out of the way; just an arrow + label.
-        const bubbleW = Math.min(vw < 480 ? 170 : 200, vw - 24);
+        // Narrower bubble on small screens so it never blankets the target
+        const bubbleW = Math.min(vw < 480 ? 220 : 280, vw - 24);
         const pos = computePosition(r, placement, bubbleW, vw, vh);
         return (
           <button
             key={s.id}
             type="button"
             onClick={() => pop(s.id)}
-            aria-label={`Dismiss tip: ${s.title}`}
+            aria-label={`Got it — dismiss tip: ${s.title}`}
             className="pointer-events-auto absolute animate-fade-in cursor-pointer text-left"
             style={{
               top: pos.top,
@@ -111,26 +111,33 @@ export function TutorialBubbles({
               animationDelay: `${i * 120}ms`,
             }}
           >
-            <div className="relative rounded-full border border-primary/50 bg-card/95 px-3 py-1.5 shadow-glow backdrop-blur-xl">
+            <div
+              className="relative rounded-2xl border-2 border-primary/50 bg-card/95 px-3 py-2.5 shadow-glow backdrop-blur-xl ring-1 ring-primary/20 transition-transform hover:scale-[1.03] active:scale-95 sm:px-4 sm:py-3"
+            >
               <span
-                className={`absolute h-2 w-2 rotate-45 border-primary/50 bg-card/95 ${
+                className={`absolute h-3 w-3 rotate-45 border-primary/50 bg-card/95 ${
                   placement === "bottom"
-                    ? "left-1/2 -top-1 -translate-x-1/2 border-l border-t"
+                    ? "left-1/2 -top-1.5 -translate-x-1/2 border-l-2 border-t-2"
                     : placement === "top"
-                      ? "left-1/2 -bottom-1 -translate-x-1/2 border-r border-b"
+                      ? "left-1/2 -bottom-1.5 -translate-x-1/2 border-r-2 border-b-2"
                       : placement === "left"
-                        ? "top-1/2 -right-1 -translate-y-1/2 border-r border-t"
-                        : "top-1/2 -left-1 -translate-y-1/2 border-l border-b"
+                        ? "top-1/2 -right-1.5 -translate-y-1/2 border-r-2 border-t-2"
+                        : "top-1/2 -left-1.5 -translate-y-1/2 border-l-2 border-b-2"
                 }`}
                 aria-hidden
               />
-              <div className="flex items-center justify-between gap-2">
-                <p className="truncate text-xs font-bold text-foreground">
-                  <span className="text-primary">{s.title}</span>
-                  <span className="ml-1 text-muted-foreground">— {s.body}</span>
-                </p>
-                <X className="h-3 w-3 shrink-0 text-muted-foreground" aria-hidden />
-              </div>
+              <span className="absolute -right-2 -top-2 grid h-6 w-6 place-items-center rounded-full bg-primary text-primary-foreground shadow ring-2 ring-background">
+                <X className="h-3 w-3" />
+              </span>
+              <p className="font-display text-xs font-bold uppercase tracking-wider text-primary sm:text-sm">
+                {s.title}
+              </p>
+              <p className="mt-1 text-xs font-medium leading-snug text-foreground sm:text-sm">
+                {s.body}
+              </p>
+              <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                Tap to pop ✨
+              </p>
             </div>
           </button>
         );
