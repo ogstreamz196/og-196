@@ -5,7 +5,14 @@ import {
   createStripeClient,
   getStripeErrorMessage,
 } from "@/lib/stripe.server";
-import { findCoinPackByPriceId, VIP_PLAN, CUSTOM_COIN_UNIT } from "@/lib/coin-packs";
+import {
+  findCoinPackByPriceId,
+  VIP_PLAN,
+  CUSTOM_COIN_UNIT,
+  applyPackOverride,
+  parsePackOverride,
+  packOverrideKey,
+} from "@/lib/coin-packs";
 
 type CheckoutSessionResult = { clientSecret: string } | { error: string };
 
