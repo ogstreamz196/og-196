@@ -323,11 +323,11 @@ export function AdminEditablePortalField({
             maxLength={field === "name" ? 80 : undefined}
           />
         )}
-        <Button type="button" size="icon" variant="ghost" className="h-7 w-7 shrink-0"
+        <Button type="button" size="icon" variant="ghost" className="h-7 w-7 shrink-0" aria-label="Save"
           disabled={mut.isPending} onClick={(e) => { e.preventDefault(); mut.mutate(); }}>
           {mut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
         </Button>
-        <Button type="button" size="icon" variant="ghost" className="h-7 w-7 shrink-0"
+        <Button type="button" size="icon" variant="ghost" className="h-7 w-7 shrink-0" aria-label="Cancel"
           onClick={(e) => { e.preventDefault(); setDraft(value == null ? "" : String(value)); setEditing(false); }}>
           <X className="h-3.5 w-3.5" />
         </Button>
