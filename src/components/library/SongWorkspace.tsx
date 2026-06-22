@@ -618,52 +618,75 @@ function GeneratingProgress({ sampleSeconds }: { sampleSeconds: number }) {
     <div
       role="status"
       aria-live="polite"
-      className="space-y-3 rounded-xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-card p-4 shadow-glow"
+      className="generating-aura relative space-y-4 overflow-hidden rounded-2xl border border-primary/40 bg-gradient-to-br from-primary/15 via-card to-card p-5 shadow-[0_20px_60px_-15px_hsl(var(--primary)/0.5)]"
     >
+      {/* Ambient red/blue glow blobs behind content */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -inset-10 -z-10 opacity-80"
+        style={{
+          background:
+            "radial-gradient(40% 50% at 15% 30%, rgba(239,68,68,0.35), transparent 70%), radial-gradient(45% 55% at 85% 70%, rgba(59,130,246,0.45), transparent 70%)",
+          filter: "blur(24px)",
+        }}
+      />
+
       <div className="flex items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2.5">
-          <span className="relative grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary/15">
-            <span className="absolute inset-0 rounded-full bg-primary/30 blur-md animate-pulse" />
-            <Loader2 className="relative h-4 w-4 animate-spin text-primary" aria-hidden="true" />
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="relative grid h-11 w-11 shrink-0 place-items-center rounded-full bg-primary/20 ring-1 ring-primary/40">
+            <span className="absolute inset-0 rounded-full bg-primary/40 blur-lg animate-pulse" />
+            <Loader2 className="relative h-5 w-5 animate-spin text-primary" aria-hidden="true" />
           </span>
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-foreground">Cooking your {sampleSeconds}s preview</p>
+            <p className="truncate text-[15px] font-bold tracking-tight text-foreground">
+              Cooking your {sampleSeconds}s preview
+            </p>
             <p className="truncate text-xs text-muted-foreground">{phase}</p>
           </div>
         </div>
-        <div className="shrink-0 rounded-full border border-border bg-background/60 px-2.5 py-1 text-xs font-bold tabular-nums">
+        <div className="shrink-0 rounded-full border border-primary/40 bg-background/70 px-3 py-1.5 text-xs font-bold tabular-nums text-foreground shadow-[0_0_18px_-4px_hsl(var(--primary)/0.7)]">
           {mm}:{ss}
         </div>
       </div>
 
       {/* Animated waveform skeleton */}
-      <div className="flex h-10 items-end gap-1" aria-hidden="true">
+      <div className="flex h-14 items-end gap-1" aria-hidden="true">
         {Array.from({ length: 28 }).map((_, i) => (
           <span
             key={i}
-            className="flex-1 rounded-sm bg-gradient-to-t from-primary/40 to-primary/80"
+            className="flex-1 rounded-sm bg-gradient-to-t from-primary/50 to-primary shadow-[0_0_8px_hsl(var(--primary)/0.55)]"
             style={{
               height: `${30 + Math.abs(Math.sin((i + elapsed) * 0.6)) * 70}%`,
-              opacity: 0.35 + (i % 4) * 0.15,
+              opacity: 0.45 + (i % 4) * 0.15,
               transition: "height 320ms ease-in-out",
             }}
           />
         ))}
       </div>
 
-      {/* Progress bar */}
-      <div className="space-y-1">
-        <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+      {/* Progress bar — thicker, glowing, with moving shimmer */}
+      <div className="space-y-1.5">
+        <div className="relative h-3 overflow-hidden rounded-full bg-muted/60 ring-1 ring-primary/20">
           <div
-            className="h-full bg-gradient-to-r from-primary via-primary/90 to-primary/70 transition-all duration-500"
+            className="h-full rounded-full bg-gradient-to-r from-[#ef4444] via-primary to-[#3b82f6] shadow-[0_0_16px_hsl(var(--primary)/0.9),0_0_4px_hsl(var(--primary))] transition-all duration-500"
             style={{ width: `${pct}%` }}
           />
+          {/* Shimmer sheen */}
+          <span
+            aria-hidden="true"
+            className="generating-shimmer pointer-events-none absolute inset-y-0 left-0 w-1/3"
+            style={{
+              background:
+                "linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent)",
+            }}
+          />
         </div>
-        <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+        <div className="flex items-center justify-between text-[11px] font-medium text-muted-foreground">
           <span>This usually takes 30–90 seconds.</span>
-          <span className="tabular-nums">{pct}%</span>
+          <span className="tabular-nums text-foreground/90">{pct}%</span>
         </div>
       </div>
+
     </div>
   );
 }
