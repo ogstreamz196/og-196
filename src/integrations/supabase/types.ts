@@ -444,6 +444,7 @@ export type Database = {
           revealed: boolean
           sample_path: string | null
           status: string
+          stream_audio_url: string | null
           style: string | null
           suno_clip_id: string | null
           suno_task_id: string | null
@@ -468,6 +469,7 @@ export type Database = {
           revealed?: boolean
           sample_path?: string | null
           status?: string
+          stream_audio_url?: string | null
           style?: string | null
           suno_clip_id?: string | null
           suno_task_id?: string | null
@@ -492,6 +494,7 @@ export type Database = {
           revealed?: boolean
           sample_path?: string | null
           status?: string
+          stream_audio_url?: string | null
           style?: string | null
           suno_clip_id?: string | null
           suno_task_id?: string | null

@@ -1,0 +1,1 @@
+ALTER TABLE public.songs ADD COLUMN IF NOT EXISTS stream_audio_url text;

@@ -358,7 +358,14 @@ export function SongWorkspace({ song, onSaved }: Props) {
                   Generate lyrics in stage 1 first.
                 </p>
               )}
-              {isPending && <GeneratingProgress sampleSeconds={settings?.sample_seconds ?? 30} startedAt={song.generation_started_at ?? song.updated_at ?? song.created_at} />}
+              {isPending && (
+                <>
+                  <GeneratingProgress sampleSeconds={settings?.sample_seconds ?? 30} startedAt={song.generation_started_at ?? song.updated_at ?? song.created_at} />
+                  {song.stream_audio_url && (
+                    <LiveStreamPreview streamUrl={song.stream_audio_url} limitSeconds={20} />
+                  )}
+                </>
+              )}
               {isFailed && (
                 <div
                   role="alert"
@@ -784,6 +791,98 @@ function InlineSamplePlayer({ songId }: { songId: string }) {
           className="w-full rounded-lg bg-black/30"
           aria-label="Sample preview"
         />
+      )}
+    </div>
+  );
+}
+
+/**
+ * Suno-style live stream preview. Plays the in-progress generation directly
+ * from Suno's stream URL while the full sample keeps cooking in the background.
+ * Hard-cuts at `limitSeconds` (default 20s) and shows a "keep cooking" blocker
+ * so users get instant feedback without being able to scrub past the preview.
+ */
+function LiveStreamPreview({
+  streamUrl,
+  limitSeconds = 20,
+}: {
+  streamUrl: string;
+  limitSeconds?: number;
+}) {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [played, setPlayed] = useState(0);
+  const [blocked, setBlocked] = useState(false);
+
+  useEffect(() => {
+    const el = audioRef.current;
+    if (!el) return;
+    const onTime = () => {
+      setPlayed(el.currentTime);
+      if (el.currentTime >= limitSeconds) {
+        el.pause();
+        el.currentTime = limitSeconds;
+        setBlocked(true);
+      }
+    };
+    const onSeeking = () => {
+      if (el.currentTime > limitSeconds) {
+        el.currentTime = limitSeconds;
+        setBlocked(true);
+      }
+    };
+    el.addEventListener("timeupdate", onTime);
+    el.addEventListener("seeking", onSeeking);
+    return () => {
+      el.removeEventListener("timeupdate", onTime);
+      el.removeEventListener("seeking", onSeeking);
+    };
+  }, [limitSeconds, streamUrl]);
+
+  const pct = Math.min(100, (played / limitSeconds) * 100);
+  const remaining = Math.max(0, Math.ceil(limitSeconds - played));
+
+  return (
+    <div className="space-y-3 rounded-xl border border-primary/40 bg-gradient-to-br from-primary/15 via-card to-card p-3 shadow-[0_0_24px_-8px_hsl(var(--primary)/0.6)]">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 text-sm font-semibold text-primary">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+          </span>
+          Live preview · listen while it generates
+        </div>
+        <span className="rounded-full border border-primary/40 bg-background/60 px-2 py-0.5 text-[10px] font-bold tabular-nums text-foreground">
+          {blocked ? "Locked" : `${remaining}s left`}
+        </span>
+      </div>
+
+      <audio
+        ref={audioRef}
+        src={streamUrl}
+        controls
+        autoPlay
+        preload="auto"
+        className="w-full rounded-lg bg-black/30"
+        aria-label="Live streaming preview"
+      />
+
+      <div className="h-1.5 overflow-hidden rounded-full bg-muted/60">
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-[#ef4444] via-primary to-[#3b82f6] transition-all duration-200"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+
+      {blocked && (
+        <div className="flex items-start gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-100">
+          <Loader2 className="mt-0.5 h-3.5 w-3.5 shrink-0 animate-spin text-amber-300" />
+          <div>
+            <p className="font-semibold">First {limitSeconds}s preview ended</p>
+            <p className="text-amber-200/80">
+              The full preview is still cooking — it'll unlock automatically as soon as it's ready.
+            </p>
+          </div>
+        </div>
       )}
     </div>
   );

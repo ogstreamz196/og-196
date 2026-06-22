@@ -115,15 +115,32 @@ Deno.serve(async (req) => {
     [];
   const items = Array.isArray(rawItems) ? rawItems : [rawItems];
 
-  const clips = items
-    .map((c: any) => ({
-      audioUrl: c?.audio_url || c?.audioUrl || c?.source_audio_url,
-      coverUrl: c?.image_url || c?.imageUrl || c?.cover_url,
-      title: c?.title,
-      duration: c?.duration,
-      clipId: c?.id || c?.clip_id,
-    }))
-    .filter((c) => !!c.audioUrl && hostAllowed(c.audioUrl));
+  const clipsRaw = items.map((c: any) => ({
+    audioUrl: c?.audio_url || c?.audioUrl || c?.source_audio_url,
+    streamUrl: c?.stream_audio_url || c?.streamAudioUrl || c?.source_stream_audio_url,
+    coverUrl: c?.image_url || c?.imageUrl || c?.cover_url,
+    title: c?.title,
+    duration: c?.duration,
+    clipId: c?.id || c?.clip_id,
+  }));
+
+  // Early "first"/"text" callback: Suno only has the stream URL, not the final
+  // file. Persist the stream URL so the UI can offer a live Suno-style preview
+  // while we wait for the "complete" callback to deliver the downloadable file.
+  if (callbackType === "first" || callbackType === "text") {
+    const firstStream = clipsRaw.find((c) => c.streamUrl && hostAllowed(c.streamUrl!));
+    if (firstStream?.streamUrl && !parentSong.stream_audio_url) {
+      await admin.from("songs").update({
+        stream_audio_url: firstStream.streamUrl,
+        cover_url: firstStream.coverUrl ?? parentSong.cover_url,
+        title: firstStream.title ?? parentSong.title,
+      }).eq("id", songId);
+      console.log("Stream URL stored for live preview:", songId);
+    }
+    return new Response("streaming", { status: 200 });
+  }
+
+  const clips = clipsRaw.filter((c) => !!c.audioUrl && hostAllowed(c.audioUrl!));
 
   if (clips.length === 0) {
     console.log("No audio clips ready yet (or all rejected by host allow-list)");
