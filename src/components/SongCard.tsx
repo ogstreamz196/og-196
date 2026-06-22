@@ -17,6 +17,8 @@ export interface Song {
   duration_seconds: number | null;
   error_message: string | null;
   created_at: string;
+  updated_at?: string | null;
+  generation_started_at?: string | null;
 }
 
 export function SongCard({ song }: { song: Song }) {

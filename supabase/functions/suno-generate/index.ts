@@ -73,6 +73,7 @@ Deno.serve(async (req) => {
       : prompt;
 
     let song: { id: string } | null = null;
+    const generationStartedAt = new Date().toISOString();
     if (existingSongId) {
       // Reuse the draft so the same song row progresses through the workflow stages.
       const { data: existing, error: exErr } = await admin
@@ -90,6 +91,7 @@ Deno.serve(async (req) => {
           lyrics: effectiveLyrics,
           title,
           status: "pending",
+          generation_started_at: generationStartedAt,
           portal_id: portalId,
           audio_path: null,
           sample_path: null,
@@ -103,7 +105,7 @@ Deno.serve(async (req) => {
     } else {
       const { data: inserted, error: songErr } = await admin
         .from("songs")
-        .insert({ user_id: user.id, prompt: effectivePrompt, style, lyrics: effectiveLyrics, title, status: "pending", portal_id: portalId })
+        .insert({ user_id: user.id, prompt: effectivePrompt, style, lyrics: effectiveLyrics, title, status: "pending", generation_started_at: generationStartedAt, portal_id: portalId })
         .select("id")
         .single();
       if (songErr) return json({ error: songErr.message }, 500);
