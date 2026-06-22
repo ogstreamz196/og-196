@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.generate-lyrics]
 verify_jwt = false
+
+[functions.suno-ping]
+verify_jwt = false
