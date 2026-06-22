@@ -530,6 +530,42 @@ export function SongWorkspace({ song, onSaved }: Props) {
   );
 }
 
+/**
+ * Lyrics skeleton — animated bars that mimic verse/chorus blocks so the
+ * textarea area doesn't collapse while the model is writing.
+ */
+function LyricsSkeleton() {
+  const blocks = [
+    { label: "[Verse 1]", lines: 6 },
+    { label: "[Chorus]", lines: 4 },
+    { label: "[Verse 2]", lines: 6 },
+    { label: "[Bridge]", lines: 3 },
+  ];
+  return (
+    <div
+      role="status"
+      aria-label="Generating lyrics"
+      className="space-y-4 rounded-md border border-primary/30 bg-gradient-to-br from-primary/5 via-card to-card p-4 font-mono text-sm"
+    >
+      {blocks.map((b, bi) => (
+        <div key={bi} className="space-y-1.5">
+          <div className="text-[11px] font-semibold text-primary/80">{b.label}</div>
+          {Array.from({ length: b.lines }).map((_, i) => (
+            <div
+              key={i}
+              className="h-3 animate-pulse rounded bg-muted/70"
+              style={{
+                width: `${55 + ((i * 13 + bi * 7) % 40)}%`,
+                animationDelay: `${(bi * b.lines + i) * 80}ms`,
+              }}
+            />
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+
+
 function CostBadge({ cost }: { cost: number }) {
   return (
     <span className="inline-flex items-center gap-1 rounded-full border border-coin/30 bg-coin/10 px-2.5 py-1 text-xs font-semibold text-coin">
