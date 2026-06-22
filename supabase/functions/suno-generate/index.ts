@@ -90,28 +90,35 @@ Deno.serve(async (req) => {
         .eq("id", existingSongId)
         .maybeSingle();
       if (exErr) return json({ error: exErr.message }, 500);
-      if (!existing || existing.user_id !== user.id) return json({ error: "Song not found" }, 404);
-      const { data: upd, error: updErr } = await admin
-        .from("songs")
-        .update({
-          prompt: effectivePrompt,
-          style,
-          lyrics: effectiveLyrics,
-          title,
-          status: "pending",
-          generation_started_at: generationStartedAt,
-          portal_id: portalId,
-          audio_path: null,
-          sample_path: null,
-          stream_audio_url: null,
-          error_message: null,
-        })
-        .eq("id", existingSongId)
-        .select("id")
-        .single();
-      if (updErr) return json({ error: updErr.message }, 500);
-      song = upd;
-    } else {
+      if (existing && existing.user_id !== user.id) {
+        return json({ error: "Song not found" }, 404);
+      }
+      if (existing) {
+        const { data: upd, error: updErr } = await admin
+          .from("songs")
+          .update({
+            prompt: effectivePrompt,
+            style,
+            lyrics: effectiveLyrics,
+            title,
+            status: "pending",
+            generation_started_at: generationStartedAt,
+            portal_id: portalId,
+            audio_path: null,
+            sample_path: null,
+            stream_audio_url: null,
+            error_message: null,
+          })
+          .eq("id", existingSongId)
+          .select("id")
+          .single();
+        if (updErr) return json({ error: updErr.message }, 500);
+        song = upd;
+      }
+      // If existing is null (stale id from client), fall through to insert a fresh row.
+    }
+    if (!song) {
+
       const { data: inserted, error: songErr } = await admin
         .from("songs")
         .insert({ user_id: user.id, prompt: effectivePrompt, style, lyrics: effectiveLyrics, title, status: "pending", generation_started_at: generationStartedAt, portal_id: portalId })
