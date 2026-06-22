@@ -60,11 +60,11 @@ function DashboardHome() {
   const scrimOpacity = useAdaptiveOverlay(welcomeRef, { min: 0.55, max: 0.92 });
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-14 px-2 sm:px-4">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-3 sm:gap-12 sm:px-6">
       {/* Welcome */}
       <section
         ref={welcomeRef}
-        className="relative flex flex-col gap-3 overflow-hidden rounded-[2.5rem] border-2 border-white/15 bg-card/55 p-8 shadow-[0_24px_60px_-20px_rgba(80,60,255,0.45)] backdrop-blur-2xl sm:p-12"
+        className="relative flex flex-col gap-3 overflow-hidden rounded-[2rem] border-2 border-white/15 bg-card/55 p-5 shadow-[0_24px_60px_-20px_rgba(80,60,255,0.45)] backdrop-blur-2xl sm:rounded-[2.5rem] sm:p-8 lg:p-10"
       >
         {/* Adaptive dark scrim */}
         <div
@@ -149,17 +149,17 @@ function DashboardHome() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Example prompts */}
         <Card className="rounded-[2rem] border-2 border-white/15 shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)] lg:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="text-4xl font-black sm:text-5xl">🎤 Try a prompt</CardTitle>
-              <CardDescription className="text-lg">Tap one to start a song in seconds.</CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between gap-3">
+            <div className="min-w-0">
+              <CardTitle className="text-2xl font-black sm:text-3xl">🎤 Try a prompt</CardTitle>
+              <CardDescription className="text-sm sm:text-base">Tap one to start a song in seconds.</CardDescription>
             </div>
             <Link
               to="/library"
               preload="intent"
-              className={cn(buttonVariants({ variant: "ghost", size: "lg" }), "gap-1.5 rounded-full text-lg")}
+              className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "shrink-0 gap-1.5 rounded-full text-sm sm:text-base")}
             >
-              Open studio <ArrowRight className="h-6 w-6" />
+              Open studio <ArrowRight className="h-4 w-4" />
             </Link>
           </CardHeader>
           <CardContent>
@@ -174,8 +174,8 @@ function DashboardHome() {
         {/* Next steps */}
         <Card className="rounded-[2rem] border-2 border-white/15 shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)]">
           <CardHeader>
-            <CardTitle className="text-4xl font-black sm:text-5xl">✅ Next steps</CardTitle>
-            <CardDescription className="text-lg">Get the most out of OG Studio.</CardDescription>
+            <CardTitle className="text-2xl font-black sm:text-3xl">✅ Next steps</CardTitle>
+            <CardDescription className="text-sm sm:text-base">Get the most out of OG Studio.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <ChecklistItem
@@ -215,7 +215,7 @@ function PrimaryCard({
     <Link
       to={to}
       preload="intent"
-      className="group relative flex min-h-[420px] flex-col justify-between overflow-hidden rounded-[2rem] border-2 border-white/15 bg-card/70 p-6 shadow-card backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:min-h-[720px] sm:p-12"
+      className="group relative flex min-h-[260px] flex-col justify-between overflow-hidden rounded-[2rem] border-2 border-white/15 bg-card/70 p-5 shadow-card backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:min-h-[380px] sm:p-8 lg:min-h-[460px] lg:p-10"
     >
       {/* Ambient gradient layers */}
       <div
