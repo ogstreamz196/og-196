@@ -17,6 +17,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { ensureCurrentUserBootstrap } from "@/lib/user-bootstrap.functions";
 import { useSiteContentRealtime } from "@/hooks/use-site-content";
 import { DisplayPrefsBridge } from "@/hooks/use-display-prefs";
+import { InstallAppPrompt } from "@/components/InstallAppPrompt";
 
 function NotFoundComponent() {
   return (
@@ -69,7 +70,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
+      { name: "theme-color", content: "#1e1e5a" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "apple-mobile-web-app-title", content: "OG Portal" },
       { title: "PORTAL" },
       {
         name: "description",
@@ -108,6 +113,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Fira+Sans:wght@300;400;500;600;700;800&display=swap",
       },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "apple-touch-icon", href: "/__l5e/assets-v1/9244a89e-48af-4c0a-8a1c-a02790e9783b/og-logo.png" },
+      { rel: "icon", href: "/__l5e/assets-v1/9244a89e-48af-4c0a-8a1c-a02790e9783b/og-logo.png", type: "image/png" },
     ],
   }),
   shellComponent: RootShell,
@@ -193,6 +201,7 @@ function RootComponent() {
         <DisplayPrefsBridge />
         <Outlet />
         <Toaster />
+        <InstallAppPrompt />
       </AuthProvider>
     </QueryClientProvider>
   );
