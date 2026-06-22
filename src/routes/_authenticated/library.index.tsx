@@ -848,55 +848,8 @@ function LibraryPage() {
         </section>
       )}
 
-      {/* Past songs */}
-      <section>
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-            Your recent songs
-          </h2>
-        </div>
-        {library.isLoading ? (
-          <div className="grid place-items-center py-10 text-muted-foreground">
-            <Loader2 className="h-5 w-5 animate-spin" />
-          </div>
-        ) : (library.data ?? []).length > 0 ? (
-          <div className="grid gap-3">
-            {(library.data ?? []).map((s) => (
-              <div key={s.id} className="relative">
-                <Link
-                  to="/library/$songId"
-                  params={{ songId: s.id }}
-                  className="block rounded-2xl transition-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <SongCard song={s} />
-                </Link>
-                {isAdmin && (
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    className="absolute right-3 top-3 h-8 w-8 opacity-90"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setPendingDelete(s);
-                    }}
-                    aria-label="Delete track"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="rounded-3xl border border-dashed border-white/10 bg-card/40 p-10 text-center">
-            <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-primary/20 to-fuchsia-500/10">
-              <LibraryIcon className="h-6 w-6 text-primary" />
-            </div>
-            <p className="mt-4 text-base font-bold">No songs yet</p>
-          </div>
-        )}
-      </section>
+
+
 
       <AlertDialog open={!!pendingDelete} onOpenChange={(o) => !o && setPendingDelete(null)}>
         <AlertDialogContent>
