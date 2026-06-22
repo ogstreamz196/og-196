@@ -17,7 +17,6 @@ import { Toaster } from "@/components/ui/sonner";
 import { ensureCurrentUserBootstrap } from "@/lib/user-bootstrap.functions";
 import { useSiteContentRealtime } from "@/hooks/use-site-content";
 import { DisplayPrefsBridge } from "@/hooks/use-display-prefs";
-import { InstallAppPrompt } from "@/components/InstallAppPrompt";
 
 function NotFoundComponent() {
   return (
@@ -70,11 +69,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { name: "theme-color", content: "#1e1e5a" },
-      { name: "apple-mobile-web-app-capable", content: "yes" },
-      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
-      { name: "apple-mobile-web-app-title", content: "OG Portal" },
+      { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "PORTAL" },
       {
         name: "description",
@@ -104,6 +99,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0962d120-9a6a-4403-b946-c07e83d9dfbd/id-preview-1984ac9d--07659a42-5b68-4c8b-83b5-ee9a625dbb92.lovable.app-1781064468022.png",
       },
       { name: "google-site-verification", content: "R34IxND5szTYrevWfX0gTnIvDi64kPx6wI0XCNM08YE" },
+      { name: "description", content: "PORTAL is an AI music generator and a hub for managing OG Bot API keys and tokens." },
+      { property: "og:description", content: "PORTAL is an AI music generator and a hub for managing OG Bot API keys and tokens." },
+      { name: "twitter:description", content: "PORTAL is an AI music generator and a hub for managing OG Bot API keys and tokens." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/258c6af9-f6ad-4792-8337-ebed91e6dd10/id-preview-993ea057--07659a42-5b68-4c8b-83b5-ee9a625dbb92.lovable.app-1782170919209.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/258c6af9-f6ad-4792-8337-ebed91e6dd10/id-preview-993ea057--07659a42-5b68-4c8b-83b5-ee9a625dbb92.lovable.app-1782170919209.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -113,9 +113,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Fira+Sans:wght@300;400;500;600;700;800&display=swap",
       },
-      { rel: "manifest", href: "/manifest.webmanifest" },
-      { rel: "apple-touch-icon", href: "/__l5e/assets-v1/9244a89e-48af-4c0a-8a1c-a02790e9783b/og-logo.png" },
-      { rel: "icon", href: "/__l5e/assets-v1/9244a89e-48af-4c0a-8a1c-a02790e9783b/og-logo.png", type: "image/png" },
     ],
   }),
   shellComponent: RootShell,
@@ -201,7 +198,6 @@ function RootComponent() {
         <DisplayPrefsBridge />
         <Outlet />
         <Toaster />
-        <InstallAppPrompt />
       </AuthProvider>
     </QueryClientProvider>
   );
