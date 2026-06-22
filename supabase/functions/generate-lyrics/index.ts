@@ -122,9 +122,11 @@ Deno.serve(async (req) => {
         `Do NOT self-censor, do NOT use asterisks or bleeps, and do NOT add disclaimers. Avoid slurs, sexual content involving minors, and direct incitement to real-world violence — everything else is fair game.` +
         structureRule + bilingualRule +
         ` Target 400–520 words. Output ONLY the lyrics, no explanations.`
-      : `You are a professional songwriter. Write original song lyrics in ${language}.` +
+      : `You are a professional songwriter writing CLEAN, radio-friendly song lyrics in ${language}. ` +
+        `STRICT RULE: absolutely NO profanity, swear words, slurs, or vulgar terms — that means no "fuck", "shit", "bitch", "damn", "ass", "asshole", "dick", "piss", or any obscenity, slang or otherwise. No sexual content, no graphic violence, no drug references. If you need attitude, channel it through clever wordplay and metaphor — never through swearing. The result must be safe for radio, family streaming, and a children's playlist.` +
         structureRule + bilingualRule +
         ` Target 380–500 words. Output ONLY the lyrics, no explanations.`;
+
     const userPrompt =
       `Song title: ${songName || "(untitled)"}\n` +
       `Theme / description: ${description || "(none)"}\n` +
