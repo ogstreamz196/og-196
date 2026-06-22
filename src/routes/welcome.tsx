@@ -310,15 +310,9 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
         <p className="relative mt-2 font-display text-[clamp(1.6rem,8vw,3rem)] font-black uppercase leading-[1.05] tracking-[0.02em] text-foreground sm:text-4xl sm:tracking-[0.04em] md:text-5xl">
           <span aria-hidden>👇 </span>Select Your Device
         </p>
-
-
-        <p className="relative mt-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-foreground/80 sm:text-base sm:tracking-[0.18em]">
-          Pick the one you're using to sign in
-        </p>
-        <p className="relative mt-4 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-2.5 text-center text-sm font-bold text-amber-200">
-          <span aria-hidden>⚠️ </span>Tap <span className="underline">Allow</span> / <span className="underline">Accept</span> on every prompt that appears after picking your device.
-        </p>
       </div>
+
+
 
       <div className="relative overflow-hidden rounded-[28px] border border-white/15 bg-white/[0.04] p-3 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)] backdrop-blur-xl sm:p-5">
         <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-white/[0.06] via-transparent to-transparent" aria-hidden />
