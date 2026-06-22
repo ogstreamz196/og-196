@@ -1026,3 +1026,27 @@ function LiveStreamPreview({
     </div>
   );
 }
+
+function FoulMouthToggle() {
+  const { foulMouth } = useFoulMouth();
+  const setFoul = useSetFoulMouth();
+  return (
+    <label
+      className={cn(
+        "flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer select-none",
+        foulMouth
+          ? "border-destructive/60 bg-destructive/10 text-destructive"
+          : "border-border bg-muted/40 text-muted-foreground hover:text-foreground",
+      )}
+      title="When ON, OG Bot can swear in lyrics & replies. When OFF, lyrics stay clean."
+    >
+      <Switch
+        checked={foulMouth}
+        onCheckedChange={(v) => setFoul.mutate(v)}
+        disabled={setFoul.isPending}
+        aria-label="Foul mouth mode"
+      />
+      <span>🤬 Foul mouth {foulMouth ? "ON" : "OFF"}</span>
+    </label>
+  );
+}
