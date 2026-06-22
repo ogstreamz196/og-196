@@ -243,7 +243,7 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
           onClick={() => signIn(d.provider)}
           disabled={pending !== null}
           aria-label={`${d.label} — ${sub}`}
-          className={`${h} ${TILE_CLASS} flex flex-col items-center justify-between gap-2 px-2 pt-4 pb-2 text-foreground sm:gap-3 sm:px-3 sm:pt-5 sm:pb-3`}
+          className={`${h} ${TILE_CLASS} flame-aura flex flex-col items-center justify-between gap-2 px-2 pt-4 pb-2 text-foreground sm:gap-3 sm:px-3 sm:pt-5 sm:pb-3`}
         >
           <div className="flex flex-1 items-center justify-center">
             {isPending ? (
@@ -282,11 +282,8 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
         <p className="relative mt-2 font-display text-[clamp(1.6rem,8vw,3rem)] font-black uppercase leading-[1.05] tracking-[0.02em] text-foreground sm:text-4xl sm:tracking-[0.04em] md:text-5xl">
           <span aria-hidden>👇 </span>Select Your Device
         </p>
-        <div className="relative mt-3 flex justify-center">
-          <span className="relative inline-flex max-w-full items-center gap-2 whitespace-nowrap rounded-full bg-amber-400 px-4 py-2 font-display text-[clamp(1.25rem,6.5vw,1.875rem)] font-black uppercase tracking-[0.04em] text-black shadow-[0_0_0_4px_rgba(0,0,0,0.5),0_8px_24px_-4px_rgba(251,191,36,0.8)] ring-2 ring-amber-300 animate-pulse sm:px-6 sm:py-2.5 sm:text-3xl sm:tracking-[0.08em]">
-            <span aria-hidden>🚀</span> Start Now
-          </span>
-        </div>
+
+
         <p className="relative mt-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-foreground/80 sm:text-base sm:tracking-[0.18em]">
           Pick the one you're using to sign in
         </p>
