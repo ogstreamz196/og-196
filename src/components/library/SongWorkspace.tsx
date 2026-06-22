@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   Loader2, FileText, MessageSquareMore, Wand2, ExternalLink,
@@ -247,7 +247,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
     <div className="space-y-6">
       {isPending && (
         <div className="sticky top-2 z-30">
-          <GeneratingProgress sampleSeconds={settings?.sample_seconds ?? 30} />
+          <GeneratingProgress sampleSeconds={settings?.sample_seconds ?? 30} startedAt={song.updated_at ?? song.created_at} />
         </div>
       )}
       <StageStepper current={stage} sampleSeconds={settings?.sample_seconds ?? 30} />
@@ -358,7 +358,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
                   Generate lyrics in stage 1 first.
                 </p>
               )}
-              {isPending && <GeneratingProgress sampleSeconds={settings?.sample_seconds ?? 30} />}
+              {isPending && <GeneratingProgress sampleSeconds={settings?.sample_seconds ?? 30} startedAt={song.updated_at ?? song.created_at} />}
               {isFailed && (
                 <div
                   role="alert"
@@ -588,13 +588,31 @@ function CostBadge({ cost }: { cost: number }) {
  * dead. Suno typically takes 30–90s; we model that with a soft progress curve
  * that asymptotes near the expected window.
  */
-function GeneratingProgress({ sampleSeconds }: { sampleSeconds: number }) {
-  const [elapsed, setElapsed] = useState(0);
+function GeneratingProgress({
+  sampleSeconds,
+  startedAt,
+}: {
+  sampleSeconds: number;
+  /** ISO timestamp of when generation kicked off. Lets elapsed resume after page refresh. */
+  startedAt?: string | null;
+}) {
+  // Anchor elapsed to the DB-side start time (song.updated_at when status flipped to
+  // pending) so a hard refresh continues the timer mid-flight instead of restarting at 0.
+  const startMs = useMemo(() => {
+    if (startedAt) {
+      const t = Date.parse(startedAt);
+      if (!Number.isNaN(t)) return t;
+    }
+    return Date.now();
+  }, [startedAt]);
+
+  const [elapsed, setElapsed] = useState(() => Math.max(0, Math.floor((Date.now() - startMs) / 1000)));
   useEffect(() => {
-    const start = Date.now();
-    const id = setInterval(() => setElapsed(Math.floor((Date.now() - start) / 1000)), 250);
+    setElapsed(Math.max(0, Math.floor((Date.now() - startMs) / 1000)));
+    const id = setInterval(() => setElapsed(Math.max(0, Math.floor((Date.now() - startMs) / 1000))), 250);
     return () => clearInterval(id);
-  }, []);
+  }, [startMs]);
+
 
   // Soft progress curve — 0→90% over ~90s, then crawls to 99%.
   const target = 90;
