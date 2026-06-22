@@ -398,6 +398,31 @@ function LibraryPage() {
     },
   });
 
+  const versionedLibrary = useMemo(() => {
+    const list = library.data ?? [];
+    const sortedAsc = [...list].sort(
+      (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+    );
+    const totals = new Map<string, number>();
+    const running = new Map<string, number>();
+    const versionOf = new Map<string, number>();
+    for (const s of sortedAsc) {
+      const key = (s.title || "Untitled").trim().toLowerCase();
+      totals.set(key, (totals.get(key) ?? 0) + 1);
+      const next = (running.get(key) ?? 0) + 1;
+      running.set(key, next);
+      versionOf.set(s.id, next);
+    }
+    return list.map((s) => {
+      const key = (s.title || "Untitled").trim().toLowerCase();
+      const total = totals.get(key) ?? 1;
+      const v = versionOf.get(s.id) ?? 1;
+      const base = s.title || "Untitled";
+      const display = total > 1 ? `${base} · Version ${v}` : base;
+      return { ...s, title: display };
+    });
+  }, [library.data]);
+
   useEffect(() => {
     if (!user) return;
     const ch = supabase
@@ -481,6 +506,64 @@ function LibraryPage() {
           </div>
         </div>
       </header>
+
+      {/* Library — previews created (above creation options) */}
+      <section>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+            Your library · previews
+          </h2>
+          {versionedLibrary.length > 0 && (
+            <span className="text-[11px] text-muted-foreground">
+              {versionedLibrary.length} track{versionedLibrary.length === 1 ? "" : "s"}
+            </span>
+          )}
+        </div>
+        {library.isLoading ? (
+          <div className="grid place-items-center py-10 text-muted-foreground">
+            <Loader2 className="h-5 w-5 animate-spin" />
+          </div>
+        ) : versionedLibrary.length > 0 ? (
+          <div className="grid gap-3">
+            {versionedLibrary.map((s) => (
+              <div key={s.id} className="relative">
+                <Link
+                  to="/library/$songId"
+                  params={{ songId: s.id }}
+                  className="block rounded-2xl transition-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <SongCard song={s} />
+                </Link>
+                {isAdmin && (
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    className="absolute right-3 top-3 h-8 w-8 opacity-90"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setPendingDelete(s);
+                    }}
+                    aria-label="Delete track"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-3xl border border-dashed border-white/10 bg-card/40 p-8 text-center">
+            <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-primary/20 to-fuchsia-500/10">
+              <LibraryIcon className="h-5 w-5 text-primary" />
+            </div>
+            <p className="mt-3 text-sm font-bold">No previews yet</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Create your first track below — versions will appear here.
+            </p>
+          </div>
+        )}
+      </section>
 
       {/* Title card */}
       <section className="rounded-3xl border border-white/10 bg-card/60 p-5 shadow-card backdrop-blur-xl sm:p-7">
@@ -765,55 +848,8 @@ function LibraryPage() {
         </section>
       )}
 
-      {/* Past songs */}
-      <section>
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-            Your recent songs
-          </h2>
-        </div>
-        {library.isLoading ? (
-          <div className="grid place-items-center py-10 text-muted-foreground">
-            <Loader2 className="h-5 w-5 animate-spin" />
-          </div>
-        ) : (library.data ?? []).length > 0 ? (
-          <div className="grid gap-3">
-            {(library.data ?? []).map((s) => (
-              <div key={s.id} className="relative">
-                <Link
-                  to="/library/$songId"
-                  params={{ songId: s.id }}
-                  className="block rounded-2xl transition-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <SongCard song={s} />
-                </Link>
-                {isAdmin && (
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    className="absolute right-3 top-3 h-8 w-8 opacity-90"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setPendingDelete(s);
-                    }}
-                    aria-label="Delete track"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="rounded-3xl border border-dashed border-white/10 bg-card/40 p-10 text-center">
-            <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-primary/20 to-fuchsia-500/10">
-              <LibraryIcon className="h-6 w-6 text-primary" />
-            </div>
-            <p className="mt-4 text-base font-bold">No songs yet</p>
-          </div>
-        )}
-      </section>
+
+
 
       <AlertDialog open={!!pendingDelete} onOpenChange={(o) => !o && setPendingDelete(null)}>
         <AlertDialogContent>
