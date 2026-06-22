@@ -73,7 +73,7 @@
   --secondary-foreground: oklch(0.97 0.008 250);
 
   --muted: oklch(0.18 0.035 263 / 0.55);
-  --muted-foreground: oklch(0.8 0.02 255);
+  --muted-foreground: oklch(0.86 0.02 255); /* bumped 0.80→0.86 for AA on dark wallpaper */
 
   /* Polished silver — secondary accent */
   --accent: oklch(0.86 0.012 255);
@@ -150,7 +150,7 @@
   --secondary: oklch(0.2 0.04 263 / 0.55);
   --secondary-foreground: oklch(0.97 0.008 250);
   --muted: oklch(0.18 0.035 263 / 0.55);
-  --muted-foreground: oklch(0.8 0.02 255);
+  --muted-foreground: oklch(0.86 0.02 255);
   --accent: oklch(0.86 0.012 255);
   --accent-foreground: oklch(0.18 0.04 263);
   --destructive: oklch(0.62 0.22 25);
@@ -190,15 +190,25 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    /* Fredoka reads cleanest at 450–500 weight on dark surfaces — bumps AA contrast vs 400. */
+    font-weight: 450;
     font-feature-settings: "ss01", "cv11";
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
     position: relative;
     min-height: 100vh;
-    /* Comfortable reading rhythm */
-    line-height: 1.7;
+    line-height: 1.65;
+    letter-spacing: 0.01em;
+  }
+  /* Buttons, labels, inputs, badges — keep on Fredoka with stronger weight for legibility. */
+  button, [role="button"], label, input, textarea, select,
+  .badge, [data-slot="badge"], [data-slot="button"] {
+    font-family: var(--font-sans);
+    font-weight: 600;
     letter-spacing: 0.005em;
   }
+  /* Bagel Fat One has thin counters at tiny sizes — never let display drop below 14px. */
+  h5, h6 { font-size: max(0.95rem, 14px); line-height: 1.25; }
   /* Media never bursts its container at any zoom */
   img, video, svg, canvas, iframe {
     max-width: 100%;
@@ -347,6 +357,58 @@
 }
 @utility shadow-card {
   box-shadow: var(--shadow-card);
+}
+
+/* Graffiti accent — reusable Permanent Marker sticker for badges, callouts, primary CTAs.
+   Safe spacing built in: generous padding clears the slanted strokes, inline-flex
+   centers icons + text, rotation is contained so it doesn't push siblings. */
+@utility graffiti-accent {
+  font-family: var(--font-graffiti);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--color-primary-foreground);
+  background-image: var(--gradient-brand);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  border: 2px solid color-mix(in oklab, white 22%, transparent);
+  box-shadow:
+    var(--shadow-glow),
+    inset 0 1px 0 0 oklch(1 0 0 / 0.18),
+    inset 0 -2px 0 0 oklch(0 0 0 / 0.22);
+  transform: rotate(-1.5deg);
+  transform-origin: center;
+  text-shadow: 0 1px 0 oklch(0 0 0 / 0.35);
+  white-space: nowrap;
+  line-height: 1.15;
+  /* Don't bleed into neighbors when rotated */
+  margin: 0.25rem 0.15rem;
+  transition: transform 180ms cubic-bezier(.34,1.56,.64,1), box-shadow 180ms;
+}
+@utility graffiti-accent-soft {
+  font-family: var(--font-graffiti);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--color-foreground);
+  background: oklch(1 0 0 / 0.06);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  border: 2px dashed color-mix(in oklab, var(--color-primary) 55%, transparent);
+  transform: rotate(-1.5deg);
+  white-space: nowrap;
+  line-height: 1.15;
+  margin: 0.15rem 0.1rem;
+}
+.graffiti-accent:hover,
+button.graffiti-accent:hover {
+  transform: rotate(-1.5deg) scale(1.04);
 }
 
 @utility surface-luxe {
