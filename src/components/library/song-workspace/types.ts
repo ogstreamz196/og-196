@@ -3,7 +3,9 @@ import type { Song } from "@/components/SongCard";
 export type WorkspaceSong = Song & {
   lyrics?: string | null;
   unlocked?: boolean | null;
-  /** Bumped whenever the row changes, including the moment status flips to pending — used to resume the generating timer after a refresh. */
+  /** Stable timestamp for when the current generation began — used to resume the generating timer after a refresh. */
+  generation_started_at?: string | null;
+  /** Bumped whenever the row changes; fallback only when older rows do not have generation_started_at. */
   updated_at?: string | null;
 };
 
