@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import ReactMarkdown from "react-markdown";
 import { Send, Trash2, Sparkles, Skull, ShieldCheck, Paperclip, Mic, MicOff, Crown, X, Loader2 } from "lucide-react";
@@ -557,12 +558,12 @@ export function OgChat({
           <span className="min-w-0 break-words font-semibold">
             You're out of OG coins. Don't sweat — your balance resets to 5 tomorrow.
           </span>
-          <a
-            href="/buy-coins"
+          <Link
+            to="/buy-coins"
             className="shrink-0 rounded-full border border-destructive/40 bg-destructive/10 px-3 py-1 font-bold uppercase tracking-wide hover:bg-destructive/20"
           >
             Top up
-          </a>
+          </Link>
         </div>
       )}
       <form
