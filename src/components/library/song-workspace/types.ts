@@ -6,7 +6,10 @@ export type WorkspaceSong = Song & {
   /** Stable timestamp for when the current generation began — used to resume the generating timer after a refresh. */
   generation_started_at?: string | null;
   /** Bumped whenever the row changes; fallback only when older rows do not have generation_started_at. */
+  /** Bumped whenever the row changes; fallback only when older rows do not have generation_started_at. */
   updated_at?: string | null;
+  /** Suno stream URL surfaced by the "first"/"text" callback — playable while the full sample is still rendering. */
+  stream_audio_url?: string | null;
 };
 
 export type Variation = {
