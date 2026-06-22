@@ -10,8 +10,8 @@
  */
 
 @theme inline {
-  --font-sans: "Hind", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Archivo Black", "Hind", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Fira Sans", "Hind", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "DM Serif Display", "Fira Sans", ui-serif, Georgia, serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
