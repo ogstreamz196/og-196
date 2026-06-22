@@ -484,3 +484,23 @@
   .generating-shimmer,
   .generating-aura { animation: none; }
 }
+
+@keyframes flash-gold {
+  0%, 100% {
+    color: hsl(var(--coin));
+    text-shadow: 0 0 8px hsl(var(--coin) / 0.55), 0 0 18px hsl(var(--coin) / 0.35);
+    transform: scale(1);
+  }
+  50% {
+    color: hsl(var(--coin));
+    text-shadow: 0 0 16px hsl(var(--coin) / 0.95), 0 0 32px hsl(var(--coin) / 0.7);
+    transform: scale(1.08);
+  }
+}
+.flash-gold {
+  animation: flash-gold 1.2s ease-in-out infinite;
+  will-change: transform, text-shadow;
+}
+@media (prefers-reduced-motion: reduce) {
+  .flash-gold { animation: none; }
+}
