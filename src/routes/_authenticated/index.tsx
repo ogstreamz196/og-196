@@ -82,12 +82,12 @@ function DashboardHome() {
         <div aria-hidden className="pointer-events-none absolute -right-10 top-8 h-40 w-40 rounded-full bg-primary/30 blur-2xl animate-[float_6s_ease-in-out_infinite]" />
         <div aria-hidden className="pointer-events-none absolute -left-12 bottom-0 h-32 w-32 rounded-full bg-accent/30 blur-2xl animate-[float_8s_ease-in-out_infinite_reverse]" />
 
-        <div className="relative flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
-          <div className="min-w-0 flex-1 rounded-3xl bg-background/35 p-5 backdrop-blur-md ring-2 ring-white/10 sm:p-7">
+        <div className="relative grid grid-cols-[minmax(0,1fr)_96px] items-start gap-3 sm:flex sm:flex-wrap sm:items-end sm:justify-between sm:gap-4">
+          <div className="min-w-0 rounded-3xl bg-background/35 p-5 backdrop-blur-md ring-2 ring-white/10 sm:flex-1 sm:p-7">
             <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground sm:text-xl">
               👋 Welcome back
             </p>
-            <h1 className="font-display mt-3 text-[clamp(2rem,11vw,6rem)] font-black leading-[1.02] tracking-[-0.02em] text-foreground [text-shadow:0_4px_28px_rgba(0,0,0,0.75)] [overflow-wrap:break-word] [word-break:normal] [hyphens:auto]">
+            <h1 className="font-display mt-3 text-[clamp(1.75rem,9vw,6rem)] font-black leading-[1.02] tracking-[-0.02em] text-foreground [text-shadow:0_4px_28px_rgba(0,0,0,0.75)] [overflow-wrap:break-word] [word-break:normal] [hyphens:auto]">
               Hello,{" "}
               <em className="inline italic text-gradient-brand animate-[wiggle_3s_ease-in-out_infinite] origin-bottom [overflow-wrap:break-word] [word-break:normal]">
                 {displayName}
@@ -97,15 +97,15 @@ function DashboardHome() {
               Jump back into your music workspace or pick up a chat with OG Bot.
             </p>
           </div>
-          <div className="flex shrink-0 items-center gap-2 text-lg">
+          <div className="flex w-full shrink-0 flex-col items-stretch gap-2 sm:w-auto sm:flex-row sm:items-center sm:text-lg">
             {isVip && (
-              <Badge variant="secondary" className="gap-1.5 rounded-full border-2 border-white/20 px-5 py-2.5 text-lg shadow-glow">
-                <Sparkles className="h-6 w-6" /> VIP
+              <Badge variant="secondary" className="justify-center gap-1 rounded-full border-2 border-white/20 px-2 py-1 text-[11px] shadow-glow sm:gap-1.5 sm:px-5 sm:py-2.5 sm:text-lg">
+                <Sparkles className="h-3.5 w-3.5 sm:h-6 sm:w-6" /> VIP
               </Badge>
             )}
-            <Badge variant="outline" className="gap-2 rounded-full border-2 border-white/20 bg-white/5 px-5 py-2.5 text-lg">
-              <Coins className="h-6 w-6 text-primary animate-[bounce_2s_ease-in-out_infinite]" />
-              {balance} coins
+            <Badge variant="outline" className="justify-center gap-1 rounded-full border-2 border-white/20 bg-white/5 px-2 py-1 text-[11px] sm:gap-2 sm:px-5 sm:py-2.5 sm:text-lg">
+              <Coins className="h-3.5 w-3.5 shrink-0 text-primary animate-[bounce_2s_ease-in-out_infinite] sm:h-6 sm:w-6" />
+              <span className="truncate">{balance}</span>
             </Badge>
           </div>
         </div>
