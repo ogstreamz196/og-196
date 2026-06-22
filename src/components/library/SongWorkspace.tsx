@@ -333,8 +333,9 @@ export function SongWorkspace({ song, onSaved }: Props) {
                   )}
                 </div>
                 {genLyrics ? (
-                  <LyricsSkeleton />
+                  <LyricsSkeleton songId={song.id} />
                 ) : (
+
                   <Textarea
                     ref={lyricsRef}
                     id="song-lyrics"
@@ -597,30 +598,54 @@ export function SongWorkspace({ song, onSaved }: Props) {
  * Lyrics skeleton — animated bars that mimic verse/chorus blocks so the
  * textarea area doesn't collapse while the model is writing.
  */
-function LyricsSkeleton() {
+function LyricsSkeleton({ songId }: { songId?: string }) {
   const blocks = [
     { label: "[Verse 1]", lines: 6 },
     { label: "[Chorus]", lines: 4 },
     { label: "[Verse 2]", lines: 6 },
     { label: "[Bridge]", lines: 3 },
   ];
-  const STAGES = [
-    { at: 0, label: "Reading your brief…" },
-    { at: 20, label: "Finding the vibe…" },
-    { at: 40, label: "Writing verses…" },
-    { at: 65, label: "Dropping the hook…" },
-    { at: 85, label: "Polishing bars…" },
-    { at: 95, label: "Almost ready…" },
-  ];
   const [progress, setProgress] = useState(4);
+  const [stageLabel, setStageLabel] = useState("Reading your brief…");
+  const startedAt = useRef<number>(Date.now());
+
+  // Local easing tween so the bar moves smoothly between real backend events.
   useEffect(() => {
     const id = setInterval(() => {
-      // ease toward 95 — real completion will unmount this component
-      setProgress((p) => (p >= 95 ? 95 : p + Math.max(0.4, (95 - p) * 0.04)));
+      setProgress((p) => (p >= 95 ? p : p + Math.max(0.2, (95 - p) * 0.015)));
     }, 250);
     return () => clearInterval(id);
   }, []);
-  const stage = STAGES.slice().reverse().find((s) => progress >= s.at) ?? STAGES[0];
+
+  // Realtime: snap to actual backend progress on every songs row update.
+  useEffect(() => {
+    if (!songId) return;
+    const channel = supabase
+      .channel(`lyrics-progress:${songId}:${Math.random().toString(36).slice(2, 8)}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "songs", filter: `id=eq.${songId}` },
+        (payload) => {
+          const row = payload.new as { lyrics_progress?: number | null; lyrics_stage?: string | null };
+          if (typeof row.lyrics_progress === "number") setProgress((p) => Math.max(p, row.lyrics_progress!));
+          if (typeof row.lyrics_stage === "string" && row.lyrics_stage) setStageLabel(row.lyrics_stage);
+        },
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [songId]);
+
+  // ETA = linear extrapolation from elapsed wall-clock against real progress.
+  const elapsedS = (Date.now() - startedAt.current) / 1000;
+  const etaSeconds = progress > 5 && progress < 99
+    ? Math.max(1, Math.round((elapsedS / progress) * (100 - progress)))
+    : null;
+  const etaLabel = etaSeconds == null
+    ? "Almost there…"
+    : etaSeconds >= 60
+      ? `~${Math.floor(etaSeconds / 60)}m ${String(etaSeconds % 60).padStart(2, "0")}s left`
+      : `~${etaSeconds}s left`;
+
   return (
     <div
       role="status"
@@ -638,10 +663,13 @@ function LyricsSkeleton() {
           />
         </div>
         <div className="flex flex-1 flex-col gap-1.5">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <span className="text-sm font-bold text-primary">OG Bot is cooking…</span>
-            <span className="font-mono text-xs font-semibold tabular-nums text-primary">
-              {Math.round(progress)}%
+            <span className="flex items-center gap-2 font-mono text-xs font-semibold tabular-nums text-primary">
+              <span>{Math.round(progress)}%</span>
+              <span className="rounded-full border border-primary/30 bg-background/60 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                {etaLabel}
+              </span>
             </span>
           </div>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
@@ -651,7 +679,7 @@ function LyricsSkeleton() {
             />
           </div>
           <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
-            {stage.label}
+            {stageLabel}
             <span className="inline-flex gap-0.5">
               <span className="h-1 w-1 animate-bounce rounded-full bg-primary [animation-delay:0ms]" />
               <span className="h-1 w-1 animate-bounce rounded-full bg-primary [animation-delay:150ms]" />
@@ -660,6 +688,7 @@ function LyricsSkeleton() {
           </span>
         </div>
       </div>
+
 
 
       {blocks.map((b, bi) => (

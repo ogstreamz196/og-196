@@ -43,6 +43,25 @@ Deno.serve(async (req) => {
     const admin = adminClient();
     const coinCost = await getSetting(admin, "coins_per_lyrics_generation", 1);
 
+    // Helper to broadcast live progress via the songs row (Realtime).
+    const updateProgress = async (progress: number, stage: string) => {
+      if (!songId) return;
+      try {
+        await admin.from("songs").update({
+          lyrics_progress: progress,
+          lyrics_stage: stage,
+        }).eq("id", songId).eq("user_id", user.id);
+      } catch (_) { /* progress is best-effort */ }
+    };
+
+    if (songId) {
+      await admin.from("songs").update({
+        lyrics_progress: 5,
+        lyrics_stage: "Reading your brief…",
+        lyrics_started_at: new Date().toISOString(),
+      }).eq("id", songId).eq("user_id", user.id);
+    }
+
     const reference = songId ?? `lyrics:${crypto.randomUUID()}`;
     const { data: balance, error: deductErr } = await admin.rpc("deduct_coins", {
       p_user: user.id,
@@ -50,8 +69,11 @@ Deno.serve(async (req) => {
       p_reference: reference,
     });
     if (deductErr) {
+      await updateProgress(0, "");
       return jsonResponse({ error: "Insufficient coins", code: "insufficient_coins" }, 402);
     }
+    await updateProgress(20, "Finding the vibe…");
+
 
     // Per-request override wins; otherwise fall back to the user's saved preference.
     let foulMouth: boolean;
@@ -115,6 +137,8 @@ Deno.serve(async (req) => {
     const url =
       `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent?key=${GEMINI_API_KEY}`;
 
+    await updateProgress(40, "Writing verses…");
+
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -132,12 +156,15 @@ Deno.serve(async (req) => {
       });
       const { data: prof } = await admin.from("profiles").select("coin_balance").eq("id", user.id).single();
       await admin.from("profiles").update({ coin_balance: ((prof as { coin_balance?: number } | null)?.coin_balance ?? 0) + coinCost }).eq("id", user.id);
+      await updateProgress(0, "");
 
       if (res.status === 429) return jsonResponse({ error: "Gemini rate limit, try again shortly" }, 429);
       const txt = await res.text();
       console.error("Gemini API error", res.status, txt);
       return jsonResponse({ error: "Lyrics generation failed", detail: txt.slice(0, 500) }, 502);
     }
+
+    await updateProgress(80, "Polishing bars…");
 
     const data = await res.json();
     const lyrics =
@@ -147,8 +174,13 @@ Deno.serve(async (req) => {
         .trim() ?? "";
 
     if (songId) {
-      await admin.from("songs").update({ lyrics }).eq("id", songId).eq("user_id", user.id);
+      await admin.from("songs").update({
+        lyrics,
+        lyrics_progress: 100,
+        lyrics_stage: "Ready",
+      }).eq("id", songId).eq("user_id", user.id);
     }
+
 
     return jsonResponse({ lyrics, coin_balance: balance, coin_cost: coinCost });
   } catch (e) {
