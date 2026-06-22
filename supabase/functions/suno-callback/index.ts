@@ -26,6 +26,10 @@ const AUDIO_HOST_ALLOWLIST = [
   "audiopipe.suno.ai",
   "mfile.erweima.ai",
   "sunoapi.org",
+  "tempfile.aiquickdraw.com",
+  "aiquickdraw.com",
+  "musicfile.removeai.ai",
+  "removeai.ai",
 ];
 
 function hostAllowed(u: string): boolean {
