@@ -17,11 +17,13 @@ export interface CoinPack {
 
 export const CURRENCY_SYMBOL = "£";
 
+// NOTE: Coins per pack are currently DOUBLED as a promo. The UI shows the
+// pre-promo amount (coins / 2) crossed out next to the doubled amount.
 export const COIN_PACKS: readonly CoinPack[] = [
   {
     bundleId: "coins_25",
     priceId: "coins_25_gbp",
-    coins: 25,
+    coins: 50,
     priceCents: 499,
     currency: "gbp",
     label: "Mini",
@@ -30,7 +32,7 @@ export const COIN_PACKS: readonly CoinPack[] = [
   {
     bundleId: "coins_50",
     priceId: "coins_50_gbp",
-    coins: 50,
+    coins: 100,
     priceCents: 999,
     currency: "gbp",
     label: "Starter",
@@ -39,7 +41,7 @@ export const COIN_PACKS: readonly CoinPack[] = [
   {
     bundleId: "coins_120",
     priceId: "coins_120_gbp",
-    coins: 120,
+    coins: 240,
     priceCents: 1999,
     currency: "gbp",
     label: "Power",
@@ -49,7 +51,7 @@ export const COIN_PACKS: readonly CoinPack[] = [
   {
     bundleId: "coins_300",
     priceId: "coins_300_gbp",
-    coins: 300,
+    coins: 600,
     priceCents: 3999,
     currency: "gbp",
     label: "Pro",
