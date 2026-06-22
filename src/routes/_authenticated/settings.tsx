@@ -34,7 +34,7 @@ function SettingsPage() {
   const [adjust, setAdjust] = useState("");
 
   useEffect(() => {
-    if (profile && !nameDirty) setName(dev.isDev ? "Developer" : (profile.display_name ?? ""));
+    if (profile && !nameDirty) setName(profile.display_name ?? (dev.isDev ? "Developer" : ""));
   }, [profile?.display_name, nameDirty, dev.isDev]);
   useEffect(() => {
     if (profile && !balanceDirty) setBalance(String(profile.coin_balance ?? 0));
