@@ -651,13 +651,16 @@ function LibraryPage() {
                 Write lyrics
               </h3>
             </div>
-            <div className="space-y-2">
-              <div>
-                <Label htmlFor="personal-details" className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Personal details <span className="font-normal normal-case">(optional)</span>
+            <div className="space-y-3">
+              <div className="relative rounded-2xl border-2 border-primary/40 bg-primary/[0.06] p-3 shadow-glow">
+                <div className="absolute -top-2.5 left-3 inline-flex items-center gap-1 rounded-full bg-gradient-brand px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow">
+                  <Sparkles className="h-3 w-3" /> Recommended — best results
+                </div>
+                <Label htmlFor="personal-details" className="block text-sm font-bold text-foreground">
+                  Tell us about them
                 </Label>
-                <p className="mt-1 text-[11px] text-muted-foreground">
-                  Add your own personal touch — hit Surprise me, tap an example, or build your own with the chips.
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  The more personal you get, the better the lyrics. Hit Surprise me, tap an example, or build it with the chips below.
                 </p>
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {(() => {
@@ -752,11 +755,15 @@ function LibraryPage() {
                   id="personal-details"
                   value={personalDetails}
                   onChange={(e) => setPersonalDetails(e.target.value)}
-                  placeholder="Their name: Aaliyah&#10;Occasion: 30th birthday&#10;Inside joke: the karaoke night we don't talk about"
+                  placeholder="✍️ Type here — Their name, occasion, inside jokes, anything personal…&#10;&#10;e.g.&#10;Their name: Aaliyah&#10;Occasion: 30th birthday&#10;Inside joke: the karaoke night we don't talk about"
                   maxLength={500}
-                  rows={4}
-                  className="mt-2 resize-none rounded-xl border-white/10 bg-background/40 text-sm"
+                  rows={5}
+                  className="mt-2 resize-none rounded-xl border-primary/30 bg-background/60 text-sm placeholder:text-muted-foreground/70 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/40"
                 />
+                <div className="mt-1 flex items-center justify-between text-[10px] text-muted-foreground">
+                  <span>{personalDetails.length === 0 ? "👆 Type here to make it personal" : "Looking good — keep going"}</span>
+                  <span>{personalDetails.length}/500</span>
+                </div>
               </div>
 
               <div>
