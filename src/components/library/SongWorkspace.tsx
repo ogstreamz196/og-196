@@ -10,8 +10,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSettings } from "@/hooks/use-settings";
+import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
+
 import { useProfile } from "@/hooks/use-profile";
 import { useVariations } from "@/hooks/use-variations";
 import { invokeError } from "@/lib/invoke-error";
@@ -35,6 +38,9 @@ interface Props {
 export function SongWorkspace({ song, onSaved }: Props) {
   const { data: settings } = useSettings();
   const { data: profile } = useProfile();
+  const { foulMouth } = useFoulMouth();
+  const setFoulMouth = useSetFoulMouth();
+
   const lyricsCost = settings?.coins_per_lyrics_generation ?? 1;
   const previewCost = settings?.coins_per_generation ?? 3;
   const fullUnlockCost = settings?.coins_per_full_unlock ?? 5;
@@ -327,11 +333,26 @@ export function SongWorkspace({ song, onSaved }: Props) {
               </div>
 
 
-              <div className="flex flex-wrap items-center justify-end gap-2">
+              <div className="flex flex-wrap items-center justify-end gap-3">
                 {dirty && <span className="mr-auto text-xs text-muted-foreground">Unsaved changes</span>}
+                <label
+                  htmlFor="foul-mouth-toggle"
+                  className="flex items-center gap-2 rounded-md border border-border/60 bg-muted/30 px-3 py-1.5 text-xs font-medium"
+                  title="Allow explicit language in generated lyrics"
+                >
+                  <span aria-hidden>🤬</span>
+                  <span>Foul mouth</span>
+                  <Switch
+                    id="foul-mouth-toggle"
+                    checked={foulMouth}
+                    onCheckedChange={(v) => setFoulMouth.mutate(v)}
+                    disabled={setFoulMouth.isPending}
+                  />
+                </label>
                 <Button variant="ghost" onClick={handleSave} disabled={!dirty || saving}>
                   {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save draft"}
                 </Button>
+
                 <Button onClick={generateLyrics} disabled={genLyrics} className="gap-2">
                   {genLyrics ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
                   {hasLyrics ? "Regenerate lyrics" : "Generate lyrics"}
