@@ -10,8 +10,9 @@
  */
 
 @theme inline {
-  --font-sans: "Fira Sans", "Hind", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "DM Serif Display", "Fira Sans", ui-serif, Georgia, serif;
+  --font-sans: "Fredoka", ui-rounded, ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Bagel Fat One", "Fredoka", ui-rounded, system-ui, sans-serif;
+  --font-graffiti: "Permanent Marker", "Bagel Fat One", system-ui, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -210,25 +211,32 @@
   html[data-density="spacious"]    { --density-scale: 1.15; --line-height-body: 1.85; }
   html[data-density] body { line-height: var(--line-height-body); }
 
-  /* Responsive typography scale — never overlaps on small screens */
+  /* Responsive typography scale — bubble/cartoon display face needs open tracking, not negative. */
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
-    letter-spacing: -0.015em;
-    font-weight: 400; /* DM Serif Display is single-weight */
+    letter-spacing: 0.005em;
+    font-weight: 400; /* Bagel Fat One is single-weight */
     text-transform: none;
   }
-  h1 { font-size: clamp(2rem, 3vw + 1rem, 3.75rem); line-height: 1.05; letter-spacing: -0.025em; }
-  h2 { font-size: clamp(1.55rem, 1.8vw + 0.95rem, 2.625rem); line-height: 1.1; letter-spacing: -0.02em; }
-  h3 { font-size: clamp(1.2rem, 1.05vw + 0.85rem, 1.75rem); line-height: 1.18; letter-spacing: -0.015em; }
-  h4 { font-size: clamp(1.05rem, 0.65vw + 0.85rem, 1.3rem); line-height: 1.25; letter-spacing: -0.01em; }
+  h1 { font-size: clamp(2rem, 3vw + 1rem, 3.75rem); line-height: 1; }
+  h2 { font-size: clamp(1.55rem, 1.8vw + 0.95rem, 2.625rem); line-height: 1.05; }
+  h3 { font-size: clamp(1.2rem, 1.05vw + 0.85rem, 1.75rem); line-height: 1.12; }
+  h4 { font-size: clamp(1.05rem, 0.65vw + 0.85rem, 1.3rem); line-height: 1.2; }
   p  { line-height: var(--line-height-body, 1.7); }
   .prose p + p { margin-top: 0.75em; }
 
   .font-display {
     font-family: var(--font-display);
     font-optical-sizing: auto;
-    letter-spacing: -0.015em;
+    letter-spacing: 0.005em;
     text-transform: none;
+  }
+  .font-graffiti {
+    font-family: var(--font-graffiti);
+    letter-spacing: 0.01em;
+    text-transform: none;
+    transform: rotate(-1.5deg);
+    display: inline-block;
   }
   /* Sitewide brand wallpaper, fixed and full-bleed */
   body::before {
