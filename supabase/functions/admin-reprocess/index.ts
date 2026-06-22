@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
     const s = song as Record<string, unknown>;
 
     await admin.from("songs").update({
-      status: "processing", error_message: null, audio_path: null, completed_at: null,
+      status: "processing", generation_started_at: new Date().toISOString(), error_message: null, audio_path: null, completed_at: null,
     }).eq("id", song_id);
 
     const callbackUrl = `${SUPABASE_URL}/functions/v1/suno-callback?song_id=${s.id}`;
