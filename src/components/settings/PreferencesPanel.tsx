@@ -20,9 +20,17 @@ export function PreferencesPanel() {
   const { foulMouth, isLoading } = useFoulMouth();
   const setFoulMouth = useSetFoulMouth();
   const { mode, setMode } = useOgMode();
-  const { prefs, update } = useAppPreferences();
+  const { prefs, update: rawUpdate } = useAppPreferences();
+  const update = <K extends keyof AppPreferences>(key: K, value: AppPreferences[K]) => {
+    rawUpdate(key, value);
+    toast.success("Settings saved", { id: "settings-saved" });
+  };
   const display = useDisplayPrefs();
   const setDisplay = useSetDisplayPrefs();
+  const changeMode = (v: "og" | "safe") => {
+    setMode(v);
+    toast.success("Settings saved", { id: "settings-saved" });
+  };
 
   const SCALE_STEP = 0.05;
   const scalePct = Math.round(display.textScale * 100);
