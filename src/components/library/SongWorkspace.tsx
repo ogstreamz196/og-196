@@ -1059,12 +1059,12 @@ function InlineSamplePlayer({ songId }: { songId: string }) {
 /**
  * Suno-style live stream preview. Plays the in-progress generation directly
  * from Suno's stream URL while the full sample keeps cooking in the background.
- * Hard-cuts at `limitSeconds` (default 20s) and shows a "keep cooking" blocker
+ * Hard-cuts at `limitSeconds` (default 35s) and shows a "keep cooking" blocker
  * so users get instant feedback without being able to scrub past the preview.
  */
 function LiveStreamPreview({
   streamUrl,
-  limitSeconds = 20,
+  limitSeconds = 35,
 }: {
   streamUrl: string;
   limitSeconds?: number;
