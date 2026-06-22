@@ -54,6 +54,8 @@ export function SongWorkspace({ song, onSaved }: Props) {
   const [genLyrics, setGenLyrics] = useState(false);
   const [genPreview, setGenPreview] = useState(false);
   const [unlocking, setUnlocking] = useState(false);
+  const lyricsRef = useRef<HTMLTextAreaElement | null>(null);
+
 
   const {
     variations, basket, busyVariation, checkingOut, variationCost,
@@ -167,8 +169,19 @@ export function SongWorkspace({ song, onSaved }: Props) {
       const next = (data?.lyrics ?? "").toString();
       if (!next) { toast.error("No lyrics returned"); return; }
       setLyrics(next);
-      toast.success(`Lyrics ready · -${data?.coin_cost ?? lyricsCost} coins`);
+      toast.success(`Lyrics ready · -${data?.coin_cost ?? lyricsCost} coins`, {
+        description: "Scroll down to review your new lyrics.",
+      });
+      // Scroll into view + focus the editor so the user immediately sees the result
+      requestAnimationFrame(() => {
+        const el = lyricsRef.current;
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+          el.focus({ preventScroll: true });
+        }
+      });
       onSaved?.();
+
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Lyrics generation failed");
     } finally {
@@ -323,6 +336,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
                   <LyricsSkeleton />
                 ) : (
                   <Textarea
+                    ref={lyricsRef}
                     id="song-lyrics"
                     value={lyrics}
                     onChange={(e) => setLyrics(e.target.value)}
@@ -330,6 +344,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
                     placeholder={"Tap Generate lyrics below — or paste your own.\n\n[Verse 1]\n…\n[Chorus]\n…"}
                     className="font-mono text-sm"
                   />
+
                 )}
               </div>
 
@@ -832,10 +847,15 @@ function GeneratingProgress({
 
       <div className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
-          <span className="relative grid h-11 w-11 shrink-0 place-items-center rounded-full bg-primary/20 ring-1 ring-primary/40">
-            <span className="absolute inset-0 rounded-full bg-primary/40 blur-lg animate-pulse" />
-            <Loader2 className="relative h-5 w-5 animate-spin text-primary" aria-hidden="true" />
+          <span className="relative grid h-12 w-12 shrink-0 place-items-center">
+            <span className="absolute inset-0 animate-ping rounded-full bg-primary/40" />
+            <img
+              src={ogBotAsset.url}
+              alt=""
+              className="relative h-12 w-12 rounded-full ring-2 ring-primary/60 shadow-[0_0_24px_-4px_hsl(var(--primary)/0.9)] animate-bounce"
+            />
           </span>
+
           <div className="min-w-0">
             <p className="truncate text-[15px] font-bold tracking-tight text-foreground">
               Cooking your {sampleSeconds}s preview
