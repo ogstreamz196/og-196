@@ -137,6 +137,9 @@ export function useSetDisplayPrefs() {
         applyToDocument(ctx.prev);
       }
     },
+    onSuccess: () => {
+      toast.success("Settings saved", { id: "settings-saved" });
+    },
     onSettled: () => {
       qc.invalidateQueries({ queryKey: displayPrefsKey(uid) });
     },
