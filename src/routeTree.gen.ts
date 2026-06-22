@@ -24,6 +24,7 @@ import { Route as AuthenticatedDeveloperRouteImport } from './routes/_authentica
 import { Route as AuthenticatedLibraryIndexRouteImport } from './routes/_authenticated/library.index'
 import { Route as AuthenticatedBuyCoinsIndexRouteImport } from './routes/_authenticated/buy-coins.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
+import { Route as ApiPublicSunoPingRouteImport } from './routes/api/public/suno-ping'
 import { Route as AuthenticatedLibrarySongIdRouteImport } from './routes/_authenticated/library.$songId'
 import { Route as AuthenticatedBuyCoinsReturnRouteImport } from './routes/_authenticated/buy-coins.return'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
@@ -110,6 +111,11 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicSunoPingRoute = ApiPublicSunoPingRouteImport.update({
+  id: '/api/public/suno-ping',
+  path: '/api/public/suno-ping',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedLibrarySongIdRoute =
   AuthenticatedLibrarySongIdRouteImport.update({
     id: '/library/$songId',
@@ -182,6 +188,7 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
   '/library/$songId': typeof AuthenticatedLibrarySongIdRoute
+  '/api/public/suno-ping': typeof ApiPublicSunoPingRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/buy-coins/': typeof AuthenticatedBuyCoinsIndexRoute
   '/library/': typeof AuthenticatedLibraryIndexRoute
@@ -207,6 +214,7 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
   '/library/$songId': typeof AuthenticatedLibrarySongIdRoute
+  '/api/public/suno-ping': typeof ApiPublicSunoPingRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/buy-coins': typeof AuthenticatedBuyCoinsIndexRoute
   '/library': typeof AuthenticatedLibraryIndexRoute
@@ -234,6 +242,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/_authenticated/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
   '/_authenticated/library/$songId': typeof AuthenticatedLibrarySongIdRoute
+  '/api/public/suno-ping': typeof ApiPublicSunoPingRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/buy-coins/': typeof AuthenticatedBuyCoinsIndexRoute
   '/_authenticated/library/': typeof AuthenticatedLibraryIndexRoute
@@ -261,6 +270,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/buy-coins/return'
     | '/library/$songId'
+    | '/api/public/suno-ping'
     | '/admin/'
     | '/buy-coins/'
     | '/library/'
@@ -286,6 +296,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/buy-coins/return'
     | '/library/$songId'
+    | '/api/public/suno-ping'
     | '/admin'
     | '/buy-coins'
     | '/library'
@@ -312,6 +323,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/users'
     | '/_authenticated/buy-coins/return'
     | '/_authenticated/library/$songId'
+    | '/api/public/suno-ping'
     | '/_authenticated/admin/'
     | '/_authenticated/buy-coins/'
     | '/_authenticated/library/'
@@ -327,6 +339,7 @@ export interface RootRouteChildren {
   WelcomeRoute: typeof WelcomeRoute
   PortalSlugRoute: typeof PortalSlugRoute
   RCodeRoute: typeof RCodeRoute
+  ApiPublicSunoPingRoute: typeof ApiPublicSunoPingRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   ApiPublicTelegramWebhookRoute: typeof ApiPublicTelegramWebhookRoute
 }
@@ -437,6 +450,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/public/suno-ping': {
+      id: '/api/public/suno-ping'
+      path: '/api/public/suno-ping'
+      fullPath: '/api/public/suno-ping'
+      preLoaderRoute: typeof ApiPublicSunoPingRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/library/$songId': {
       id: '/_authenticated/library/$songId'
@@ -564,6 +584,7 @@ const rootRouteChildren: RootRouteChildren = {
   WelcomeRoute: WelcomeRoute,
   PortalSlugRoute: PortalSlugRoute,
   RCodeRoute: RCodeRoute,
+  ApiPublicSunoPingRoute: ApiPublicSunoPingRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   ApiPublicTelegramWebhookRoute: ApiPublicTelegramWebhookRoute,
 }
