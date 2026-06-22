@@ -230,9 +230,9 @@ function PrimaryCard({
       <div className="pointer-events-none absolute -right-10 -top-10 h-56 w-56 rounded-full bg-primary/10 blur-3xl transition-transform duration-700 group-hover:scale-110" />
       <div className="pointer-events-none absolute right-4 top-6 opacity-[0.07] transition-all duration-700 group-hover:rotate-12 group-hover:opacity-[0.14] sm:right-8 sm:top-10">
         {isAccent ? (
-          <Bot className="h-48 w-48 sm:h-64 sm:w-64" strokeWidth={1.25} />
+          <Bot className="h-28 w-28 sm:h-64 sm:w-64" strokeWidth={1.25} />
         ) : (
-          <Disc3 className="h-48 w-48 animate-[spin_18s_linear_infinite] sm:h-64 sm:w-64" strokeWidth={1.25} />
+          <Disc3 className="h-28 w-28 animate-[spin_18s_linear_infinite] sm:h-64 sm:w-64" strokeWidth={1.25} />
         )}
       </div>
       {/* Equalizer bars bottom-right accent */}
