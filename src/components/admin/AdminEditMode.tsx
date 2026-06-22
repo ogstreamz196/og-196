@@ -211,11 +211,11 @@ export function AdminEditableBalance({ userId, value, className, showIcon = true
           }}
           className="h-7 w-24 text-sm"
         />
-        <Button size="icon" variant="ghost" className="h-7 w-7"
+        <Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Save"
           disabled={mut.isPending} onClick={() => mut.mutate()}>
           {mut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
         </Button>
-        <Button size="icon" variant="ghost" className="h-7 w-7"
+        <Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Cancel"
           onClick={() => { setDraft(String(value)); setEditing(false); }}>
           <X className="h-3.5 w-3.5" />
         </Button>
