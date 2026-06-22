@@ -121,7 +121,7 @@ export function InstallAppPrompt() {
           <div className="flex flex-col items-center text-center">
             <img
               src={ogLogo}
-              alt=""
+              alt="OG Streamz"
               className="h-16 w-16 rounded-2xl border border-border/60 object-cover shadow-card"
             />
             <h2 className="mt-4 font-display text-2xl leading-tight">Install OG on your iPhone</h2>
