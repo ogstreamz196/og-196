@@ -564,6 +564,9 @@ function LyricsSkeleton() {
       ))}
     </div>
   );
+}
+
+
 
 
 function CostBadge({ cost }: { cost: number }) {
