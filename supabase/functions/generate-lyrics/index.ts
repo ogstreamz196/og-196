@@ -80,29 +80,29 @@ Deno.serve(async (req) => {
     const isRock = /(rock|metal|punk|indie|alt)/.test(tagsLower);
 
     const structure = isRap
-      ? "[Intro] (4 lines) → [Verse 1] (16 bars) → [Hook] (8 bars, catchy repeatable) → [Verse 2] (16 bars) → [Hook] → [Bridge] (8 bars) → [Hook] → [Outro] (4 lines, ad-libs ok)"
+      ? "[Intro] (4 lines) → [Verse 1] (16 bars) → [Hook] (8 bars, catchy repeatable) → [Verse 2] (16 bars) → [Hook] → [Bridge] (8 bars) → [Verse 3] (12 bars) → [Hook] (x2) → [Outro] (4 lines, ad-libs ok)"
       : isBallad
-      ? "[Intro] (2-4 lines, scene-setting) → [Verse 1] (8 lines) → [Chorus] (4-6 lines, memorable hook) → [Verse 2] (8 lines) → [Chorus] → [Bridge] (4-6 lines, emotional turn) → [Final Chorus] (lifted, optional key change cue in parentheses) → [Outro] (2-4 lines)"
+      ? "[Intro] (4 lines, scene-setting) → [Verse 1] (8 lines) → [Chorus] (6 lines, memorable hook) → [Verse 2] (8 lines) → [Chorus] (6 lines) → [Bridge] (6 lines, emotional turn) → [Final Chorus] (8 lines, lifted, optional key change cue in parentheses) → [Outro] (4 lines)"
       : isDance
-      ? "[Intro] (2 lines, vibe-setter) → [Verse 1] (8 lines) → [Pre-Chorus] (4 lines, build-up) → [Chorus] (4-6 lines, anthemic hook) → [Verse 2] (8 lines) → [Pre-Chorus] → [Chorus] → [Drop] (2-4 lines or 'instrumental drop' note) → [Bridge] (4 lines) → [Chorus] (x2) → [Outro] (2 lines)"
+      ? "[Intro] (4 lines, vibe-setter) → [Verse 1] (8 lines) → [Pre-Chorus] (4 lines, build-up) → [Chorus] (6 lines, anthemic hook) → [Verse 2] (8 lines) → [Pre-Chorus] (4 lines) → [Chorus] (6 lines) → [Drop] (4 lines) → [Bridge] (6 lines) → [Chorus] (x2, 12 lines) → [Outro] (4 lines)"
       : isRock
-      ? "[Intro] (2 lines) → [Verse 1] (8 lines) → [Chorus] (4-6 lines) → [Verse 2] (8 lines) → [Chorus] → [Bridge / Guitar Solo cue] (4 lines) → [Chorus] (x2) → [Outro] (2-4 lines)"
-      : "[Intro] (2-4 lines) → [Verse 1] (8 lines) → [Pre-Chorus] (2-4 lines) → [Chorus] (4-6 lines, hook) → [Verse 2] (8 lines) → [Pre-Chorus] → [Chorus] → [Bridge] (4-6 lines) → [Chorus] (final, lifted) → [Outro] (2-4 lines)";
+      ? "[Intro] (4 lines) → [Verse 1] (8 lines) → [Chorus] (6 lines) → [Verse 2] (8 lines) → [Chorus] (6 lines) → [Bridge / Guitar Solo cue] (6 lines) → [Verse 3] (6 lines) → [Chorus] (x2, 12 lines) → [Outro] (4 lines)"
+      : "[Intro] (4 lines) → [Verse 1] (8 lines) → [Pre-Chorus] (4 lines) → [Chorus] (6 lines, hook) → [Verse 2] (8 lines) → [Pre-Chorus] (4 lines) → [Chorus] (6 lines) → [Bridge] (6 lines) → [Verse 3] (6 lines) → [Chorus] (final, lifted, 8 lines) → [Outro] (4 lines)";
 
     const structureRule =
-      ` Deliver a COMPLETE, performable song that follows this exact structure for the chosen style: ${structure}.` +
+      ` Deliver a COMPLETE, performable song sized to fill a TWO-MINUTE track (roughly 380–520 words, ~55–75 lines of lyric content excluding section markers). Follow this exact structure for the chosen style: ${structure}.` +
       ` Use the bracketed section markers verbatim (e.g. [Verse 1], [Chorus], [Bridge], [Outro]). Every section must have lyrics — no placeholders, no "(instrumental)" unless the structure explicitly says so.` +
-      ` Make the chorus/hook genuinely repeatable and tied to the song title or central theme.`;
+      ` Make the chorus/hook genuinely repeatable and tied to the song title or central theme. Do NOT cut the song short — hit the full structure.`;
 
     const systemPrompt = foulMouth
       ? `You are a foul-mouthed, no-holds-barred songwriter writing EXPLICIT adult song lyrics in ${language}. ` +
         `Lean ALL the way into raw, gritty, street-level language: drop "fuck", "fucking", "shit", "dickhead", "bastard", "bitch", "asshole" and similar profanity liberally throughout EVERY verse and chorus — at least a few per section. Use unfiltered attitude, savage punchlines, and trash-talk energy from the very first line. Make it sound like a parental-advisory hip-hop / punk track, NOT a radio edit. ` +
         `Do NOT self-censor, do NOT use asterisks or bleeps, and do NOT add disclaimers. Avoid slurs, sexual content involving minors, and direct incitement to real-world violence — everything else is fair game.` +
         structureRule + bilingualRule +
-        ` Target 280–450 words. Output ONLY the lyrics, no explanations.`
+        ` Target 400–520 words. Output ONLY the lyrics, no explanations.`
       : `You are a professional songwriter. Write original song lyrics in ${language}.` +
         structureRule + bilingualRule +
-        ` Target 250–400 words. Output ONLY the lyrics, no explanations.`;
+        ` Target 380–500 words. Output ONLY the lyrics, no explanations.`;
     const userPrompt =
       `Song title: ${songName || "(untitled)"}\n` +
       `Theme / description: ${description || "(none)"}\n` +
@@ -110,7 +110,7 @@ Deno.serve(async (req) => {
       `Language: ${language}\n` +
       (personalDetails ? `Personal details to weave in naturally (names, places, references): ${personalDetails}\n` : "") +
       (extraContext ? `Extra context from the artist: ${extraContext}\n` : "") +
-      `\nWrite the lyrics now.`;
+      `\nWrite the FULL two-minute song now — do not stop early.`;
 
     const url =
       `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent?key=${GEMINI_API_KEY}`;
@@ -121,7 +121,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         systemInstruction: { role: "system", parts: [{ text: systemPrompt }] },
         contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-        generationConfig: { temperature: 0.9, maxOutputTokens: 2400 },
+        generationConfig: { temperature: 0.9, maxOutputTokens: 4096 },
       }),
     });
 
