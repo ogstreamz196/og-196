@@ -705,6 +705,10 @@ export type Database = {
       }
       purchase_vip: { Args: never; Returns: number }
       redeem_og_bot_invite: { Args: { p_code: string }; Returns: string }
+      refund_generation_charge: {
+        Args: { p_amount: number; p_reference: string; p_user: string }
+        Returns: number
+      }
       regenerate_og_bot_token: {
         Args: { target_user_id: string }
         Returns: string

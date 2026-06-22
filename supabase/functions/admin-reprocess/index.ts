@@ -3,8 +3,16 @@ import { handlePreflight, jsonResponse } from "../_shared/cors.ts";
 import { requireAdmin } from "../_shared/admin-guard.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const SUNO_API_KEY = Deno.env.get("SUNO_API_KEY")!;
 const SUNO_API_URL = "https://apibox.erweima.ai/api/v1/generate";
+
+async function callbackToken(songId: string): Promise<string> {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey("raw", enc.encode(SERVICE_ROLE), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const buf = await crypto.subtle.sign("HMAC", key, enc.encode(songId));
+  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
 
 Deno.serve(async (req) => {
   const pre = handlePreflight(req);
@@ -22,20 +30,20 @@ Deno.serve(async (req) => {
     const s = song as Record<string, unknown>;
 
     await admin.from("songs").update({
-      status: "processing", generation_started_at: new Date().toISOString(), error_message: null, audio_path: null, completed_at: null,
+      status: "processing", generation_started_at: new Date().toISOString(), error_message: null, audio_path: null, sample_path: null, stream_audio_url: null, completed_at: null,
     }).eq("id", song_id);
 
-    const callbackUrl = `${SUPABASE_URL}/functions/v1/suno-callback?song_id=${s.id}`;
+    const callbackUrl = `${SUPABASE_URL}/functions/v1/suno-callback?song_id=${s.id}&token=${await callbackToken(String(s.id))}`;
     const sunoRes = await fetch(SUNO_API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${SUNO_API_KEY}` },
       body: JSON.stringify({
         prompt: s.lyrics || s.prompt,
         style: s.style || undefined,
-        title: s.title || undefined,
+        title: (s.title as string | undefined) || "Untitled track",
         customMode: !!(s.style || s.lyrics || s.title),
         instrumental: false,
-        model: "V4",
+        model: "V4_5ALL",
         callBackUrl: callbackUrl,
       }),
     });

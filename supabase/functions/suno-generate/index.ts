@@ -11,6 +11,9 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const SUNO_API_KEY = Deno.env.get("SUNO_API_KEY")!;
 const SUNO_API_URL = "https://apibox.erweima.ai/api/v1/generate";
+const MAX_PROMPT_CHARS = 4_800;
+const MAX_STYLE_CHARS = 900;
+const MAX_TITLE_CHARS = 80;
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -22,6 +25,11 @@ async function getSetting(admin: any, key: string, fallback: number): Promise<nu
   const { data } = await admin.from("app_settings").select("value").eq("key", key).maybeSingle();
   const v = data?.value;
   return typeof v === "number" ? v : fallback;
+}
+
+function limitText(value: string | null, max: number): string | null {
+  if (!value) return value;
+  return value.length > max ? value.slice(0, max).trimEnd() : value;
 }
 
 Deno.serve(async (req) => {
@@ -40,9 +48,9 @@ Deno.serve(async (req) => {
 
     const body = await req.json();
     const prompt = (body.prompt ?? "").toString().trim();
-    const style = (body.style ?? "").toString().trim() || null;
-    const lyrics = (body.lyrics ?? "").toString().trim() || null;
-    const title = (body.title ?? "").toString().trim() || null;
+    const style = limitText((body.style ?? "").toString().trim() || null, MAX_STYLE_CHARS);
+    const lyrics = limitText((body.lyrics ?? "").toString().trim() || null, MAX_PROMPT_CHARS);
+    const title = limitText((body.title ?? "").toString().trim() || null, MAX_TITLE_CHARS);
     const instrumental = !!body.instrumental;
     const portalId = body.portal_id ? String(body.portal_id) : null;
     const existingSongId = body.song_id ? String(body.song_id) : null;
@@ -95,6 +103,7 @@ Deno.serve(async (req) => {
           portal_id: portalId,
           audio_path: null,
           sample_path: null,
+          stream_audio_url: null,
           error_message: null,
         })
         .eq("id", existingSongId)
@@ -132,6 +141,8 @@ Deno.serve(async (req) => {
     const token = Array.from(new Uint8Array(sigBuf)).map((b) => b.toString(16).padStart(2, "0")).join("");
     const callbackUrl = `${SUPABASE_URL}/functions/v1/suno-callback?song_id=${songId}&token=${token}`;
 
+    const customMode = !!(style || effectiveLyrics || title);
+    const sunoTitle = limitText(title || "Untitled track", MAX_TITLE_CHARS);
     let sunoRes: Response;
     try {
       sunoRes = await fetch(SUNO_API_URL, {
@@ -140,10 +151,10 @@ Deno.serve(async (req) => {
         body: JSON.stringify({
           prompt: effectiveLyrics || effectivePrompt,
           style: style || undefined,
-          title: title || undefined,
-          customMode: !!(style || effectiveLyrics || title),
+          title: customMode ? sunoTitle : undefined,
+          customMode,
           instrumental,
-          model: "V4",
+          model: "V4_5ALL",
           callBackUrl: callbackUrl,
         }),
       });
@@ -161,7 +172,19 @@ Deno.serve(async (req) => {
 
     let sunoBody: any = {};
     try { sunoBody = JSON.parse(sunoText); } catch { /* keep empty */ }
+    if (typeof sunoBody?.code === "number" && sunoBody.code !== 200) {
+      const reason = sunoBody?.msg || sunoBody?.message || `Suno API code ${sunoBody.code}`;
+      console.error("Suno API rejected task", sunoBody.code, reason);
+      await refund(admin, user.id, songId, reason, coinCost);
+      return json({ error: reason, code: sunoBody.code }, sunoBody.code === 429 ? 402 : 502);
+    }
     const taskId = sunoBody?.data?.taskId ?? sunoBody?.taskId ?? sunoBody?.task_id ?? null;
+    if (!taskId) {
+      const reason = sunoBody?.msg || sunoBody?.message || "Suno did not return a task ID";
+      console.error("Suno missing task id", JSON.stringify(sunoBody).slice(0, 500));
+      await refund(admin, user.id, songId, reason, coinCost);
+      return json({ error: reason, code: "missing_task_id" }, 502);
+    }
 
     await admin.from("songs").update({ status: "processing", suno_task_id: taskId }).eq("id", songId);
 
