@@ -358,7 +358,14 @@ export function SongWorkspace({ song, onSaved }: Props) {
                   Generate lyrics in stage 1 first.
                 </p>
               )}
-              {isPending && <GeneratingProgress sampleSeconds={settings?.sample_seconds ?? 30} startedAt={song.generation_started_at ?? song.updated_at ?? song.created_at} />}
+              {isPending && (
+                <>
+                  <GeneratingProgress sampleSeconds={settings?.sample_seconds ?? 30} startedAt={song.generation_started_at ?? song.updated_at ?? song.created_at} />
+                  {song.stream_audio_url && (
+                    <LiveStreamPreview streamUrl={song.stream_audio_url} limitSeconds={20} />
+                  )}
+                </>
+              )}
               {isFailed && (
                 <div
                   role="alert"
