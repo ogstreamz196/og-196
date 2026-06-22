@@ -416,7 +416,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
                     onCancelled={onSaved}
                   />
                   {song.stream_audio_url && (
-                    <LiveStreamPreview streamUrl={song.stream_audio_url} limitSeconds={20} />
+                    <LiveStreamPreview streamUrl={song.stream_audio_url} limitSeconds={35} />
                   )}
                 </>
               )}
