@@ -332,16 +332,9 @@ const TUTORIAL_STEPS: TutorialStep[] = [
   {
     id: "tap-device",
     selector: "#sign-in",
-    title: "Start here 👇",
-    body: "Tap the tile that matches your device — Google, Apple, Android, Samsung or iPhone — to sign in.",
+    title: "Do this first",
+    body: "Pick your device 👇",
     placement: "top",
-  },
-  {
-    id: "scroll-styles",
-    selector: "#studio",
-    title: "Scroll down",
-    body: "See the song styles you can prompt — drill, afrobeats, pop, R&B and more.",
-    placement: "bottom",
   },
 ];
 
