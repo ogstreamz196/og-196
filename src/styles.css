@@ -73,7 +73,7 @@
   --secondary-foreground: oklch(0.97 0.008 250);
 
   --muted: oklch(0.18 0.035 263 / 0.55);
-  --muted-foreground: oklch(0.8 0.02 255);
+  --muted-foreground: oklch(0.86 0.02 255); /* bumped 0.80→0.86 for AA on dark wallpaper */
 
   /* Polished silver — secondary accent */
   --accent: oklch(0.86 0.012 255);
