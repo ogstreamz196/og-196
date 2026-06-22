@@ -96,110 +96,74 @@ export function InstallAppPrompt() {
 
   if (!open) return null;
 
-  // iOS step-by-step modal — full-screen overlay with clear "Add to Home Screen" callout.
+  const ios = isIOS();
+
+  // iOS expanded helper — still compact, anchored bottom, points to Share in Safari toolbar.
   if (iosHelp) {
     return (
       <div
         role="dialog"
-        aria-modal="true"
         aria-label="Add OG to your Home Screen"
-        className="fixed inset-0 z-[70] flex items-end justify-center bg-black/70 p-3 backdrop-blur-sm animate-fade-in sm:items-center"
-        onClick={dismiss}
+        className="fixed inset-x-3 bottom-3 z-[70] mx-auto max-w-xs animate-fade-in sm:left-auto sm:right-4 sm:mx-0"
       >
-        <div
-          className="glass-panel-strong relative w-full max-w-sm overflow-hidden rounded-3xl border border-border/60 p-6 shadow-glow"
-          onClick={(e) => e.stopPropagation()}
-        >
+        <div className="glass-panel-strong relative overflow-hidden rounded-2xl border border-primary/40 p-3 pr-8 text-xs shadow-glow">
           <button
             onClick={dismiss}
-            aria-label="Close"
-            className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full text-muted-foreground transition hover:bg-white/10 hover:text-foreground"
+            aria-label="Dismiss"
+            className="absolute right-1.5 top-1.5 grid h-6 w-6 place-items-center rounded-full text-muted-foreground transition hover:bg-white/10 hover:text-foreground"
           >
-            <X className="h-4 w-4" />
+            <X className="h-3.5 w-3.5" />
           </button>
-
-          <div className="flex flex-col items-center text-center">
-            <img
-              src={ogLogo}
-              alt="OG Streamz"
-              className="h-16 w-16 rounded-2xl border border-border/60 object-cover shadow-card"
-            />
-            <h2 className="mt-4 font-display text-2xl leading-tight">Install OG on your iPhone</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Three taps in Safari and you're done.
-            </p>
-          </div>
-
-          <ol className="mt-5 space-y-3">
-            <li className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3">
-              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary text-sm font-bold text-primary-foreground">1</span>
-              <div className="min-w-0 flex-1 text-sm">
-                Tap the <Share className="mx-1 inline h-4 w-4 text-primary" aria-label="Share" />
-                <span className="font-semibold">Share</span> button at the bottom of Safari.
-              </div>
-            </li>
-            <li className="flex items-start gap-3 rounded-2xl border-2 border-primary/60 bg-primary/10 p-3 shadow-glow">
-              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary text-sm font-bold text-primary-foreground">2</span>
-              <div className="min-w-0 flex-1 text-sm">
-                Scroll and choose <Plus className="mx-1 inline h-4 w-4 text-primary" aria-label="Add" />
-                <span className="font-bold text-foreground">Add to Home Screen</span>.
-              </div>
-            </li>
-            <li className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3">
-              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary text-sm font-bold text-primary-foreground">3</span>
-              <div className="min-w-0 flex-1 text-sm">
-                Tap <span className="font-semibold">Add</span> in the top-right — OG opens like a real app.
-              </div>
-            </li>
+          <div className="font-semibold text-foreground">Do this first 👇</div>
+          <ol className="mt-1.5 space-y-1 text-muted-foreground">
+            <li>1. Tap <Share className="mx-0.5 inline h-3 w-3 text-primary" /> <span className="text-foreground">Share</span> below</li>
+            <li>2. Pick <Plus className="mx-0.5 inline h-3 w-3 text-primary" /> <span className="text-foreground">Add to Home Screen</span></li>
           </ol>
-
-          <Button onClick={dismiss} className="mt-5 w-full bg-gradient-brand text-primary-foreground shadow-glow">
-            Got it
-          </Button>
+          <ArrowAnchor />
         </div>
       </div>
     );
   }
 
-  // Default install banner (Android/Chromium fires beforeinstallprompt; iOS taps Install → opens modal above).
+  // Default tiny pill — bottom-center, points down to device toolbar.
   return (
     <div
       role="dialog"
       aria-label="Install OG app"
-      className="fixed inset-x-3 bottom-3 z-[60] mx-auto max-w-md animate-fade-in sm:left-auto sm:right-4 sm:mx-0"
+      className="fixed inset-x-0 bottom-3 z-[60] mx-auto w-fit max-w-[92vw] animate-fade-in"
     >
-      <div className="glass-panel-strong relative overflow-hidden rounded-2xl border border-border/60 p-4 shadow-glow">
+      <div className="glass-panel-strong relative flex items-center gap-2 rounded-full border border-primary/40 py-1.5 pl-3 pr-1.5 text-xs shadow-glow">
+        <span className="font-semibold text-foreground">Do this first 👇</span>
+        <button
+          onClick={install}
+          className="rounded-full bg-gradient-brand px-3 py-1 text-xs font-semibold text-primary-foreground shadow-card transition hover:brightness-110"
+        >
+          {ios ? "Install" : "Add app"}
+        </button>
         <button
           onClick={dismiss}
           aria-label="Dismiss"
-          className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full text-muted-foreground transition hover:bg-white/10 hover:text-foreground"
+          className="grid h-6 w-6 place-items-center rounded-full text-muted-foreground transition hover:bg-white/10 hover:text-foreground"
         >
-          <X className="h-4 w-4" />
+          <X className="h-3.5 w-3.5" />
         </button>
-        <div className="flex items-start gap-3 pr-6">
-          <img
-            src={ogLogo}
-            alt=""
-            className="h-12 w-12 shrink-0 rounded-xl border border-border/60 object-cover shadow-card"
-          />
-          <div className="min-w-0 flex-1">
-            <div className="text-sm font-semibold leading-tight">Install OG on your phone</div>
-            <p className="mt-0.5 text-xs leading-snug text-muted-foreground">
-              One tap to add it to your home screen — opens like a real app, no browser bars.
-            </p>
-            <div className="mt-3 flex gap-2">
-              <Button size="sm" onClick={install} className="h-8 gap-1.5 px-3 text-xs">
-                <Download className="h-3.5 w-3.5" />
-                {isIOS() ? "Show me how" : "Install app"}
-              </Button>
-              <Button size="sm" variant="ghost" onClick={dismiss} className="h-8 px-2 text-xs">
-                Not now
-              </Button>
-            </div>
-          </div>
-        </div>
+        <ArrowAnchor />
       </div>
     </div>
+  );
+}
+
+// Downward-pointing arrow that visually anchors the pill to the device's bottom toolbar.
+function ArrowAnchor() {
+  return (
+    <span
+      aria-hidden="true"
+      className="pointer-events-none absolute -bottom-2 left-1/2 -translate-x-1/2 text-primary"
+    >
+      <svg width="14" height="8" viewBox="0 0 14 8" fill="currentColor">
+        <path d="M7 8L0 0h14L7 8z" />
+      </svg>
+    </span>
   );
 }
 
