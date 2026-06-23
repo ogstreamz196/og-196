@@ -304,7 +304,9 @@ export function PurchaseHistory() {
   const [range, setRange] = useState<RangeKey>("30d");
 
   return (
+    <>
     <section className="mx-auto mt-10 w-full max-w-3xl rounded-2xl border border-border bg-card p-6 shadow-card">
+
       <header className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Receipt className="h-5 w-5 text-primary" />
