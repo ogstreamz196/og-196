@@ -44,7 +44,7 @@ export function HomeHero({ balance, isAdmin, isVip }: HomeHeroProps) {
           to="/library"
           className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-background/40 px-7 py-3 text-sm font-semibold text-foreground backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-background/60"
         >
-          <Library className="h-4 w-4" /> My Library
+          <Library className="h-4 w-4" /> MusicHUB
         </Link>
       </div>
 
