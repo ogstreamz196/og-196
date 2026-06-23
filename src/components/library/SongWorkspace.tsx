@@ -471,12 +471,13 @@ export function SongWorkspace({ song, onSaved }: Props) {
               <div className="flex flex-wrap items-center justify-end gap-2">
                 <Button
                   onClick={generatePreview}
-                  disabled={!hasLyrics || genPreview || isPending}
+                  disabled={!hasLyrics || genPreview || isPending || balance < previewCost}
+                  aria-busy={genPreview || isPending}
                   className="gap-2"
                 >
                   {genPreview || isPending ? <Loader2 className="h-4 w-4 animate-spin" /> :
                     isReady ? <RefreshCw className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                  {isReady ? "Regenerate sample" : isPending ? "Generating…" : "Generate preview"}
+                  {genPreview ? "Starting…" : isPending ? "Generating — please wait" : isReady ? "Regenerate sample" : "Generate preview"}
                   <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-background/30 px-1.5 py-0.5 text-[10px] font-semibold">
                     <Coins className="h-3 w-3" /> {previewCost}
                   </span>
