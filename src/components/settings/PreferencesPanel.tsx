@@ -19,7 +19,7 @@ import { useDisplayPrefs, useSetDisplayPrefs, clampScale, type Density } from "@
  * Stores assistant tone in DB (foul_mouth) and the rest per-browser.
  */
 export function PreferencesPanel() {
-  const { foulMouth, isLoading, forcedClean } = useFoulMouth();
+  const { foulMouth, isLoading } = useFoulMouth();
   const setFoulMouth = useSetFoulMouth();
   const { isVip } = useRole();
   const { mode, setMode } = useOgMode();
@@ -143,19 +143,16 @@ export function PreferencesPanel() {
 
           <ToggleRow
             icon={<MessageSquareMore className="h-4 w-4" />}
-            label={forcedClean ? "Foul-mouth (paused)" : isVip ? "Foul-mouth" : "Foul-mouth (VIP only)"}
+            label={isVip ? "Foul-mouth" : "Foul-mouth (VIP only)"}
             description={
-              forcedClean
-                ? "OG is keeping it clean for everyone right now — foul mouth is paused until further notice."
-                : isVip
-                  ? "When OG mode is on, allow stronger language."
-                  : "Unlock with OG VIP (£5/month) to let OG go fully savage."
+              isVip
+                ? "When OG mode is on, allow stronger language."
+                : "Unlock with OG VIP (£5/month) to let OG go fully savage."
             }
-            checked={!forcedClean && isVip && foulMouth}
-            disabled={forcedClean || !isVip || isLoading || setFoulMouth.isPending}
+            checked={isVip && foulMouth}
+            disabled={!isVip || isLoading || setFoulMouth.isPending}
             onChange={(v) => setFoulMouth.mutate(v)}
           />
-
           {!isVip && (
             <Link
               to="/buy-coins"
