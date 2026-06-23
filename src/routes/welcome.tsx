@@ -316,11 +316,11 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
 
 
 
-      <div className="relative overflow-hidden rounded-[28px] border border-white/15 bg-white/[0.04] p-3 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)] backdrop-blur-xl sm:p-5">
+      <div className="landing-card-tight relative overflow-hidden shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)]">
         <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-white/[0.06] via-transparent to-transparent" aria-hidden />
-        <div className="relative space-y-3 sm:space-y-4">
-          <div className="grid grid-cols-2 gap-3 sm:gap-4">{primaryTiles}</div>
-          <div className="grid grid-cols-3 gap-3 sm:gap-4">{secondaryTiles}</div>
+        <div className="relative landing-grid">
+          <div className="landing-grid grid-cols-2">{primaryTiles}</div>
+          <div className="landing-grid grid-cols-3">{secondaryTiles}</div>
         </div>
       </div>
     </div>
