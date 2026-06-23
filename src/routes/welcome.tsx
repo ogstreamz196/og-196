@@ -490,24 +490,24 @@ function AlbumCoverShowcase() {
   ];
 
   return (
-    <div className="mx-auto mt-12 max-w-4xl px-1 sm:mt-16 sm:px-0">
+    <div className="mx-auto mt-10 max-w-4xl px-1 sm:mt-16 sm:px-0">
       <div className="text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground sm:text-sm">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:text-sm sm:tracking-[0.25em]">
           What to tell us
         </p>
-        <h3 className="font-display mt-3 text-balance text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:mt-4 sm:text-5xl md:text-6xl">
+        <h3 className="font-display mt-2.5 text-balance text-[clamp(1.6rem,7vw,2.25rem)] font-semibold leading-[1.05] tracking-[-0.025em] sm:mt-4 sm:text-5xl md:text-6xl">
           The more personal, <em className="italic text-gradient-brand">the better the song</em>
         </h3>
       </div>
 
-      <ul className="mt-8 grid gap-4 sm:mt-10 sm:gap-6 md:grid-cols-2">
+      <ul className="mt-6 grid gap-3 sm:mt-10 sm:gap-6 md:grid-cols-2">
         {examples.map((e, i) => (
           <li
             key={e.label}
-            className="group relative flex items-start gap-4 rounded-[2rem] border-2 border-white/15 bg-card/70 p-6 text-left shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-primary/40 sm:p-8"
+            className="group relative flex items-start gap-3.5 rounded-[1.5rem] border border-white/15 bg-card/70 p-4 text-left shadow-[0_14px_40px_-22px_rgba(80,60,255,0.5)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-primary/40 sm:gap-4 sm:rounded-[2rem] sm:border-2 sm:p-8 sm:shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)]"
           >
             <CardEditBadge />
-            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-brand text-2xl shadow-glow sm:h-14 sm:w-14 sm:text-3xl">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-brand text-xl shadow-glow sm:h-14 sm:w-14 sm:rounded-2xl sm:text-3xl">
               {e.emoji}
             </span>
             <div className="min-w-0">
@@ -515,21 +515,21 @@ function AlbumCoverShowcase() {
                 as="p"
                 contentKey={`welcome.example.${i}.label`}
                 defaultValue={e.label}
-                className="text-xs font-black uppercase tracking-[0.24em] text-primary sm:text-sm"
+                className="text-[10px] font-black uppercase tracking-[0.2em] text-primary sm:text-sm sm:tracking-[0.24em]"
               />
               <EditableContent
                 as="p"
                 multiline
                 contentKey={`welcome.example.${i}.example`}
                 defaultValue={e.example}
-                className="mt-2 block text-lg font-semibold leading-snug text-foreground sm:text-xl"
+                className="mt-1.5 block text-[15px] font-semibold leading-snug text-foreground sm:mt-2 sm:text-xl"
               />
             </div>
           </li>
         ))}
       </ul>
 
-      <p className="mt-6 text-center text-sm font-semibold text-muted-foreground sm:mt-8 sm:text-base">
+      <p className="mt-5 text-center text-xs font-medium text-muted-foreground sm:mt-8 sm:text-base sm:font-semibold">
         Even one or two details turns into a track that feels like <em className="italic text-foreground">them</em>. 🎧
       </p>
     </div>
