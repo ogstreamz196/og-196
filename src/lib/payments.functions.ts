@@ -399,3 +399,37 @@ export const getCoinPurchaseHistory = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return (data ?? []) as PurchaseRow[];
   });
+
+// -------------------------------------------------------------------------
+// Receipt link: look up the Stripe-hosted receipt for a paid checkout
+// session. Returns the latest charge's receipt_url (or hosted invoice url
+// for subscriptions). Requires auth + ownership match.
+// -------------------------------------------------------------------------
+
+type ReceiptResult = { url: string } | { error: string };
+
+export const getStripeReceiptUrl = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: { sessionId: string; environment: StripeEnv }) => {
+    if (!/^cs_(test|live)_[A-Za-z0-9]+$/.test(data.sessionId)) throw new Error("Invalid sessionId");
+    if (data.environment !== "sandbox" && data.environment !== "live") throw new Error("Invalid environment");
+    return data;
+  })
+  .handler(async ({ data, context }): Promise<ReceiptResult> => {
+    try {
+      const stripe = createStripeClient(data.environment);
+      const session = await stripe.checkout.sessions.retrieve(data.sessionId, {
+        expand: ["payment_intent", "payment_intent.latest_charge", "invoice"],
+      });
+      if ((session.metadata?.userId ?? "") !== context.userId) {
+        return { error: "Not your session" };
+      }
+      const charge = (session.payment_intent as any)?.latest_charge;
+      if (charge?.receipt_url) return { url: charge.receipt_url };
+      const invoice = session.invoice as any;
+      if (invoice?.hosted_invoice_url) return { url: invoice.hosted_invoice_url };
+      return { error: "No receipt available yet" };
+    } catch (error) {
+      return { error: getStripeErrorMessage(error) };
+    }
+  });
