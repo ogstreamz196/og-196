@@ -15,6 +15,9 @@ import { useRole } from "@/hooks/use-role";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { useOgMode } from "@/hooks/use-og-mode";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import type { RealtimePostgresInsertPayload } from "@supabase/supabase-js";
+
 
 /** Telegram-style premium font stack — SF on Apple, Segoe on Windows, Roboto on Android. */
 const TELEGRAM_FONT_STACK =
