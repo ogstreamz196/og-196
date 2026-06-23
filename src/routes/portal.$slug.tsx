@@ -585,18 +585,18 @@ function PortalPage() {
         </div>
 
         {user && (
-          <div className="mt-10">
-            <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
+          <div>
+            <h2 className="mb-5 flex items-center gap-2 text-lg uppercase tracking-[0.28em] text-muted-foreground sm:text-xl">
               <Music2 className="h-5 w-5 text-primary" /> Your tracks from this portal
             </h2>
             {portalSongsQuery.isLoading ? (
               <div className="grid place-items-center py-12 text-muted-foreground"><Loader2 className="h-6 w-6 animate-spin" /></div>
             ) : portalSongsQuery.data && portalSongsQuery.data.length > 0 ? (
-              <div className="grid gap-3">
+              <div className="grid gap-4">
                 {portalSongsQuery.data.map((s) => <SongCard key={s.id} song={s} />)}
               </div>
             ) : (
-              <div className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center text-muted-foreground">
+              <div className="rounded-[2rem] border-2 border-dashed border-white/15 bg-card/50 p-10 text-center text-lg text-muted-foreground">
                 Nothing yet — generate your first track above.
               </div>
             )}
