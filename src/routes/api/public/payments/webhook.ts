@@ -197,6 +197,120 @@ async function grantVipFromCheckout(session: any, env: StripeEnv) {
   await grantVipRole(userId, { sessionId: session.id, env, source: "checkout" });
 }
 
+// ─── refunds ───────────────────────────────────────────────────────────────
+// Given a Stripe refund (or charge.refunded charge), resolve the user_id and
+// upsert a row in payment_refunds keyed by refund id (idempotent).
+async function upsertRefundRow(opts: {
+  refundId: string;
+  chargeId: string | null;
+  paymentIntentId: string | null;
+  amount: number;
+  currency: string;
+  status: string;
+  reason: string | null;
+  failureReason: string | null;
+  env: StripeEnv;
+}) {
+  const supabase = await getAdminClient();
+  // Resolve session + user via PI (most reliable — checkout session metadata
+  // carries our userId, and we filter by payment_intent on the session list).
+  let userId: string | null = null;
+  let sessionId: string | null = null;
+  if (opts.paymentIntentId) {
+    try {
+      const { createStripeClient } = await import("@/lib/stripe.server");
+      const stripe = createStripeClient(opts.env);
+      const sessions = await stripe.checkout.sessions.list({
+        payment_intent: opts.paymentIntentId,
+        limit: 1,
+      });
+      const s = sessions.data[0];
+      if (s) {
+        sessionId = s.id;
+        userId = (s.metadata?.userId as string | undefined) ?? null;
+      }
+    } catch (e) {
+      log("warn", "refund session lookup failed", {
+        refundId: opts.refundId,
+        err: String((e as Error)?.message ?? e),
+      });
+    }
+  }
+  // Fallback: previous webhook row keyed by session in coin_transactions.
+  if (!userId && sessionId) {
+    const { data: tx } = await supabase
+      .from("coin_transactions")
+      .select("user_id")
+      .eq("reference", `stripe:${opts.env}:${sessionId}`)
+      .maybeSingle();
+    userId = (tx?.user_id as string | undefined) ?? null;
+  }
+  if (!userId) {
+    log("warn", "refund missing user_id; skipping upsert", { refundId: opts.refundId });
+    return;
+  }
+  const { error } = await supabase.from("payment_refunds").upsert(
+    {
+      user_id: userId,
+      stripe_refund_id: opts.refundId,
+      stripe_charge_id: opts.chargeId,
+      stripe_payment_intent_id: opts.paymentIntentId,
+      stripe_session_id: sessionId,
+      amount: opts.amount,
+      currency: opts.currency,
+      status: opts.status,
+      reason: opts.reason,
+      failure_reason: opts.failureReason,
+      environment: opts.env,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "stripe_refund_id" },
+  );
+  if (error) log("error", "refund upsert failed", { refundId: opts.refundId, err: error.message });
+  else log("info", "refund upserted", { refundId: opts.refundId, status: opts.status, userId });
+}
+
+async function handleRefundEvent(refund: any, env: StripeEnv) {
+  await upsertRefundRow({
+    refundId: refund.id,
+    chargeId: (typeof refund.charge === "string" ? refund.charge : refund.charge?.id) ?? null,
+    paymentIntentId:
+      (typeof refund.payment_intent === "string"
+        ? refund.payment_intent
+        : refund.payment_intent?.id) ?? null,
+    amount: refund.amount ?? 0,
+    currency: refund.currency ?? "gbp",
+    status: refund.status ?? "pending",
+    reason: refund.reason ?? null,
+    failureReason: refund.failure_reason ?? null,
+    env,
+  });
+}
+
+async function handleChargeRefunded(charge: any, env: StripeEnv) {
+  const refunds: any[] = charge?.refunds?.data ?? [];
+  if (!refunds.length) {
+    log("info", "charge.refunded with no refund objects", { chargeId: charge?.id });
+    return;
+  }
+  for (const r of refunds) {
+    await upsertRefundRow({
+      refundId: r.id,
+      chargeId: charge.id ?? null,
+      paymentIntentId:
+        (typeof charge.payment_intent === "string"
+          ? charge.payment_intent
+          : charge.payment_intent?.id) ?? null,
+      amount: r.amount ?? 0,
+      currency: r.currency ?? charge.currency ?? "gbp",
+      status: r.status ?? "succeeded",
+      reason: r.reason ?? null,
+      failureReason: r.failure_reason ?? null,
+      env,
+    });
+  }
+}
+
 // ─── dispatch ──────────────────────────────────────────────────────────────
 async function handleEvent(event: { id: string; type: string; data: { object: any } }, env: StripeEnv) {
   log("info", "handling event", { eventId: event.id, type: event.type, env });
