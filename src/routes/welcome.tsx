@@ -647,11 +647,11 @@ function HowItWorks() {
           </h2>
         </div>
 
-        <div className="mt-10 grid gap-5 sm:mt-14 sm:gap-6 md:grid-cols-3">
+        <div className="mt-10 grid gap-4 sm:mt-14 sm:gap-6 md:grid-cols-3">
           {steps.map((s, i) => (
             <div
               key={s.n}
-              className="group relative rounded-3xl border-2 border-white/12 bg-card/70 p-6 text-center backdrop-blur-xl transition hover:-translate-y-1 hover:border-primary/40 sm:p-8"
+              className="group relative rounded-[2rem] border-2 border-white/15 bg-card/70 p-6 text-center shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)] backdrop-blur-xl transition hover:-translate-y-1 hover:border-primary/40 sm:p-8"
               style={{ animationDelay: `${i * 120}ms` }}
             >
               <CardEditBadge />
@@ -660,9 +660,9 @@ function HowItWorks() {
               </div>
               <div className="mt-4 text-5xl sm:mt-5 sm:text-6xl">{s.emoji}</div>
               <EditableContent as="h3" contentKey={`welcome.step.${s.n}.title`} defaultValue={s.title}
-                className="font-display mt-3 block text-2xl font-semibold sm:mt-4 sm:text-3xl md:text-4xl" />
+                className="font-display mt-3 block text-4xl font-black sm:mt-4 sm:text-5xl" />
               <EditableContent as="p" multiline contentKey={`welcome.step.${s.n}.body`} defaultValue={s.body}
-                className="mt-2 block text-base text-muted-foreground sm:mt-3 sm:text-lg md:text-xl" />
+                className="mt-2 block text-lg text-muted-foreground sm:mt-3" />
             </div>
           ))}
         </div>
