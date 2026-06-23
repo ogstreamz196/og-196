@@ -453,6 +453,21 @@ function RefundsPanel() {
           )}
           <button
             type="button"
+            onClick={toggleEmailNotify}
+            aria-pressed={emailNotify}
+            title={emailNotify ? "Email alerts: ON" : "Email alerts: OFF"}
+            className={
+              "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition " +
+              (emailNotify
+                ? "border-primary bg-primary/15 text-primary"
+                : "border-border bg-background text-muted-foreground hover:text-foreground")
+            }
+          >
+            {emailNotify ? <Bell className="h-3 w-3" /> : <BellOff className="h-3 w-3" />}
+            {emailNotify ? "Email alerts on" : "Email alerts off"}
+          </button>
+          <button
+            type="button"
             onClick={refreshFromStripe}
             disabled={isFetching}
             className="inline-flex items-center gap-1 text-xs text-muted-foreground underline hover:text-foreground disabled:opacity-50"
@@ -462,6 +477,9 @@ function RefundsPanel() {
           </button>
         </div>
       </header>
+
+      {hasPending && <SettlementTimeline />}
+
 
       {isLoading ? (
         <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
