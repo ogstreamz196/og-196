@@ -131,6 +131,16 @@ export function AppShell({ children }: { children: ReactNode }) {
                     Boss
                   </div>
                 )}
+                {!roleLoading && isVip && (
+                  <Link
+                    to="/settings"
+                    title="VIP membership — manage subscription"
+                    className="hidden items-center gap-1.5 rounded-full border border-primary/40 bg-gradient-brand px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow-glow hover:opacity-90 md:flex"
+                  >
+                    <Crown className="h-3 w-3" />
+                    VIP
+                  </Link>
+                )}
                 <AdminEditModeToggle className="hidden md:inline-flex" />
                 <HighContrastToggle />
                 <CoinBalance />
