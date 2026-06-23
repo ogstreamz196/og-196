@@ -643,3 +643,24 @@ button.graffiti-accent:hover {
   text-transform: uppercase;
   font-weight: 600;
 }
+
+/* ============================================================
+   Vertical rhythm — em-based spacing so heading→body gaps stay
+   visually aligned regardless of breakpoint, zoom, or font.
+   ============================================================ */
+@utility rhythm {
+  /* Stack children with em-based gap that tracks the prior heading. */
+  & > * + * { margin-top: 0.75em; }
+  & > :is(h1, h2, h3, h4, .landing-h2) { line-height: 1.1; text-wrap: balance; }
+  & > :is(h1, h2, h3, h4, .landing-h2) + * { margin-top: 0.55em; }
+  & > p + p { margin-top: 0.85em; }
+  & > :is(p, li, blockquote) { line-height: 1.65; text-wrap: pretty; }
+  & > :is(h1, h2) { margin-top: 1.25em; }
+  & > :first-child { margin-top: 0; }
+}
+@utility rhythm-tight {
+  & > * + * { margin-top: 0.5em; }
+  & > :is(h1, h2, h3, h4) + * { margin-top: 0.4em; }
+  & > :is(p, li) { line-height: 1.5; text-wrap: pretty; }
+  & > :first-child { margin-top: 0; }
+}
