@@ -31,14 +31,14 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="landing-card">
-      <div className="mb-4 flex items-center gap-3">
+    <section className="landing-card rhythm">
+      <div className="flex items-center gap-3">
         <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-primary/15 text-primary">
           <Icon className="h-6 w-6" />
         </div>
         <h2 className="font-display landing-h2 min-w-0 text-foreground">{title}</h2>
       </div>
-      <div className="landing-body space-y-3 text-muted-foreground">{children}</div>
+      <div className="landing-body rhythm text-muted-foreground">{children}</div>
     </section>
   );
 }
