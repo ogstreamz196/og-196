@@ -228,6 +228,13 @@ function LibraryPage() {
   const [title, setTitle] = useState("");
   const [selections, setSelections] = useState<Selections>({});
   const [chips, setChips] = useState<Record<Category, string[]>>(() => initialChips());
+  const [categoryNotes, setCategoryNotes] = useState<Record<Category, string>>({
+    language: "",
+    genre: "",
+    mood: "",
+    theme: "",
+    tempo: "",
+  });
   const [lyrics, setLyrics] = useState("");
   const [genLyrics, setGenLyrics] = useState(false);
   const [foulMouth, setFoulMouth] = useState(false);
@@ -281,13 +288,21 @@ function LibraryPage() {
     if (!canGenerateLyrics) return;
     setGenLyrics(true);
     try {
+      const noteParts = (["language", "genre", "mood", "theme", "tempo"] as Category[])
+        .map((c) => {
+          const n = categoryNotes[c]?.trim();
+          return n ? `${META[c].label} notes: ${n}` : null;
+        })
+        .filter(Boolean) as string[];
       const description = [
         selections.theme ? `Theme: ${selections.theme}` : null,
         selections.mood ? `Mood: ${selections.mood}` : null,
         selections.tempo ? `Tempo: ${selections.tempo}` : null,
+        ...noteParts,
       ]
         .filter(Boolean)
         .join(" · ");
+      const combinedExtra = [extraContext.trim(), ...noteParts].filter(Boolean).join("\n");
       const { data, error } = await supabase.functions.invoke("generate-lyrics", {
         body: {
           songName: title.trim(),
@@ -296,7 +311,7 @@ function LibraryPage() {
           language: selections.language,
           foulMouth,
           personalDetails: personalDetails.trim() || undefined,
-          extraContext: extraContext.trim() || undefined,
+          extraContext: combinedExtra || undefined,
         },
       });
       if (error) {
@@ -334,13 +349,24 @@ function LibraryPage() {
     }
     setGenSong(true);
     try {
-      const style = [selections.genre, selections.mood, selections.tempo]
+      const cats: Category[] = ["language", "genre", "mood", "theme", "tempo"];
+      const noteParts = cats
+        .map((c) => {
+          const n = categoryNotes[c]?.trim();
+          return n ? `${META[c].label} notes: ${n}` : null;
+        })
+        .filter(Boolean) as string[];
+      const styleNoteParts = (["genre", "mood", "tempo"] as Category[])
+        .map((c) => categoryNotes[c]?.trim())
+        .filter(Boolean) as string[];
+      const style = [selections.genre, selections.mood, selections.tempo, ...styleNoteParts]
         .filter(Boolean)
         .join(" · ");
       const promptText = [
         title.trim(),
         selections.theme ? `About: ${selections.theme}` : null,
         selections.language ? `Language: ${selections.language}` : null,
+        ...noteParts,
       ]
         .filter(Boolean)
         .join(" — ");
@@ -617,6 +643,7 @@ function LibraryPage() {
                 theme: pick(POOLS.theme),
                 tempo: pick(POOLS.tempo),
               });
+              setCategoryNotes({ language: "", genre: "", mood: "", theme: "", tempo: "" });
               setLyrics(pick(LYRICS_SAMPLES));
               setFoulMouth(Math.random() < 0.5);
               toast.success("Surprise prompt loaded");
@@ -637,6 +664,8 @@ function LibraryPage() {
             cat={cat}
             value={selections[cat]}
             chips={chips[cat]}
+            note={categoryNotes[cat]}
+            onNoteChange={(v) => setCategoryNotes((prev) => ({ ...prev, [cat]: v }))}
             onSelect={(v) => setField(cat, v)}
             onPickChip={(v) => pickChip(cat, v)}
             onRefresh={() => refreshRow(cat)}
@@ -979,6 +1008,8 @@ function CategoryCard({
   cat,
   value,
   chips,
+  note,
+  onNoteChange,
   onSelect,
   onPickChip,
   onRefresh,
@@ -986,6 +1017,8 @@ function CategoryCard({
   cat: Category;
   value: string | undefined;
   chips: string[];
+  note: string;
+  onNoteChange: (v: string) => void;
   onSelect: (v: string) => void;
   onPickChip: (v: string) => void;
   onRefresh: () => void;
@@ -1070,6 +1103,26 @@ function CategoryCard({
               );
             })}
           </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <label
+            htmlFor={`note-${cat}`}
+            className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground"
+          >
+            <span>Add your own {meta.label.toLowerCase()} notes</span>
+            <span className="text-[10px] normal-case tracking-normal text-muted-foreground/70">
+              {note.length}/200
+            </span>
+          </label>
+          <Textarea
+            id={`note-${cat}`}
+            value={note}
+            maxLength={200}
+            onChange={(e) => onNoteChange(e.target.value.slice(0, 200))}
+            placeholder={`e.g. extra ${meta.label.toLowerCase()} details for the AI to weave in…`}
+            className="min-h-[64px] resize-y rounded-xl border-white/10 bg-background/40 text-xs"
+          />
         </div>
       </div>
     </div>
