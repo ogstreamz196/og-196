@@ -121,38 +121,45 @@ export function PurchaseHistory() {
         </div>
       ) : error ? (
         <p className="mt-6 text-sm text-destructive">Couldn't load your history.</p>
-      ) : !data || data.length === 0 ? (
-        <p className="mt-6 text-sm text-muted-foreground">
-          No coin activity yet. Your purchases will appear here.
-        </p>
-      ) : (
-        <ul className="mt-4 divide-y divide-border">
-          {data.map((row) => {
-            const positive = row.amount >= 0;
-            const status = statusFor(row);
-            return (
-              <li key={row.id} className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm">
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-medium">{labelForType(row.type)}</p>
-                    <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${toneClass[status.tone]}`}>
-                      {status.label}
-                    </span>
+      ) : (() => {
+        const paidCoinPurchases = (data ?? []).filter(
+          (row) => row.type === "stripe_purchase" && row.amount > 0,
+        );
+        if (paidCoinPurchases.length === 0) {
+          return (
+            <p className="mt-6 text-sm text-muted-foreground">
+              No coin purchases yet. Paid top-ups will appear here.
+            </p>
+          );
+        }
+        return (
+          <ul className="mt-4 divide-y divide-border">
+            {paidCoinPurchases.map((row) => {
+              const status = statusFor(row);
+              return (
+                <li key={row.id} className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-medium">{labelForType(row.type)}</p>
+                      <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${toneClass[status.tone]}`}>
+                        {status.label}
+                      </span>
+                    </div>
+                    <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                      <span>{formatDate(row.created_at)}</span>
+                      <ReceiptLink row={row} />
+                    </div>
                   </div>
-                  <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                    <span>{formatDate(row.created_at)}</span>
-                    <ReceiptLink row={row} />
+                  <div className="flex shrink-0 items-center gap-1 font-bold tabular-nums text-emerald-500">
+                    +{row.amount}
+                    <Coins className="h-4 w-4 text-coin" />
                   </div>
-                </div>
-                <div className={`flex shrink-0 items-center gap-1 font-bold tabular-nums ${positive ? "text-emerald-500" : "text-muted-foreground"}`}>
-                  {positive ? "+" : ""}{row.amount}
-                  <Coins className="h-4 w-4 text-coin" />
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+                </li>
+              );
+            })}
+          </ul>
+        );
+      })()}
     </section>
   );
 }
