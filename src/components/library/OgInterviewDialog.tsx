@@ -70,7 +70,7 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
   async function submit() {
     const text = answer.trim();
     if (!text || loading || finishing) return;
-    const next: Turn[] = [...history, { role: "user", text }];
+    const next: InterviewTurn[] = [...history, { role: "user", text }];
     setHistory(next);
     setAnswer("");
     await askNext(next);
