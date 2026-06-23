@@ -82,7 +82,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const dev = useDevMode();
-  const { isAdmin, isLoading: roleLoading } = useRole();
+  const { isAdmin, isVip, isLoading: roleLoading } = useRole();
 
   async function handleSignOut() {
     await queryClient.cancelQueries();
