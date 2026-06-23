@@ -591,7 +591,7 @@ function LibraryPage() {
       <section>
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-            Your library · previews
+            MusicHUB · previews
           </h2>
           {versionedLibrary.length > 0 && (
             <span className="text-[11px] text-muted-foreground">
