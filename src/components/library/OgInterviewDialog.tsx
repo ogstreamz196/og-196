@@ -119,6 +119,10 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
 
         <div
           ref={scrollRef}
+          role="log"
+          aria-live="polite"
+          aria-relevant="additions text"
+          aria-label="Interview conversation"
           className="flex-1 space-y-3 overflow-y-auto bg-background/40 px-4 py-4 sm:px-5"
         >
           {history.length === 0 && loading && (
