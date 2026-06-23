@@ -18,7 +18,7 @@ import {
 } from "@/lib/coin-packs";
 import { StripeEmbeddedCheckoutInline } from "@/components/StripeEmbeddedCheckout";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
-import { CirculatingCoins } from "@/components/CirculatingCoins";
+
 import { toast } from "sonner";
 import { PurchaseHistory } from "@/components/PurchaseHistory";
 
@@ -292,18 +292,6 @@ function BuyCoinsPage() {
           </div>
         </SectionCard>
 
-        {/* Live coin economy snapshot */}
-        <SectionCard>
-          <SectionHeader
-            eyebrow="Live economy"
-            title="Coins in circulation"
-            subtitle="How OG Coins move through the network right now."
-            icon={<TrendingDown className="h-5 w-5" />}
-          />
-          <div className="px-5 pb-5 sm:px-6 sm:pb-6">
-            <CirculatingCoins />
-          </div>
-        </SectionCard>
 
         {/* Coin packs */}
         <SectionCard>
