@@ -68,22 +68,20 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
   const [answer, setAnswer] = useState("");
   const [loading, setLoading] = useState(false);
   const [finishing, setFinishing] = useState(false);
+  const [pendingDraft, setPendingDraft] = useState<Draft | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  // Restore draft (or start fresh) whenever the dialog opens.
+  // On open: surface a resume banner if a draft exists, otherwise start fresh.
   useEffect(() => {
     if (!open) return;
     const draft = loadDraft(seed);
-    if (draft && draft.history.length > 0) {
-      setHistory(draft.history);
-      setAnswer(draft.answer ?? "");
-      // If last turn is from user, the bot owes us a question — fetch it.
-      const last = draft.history[draft.history.length - 1];
-      if (last?.role === "user") {
-        void askNext(draft.history);
-      }
+    if (draft && draft.history.filter((t) => t.role === "user").length > 0) {
+      setHistory([]);
+      setAnswer("");
+      setPendingDraft(draft);
     } else {
+      setPendingDraft(null);
       setHistory([]);
       setAnswer("");
       void askNext([]);
@@ -91,12 +89,33 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, seed]);
 
+  function resumeDraft() {
+    if (!pendingDraft) return;
+    const draft = pendingDraft;
+    setPendingDraft(null);
+    setHistory(draft.history);
+    setAnswer(draft.answer ?? "");
+    const last = draft.history[draft.history.length - 1];
+    if (last?.role === "user") {
+      void askNext(draft.history);
+    }
+  }
+
+  function discardDraft() {
+    clearDraft();
+    setPendingDraft(null);
+    setHistory([]);
+    setAnswer("");
+    void askNext([]);
+  }
+
   // Persist transcript + in-flight answer whenever they change while open.
   useEffect(() => {
-    if (!open) return;
+    if (!open || pendingDraft) return;
     if (history.length === 0 && !answer) return;
     saveDraft({ seed, history, answer, ts: Date.now() });
-  }, [open, seed, history, answer]);
+  }, [open, seed, history, answer, pendingDraft]);
+
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -202,6 +221,42 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
             </div>
           </div>
         </DialogHeader>
+
+        {pendingDraft && (
+          <div className="flex flex-col gap-2 border-b border-primary/30 bg-primary/10 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+            <div className="flex items-start gap-2 text-sm">
+              <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              <div>
+                <div className="font-semibold text-foreground">Resume your draft?</div>
+                <div className="text-xs text-muted-foreground">
+                  {pendingDraft.history.filter((t) => t.role === "user").length} answer
+                  {pendingDraft.history.filter((t) => t.role === "user").length === 1 ? "" : "s"} saved
+                  {" · "}
+                  {Math.max(1, Math.round((Date.now() - pendingDraft.ts) / 60000))}m ago
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2 sm:shrink-0">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={discardDraft}
+                className="text-xs font-semibold"
+              >
+                Start fresh
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                onClick={resumeDraft}
+                className="gap-1.5 bg-gradient-brand text-xs font-semibold text-primary-foreground"
+              >
+                Resume
+              </Button>
+            </div>
+          </div>
+        )}
 
 
         <div
