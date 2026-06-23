@@ -3,7 +3,7 @@
 export const queryKeys = {
   profile: (userId?: string) => ["profile", userId] as const,
   coinBalance: (userId?: string) => ["coin-balance", userId] as const,
-  coinStats: () => ["coin-stats"] as const,
+  
   coinTransactions: (userId?: string) => ["coin-transactions", userId] as const,
   songs: (userId?: string) => ["songs", userId] as const,
   song: (songId: string) => ["song", songId] as const,
