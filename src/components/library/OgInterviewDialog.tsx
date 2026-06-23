@@ -190,8 +190,8 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
   const answered = history.filter((t) => t.role === "user").length;
   const progressPct = Math.min(100, Math.round((answered / TARGET_ANSWERS) * 100));
   const stepLabel = answered >= TARGET_ANSWERS
-    ? `Step ${answered} · enough to roll`
-    : `Step ${answered + 1} of ~${TARGET_ANSWERS}`;
+    ? `Step ${answered} · all done`
+    : `Step ${answered + 1} of ${TARGET_ANSWERS}`;
 
   return (
     <Dialog open={open} onOpenChange={(o) => !finishing && onOpenChange(o)}>
@@ -199,19 +199,19 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
         <DialogHeader className="space-y-2 border-b border-white/10 bg-gradient-to-br from-primary/20 via-fuchsia-500/10 to-background px-5 py-4">
           <DialogTitle className="flex items-center gap-2 text-lg font-black">
             <MessageCircleHeart className="h-5 w-5 text-primary" />
-            OG Bot wants to know you
+            Create Song — guided wizard
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            Answer as many as you like. Every answer makes the song sharper.
-            Tap <span className="font-semibold text-foreground">That's enough</span> when you're done.
+            Same questions as the creation page — Language, Genre, Mood, Theme, Tempo, then a few personal details.
+            Tap <span className="font-semibold text-foreground">That's enough</span> any time to finish.
           </DialogDescription>
           <div
             className="space-y-1 pt-1"
-            aria-label={`Progress: ${answered} of about ${TARGET_ANSWERS} answers captured`}
+            aria-label={`Progress: ${answered} of ${TARGET_ANSWERS} answers captured`}
           >
             <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
               <span>{stepLabel}</span>
-              <span>{answered}/~{TARGET_ANSWERS}</span>
+              <span>{answered}/{TARGET_ANSWERS}</span>
             </div>
             <div
               role="progressbar"
