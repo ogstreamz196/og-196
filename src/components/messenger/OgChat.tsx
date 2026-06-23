@@ -286,6 +286,12 @@ export function OgChat({
   }
 
   async function toggleFoul() {
+    if (!isVip) {
+      toast.message("Foul-mouth is a VIP perk — grab OG VIP for £5/month.", {
+        action: { label: "Get VIP", onClick: () => { window.location.href = "/buy-coins?flow=vip"; } },
+      });
+      return;
+    }
     try {
       const next = !foulMouth;
       await setFoulMouth.mutateAsync(next);
