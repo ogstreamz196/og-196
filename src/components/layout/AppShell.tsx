@@ -46,8 +46,8 @@ function BrandLockup({ compact = false }: { compact?: boolean }) {
 }
 
 const routeTitles: Record<string, string> = {
-  "/": "Music Hub",
-  "/library": "Music Hub",
+  "/": "Home",
+  "/library": "My Library",
   "/messenger": "OG Messenger",
   "/portals": "Portals",
   "/buy-coins": "Buy Coins",
