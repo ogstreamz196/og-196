@@ -592,7 +592,7 @@ function Pillars() {
           </p>
           <h2 className="font-display mt-3 flex flex-wrap items-center justify-center gap-3 text-balance text-4xl font-semibold leading-[1.05] tracking-[-0.035em] sm:mt-4 sm:gap-4 sm:text-6xl md:text-7xl lg:text-8xl">
             <span>Different songs</span>
-            <OgBotLogo className="h-12 w-12 sm:h-20 sm:w-20 md:h-24 md:w-24 lg:h-28 lg:w-28" />
+            <OgBotLogo className="h-20 w-20 sm:h-32 sm:w-32 md:h-40 md:w-40 lg:h-48 lg:w-48" />
           </h2>
         </div>
 
