@@ -557,17 +557,17 @@ function LibraryPage() {
         </div>
 
         {/* OG Bot wizard — guided start-to-finish */}
-        <div className="relative mt-7 flex flex-col gap-3 rounded-2xl border-2 border-primary/40 bg-primary/[0.08] p-4 shadow-glow backdrop-blur sm:mt-8 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:p-5">
-          <div className="flex items-start gap-3 sm:items-center">
+        <div className="relative mt-7 grid grid-cols-[minmax(0,1fr)] gap-3 rounded-2xl border-2 border-primary/40 bg-primary/[0.08] p-4 shadow-glow backdrop-blur sm:mt-8 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-5 sm:p-5">
+          <div className="flex min-w-0 items-start gap-3 sm:items-center">
             <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-gradient-brand text-primary-foreground shadow-glow">
               <Wand2 className="h-5 w-5" />
             </span>
             <div className="min-w-0">
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">
+              <p className="truncate text-xs font-bold uppercase tracking-[0.18em] text-primary">
                 New here? Let OG guide you
               </p>
               <p className="text-sm leading-snug text-foreground sm:text-base">
-                The OG Bot wizard takes you from idea → lyrics → finished track, step by step.
+                OG Bot interviews you, then fills the brief so you can hit generate.
               </p>
             </div>
           </div>
@@ -575,12 +575,14 @@ function LibraryPage() {
             type="button"
             size="lg"
             onClick={() => setInterviewOpen(true)}
-            className="h-12 w-full shrink-0 justify-center gap-2 rounded-xl bg-gradient-brand text-sm font-bold text-primary-foreground shadow-glow sm:h-12 sm:w-auto sm:px-6"
+            aria-label="Start the OG Bot wizard"
+            className="h-12 w-full shrink-0 justify-center gap-2 whitespace-nowrap rounded-xl bg-gradient-brand text-sm font-bold text-primary-foreground shadow-glow sm:w-auto sm:px-6"
           >
             <Sparkles className="h-4 w-4" />
             Start the wizard
           </Button>
         </div>
+
       </header>
 
 
@@ -1039,7 +1041,18 @@ function LibraryPage() {
       <OgInterviewDialog
         open={interviewOpen}
         onOpenChange={setInterviewOpen}
-        seed={personalDetails}
+        seed={(() => {
+          const parts: string[] = [];
+          if (title.trim()) parts.push(`Working title: ${title.trim()}`);
+          const styleBits = [selections.genre, selections.mood, selections.theme, selections.tempo, selections.language]
+            .filter(Boolean)
+            .join(" · ");
+          if (styleBits) parts.push(`Vibe so far: ${styleBits}`);
+          if (personalDetails.trim()) parts.push(`Personal details: ${personalDetails.trim()}`);
+          if (extraContext.trim()) parts.push(`Extra context: ${extraContext.trim()}`);
+          if (lyrics.trim()) parts.push(`Existing lyrics draft (excerpt): ${lyrics.trim().slice(0, 240)}`);
+          return parts.join("\n");
+        })()}
         onDone={(brief, transcript) => {
           setInterviewTranscript(transcript);
           setPersonalDetails((prev) => {
@@ -1051,6 +1064,7 @@ function LibraryPage() {
           });
         }}
       />
+
 
       <ReviewDialog
         open={reviewOpen}
