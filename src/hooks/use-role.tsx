@@ -1,6 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./use-auth";
+import { useFreeAccess } from "./use-free-access";
+
+
 
 export type AppRole = "admin" | "user" | "vip" | "og_bot" | "dev" | "boss";
 
