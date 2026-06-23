@@ -24,9 +24,26 @@ interface OgInterviewDialogProps {
   onDone: (brief: string, transcript: InterviewTurn[]) => void;
 }
 
-const DRAFT_KEY = "og-interview:draft:v1";
+const DRAFT_KEY = "og-interview:draft:v2";
 const DRAFT_TTL_MS = 1000 * 60 * 60 * 24; // 24h
-const TARGET_ANSWERS = 4;
+
+// Scripted questions — mirror the sections on the music creation page so the
+// wizard collects the exact same inputs (Language, Genre, Mood, Theme, Tempo)
+// plus the "Get to know me" personal section.
+const SCRIPT: string[] = [
+  // Mirrors the 5 picker sections (label + helper text) from library.index.tsx
+  "Language — what language do you want to sing in?",
+  "Genre — what sound are we cooking? (e.g. Drill, Afrobeats, R&B, Pop, Lo-fi…)",
+  "Mood — how should it feel? (e.g. Hype, Romantic, Dark, Chill, Nostalgic…)",
+  "Theme — what's the song about? (love, heartbreak, hustle, a person, a night out…)",
+  "Tempo — how fast should it hit? (slow ballad, mid-tempo groove, fast banger…)",
+  // Mirrors the "Get to know me" / Personal details section
+  "Get to know me — who is this song for, and what's the one word that sums them up?",
+  "A defining memory, place, or moment between you two — give me the vivid detail.",
+  "Inside jokes, nicknames, signature phrases or quirks I should weave in?",
+  "Anything else personal — drama, dreams, flexes — that should land in the lyrics?",
+];
+const TARGET_ANSWERS = SCRIPT.length;
 
 type Draft = { seed: string; history: InterviewTurn[]; answer: string; ts: number };
 
