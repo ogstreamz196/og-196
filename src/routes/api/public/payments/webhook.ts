@@ -36,7 +36,7 @@ async function alreadyProcessed(
     event_id: eventId,
     event_type: eventType,
     environment: env,
-    payload_summary: summary,
+    payload_summary: summary as never,
   });
   if (!error) return false;
   // 23505 unique_violation = duplicate delivery
