@@ -161,6 +161,17 @@ function RootComponent() {
           router.invalidate();
         }
 
+        // Auto-sync this user's activity to Sheets on app load (once per session).
+        try {
+          const key = `og:auto-sync:${data.user.id}`;
+          if (typeof window !== "undefined" && !window.sessionStorage.getItem(key)) {
+            window.sessionStorage.setItem(key, "1");
+            import("@/lib/user-log.functions")
+              .then((m) => m.syncUserActivity({ data: {} }))
+              .catch((e) => console.warn("auto-sync failed", e));
+          }
+        } catch { /* non-blocking */ }
+
         // Claim pending referral (set on /welcome?ref=<uuid> before sign-in)
         try {
           const pending = typeof window !== "undefined" ? localStorage.getItem("og_pending_ref") : null;

@@ -58,9 +58,12 @@ async function ensureUserTab(sheetTitle: string): Promise<void> {
 }
 
 async function writeRange(sheetTitle: string, range: string, values: (string | number | null)[][]): Promise<void> {
-  const fullRange = `'${sheetTitle}'!${range}`;
+  // NOTE: do NOT encodeURIComponent the range — the Sheets API requires the
+  // literal `!` and `:` characters in the URL path; encoding them yields
+  // "Unable to parse range: Sheet1!A1%3AZ1000" (HTTP 400).
+  const fullRange = `'${sheetTitle.replace(/'/g, "''")}'!${range}`;
   await gw(
-    `${SHEETS_BASE}/spreadsheets/${SPREADSHEET_ID}/values/${encodeURIComponent(fullRange)}?valueInputOption=RAW`,
+    `${SHEETS_BASE}/spreadsheets/${SPREADSHEET_ID}/values/${fullRange}?valueInputOption=RAW`,
     {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -71,9 +74,9 @@ async function writeRange(sheetTitle: string, range: string, values: (string | n
 }
 
 async function clearTab(sheetTitle: string): Promise<void> {
-  const fullRange = `'${sheetTitle}'!A1:Z10000`;
+  const fullRange = `'${sheetTitle.replace(/'/g, "''")}'!A1:Z10000`;
   await gw(
-    `${SHEETS_BASE}/spreadsheets/${SPREADSHEET_ID}/values/${encodeURIComponent(fullRange)}:clear`,
+    `${SHEETS_BASE}/spreadsheets/${SPREADSHEET_ID}/values/${fullRange}:clear`,
     { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" },
     "GOOGLE_SHEETS_API_KEY",
   );
