@@ -90,7 +90,11 @@ export const chatOgBot = createServerFn({ method: "POST" })
     const personaMap = new Map<string, string>(
       (siteRes.data ?? []).map((r: { key: string; value: string }) => [r.key, r.value]),
     );
-    const foulMouth = prefRes.data?.foul_mouth ?? false;
+    // Foul-mouth is a VIP-only feature. Non-VIP users (even if a stored
+    // pref says true) get the clean OG persona — the upgrade path lives
+    // in the UI (Buy Coins → VIP).
+    const isVip = roles.includes("vip") || roles.includes("admin");
+    const foulMouth = isVip ? (prefRes.data?.foul_mouth ?? false) : false;
 
     const userCtx: UserContextSummary = {
       display_name: profile.display_name,

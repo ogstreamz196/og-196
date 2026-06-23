@@ -342,12 +342,12 @@ function BuyCoinsPage() {
         </SectionCard>
 
 
-        {/* VIP yearly subscription */}
+        {/* VIP monthly subscription */}
         <SectionCard className="border-coin/40">
           <SectionHeader
-            eyebrow="Yearly membership"
+            eyebrow="Monthly membership"
             title={<EditableContent contentKey="buyCoins.vip.heading" defaultValue="Or go all-in with OG VIP" />}
-            subtitle={<EditableContent contentKey="buyCoins.vip.subtitle" defaultValue="Unlock exclusive privileges across OG Streamz for a full year." multiline />}
+            subtitle={<EditableContent contentKey="buyCoins.vip.subtitle" defaultValue="Unlock exclusive privileges across OG Streamz — billed monthly, cancel anytime." multiline />}
             icon={<Crown className="h-5 w-5 text-coin" />}
           />
           <div className="px-5 pb-5 sm:px-6 sm:pb-6">
@@ -362,10 +362,10 @@ function BuyCoinsPage() {
                   )}
                 </div>
                 <ul className="mt-3 grid gap-1.5 text-sm text-muted-foreground sm:grid-cols-2">
+                  <li className="flex items-center gap-2"><Star className="h-3.5 w-3.5 shrink-0 text-coin" /> Foul-mouth OG Bot unlocked</li>
                   <li className="flex items-center gap-2"><Star className="h-3.5 w-3.5 shrink-0 text-coin" /> Priority OG Messenger replies</li>
                   <li className="flex items-center gap-2"><Star className="h-3.5 w-3.5 shrink-0 text-coin" /> VIP badge across the hub</li>
-                  <li className="flex items-center gap-2"><Star className="h-3.5 w-3.5 shrink-0 text-coin" /> Early access to new portals</li>
-                  <li className="flex items-center gap-2"><Gift className="h-3.5 w-3.5 shrink-0 text-coin" /> Bonus monthly OG Coin drops</li>
+                  <li className="flex items-center gap-2"><Gift className="h-3.5 w-3.5 shrink-0 text-coin" /> Instant Stripe refunds</li>
                 </ul>
               </div>
               <div className="flex items-center justify-between gap-3 sm:flex-col sm:items-end sm:justify-center">
@@ -373,7 +373,7 @@ function BuyCoinsPage() {
                   <div className="text-3xl font-black tabular-nums leading-none">
                     {CURRENCY_SYMBOL}{(VIP_PLAN.priceCents / 100).toFixed(0)}
                   </div>
-                  <div className="mt-1 text-xs font-semibold text-muted-foreground">/ year</div>
+                  <div className="mt-1 text-xs font-semibold text-muted-foreground">/ month</div>
                 </div>
                 <Button
                   size="lg"
