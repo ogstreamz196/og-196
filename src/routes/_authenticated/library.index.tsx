@@ -543,7 +543,7 @@ function LibraryPage() {
         </div>
 
         {/* Progress */}
-        <div className="relative mt-6 space-y-1.5">
+        <div className="relative mt-7 space-y-2">
           <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
             <span>Progress</span>
             <span>{totalFilled}/6</span>
@@ -555,7 +555,34 @@ function LibraryPage() {
             />
           </div>
         </div>
+
+        {/* OG Bot wizard — guided start-to-finish */}
+        <div className="relative mt-7 flex flex-col gap-3 rounded-2xl border-2 border-primary/40 bg-primary/[0.08] p-4 shadow-glow backdrop-blur sm:mt-8 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:p-5">
+          <div className="flex items-start gap-3 sm:items-center">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-gradient-brand text-primary-foreground shadow-glow">
+              <Wand2 className="h-5 w-5" />
+            </span>
+            <div className="min-w-0">
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">
+                New here? Let OG guide you
+              </p>
+              <p className="text-sm leading-snug text-foreground sm:text-base">
+                The OG Bot wizard takes you from idea → lyrics → finished track, step by step.
+              </p>
+            </div>
+          </div>
+          <Button
+            type="button"
+            size="lg"
+            onClick={() => setInterviewOpen(true)}
+            className="h-12 w-full shrink-0 justify-center gap-2 rounded-xl bg-gradient-brand text-sm font-bold text-primary-foreground shadow-glow sm:h-12 sm:w-auto sm:px-6"
+          >
+            <Sparkles className="h-4 w-4" />
+            Start the wizard
+          </Button>
+        </div>
       </header>
+
 
       {/* Library — previews created (above creation options) */}
       <section>
