@@ -643,6 +643,7 @@ function LibraryPage() {
                 theme: pick(POOLS.theme),
                 tempo: pick(POOLS.tempo),
               });
+              setCategoryNotes({ language: "", genre: "", mood: "", theme: "", tempo: "" });
               setLyrics(pick(LYRICS_SAMPLES));
               setFoulMouth(Math.random() < 0.5);
               toast.success("Surprise prompt loaded");
