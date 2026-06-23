@@ -66,9 +66,10 @@ export function useFoulMouth() {
   }, [uid, qc]);
 
   return {
-    foulMouth: query.data ?? false,
+    foulMouth: FOUL_MOUTH_FORCED_CLEAN ? false : (query.data ?? false),
     isLoading: query.isLoading,
     isReady: !!uid && query.isFetched,
+    forcedClean: FOUL_MOUTH_FORCED_CLEAN,
   };
 }
 
