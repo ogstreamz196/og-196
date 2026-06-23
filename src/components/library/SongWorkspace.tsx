@@ -423,21 +423,61 @@ export function SongWorkspace({ song, onSaved }: Props) {
               {isFailed && (
                 <div
                   role="alert"
-                  className="flex items-center gap-2 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+                  className="space-y-3 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
                 >
-                  <AlertCircle className="h-4 w-4" aria-hidden="true" /> {song.error_message || "Generation failed."}
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold">Generation failed</p>
+                      <p className="mt-0.5 text-xs opacity-90">
+                        {song.error_message || "Something went wrong on Suno's side."}
+                        {" "}Your coins were refunded automatically.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={generatePreview}
+                      disabled={!hasLyrics || genPreview || balance < previewCost}
+                      className="gap-1.5"
+                    >
+                      {genPreview ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+                      Try again
+                      <span className="ml-0.5 inline-flex items-center gap-1 rounded-full bg-background/30 px-1.5 py-0.5 text-[10px] font-semibold">
+                        <Coins className="h-3 w-3" /> {previewCost}
+                      </span>
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => lyricsRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })}
+                      className="gap-1.5"
+                    >
+                      <FileText className="h-3.5 w-3.5" /> Tweak lyrics
+                    </Button>
+                    {balance < previewCost && (
+                      <Button asChild size="sm" variant="secondary" className="gap-1.5">
+                        <Link to="/buy-coins">
+                          <Coins className="h-3.5 w-3.5" /> Top up coins
+                        </Link>
+                      </Button>
+                    )}
+                  </div>
                 </div>
               )}
               {isReady && <InlineSamplePlayer songId={song.id} />}
               <div className="flex flex-wrap items-center justify-end gap-2">
                 <Button
                   onClick={generatePreview}
-                  disabled={!hasLyrics || genPreview || isPending}
+                  disabled={!hasLyrics || genPreview || isPending || balance < previewCost}
+                  aria-busy={genPreview || isPending}
                   className="gap-2"
                 >
                   {genPreview || isPending ? <Loader2 className="h-4 w-4 animate-spin" /> :
                     isReady ? <RefreshCw className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                  {isReady ? "Regenerate sample" : isPending ? "Generating…" : "Generate preview"}
+                  {genPreview ? "Starting…" : isPending ? "Generating — please wait" : isReady ? "Regenerate sample" : "Generate preview"}
                   <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-background/30 px-1.5 py-0.5 text-[10px] font-semibold">
                     <Coins className="h-3 w-3" /> {previewCost}
                   </span>
