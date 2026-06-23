@@ -11,8 +11,10 @@ import { join } from "node:path";
 const RULES = {
   cardShell: 'rounded-[2rem] border-2 border-white/15',
   cardShadow: 'shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)]',
-  cardTitle: /text-(?:3xl|4xl|5xl)\s+font-(?:black|semibold)/,
-  cardBody: /text-lg/,
+  // Card titles either use a Tailwind size + black/semibold weight OR the
+  // fluid clamp() pattern used on the home/portal heroes.
+  cardTitle: /text-(?:3xl|4xl|5xl|6xl)\s+font-(?:black|semibold|bold)|text-\[clamp\(/,
+  cardBody: /\btext-lg\b/,
   container: 'max-w-7xl',
   sectionGap: 'gap-14',
 };
