@@ -563,11 +563,11 @@ function LibraryPage() {
               <Wand2 className="h-5 w-5" />
             </span>
             <div className="min-w-0">
-              <p className="truncate text-xs font-bold uppercase tracking-[0.18em] bg-gradient-to-r from-slate-100 via-white to-slate-400 bg-clip-text text-transparent">
+              <p className="truncate text-xs font-bold uppercase tracking-[0.24em] leading-relaxed bg-gradient-to-r from-slate-100 via-white to-slate-400 bg-clip-text text-transparent">
                 New here? Let OG guide you
 
               </p>
-              <p className="text-sm leading-snug text-foreground sm:text-base">
+              <p className="text-sm leading-relaxed tracking-wide text-foreground sm:text-base">
                 OG Bot interviews you, then fills the brief so you can hit generate.
               </p>
             </div>
@@ -576,8 +576,8 @@ function LibraryPage() {
             type="button"
             size="lg"
             onClick={() => setInterviewOpen(true)}
-            aria-label="Start the OG Bot wizard"
-            className="h-12 w-full shrink-0 justify-center gap-2 whitespace-nowrap rounded-xl bg-gradient-brand text-sm font-bold text-primary-foreground shadow-glow sm:w-auto sm:px-6"
+            aria-label="Create Song Now"
+            className="h-12 w-full shrink-0 justify-center gap-2 whitespace-nowrap rounded-xl bg-gradient-brand text-sm font-bold tracking-wide text-primary-foreground shadow-glow sm:w-auto sm:px-6"
           >
             <Sparkles className="h-4 w-4" />
             Create Song Now
