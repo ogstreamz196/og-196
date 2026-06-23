@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
-import { Send, Circle, Radio, ShieldAlert } from "lucide-react";
+import { Send, Circle, Radio, ShieldAlert, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -39,12 +39,20 @@ function DeveloperPage() {
   const selected = others.find((u) => u.user_id === selectedId) ?? null;
 
   const send = useMutation({
-    mutationFn: async (vars: { target: string; content: string }) => {
-      const { error } = await supabase.rpc("dev_send_og_message_as_bot", {
-        target_user_id: vars.target,
-        message_content: vars.content,
-      });
-      if (error) throw error;
+    mutationFn: async (vars: { target: string; content: string; targetLabel: string }) => {
+      const toastId = toast.loading(`Posting to ${vars.targetLabel}'s OG Bot…`);
+      try {
+        const { data, error } = await supabase.rpc("dev_send_og_message_as_bot", {
+          target_user_id: vars.target,
+          message_content: vars.content,
+        });
+        if (error) throw error;
+        toast.success(`Delivered to ${vars.targetLabel}'s OG Bot history`, { id: toastId });
+        return data;
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "Send failed", { id: toastId });
+        throw e;
+      }
     },
     onSuccess: (_, vars) => {
       setLog((prev) => [
@@ -57,10 +65,6 @@ function DeveloperPage() {
         ...prev,
       ]);
       setDraft("");
-      toast.success("Sent through OG Bot");
-    },
-    onError: (e: unknown) => {
-      toast.error(e instanceof Error ? e.message : "Send failed");
     },
   });
 
@@ -175,7 +179,11 @@ function DeveloperPage() {
                   e.preventDefault();
                   const text = draft.trim();
                   if (!text) return;
-                  send.mutate({ target: selected.user_id, content: text });
+                  send.mutate({
+                    target: selected.user_id,
+                    content: text,
+                    targetLabel: selected.display_name || selected.email || selected.user_id.slice(0, 8),
+                  });
                 }}
               >
                 <Textarea
@@ -188,12 +196,18 @@ function DeveloperPage() {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
                       const text = draft.trim();
-                      if (text) send.mutate({ target: selected.user_id, content: text });
+                      if (text) {
+                        send.mutate({
+                          target: selected.user_id,
+                          content: text,
+                          targetLabel: selected.display_name || selected.email || selected.user_id.slice(0, 8),
+                        });
+                      }
                     }
                   }}
                 />
                 <Button type="submit" disabled={!draft.trim() || send.isPending}>
-                  <Send className="h-4 w-4" />
+                  {send.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                 </Button>
               </form>
             </>
