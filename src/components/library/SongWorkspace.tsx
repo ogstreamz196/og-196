@@ -39,7 +39,7 @@ interface Props {
 export function SongWorkspace({ song, onSaved }: Props) {
   const { data: settings } = useSettings();
   const { data: profile } = useProfile();
-  const { foulMouth } = useFoulMouth();
+  const { foulMouth, forcedClean } = useFoulMouth();
   const setFoulMouth = useSetFoulMouth();
 
   const lyricsCost = settings?.coins_per_lyrics_generation ?? 1;
