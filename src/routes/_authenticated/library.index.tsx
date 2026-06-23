@@ -643,6 +643,31 @@ function LibraryPage() {
         )}
       </section>
 
+      {/* ====== Clear boundary: library ends ↑ · creation starts ↓ ====== */}
+      <div
+        role="separator"
+        aria-label="Library above. Song creation starts below."
+        className="relative my-2"
+      >
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-gradient-to-r from-transparent via-primary/40 to-transparent"
+        />
+        <div className="relative mx-auto flex w-full max-w-3xl flex-col items-center gap-3 rounded-3xl border-2 border-primary/40 bg-gradient-to-br from-primary/15 via-fuchsia-500/10 to-background px-5 py-5 text-center shadow-glow backdrop-blur sm:flex-row sm:justify-between sm:px-8">
+          <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+            <LibraryIcon className="h-4 w-4 text-primary" /> Library above
+          </div>
+          <div className="text-sm font-black uppercase tracking-[0.18em] sm:text-base">
+            <span className="bg-gradient-brand bg-clip-text text-transparent">
+              ↓ Start a new song below ↓
+            </span>
+          </div>
+          <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+            <Mic2 className="h-4 w-4 text-primary" /> Studio
+          </div>
+        </div>
+      </div>
+
       {/* Title card */}
       <section className="rounded-3xl border border-white/10 bg-card/60 p-5 shadow-card backdrop-blur-xl sm:p-7">
         <div className="flex items-center gap-3">
@@ -701,55 +726,41 @@ function LibraryPage() {
         </div>
       </section>
 
-      {/* Category bento */}
-      <section className="grid gap-4 sm:grid-cols-2">
-        {(["language", "genre", "mood", "theme", "tempo"] as Category[]).map((cat) => (
-          <CategoryCard
-            key={cat}
-            cat={cat}
-            value={selections[cat]}
-            chips={chips[cat]}
-            note={categoryNotes[cat]}
-            onNoteChange={(v) => setCategoryNotes((prev) => ({ ...prev, [cat]: v }))}
-            onSelect={(v) => setField(cat, v)}
-            onPickChip={(v) => pickChip(cat, v)}
-            onRefresh={() => refreshRow(cat)}
-          />
-        ))}
-
-      </section>
-
-      {/* Step 1 — full-page lyric brief form */}
+      {/* Step 1 — Personal (moved to top of creation flow) */}
       <section
-        id="lyric-brief"
-        className="relative overflow-hidden rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/25 via-fuchsia-500/15 to-background p-5 shadow-glow sm:p-8 lg:p-10 flex flex-col gap-7 min-h-[calc(100svh-7rem)]"
+        id="personal-brief"
+        className="relative overflow-hidden rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/25 via-fuchsia-500/15 to-background p-5 shadow-glow sm:p-8 lg:p-10 flex flex-col gap-7"
       >
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-primary/30 blur-3xl"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -left-20 bottom-0 h-64 w-64 rounded-full bg-fuchsia-500/20 blur-3xl"
-        />
+        <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-primary/30 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute -left-20 bottom-0 h-64 w-64 rounded-full bg-fuchsia-500/20 blur-3xl" />
 
         <header className="relative space-y-2">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em]">
-            <Sparkles className="h-3.5 w-3.5 text-primary" /> Step 1 — Lyric brief
+            <Sparkles className="h-3.5 w-3.5 text-primary" /> Step 1 — Tell us about you
           </div>
           <h2 className="font-display text-4xl font-black leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-            Write lyrics
+            Get personal
           </h2>
           <p className="text-base text-muted-foreground sm:text-lg">
-            Tell OG Bot anything you want — names, places, jokes, drama, dreams. The more specific, the sharper the song.
+            Names, places, jokes, drama, dreams — anything you want woven into the lyrics. The more specific, the sharper the song.
           </p>
         </header>
 
-        {/* Big action row — Surprise me + Get to know me */}
+        {/* Big action row — Get to know me + Surprise me */}
         <div className="relative grid gap-3 sm:grid-cols-2">
           <Button
             type="button"
             size="lg"
+            onClick={() => setInterviewOpen(true)}
+            className="h-14 w-full justify-center gap-2 rounded-2xl bg-gradient-brand text-base font-bold text-primary-foreground shadow-glow sm:h-16 sm:text-lg"
+          >
+            <MessageCircleHeart className="h-5 w-5" />
+            Get to know me
+          </Button>
+          <Button
+            type="button"
+            size="lg"
+            variant="outline"
             onClick={() => {
               const TEMPLATES = [
                 "Their name: Aaliyah\nOccasion: 30th birthday\nInside joke: still can't parallel park\nWhat they love: oat-milk lattes",
@@ -761,20 +772,10 @@ function LibraryPage() {
               setPersonalDetails(pick(TEMPLATES).slice(0, 500));
               toast.success("Surprise brief loaded");
             }}
-            className="h-14 w-full justify-center gap-2 rounded-2xl bg-gradient-brand text-base font-bold text-primary-foreground shadow-glow sm:h-16 sm:text-lg"
-          >
-            <Shuffle className="h-5 w-5" />
-            🎲 Surprise me
-          </Button>
-          <Button
-            type="button"
-            size="lg"
-            variant="outline"
-            onClick={() => setInterviewOpen(true)}
             className="h-14 w-full justify-center gap-2 rounded-2xl border-2 border-primary/40 bg-primary/10 text-base font-bold text-foreground hover:border-primary hover:bg-primary/20 sm:h-16 sm:text-lg"
           >
-            <MessageCircleHeart className="h-5 w-5 text-primary" />
-            Get to know me
+            <Shuffle className="h-5 w-5 text-primary" />
+            🎲 Surprise me
           </Button>
         </div>
 
@@ -890,6 +891,99 @@ function LibraryPage() {
             className="mt-2 min-h-[96px] resize-y rounded-xl border-white/10 bg-background/40 text-base sm:text-lg"
           />
         </div>
+      </section>
+
+      {/* Step 2 — Pick your sound (categories, theme & tempo merged) */}
+      <section className="space-y-4">
+        <header className="flex items-end justify-between gap-3">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em]">
+              <Disc3 className="h-3.5 w-3.5 text-primary" /> Step 2 — Pick your sound
+            </div>
+            <h2 className="mt-2 font-display text-3xl font-black tracking-tight sm:text-4xl">
+              Choose the vibe
+            </h2>
+          </div>
+          <div className="hidden text-right text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:block">
+            Progress {totalFilled}/6
+          </div>
+        </header>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          {(["language", "genre", "mood"] as Category[]).map((cat) => (
+            <CategoryCard
+              key={cat}
+              cat={cat}
+              value={selections[cat]}
+              chips={chips[cat]}
+              note={categoryNotes[cat]}
+              onNoteChange={(v) => setCategoryNotes((prev) => ({ ...prev, [cat]: v }))}
+              onSelect={(v) => setField(cat, v)}
+              onPickChip={(v) => pickChip(cat, v)}
+              onRefresh={() => refreshRow(cat)}
+            />
+          ))}
+
+          {/* Theme & Tempo — paired into a single combined card */}
+          <div className="relative overflow-hidden rounded-3xl border-2 border-dashed border-primary/30 bg-gradient-to-br from-rose-500/10 via-emerald-500/10 to-background p-4 shadow-card sm:col-span-2">
+            <div className="mb-3 flex items-center justify-between gap-2 px-1">
+              <div className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-foreground/80">
+                <span className="text-base">🎯</span>
+                Theme &amp; Tempo
+                <span className="rounded-full bg-primary/20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary">
+                  Paired
+                </span>
+              </div>
+              <span className="text-[10px] font-medium normal-case tracking-normal text-muted-foreground">
+                What the song's about + how fast it hits
+              </span>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {(["theme", "tempo"] as Category[]).map((cat) => (
+                <CategoryCard
+                  key={cat}
+                  cat={cat}
+                  value={selections[cat]}
+                  chips={chips[cat]}
+                  note={categoryNotes[cat]}
+                  onNoteChange={(v) => setCategoryNotes((prev) => ({ ...prev, [cat]: v }))}
+                  onSelect={(v) => setField(cat, v)}
+                  onPickChip={(v) => pickChip(cat, v)}
+                  onRefresh={() => refreshRow(cat)}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Compact mobile progress */}
+        <div className="space-y-1.5 sm:hidden">
+          <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+            <span>Progress</span>
+            <span>{totalFilled}/6</span>
+          </div>
+          <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+            <div
+              className="h-full rounded-full bg-gradient-brand transition-all duration-500"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Step 3 — Finalize & generate */}
+      <section className="space-y-5 rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/20 via-fuchsia-500/10 to-background p-5 shadow-glow sm:p-8">
+        <header className="space-y-2">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em]">
+            <Wand2 className="h-3.5 w-3.5 text-primary" /> Step 3 — Generate
+          </div>
+          <h2 className="font-display text-3xl font-black tracking-tight sm:text-4xl">
+            Write the lyrics
+          </h2>
+          <p className="text-sm text-muted-foreground sm:text-base">
+            Set the explicit toggle and let OG cook your lyrics. You'll review them before paying for the full song.
+          </p>
+        </header>
 
         {/* Foul mouth toggle */}
         <button
@@ -955,7 +1049,7 @@ function LibraryPage() {
         </button>
 
         {/* Generate CTA */}
-        <div className="relative mt-auto">
+        <div className="relative">
           <Button
             onClick={generateLyrics}
             disabled={!canGenerateLyrics || genLyrics}
