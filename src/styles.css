@@ -412,6 +412,13 @@
   color: transparent;
 }
 
+@utility text-gradient-red {
+  background-image: linear-gradient(135deg, oklch(0.7 0.22 25), oklch(0.55 0.24 18));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 @utility bg-gradient-brand {
   background-image: var(--gradient-brand);
 }
