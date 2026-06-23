@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Coins, Loader2, Receipt, ExternalLink, Crown, Undo2, RefreshCw } from "lucide-react";
@@ -321,6 +321,34 @@ function RefundsPanel() {
   }
 
   const rows = (data ?? []) as RefundRow[];
+
+  // Notify on status transitions (e.g. pending → succeeded/failed). Seeds the
+  // baseline on first load so we don't spam toasts for existing rows.
+  const lastStatusRef = useRef<Map<string, string> | null>(null);
+  useEffect(() => {
+    if (!rows.length) return;
+    const prev = lastStatusRef.current;
+    const next = new Map(rows.map((r) => [r.stripe_refund_id, r.status]));
+    if (prev) {
+      for (const r of rows) {
+        const before = prev.get(r.stripe_refund_id);
+        if (before && before !== r.status) {
+          const amount = formatMoney(r.amount, r.currency);
+          if (r.status === "succeeded") {
+            toast.success(`Refund completed · ${amount}`, { id: `refund-${r.stripe_refund_id}` });
+          } else if (r.status === "failed") {
+            toast.error(`Refund failed · ${r.failure_reason ?? "see details"}`, { id: `refund-${r.stripe_refund_id}` });
+          } else if (r.status === "canceled") {
+            toast(`Refund canceled · ${amount}`, { id: `refund-${r.stripe_refund_id}` });
+          } else {
+            toast(`Refund status: ${r.status}`, { id: `refund-${r.stripe_refund_id}` });
+          }
+        }
+      }
+    }
+    lastStatusRef.current = next;
+  }, [rows]);
+
   const lastUpdated = dataUpdatedAt ? new Date(dataUpdatedAt).toLocaleTimeString() : null;
 
   return (
