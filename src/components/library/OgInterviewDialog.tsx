@@ -15,17 +15,17 @@ import { invokeError } from "@/lib/invoke-error";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-type Turn = { role: "bot" | "user"; text: string };
+export type InterviewTurn = { role: "bot" | "user"; text: string };
 
 interface OgInterviewDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   seed: string;
-  onDone: (brief: string) => void;
+  onDone: (brief: string, transcript: InterviewTurn[]) => void;
 }
 
 export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterviewDialogProps) {
-  const [history, setHistory] = useState<Turn[]>([]);
+  const [history, setHistory] = useState<InterviewTurn[]>([]);
   const [answer, setAnswer] = useState("");
   const [loading, setLoading] = useState(false);
   const [finishing, setFinishing] = useState(false);
@@ -50,7 +50,7 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
     }
   }, [history, loading, finishing, open]);
 
-  async function askNext(currentHistory: Turn[]) {
+  async function askNext(currentHistory: InterviewTurn[]) {
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("og-interview", {
@@ -70,7 +70,7 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
   async function submit() {
     const text = answer.trim();
     if (!text || loading || finishing) return;
-    const next: Turn[] = [...history, { role: "user", text }];
+    const next: InterviewTurn[] = [...history, { role: "user", text }];
     setHistory(next);
     setAnswer("");
     await askNext(next);
@@ -91,7 +91,7 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
       if (error) throw new Error(invokeError(error, "Couldn't save your details"));
       const summary = (data?.summary ?? "").toString().trim();
       if (!summary) throw new Error("Bot returned nothing — try again");
-      onDone(summary);
+      onDone(summary, history);
       toast.success(`Saved ${answered} answer${answered === 1 ? "" : "s"} into your details`);
       onOpenChange(false);
     } catch (e) {
@@ -119,6 +119,10 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
 
         <div
           ref={scrollRef}
+          role="log"
+          aria-live="polite"
+          aria-relevant="additions text"
+          aria-label="Interview conversation"
           className="flex-1 space-y-3 overflow-y-auto bg-background/40 px-4 py-4 sm:px-5"
         >
           {history.length === 0 && loading && (
@@ -171,16 +175,23 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 void submit();
+              } else if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                e.preventDefault();
+                void submit();
+              } else if (e.key === "Escape" && !finishing) {
+                e.preventDefault();
+                void finish();
               }
             }}
+            aria-label="Your answer"
             placeholder={
               loading
                 ? "Waiting for the next question…"
-                : "Your answer — Enter to send, Shift+Enter for a new line"
+                : "Your answer — Enter to send, Shift+Enter for new line, Esc to finish"
             }
             disabled={loading || finishing}
             rows={2}
-            className="resize-none rounded-xl border-primary/20 bg-background/60 text-sm"
+            className="resize-none rounded-xl border-primary/20 bg-background/60 text-sm focus-visible:ring-2 focus-visible:ring-primary"
           />
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="text-xs text-muted-foreground">
