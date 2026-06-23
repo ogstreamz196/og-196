@@ -505,9 +505,10 @@ function LibraryPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-1 pb-12 sm:px-0">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-3 pb-16 sm:gap-12 sm:px-4 md:gap-14">
       {/* Hero */}
-      <header className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-primary/25 via-fuchsia-500/15 to-background p-6 shadow-card sm:p-10">
+      <header className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-primary/25 via-fuchsia-500/15 to-background p-7 shadow-card sm:p-12">
+
         <div
           aria-hidden
           className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-primary/30 blur-3xl"
