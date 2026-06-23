@@ -24,9 +24,26 @@ interface OgInterviewDialogProps {
   onDone: (brief: string, transcript: InterviewTurn[]) => void;
 }
 
-const DRAFT_KEY = "og-interview:draft:v1";
+const DRAFT_KEY = "og-interview:draft:v2";
 const DRAFT_TTL_MS = 1000 * 60 * 60 * 24; // 24h
-const TARGET_ANSWERS = 4;
+
+// Scripted questions — mirror the sections on the music creation page so the
+// wizard collects the exact same inputs (Language, Genre, Mood, Theme, Tempo)
+// plus the "Get to know me" personal section.
+const SCRIPT: string[] = [
+  // Mirrors the 5 picker sections (label + helper text) from library.index.tsx
+  "Language — what language do you want to sing in?",
+  "Genre — what sound are we cooking? (e.g. Drill, Afrobeats, R&B, Pop, Lo-fi…)",
+  "Mood — how should it feel? (e.g. Hype, Romantic, Dark, Chill, Nostalgic…)",
+  "Theme — what's the song about? (love, heartbreak, hustle, a person, a night out…)",
+  "Tempo — how fast should it hit? (slow ballad, mid-tempo groove, fast banger…)",
+  // Mirrors the "Get to know me" / Personal details section
+  "Get to know me — who is this song for, and what's the one word that sums them up?",
+  "A defining memory, place, or moment between you two — give me the vivid detail.",
+  "Inside jokes, nicknames, signature phrases or quirks I should weave in?",
+  "Anything else personal — drama, dreams, flexes — that should land in the lyrics?",
+];
+const TARGET_ANSWERS = SCRIPT.length;
 
 type Draft = { seed: string; history: InterviewTurn[]; answer: string; ts: number };
 
@@ -82,9 +99,8 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
       setPendingDraft(draft);
     } else {
       setPendingDraft(null);
-      setHistory([]);
+      setHistory([{ role: "bot", text: SCRIPT[0] }]);
       setAnswer("");
-      void askNext([]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, seed]);
@@ -95,18 +111,14 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
     setPendingDraft(null);
     setHistory(draft.history);
     setAnswer(draft.answer ?? "");
-    const last = draft.history[draft.history.length - 1];
-    if (last?.role === "user") {
-      void askNext(draft.history);
-    }
+    askNext(draft.history);
   }
 
   function discardDraft() {
     clearDraft();
     setPendingDraft(null);
-    setHistory([]);
+    setHistory([{ role: "bot", text: SCRIPT[0] }]);
     setAnswer("");
-    void askNext([]);
   }
 
   // Persist transcript + in-flight answer whenever they change while open.
@@ -127,21 +139,14 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
   }, [history, loading, finishing, open]);
 
 
-  async function askNext(currentHistory: InterviewTurn[]) {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("og-interview", {
-        body: { action: "next", seed, history: currentHistory },
-      });
-      if (error) throw new Error(invokeError(error, "Bot couldn't think of a question"));
-      const q = (data?.question ?? "").toString().trim();
-      if (!q) throw new Error("Bot went quiet — try again");
-      setHistory([...currentHistory, { role: "bot", text: q }]);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Interview failed");
-    } finally {
-      setLoading(false);
-    }
+  function askNext(currentHistory: InterviewTurn[]) {
+    const answered = currentHistory.filter((t) => t.role === "user").length;
+    if (answered >= SCRIPT.length) return; // script complete
+    const nextQ = SCRIPT[answered];
+    // Avoid duplicating the question if it's already the last bot turn.
+    const last = currentHistory[currentHistory.length - 1];
+    if (last?.role === "bot" && last.text === nextQ) return;
+    setHistory([...currentHistory, { role: "bot", text: nextQ }]);
   }
 
   async function submit() {
@@ -150,8 +155,9 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
     const next: InterviewTurn[] = [...history, { role: "user", text }];
     setHistory(next);
     setAnswer("");
-    await askNext(next);
+    askNext(next);
   }
+
 
   async function finish() {
     if (finishing || loading) return;
@@ -184,8 +190,8 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
   const answered = history.filter((t) => t.role === "user").length;
   const progressPct = Math.min(100, Math.round((answered / TARGET_ANSWERS) * 100));
   const stepLabel = answered >= TARGET_ANSWERS
-    ? `Step ${answered} · enough to roll`
-    : `Step ${answered + 1} of ~${TARGET_ANSWERS}`;
+    ? `Step ${answered} · all done`
+    : `Step ${answered + 1} of ${TARGET_ANSWERS}`;
 
   return (
     <Dialog open={open} onOpenChange={(o) => !finishing && onOpenChange(o)}>
@@ -193,19 +199,19 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
         <DialogHeader className="space-y-2 border-b border-white/10 bg-gradient-to-br from-primary/20 via-fuchsia-500/10 to-background px-5 py-4">
           <DialogTitle className="flex items-center gap-2 text-lg font-black">
             <MessageCircleHeart className="h-5 w-5 text-primary" />
-            OG Bot wants to know you
+            Create Song — guided wizard
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            Answer as many as you like. Every answer makes the song sharper.
-            Tap <span className="font-semibold text-foreground">That's enough</span> when you're done.
+            Same questions as the creation page — Language, Genre, Mood, Theme, Tempo, then a few personal details.
+            Tap <span className="font-semibold text-foreground">That's enough</span> any time to finish.
           </DialogDescription>
           <div
             className="space-y-1 pt-1"
-            aria-label={`Progress: ${answered} of about ${TARGET_ANSWERS} answers captured`}
+            aria-label={`Progress: ${answered} of ${TARGET_ANSWERS} answers captured`}
           >
             <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
               <span>{stepLabel}</span>
-              <span>{answered}/~{TARGET_ANSWERS}</span>
+              <span>{answered}/{TARGET_ANSWERS}</span>
             </div>
             <div
               role="progressbar"
