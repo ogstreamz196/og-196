@@ -50,7 +50,7 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
     }
   }, [history, loading, finishing, open]);
 
-  async function askNext(currentHistory: Turn[]) {
+  async function askNext(currentHistory: InterviewTurn[]) {
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("og-interview", {
