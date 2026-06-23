@@ -489,11 +489,11 @@ function AlbumCoverShowcase() {
         </h3>
       </div>
 
-      <ul className="mt-8 grid gap-3 sm:mt-10 sm:gap-4 md:grid-cols-2">
+      <ul className="mt-8 grid gap-4 sm:mt-10 sm:gap-6 md:grid-cols-2">
         {examples.map((e, i) => (
           <li
             key={e.label}
-            className="group relative flex items-start gap-4 rounded-2xl border-2 border-white/12 bg-card/70 p-4 text-left backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-primary/40 sm:rounded-3xl sm:p-5"
+            className="group relative flex items-start gap-4 rounded-[2rem] border-2 border-white/15 bg-card/70 p-6 text-left shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-primary/40 sm:p-8"
           >
             <CardEditBadge />
             <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-brand text-2xl shadow-glow sm:h-14 sm:w-14 sm:text-3xl">
@@ -504,14 +504,14 @@ function AlbumCoverShowcase() {
                 as="p"
                 contentKey={`welcome.example.${i}.label`}
                 defaultValue={e.label}
-                className="text-[11px] font-black uppercase tracking-[0.18em] text-primary sm:text-xs"
+                className="text-xs font-black uppercase tracking-[0.24em] text-primary sm:text-sm"
               />
               <EditableContent
                 as="p"
                 multiline
                 contentKey={`welcome.example.${i}.example`}
                 defaultValue={e.example}
-                className="mt-1.5 block text-base font-semibold leading-snug text-foreground sm:text-lg md:text-xl"
+                className="mt-2 block text-lg font-semibold leading-snug text-foreground sm:text-xl"
               />
             </div>
           </li>
