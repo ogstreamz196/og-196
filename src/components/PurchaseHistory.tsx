@@ -91,6 +91,15 @@ function ReceiptLink({ row }: { row: PurchaseRow }) {
   );
 }
 
+type RangeKey = "all" | "30d" | "90d" | "year";
+
+const RANGE_OPTIONS: { key: RangeKey; label: string; days: number | null }[] = [
+  { key: "30d", label: "Last 30 days", days: 30 },
+  { key: "90d", label: "Last 90 days", days: 90 },
+  { key: "year", label: "Last year", days: 365 },
+  { key: "all", label: "All time", days: null },
+];
+
 export function PurchaseHistory() {
   const fetcher = useServerFn(getCoinPurchaseHistory);
   const { data, isLoading, error, refetch, isFetching } = useQuery({
@@ -98,6 +107,8 @@ export function PurchaseHistory() {
     queryFn: () => fetcher(),
     staleTime: 30_000,
   });
+
+  const [range, setRange] = useState<RangeKey>("30d");
 
   return (
     <section className="mx-auto mt-10 w-full max-w-3xl rounded-2xl border border-border bg-card p-6 shadow-card">
@@ -115,6 +126,27 @@ export function PurchaseHistory() {
         </button>
       </header>
 
+      <div className="mt-4 flex flex-wrap gap-2">
+        {RANGE_OPTIONS.map((opt) => {
+          const active = range === opt.key;
+          return (
+            <button
+              key={opt.key}
+              type="button"
+              onClick={() => setRange(opt.key)}
+              className={
+                "rounded-full border px-3 py-1 text-xs font-semibold transition " +
+                (active
+                  ? "border-primary bg-primary/15 text-primary"
+                  : "border-border bg-background text-muted-foreground hover:text-foreground")
+              }
+            >
+              {opt.label}
+            </button>
+          );
+        })}
+      </div>
+
       {isLoading ? (
         <div className="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" /> Loading…
@@ -122,13 +154,16 @@ export function PurchaseHistory() {
       ) : error ? (
         <p className="mt-6 text-sm text-destructive">Couldn't load your history.</p>
       ) : (() => {
-        const paidCoinPurchases = (data ?? []).filter(
-          (row) => row.type === "stripe_purchase" && row.amount > 0,
-        );
+        const days = RANGE_OPTIONS.find((o) => o.key === range)?.days ?? null;
+        const cutoff = days != null ? Date.now() - days * 24 * 60 * 60 * 1000 : null;
+        const paidCoinPurchases = (data ?? [])
+          .filter((row) => row.type === "stripe_purchase" && row.amount > 0)
+          .filter((row) => cutoff == null || new Date(row.created_at).getTime() >= cutoff)
+          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
         if (paidCoinPurchases.length === 0) {
           return (
             <p className="mt-6 text-sm text-muted-foreground">
-              No coin purchases yet. Paid top-ups will appear here.
+              No coin purchases in this range. Try a wider window.
             </p>
           );
         }
