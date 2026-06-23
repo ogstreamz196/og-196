@@ -404,6 +404,7 @@ function BuyCoinsPage() {
             multiline
           />
         </p>
+        <PurchaseHistory />
       </div>
     </DashboardShell>
   );
