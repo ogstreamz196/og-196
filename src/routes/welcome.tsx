@@ -34,7 +34,10 @@ function OgBotLogo({ className = "h-8 w-8" }: { className?: string }) {
     <img
       src={ogBotAsset.url}
       alt="OG Bot"
-      className={`inline-block aspect-square rounded-xl object-cover align-middle shadow-glow ${className}`}
+      width={512}
+      height={512}
+      decoding="async"
+      className={`inline-block aspect-square shrink-0 rounded-xl object-contain object-center align-middle shadow-glow ${className}`}
     />
   );
 }
