@@ -29,6 +29,7 @@ import { useSettings } from "@/hooks/use-settings";
 import { invokeError } from "@/lib/invoke-error";
 import { cn } from "@/lib/utils";
 import { SongCard, type Song } from "@/components/SongCard";
+import { OgInterviewDialog } from "@/components/library/OgInterviewDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
