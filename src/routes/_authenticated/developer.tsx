@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
-import { Send, Circle, Radio, ShieldAlert, Loader2 } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { Send, Circle, Radio, ShieldAlert, Loader2, FileSpreadsheet, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,6 +13,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { BossNav } from "@/components/admin/BossNav";
+import { syncUserActivity, syncAllUsersActivity } from "@/lib/user-log.functions";
 
 export const Route = createFileRoute("/_authenticated/developer")({
   component: DeveloperPage,
