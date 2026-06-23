@@ -110,7 +110,9 @@ function DeveloperPage() {
   return (
     <div className="px-4 py-6 md:px-8">
       <BossNav />
+      <FreeAccessPanel />
       <header className="mb-6 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:flex-wrap sm:justify-between">
+
         <div className="flex min-w-0 items-center gap-3">
           <Radio className="h-6 w-6 shrink-0 text-primary" />
           <div className="min-w-0">
