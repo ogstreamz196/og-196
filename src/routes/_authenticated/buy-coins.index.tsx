@@ -20,6 +20,7 @@ import { StripeEmbeddedCheckoutInline } from "@/components/StripeEmbeddedCheckou
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { CirculatingCoins } from "@/components/CirculatingCoins";
 import { toast } from "sonner";
+import { PurchaseHistory } from "@/components/PurchaseHistory";
 
 const SELECTION_STORAGE_KEY = "buyCoins.lastSelection";
 
