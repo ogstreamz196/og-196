@@ -19,7 +19,7 @@ import { useDisplayPrefs, useSetDisplayPrefs, clampScale, type Density } from "@
  * Stores assistant tone in DB (foul_mouth) and the rest per-browser.
  */
 export function PreferencesPanel() {
-  const { foulMouth, isLoading } = useFoulMouth();
+  const { foulMouth, isLoading, forcedClean } = useFoulMouth();
   const setFoulMouth = useSetFoulMouth();
   const { isVip } = useRole();
   const { mode, setMode } = useOgMode();
