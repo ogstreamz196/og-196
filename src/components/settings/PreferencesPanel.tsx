@@ -140,12 +140,26 @@ export function PreferencesPanel() {
 
           <ToggleRow
             icon={<MessageSquareMore className="h-4 w-4" />}
-            label="Foul-mouth"
-            description="When OG mode is on, allow stronger language."
-            checked={foulMouth}
-            disabled={isLoading || setFoulMouth.isPending}
+            label={isVip ? "Foul-mouth" : "Foul-mouth (VIP only)"}
+            description={
+              isVip
+                ? "When OG mode is on, allow stronger language."
+                : "Unlock with OG VIP (£5/month) to let OG go fully savage."
+            }
+            checked={isVip && foulMouth}
+            disabled={!isVip || isLoading || setFoulMouth.isPending}
             onChange={(v) => setFoulMouth.mutate(v)}
           />
+          {!isVip && (
+            <Link
+              to="/buy-coins"
+              search={{ flow: "vip" } as never}
+              className="inline-flex items-center gap-2 rounded-md border border-primary/40 bg-primary/10 px-3 py-2 text-xs font-semibold text-primary hover:bg-primary/15"
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              Upgrade to OG VIP — £5/month
+            </Link>
+          )}
         </CardContent>
       </Card>
 
