@@ -80,6 +80,12 @@ export function useSetFoulMouth() {
 
   return useMutation({
     mutationFn: async (next: boolean) => {
+      if (FOUL_MOUTH_FORCED_CLEAN) {
+        toast.info("OG is staying clean for everyone right now — foul mouth is paused until further notice.", {
+          id: "foul-mouth-locked",
+        });
+        return false;
+      }
       if (!uid) throw new Error("Sign in required");
       const { error } = await supabase
         .from("user_preferences")
