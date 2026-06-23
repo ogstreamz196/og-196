@@ -194,6 +194,10 @@ function RootComponent() {
         import("@/lib/dev-telemetry.functions")
           .then((m) => m.notifyDevSignIn())
           .catch(() => undefined);
+        // Snapshot the signed-in user's activity to Sheets (fire-and-forget).
+        import("@/lib/user-log.functions")
+          .then((m) => m.syncUserActivity({ data: {} }))
+          .catch(() => undefined);
       }
     });
     return () => sub.subscription.unsubscribe();
