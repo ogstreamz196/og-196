@@ -138,6 +138,7 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
     if (finishing || loading) return;
     const answered = history.filter((t) => t.role === "user").length;
     if (answered === 0) {
+      clearDraft();
       onOpenChange(false);
       return;
     }
@@ -151,9 +152,11 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
       if (!summary) throw new Error("Bot returned nothing — try again");
       onDone(summary, history);
       toast.success(`Saved ${answered} answer${answered === 1 ? "" : "s"} into your details`);
+      clearDraft();
       onOpenChange(false);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Couldn't finish interview");
+
     } finally {
       setFinishing(false);
     }
