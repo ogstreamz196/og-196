@@ -187,9 +187,43 @@ function RootComponent() {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       router.invalidate();
       if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
+      if (event === "SIGNED_IN" && typeof window !== "undefined") {
+        const key = "og:dev-notified-session";
+        if (window.sessionStorage.getItem(key)) return;
+        window.sessionStorage.setItem(key, "1");
+        import("@/lib/dev-telemetry.functions")
+          .then((m) => m.notifyDevSignIn())
+          .catch(() => undefined);
+      }
     });
     return () => sub.subscription.unsubscribe();
   }, [router, queryClient]);
+
+  // Track last visited page (debounced) so devs can see it from the admin panel.
+  useEffect(() => {
+    let lastSent = "";
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const unsub = router.subscribe("onResolved", ({ toLocation }) => {
+      const path = toLocation.pathname;
+      if (!path || path === lastSent) return;
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        lastSent = path;
+        supabase.auth.getSession().then(({ data }) => {
+          if (!data.session) return;
+          import("@/lib/dev-telemetry.functions")
+            .then((m) => m.updateLastPage({ data: { path } }))
+            .catch(() => undefined);
+        });
+      }, 800);
+    });
+    return () => {
+      if (timer) clearTimeout(timer);
+      unsub();
+    };
+  }, [router]);
+
+
 
   return (
     <QueryClientProvider client={queryClient}>
