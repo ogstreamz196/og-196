@@ -59,7 +59,7 @@ export function useFoulMouth() {
   }, [uid, qc]);
 
   return {
-    foulMouth: query.data ?? false,
+    foulMouth: query.data ?? true,
     isLoading: query.isLoading,
     isReady: !!uid && query.isFetched,
   };
