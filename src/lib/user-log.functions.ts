@@ -94,7 +94,7 @@ function flatten(sections: Section[]): (string | number | null)[][] {
 }
 
 async function buildUserSnapshot(
-  supabase: NonNullable<Awaited<ReturnType<typeof requireSupabaseAuth>>>["supabase"] extends infer _ ? any : any,
+  supabase: any,
   userId: string,
 ): Promise<{ tab: string; values: (string | number | null)[][] }> {
   const [profileRes, rolesRes, txRes, songsRes, msgsRes, portalsRes] = await Promise.all([
