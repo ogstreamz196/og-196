@@ -29,7 +29,7 @@ export function useFoulMouth() {
         .eq("user_id", uid!)
         .maybeSingle();
       if (error) throw new Error(error.message);
-      return (data?.foul_mouth ?? false) as boolean;
+      return (data?.foul_mouth ?? true) as boolean;
     },
   });
 
