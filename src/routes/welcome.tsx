@@ -34,7 +34,10 @@ function OgBotLogo({ className = "h-8 w-8" }: { className?: string }) {
     <img
       src={ogBotAsset.url}
       alt="OG Bot"
-      className={`inline-block aspect-square rounded-xl object-cover align-middle shadow-glow ${className}`}
+      width={512}
+      height={512}
+      decoding="async"
+      className={`inline-block aspect-square shrink-0 rounded-xl object-contain object-center align-middle shadow-glow ${className}`}
     />
   );
 }
@@ -586,17 +589,18 @@ function Pillars() {
     <section id="studio" className="relative scroll-mt-24">
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-8 sm:py-24 lg:py-32">
 
-        <div className="mx-auto max-w-5xl text-center">
+        <div className="mx-auto max-w-6xl text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground sm:text-sm">
             Prompt playground
           </p>
-          <h2 className="font-display mt-4 flex flex-nowrap items-center justify-center gap-4 text-balance font-semibold leading-[0.95] tracking-[-0.035em] sm:mt-6 sm:gap-8">
-            <span className="text-left text-2xl sm:text-4xl md:text-5xl lg:text-6xl">
+          <h2 className="font-display mt-4 flex flex-nowrap items-center justify-center gap-3 text-balance font-semibold leading-[0.95] tracking-[-0.035em] sm:mt-6 sm:gap-6">
+            <span className="text-left text-lg sm:text-2xl md:text-3xl lg:text-4xl">
               Different<br className="hidden sm:block" /> songs
             </span>
-            <OgBotLogo className="h-32 w-32 shrink-0 sm:h-56 sm:w-56 md:h-72 md:w-72 lg:h-[22rem] lg:w-[22rem]" />
+            <OgBotLogo className="h-[18rem] w-[18rem] sm:h-[28rem] sm:w-[28rem] md:h-[36rem] md:w-[36rem] lg:h-[44rem] lg:w-[44rem]" />
           </h2>
         </div>
+
 
         <div className="mt-12 grid gap-4 sm:mt-16 sm:gap-6 md:grid-cols-3">
           {items.map((it) => (
