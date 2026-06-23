@@ -235,6 +235,7 @@ function RootComponent() {
       <AuthProvider>
         <SiteContentRealtimeBridge />
         <DisplayPrefsBridge />
+        <UserActivityArchiver />
         <Outlet />
         <Toaster />
       </AuthProvider>
