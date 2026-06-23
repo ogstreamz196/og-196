@@ -433,12 +433,13 @@ function Hero() {
 
       <div className="relative mx-auto w-full max-w-6xl text-center">
 
-        <div className="wc-pop mx-auto mt-6 inline-flex max-w-full flex-wrap items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2.5 text-[11px] font-extrabold uppercase tracking-[0.16em] backdrop-blur-xl sm:mt-12 sm:gap-3 sm:px-6 sm:py-3 sm:text-base md:gap-4 md:px-8 md:py-4 md:text-xl">
-          <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-primary shadow-glow sm:h-3 sm:w-3" />
-          <span>Bespoke tracks · made for you by</span>
-          <OgBotLogo className="h-7 w-7 sm:h-12 sm:w-12 md:h-14 md:w-14" />
-          <span className="text-gradient-brand">OG BOT</span>
+        <div className="wc-pop mx-auto mt-6 inline-flex max-w-full flex-wrap items-center justify-center gap-3 rounded-full border-2 border-white/25 bg-white/10 px-5 py-3 text-sm font-black uppercase tracking-[0.18em] backdrop-blur-xl sm:mt-12 sm:gap-5 sm:px-8 sm:py-4 sm:text-xl md:gap-6 md:px-10 md:py-5 md:text-3xl">
+          <span className="h-3 w-3 animate-pulse rounded-full bg-primary shadow-glow sm:h-4 sm:w-4" />
+          <span className="font-display font-black tracking-[0.04em]">Bespoke tracks · made for you by</span>
+          <OgBotLogo className="h-14 w-14 sm:h-20 sm:w-20 md:h-28 md:w-28" />
+          <span className="font-display text-gradient-brand font-black tracking-[0.06em] text-xl sm:text-3xl md:text-5xl">OG BOT</span>
         </div>
+
 
         <h1 className="font-display mt-6 text-[clamp(2.5rem,11vw,12rem)] font-black leading-[0.88] tracking-[-0.055em] drop-shadow-[0_8px_30px_rgba(80,60,255,0.35)] sm:mt-10 sm:leading-[0.85]">
           <span className="wc-pop block">PROMPT IT.</span>
