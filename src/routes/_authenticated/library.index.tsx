@@ -440,6 +440,14 @@ function LibraryPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
+  // Refresh the library list immediately when explicit-mode is toggled so the
+  // results reflect the new preference without a manual reload.
+  useEffect(() => {
+    if (!user) return;
+    library.refetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [foulMouth]);
+
   async function handleDelete() {
     if (!pendingDelete) return;
     setDeleting(true);
@@ -828,18 +836,34 @@ function LibraryPage() {
             </div>
             <button
               type="button"
+              role="switch"
+              aria-checked={foulMouth}
+              aria-label={
+                foulMouth
+                  ? "OG Foul Mouth is on. Activate to turn explicit mode off."
+                  : "OG Foul Mouth is off. Activate to turn explicit mode on."
+              }
+              aria-describedby="foul-mouth-status"
               onClick={() => !genLyrics && setFoulMouth((v) => !v)}
+              onKeyDown={(e) => {
+                if (genLyrics) return;
+                if (e.key === " " || e.key === "Enter") {
+                  e.preventDefault();
+                  setFoulMouth((v) => !v);
+                }
+              }}
               disabled={genLyrics}
-              aria-pressed={foulMouth}
               className={cn(
-                "group flex w-full items-center justify-between gap-3 rounded-2xl border-2 px-4 py-3 text-left transition-all",
+                "group flex w-full min-h-11 items-center justify-between gap-3 rounded-2xl border-2 px-4 py-3 text-left transition-all",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                "disabled:opacity-60 disabled:cursor-not-allowed",
                 foulMouth
                   ? "border-destructive bg-destructive/15 shadow-[0_0_24px_-6px_oklch(0.62_0.22_25_/_0.6)]"
                   : "border-white/15 bg-white/[0.04] hover:border-white/25",
               )}
             >
               <div className="flex items-center gap-3">
-                <div className={cn(
+                <div aria-hidden className={cn(
                   "grid h-10 w-10 shrink-0 place-items-center rounded-xl text-lg transition",
                   foulMouth ? "bg-destructive/30" : "bg-white/5",
                 )}>
@@ -847,10 +871,14 @@ function LibraryPage() {
                 </div>
                 <div>
                   <div className="text-sm font-bold leading-tight">OG Foul Mouth</div>
-                  <div className={cn(
-                    "text-xs leading-tight",
-                    foulMouth ? "font-semibold text-destructive-foreground/90" : "text-muted-foreground",
-                  )}>
+                  <div
+                    id="foul-mouth-status"
+                    aria-live="polite"
+                    className={cn(
+                      "text-xs leading-tight",
+                      foulMouth ? "font-semibold text-destructive-foreground/90" : "text-muted-foreground",
+                    )}
+                  >
                     {foulMouth ? "EXPLICIT — full swearing ON" : "Clean version — tap to go explicit"}
                   </div>
                 </div>
