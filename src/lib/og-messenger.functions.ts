@@ -75,10 +75,10 @@ export const chatOgBot = createServerFn({ method: "POST" })
         .limit(40),
       supabaseAdmin
         .from("app_settings")
-        .select("value")
-        .eq("key", "free_access_all")
-        .maybeSingle(),
+        .select("key, value")
+        .in("key", ["free_access_all", "free_access_expires_at"]),
     ]);
+
 
     if (profileRes.error) throw new Error(profileRes.error.message);
     const rawProfile = profileRes.data;
@@ -96,10 +96,20 @@ export const chatOgBot = createServerFn({ method: "POST" })
       (siteRes.data ?? []).map((r: { key: string; value: string }) => [r.key, r.value]),
     );
     // Foul-mouth is normally VIP-only. While the dev-controlled
-    // free_access_all flag is ON, every signed-in user gets it too.
-    const freeAccessRaw = freeRes.data?.value as unknown;
-    const freeAccess = freeAccessRaw === true || freeAccessRaw === "true";
+    // free_access_all flag is ON (and not past its optional expiry), every
+    // signed-in user gets it too.
+    const freeMap = new Map(
+      (freeRes.data ?? []).map((r: { key: string; value: unknown }) => [r.key, r.value]),
+    );
+    const freeRaw = freeMap.get("free_access_all");
+    const freeExpRaw = freeMap.get("free_access_expires_at");
+    const freeExpired =
+      typeof freeExpRaw === "string" && freeExpRaw
+        ? new Date(freeExpRaw).getTime() <= Date.now()
+        : false;
+    const freeAccess = (freeRaw === true || freeRaw === "true") && !freeExpired;
     const isVip = roles.includes("vip") || roles.includes("admin") || freeAccess;
+
     const foulMouth = isVip ? (prefRes.data?.foul_mouth ?? false) : false;
 
 
