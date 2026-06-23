@@ -435,7 +435,7 @@ function Hero() {
 
         <div className="wc-pop mx-auto mt-6 inline-flex max-w-full flex-nowrap items-center justify-center gap-3 rounded-full border-2 border-white/25 bg-white/10 px-5 py-3 text-sm font-black uppercase tracking-[0.18em] backdrop-blur-xl sm:mt-12 sm:gap-6 sm:px-8 sm:py-4 sm:text-xl md:gap-8 md:px-10 md:py-5 md:text-3xl">
           <span className="font-display font-black tracking-[0.04em] text-right">Bespoke<br className="sm:hidden" /> tracks</span>
-          <OgBotLogo className="h-20 w-20 sm:h-32 sm:w-32 md:h-44 md:w-44 lg:h-52 lg:w-52" />
+          <OgBotLogo className="h-40 w-40 sm:h-64 sm:w-64 md:h-[22rem] md:w-[22rem] lg:h-[26rem] lg:w-[26rem]" />
           <span className="font-display font-black tracking-[0.04em] text-left">Made<br className="sm:hidden" /> for you</span>
         </div>
 
