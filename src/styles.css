@@ -235,6 +235,59 @@
   /* Radix toast viewport on phones — keep within safe-area, never wider than screen. */
   [data-radix-toast-viewport] {
     max-width: 100vw;
+    padding-top: max(0.5rem, env(safe-area-inset-top));
+    padding-right: max(0.5rem, env(safe-area-inset-right));
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+    padding-left: max(0.5rem, env(safe-area-inset-left));
+  }
+  /* Sticky/fixed page headers and bottom bars get notch-aware insets. */
+  .safe-top    { padding-top: max(var(--safe-pad, 0px), env(safe-area-inset-top)); }
+  .safe-bottom { padding-bottom: max(var(--safe-pad, 0px), env(safe-area-inset-bottom)); }
+  .safe-x {
+    padding-left: max(var(--safe-pad, 0px), env(safe-area-inset-left));
+    padding-right: max(var(--safe-pad, 0px), env(safe-area-inset-right));
+  }
+  /* Centered Radix dialogs/sheets must never escape the safe area on iPhone/Samsung. */
+  [data-radix-dialog-content],
+  [data-radix-alert-dialog-content] {
+    max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 1rem) !important;
+    margin-top: env(safe-area-inset-top);
+    margin-bottom: env(safe-area-inset-bottom);
+  }
+  /* Soft route-enter animation — every page main fades/lifts in (respects reduced-motion). */
+  main, [data-page-root] {
+    animation: page-enter 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes page-enter {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  /* Tactile press feedback on every clickable surface. */
+  button, [role="button"], a[href], [data-slot="button"] {
+    transition: transform 140ms ease, box-shadow 200ms ease, background-color 200ms ease, color 200ms ease, opacity 200ms ease;
+  }
+  button:not(:disabled):active,
+  [role="button"]:not([aria-disabled="true"]):active,
+  a[href]:active,
+  [data-slot="button"]:not(:disabled):active {
+    transform: scale(0.97);
+  }
+  /* Cards lift slightly on hover for a more "alive" feel. */
+  @media (hover: hover) {
+    .glass-panel, [data-slot="card"] {
+      transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+    }
+    .glass-panel:hover, [data-slot="card"]:hover {
+      transform: translateY(-2px);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
   /* Density tokens — consumed by surfaces that opt in via `var(--space-y)` etc. */
   :root,
