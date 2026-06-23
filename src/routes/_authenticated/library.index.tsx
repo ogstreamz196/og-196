@@ -855,13 +855,17 @@ function LibraryPage() {
                   </div>
                 </div>
               </div>
-              <Switch
-                id="foul-mouth-toggle"
-                checked={foulMouth}
-                onCheckedChange={setFoulMouth}
-                disabled={genLyrics}
-                className="pointer-events-none scale-125 data-[state=checked]:bg-destructive"
-              />
+              <span
+                aria-hidden
+                className={cn(
+                  "pointer-events-none inline-flex shrink-0 items-center justify-center rounded-full border-2 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.14em] transition",
+                  foulMouth
+                    ? "border-destructive bg-destructive text-destructive-foreground shadow-[0_0_18px_-4px_oklch(0.62_0.22_25_/_0.8)]"
+                    : "border-white/25 bg-white/10 text-foreground",
+                )}
+              >
+                {foulMouth ? "Turn off" : "Turn on"}
+              </span>
             </button>
             <Button
               onClick={generateLyrics}
