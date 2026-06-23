@@ -250,21 +250,21 @@ function PrimaryCard({
       </div>
 
       <div className="relative flex flex-1 flex-col">
-        <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-white/15 bg-gradient-brand-soft text-primary shadow-glow sm:h-20 sm:w-20">
+        <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl border-2 border-white/15 bg-gradient-brand-soft text-primary shadow-glow sm:mb-6 sm:h-20 sm:w-20">
           {icon}
         </div>
         <div className="flex items-center gap-2">
-          <p className="text-sm uppercase tracking-[0.24em] text-muted-foreground sm:text-base">{eyebrow}</p>
+          <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground sm:text-base">{eyebrow}</p>
           <span className="h-px flex-1 bg-gradient-to-r from-white/15 to-transparent" />
         </div>
-        <h3 className="font-display mt-4 text-[clamp(2.25rem,8.5vw,6.5rem)] font-black uppercase leading-[0.92] tracking-[-0.035em] drop-shadow-[0_6px_24px_rgba(80,60,255,0.35)] [overflow-wrap:break-word]">
+        <h3 className="font-display mt-3 text-[clamp(2rem,11vw,6.5rem)] font-black uppercase leading-[0.95] tracking-[-0.035em] drop-shadow-[0_6px_24px_rgba(80,60,255,0.35)] [overflow-wrap:break-word] sm:mt-4">
           {title.split(" ").map((word, i, arr) => {
             const isLast = i === arr.length - 1;
             return (
               <span
                 key={`${word}-${i}`}
                 className={
-                  "wc-pop block " +
+                  "wc-pop mr-[0.25em] inline-block " +
                   (isLast ? "italic text-gradient-brand wc-bounce-soft" : "")
                 }
                 style={{ animationDelay: `${i * 0.12}s` }}
@@ -275,10 +275,10 @@ function PrimaryCard({
             );
           })}
         </h3>
-        <p className="mt-6 max-w-md text-lg leading-relaxed text-muted-foreground sm:text-xl">{body}</p>
+        <p className="mt-4 max-w-md text-base leading-relaxed text-muted-foreground sm:mt-6 sm:text-xl">{body}</p>
 
         {/* Feature chips */}
-        <div className="mt-7 flex flex-wrap gap-2.5">
+        <div className="mt-5 flex flex-wrap gap-2 sm:mt-7 sm:gap-2.5">
           {(isAccent
             ? [
                 { icon: <Sparkles className="h-4 w-4" />, label: "AI co-producer" },
@@ -293,7 +293,7 @@ function PrimaryCard({
           ).map((chip) => (
             <span
               key={chip.label}
-              className="inline-flex items-center gap-1.5 rounded-full border-2 border-white/15 bg-white/[0.04] px-3.5 py-1.5 text-sm font-semibold text-foreground/80 backdrop-blur-sm"
+              className="inline-flex items-center gap-1.5 rounded-full border-2 border-white/15 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-foreground/80 backdrop-blur-sm sm:px-3.5 sm:text-sm"
             >
               {chip.icon}
               {chip.label}
@@ -302,8 +302,8 @@ function PrimaryCard({
         </div>
       </div>
 
-      <div className="relative mt-10 inline-flex items-center gap-2 text-lg font-bold text-primary">
-        <span className="rounded-full border-2 border-primary/40 bg-primary/15 px-5 py-2.5 backdrop-blur-sm transition-colors group-hover:bg-primary/25">
+      <div className="relative mt-6 inline-flex items-center gap-2 text-base font-bold text-primary sm:mt-10 sm:text-lg">
+        <span className="rounded-full border-2 border-primary/40 bg-primary/15 px-4 py-2 backdrop-blur-sm transition-colors group-hover:bg-primary/25 sm:px-5 sm:py-2.5">
           {cta}
         </span>
         <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
