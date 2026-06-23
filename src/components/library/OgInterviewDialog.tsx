@@ -99,9 +99,8 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
       setPendingDraft(draft);
     } else {
       setPendingDraft(null);
-      setHistory([]);
+      setHistory([{ role: "bot", text: SCRIPT[0] }]);
       setAnswer("");
-      void askNext([]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, seed]);
@@ -112,18 +111,14 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
     setPendingDraft(null);
     setHistory(draft.history);
     setAnswer(draft.answer ?? "");
-    const last = draft.history[draft.history.length - 1];
-    if (last?.role === "user") {
-      void askNext(draft.history);
-    }
+    askNext(draft.history);
   }
 
   function discardDraft() {
     clearDraft();
     setPendingDraft(null);
-    setHistory([]);
+    setHistory([{ role: "bot", text: SCRIPT[0] }]);
     setAnswer("");
-    void askNext([]);
   }
 
   // Persist transcript + in-flight answer whenever they change while open.
@@ -144,21 +139,14 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
   }, [history, loading, finishing, open]);
 
 
-  async function askNext(currentHistory: InterviewTurn[]) {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("og-interview", {
-        body: { action: "next", seed, history: currentHistory },
-      });
-      if (error) throw new Error(invokeError(error, "Bot couldn't think of a question"));
-      const q = (data?.question ?? "").toString().trim();
-      if (!q) throw new Error("Bot went quiet — try again");
-      setHistory([...currentHistory, { role: "bot", text: q }]);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Interview failed");
-    } finally {
-      setLoading(false);
-    }
+  function askNext(currentHistory: InterviewTurn[]) {
+    const answered = currentHistory.filter((t) => t.role === "user").length;
+    if (answered >= SCRIPT.length) return; // script complete
+    const nextQ = SCRIPT[answered];
+    // Avoid duplicating the question if it's already the last bot turn.
+    const last = currentHistory[currentHistory.length - 1];
+    if (last?.role === "bot" && last.text === nextQ) return;
+    setHistory([...currentHistory, { role: "bot", text: nextQ }]);
   }
 
   async function submit() {
@@ -167,8 +155,9 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
     const next: InterviewTurn[] = [...history, { role: "user", text }];
     setHistory(next);
     setAnswer("");
-    await askNext(next);
+    askNext(next);
   }
+
 
   async function finish() {
     if (finishing || loading) return;
