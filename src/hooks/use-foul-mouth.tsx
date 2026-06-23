@@ -10,6 +10,13 @@ import { toast } from "sonner";
  * Defaults to OFF — users must opt in.
  * Realtime subscribed so widget ↔ messenger toggle stays in sync across surfaces & devices.
  */
+
+/**
+ * TEMPORARY GLOBAL OVERRIDE: OG bot is forced clean for everyone until further
+ * notice. Flip to `false` to restore per-user preference behaviour.
+ */
+export const FOUL_MOUTH_FORCED_CLEAN = true;
+
 export function foulMouthQueryKey(userId: string | null | undefined) {
   return ["user-preferences", "foul_mouth", userId ?? "anon"] as const;
 }
@@ -59,9 +66,10 @@ export function useFoulMouth() {
   }, [uid, qc]);
 
   return {
-    foulMouth: query.data ?? false,
+    foulMouth: FOUL_MOUTH_FORCED_CLEAN ? false : (query.data ?? false),
     isLoading: query.isLoading,
     isReady: !!uid && query.isFetched,
+    forcedClean: FOUL_MOUTH_FORCED_CLEAN,
   };
 }
 
@@ -72,6 +80,12 @@ export function useSetFoulMouth() {
 
   return useMutation({
     mutationFn: async (next: boolean) => {
+      if (FOUL_MOUTH_FORCED_CLEAN) {
+        toast.info("OG is staying clean for everyone right now — foul mouth is paused until further notice.", {
+          id: "foul-mouth-locked",
+        });
+        return false;
+      }
       if (!uid) throw new Error("Sign in required");
       const { error } = await supabase
         .from("user_preferences")

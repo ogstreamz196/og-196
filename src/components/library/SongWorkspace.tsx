@@ -39,7 +39,7 @@ interface Props {
 export function SongWorkspace({ song, onSaved }: Props) {
   const { data: settings } = useSettings();
   const { data: profile } = useProfile();
-  const { foulMouth } = useFoulMouth();
+  const { foulMouth, forcedClean } = useFoulMouth();
   const setFoulMouth = useSetFoulMouth();
 
   const lyricsCost = settings?.coins_per_lyrics_generation ?? 1;
@@ -357,15 +357,17 @@ export function SongWorkspace({ song, onSaved }: Props) {
                 <label
                   htmlFor="foul-mouth-toggle"
                   className="flex items-center gap-2 rounded-md border border-border/60 bg-muted/30 px-3 py-1.5 text-xs font-medium"
-                  title="Allow explicit language in generated lyrics"
+                  title={forcedClean
+                    ? "Foul mouth is paused for everyone right now"
+                    : "Allow explicit language in generated lyrics"}
                 >
-                  <span aria-hidden>🤬</span>
-                  <span>Foul mouth</span>
+                  <span aria-hidden>{forcedClean ? "🧼" : "🤬"}</span>
+                  <span>{forcedClean ? "Clean mode (locked)" : "Foul mouth"}</span>
                   <Switch
                     id="foul-mouth-toggle"
-                    checked={foulMouth}
+                    checked={!forcedClean && foulMouth}
                     onCheckedChange={(v) => setFoulMouth.mutate(v)}
-                    disabled={setFoulMouth.isPending}
+                    disabled={forcedClean || setFoulMouth.isPending}
                   />
                 </label>
                 <Button variant="ghost" onClick={handleSave} disabled={!dirty || saving}>
