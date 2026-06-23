@@ -80,12 +80,15 @@ function RefundButton({ row }: { row: PurchaseRow }) {
   const refundFn = useServerFn(refundCoinPurchase);
   const qc = useQueryClient();
   const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
   if (!stripe) return null;
   const already = row.stripe?.refunded;
+  const currency = row.stripe?.currency ?? "gbp";
+  const cashAmount = row.stripe?.amountPaid ?? 0;
+  const coinAmount = row.amount;
 
   async function run() {
     if (already) return;
-    if (!confirm("Instantly refund this purchase? Coins credited will be reversed.")) return;
     setLoading(true);
     try {
       const env = (() => { try { return getStripeEnvironment(); } catch { return stripe!.env; } })();
@@ -98,6 +101,7 @@ function RefundButton({ row }: { row: PurchaseRow }) {
       }
       await qc.invalidateQueries({ queryKey: ["coin-transactions", "me"] });
       await qc.invalidateQueries({ queryKey: ["profile"] });
+      setOpen(false);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Refund failed");
     } finally {
@@ -106,17 +110,75 @@ function RefundButton({ row }: { row: PurchaseRow }) {
   }
 
   return (
-    <button
-      type="button"
-      onClick={run}
-      disabled={loading || already}
-      className="inline-flex items-center gap-1 rounded-full border border-amber-400/40 bg-gradient-to-r from-amber-500/20 to-yellow-500/20 px-2.5 py-1 text-[11px] font-bold text-amber-300 shadow-[0_0_18px_-6px_theme(colors.amber.400)] hover:from-amber-500/30 hover:to-yellow-500/30 disabled:opacity-50"
-      title={already ? "Already refunded" : "VIP instant refund"}
-    >
-      {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Crown className="h-3 w-3" />}
-      <Undo2 className="h-3 w-3" />
-      {already ? "Refunded" : "Instant refund"}
-    </button>
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        disabled={loading || already}
+        className="inline-flex items-center gap-1 rounded-full border border-amber-400/40 bg-gradient-to-r from-amber-500/20 to-yellow-500/20 px-2.5 py-1 text-[11px] font-bold text-amber-300 shadow-[0_0_18px_-6px_theme(colors.amber.400)] hover:from-amber-500/30 hover:to-yellow-500/30 disabled:opacity-50"
+        title={already ? "Already refunded" : "VIP instant refund"}
+      >
+        {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Crown className="h-3 w-3" />}
+        <Undo2 className="h-3 w-3" />
+        {already ? "Refunded" : "Instant refund"}
+      </button>
+
+      {open && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+          onClick={() => !loading && setOpen(false)}
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl border border-amber-400/40 bg-card p-6 shadow-[0_0_60px_-10px_theme(colors.amber.400)]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-2">
+              <Crown className="h-5 w-5 text-amber-400" />
+              <h4 className="text-lg font-bold">Confirm instant refund</h4>
+            </div>
+            <p className="mt-2 text-sm text-muted-foreground">
+              This reverses the purchase immediately. The amounts below will be undone.
+            </p>
+
+            <dl className="mt-4 space-y-2 rounded-xl border border-border bg-background/50 p-4 text-sm">
+              <div className="flex items-center justify-between">
+                <dt className="text-muted-foreground">Cash refunded to card</dt>
+                <dd className="font-bold tabular-nums text-foreground">
+                  {formatMoney(cashAmount, currency)}
+                </dd>
+              </div>
+              <div className="flex items-center justify-between">
+                <dt className="text-muted-foreground">Coins removed from balance</dt>
+                <dd className="flex items-center gap-1 font-bold tabular-nums text-destructive">
+                  −{coinAmount}
+                  <Coins className="h-3.5 w-3.5 text-coin" />
+                </dd>
+              </div>
+            </dl>
+
+            <div className="mt-5 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                disabled={loading}
+                className="flex-1 rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold hover:bg-muted disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={run}
+                disabled={loading}
+                className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-full border border-amber-400/40 bg-gradient-to-r from-amber-500 to-yellow-500 px-4 py-2 text-sm font-bold text-black shadow-[0_0_20px_-4px_theme(colors.amber.400)] hover:brightness-110 disabled:opacity-50"
+              >
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Undo2 className="h-4 w-4" />}
+                Refund now
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
