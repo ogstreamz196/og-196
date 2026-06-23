@@ -75,10 +75,10 @@ export const chatOgBot = createServerFn({ method: "POST" })
         .limit(40),
       supabaseAdmin
         .from("app_settings")
-        .select("value")
-        .eq("key", "free_access_all")
-        .maybeSingle(),
+        .select("key, value")
+        .in("key", ["free_access_all", "free_access_expires_at"]),
     ]);
+
 
     if (profileRes.error) throw new Error(profileRes.error.message);
     const rawProfile = profileRes.data;
