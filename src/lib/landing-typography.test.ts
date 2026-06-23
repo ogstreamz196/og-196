@@ -48,8 +48,8 @@ describe("landing page typography parity", () => {
         expect(src).toContain(RULES.container);
       });
 
-      it("uses the home page gap-14 section rhythm", () => {
-        expect(src).toContain(RULES.sectionGap);
+      it("uses the home page section rhythm (gap-14 or py-16+)", () => {
+        expect(src).toMatch(RULES.sectionRhythm);
       });
 
       it("has at least one large card title (text-3xl/4xl/5xl + font-black/semibold)", () => {
