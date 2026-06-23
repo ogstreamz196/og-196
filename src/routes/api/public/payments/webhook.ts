@@ -96,6 +96,38 @@ async function grantVipForSession(session: any, env: StripeEnv) {
   else console.log("payments webhook: VIP granted", { userId, env, sessionId: session?.id });
 }
 
+async function revokeVipForSubscription(subscription: any) {
+  const meta = (subscription?.metadata ?? {}) as Record<string, string | undefined>;
+  const userId = meta.userId;
+  if (!userId) {
+    console.warn("payments webhook: missing userId on subscription event", subscription?.id);
+    return;
+  }
+  const supabase = await getAdminClient();
+  const { error } = await supabase
+    .from("user_roles")
+    .delete()
+    .eq("user_id", userId)
+    .eq("role", "vip");
+  if (error) console.error("payments webhook: VIP role revoke failed", error);
+  else console.log("payments webhook: VIP revoked", { userId, sub: subscription?.id });
+}
+
+async function syncVipFromSubscription(subscription: any) {
+  // Active / trialing / past_due (within grace) keep VIP; canceled / unpaid /
+  // incomplete_expired revoke it.
+  const status = subscription?.status as string | undefined;
+  const keep = status === "active" || status === "trialing" || status === "past_due";
+  if (keep) {
+    await grantVipForSession(
+      { metadata: subscription?.metadata, id: subscription?.id, status: "complete", payment_status: "paid" },
+      "live", // env not used for grant
+    );
+  } else {
+    await revokeVipForSubscription(subscription);
+  }
+}
+
 async function handleEvent(event: { type: string; data: { object: any } }, env: StripeEnv) {
   switch (event.type) {
     case "checkout.session.completed":
@@ -109,6 +141,13 @@ async function handleEvent(event: { type: string; data: { object: any } }, env: 
       }
       break;
     }
+    case "customer.subscription.created":
+    case "customer.subscription.updated":
+      await syncVipFromSubscription(event.data.object);
+      break;
+    case "customer.subscription.deleted":
+      await revokeVipForSubscription(event.data.object);
+      break;
     default:
       console.log("payments webhook: unhandled event", event.type);
   }
