@@ -349,7 +349,7 @@ function PortalPage() {
           )}
         </div>
 
-        <div className="grid gap-6 rounded-[2rem] border-2 border-white/15 bg-card/70 p-6 shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)] backdrop-blur-xl sm:p-8">
+        <div className="landing-card landing-grid">
           <div className="flex items-center gap-2 border-b border-border pb-3">
             <div className="grid h-7 w-7 place-items-center rounded-full bg-primary/10 text-xs font-bold text-primary">1</div>
             <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
