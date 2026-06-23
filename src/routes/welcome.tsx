@@ -586,13 +586,15 @@ function Pillars() {
     <section id="studio" className="relative scroll-mt-24">
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-8 sm:py-24 lg:py-32">
 
-        <div className="mx-auto max-w-3xl text-center">
+        <div className="mx-auto max-w-5xl text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground sm:text-sm">
             Prompt playground
           </p>
-          <h2 className="font-display mt-3 flex flex-wrap items-center justify-center gap-3 text-balance text-4xl font-semibold leading-[1.05] tracking-[-0.035em] sm:mt-4 sm:gap-4 sm:text-6xl md:text-7xl lg:text-8xl">
-            <span>Different songs</span>
-            <OgBotLogo className="h-20 w-20 sm:h-32 sm:w-32 md:h-40 md:w-40 lg:h-48 lg:w-48" />
+          <h2 className="font-display mt-4 flex flex-nowrap items-center justify-center gap-4 text-balance font-semibold leading-[0.95] tracking-[-0.035em] sm:mt-6 sm:gap-8">
+            <span className="text-left text-2xl sm:text-4xl md:text-5xl lg:text-6xl">
+              Different<br className="hidden sm:block" /> songs
+            </span>
+            <OgBotLogo className="h-32 w-32 shrink-0 sm:h-56 sm:w-56 md:h-72 md:w-72 lg:h-[22rem] lg:w-[22rem]" />
           </h2>
         </div>
 
