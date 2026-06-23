@@ -349,13 +349,24 @@ function LibraryPage() {
     }
     setGenSong(true);
     try {
-      const style = [selections.genre, selections.mood, selections.tempo]
+      const cats: Category[] = ["language", "genre", "mood", "theme", "tempo"];
+      const noteParts = cats
+        .map((c) => {
+          const n = categoryNotes[c]?.trim();
+          return n ? `${META[c].label} notes: ${n}` : null;
+        })
+        .filter(Boolean) as string[];
+      const styleNoteParts = (["genre", "mood", "tempo"] as Category[])
+        .map((c) => categoryNotes[c]?.trim())
+        .filter(Boolean) as string[];
+      const style = [selections.genre, selections.mood, selections.tempo, ...styleNoteParts]
         .filter(Boolean)
         .join(" · ");
       const promptText = [
         title.trim(),
         selections.theme ? `About: ${selections.theme}` : null,
         selections.language ? `Language: ${selections.language}` : null,
+        ...noteParts,
       ]
         .filter(Boolean)
         .join(" — ");
