@@ -580,7 +580,7 @@ function LibraryPage() {
             className="h-12 w-full shrink-0 justify-center gap-2 whitespace-nowrap rounded-xl bg-gradient-brand text-sm font-bold text-primary-foreground shadow-glow sm:w-auto sm:px-6"
           >
             <Sparkles className="h-4 w-4" />
-            Start the wizard
+            Create Song Now
           </Button>
         </div>
 
