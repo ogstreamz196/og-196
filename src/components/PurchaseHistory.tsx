@@ -416,13 +416,27 @@ function RefundsPanel() {
           } else {
             toast(`Refund status: ${r.status}`, { id: `refund-${r.stripe_refund_id}` });
           }
+          if (emailNotify && r.status !== "pending" && r.status !== "requires_action") {
+            // Email delivery hooks in once the project's email domain is
+            // scaffolded. Until then we log the intent so QA can verify the
+            // trigger fires on each status transition.
+            console.info("[refund-email-intent]", {
+              refundId: r.stripe_refund_id,
+              from: before,
+              to: r.status,
+              amount: r.amount,
+              currency: r.currency,
+            });
+          }
         }
       }
     }
     lastStatusRef.current = next;
-  }, [rows]);
+  }, [rows, emailNotify]);
 
+  const hasPending = useMemo(() => rows.some((r) => r.status === "pending" || r.status === "requires_action"), [rows]);
   const lastUpdated = dataUpdatedAt ? new Date(dataUpdatedAt).toLocaleTimeString() : null;
+
 
   return (
     <section className="mx-auto mt-6 w-full max-w-3xl rounded-2xl border border-border bg-card p-6 shadow-card">
