@@ -119,19 +119,65 @@ function DeveloperPage() {
             </p>
           </div>
         </div>
-        <Button
-          variant="outline"
-          onClick={() => syncAllM.mutate()}
-          disabled={syncAllM.isPending}
-          className="gap-2"
-        >
-          {syncAllM.isPending ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <FileSpreadsheet className="h-4 w-4" />
-          )}
-          Sync all to Sheets
-        </Button>
+        <div className="flex items-center gap-2">
+          {(() => {
+            const running = syncAllM.isPending || syncOneM.isPending;
+            const failed = !running && (syncAllM.isError || syncOneM.isError);
+            const success = !running && !failed && (syncAllM.isSuccess || syncOneM.isSuccess);
+            const cls = running
+              ? "border-amber-500/40 bg-amber-500/10 text-amber-300"
+              : failed
+                ? "border-destructive/40 bg-destructive/10 text-destructive"
+                : success
+                  ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300"
+                  : "border-border bg-muted/30 text-muted-foreground";
+            const label = running
+              ? "Auto-sync: running…"
+              : failed
+                ? "Auto-sync: failed"
+                : success
+                  ? "Auto-sync: success"
+                  : "Auto-sync: idle";
+            return (
+              <span
+                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${cls}`}
+                title={
+                  failed
+                    ? (syncAllM.error instanceof Error ? syncAllM.error.message : null) ??
+                      (syncOneM.error instanceof Error ? syncOneM.error.message : null) ??
+                      "Sync failed"
+                    : label
+                }
+              >
+                <span
+                  className={`h-1.5 w-1.5 rounded-full ${
+                    running
+                      ? "animate-pulse bg-amber-400"
+                      : failed
+                        ? "bg-destructive"
+                        : success
+                          ? "bg-emerald-400"
+                          : "bg-muted-foreground/60"
+                  }`}
+                />
+                {label}
+              </span>
+            );
+          })()}
+          <Button
+            variant="outline"
+            onClick={() => syncAllM.mutate()}
+            disabled={syncAllM.isPending}
+            className="gap-2"
+          >
+            {syncAllM.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <FileSpreadsheet className="h-4 w-4" />
+            )}
+            Sync all to Sheets
+          </Button>
+        </div>
       </header>
 
 
