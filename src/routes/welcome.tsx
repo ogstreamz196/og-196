@@ -489,11 +489,11 @@ function AlbumCoverShowcase() {
         </h3>
       </div>
 
-      <ul className="mt-8 grid gap-3 sm:mt-10 sm:gap-4 md:grid-cols-2">
+      <ul className="mt-8 grid gap-4 sm:mt-10 sm:gap-6 md:grid-cols-2">
         {examples.map((e, i) => (
           <li
             key={e.label}
-            className="group relative flex items-start gap-4 rounded-2xl border-2 border-white/12 bg-card/70 p-4 text-left backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-primary/40 sm:rounded-3xl sm:p-5"
+            className="group relative flex items-start gap-4 rounded-[2rem] border-2 border-white/15 bg-card/70 p-6 text-left shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-primary/40 sm:p-8"
           >
             <CardEditBadge />
             <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-brand text-2xl shadow-glow sm:h-14 sm:w-14 sm:text-3xl">
@@ -504,14 +504,14 @@ function AlbumCoverShowcase() {
                 as="p"
                 contentKey={`welcome.example.${i}.label`}
                 defaultValue={e.label}
-                className="text-[11px] font-black uppercase tracking-[0.18em] text-primary sm:text-xs"
+                className="text-xs font-black uppercase tracking-[0.24em] text-primary sm:text-sm"
               />
               <EditableContent
                 as="p"
                 multiline
                 contentKey={`welcome.example.${i}.example`}
                 defaultValue={e.example}
-                className="mt-1.5 block text-base font-semibold leading-snug text-foreground sm:text-lg md:text-xl"
+                className="mt-2 block text-lg font-semibold leading-snug text-foreground sm:text-xl"
               />
             </div>
           </li>
@@ -593,12 +593,12 @@ function Pillars() {
           </h2>
         </div>
 
-        <div className="mt-12 grid gap-5 sm:mt-16 sm:gap-6 md:grid-cols-3">
+        <div className="mt-12 grid gap-4 sm:mt-16 sm:gap-6 md:grid-cols-3">
           {items.map((it) => (
             <article
               key={it.key}
               style={{ transform: `rotate(${it.tilt}deg)` }}
-              className="group relative rounded-3xl border-2 border-white/12 bg-card/80 p-6 backdrop-blur-xl transition-all duration-200 hover:-translate-y-2 hover:rotate-0 hover:border-primary/40 hover:shadow-glow sm:p-8"
+              className="group relative rounded-[2rem] border-2 border-white/15 bg-card/80 p-6 shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)] backdrop-blur-xl transition-all duration-200 hover:-translate-y-2 hover:rotate-0 hover:border-primary/40 hover:shadow-glow sm:p-8"
             >
               <CardEditBadge />
               <div className="flex items-center gap-3">
@@ -611,14 +611,14 @@ function Pillars() {
                 as="h3"
                 contentKey={`welcome.pillar.${it.key}.title`}
                 defaultValue={String(it.title)}
-                className="font-display mt-5 block text-2xl font-semibold tracking-tight sm:mt-6 sm:text-4xl md:text-5xl"
+                className="font-display mt-5 block text-4xl font-black tracking-tight sm:mt-6 sm:text-5xl"
               />
               <EditableContent
                 as="p"
                 multiline
                 contentKey={`welcome.pillar.${it.key}.body`}
                 defaultValue={it.body}
-                className="mt-3 block text-base leading-relaxed text-muted-foreground sm:mt-4 sm:text-lg md:text-xl"
+                className="mt-3 block text-lg leading-relaxed text-muted-foreground sm:mt-4"
               />
             </article>
           ))}
@@ -647,11 +647,11 @@ function HowItWorks() {
           </h2>
         </div>
 
-        <div className="mt-10 grid gap-5 sm:mt-14 sm:gap-6 md:grid-cols-3">
+        <div className="mt-10 grid gap-4 sm:mt-14 sm:gap-6 md:grid-cols-3">
           {steps.map((s, i) => (
             <div
               key={s.n}
-              className="group relative rounded-3xl border-2 border-white/12 bg-card/70 p-6 text-center backdrop-blur-xl transition hover:-translate-y-1 hover:border-primary/40 sm:p-8"
+              className="group relative rounded-[2rem] border-2 border-white/15 bg-card/70 p-6 text-center shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)] backdrop-blur-xl transition hover:-translate-y-1 hover:border-primary/40 sm:p-8"
               style={{ animationDelay: `${i * 120}ms` }}
             >
               <CardEditBadge />
@@ -660,9 +660,9 @@ function HowItWorks() {
               </div>
               <div className="mt-4 text-5xl sm:mt-5 sm:text-6xl">{s.emoji}</div>
               <EditableContent as="h3" contentKey={`welcome.step.${s.n}.title`} defaultValue={s.title}
-                className="font-display mt-3 block text-2xl font-semibold sm:mt-4 sm:text-3xl md:text-4xl" />
+                className="font-display mt-3 block text-4xl font-black sm:mt-4 sm:text-5xl" />
               <EditableContent as="p" multiline contentKey={`welcome.step.${s.n}.body`} defaultValue={s.body}
-                className="mt-2 block text-base text-muted-foreground sm:mt-3 sm:text-lg md:text-xl" />
+                className="mt-2 block text-lg text-muted-foreground sm:mt-3" />
             </div>
           ))}
         </div>

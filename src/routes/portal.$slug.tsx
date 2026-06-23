@@ -318,21 +318,21 @@ function PortalPage() {
         )}
       </header>
 
-      <main className="mx-auto max-w-4xl px-4 py-8 md:px-8 md:py-12">
+      <main className="mx-auto flex w-full max-w-7xl flex-col gap-14 px-2 py-10 sm:px-4 sm:py-14">
         <div
-          className="relative overflow-hidden rounded-3xl border bg-card p-8 shadow-card"
+          className="relative overflow-hidden rounded-[2rem] border-2 bg-card/70 p-8 shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)] backdrop-blur-xl sm:p-12"
           style={{ borderColor: themeColor, boxShadow: `0 0 60px -20px ${themeColor}` }}
         >
           <div
-            className="inline-flex items-center gap-2 rounded-full border bg-background/50 px-3 py-1 text-xs backdrop-blur"
+            className="inline-flex items-center gap-2 rounded-full border bg-background/50 px-3 py-1 text-sm backdrop-blur"
             style={{ borderColor: themeColor, color: themeColor }}
           >
-            <Wand2 className="h-3 w-3" />
+            <Wand2 className="h-3.5 w-3.5" />
             Portal · Lyrics in {language}
           </div>
 
-          <h1 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl">{portal.name}</h1>
-          <p className="mt-2 max-w-xl text-muted-foreground">
+          <h1 className="font-display mt-4 text-[clamp(2.25rem,9vw,5.5rem)] font-black leading-[0.95] tracking-[-0.03em]">{portal.name}</h1>
+          <p className="mt-3 max-w-2xl text-lg leading-relaxed text-muted-foreground">
             <EditableContent
               contentKey="portal.subtitle"
               defaultValue="Write your song idea below, generate lyrics for free, then turn them into music."
@@ -341,7 +341,7 @@ function PortalPage() {
           </p>
           {portal.custom_welcome_text && (
             <div
-              className="mt-4 rounded-xl border bg-background/40 p-3 text-sm"
+              className="mt-4 rounded-2xl border bg-background/40 p-4 text-base"
               style={{ borderColor: themeColor }}
             >
               {portal.custom_welcome_text}
@@ -349,7 +349,7 @@ function PortalPage() {
           )}
         </div>
 
-        <div className="mt-6 grid gap-6 rounded-2xl border border-border bg-card p-6 shadow-card">
+        <div className="grid gap-6 rounded-[2rem] border-2 border-white/15 bg-card/70 p-6 shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)] backdrop-blur-xl sm:p-8">
           <div className="flex items-center gap-2 border-b border-border pb-3">
             <div className="grid h-7 w-7 place-items-center rounded-full bg-primary/10 text-xs font-bold text-primary">1</div>
             <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
@@ -585,18 +585,18 @@ function PortalPage() {
         </div>
 
         {user && (
-          <div className="mt-10">
-            <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
+          <div>
+            <h2 className="mb-5 flex items-center gap-2 text-lg uppercase tracking-[0.28em] text-muted-foreground sm:text-xl">
               <Music2 className="h-5 w-5 text-primary" /> Your tracks from this portal
             </h2>
             {portalSongsQuery.isLoading ? (
               <div className="grid place-items-center py-12 text-muted-foreground"><Loader2 className="h-6 w-6 animate-spin" /></div>
             ) : portalSongsQuery.data && portalSongsQuery.data.length > 0 ? (
-              <div className="grid gap-3">
+              <div className="grid gap-4">
                 {portalSongsQuery.data.map((s) => <SongCard key={s.id} song={s} />)}
               </div>
             ) : (
-              <div className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center text-muted-foreground">
+              <div className="rounded-[2rem] border-2 border-dashed border-white/15 bg-card/50 p-10 text-center text-lg text-muted-foreground">
                 Nothing yet — generate your first track above.
               </div>
             )}
