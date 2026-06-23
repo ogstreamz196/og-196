@@ -143,16 +143,19 @@ export function PreferencesPanel() {
 
           <ToggleRow
             icon={<MessageSquareMore className="h-4 w-4" />}
-            label={isVip ? "Foul-mouth" : "Foul-mouth (VIP only)"}
+            label={forcedClean ? "Foul-mouth (paused)" : isVip ? "Foul-mouth" : "Foul-mouth (VIP only)"}
             description={
-              isVip
-                ? "When OG mode is on, allow stronger language."
-                : "Unlock with OG VIP (£5/month) to let OG go fully savage."
+              forcedClean
+                ? "OG is keeping it clean for everyone right now — foul mouth is paused until further notice."
+                : isVip
+                  ? "When OG mode is on, allow stronger language."
+                  : "Unlock with OG VIP (£5/month) to let OG go fully savage."
             }
-            checked={isVip && foulMouth}
-            disabled={!isVip || isLoading || setFoulMouth.isPending}
+            checked={!forcedClean && isVip && foulMouth}
+            disabled={forcedClean || !isVip || isLoading || setFoulMouth.isPending}
             onChange={(v) => setFoulMouth.mutate(v)}
           />
+
           {!isVip && (
             <Link
               to="/buy-coins"
