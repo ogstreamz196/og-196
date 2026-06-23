@@ -222,6 +222,42 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
           </div>
         </DialogHeader>
 
+        {pendingDraft && (
+          <div className="flex flex-col gap-2 border-b border-primary/30 bg-primary/10 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+            <div className="flex items-start gap-2 text-sm">
+              <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              <div>
+                <div className="font-semibold text-foreground">Resume your draft?</div>
+                <div className="text-xs text-muted-foreground">
+                  {pendingDraft.history.filter((t) => t.role === "user").length} answer
+                  {pendingDraft.history.filter((t) => t.role === "user").length === 1 ? "" : "s"} saved
+                  {" · "}
+                  {Math.max(1, Math.round((Date.now() - pendingDraft.ts) / 60000))}m ago
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2 sm:shrink-0">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={discardDraft}
+                className="text-xs font-semibold"
+              >
+                Start fresh
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                onClick={resumeDraft}
+                className="gap-1.5 bg-gradient-brand text-xs font-semibold text-primary-foreground"
+              >
+                Resume
+              </Button>
+            </div>
+          </div>
+        )}
+
 
         <div
           ref={scrollRef}
