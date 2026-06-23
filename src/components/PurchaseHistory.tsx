@@ -214,17 +214,105 @@ function refundToneFor(status: string) {
   }
 }
 
+function RefundDetailsDrawer({ refund, onClose }: { refund: RefundRow; onClose: () => void }) {
+  const tone = refundToneFor(refund.status);
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 p-0 backdrop-blur-sm sm:items-center sm:p-4"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Refund details"
+    >
+      <div
+        className="w-full max-w-md rounded-t-2xl border border-border bg-card p-6 shadow-card sm:rounded-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Undo2 className="h-5 w-5 text-primary" />
+            <h4 className="text-lg font-bold">Refund details</h4>
+          </div>
+          <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${tone.tone}`}>
+            {tone.label}
+          </span>
+        </div>
+
+        <dl className="mt-4 space-y-3 text-sm">
+          <div className="flex items-center justify-between gap-3">
+            <dt className="text-muted-foreground">Amount</dt>
+            <dd className="font-bold tabular-nums">{formatMoney(refund.amount, refund.currency)}</dd>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <dt className="text-muted-foreground">Currency</dt>
+            <dd className="font-mono uppercase">{refund.currency}</dd>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <dt className="text-muted-foreground">Created</dt>
+            <dd>{formatDate(refund.created_at)}</dd>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <dt className="text-muted-foreground">Last update</dt>
+            <dd>{formatDate(refund.updated_at)}</dd>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <dt className="text-muted-foreground">Environment</dt>
+            <dd className="font-mono text-xs uppercase">{refund.environment}</dd>
+          </div>
+          {refund.reason && (
+            <div className="flex items-center justify-between gap-3">
+              <dt className="text-muted-foreground">Reason</dt>
+              <dd>{refund.reason}</dd>
+            </div>
+          )}
+          {refund.failure_reason && (
+            <div className="flex items-center justify-between gap-3">
+              <dt className="text-muted-foreground">Failure</dt>
+              <dd className="text-destructive">{refund.failure_reason}</dd>
+            </div>
+          )}
+          <div className="rounded-xl border border-border bg-background/50 p-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Refund ID</p>
+            <p className="mt-0.5 break-all font-mono text-xs">{refund.stripe_refund_id}</p>
+          </div>
+          {refund.stripe_session_id && (
+            <div className="rounded-xl border border-border bg-background/50 p-3">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Checkout session</p>
+              <p className="mt-0.5 break-all font-mono text-xs">{refund.stripe_session_id}</p>
+            </div>
+          )}
+        </dl>
+
+        <div className="mt-5 flex justify-end">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold hover:bg-muted"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function RefundsPanel() {
   const fetcher = useServerFn(getMyRefunds);
-  const { data, isLoading, error, refetch, isFetching } = useQuery({
+  const { data, isLoading, error, refetch, isFetching, dataUpdatedAt } = useQuery({
     queryKey: ["my-refunds"],
-    queryFn: () => fetcher({ data: {} }),
-    staleTime: 30_000,
+    queryFn: () => fetcher({ data: { refresh: true } }),
+    staleTime: 60_000,
+    // Auto-refresh every 3 minutes; pause while tab is hidden so we don't
+    // burn Stripe API quota in background tabs.
+    refetchInterval: 3 * 60_000,
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: true,
   });
+  const [selected, setSelected] = useState<RefundRow | null>(null);
 
   async function refreshFromStripe() {
     try {
-      await fetcher({ data: { refresh: true } });
       await refetch();
       toast.success("Refund statuses updated from Stripe");
     } catch (e) {
@@ -233,6 +321,7 @@ function RefundsPanel() {
   }
 
   const rows = (data ?? []) as RefundRow[];
+  const lastUpdated = dataUpdatedAt ? new Date(dataUpdatedAt).toLocaleTimeString() : null;
 
   return (
     <section className="mx-auto mt-6 w-full max-w-3xl rounded-2xl border border-border bg-card p-6 shadow-card">
@@ -241,15 +330,22 @@ function RefundsPanel() {
           <Undo2 className="h-5 w-5 text-primary" />
           <h3 className="text-lg font-bold">Refund status</h3>
         </div>
-        <button
-          type="button"
-          onClick={refreshFromStripe}
-          disabled={isFetching}
-          className="inline-flex items-center gap-1 text-xs text-muted-foreground underline hover:text-foreground disabled:opacity-50"
-        >
-          <RefreshCw className={`h-3 w-3 ${isFetching ? "animate-spin" : ""}`} />
-          {isFetching ? "Refreshing…" : "Refresh from Stripe"}
-        </button>
+        <div className="flex items-center gap-3">
+          {lastUpdated && (
+            <span className="hidden text-[10px] text-muted-foreground sm:inline">
+              Updated {lastUpdated} · auto every 3 min
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={refreshFromStripe}
+            disabled={isFetching}
+            className="inline-flex items-center gap-1 text-xs text-muted-foreground underline hover:text-foreground disabled:opacity-50"
+          >
+            <RefreshCw className={`h-3 w-3 ${isFetching ? "animate-spin" : ""}`} />
+            {isFetching ? "Refreshing…" : "Refresh now"}
+          </button>
+        </div>
       </header>
 
       {isLoading ? (
@@ -265,31 +361,41 @@ function RefundsPanel() {
           {rows.map((r) => {
             const tone = refundToneFor(r.status);
             return (
-              <li key={r.id} className="flex flex-col gap-1 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${tone.tone}`}>
-                      {tone.label}
-                    </span>
-                    <span className="font-mono text-[11px] text-muted-foreground">{r.stripe_refund_id}</span>
+              <li key={r.id}>
+                <button
+                  type="button"
+                  onClick={() => setSelected(r)}
+                  className="flex w-full flex-col gap-1 py-3 text-left text-sm hover:bg-muted/30 sm:flex-row sm:items-center sm:justify-between"
+                  aria-label={`View refund details for ${r.stripe_refund_id}`}
+                >
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${tone.tone}`}>
+                        {tone.label}
+                      </span>
+                      <span className="font-mono text-[11px] text-muted-foreground">{r.stripe_refund_id}</span>
+                    </div>
+                    <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                      <span>{formatDate(r.created_at)}</span>
+                      {r.reason && <span>· {r.reason}</span>}
+                      {r.failure_reason && <span className="text-destructive">· {r.failure_reason}</span>}
+                    </div>
                   </div>
-                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                    <span>{formatDate(r.created_at)}</span>
-                    {r.reason && <span>· {r.reason}</span>}
-                    {r.failure_reason && <span className="text-destructive">· {r.failure_reason}</span>}
+                  <div className="text-sm font-bold tabular-nums text-foreground">
+                    {formatMoney(r.amount, r.currency)}
                   </div>
-                </div>
-                <div className="text-sm font-bold tabular-nums text-foreground">
-                  {formatMoney(r.amount, r.currency)}
-                </div>
+                </button>
               </li>
             );
           })}
         </ul>
       )}
+
+      {selected && <RefundDetailsDrawer refund={selected} onClose={() => setSelected(null)} />}
     </section>
   );
 }
+
 
 export function PurchaseHistory() {
 
