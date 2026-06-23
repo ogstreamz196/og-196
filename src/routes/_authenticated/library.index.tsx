@@ -17,6 +17,7 @@ import {
   Mic2,
   Music4,
   Shuffle,
+  MessageCircleHeart,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +29,7 @@ import { useSettings } from "@/hooks/use-settings";
 import { invokeError } from "@/lib/invoke-error";
 import { cn } from "@/lib/utils";
 import { SongCard, type Song } from "@/components/SongCard";
+import { OgInterviewDialog } from "@/components/library/OgInterviewDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -243,6 +245,7 @@ function LibraryPage() {
   const [genSong, setGenSong] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<Song | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [interviewOpen, setInterviewOpen] = useState(false);
 
   function setField(cat: Category, value: string) {
     setSelections((prev) => ({ ...prev, [cat]: value }));
@@ -672,270 +675,263 @@ function LibraryPage() {
           />
         ))}
 
-        {/* CTA card matches grid */}
-        <div className="relative overflow-hidden rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/25 via-fuchsia-500/15 to-background p-5 shadow-glow sm:p-6">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/30 blur-3xl"
-          />
-          <div className="relative flex h-full flex-col justify-between gap-4">
-            <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em]">
-                <Sparkles className="h-3 w-3 text-primary" /> Step 1
-              </div>
-              <h3 className="mt-3 font-display text-2xl font-black leading-tight tracking-tight">
-                Write lyrics
-              </h3>
-            </div>
-            <div className="space-y-3">
-              <div className="relative rounded-2xl border-2 border-primary/40 bg-primary/[0.06] p-3 shadow-glow">
-                <div className="absolute -top-2.5 left-3 inline-flex items-center gap-1 rounded-full bg-gradient-brand px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow">
-                  <Sparkles className="h-3 w-3" /> Recommended — best results
-                </div>
-                <Label htmlFor="personal-details" className="block text-sm font-bold text-foreground">
-                  Tell us about them
-                </Label>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  The more personal you get, the better the lyrics. Hit Surprise me, tap an example, or build it with the chips below.
-                </p>
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {(() => {
-                    const EXAMPLES = [
-                      {
-                        label: "🎂 Birthday roast",
-                        text: "Their name: Aaliyah\nOccasion: 30th birthday\nInside joke: still can't parallel park\nWhat they love: oat-milk lattes",
-                      },
-                      {
-                        label: "💔 Breakup anthem",
-                        text: "Their name: Marcus\nStory: ghosted me after 2 years\nCity: Manchester\nInside joke: \"I'll text you back\" — never did",
-                      },
-                      {
-                        label: "💍 Wedding toast",
-                        text: "Their name: Sam & Jordan\nOccasion: wedding day\nWhat they love: late-night taco runs\nInside joke: the karaoke night we don't talk about",
-                      },
-                      {
-                        label: "🏆 Hype song",
-                        text: "Their name: Dre\nOccasion: promotion at work\nCity: Brooklyn\nWhat they love: never missing leg day",
-                      },
-                    ];
-                    const NAMES = ["Aaliyah", "Marcus", "Sam", "Dre", "Kai", "Imani", "Leo", "Zara", "Tomi", "Naomi", "Reece", "Mika"];
-                    const OCCASIONS = ["30th birthday", "graduation", "promotion at work", "engagement", "leaving do", "housewarming", "anniversary"];
-                    const CITIES = ["London", "Manchester", "Brooklyn", "Lagos", "Toronto", "Berlin", "Dublin", "Lisbon"];
-                    const LOVES = ["oat-milk lattes", "matcha runs", "vintage Jordans", "late-night taco runs", "never missing leg day", "Sunday roasts"];
-                    const JOKES = ["still can't parallel park", "always 20 mins late", "owns 14 hoodies in black", "lost the karaoke crown", "can't say 'specific'"];
-                    const STORIES = ["ghosted me after 2 years", "stole my fries on a first date", "called me by their ex's name", "left mid-movie to 'grab water'"];
-                    const pick = <T,>(a: T[]) => a[Math.floor(Math.random() * a.length)];
-                    const surprise = () => {
-                      const base = pick(EXAMPLES);
-                      const text = base.text
-                        .replace(/Their name: [^\n]+/, `Their name: ${pick(NAMES)}`)
-                        .replace(/Occasion: [^\n]+/, `Occasion: ${pick(OCCASIONS)}`)
-                        .replace(/City: [^\n]+/, `City: ${pick(CITIES)}`)
-                        .replace(/What they love: [^\n]+/, `What they love: ${pick(LOVES)}`)
-                        .replace(/Inside joke: [^\n]+/, `Inside joke: ${pick(JOKES)}`)
-                        .replace(/Story: [^\n]+/, `Story: ${pick(STORIES)}`);
-                      setPersonalDetails(text.slice(0, 500));
-                      toast.success(`Surprise! ${base.label} loaded`);
-                    };
-                    return (
-                      <>
-                        <button
-                          type="button"
-                          onClick={surprise}
-                          className="rounded-full border border-primary bg-primary/20 px-2.5 py-1 text-[11px] font-bold text-foreground transition hover:bg-primary/30"
-                        >
-                          🎲 Surprise me
-                        </button>
-                        {EXAMPLES.map((ex) => (
-                          <button
-                            key={ex.label}
-                            type="button"
-                            onClick={() => {
-                              setPersonalDetails(ex.text.slice(0, 500));
-                              toast.success(`${ex.label} loaded`);
-                            }}
-                            className="rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-foreground transition hover:border-primary hover:bg-primary/20"
-                          >
-                            {ex.label}
-                          </button>
-                        ))}
-                      </>
-                    );
-                  })()}
-                </div>
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {[
-                    { label: "👤 Their name", snippet: "Their name: " },
-                    { label: "🎂 Occasion", snippet: "Occasion: " },
-                    { label: "💛 What they love", snippet: "What they love: " },
-                    { label: "🤫 Inside joke", snippet: "Inside joke: " },
-                    { label: "📍 City / place", snippet: "City: " },
-                    { label: "💔 Drama / story", snippet: "Story: " },
-                  ].map((chip) => (
-                    <button
-                      key={chip.label}
-                      type="button"
-                      onClick={() =>
-                        setPersonalDetails((v) => {
-                          const sep = v.length === 0 ? "" : v.endsWith("\n") ? "" : "\n";
-                          return (v + sep + chip.snippet).slice(0, 500);
-                        })
-                      }
-                      className="rounded-full border border-white/15 bg-white/[0.04] px-2.5 py-1 text-[11px] font-semibold text-foreground/85 transition hover:border-primary/50 hover:bg-primary/15 hover:text-foreground"
-                    >
-                      {chip.label}
-                    </button>
-                  ))}
-                </div>
-                {(() => {
-                  const MAX = 500;
-                  const len = personalDetails.length;
-                  const trimmed = personalDetails.trim();
-                  const hasName = /name\s*[:\-]/i.test(trimmed) || /^[A-Z][a-z]+/m.test(trimmed);
-                  const hasDetail = /(occasion|love|joke|story|city|place)\s*[:\-]/i.test(trimmed);
-                  const pct = (len / MAX) * 100;
-                  let status: "empty" | "tiny" | "warn" | "good" | "near" | "full";
-                  let msg: string;
-                  if (len === 0) { status = "empty"; msg = "👆 Type here, or tap a chip / example above"; }
-                  else if (len < 20) { status = "tiny"; msg = "Add a name and an occasion for best results"; }
-                  else if (!hasName) { status = "warn"; msg = "💡 Add a name (e.g. \"Their name: Aaliyah\")"; }
-                  else if (!hasDetail) { status = "warn"; msg = "💡 Add an occasion, love, or inside joke"; }
-                  else if (len > MAX - 30) { status = "near"; msg = "Almost at the limit"; }
-                  else { status = "good"; msg = "✓ Looking good — the more specific, the better"; }
-                  if (len >= MAX) { status = "full"; msg = "Character limit reached"; }
-                  const tone =
-                    status === "good" ? "text-emerald-400" :
-                    status === "warn" || status === "tiny" ? "text-amber-400" :
-                    status === "near" || status === "full" ? "text-destructive" :
-                    "text-muted-foreground";
-                  const barTone =
-                    status === "full" || status === "near" ? "bg-destructive" :
-                    status === "good" ? "bg-emerald-500" :
-                    status === "warn" || status === "tiny" ? "bg-amber-500" :
-                    "bg-primary/40";
-                  return (
-                    <>
-                      <Textarea
-                        id="personal-details"
-                        aria-describedby="personal-details-help personal-details-count"
-                        aria-invalid={status === "full" || status === "near"}
-                        value={personalDetails}
-                        onChange={(e) => setPersonalDetails(e.target.value.slice(0, MAX))}
-                        placeholder="✍️ Type here — Their name, occasion, inside jokes, anything personal…&#10;&#10;e.g.&#10;Their name: Aaliyah&#10;Occasion: 30th birthday&#10;Inside joke: the karaoke night we don't talk about"
-                        maxLength={MAX}
-                        rows={5}
-                        className="mt-2 resize-none rounded-xl border-primary/30 bg-background/60 text-sm placeholder:text-muted-foreground/70 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/40 aria-[invalid=true]:border-destructive aria-[invalid=true]:focus-visible:ring-destructive/40"
-                      />
-                      <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-white/5">
-                        <div
-                          className={cn("h-full transition-all", barTone)}
-                          style={{ width: `${Math.min(100, pct)}%` }}
-                        />
-                      </div>
-                      <div className="mt-1 flex items-center justify-between gap-2 text-[11px]">
-                        <span id="personal-details-help" className={cn("min-w-0 truncate font-medium", tone)} aria-live="polite">{msg}</span>
-                        <span
-                          id="personal-details-count"
-                          className={cn("shrink-0 tabular-nums", tone)}
-                        >
-                          {len}/{MAX}
-                        </span>
-                      </div>
-                    </>
-                  );
-                })()}
-              </div>
+      </section>
 
-              <div>
-                <Label htmlFor="extra-context" className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Extra context <span className="font-normal normal-case">(optional)</span>
-                </Label>
-                <Textarea
-                  id="extra-context"
-                  value={extraContext}
-                  onChange={(e) => setExtraContext(e.target.value)}
-                  placeholder="Anything else the AI should know before writing…"
-                  maxLength={1000}
-                  rows={2}
-                  className="mt-1 resize-none rounded-xl border-white/10 bg-background/40 text-sm"
-                />
-              </div>
-            </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={foulMouth}
-              aria-label={
-                foulMouth
-                  ? "OG Foul Mouth is on. Activate to turn explicit mode off."
-                  : "OG Foul Mouth is off. Activate to turn explicit mode on."
-              }
-              aria-describedby="foul-mouth-status"
-              onClick={() => !genLyrics && setFoulMouth((v) => !v)}
-              onKeyDown={(e) => {
-                if (genLyrics) return;
-                if (e.key === " " || e.key === "Enter") {
-                  e.preventDefault();
-                  setFoulMouth((v) => !v);
+      {/* Step 1 — full-page lyric brief form */}
+      <section
+        id="lyric-brief"
+        className="relative overflow-hidden rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/25 via-fuchsia-500/15 to-background p-5 shadow-glow sm:p-8 lg:p-10 flex flex-col gap-7 min-h-[calc(100svh-7rem)]"
+      >
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-primary/30 blur-3xl"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -left-20 bottom-0 h-64 w-64 rounded-full bg-fuchsia-500/20 blur-3xl"
+        />
+
+        <header className="relative space-y-2">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em]">
+            <Sparkles className="h-3.5 w-3.5 text-primary" /> Step 1 — Lyric brief
+          </div>
+          <h2 className="font-display text-4xl font-black leading-tight tracking-tight sm:text-5xl lg:text-6xl">
+            Write lyrics
+          </h2>
+          <p className="text-base text-muted-foreground sm:text-lg">
+            Tell OG Bot anything you want — names, places, jokes, drama, dreams. The more specific, the sharper the song.
+          </p>
+        </header>
+
+        {/* Big action row — Surprise me + Get to know me */}
+        <div className="relative grid gap-3 sm:grid-cols-2">
+          <Button
+            type="button"
+            size="lg"
+            onClick={() => {
+              const TEMPLATES = [
+                "Their name: Aaliyah\nOccasion: 30th birthday\nInside joke: still can't parallel park\nWhat they love: oat-milk lattes",
+                "Their name: Marcus\nStory: ghosted me after 2 years\nCity: Manchester\nInside joke: \"I'll text you back\" — never did",
+                "Their name: Sam & Jordan\nOccasion: wedding day\nWhat they love: late-night taco runs\nInside joke: the karaoke night we don't talk about",
+                "Their name: Dre\nOccasion: promotion at work\nCity: Brooklyn\nWhat they love: never missing leg day",
+              ];
+              const pick = <T,>(a: T[]) => a[Math.floor(Math.random() * a.length)];
+              setPersonalDetails(pick(TEMPLATES).slice(0, 500));
+              toast.success("Surprise brief loaded");
+            }}
+            className="h-14 w-full justify-center gap-2 rounded-2xl bg-gradient-brand text-base font-bold text-primary-foreground shadow-glow sm:h-16 sm:text-lg"
+          >
+            <Shuffle className="h-5 w-5" />
+            🎲 Surprise me
+          </Button>
+          <Button
+            type="button"
+            size="lg"
+            variant="outline"
+            onClick={() => setInterviewOpen(true)}
+            className="h-14 w-full justify-center gap-2 rounded-2xl border-2 border-primary/40 bg-primary/10 text-base font-bold text-foreground hover:border-primary hover:bg-primary/20 sm:h-16 sm:text-lg"
+          >
+            <MessageCircleHeart className="h-5 w-5 text-primary" />
+            Get to know me
+          </Button>
+        </div>
+
+        {/* Personal details — the main writing area */}
+        <div className="relative rounded-2xl border-2 border-primary/40 bg-primary/[0.06] p-5 shadow-glow sm:p-6">
+          <div className="absolute -top-3 left-4 inline-flex items-center gap-1 rounded-full bg-gradient-brand px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-primary-foreground shadow">
+            <Sparkles className="h-3.5 w-3.5" /> Recommended — best results
+          </div>
+          <Label htmlFor="personal-details" className="block text-lg font-bold text-foreground sm:text-xl">
+            Tell us anything personal
+          </Label>
+          <p className="mt-1 text-sm text-muted-foreground sm:text-base">
+            Names, nicknames, places, dates, inside jokes, favourite foods, drama — anything you want woven into the lyrics.
+          </p>
+
+          {/* Quick-insert chips */}
+          <div className="mt-4 flex flex-wrap gap-2">
+            {[
+              { label: "👤 Their name", snippet: "Their name: " },
+              { label: "🎂 Occasion", snippet: "Occasion: " },
+              { label: "💛 What they love", snippet: "What they love: " },
+              { label: "🤫 Inside joke", snippet: "Inside joke: " },
+              { label: "📍 City / place", snippet: "City: " },
+              { label: "💔 Drama / story", snippet: "Story: " },
+            ].map((chip) => (
+              <button
+                key={chip.label}
+                type="button"
+                onClick={() =>
+                  setPersonalDetails((v) => {
+                    const sep = v.length === 0 ? "" : v.endsWith("\n") ? "" : "\n";
+                    return (v + sep + chip.snippet).slice(0, 500);
+                  })
                 }
-              }}
-              disabled={genLyrics}
-              className={cn(
-                "group flex w-full min-h-11 items-center justify-between gap-3 rounded-2xl border-2 px-4 py-3 text-left transition-all",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-                "disabled:opacity-60 disabled:cursor-not-allowed",
-                foulMouth
-                  ? "border-destructive bg-destructive/15 shadow-[0_0_24px_-6px_oklch(0.62_0.22_25_/_0.6)]"
-                  : "border-white/15 bg-white/[0.04] hover:border-white/25",
-              )}
-            >
-              <div className="flex items-center gap-3">
-                <div aria-hidden className={cn(
-                  "grid h-10 w-10 shrink-0 place-items-center rounded-xl text-lg transition",
-                  foulMouth ? "bg-destructive/30" : "bg-white/5",
-                )}>
-                  {foulMouth ? "🤬" : "🧼"}
-                </div>
-                <div>
-                  <div className="text-sm font-bold leading-tight">OG Foul Mouth</div>
+                className="rounded-full border border-white/15 bg-white/[0.05] px-3.5 py-1.5 text-sm font-semibold text-foreground/85 transition hover:border-primary/60 hover:bg-primary/15 hover:text-foreground"
+              >
+                {chip.label}
+              </button>
+            ))}
+          </div>
+
+          {(() => {
+            const MAX = 500;
+            const len = personalDetails.length;
+            const trimmed = personalDetails.trim();
+            const hasName = /name\s*[:\-]/i.test(trimmed) || /^[A-Z][a-z]+/m.test(trimmed);
+            const hasDetail = /(occasion|love|joke|story|city|place)\s*[:\-]/i.test(trimmed);
+            const pct = (len / MAX) * 100;
+            let status: "empty" | "tiny" | "warn" | "good" | "near" | "full";
+            let msg: string;
+            if (len === 0) { status = "empty"; msg = "👆 Type anything you want — or tap Get to know me"; }
+            else if (len < 20) { status = "tiny"; msg = "Add a name and an occasion for best results"; }
+            else if (!hasName) { status = "warn"; msg = "💡 Add a name (e.g. \"Their name: Aaliyah\")"; }
+            else if (!hasDetail) { status = "warn"; msg = "💡 Add an occasion, love, or inside joke"; }
+            else if (len > MAX - 30) { status = "near"; msg = "Almost at the limit"; }
+            else { status = "good"; msg = "✓ Looking good — the more specific, the better"; }
+            if (len >= MAX) { status = "full"; msg = "Character limit reached"; }
+            const tone =
+              status === "good" ? "text-emerald-400" :
+              status === "warn" || status === "tiny" ? "text-amber-400" :
+              status === "near" || status === "full" ? "text-destructive" :
+              "text-muted-foreground";
+            const barTone =
+              status === "full" || status === "near" ? "bg-destructive" :
+              status === "good" ? "bg-emerald-500" :
+              status === "warn" || status === "tiny" ? "bg-amber-500" :
+              "bg-primary/40";
+            return (
+              <>
+                <Textarea
+                  id="personal-details"
+                  aria-describedby="personal-details-help personal-details-count"
+                  aria-invalid={status === "full" || status === "near"}
+                  value={personalDetails}
+                  onChange={(e) => setPersonalDetails(e.target.value.slice(0, MAX))}
+                  placeholder="✍️ Type here — anything personal. Names, places, inside jokes, drama, dreams…&#10;&#10;e.g.&#10;Their name: Aaliyah&#10;Occasion: 30th birthday&#10;Inside joke: the karaoke night we don't talk about"
+                  maxLength={MAX}
+                  rows={10}
+                  className="mt-4 min-h-[240px] resize-y rounded-xl border-primary/30 bg-background/60 text-base leading-relaxed placeholder:text-muted-foreground/70 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/40 aria-[invalid=true]:border-destructive aria-[invalid=true]:focus-visible:ring-destructive/40 sm:text-lg"
+                />
+                <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/5">
                   <div
-                    id="foul-mouth-status"
-                    aria-live="polite"
-                    className={cn(
-                      "text-xs leading-tight",
-                      foulMouth ? "font-semibold text-destructive-foreground/90" : "text-muted-foreground",
-                    )}
-                  >
-                    {foulMouth ? "EXPLICIT — full swearing ON" : "Clean version — tap to go explicit"}
-                  </div>
+                    className={cn("h-full transition-all", barTone)}
+                    style={{ width: `${Math.min(100, pct)}%` }}
+                  />
                 </div>
-              </div>
-              <span
-                aria-hidden
+                <div className="mt-1.5 flex items-center justify-between gap-2 text-sm">
+                  <span id="personal-details-help" className={cn("min-w-0 truncate font-medium", tone)} aria-live="polite">{msg}</span>
+                  <span
+                    id="personal-details-count"
+                    className={cn("shrink-0 tabular-nums font-semibold", tone)}
+                  >
+                    {len}/{MAX}
+                  </span>
+                </div>
+              </>
+            );
+          })()}
+        </div>
+
+        {/* Extra context */}
+        <div className="relative">
+          <Label htmlFor="extra-context" className="text-sm font-bold uppercase tracking-wider text-muted-foreground sm:text-base">
+            Extra context <span className="font-normal normal-case">(optional)</span>
+          </Label>
+          <Textarea
+            id="extra-context"
+            value={extraContext}
+            onChange={(e) => setExtraContext(e.target.value)}
+            placeholder="Anything else the AI should know before writing…"
+            maxLength={1000}
+            rows={3}
+            className="mt-2 min-h-[96px] resize-y rounded-xl border-white/10 bg-background/40 text-base sm:text-lg"
+          />
+        </div>
+
+        {/* Foul mouth toggle */}
+        <button
+          type="button"
+          role="switch"
+          aria-checked={foulMouth}
+          aria-label={
+            foulMouth
+              ? "OG Foul Mouth is on. Activate to turn explicit mode off."
+              : "OG Foul Mouth is off. Activate to turn explicit mode on."
+          }
+          aria-describedby="foul-mouth-status"
+          onClick={() => !genLyrics && setFoulMouth((v) => !v)}
+          onKeyDown={(e) => {
+            if (genLyrics) return;
+            if (e.key === " " || e.key === "Enter") {
+              e.preventDefault();
+              setFoulMouth((v) => !v);
+            }
+          }}
+          disabled={genLyrics}
+          className={cn(
+            "relative group flex w-full min-h-14 items-center justify-between gap-3 rounded-2xl border-2 px-5 py-4 text-left transition-all",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+            "disabled:opacity-60 disabled:cursor-not-allowed",
+            foulMouth
+              ? "border-destructive bg-destructive/15 shadow-[0_0_24px_-6px_oklch(0.62_0.22_25_/_0.6)]"
+              : "border-white/15 bg-white/[0.04] hover:border-white/25",
+          )}
+        >
+          <div className="flex items-center gap-4">
+            <div aria-hidden className={cn(
+              "grid h-12 w-12 shrink-0 place-items-center rounded-xl text-2xl transition",
+              foulMouth ? "bg-destructive/30" : "bg-white/5",
+            )}>
+              {foulMouth ? "🤬" : "🧼"}
+            </div>
+            <div>
+              <div className="text-base font-bold leading-tight sm:text-lg">OG Foul Mouth</div>
+              <div
+                id="foul-mouth-status"
+                aria-live="polite"
                 className={cn(
-                  "pointer-events-none inline-flex shrink-0 items-center justify-center rounded-full border-2 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.14em] transition",
-                  foulMouth
-                    ? "border-destructive bg-destructive text-destructive-foreground shadow-[0_0_18px_-4px_oklch(0.62_0.22_25_/_0.8)]"
-                    : "border-white/25 bg-white/10 text-foreground",
+                  "text-sm leading-tight",
+                  foulMouth ? "font-semibold text-destructive-foreground/90" : "text-muted-foreground",
                 )}
               >
-                {foulMouth ? "Turn off" : "Turn on"}
-              </span>
-            </button>
-            <Button
-              onClick={generateLyrics}
-              disabled={!canGenerateLyrics || genLyrics}
-              size="lg"
-              className="w-full gap-2 bg-gradient-brand text-primary-foreground shadow-glow"
-            >
-              {genLyrics ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Sparkles className="h-4 w-4" />
-              )}
-              {lyrics ? "Regenerate" : "Generate lyrics"} · -{lyricsCost}
-            </Button>
+                {foulMouth ? "EXPLICIT — full swearing ON" : "Clean version — tap to go explicit"}
+              </div>
+            </div>
           </div>
+          <span
+            aria-hidden
+            className={cn(
+              "pointer-events-none inline-flex shrink-0 items-center justify-center rounded-full border-2 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] transition",
+              foulMouth
+                ? "border-destructive bg-destructive text-destructive-foreground shadow-[0_0_18px_-4px_oklch(0.62_0.22_25_/_0.8)]"
+                : "border-white/25 bg-white/10 text-foreground",
+            )}
+          >
+            {foulMouth ? "Turn off" : "Turn on"}
+          </span>
+        </button>
+
+        {/* Generate CTA */}
+        <div className="relative mt-auto">
+          <Button
+            onClick={generateLyrics}
+            disabled={!canGenerateLyrics || genLyrics}
+            size="lg"
+            className="h-16 w-full gap-2 rounded-2xl bg-gradient-brand text-lg font-black text-primary-foreground shadow-glow sm:h-[68px] sm:text-xl"
+          >
+            {genLyrics ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <Sparkles className="h-5 w-5" />
+            )}
+            {lyrics ? "Regenerate lyrics" : "Generate lyrics"} · -{lyricsCost}
+          </Button>
+          {!canGenerateLyrics && !genLyrics && (
+            <p className="mt-2 text-center text-xs text-muted-foreground">
+              Pick a language and at least one style detail above to unlock
+            </p>
+          )}
         </div>
       </section>
 
@@ -1000,6 +996,21 @@ function LibraryPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <OgInterviewDialog
+        open={interviewOpen}
+        onOpenChange={setInterviewOpen}
+        seed={personalDetails}
+        onDone={(brief) => {
+          setPersonalDetails((prev) => {
+            const trimmed = brief.trim();
+            if (!trimmed) return prev;
+            if (!prev.trim()) return trimmed.slice(0, 500);
+            const merged = `${prev.trim()}\n${trimmed}`;
+            return merged.slice(0, 500);
+          });
+        }}
+      />
     </div>
   );
 }
