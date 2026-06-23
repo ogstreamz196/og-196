@@ -64,7 +64,7 @@ function TrustPage() {
           </p>
         </header>
 
-        <div className="grid gap-6">
+        <div className="landing-grid">
           <Section icon={UserCheck} title="Accounts &amp; authentication">
             <p>
               You sign in with Google or Apple via secure OAuth — OG Studio never sees or stores
