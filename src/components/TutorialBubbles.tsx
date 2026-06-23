@@ -100,8 +100,18 @@ export function TutorialBubbles({
           <button
             key={s.id}
             type="button"
-            onClick={() => pop(s.id)}
-            aria-label={`Got it — dismiss tip: ${s.title}`}
+            onClick={() => {
+              const target = document.querySelector(s.selector);
+              if (target) {
+                const prefersReduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+                target.scrollIntoView({
+                  behavior: prefersReduced ? "auto" : "smooth",
+                  block: "center",
+                });
+              }
+              pop(s.id);
+            }}
+            aria-label={`Scroll to ${s.title} and dismiss tip`}
             className="pointer-events-auto absolute animate-fade-in cursor-pointer text-left"
             style={{
               top: pos.top,
