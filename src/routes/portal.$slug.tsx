@@ -320,7 +320,7 @@ function PortalPage() {
 
       <main className="mx-auto flex w-full max-w-7xl flex-col gap-14 px-2 py-10 sm:px-4 sm:py-14">
         <div
-          className="relative overflow-hidden rounded-[2rem] border-2 bg-card/70 p-8 shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)] backdrop-blur-xl sm:p-12"
+          className="landing-card relative overflow-hidden border-2"
           style={{ borderColor: themeColor, boxShadow: `0 0 60px -20px ${themeColor}` }}
         >
           <div
