@@ -134,7 +134,7 @@ function TrustPage() {
           </Section>
         </div>
 
-        <p className="mt-10 text-xs text-muted-foreground">
+        <p className="text-sm text-muted-foreground sm:text-base">
           Shared responsibility: OG Studio provides app-level controls described above; the
           underlying hosting platform provides the infrastructure they run on. You're responsible
           for keeping your sign-in provider account and device secure.
