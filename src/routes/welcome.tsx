@@ -462,9 +462,9 @@ function Hero() {
         </h1>
 
 
-        <div id="sign-in" className="mx-auto mt-10 max-w-3xl scroll-mt-24 sm:mt-14">
+        <div id="sign-in" className="mx-auto mt-8 max-w-md scroll-mt-24 sm:mt-14 sm:max-w-3xl">
           <AuthButtons size="xl" />
-          <p className="mt-5 text-center text-base font-bold text-foreground sm:mt-6 sm:text-xl">
+          <p className="mt-4 text-center text-sm font-semibold tracking-wide text-muted-foreground sm:mt-6 sm:text-lg sm:font-bold sm:text-foreground">
             Free to start — no card required
           </p>
         </div>
