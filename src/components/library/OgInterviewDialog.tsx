@@ -24,6 +24,45 @@ interface OgInterviewDialogProps {
   onDone: (brief: string, transcript: InterviewTurn[]) => void;
 }
 
+const DRAFT_KEY = "og-interview:draft:v1";
+const DRAFT_TTL_MS = 1000 * 60 * 60 * 24; // 24h
+const TARGET_ANSWERS = 4;
+
+type Draft = { seed: string; history: InterviewTurn[]; answer: string; ts: number };
+
+function loadDraft(seed: string): Draft | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Draft;
+    if (!parsed || parsed.seed !== seed) return null;
+    if (Date.now() - parsed.ts > DRAFT_TTL_MS) return null;
+    if (!Array.isArray(parsed.history)) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function saveDraft(draft: Draft) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+  } catch {
+    /* ignore quota */
+  }
+}
+
+function clearDraft() {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(DRAFT_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterviewDialogProps) {
   const [history, setHistory] = useState<InterviewTurn[]>([]);
   const [answer, setAnswer] = useState("");
@@ -32,14 +71,32 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  // Reset + ask the opener whenever the dialog opens.
+  // Restore draft (or start fresh) whenever the dialog opens.
   useEffect(() => {
     if (!open) return;
-    setHistory([]);
-    setAnswer("");
-    void askNext([]);
+    const draft = loadDraft(seed);
+    if (draft && draft.history.length > 0) {
+      setHistory(draft.history);
+      setAnswer(draft.answer ?? "");
+      // If last turn is from user, the bot owes us a question — fetch it.
+      const last = draft.history[draft.history.length - 1];
+      if (last?.role === "user") {
+        void askNext(draft.history);
+      }
+    } else {
+      setHistory([]);
+      setAnswer("");
+      void askNext([]);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [open, seed]);
+
+  // Persist transcript + in-flight answer whenever they change while open.
+  useEffect(() => {
+    if (!open) return;
+    if (history.length === 0 && !answer) return;
+    saveDraft({ seed, history, answer, ts: Date.now() });
+  }, [open, seed, history, answer]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -49,6 +106,7 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
       inputRef.current?.focus();
     }
   }, [history, loading, finishing, open]);
+
 
   async function askNext(currentHistory: InterviewTurn[]) {
     setLoading(true);
