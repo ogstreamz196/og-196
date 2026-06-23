@@ -228,6 +228,13 @@ function LibraryPage() {
   const [title, setTitle] = useState("");
   const [selections, setSelections] = useState<Selections>({});
   const [chips, setChips] = useState<Record<Category, string[]>>(() => initialChips());
+  const [categoryNotes, setCategoryNotes] = useState<Record<Category, string>>({
+    language: "",
+    genre: "",
+    mood: "",
+    theme: "",
+    tempo: "",
+  });
   const [lyrics, setLyrics] = useState("");
   const [genLyrics, setGenLyrics] = useState(false);
   const [foulMouth, setFoulMouth] = useState(false);
