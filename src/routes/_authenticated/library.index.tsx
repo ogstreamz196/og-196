@@ -1041,7 +1041,18 @@ function LibraryPage() {
       <OgInterviewDialog
         open={interviewOpen}
         onOpenChange={setInterviewOpen}
-        seed={personalDetails}
+        seed={(() => {
+          const parts: string[] = [];
+          if (title.trim()) parts.push(`Working title: ${title.trim()}`);
+          const styleBits = [selections.genre, selections.mood, selections.theme, selections.tempo, selections.language]
+            .filter(Boolean)
+            .join(" · ");
+          if (styleBits) parts.push(`Vibe so far: ${styleBits}`);
+          if (personalDetails.trim()) parts.push(`Personal details: ${personalDetails.trim()}`);
+          if (extraContext.trim()) parts.push(`Extra context: ${extraContext.trim()}`);
+          if (lyrics.trim()) parts.push(`Existing lyrics draft (excerpt): ${lyrics.trim().slice(0, 240)}`);
+          return parts.join("\n");
+        })()}
         onDone={(brief, transcript) => {
           setInterviewTranscript(transcript);
           setPersonalDetails((prev) => {
@@ -1053,6 +1064,7 @@ function LibraryPage() {
           });
         }}
       />
+
 
       <ReviewDialog
         open={reviewOpen}
