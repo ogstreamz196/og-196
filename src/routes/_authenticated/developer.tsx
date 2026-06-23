@@ -109,17 +109,17 @@ function DeveloperPage() {
   return (
     <div className="px-4 py-6 md:px-8">
       <BossNav />
-      <header className="mb-6 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <Radio className="h-6 w-6 text-primary" />
-          <div>
-            <h1 className="text-2xl font-bold">Live users</h1>
-            <p className="text-sm text-muted-foreground">
+      <header className="mb-6 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:flex-wrap sm:justify-between">
+        <div className="flex min-w-0 items-center gap-3">
+          <Radio className="h-6 w-6 shrink-0 text-primary" />
+          <div className="min-w-0">
+            <h1 className="truncate text-xl font-bold sm:text-2xl">Live users</h1>
+            <p className="truncate text-xs text-muted-foreground sm:text-sm">
               Realtime presence — speak through OG Bot in their widget.
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2">
           {(() => {
             const running = syncAllM.isPending || syncOneM.isPending;
             const failed = !running && (syncAllM.isError || syncOneM.isError);
