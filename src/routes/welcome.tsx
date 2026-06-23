@@ -309,14 +309,14 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
   );
 
   return (
-    <div className="w-full space-y-5">
-      <div className="relative mx-auto max-w-xl overflow-hidden rounded-3xl border-2 border-primary/50 bg-linear-to-br from-primary/25 via-primary/10 to-transparent px-3 py-5 text-center shadow-[0_12px_40px_-12px_rgba(59,130,246,0.55)] sm:px-5">
+    <div className="w-full space-y-4 sm:space-y-6">
+      <div className="relative mx-auto max-w-xl overflow-hidden rounded-3xl border-2 border-primary/50 bg-linear-to-br from-primary/25 via-primary/10 to-transparent px-4 py-4 text-center shadow-[0_12px_40px_-12px_rgba(59,130,246,0.55)] sm:px-6 sm:py-6">
         <div className="pointer-events-none absolute inset-x-0 -top-1/2 h-full animate-pulse bg-linear-to-b from-primary/20 to-transparent blur-2xl" aria-hidden />
         <span className="relative inline-flex items-center gap-1.5 rounded-full border border-primary/60 bg-primary/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-primary-foreground sm:gap-2 sm:px-3 sm:text-xs sm:tracking-[0.2em]">
           <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-black text-primary-foreground sm:h-5 sm:w-5 sm:text-[11px]">1</span>
           Step 1
         </span>
-        <p className="relative mt-2 font-display text-[clamp(1.6rem,8vw,3rem)] font-black uppercase leading-[1.05] tracking-[0.02em] text-foreground sm:text-4xl sm:tracking-[0.04em] md:text-5xl">
+        <p className="relative mt-2.5 font-display text-[clamp(1.4rem,7vw,3rem)] font-black uppercase leading-[1.02] tracking-[0.01em] text-foreground sm:mt-3 sm:text-4xl sm:tracking-[0.04em] md:text-5xl">
           <span aria-hidden>👇 </span>Select Your Device
         </p>
       </div>
@@ -462,9 +462,9 @@ function Hero() {
         </h1>
 
 
-        <div id="sign-in" className="mx-auto mt-10 max-w-3xl scroll-mt-24 sm:mt-14">
+        <div id="sign-in" className="mx-auto mt-8 max-w-md scroll-mt-24 sm:mt-14 sm:max-w-3xl">
           <AuthButtons size="xl" />
-          <p className="mt-5 text-center text-base font-bold text-foreground sm:mt-6 sm:text-xl">
+          <p className="mt-4 text-center text-sm font-semibold tracking-wide text-muted-foreground sm:mt-6 sm:text-lg sm:font-bold sm:text-foreground">
             Free to start — no card required
           </p>
         </div>
@@ -490,24 +490,24 @@ function AlbumCoverShowcase() {
   ];
 
   return (
-    <div className="mx-auto mt-12 max-w-4xl px-1 sm:mt-16 sm:px-0">
+    <div className="mx-auto mt-10 max-w-4xl px-1 sm:mt-16 sm:px-0">
       <div className="text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground sm:text-sm">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:text-sm sm:tracking-[0.25em]">
           What to tell us
         </p>
-        <h3 className="font-display mt-3 text-balance text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:mt-4 sm:text-5xl md:text-6xl">
+        <h3 className="font-display mt-2.5 text-balance text-[clamp(1.6rem,7vw,2.25rem)] font-semibold leading-[1.05] tracking-[-0.025em] sm:mt-4 sm:text-5xl md:text-6xl">
           The more personal, <em className="italic text-gradient-brand">the better the song</em>
         </h3>
       </div>
 
-      <ul className="mt-8 grid gap-4 sm:mt-10 sm:gap-6 md:grid-cols-2">
+      <ul className="mt-6 grid gap-3 sm:mt-10 sm:gap-6 md:grid-cols-2">
         {examples.map((e, i) => (
           <li
             key={e.label}
-            className="group relative flex items-start gap-4 rounded-[2rem] border-2 border-white/15 bg-card/70 p-6 text-left shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-primary/40 sm:p-8"
+            className="group relative flex items-start gap-3.5 rounded-[1.5rem] border border-white/15 bg-card/70 p-4 text-left shadow-[0_14px_40px_-22px_rgba(80,60,255,0.5)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-primary/40 sm:gap-4 sm:rounded-[2rem] sm:border-2 sm:p-8 sm:shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)]"
           >
             <CardEditBadge />
-            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-brand text-2xl shadow-glow sm:h-14 sm:w-14 sm:text-3xl">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-brand text-xl shadow-glow sm:h-14 sm:w-14 sm:rounded-2xl sm:text-3xl">
               {e.emoji}
             </span>
             <div className="min-w-0">
@@ -515,21 +515,21 @@ function AlbumCoverShowcase() {
                 as="p"
                 contentKey={`welcome.example.${i}.label`}
                 defaultValue={e.label}
-                className="text-xs font-black uppercase tracking-[0.24em] text-primary sm:text-sm"
+                className="text-[10px] font-black uppercase tracking-[0.2em] text-primary sm:text-sm sm:tracking-[0.24em]"
               />
               <EditableContent
                 as="p"
                 multiline
                 contentKey={`welcome.example.${i}.example`}
                 defaultValue={e.example}
-                className="mt-2 block text-lg font-semibold leading-snug text-foreground sm:text-xl"
+                className="mt-1.5 block text-[15px] font-semibold leading-snug text-foreground sm:mt-2 sm:text-xl"
               />
             </div>
           </li>
         ))}
       </ul>
 
-      <p className="mt-6 text-center text-sm font-semibold text-muted-foreground sm:mt-8 sm:text-base">
+      <p className="mt-5 text-center text-xs font-medium text-muted-foreground sm:mt-8 sm:text-base sm:font-semibold">
         Even one or two details turns into a track that feels like <em className="italic text-foreground">them</em>. 🎧
       </p>
     </div>
