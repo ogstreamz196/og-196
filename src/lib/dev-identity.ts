@@ -30,9 +30,16 @@ export function maskDevIdentity<T extends MaskableProfile>(
 ): T | null | undefined {
   if (!profile) return profile;
   if (!isDevEmail(profile.email)) return profile;
+  const current = (profile.display_name ?? "").trim();
+  // Preserve any custom display name the dev has set for themselves; only
+  // fall back to the generic "Developer" label when nothing meaningful is set.
+  const hasCustomName =
+    current.length > 0 &&
+    current.toLowerCase() !== DEV_EMAIL.toLowerCase() &&
+    current.toLowerCase() !== DEV_EMAIL_MASK.toLowerCase();
   return {
     ...profile,
     email: DEV_EMAIL_MASK,
-    display_name: DEV_DISPLAY_NAME,
+    display_name: hasCustomName ? profile.display_name : DEV_DISPLAY_NAME,
   };
 }
