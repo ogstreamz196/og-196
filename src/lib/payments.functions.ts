@@ -580,3 +580,56 @@ export const refundCoinPurchase = createServerFn({ method: "POST" })
     }
   });
 
+// ─── Billing portal (Manage my subscription) ──────────────────────────────
+type PortalResult = { url: string } | { error: string };
+
+export const createBillingPortalSession = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    (data: { returnUrl: string; environment: StripeEnv }) => {
+      if (data.environment !== "sandbox" && data.environment !== "live") {
+        throw new Error("Invalid environment");
+      }
+      if (!/^https?:\/\//.test(data.returnUrl)) throw new Error("Invalid returnUrl");
+      return data;
+    },
+  )
+  .handler(async ({ data, context }): Promise<PortalResult> => {
+    const { userId, supabase } = context;
+    try {
+      // Prefer the customer id from the latest synced subscription row.
+      const { data: sub } = await supabase
+        .from("subscriptions")
+        .select("stripe_customer_id")
+        .eq("user_id", userId)
+        .eq("environment", data.environment)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      const stripe = createStripeClient(data.environment);
+      let customerId = (sub?.stripe_customer_id as string | undefined) ?? null;
+
+      // Fallback: search Stripe by metadata.userId (covers users who subscribed
+      // before the subscriptions table was wired up).
+      if (!customerId) {
+        const found = await stripe.customers.search({
+          query: `metadata['userId']:'${userId}'`,
+          limit: 1,
+        });
+        customerId = found.data[0]?.id ?? null;
+      }
+      if (!customerId) return { error: "No active subscription found." };
+
+      const portal = await stripe.billingPortal.sessions.create({
+        customer: customerId,
+        return_url: data.returnUrl,
+      });
+      return { url: portal.url };
+    } catch (error) {
+      console.error("createBillingPortalSession failed", error);
+      return { error: getStripeErrorMessage(error) };
+    }
+  });
+
+
