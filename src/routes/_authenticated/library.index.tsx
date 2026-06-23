@@ -543,21 +543,19 @@ function LibraryPage() {
                 >
                   <SongCard song={s} />
                 </Link>
-                {isAdmin && (
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    className="absolute right-3 top-3 h-8 w-8 opacity-90"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setPendingDelete(s);
-                    }}
-                    aria-label="Delete track"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                )}
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  className="absolute right-3 top-3 h-8 w-8 opacity-90 shadow-md"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setPendingDelete(s);
+                  }}
+                  aria-label="Delete track"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
             ))}
           </div>
