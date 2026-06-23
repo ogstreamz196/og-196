@@ -38,14 +38,14 @@ type NavItem = { title: string; url: AppRoute; icon: typeof Home; adminOnly?: bo
 
 const primaryNav: NavItem[] = [
   { title: "Home", url: "/", icon: Home },
-  { title: "Music Hub", url: "/library", icon: Music2 },
+  { title: "My Library", url: "/library", icon: Music2 },
   { title: "OG Messenger", url: "/messenger", icon: MessagesSquare },
   { title: "Portals", url: "/portals", icon: DoorOpen, adminOnly: true },
 ];
 
 const accountNav: NavItem[] = [
   { title: "Referrals", url: "/referrals", icon: Gift },
-  { title: "Store", url: "/buy-coins", icon: Coins },
+  { title: "Buy Coins", url: "/buy-coins", icon: Coins },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 

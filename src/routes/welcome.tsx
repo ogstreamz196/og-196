@@ -264,7 +264,7 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
   }, []);
 
   const renderTile = useCallback(
-    (d: Device) => {
+    (d: Device, idx: number) => {
       const isPending = pending === d.provider;
       const sub = d.provider === "google" ? "Sign in with Google" : "Sign in with Apple";
       return (
@@ -273,7 +273,8 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
           onClick={() => signIn(d.provider)}
           disabled={pending !== null}
           aria-label={`${d.label} — ${sub}`}
-          className={`${h} ${TILE_CLASS} ${auraOn ? "flame-aura" : ""} flex flex-col items-center justify-between gap-[clamp(0.5rem,1.2vw,0.875rem)] px-[clamp(0.5rem,1.2vw,0.875rem)] pt-[clamp(0.875rem,2vw,1.25rem)] pb-[clamp(0.5rem,1.2vw,0.875rem)] text-foreground`}
+          style={{ ["--luxe-delay" as string]: `${idx * 0.6}s` }}
+          className={`${h} ${TILE_CLASS} ${auraOn ? "luxe-glow" : ""} flex flex-col items-center justify-between gap-[clamp(0.5rem,1.2vw,0.875rem)] px-[clamp(0.5rem,1.2vw,0.875rem)] pt-[clamp(0.875rem,2vw,1.25rem)] pb-[clamp(0.5rem,1.2vw,0.875rem)] text-foreground`}
         >
 
           <div className="flex flex-1 items-center justify-center">
@@ -301,8 +302,11 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
     [pending, signIn, h, auraOn],
   );
 
-  const primaryTiles = useMemo(() => PRIMARY_DEVICES.map(renderTile), [renderTile]);
-  const secondaryTiles = useMemo(() => SECONDARY_DEVICES.map(renderTile), [renderTile]);
+  const primaryTiles = useMemo(() => PRIMARY_DEVICES.map((d, i) => renderTile(d, i)), [renderTile]);
+  const secondaryTiles = useMemo(
+    () => SECONDARY_DEVICES.map((d, i) => renderTile(d, i + PRIMARY_DEVICES.length)),
+    [renderTile],
+  );
 
   return (
     <div className="w-full space-y-5">
