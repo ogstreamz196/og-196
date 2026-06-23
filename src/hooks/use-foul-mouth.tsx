@@ -7,7 +7,7 @@ import { toast } from "sonner";
 /**
  * Single source of truth for the per-user "foul mouth" preference.
  * Reads and writes the `user_preferences.foul_mouth` row for the signed-in user.
- * Defaults to OFF — users must opt in.
+ * Defaults to ON site-wide — users can opt out.
  * Realtime subscribed so widget ↔ messenger toggle stays in sync across surfaces & devices.
  */
 export function foulMouthQueryKey(userId: string | null | undefined) {
