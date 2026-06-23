@@ -114,6 +114,11 @@ function DeveloperPage() {
                       <div className="truncate text-[11px] text-muted-foreground">
                         {u.email}
                       </div>
+                      {u.last_page && (
+                        <div className="truncate text-[11px] text-primary/80">
+                          on <code>{u.last_page}</code>
+                        </div>
+                      )}
                     </div>
                   </button>
                 </li>
