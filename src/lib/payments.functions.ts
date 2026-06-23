@@ -280,3 +280,120 @@ export const createCustomCoinCheckoutSession = createServerFn({ method: "POST" }
       return { error: getStripeErrorMessage(error) };
     }
   });
+
+// -------------------------------------------------------------------------
+// Reconcile: when the webhook hasn't credited yet (delivery delay, missed
+// retry, etc.), the return page calls this with the Stripe session_id to
+// credit coins on-demand. Idempotent: uses the same `reference` key as
+// the webhook so it can run safely alongside it.
+// -------------------------------------------------------------------------
+
+type ReconcileResult =
+  | { status: "credited"; coins: number; balance: number }
+  | { status: "already_credited"; balance: number }
+  | { status: "vip_granted" }
+  | { status: "pending"; reason: string }
+  | { error: string };
+
+export const reconcileCoinSession = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: { sessionId: string; environment: StripeEnv }) => {
+    if (!/^cs_(test|live)_[A-Za-z0-9]+$/.test(data.sessionId)) throw new Error("Invalid sessionId");
+    if (data.environment !== "sandbox" && data.environment !== "live") throw new Error("Invalid environment");
+    return data;
+  })
+  .handler(async ({ data, context }): Promise<ReconcileResult> => {
+    const { userId } = context;
+    try {
+      const stripe = createStripeClient(data.environment);
+      const session = await stripe.checkout.sessions.retrieve(data.sessionId);
+
+      const meta = (session.metadata ?? {}) as Record<string, string | undefined>;
+      if (meta.userId !== userId) {
+        return { error: "Session does not belong to this user" };
+      }
+      if (session.status !== "complete" || (session.payment_status && session.payment_status !== "paid" && session.payment_status !== "no_payment_required")) {
+        return { status: "pending", reason: session.payment_status ?? session.status ?? "unknown" };
+      }
+
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const bundleId = meta.bundleId;
+
+      // VIP subscription path
+      if (bundleId && isVipBundle(bundleId)) {
+        const { error } = await supabaseAdmin
+          .from("user_roles")
+          .upsert({ user_id: userId, role: "vip" }, { onConflict: "user_id,role" });
+        if (error) return { error: error.message };
+        return { status: "vip_granted" };
+      }
+
+      const metaCoins = meta.coins ? Number(meta.coins) : 0;
+      const pack = bundleId ? findCoinPackByBundleId(bundleId) : null;
+      const coins = Number.isFinite(metaCoins) && metaCoins > 0 ? metaCoins : (pack?.coins ?? 0);
+      if (!coins || coins <= 0) return { error: "Could not determine coin amount" };
+
+      const reference = `stripe:${data.environment}:${session.id}`;
+      const { data: existing } = await supabaseAdmin
+        .from("coin_transactions")
+        .select("id")
+        .eq("reference", reference)
+        .maybeSingle();
+
+      const { data: profile } = await supabaseAdmin
+        .from("profiles").select("coin_balance").eq("id", userId).maybeSingle();
+      if (!profile) return { error: "Profile not found" };
+
+      if (existing) {
+        return { status: "already_credited", balance: profile.coin_balance ?? 0 };
+      }
+
+      const newBalance = (profile.coin_balance ?? 0) + coins;
+      const { error: updErr } = await supabaseAdmin
+        .from("profiles").update({ coin_balance: newBalance }).eq("id", userId);
+      if (updErr) return { error: updErr.message };
+
+      const { error: txErr } = await supabaseAdmin.from("coin_transactions").insert({
+        user_id: userId,
+        amount: coins,
+        type: "stripe_purchase",
+        reference,
+      });
+      if (txErr) {
+        // Race with webhook: another writer inserted the same reference.
+        // Treat as success — the balance update already landed.
+        if (txErr.code !== "23505") console.error("reconcile tx insert failed", txErr);
+      }
+
+      return { status: "credited", coins, balance: newBalance };
+    } catch (error) {
+      console.error("reconcileCoinSession failed", error);
+      return { error: getStripeErrorMessage(error) };
+    }
+  });
+
+// -------------------------------------------------------------------------
+// Purchase history: any user can see their own coin/VIP transactions.
+// -------------------------------------------------------------------------
+
+export type PurchaseRow = {
+  id: string;
+  amount: number;
+  type: string;
+  reference: string | null;
+  created_at: string;
+};
+
+export const getCoinPurchaseHistory = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<PurchaseRow[]> => {
+    const { supabase, userId } = context;
+    const { data, error } = await supabase
+      .from("coin_transactions")
+      .select("id, amount, type, reference, created_at")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (error) throw new Error(error.message);
+    return (data ?? []) as PurchaseRow[];
+  });
