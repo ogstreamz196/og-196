@@ -368,6 +368,21 @@ function RefundsPanel() {
     refetchOnWindowFocus: true,
   });
   const [selected, setSelected] = useState<RefundRow | null>(null);
+  const [emailNotify, setEmailNotify] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return window.localStorage.getItem(EMAIL_OPT_IN_KEY) === "1";
+  });
+  function toggleEmailNotify() {
+    setEmailNotify((prev) => {
+      const next = !prev;
+      try {
+        window.localStorage.setItem(EMAIL_OPT_IN_KEY, next ? "1" : "0");
+      } catch {}
+      toast(next ? "Email alerts on for refund status changes" : "Email alerts off");
+      return next;
+    });
+  }
+
 
   async function refreshFromStripe() {
     try {
