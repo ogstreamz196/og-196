@@ -430,10 +430,10 @@ function Hero() {
 
       <div className="relative mx-auto w-full max-w-6xl text-center">
 
-        <div className="wc-pop mt-6 inline-flex flex-wrap items-center justify-center gap-3 rounded-full border border-white/20 bg-white/10 px-6 py-3 text-base font-extrabold uppercase tracking-[0.18em] backdrop-blur-xl sm:mt-12 sm:gap-4 sm:px-8 sm:py-4 sm:text-2xl md:text-3xl">
-          <span className="h-3 w-3 animate-pulse rounded-full bg-primary shadow-glow sm:h-3.5 sm:w-3.5" />
+        <div className="wc-pop mx-auto mt-6 inline-flex max-w-full flex-wrap items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2.5 text-[11px] font-extrabold uppercase tracking-[0.16em] backdrop-blur-xl sm:mt-12 sm:gap-3 sm:px-6 sm:py-3 sm:text-base md:gap-4 md:px-8 md:py-4 md:text-xl">
+          <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-primary shadow-glow sm:h-3 sm:w-3" />
           <span>Bespoke tracks · made for you by</span>
-          <OgBotLogo className="h-10 w-10 sm:h-14 sm:w-14 md:h-16 md:w-16" />
+          <OgBotLogo className="h-7 w-7 sm:h-12 sm:w-12 md:h-14 md:w-14" />
           <span className="text-gradient-brand">OG BOT</span>
         </div>
 
