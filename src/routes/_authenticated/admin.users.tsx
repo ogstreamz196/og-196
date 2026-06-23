@@ -288,6 +288,77 @@ function AdminUsersPage() {
 
 /* ---------- Row ---------- */
 
+function InlineNameEdit({ user }: { user: ProfileRow }) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(user.display_name ?? "");
+  const qc = useQueryClient();
+
+  useEffect(() => {
+    if (!editing) setValue(user.display_name ?? "");
+  }, [editing, user.display_name]);
+
+  const save = useMutation({
+    mutationFn: async () => {
+      const trimmed = value.trim();
+      if (!trimmed) throw new Error("Display name required");
+      if (trimmed === (user.display_name ?? "")) return;
+      const { error } = await supabase.rpc("admin_update_profile_label", {
+        target_user_id: user.id,
+        new_display_name: trimmed,
+        admin_notes: "users_list_inline_edit",
+      });
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      toast.success("Name updated");
+      qc.invalidateQueries({ queryKey: ["admin-users-list"] });
+      setEditing(false);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  if (editing) {
+    return (
+      <form
+        className="flex items-center gap-1"
+        onSubmit={(e) => { e.preventDefault(); save.mutate(); }}
+      >
+        <Input
+          autoFocus
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Escape") setEditing(false); }}
+          maxLength={80}
+          className="h-7 text-sm"
+          aria-label="Edit display name"
+        />
+        <Button type="submit" size="icon" variant="ghost" className="h-7 w-7" disabled={save.isPending} aria-label="Save name">
+          {save.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Pencil className="h-3.5 w-3.5" />}
+        </Button>
+        <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={() => setEditing(false)} aria-label="Cancel">
+          <X className="h-3.5 w-3.5" />
+        </Button>
+      </form>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => setEditing(true)}
+      className="group/name flex w-full min-w-0 items-center gap-1.5 rounded text-left hover:text-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
+      aria-label={`Edit display name for ${user.email ?? "user"}`}
+      title="Click to rename"
+    >
+      <span className="truncate text-sm font-medium">
+        {user.display_name ?? user.email?.split("@")[0] ?? "—"}
+      </span>
+      <Pencil className="h-3 w-3 shrink-0 opacity-0 transition-opacity group-hover/name:opacity-60" aria-hidden />
+    </button>
+  );
+}
+
+
 function UserRow({ user, roles }: { user: ProfileRow; roles: string[] }) {
   const isVip = roles.includes("vip");
   const isOgBot = roles.includes("og_bot");
@@ -300,8 +371,8 @@ function UserRow({ user, roles }: { user: ProfileRow; roles: string[] }) {
           <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-brand text-xs font-semibold text-primary-foreground">
             {(user.display_name ?? user.email ?? "?").slice(0, 1).toUpperCase()}
           </div>
-          <div className="min-w-0">
-            <div className="truncate text-sm font-medium">{user.display_name ?? user.email?.split("@")[0] ?? "—"}</div>
+          <div className="min-w-0 flex-1">
+            <InlineNameEdit user={user} />
             <div className="truncate text-xs text-muted-foreground">{user.email ?? "—"}</div>
           </div>
         </div>
