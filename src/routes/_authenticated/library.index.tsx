@@ -28,6 +28,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { useSettings } from "@/hooks/use-settings";
 import { invokeError } from "@/lib/invoke-error";
 import { cn } from "@/lib/utils";
+import { FOUL_MOUTH_FORCED_CLEAN } from "@/hooks/use-foul-mouth";
 import { SongCard, type Song } from "@/components/SongCard";
 import { OgInterviewDialog, type InterviewTurn } from "@/components/library/OgInterviewDialog";
 import { Button } from "@/components/ui/button";
