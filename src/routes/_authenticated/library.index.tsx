@@ -1003,7 +1003,8 @@ function LibraryPage() {
         open={interviewOpen}
         onOpenChange={setInterviewOpen}
         seed={personalDetails}
-        onDone={(brief) => {
+        onDone={(brief, transcript) => {
+          setInterviewTranscript(transcript);
           setPersonalDetails((prev) => {
             const trimmed = brief.trim();
             if (!trimmed) return prev;
@@ -1011,6 +1012,24 @@ function LibraryPage() {
             const merged = `${prev.trim()}\n${trimmed}`;
             return merged.slice(0, 500);
           });
+        }}
+      />
+
+      <ReviewDialog
+        open={reviewOpen}
+        onOpenChange={(o) => !genSong && setReviewOpen(o)}
+        title={title}
+        selections={selections}
+        categoryNotes={categoryNotes}
+        personalDetails={personalDetails}
+        extraContext={extraContext}
+        foulMouth={foulMouth}
+        lyrics={lyrics}
+        transcript={interviewTranscript}
+        previewCost={previewCost}
+        generating={genSong}
+        onConfirm={async () => {
+          await generateSong();
         }}
       />
     </div>
