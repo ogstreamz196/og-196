@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import { useNavigate, useRouterState } from "@tanstack/react-router";
-import { Search, ShieldCheck, LogOut } from "lucide-react";
+import { useNavigate, useRouterState, Link } from "@tanstack/react-router";
+import { Search, ShieldCheck, LogOut, Crown } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
@@ -82,7 +82,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const dev = useDevMode();
-  const { isAdmin, isLoading: roleLoading } = useRole();
+  const { isAdmin, isVip, isLoading: roleLoading } = useRole();
 
   async function handleSignOut() {
     await queryClient.cancelQueries();
@@ -130,6 +130,16 @@ export function AppShell({ children }: { children: ReactNode }) {
                     <ShieldCheck className="h-3 w-3" />
                     Boss
                   </div>
+                )}
+                {!roleLoading && isVip && (
+                  <Link
+                    to="/settings"
+                    title="VIP membership — manage subscription"
+                    className="hidden items-center gap-1.5 rounded-full border border-primary/40 bg-gradient-brand px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow-glow hover:opacity-90 md:flex"
+                  >
+                    <Crown className="h-3 w-3" />
+                    VIP
+                  </Link>
                 )}
                 <AdminEditModeToggle className="hidden md:inline-flex" />
                 <HighContrastToggle />

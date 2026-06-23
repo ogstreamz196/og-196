@@ -15,6 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { PreferencesPanel } from "@/components/settings/PreferencesPanel";
+import { VipStatusCard } from "@/components/settings/VipStatusCard";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   component: SettingsPage,
@@ -173,7 +174,9 @@ function SettingsPage() {
         </section>
 
         {/* Preferences — assistant, music, appearance */}
+        <VipStatusCard />
         <PreferencesPanel />
+
 
         {/* Coins */}
         <section className="rounded-2xl border border-border bg-card p-6 shadow-card space-y-4">
