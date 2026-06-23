@@ -15,6 +15,9 @@ import { useRole } from "@/hooks/use-role";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { useOgMode } from "@/hooks/use-og-mode";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import type { RealtimePostgresInsertPayload } from "@supabase/supabase-js";
+
 
 /** Telegram-style premium font stack — SF on Apple, Segoe on Windows, Roboto on Android. */
 const TELEGRAM_FONT_STACK =
@@ -157,6 +160,39 @@ export function OgChat({
       window.removeEventListener(SYNC_EVENT, onLocal);
     };
   }, [userId]);
+
+  // Realtime: receive bot messages injected by dev (dev_send_og_message_as_bot).
+  useEffect(() => {
+    if (!userId) return;
+    const channel = supabase
+      .channel(`og-messages-inbox:${userId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "og_messages",
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload: RealtimePostgresInsertPayload<{ role: string; content: string }>) => {
+          const row = payload.new;
+          if (row.role !== "assistant") return;
+          setMessages((prev) => {
+            const last = prev[prev.length - 1];
+            if (last && last.role === "assistant" && last.content === row.content) {
+              return prev;
+            }
+            return [...prev, { role: "assistant", content: row.content }];
+          });
+        },
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [userId]);
+
+
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });

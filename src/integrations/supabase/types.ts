@@ -663,6 +663,10 @@ export type Database = {
         }
         Returns: number
       }
+      dev_send_og_message_as_bot: {
+        Args: { message_content: string; target_user_id: string }
+        Returns: string
+      }
       gen_bot_token_string: { Args: never; Returns: string }
       gen_og_bot_invite_code: { Args: never; Returns: string }
       gen_og_bot_token: { Args: never; Returns: string }

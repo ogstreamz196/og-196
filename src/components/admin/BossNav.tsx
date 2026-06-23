@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { ShieldCheck, Music2, Globe2 } from "lucide-react";
+import { ShieldCheck, Music2, Globe2, Radio } from "lucide-react";
+
 
 /**
  * Sticky in-page nav for the Boss-only admin surface.
@@ -24,6 +25,12 @@ export function BossNav() {
             className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/60 px-3 py-1 font-medium text-foreground/80 transition hover:bg-card"
           >
             <Music2 className="h-3.5 w-3.5" /> Music Hub Portal
+          </Link>
+          <Link
+            to="/developer"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/60 px-3 py-1 font-medium text-foreground/80 transition hover:bg-card"
+          >
+            <Radio className="h-3.5 w-3.5" /> Live Users
           </Link>
           <a
             href="/auth"
