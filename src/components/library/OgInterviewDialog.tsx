@@ -25,7 +25,7 @@ interface OgInterviewDialogProps {
 }
 
 export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterviewDialogProps) {
-  const [history, setHistory] = useState<Turn[]>([]);
+  const [history, setHistory] = useState<InterviewTurn[]>([]);
   const [answer, setAnswer] = useState("");
   const [loading, setLoading] = useState(false);
   const [finishing, setFinishing] = useState(false);
