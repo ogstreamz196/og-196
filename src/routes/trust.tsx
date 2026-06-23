@@ -31,14 +31,14 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-2xl border border-border bg-card/60 p-6 backdrop-blur-sm">
-      <div className="mb-3 flex items-center gap-3">
-        <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/15 text-primary">
-          <Icon className="h-5 w-5" />
+    <section className="rounded-[2rem] border-2 border-white/15 bg-card/60 p-6 shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)] backdrop-blur-sm sm:p-8">
+      <div className="mb-4 flex items-center gap-3">
+        <div className="grid h-12 w-12 place-items-center rounded-2xl bg-primary/15 text-primary">
+          <Icon className="h-6 w-6" />
         </div>
-        <h2 className="font-display text-xl font-bold text-foreground">{title}</h2>
+        <h2 className="font-display text-3xl font-black text-foreground sm:text-4xl">{title}</h2>
       </div>
-      <div className="space-y-3 text-sm leading-relaxed text-muted-foreground">{children}</div>
+      <div className="space-y-3 text-lg leading-relaxed text-muted-foreground">{children}</div>
     </section>
   );
 }
