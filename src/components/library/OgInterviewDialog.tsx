@@ -175,16 +175,23 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 void submit();
+              } else if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                e.preventDefault();
+                void submit();
+              } else if (e.key === "Escape" && !finishing) {
+                e.preventDefault();
+                void finish();
               }
             }}
+            aria-label="Your answer"
             placeholder={
               loading
                 ? "Waiting for the next question…"
-                : "Your answer — Enter to send, Shift+Enter for a new line"
+                : "Your answer — Enter to send, Shift+Enter for new line, Esc to finish"
             }
             disabled={loading || finishing}
             rows={2}
-            className="resize-none rounded-xl border-primary/20 bg-background/60 text-sm"
+            className="resize-none rounded-xl border-primary/20 bg-background/60 text-sm focus-visible:ring-2 focus-visible:ring-primary"
           />
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="text-xs text-muted-foreground">
