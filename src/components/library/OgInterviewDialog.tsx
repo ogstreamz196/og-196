@@ -15,13 +15,13 @@ import { invokeError } from "@/lib/invoke-error";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-type Turn = { role: "bot" | "user"; text: string };
+export type InterviewTurn = { role: "bot" | "user"; text: string };
 
 interface OgInterviewDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   seed: string;
-  onDone: (brief: string) => void;
+  onDone: (brief: string, transcript: InterviewTurn[]) => void;
 }
 
 export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterviewDialogProps) {
