@@ -619,6 +619,64 @@ button.graffiti-accent:hover {
   }
 }
 
+/* Premium luxury slow glow — soft gold + brand halo that breathes.
+   GPU-friendly: only opacity/transform animate on stacked pseudo-elements. */
+@keyframes luxe-glow-breathe {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50%      { opacity: 0.95; transform: scale(1.015); }
+}
+@keyframes luxe-glow-sheen {
+  0%   { transform: translateX(-130%) skewX(-18deg); opacity: 0; }
+  20%  { opacity: 0.55; }
+  60%  { opacity: 0.35; }
+  100% { transform: translateX(160%) skewX(-18deg); opacity: 0; }
+}
+.luxe-glow {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.luxe-glow::before,
+.luxe-glow::after {
+  content: "";
+  position: absolute;
+  border-radius: inherit;
+  pointer-events: none;
+  will-change: opacity, transform;
+  transform: translateZ(0);
+}
+.luxe-glow::before {
+  inset: -8px;
+  z-index: -1;
+  box-shadow:
+    0 0 0 1px rgba(212, 175, 55, 0.4),
+    0 0 22px 4px rgba(212, 175, 55, 0.32),
+    0 0 48px 14px hsl(var(--primary) / 0.38),
+    0 18px 60px -12px hsl(var(--primary) / 0.55);
+  animation: luxe-glow-breathe 6.5s ease-in-out infinite;
+}
+.luxe-glow::after {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 38%;
+  z-index: 1;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgba(255, 235, 180, 0.22) 45%,
+    rgba(255, 255, 255, 0.45) 55%,
+    transparent 100%
+  );
+  mix-blend-mode: screen;
+  animation: luxe-glow-sheen 7.2s ease-in-out infinite;
+  animation-delay: var(--luxe-delay, 0s);
+}
+@media (prefers-reduced-motion: reduce) {
+  .luxe-glow::before { animation: none; opacity: 0.55; }
+  .luxe-glow::after { animation: none; opacity: 0; }
+}
+
 /* Generating-state shimmer + slow aura pulse */
 @keyframes generating-shimmer {
   0%   { transform: translateX(-120%); }
