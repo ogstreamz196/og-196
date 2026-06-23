@@ -149,33 +149,45 @@ function DeveloperPage() {
             </div>
           ) : (
             <ul className="space-y-1">
-              {others.map((u) => (
-                <li key={u.user_id}>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedId(u.user_id)}
-                    className={cn(
-                      "flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left transition hover:bg-card",
-                      selectedId === u.user_id && "bg-card ring-1 ring-primary/40",
-                    )}
-                  >
-                    <Circle className="h-2.5 w-2.5 fill-emerald-400 text-emerald-400" />
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate text-sm font-medium">
-                        {u.display_name || u.email || u.user_id.slice(0, 8)}
-                      </div>
-                      <div className="truncate text-[11px] text-muted-foreground">
-                        {u.email}
-                      </div>
-                      {u.last_page && (
-                        <div className="truncate text-[11px] text-primary/80">
-                          on <code>{u.last_page}</code>
-                        </div>
+              {others.map((u) => {
+                const label = u.display_name || u.email || u.user_id.slice(0, 8);
+                return (
+                  <li key={u.user_id} className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedId(u.user_id)}
+                      className={cn(
+                        "flex flex-1 items-center gap-2 rounded-lg px-2 py-2 text-left transition hover:bg-card",
+                        selectedId === u.user_id && "bg-card ring-1 ring-primary/40",
                       )}
-                    </div>
-                  </button>
-                </li>
-              ))}
+                    >
+                      <Circle className="h-2.5 w-2.5 fill-emerald-400 text-emerald-400" />
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-sm font-medium">{label}</div>
+                        <div className="truncate text-[11px] text-muted-foreground">{u.email}</div>
+                        {u.last_page && (
+                          <div className="truncate text-[11px] text-primary/80">
+                            on <code>{u.last_page}</code>
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      title="Sync this user to Sheets"
+                      onClick={() => syncOneM.mutate({ userId: u.user_id, label })}
+                      disabled={syncOneM.isPending}
+                    >
+                      {syncOneM.isPending && syncOneM.variables?.userId === u.user_id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <RefreshCw className="h-3.5 w-3.5" />
+                      )}
+                    </Button>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </aside>
