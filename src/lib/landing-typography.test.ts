@@ -16,7 +16,9 @@ const RULES = {
   cardTitle: /text-(?:3xl|4xl|5xl|6xl)\s+font-(?:black|semibold|bold)|text-\[clamp\(/,
   cardBody: /\btext-lg\b/,
   container: 'max-w-7xl',
-  sectionGap: 'gap-14',
+  // Section rhythm: either the flex `gap-14` used on home/trust/portal main
+  // wrappers, or section-level vertical padding for the long-form welcome page.
+  sectionRhythm: /\bgap-14\b|\bpy-1[6-9]\b|\bpy-2[0-9]\b/,
 };
 
 const LANDING_PAGES = [
