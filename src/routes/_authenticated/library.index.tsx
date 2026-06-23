@@ -288,13 +288,21 @@ function LibraryPage() {
     if (!canGenerateLyrics) return;
     setGenLyrics(true);
     try {
+      const noteParts = (["language", "genre", "mood", "theme", "tempo"] as Category[])
+        .map((c) => {
+          const n = categoryNotes[c]?.trim();
+          return n ? `${META[c].label} notes: ${n}` : null;
+        })
+        .filter(Boolean) as string[];
       const description = [
         selections.theme ? `Theme: ${selections.theme}` : null,
         selections.mood ? `Mood: ${selections.mood}` : null,
         selections.tempo ? `Tempo: ${selections.tempo}` : null,
+        ...noteParts,
       ]
         .filter(Boolean)
         .join(" · ");
+      const combinedExtra = [extraContext.trim(), ...noteParts].filter(Boolean).join("\n");
       const { data, error } = await supabase.functions.invoke("generate-lyrics", {
         body: {
           songName: title.trim(),
@@ -303,7 +311,7 @@ function LibraryPage() {
           language: selections.language,
           foulMouth,
           personalDetails: personalDetails.trim() || undefined,
-          extraContext: extraContext.trim() || undefined,
+          extraContext: combinedExtra || undefined,
         },
       });
       if (error) {
