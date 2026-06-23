@@ -245,6 +245,7 @@ function LibraryPage() {
   const [genSong, setGenSong] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<Song | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [interviewOpen, setInterviewOpen] = useState(false);
 
   function setField(cat: Category, value: string) {
     setSelections((prev) => ({ ...prev, [cat]: value }));
