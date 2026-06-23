@@ -46,23 +46,25 @@ function Section({
 function TrustPage() {
   return (
     <div className="min-h-dvh bg-background text-foreground">
-      <div className="mx-auto w-full max-w-3xl px-5 py-10 sm:py-14">
-        <header className="mb-8 space-y-3">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-14 px-2 py-10 sm:px-4 sm:py-14">
+        <header className="space-y-3">
           <Link
             to="/welcome"
-            className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground"
+            className="text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground hover:text-foreground sm:text-sm"
           >
             ← Back
           </Link>
-          <h1 className="font-display text-3xl font-black sm:text-4xl">Trust &amp; Privacy</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="font-display text-[clamp(2.25rem,8vw,5rem)] font-black leading-[0.95] tracking-[-0.03em]">
+            Trust &amp; Privacy
+          </h1>
+          <p className="max-w-3xl text-lg leading-relaxed text-muted-foreground">
             This page is maintained by the OG Studio team to answer common security and privacy
             questions about OG Studio. It describes the app-visible controls we enable today and is
             not an independent certification or audit.
           </p>
         </header>
 
-        <div className="grid gap-4">
+        <div className="grid gap-6">
           <Section icon={UserCheck} title="Accounts &amp; authentication">
             <p>
               You sign in with Google or Apple via secure OAuth — OG Studio never sees or stores
