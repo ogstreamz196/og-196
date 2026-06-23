@@ -249,7 +249,8 @@ function LibraryPage() {
   });
   const [lyrics, setLyrics] = useState("");
   const [genLyrics, setGenLyrics] = useState(false);
-  const [foulMouth, setFoulMouth] = useState(false);
+  const [foulMouthPref, setFoulMouth] = useState(false);
+  const foulMouth = FOUL_MOUTH_FORCED_CLEAN ? false : foulMouthPref;
   const [personalDetails, setPersonalDetails] = useState("");
   const [extraContext, setExtraContext] = useState("");
   const [genSong, setGenSong] = useState(false);
