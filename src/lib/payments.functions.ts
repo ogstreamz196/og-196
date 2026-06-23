@@ -378,13 +378,68 @@ export const reconcileCoinSession = createServerFn({ method: "POST" })
 // Purchase history: any user can see their own coin/VIP transactions.
 // -------------------------------------------------------------------------
 
+export type StripePurchaseDetails = {
+  amountPaid: number;
+  currency: string;
+  refundedAmount: number;
+  refunded: boolean;
+  partiallyRefunded: boolean;
+};
+
 export type PurchaseRow = {
   id: string;
   amount: number;
   type: string;
   reference: string | null;
   created_at: string;
+  stripe?: StripePurchaseDetails | null;
 };
+
+const ZERO_DECIMAL = new Set(["bif","clp","djf","gnf","jpy","kmf","krw","mga","pyg","rwf","ugx","vnd","vuv","xaf","xof","xpf"]);
+const THREE_DECIMAL = new Set(["bhd","jod","kwd","omr","tnd"]);
+function toMajorUnit(amount: number, currency: string) {
+  const c = (currency ?? "").toLowerCase();
+  if (ZERO_DECIMAL.has(c)) return amount;
+  if (THREE_DECIMAL.has(c)) return amount / 1000;
+  return amount / 100;
+}
+
+function parseStripeRef(ref: string | null): { env: StripeEnv; sessionId: string } | null {
+  if (!ref) return null;
+  const m = /^stripe:(sandbox|live):(cs_(?:test|live)_[A-Za-z0-9]+)$/.exec(ref);
+  return m ? { env: m[1] as StripeEnv, sessionId: m[2] } : null;
+}
+
+async function fetchStripeDetails(
+  sessionId: string,
+  env: StripeEnv,
+  expectedUserId: string,
+): Promise<StripePurchaseDetails | null> {
+  try {
+    const stripe = createStripeClient(env);
+    const session = await stripe.checkout.sessions.retrieve(sessionId, {
+      expand: ["payment_intent", "payment_intent.latest_charge"],
+    });
+    if ((session.metadata?.userId ?? "") !== expectedUserId) return null;
+    const charge: any = (session.payment_intent as any)?.latest_charge;
+    if (!charge) return null;
+    const currency = (charge.currency ?? session.currency ?? "usd") as string;
+    const amountPaid = toMajorUnit(charge.amount ?? 0, currency);
+    const refundedRaw = charge.amount_refunded ?? 0;
+    const refundedAmount = toMajorUnit(refundedRaw, currency);
+    const refunded = !!charge.refunded || refundedRaw >= (charge.amount ?? 0);
+    return {
+      amountPaid,
+      currency,
+      refundedAmount,
+      refunded,
+      partiallyRefunded: refundedRaw > 0 && !refunded,
+    };
+  } catch (e) {
+    console.error("fetchStripeDetails failed", e);
+    return null;
+  }
+}
 
 export const getCoinPurchaseHistory = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -397,13 +452,27 @@ export const getCoinPurchaseHistory = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false })
       .limit(100);
     if (error) throw new Error(error.message);
-    return (data ?? []) as PurchaseRow[];
+    const rows = (data ?? []) as PurchaseRow[];
+
+    const stripeRows = rows
+      .filter((r) => r.type === "stripe_purchase" && r.amount > 0 && parseStripeRef(r.reference))
+      .slice(0, 30);
+
+    const enriched = await Promise.all(
+      stripeRows.map(async (r) => {
+        const ref = parseStripeRef(r.reference)!;
+        const details = await fetchStripeDetails(ref.sessionId, ref.env, userId);
+        return [r.id, details] as const;
+      }),
+    );
+    const detailMap = new Map(enriched);
+    return rows.map((r) =>
+      detailMap.has(r.id) ? { ...r, stripe: detailMap.get(r.id) ?? null } : r,
+    );
   });
 
 // -------------------------------------------------------------------------
-// Receipt link: look up the Stripe-hosted receipt for a paid checkout
-// session. Returns the latest charge's receipt_url (or hosted invoice url
-// for subscriptions). Requires auth + ownership match.
+// Receipt link
 // -------------------------------------------------------------------------
 
 type ReceiptResult = { url: string } | { error: string };
@@ -433,3 +502,81 @@ export const getStripeReceiptUrl = createServerFn({ method: "POST" })
       return { error: getStripeErrorMessage(error) };
     }
   });
+
+// -------------------------------------------------------------------------
+// VIP-only instant refund. Issues a full Stripe refund and reverses the
+// credited coins on the caller's balance. Idempotent if charge is already
+// refunded.
+// -------------------------------------------------------------------------
+
+type RefundResult =
+  | { status: "refunded"; refundedAmount: number; currency: string; newBalance: number }
+  | { status: "already_refunded"; refundedAmount: number; currency: string }
+  | { error: string };
+
+export const refundCoinPurchase = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: { sessionId: string; environment: StripeEnv }) => {
+    if (!/^cs_(test|live)_[A-Za-z0-9]+$/.test(data.sessionId)) throw new Error("Invalid sessionId");
+    if (data.environment !== "sandbox" && data.environment !== "live") throw new Error("Invalid environment");
+    return data;
+  })
+  .handler(async ({ data, context }): Promise<RefundResult> => {
+    const { supabase, userId } = context;
+    try {
+      const { data: isVip, error: roleErr } = await supabase.rpc("has_role", {
+        _user_id: userId,
+        _role: "vip",
+      });
+      if (roleErr) return { error: roleErr.message };
+      if (!isVip) return { error: "VIP membership required for instant refunds" };
+
+      const stripe = createStripeClient(data.environment);
+      const session = await stripe.checkout.sessions.retrieve(data.sessionId, {
+        expand: ["payment_intent", "payment_intent.latest_charge"],
+      });
+      if ((session.metadata?.userId ?? "") !== userId) {
+        return { error: "Not your session" };
+      }
+      const pi: any = session.payment_intent;
+      const charge: any = pi?.latest_charge;
+      if (!pi?.id || !charge) return { error: "No charge to refund" };
+
+      const currency = (charge.currency ?? "usd") as string;
+      const reference = `stripe:${data.environment}:${session.id}`;
+
+      if (charge.refunded || (charge.amount_refunded ?? 0) >= (charge.amount ?? 0)) {
+        return {
+          status: "already_refunded",
+          refundedAmount: toMajorUnit(charge.amount_refunded ?? charge.amount ?? 0, currency),
+          currency,
+        };
+      }
+
+      const refund = await stripe.refunds.create({ payment_intent: pi.id });
+      const refundedAmount = toMajorUnit(refund.amount ?? 0, currency);
+
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+      const coinsToReverse = Math.max(0, Number(session.metadata?.coins ?? 0)) || 0;
+      const { data: prof } = await supabaseAdmin
+        .from("profiles").select("coin_balance").eq("id", userId).maybeSingle();
+      const current = prof?.coin_balance ?? 0;
+      const newBalance = Math.max(0, current - coinsToReverse);
+      if (coinsToReverse > 0) {
+        await supabaseAdmin.from("profiles").update({ coin_balance: newBalance }).eq("id", userId);
+        await supabaseAdmin.from("coin_transactions").insert({
+          user_id: userId,
+          amount: -coinsToReverse,
+          type: "refund",
+          reference,
+        });
+      }
+
+      return { status: "refunded", refundedAmount, currency, newBalance };
+    } catch (error) {
+      console.error("refundCoinPurchase failed", error);
+      return { error: getStripeErrorMessage(error) };
+    }
+  });
+
