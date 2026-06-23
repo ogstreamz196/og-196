@@ -174,7 +174,9 @@ function SettingsPage() {
         </section>
 
         {/* Preferences — assistant, music, appearance */}
+        <VipStatusCard />
         <PreferencesPanel />
+
 
         {/* Coins */}
         <section className="rounded-2xl border border-border bg-card p-6 shadow-card space-y-4">
