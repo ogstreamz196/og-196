@@ -17,6 +17,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { ensureCurrentUserBootstrap } from "@/lib/user-bootstrap.functions";
 import { useSiteContentRealtime } from "@/hooks/use-site-content";
 import { DisplayPrefsBridge } from "@/hooks/use-display-prefs";
+import { UserActivityArchiver } from "@/hooks/use-user-activity-archiver";
 
 function NotFoundComponent() {
   return (
@@ -194,6 +195,10 @@ function RootComponent() {
         import("@/lib/dev-telemetry.functions")
           .then((m) => m.notifyDevSignIn())
           .catch(() => undefined);
+        // Snapshot the signed-in user's activity to Sheets (fire-and-forget).
+        import("@/lib/user-log.functions")
+          .then((m) => m.syncUserActivity({ data: {} }))
+          .catch(() => undefined);
       }
     });
     return () => sub.subscription.unsubscribe();
@@ -230,6 +235,7 @@ function RootComponent() {
       <AuthProvider>
         <SiteContentRealtimeBridge />
         <DisplayPrefsBridge />
+        <UserActivityArchiver />
         <Outlet />
         <Toaster />
       </AuthProvider>
