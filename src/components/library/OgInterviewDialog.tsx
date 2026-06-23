@@ -163,11 +163,15 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
   }
 
   const answered = history.filter((t) => t.role === "user").length;
+  const progressPct = Math.min(100, Math.round((answered / TARGET_ANSWERS) * 100));
+  const stepLabel = answered >= TARGET_ANSWERS
+    ? `Step ${answered} · enough to roll`
+    : `Step ${answered + 1} of ~${TARGET_ANSWERS}`;
 
   return (
     <Dialog open={open} onOpenChange={(o) => !finishing && onOpenChange(o)}>
       <DialogContent className="flex max-h-[92svh] w-[min(96vw,640px)] flex-col gap-0 overflow-hidden p-0 sm:max-h-[88svh]">
-        <DialogHeader className="space-y-1 border-b border-white/10 bg-gradient-to-br from-primary/20 via-fuchsia-500/10 to-background px-5 py-4">
+        <DialogHeader className="space-y-2 border-b border-white/10 bg-gradient-to-br from-primary/20 via-fuchsia-500/10 to-background px-5 py-4">
           <DialogTitle className="flex items-center gap-2 text-lg font-black">
             <MessageCircleHeart className="h-5 w-5 text-primary" />
             OG Bot wants to know you
@@ -176,7 +180,29 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
             Answer as many as you like. Every answer makes the song sharper.
             Tap <span className="font-semibold text-foreground">That's enough</span> when you're done.
           </DialogDescription>
+          <div
+            className="space-y-1 pt-1"
+            aria-label={`Progress: ${answered} of about ${TARGET_ANSWERS} answers captured`}
+          >
+            <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <span>{stepLabel}</span>
+              <span>{answered}/~{TARGET_ANSWERS}</span>
+            </div>
+            <div
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={TARGET_ANSWERS}
+              aria-valuenow={Math.min(answered, TARGET_ANSWERS)}
+              className="h-1.5 w-full overflow-hidden rounded-full bg-white/10"
+            >
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-primary to-fuchsia-500 transition-all duration-500 ease-out"
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
+          </div>
         </DialogHeader>
+
 
         <div
           ref={scrollRef}
