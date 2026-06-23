@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { BossNav } from "@/components/admin/BossNav";
+import { FreeAccessPanel } from "@/components/admin/FreeAccessPanel";
 import { syncUserActivity, syncAllUsersActivity } from "@/lib/user-log.functions";
 
 export const Route = createFileRoute("/_authenticated/developer")({
@@ -109,7 +110,9 @@ function DeveloperPage() {
   return (
     <div className="px-4 py-6 md:px-8">
       <BossNav />
+      <FreeAccessPanel />
       <header className="mb-6 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:flex-wrap sm:justify-between">
+
         <div className="flex min-w-0 items-center gap-3">
           <Radio className="h-6 w-6 shrink-0 text-primary" />
           <div className="min-w-0">

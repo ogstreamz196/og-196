@@ -1,11 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./use-auth";
+import { useFreeAccess } from "./use-free-access";
+
+
 
 export type AppRole = "admin" | "user" | "vip" | "og_bot" | "dev" | "boss";
 
 export function useRole() {
   const { user, loading: authLoading } = useAuth();
+  const { enabled: freeAccess } = useFreeAccess();
   const query = useQuery({
     queryKey: ["user-role", user?.id],
     enabled: !!user,
@@ -21,19 +25,27 @@ export function useRole() {
         roles,
         isAdmin,
         isUser: roles.includes("user"),
-        isVip: roles.includes("vip"),
+        hasVipRole: roles.includes("vip"),
         isDev: roles.includes("dev") || isAdmin,
         isBoss: roles.includes("boss") || isAdmin,
       };
     },
   });
+  const hasVipRole = query.data?.hasVipRole ?? false;
+  const isAdmin = query.data?.isAdmin ?? false;
+  // VIP-gated features are unlocked for everyone while the dev-controlled
+  // free_access_all flag is ON. Admins always have access.
+  const isVip = hasVipRole || isAdmin || freeAccess;
   return {
     ...query,
     isLoading: authLoading || query.isLoading,
-    isAdmin: query.data?.isAdmin ?? false,
-    isVip: query.data?.isVip ?? false,
+    isAdmin,
+    isVip,
+    hasVipRole,
+    isFreeAccess: freeAccess,
     isDev: query.data?.isDev ?? false,
     isBoss: query.data?.isBoss ?? false,
     roles: query.data?.roles ?? [],
   };
 }
+
