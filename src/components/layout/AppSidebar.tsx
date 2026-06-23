@@ -38,7 +38,7 @@ type NavItem = { title: string; url: AppRoute; icon: typeof Home; adminOnly?: bo
 
 const primaryNav: NavItem[] = [
   { title: "Home", url: "/", icon: Home },
-  { title: "My Library", url: "/library", icon: Music2 },
+  { title: "MusicHUB", url: "/library", icon: Music2 },
   { title: "OG Messenger", url: "/messenger", icon: MessagesSquare },
   { title: "Portals", url: "/portals", icon: DoorOpen, adminOnly: true },
 ];

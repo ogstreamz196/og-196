@@ -140,7 +140,7 @@ function DashboardHome() {
         </h2>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <QuickAction to="/library" icon={<Plus className="h-6 w-6" />} label="New song" />
-          <QuickAction to="/library" icon={<Library className="h-6 w-6" />} label="My library" />
+          <QuickAction to="/library" icon={<Library className="h-6 w-6" />} label="MusicHUB" />
           <QuickAction to="/messenger" icon={<Wand2 className="h-6 w-6" />} label="Ask OG" />
           <QuickAction to="/buy-coins" icon={<Coins className="h-6 w-6" />} label="Buy coins" />
         </div>
