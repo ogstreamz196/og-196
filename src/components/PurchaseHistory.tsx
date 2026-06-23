@@ -413,5 +413,8 @@ export function PurchaseHistory() {
         );
       })()}
     </section>
+    <RefundsPanel />
+    </>
   );
 }
+
