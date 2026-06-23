@@ -1,5 +1,6 @@
 import { Sparkles, MessageSquareMore, Music2, Palette, Bell, Type, Rows3, Minus, Plus, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
+import { Link } from "@tanstack/react-router";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -9,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { useOgMode } from "@/hooks/use-og-mode";
+import { useRole } from "@/hooks/use-role";
 import { useAppPreferences, type AppPreferences } from "@/hooks/use-app-preferences";
 import { useDisplayPrefs, useSetDisplayPrefs, clampScale, type Density } from "@/hooks/use-display-prefs";
 
@@ -19,6 +21,7 @@ import { useDisplayPrefs, useSetDisplayPrefs, clampScale, type Density } from "@
 export function PreferencesPanel() {
   const { foulMouth, isLoading } = useFoulMouth();
   const setFoulMouth = useSetFoulMouth();
+  const { isVip } = useRole();
   const { mode, setMode } = useOgMode();
   const { prefs, update: rawUpdate } = useAppPreferences();
   const update = <K extends keyof AppPreferences>(key: K, value: AppPreferences[K]) => {
