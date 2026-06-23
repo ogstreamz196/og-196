@@ -18,7 +18,7 @@ import {
 } from "@/lib/coin-packs";
 import { StripeEmbeddedCheckoutInline } from "@/components/StripeEmbeddedCheckout";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
-import { CirculatingCoins } from "@/components/CirculatingCoins";
+
 import { toast } from "sonner";
 import { PurchaseHistory } from "@/components/PurchaseHistory";
 
