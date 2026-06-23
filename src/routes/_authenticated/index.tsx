@@ -100,7 +100,7 @@ function DashboardHome() {
             </p>
             <h1 className="font-display mt-3 text-[clamp(2.25rem,12vw,6rem)] font-black leading-[1.02] tracking-[-0.02em] text-foreground [text-shadow:0_4px_28px_rgba(0,0,0,0.75)] [overflow-wrap:break-word] [word-break:normal]">
               Hello,{" "}
-              <em className="inline italic text-gradient-brand animate-[wiggle_3s_ease-in-out_infinite] origin-bottom [overflow-wrap:break-word] [word-break:normal]">
+              <em className="inline italic text-gradient-red animate-[wiggle_3s_ease-in-out_infinite] origin-bottom [overflow-wrap:break-word] [word-break:normal]">
                 {displayName}
               </em>
             </h1>
@@ -265,7 +265,7 @@ function PrimaryCard({
                 key={`${word}-${i}`}
                 className={
                   "wc-pop mr-[0.25em] inline-block " +
-                  (isLast ? "italic text-gradient-brand wc-bounce-soft" : "")
+                  (isLast ? "italic text-gradient-red wc-bounce-soft" : "")
                 }
                 style={{ animationDelay: `${i * 0.12}s` }}
               >
