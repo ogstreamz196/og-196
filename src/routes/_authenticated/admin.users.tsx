@@ -300,8 +300,8 @@ function UserRow({ user, roles }: { user: ProfileRow; roles: string[] }) {
           <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-brand text-xs font-semibold text-primary-foreground">
             {(user.display_name ?? user.email ?? "?").slice(0, 1).toUpperCase()}
           </div>
-          <div className="min-w-0">
-            <div className="truncate text-sm font-medium">{user.display_name ?? user.email?.split("@")[0] ?? "—"}</div>
+          <div className="min-w-0 flex-1">
+            <InlineNameEdit user={user} />
             <div className="truncate text-xs text-muted-foreground">{user.email ?? "—"}</div>
           </div>
         </div>
