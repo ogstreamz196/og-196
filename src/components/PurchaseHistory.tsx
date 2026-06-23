@@ -94,7 +94,7 @@ function RefundButton({ row }: { row: PurchaseRow }) {
     if (already) return;
     setLoading(true);
     try {
-      const env = (() => { try { return getStripeEnvironment(); } catch { return stripe!.env; } })();
+      const env = stripe!.env;
       const res = await refundFn({ data: { sessionId: stripe!.sessionId, environment: env } });
       if ("error" in res) { toast.error(res.error); return; }
       if (res.status === "already_refunded") {
