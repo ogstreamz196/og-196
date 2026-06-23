@@ -47,8 +47,8 @@ export const chatOgBot = createServerFn({ method: "POST" })
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    // 1. Load user context in parallel (profile, role flags, foul pref, persona overrides, learned insults).
-    const [profileRes, rolesRes, prefRes, siteRes, learnedRes] = await Promise.all([
+    // 1. Load user context in parallel (profile, role flags, foul pref, persona overrides, learned insults, free-access flag).
+    const [profileRes, rolesRes, prefRes, siteRes, learnedRes, freeRes] = await Promise.all([
       supabaseAdmin
         .from("profiles")
         .select("display_name, email, coin_balance")
@@ -73,6 +73,11 @@ export const chatOgBot = createServerFn({ method: "POST" })
         .eq("user_id", context.userId)
         .order("last_seen_at", { ascending: false })
         .limit(40),
+      supabaseAdmin
+        .from("app_settings")
+        .select("value")
+        .eq("key", "free_access_all")
+        .maybeSingle(),
     ]);
 
     if (profileRes.error) throw new Error(profileRes.error.message);
@@ -90,11 +95,13 @@ export const chatOgBot = createServerFn({ method: "POST" })
     const personaMap = new Map<string, string>(
       (siteRes.data ?? []).map((r: { key: string; value: string }) => [r.key, r.value]),
     );
-    // Foul-mouth is a VIP-only feature. Non-VIP users (even if a stored
-    // pref says true) get the clean OG persona — the upgrade path lives
-    // in the UI (Buy Coins → VIP).
-    const isVip = roles.includes("vip") || roles.includes("admin");
+    // Foul-mouth is normally VIP-only. While the dev-controlled
+    // free_access_all flag is ON, every signed-in user gets it too.
+    const freeAccessRaw = freeRes.data?.value as unknown;
+    const freeAccess = freeAccessRaw === true || freeAccessRaw === "true";
+    const isVip = roles.includes("vip") || roles.includes("admin") || freeAccess;
     const foulMouth = isVip ? (prefRes.data?.foul_mouth ?? false) : false;
+
 
     const userCtx: UserContextSummary = {
       display_name: profile.display_name,
