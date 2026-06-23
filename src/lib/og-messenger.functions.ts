@@ -110,7 +110,7 @@ export const chatOgBot = createServerFn({ method: "POST" })
     const freeAccess = (freeRaw === true || freeRaw === "true") && !freeExpired;
     const isVip = roles.includes("vip") || roles.includes("admin") || freeAccess;
 
-    const foulMouth = isVip ? (prefRes.data?.foul_mouth ?? false) : false;
+    const foulMouth = isVip ? (prefRes.data?.foul_mouth ?? true) : false;
 
 
     const userCtx: UserContextSummary = {
