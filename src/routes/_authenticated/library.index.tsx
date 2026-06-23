@@ -440,6 +440,14 @@ function LibraryPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
+  // Refresh the library list immediately when explicit-mode is toggled so the
+  // results reflect the new preference without a manual reload.
+  useEffect(() => {
+    if (!user) return;
+    library.refetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [foulMouth]);
+
   async function handleDelete() {
     if (!pendingDelete) return;
     setDeleting(true);
