@@ -663,6 +663,8 @@ function LibraryPage() {
             cat={cat}
             value={selections[cat]}
             chips={chips[cat]}
+            note={categoryNotes[cat]}
+            onNoteChange={(v) => setCategoryNotes((prev) => ({ ...prev, [cat]: v }))}
             onSelect={(v) => setField(cat, v)}
             onPickChip={(v) => pickChip(cat, v)}
             onRefresh={() => refreshRow(cat)}
