@@ -20,9 +20,10 @@ const FEATURES = [
   {
     to: "/library",
     icon: <Library className="h-6 w-6" />,
-    title: "Your Library",
+    title: "MusicHUB",
     description: "Every track you generate lives here. Stream, review, and build your personal catalog.",
-    cta: "Open Library",
+    cta: "Open MusicHUB",
+
   },
   {
     to: "/messenger",
