@@ -179,7 +179,11 @@ function DeveloperPage() {
                   e.preventDefault();
                   const text = draft.trim();
                   if (!text) return;
-                  send.mutate({ target: selected.user_id, content: text });
+                  send.mutate({
+                    target: selected.user_id,
+                    content: text,
+                    targetLabel: selected.display_name || selected.email || selected.user_id.slice(0, 8),
+                  });
                 }}
               >
                 <Textarea
@@ -192,12 +196,18 @@ function DeveloperPage() {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
                       const text = draft.trim();
-                      if (text) send.mutate({ target: selected.user_id, content: text });
+                      if (text) {
+                        send.mutate({
+                          target: selected.user_id,
+                          content: text,
+                          targetLabel: selected.display_name || selected.email || selected.user_id.slice(0, 8),
+                        });
+                      }
                     }
                   }}
                 />
                 <Button type="submit" disabled={!draft.trim() || send.isPending}>
-                  <Send className="h-4 w-4" />
+                  {send.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                 </Button>
               </form>
             </>
