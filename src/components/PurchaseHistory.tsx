@@ -298,7 +298,64 @@ function RefundDetailsDrawer({ refund, onClose }: { refund: RefundRow; onClose: 
   );
 }
 
+const EMAIL_OPT_IN_KEY = "refund-email-notify";
+
+function SettlementTimeline() {
+  const items = [
+    {
+      icon: CreditCard,
+      label: "Credit & debit cards",
+      window: "5–10 business days",
+      note: "Issuing bank decides when the credit lands on your statement.",
+    },
+    {
+      icon: Landmark,
+      label: "Bank debits (SEPA, ACH, BACS)",
+      window: "Up to 14 business days",
+      note: "Bank-to-bank reversals are slower than card refunds.",
+    },
+    {
+      icon: Smartphone,
+      label: "Apple Pay / Google Pay",
+      window: "5–10 business days",
+      note: "Settles back to the underlying card, not the wallet.",
+    },
+  ];
+  return (
+    <div className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
+      <div className="flex items-center gap-2">
+        <Clock className="h-4 w-4 text-amber-500" />
+        <h4 className="text-sm font-bold">Estimated time to refund</h4>
+      </div>
+      <p className="mt-1 text-xs text-muted-foreground">
+        Once a refund is approved on our side, settlement back to the original payment method depends on the network. Typical windows:
+      </p>
+      <ul className="mt-3 space-y-2.5">
+        {items.map((it) => {
+          const Icon = it.icon;
+          return (
+            <li key={it.label} className="flex items-start gap-3">
+              <Icon className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <p className="text-xs font-semibold">{it.label}</p>
+                  <span className="text-[11px] font-bold tabular-nums text-amber-500">{it.window}</span>
+                </div>
+                <p className="text-[11px] text-muted-foreground">{it.note}</p>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+      <p className="mt-3 text-[11px] text-muted-foreground">
+        These are payment-network estimates. Weekends and bank holidays can extend the window. You'll see "Refunded" here as soon as your bank confirms.
+      </p>
+    </div>
+  );
+}
+
 function RefundsPanel() {
+
   const fetcher = useServerFn(getMyRefunds);
   const { data, isLoading, error, refetch, isFetching, dataUpdatedAt } = useQuery({
     queryKey: ["my-refunds"],
