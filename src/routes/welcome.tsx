@@ -309,14 +309,14 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
   );
 
   return (
-    <div className="w-full space-y-5">
-      <div className="relative mx-auto max-w-xl overflow-hidden rounded-3xl border-2 border-primary/50 bg-linear-to-br from-primary/25 via-primary/10 to-transparent px-3 py-5 text-center shadow-[0_12px_40px_-12px_rgba(59,130,246,0.55)] sm:px-5">
+    <div className="w-full space-y-4 sm:space-y-6">
+      <div className="relative mx-auto max-w-xl overflow-hidden rounded-3xl border-2 border-primary/50 bg-linear-to-br from-primary/25 via-primary/10 to-transparent px-4 py-4 text-center shadow-[0_12px_40px_-12px_rgba(59,130,246,0.55)] sm:px-6 sm:py-6">
         <div className="pointer-events-none absolute inset-x-0 -top-1/2 h-full animate-pulse bg-linear-to-b from-primary/20 to-transparent blur-2xl" aria-hidden />
         <span className="relative inline-flex items-center gap-1.5 rounded-full border border-primary/60 bg-primary/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-primary-foreground sm:gap-2 sm:px-3 sm:text-xs sm:tracking-[0.2em]">
           <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-black text-primary-foreground sm:h-5 sm:w-5 sm:text-[11px]">1</span>
           Step 1
         </span>
-        <p className="relative mt-2 font-display text-[clamp(1.6rem,8vw,3rem)] font-black uppercase leading-[1.05] tracking-[0.02em] text-foreground sm:text-4xl sm:tracking-[0.04em] md:text-5xl">
+        <p className="relative mt-2.5 font-display text-[clamp(1.4rem,7vw,3rem)] font-black uppercase leading-[1.02] tracking-[0.01em] text-foreground sm:mt-3 sm:text-4xl sm:tracking-[0.04em] md:text-5xl">
           <span aria-hidden>👇 </span>Select Your Device
         </p>
       </div>
