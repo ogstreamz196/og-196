@@ -523,7 +523,7 @@ function LibraryPage() {
               <Music4 className="h-3 w-3 text-primary" /> Create a song
             </div>
             <h1 className="font-display text-4xl font-black leading-[0.95] tracking-[-0.03em] sm:text-6xl">
-              Hey <em className="not-italic text-gradient-brand">{firstName}</em>.
+              Hey <em className="not-italic bg-gradient-to-br from-slate-100 via-white to-slate-400 bg-clip-text text-transparent drop-shadow-[0_1px_0_rgba(0,0,0,0.4)]">{firstName}</em>.
             </h1>
             <p className="text-base text-muted-foreground sm:text-lg">
               Pick your vibe. We'll do the rest.
