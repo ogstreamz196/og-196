@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { ShieldCheck, Music2, Globe2 } from "lucide-react";
+import { ShieldCheck, Music2, Globe2, Radio } from "lucide-react";
+
 
 /**
  * Sticky in-page nav for the Boss-only admin surface.
