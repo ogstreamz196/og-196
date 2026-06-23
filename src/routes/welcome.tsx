@@ -270,23 +270,25 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
           onClick={() => signIn(d.provider)}
           disabled={pending !== null}
           aria-label={`${d.label} — ${sub}`}
-          className={`${h} ${TILE_CLASS} ${auraOn ? "flame-aura" : ""} flex flex-col items-center justify-between gap-2 px-2 pt-4 pb-2 text-foreground sm:gap-3 sm:px-3 sm:pt-5 sm:pb-3`}
+          className={`${h} ${TILE_CLASS} ${auraOn ? "flame-aura" : ""} flex flex-col items-center justify-between gap-[clamp(0.5rem,1.2vw,0.875rem)] px-[clamp(0.5rem,1.2vw,0.875rem)] pt-[clamp(0.875rem,2vw,1.25rem)] pb-[clamp(0.5rem,1.2vw,0.875rem)] text-foreground`}
         >
 
           <div className="flex flex-1 items-center justify-center">
             {isPending ? (
               <Loader2 className="h-10 w-10 animate-spin text-foreground sm:h-16 sm:w-16" aria-hidden />
             ) : (
-              <div className="grid h-12 w-12 place-items-center rounded-2xl bg-white shadow-[0_8px_24px_rgba(0,0,0,0.45)] ring-2 ring-white/90 transition-transform duration-200 group-hover:scale-110 group-hover:rotate-[-3deg] group-active:scale-95 sm:h-20 sm:w-20 sm:rounded-3xl md:h-24 md:w-24">
-                <d.Icon className={`h-9 w-9 sm:h-16 sm:w-16 md:h-[88px] md:w-[88px] ${d.iconClass ?? "text-black"}`} />
+              <div className="grid aspect-square w-[clamp(3rem,9vw,6rem)] place-items-center rounded-[clamp(14px,2vw,24px)] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.45)] ring-2 ring-white/90 transition-transform duration-200 group-hover:scale-110 group-hover:rotate-[-3deg] group-active:scale-95">
+                <div className={`grid place-items-center ${d.iconClass ?? "text-black"}`}>
+                  <d.Icon className="h-[clamp(2.25rem,7vw,5.5rem)] w-[clamp(2.25rem,7vw,5.5rem)]" />
+                </div>
               </div>
             )}
           </div>
           <div className="w-full min-w-0 space-y-1">
-            <span className="font-display block w-full rounded-xl bg-white px-1.5 py-1.5 text-center text-[11px] font-bold uppercase leading-tight tracking-wide text-black shadow-[0_3px_0_0_rgba(0,0,0,0.15)] break-words sm:px-2 sm:py-2 sm:text-base sm:tracking-wider">
+            <span className="font-display landing-tile-label block w-full rounded-xl bg-white px-[clamp(0.375rem,0.8vw,0.625rem)] py-[clamp(0.375rem,0.8vw,0.5rem)] text-center text-black shadow-[0_3px_0_0_rgba(0,0,0,0.15)] break-words">
               {d.label}
             </span>
-            <span className="block text-center text-[9px] font-semibold uppercase leading-tight tracking-[0.12em] text-foreground/70 break-words sm:text-[10px] sm:tracking-[0.16em]">
+            <span className="landing-tile-sub block text-center text-foreground/70 break-words">
               {sub}
             </span>
           </div>
@@ -314,11 +316,11 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
 
 
 
-      <div className="relative overflow-hidden rounded-[28px] border border-white/15 bg-white/[0.04] p-3 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)] backdrop-blur-xl sm:p-5">
+      <div className="landing-card-tight relative overflow-hidden shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)]">
         <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-white/[0.06] via-transparent to-transparent" aria-hidden />
-        <div className="relative space-y-3 sm:space-y-4">
-          <div className="grid grid-cols-2 gap-3 sm:gap-4">{primaryTiles}</div>
-          <div className="grid grid-cols-3 gap-3 sm:gap-4">{secondaryTiles}</div>
+        <div className="relative landing-grid">
+          <div className="landing-grid grid-cols-2">{primaryTiles}</div>
+          <div className="landing-grid grid-cols-3">{secondaryTiles}</div>
         </div>
       </div>
     </div>
