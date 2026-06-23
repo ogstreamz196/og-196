@@ -24,6 +24,45 @@ interface OgInterviewDialogProps {
   onDone: (brief: string, transcript: InterviewTurn[]) => void;
 }
 
+const DRAFT_KEY = "og-interview:draft:v1";
+const DRAFT_TTL_MS = 1000 * 60 * 60 * 24; // 24h
+const TARGET_ANSWERS = 4;
+
+type Draft = { seed: string; history: InterviewTurn[]; answer: string; ts: number };
+
+function loadDraft(seed: string): Draft | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Draft;
+    if (!parsed || parsed.seed !== seed) return null;
+    if (Date.now() - parsed.ts > DRAFT_TTL_MS) return null;
+    if (!Array.isArray(parsed.history)) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function saveDraft(draft: Draft) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+  } catch {
+    /* ignore quota */
+  }
+}
+
+function clearDraft() {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(DRAFT_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterviewDialogProps) {
   const [history, setHistory] = useState<InterviewTurn[]>([]);
   const [answer, setAnswer] = useState("");
@@ -32,14 +71,32 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  // Reset + ask the opener whenever the dialog opens.
+  // Restore draft (or start fresh) whenever the dialog opens.
   useEffect(() => {
     if (!open) return;
-    setHistory([]);
-    setAnswer("");
-    void askNext([]);
+    const draft = loadDraft(seed);
+    if (draft && draft.history.length > 0) {
+      setHistory(draft.history);
+      setAnswer(draft.answer ?? "");
+      // If last turn is from user, the bot owes us a question — fetch it.
+      const last = draft.history[draft.history.length - 1];
+      if (last?.role === "user") {
+        void askNext(draft.history);
+      }
+    } else {
+      setHistory([]);
+      setAnswer("");
+      void askNext([]);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [open, seed]);
+
+  // Persist transcript + in-flight answer whenever they change while open.
+  useEffect(() => {
+    if (!open) return;
+    if (history.length === 0 && !answer) return;
+    saveDraft({ seed, history, answer, ts: Date.now() });
+  }, [open, seed, history, answer]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -49,6 +106,7 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
       inputRef.current?.focus();
     }
   }, [history, loading, finishing, open]);
+
 
   async function askNext(currentHistory: InterviewTurn[]) {
     setLoading(true);
@@ -80,6 +138,7 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
     if (finishing || loading) return;
     const answered = history.filter((t) => t.role === "user").length;
     if (answered === 0) {
+      clearDraft();
       onOpenChange(false);
       return;
     }
@@ -93,20 +152,26 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
       if (!summary) throw new Error("Bot returned nothing — try again");
       onDone(summary, history);
       toast.success(`Saved ${answered} answer${answered === 1 ? "" : "s"} into your details`);
+      clearDraft();
       onOpenChange(false);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Couldn't finish interview");
+
     } finally {
       setFinishing(false);
     }
   }
 
   const answered = history.filter((t) => t.role === "user").length;
+  const progressPct = Math.min(100, Math.round((answered / TARGET_ANSWERS) * 100));
+  const stepLabel = answered >= TARGET_ANSWERS
+    ? `Step ${answered} · enough to roll`
+    : `Step ${answered + 1} of ~${TARGET_ANSWERS}`;
 
   return (
     <Dialog open={open} onOpenChange={(o) => !finishing && onOpenChange(o)}>
       <DialogContent className="flex max-h-[92svh] w-[min(96vw,640px)] flex-col gap-0 overflow-hidden p-0 sm:max-h-[88svh]">
-        <DialogHeader className="space-y-1 border-b border-white/10 bg-gradient-to-br from-primary/20 via-fuchsia-500/10 to-background px-5 py-4">
+        <DialogHeader className="space-y-2 border-b border-white/10 bg-gradient-to-br from-primary/20 via-fuchsia-500/10 to-background px-5 py-4">
           <DialogTitle className="flex items-center gap-2 text-lg font-black">
             <MessageCircleHeart className="h-5 w-5 text-primary" />
             OG Bot wants to know you
@@ -115,7 +180,29 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
             Answer as many as you like. Every answer makes the song sharper.
             Tap <span className="font-semibold text-foreground">That's enough</span> when you're done.
           </DialogDescription>
+          <div
+            className="space-y-1 pt-1"
+            aria-label={`Progress: ${answered} of about ${TARGET_ANSWERS} answers captured`}
+          >
+            <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <span>{stepLabel}</span>
+              <span>{answered}/~{TARGET_ANSWERS}</span>
+            </div>
+            <div
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={TARGET_ANSWERS}
+              aria-valuenow={Math.min(answered, TARGET_ANSWERS)}
+              className="h-1.5 w-full overflow-hidden rounded-full bg-white/10"
+            >
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-primary to-fuchsia-500 transition-all duration-500 ease-out"
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
+          </div>
         </DialogHeader>
+
 
         <div
           ref={scrollRef}
