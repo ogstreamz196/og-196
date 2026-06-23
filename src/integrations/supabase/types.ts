@@ -298,6 +298,57 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_refunds: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          environment: string
+          failure_reason: string | null
+          id: string
+          reason: string | null
+          status: string
+          stripe_charge_id: string | null
+          stripe_payment_intent_id: string | null
+          stripe_refund_id: string
+          stripe_session_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          environment?: string
+          failure_reason?: string | null
+          id?: string
+          reason?: string | null
+          status?: string
+          stripe_charge_id?: string | null
+          stripe_payment_intent_id?: string | null
+          stripe_refund_id: string
+          stripe_session_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          environment?: string
+          failure_reason?: string | null
+          id?: string
+          reason?: string | null
+          status?: string
+          stripe_charge_id?: string | null
+          stripe_payment_intent_id?: string | null
+          stripe_refund_id?: string
+          stripe_session_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       portals: {
         Row: {
           allowed_styles: string[] | null

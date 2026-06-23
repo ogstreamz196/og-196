@@ -632,4 +632,82 @@ export const createBillingPortalSession = createServerFn({ method: "POST" })
     }
   });
 
+// -------------------------------------------------------------------------
+// Refund status: returns the caller's refunds from the local mirror, and
+// optionally refreshes the latest status from Stripe in case a webhook is
+// delayed or hasn't been delivered yet.
+// -------------------------------------------------------------------------
+
+export type RefundRow = {
+  id: string;
+  stripe_refund_id: string;
+  stripe_session_id: string | null;
+  amount: number; // major units (e.g. 5.00)
+  currency: string;
+  status: string;
+  reason: string | null;
+  failure_reason: string | null;
+  environment: StripeEnv;
+  created_at: string;
+  updated_at: string;
+};
+
+export const getMyRefunds = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: { refresh?: boolean } | undefined) => data ?? {})
+  .handler(async ({ data, context }): Promise<RefundRow[]> => {
+    const { supabase, userId } = context;
+
+    const { data: rows, error } = await supabase
+      .from("payment_refunds")
+      .select(
+        "id, stripe_refund_id, stripe_session_id, amount, currency, status, reason, failure_reason, environment, created_at, updated_at",
+      )
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (error) throw new Error(error.message);
+
+    let working = (rows ?? []) as Array<RefundRow & { amount: number }>;
+
+    // Live refresh: re-fetch up to 10 most recent refunds whose status is
+    // still pending or that the caller asked to refresh.
+    if (data.refresh && working.length) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const targets = working
+        .filter((r) => data.refresh || r.status === "pending")
+        .slice(0, 10);
+      await Promise.all(
+        targets.map(async (r) => {
+          try {
+            const stripe = createStripeClient(r.environment);
+            const live = await stripe.refunds.retrieve(r.stripe_refund_id);
+            const liveStatus = live.status ?? r.status;
+            const liveFailure = live.failure_reason ?? null;
+            if (liveStatus !== r.status || liveFailure !== r.failure_reason) {
+              r.status = liveStatus;
+              r.failure_reason = liveFailure;
+              await supabaseAdmin
+                .from("payment_refunds")
+                .update({
+                  status: liveStatus,
+                  failure_reason: liveFailure,
+                  updated_at: new Date().toISOString(),
+                })
+                .eq("stripe_refund_id", r.stripe_refund_id);
+            }
+          } catch (e) {
+            console.error("refund refresh failed", r.stripe_refund_id, e);
+          }
+        }),
+      );
+    }
+
+    return working.map((r) => ({
+      ...r,
+      amount: toMajorUnit(r.amount, r.currency),
+    }));
+  });
+
+
 

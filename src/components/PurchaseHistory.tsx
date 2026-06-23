@@ -1,17 +1,20 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Coins, Loader2, Receipt, ExternalLink, Crown, Undo2 } from "lucide-react";
+import { Coins, Loader2, Receipt, ExternalLink, Crown, Undo2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import {
   getCoinPurchaseHistory,
   getStripeReceiptUrl,
   refundCoinPurchase,
+  getMyRefunds,
   type PurchaseRow,
+  type RefundRow,
   type StripePurchaseDetails,
 } from "@/lib/payments.functions";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { useRole } from "@/hooks/use-role";
+
 
 function formatDate(iso: string) {
   try { return new Date(iso).toLocaleString(); } catch { return iso; }
@@ -194,7 +197,102 @@ const RANGE_OPTIONS: { key: RangeKey; label: string; days: number | null }[] = [
   { key: "all", label: "All time", days: null },
 ];
 
+function refundToneFor(status: string) {
+  switch (status) {
+    case "succeeded":
+      return { label: "Refunded", tone: "border-emerald-500/30 bg-emerald-500/15 text-emerald-500" };
+    case "pending":
+      return { label: "Pending", tone: "border-amber-500/30 bg-amber-500/15 text-amber-500" };
+    case "failed":
+      return { label: "Failed", tone: "border-destructive/30 bg-destructive/15 text-destructive" };
+    case "canceled":
+      return { label: "Canceled", tone: "border-muted-foreground/30 bg-muted/40 text-muted-foreground" };
+    case "requires_action":
+      return { label: "Action required", tone: "border-amber-500/30 bg-amber-500/15 text-amber-500" };
+    default:
+      return { label: status, tone: "border-border bg-muted/30 text-muted-foreground" };
+  }
+}
+
+function RefundsPanel() {
+  const fetcher = useServerFn(getMyRefunds);
+  const { data, isLoading, error, refetch, isFetching } = useQuery({
+    queryKey: ["my-refunds"],
+    queryFn: () => fetcher({ data: {} }),
+    staleTime: 30_000,
+  });
+
+  async function refreshFromStripe() {
+    try {
+      await fetcher({ data: { refresh: true } });
+      await refetch();
+      toast.success("Refund statuses updated from Stripe");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Couldn't refresh");
+    }
+  }
+
+  const rows = (data ?? []) as RefundRow[];
+
+  return (
+    <section className="mx-auto mt-6 w-full max-w-3xl rounded-2xl border border-border bg-card p-6 shadow-card">
+      <header className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <Undo2 className="h-5 w-5 text-primary" />
+          <h3 className="text-lg font-bold">Refund status</h3>
+        </div>
+        <button
+          type="button"
+          onClick={refreshFromStripe}
+          disabled={isFetching}
+          className="inline-flex items-center gap-1 text-xs text-muted-foreground underline hover:text-foreground disabled:opacity-50"
+        >
+          <RefreshCw className={`h-3 w-3 ${isFetching ? "animate-spin" : ""}`} />
+          {isFetching ? "Refreshing…" : "Refresh from Stripe"}
+        </button>
+      </header>
+
+      {isLoading ? (
+        <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+        </div>
+      ) : error ? (
+        <p className="mt-4 text-sm text-destructive">Couldn't load refunds.</p>
+      ) : rows.length === 0 ? (
+        <p className="mt-4 text-sm text-muted-foreground">No refunds on file.</p>
+      ) : (
+        <ul className="mt-4 divide-y divide-border">
+          {rows.map((r) => {
+            const tone = refundToneFor(r.status);
+            return (
+              <li key={r.id} className="flex flex-col gap-1 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${tone.tone}`}>
+                      {tone.label}
+                    </span>
+                    <span className="font-mono text-[11px] text-muted-foreground">{r.stripe_refund_id}</span>
+                  </div>
+                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                    <span>{formatDate(r.created_at)}</span>
+                    {r.reason && <span>· {r.reason}</span>}
+                    {r.failure_reason && <span className="text-destructive">· {r.failure_reason}</span>}
+                  </div>
+                </div>
+                <div className="text-sm font-bold tabular-nums text-foreground">
+                  {formatMoney(r.amount, r.currency)}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
+  );
+}
+
 export function PurchaseHistory() {
+
   const fetcher = useServerFn(getCoinPurchaseHistory);
   const { isVip } = useRole();
   const { data, isLoading, error, refetch, isFetching } = useQuery({
@@ -206,7 +304,9 @@ export function PurchaseHistory() {
   const [range, setRange] = useState<RangeKey>("30d");
 
   return (
+    <>
     <section className="mx-auto mt-10 w-full max-w-3xl rounded-2xl border border-border bg-card p-6 shadow-card">
+
       <header className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Receipt className="h-5 w-5 text-primary" />
@@ -315,5 +415,8 @@ export function PurchaseHistory() {
         );
       })()}
     </section>
+    <RefundsPanel />
+    </>
   );
 }
+
