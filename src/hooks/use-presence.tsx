@@ -1,12 +1,8 @@
 import { useEffect, useState } from "react";
+import { useRouter } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./use-auth";
 
-/**
- * Shared realtime presence channel for all signed-in users.
- * Mount <PresenceTracker /> once inside the authenticated shell so every
- * tab announces itself; useOnlineUsers() reads the live roster.
- */
 const PRESENCE_CHANNEL = "ogstreamz:presence";
 
 export type OnlineUser = {
@@ -14,29 +10,50 @@ export type OnlineUser = {
   email: string | null;
   display_name: string | null;
   online_at: string;
+  last_page: string | null;
 };
 
+/**
+ * Mount once inside the authenticated shell. Each tab joins a shared
+ * presence channel and re-tracks itself when the route changes so devs
+ * see the current page live.
+ */
 export function PresenceTracker() {
   const { user } = useAuth();
+  const router = useRouter();
   useEffect(() => {
     if (!user) return;
     const channel = supabase.channel(PRESENCE_CHANNEL, {
       config: { presence: { key: user.id } },
     });
+
+    let currentPath =
+      typeof window !== "undefined" ? window.location.pathname : "/";
+
+    const payload = () => ({
+      user_id: user.id,
+      email: user.email ?? null,
+      display_name:
+        (user.user_metadata?.display_name as string | undefined) ?? null,
+      online_at: new Date().toISOString(),
+      last_page: currentPath,
+    });
+
     channel.subscribe(async (status) => {
       if (status !== "SUBSCRIBED") return;
-      await channel.track({
-        user_id: user.id,
-        email: user.email ?? null,
-        display_name:
-          (user.user_metadata?.display_name as string | undefined) ?? null,
-        online_at: new Date().toISOString(),
-      });
+      await channel.track(payload());
     });
+
+    const unsub = router.subscribe("onResolved", ({ toLocation }) => {
+      currentPath = toLocation.pathname;
+      void channel.track(payload());
+    });
+
     return () => {
+      unsub();
       void supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, [user, router]);
   return null;
 }
 
