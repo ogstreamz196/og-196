@@ -215,7 +215,7 @@ function PrimaryCard({
     <Link
       to={to}
       preload="intent"
-      className="group relative flex min-h-[420px] flex-col justify-between overflow-hidden rounded-[2rem] border-2 border-white/15 bg-card/70 p-6 shadow-card backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:min-h-[720px] sm:p-12"
+      className="group relative flex flex-col justify-between overflow-hidden rounded-[2rem] border-2 border-white/15 bg-card/70 p-5 shadow-card backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:min-h-[560px] sm:p-12"
     >
       {/* Ambient gradient layers */}
       <div
