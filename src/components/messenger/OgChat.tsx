@@ -158,6 +158,39 @@ export function OgChat({
     };
   }, [userId]);
 
+  // Realtime: receive bot messages injected by dev (dev_send_og_message_as_bot).
+  useEffect(() => {
+    if (!userId) return;
+    const channel = supabase
+      .channel(`og-messages-inbox:${userId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "og_messages",
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload) => {
+          const row = payload.new as { role: string; content: string };
+          if (row.role !== "assistant") return;
+          setMessages((prev) => {
+            const last = prev[prev.length - 1];
+            if (last && last.role === "assistant" && last.content === row.content) {
+              return prev;
+            }
+            return [...prev, { role: "assistant", content: row.content }];
+          });
+        },
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [userId]);
+
+
+
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
