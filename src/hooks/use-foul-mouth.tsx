@@ -10,6 +10,13 @@ import { toast } from "sonner";
  * Defaults to OFF — users must opt in.
  * Realtime subscribed so widget ↔ messenger toggle stays in sync across surfaces & devices.
  */
+
+/**
+ * TEMPORARY GLOBAL OVERRIDE: OG bot is forced clean for everyone until further
+ * notice. Flip to `false` to restore per-user preference behaviour.
+ */
+export const FOUL_MOUTH_FORCED_CLEAN = true;
+
 export function foulMouthQueryKey(userId: string | null | undefined) {
   return ["user-preferences", "foul_mouth", userId ?? "anon"] as const;
 }
