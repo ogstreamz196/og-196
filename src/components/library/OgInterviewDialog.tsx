@@ -91,7 +91,7 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
       if (error) throw new Error(invokeError(error, "Couldn't save your details"));
       const summary = (data?.summary ?? "").toString().trim();
       if (!summary) throw new Error("Bot returned nothing — try again");
-      onDone(summary);
+      onDone(summary, history);
       toast.success(`Saved ${answered} answer${answered === 1 ? "" : "s"} into your details`);
       onOpenChange(false);
     } catch (e) {
