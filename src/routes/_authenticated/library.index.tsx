@@ -996,6 +996,21 @@ function LibraryPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <OgInterviewDialog
+        open={interviewOpen}
+        onOpenChange={setInterviewOpen}
+        seed={personalDetails}
+        onDone={(brief) => {
+          setPersonalDetails((prev) => {
+            const trimmed = brief.trim();
+            if (!trimmed) return prev;
+            if (!prev.trim()) return trimmed.slice(0, 500);
+            const merged = `${prev.trim()}\n${trimmed}`;
+            return merged.slice(0, 500);
+          });
+        }}
+      />
     </div>
   );
 }
