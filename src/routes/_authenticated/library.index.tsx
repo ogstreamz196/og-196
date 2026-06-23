@@ -987,67 +987,85 @@ function LibraryPage() {
         </header>
 
         {/* Foul mouth toggle */}
-        <button
-          type="button"
-          role="switch"
-          aria-checked={foulMouth}
-          aria-label={
-            foulMouth
-              ? "OG Foul Mouth is on. Activate to turn explicit mode off."
-              : "OG Foul Mouth is off. Activate to turn explicit mode on."
-          }
-          aria-describedby="foul-mouth-status"
-          onClick={() => !genLyrics && setFoulMouth((v) => !v)}
-          onKeyDown={(e) => {
-            if (genLyrics) return;
-            if (e.key === " " || e.key === "Enter") {
-              e.preventDefault();
-              setFoulMouth((v) => !v);
-            }
-          }}
-          disabled={genLyrics}
-          className={cn(
-            "relative group flex w-full min-h-14 items-center justify-between gap-3 rounded-2xl border-2 px-5 py-4 text-left transition-all",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-            "disabled:opacity-60 disabled:cursor-not-allowed",
-            foulMouth
-              ? "border-destructive bg-destructive/15 shadow-[0_0_24px_-6px_oklch(0.62_0.22_25_/_0.6)]"
-              : "border-white/15 bg-white/[0.04] hover:border-white/25",
-          )}
-        >
-          <div className="flex items-center gap-4">
-            <div aria-hidden className={cn(
-              "grid h-12 w-12 shrink-0 place-items-center rounded-xl text-2xl transition",
-              foulMouth ? "bg-destructive/30" : "bg-white/5",
-            )}>
-              {foulMouth ? "🤬" : "🧼"}
+        {FOUL_MOUTH_FORCED_CLEAN ? (
+          <div
+            role="note"
+            aria-live="polite"
+            className="flex w-full items-center gap-4 rounded-2xl border-2 border-white/15 bg-white/[0.04] px-5 py-4"
+          >
+            <div aria-hidden className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-white/5 text-2xl">
+              🧼
             </div>
-            <div>
-              <div className="text-base font-bold leading-tight sm:text-lg">OG Foul Mouth</div>
-              <div
-                id="foul-mouth-status"
-                aria-live="polite"
-                className={cn(
-                  "text-sm leading-tight",
-                  foulMouth ? "font-semibold text-destructive-foreground/90" : "text-muted-foreground",
-                )}
-              >
-                {foulMouth ? "EXPLICIT — full swearing ON" : "Clean version — tap to go explicit"}
+            <div className="flex-1">
+              <div className="text-base font-bold leading-tight sm:text-lg">OG Foul Mouth — paused</div>
+              <div className="text-sm leading-tight text-muted-foreground">
+                Clean lyrics for everyone right now. Foul mouth is off until further notice.
               </div>
             </div>
           </div>
-          <span
-            aria-hidden
-            className={cn(
-              "pointer-events-none inline-flex shrink-0 items-center justify-center rounded-full border-2 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] transition",
+        ) : (
+          <button
+            type="button"
+            role="switch"
+            aria-checked={foulMouth}
+            aria-label={
               foulMouth
-                ? "border-destructive bg-destructive text-destructive-foreground shadow-[0_0_18px_-4px_oklch(0.62_0.22_25_/_0.8)]"
-                : "border-white/25 bg-white/10 text-foreground",
+                ? "OG Foul Mouth is on. Activate to turn explicit mode off."
+                : "OG Foul Mouth is off. Activate to turn explicit mode on."
+            }
+            aria-describedby="foul-mouth-status"
+            onClick={() => !genLyrics && setFoulMouth((v) => !v)}
+            onKeyDown={(e) => {
+              if (genLyrics) return;
+              if (e.key === " " || e.key === "Enter") {
+                e.preventDefault();
+                setFoulMouth((v) => !v);
+              }
+            }}
+            disabled={genLyrics}
+            className={cn(
+              "relative group flex w-full min-h-14 items-center justify-between gap-3 rounded-2xl border-2 px-5 py-4 text-left transition-all",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+              "disabled:opacity-60 disabled:cursor-not-allowed",
+              foulMouth
+                ? "border-destructive bg-destructive/15 shadow-[0_0_24px_-6px_oklch(0.62_0.22_25_/_0.6)]"
+                : "border-white/15 bg-white/[0.04] hover:border-white/25",
             )}
           >
-            {foulMouth ? "Turn off" : "Turn on"}
-          </span>
-        </button>
+            <div className="flex items-center gap-4">
+              <div aria-hidden className={cn(
+                "grid h-12 w-12 shrink-0 place-items-center rounded-xl text-2xl transition",
+                foulMouth ? "bg-destructive/30" : "bg-white/5",
+              )}>
+                {foulMouth ? "🤬" : "🧼"}
+              </div>
+              <div>
+                <div className="text-base font-bold leading-tight sm:text-lg">OG Foul Mouth</div>
+                <div
+                  id="foul-mouth-status"
+                  aria-live="polite"
+                  className={cn(
+                    "text-sm leading-tight",
+                    foulMouth ? "font-semibold text-destructive-foreground/90" : "text-muted-foreground",
+                  )}
+                >
+                  {foulMouth ? "EXPLICIT — full swearing ON" : "Clean version — tap to go explicit"}
+                </div>
+              </div>
+            </div>
+            <span
+              aria-hidden
+              className={cn(
+                "pointer-events-none inline-flex shrink-0 items-center justify-center rounded-full border-2 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] transition",
+                foulMouth
+                  ? "border-destructive bg-destructive text-destructive-foreground shadow-[0_0_18px_-4px_oklch(0.62_0.22_25_/_0.8)]"
+                  : "border-white/25 bg-white/10 text-foreground",
+              )}
+            >
+              {foulMouth ? "Turn off" : "Turn on"}
+            </span>
+          </button>
+        )}
 
         {/* Generate CTA */}
         <div className="relative">
