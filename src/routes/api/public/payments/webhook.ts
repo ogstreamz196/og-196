@@ -330,6 +330,15 @@ async function handleEvent(event: { id: string; type: string; data: { object: an
     case "customer.subscription.deleted":
       await handleSubscriptionDeleted(event.data.object, env);
       break;
+    case "charge.refunded":
+      await handleChargeRefunded(event.data.object, env);
+      break;
+    case "refund.created":
+    case "refund.updated":
+    case "refund.failed":
+    case "charge.refund.updated":
+      await handleRefundEvent(event.data.object, env);
+      break;
     default:
       log("info", "unhandled event", { type: event.type });
   }
