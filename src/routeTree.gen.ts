@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as TrustRouteImport } from './routes/trust'
+import { Route as MPreviewRouteImport } from './routes/m-preview'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
@@ -43,6 +44,11 @@ const WelcomeRoute = WelcomeRouteImport.update({
 const TrustRoute = TrustRouteImport.update({
   id: '/trust',
   path: '/trust',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MPreviewRoute = MPreviewRouteImport.update({
+  id: '/m-preview',
+  path: '/m-preview',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -173,6 +179,7 @@ const AuthenticatedAdminUsersUserIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
+  '/m-preview': typeof MPreviewRoute
   '/trust': typeof TrustRoute
   '/welcome': typeof WelcomeRoute
   '/developer': typeof AuthenticatedDeveloperRoute
@@ -198,6 +205,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
+  '/m-preview': typeof MPreviewRoute
   '/trust': typeof TrustRoute
   '/welcome': typeof WelcomeRoute
   '/developer': typeof AuthenticatedDeveloperRoute
@@ -226,6 +234,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/m-preview': typeof MPreviewRoute
   '/trust': typeof TrustRoute
   '/welcome': typeof WelcomeRoute
   '/_authenticated/developer': typeof AuthenticatedDeveloperRoute
@@ -255,6 +264,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/m-preview'
     | '/trust'
     | '/welcome'
     | '/developer'
@@ -280,6 +290,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
+    | '/m-preview'
     | '/trust'
     | '/welcome'
     | '/developer'
@@ -307,6 +318,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_authenticated'
     | '/auth'
+    | '/m-preview'
     | '/trust'
     | '/welcome'
     | '/_authenticated/developer'
@@ -335,6 +347,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  MPreviewRoute: typeof MPreviewRoute
   TrustRoute: typeof TrustRoute
   WelcomeRoute: typeof WelcomeRoute
   PortalSlugRoute: typeof PortalSlugRoute
@@ -358,6 +371,13 @@ declare module '@tanstack/react-router' {
       path: '/trust'
       fullPath: '/trust'
       preLoaderRoute: typeof TrustRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/m-preview': {
+      id: '/m-preview'
+      path: '/m-preview'
+      fullPath: '/m-preview'
+      preLoaderRoute: typeof MPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -580,6 +600,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  MPreviewRoute: MPreviewRoute,
   TrustRoute: TrustRoute,
   WelcomeRoute: WelcomeRoute,
   PortalSlugRoute: PortalSlugRoute,
