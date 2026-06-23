@@ -430,10 +430,11 @@ function Hero() {
 
       <div className="relative mx-auto w-full max-w-6xl text-center">
 
-        <div className="wc-pop mt-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] backdrop-blur-xl sm:mt-12 sm:px-5 sm:text-base">
-          <span className="h-2 w-2 animate-pulse rounded-full bg-primary shadow-glow" />
+        <div className="wc-pop mt-6 inline-flex flex-wrap items-center justify-center gap-3 rounded-full border border-white/20 bg-white/10 px-6 py-3 text-base font-extrabold uppercase tracking-[0.18em] backdrop-blur-xl sm:mt-12 sm:gap-4 sm:px-8 sm:py-4 sm:text-2xl md:text-3xl">
+          <span className="h-3 w-3 animate-pulse rounded-full bg-primary shadow-glow sm:h-3.5 sm:w-3.5" />
           <span>Bespoke tracks · made for you by</span>
-          <OgBotLogo className="h-5 w-5 sm:h-6 sm:w-6" />
+          <OgBotLogo className="h-10 w-10 sm:h-14 sm:w-14 md:h-16 md:w-16" />
+          <span className="text-gradient-brand">OG BOT</span>
         </div>
 
         <h1 className="font-display mt-6 text-[clamp(2.5rem,11vw,12rem)] font-black leading-[0.88] tracking-[-0.055em] drop-shadow-[0_8px_30px_rgba(80,60,255,0.35)] sm:mt-10 sm:leading-[0.85]">
