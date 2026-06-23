@@ -39,12 +39,20 @@ function DeveloperPage() {
   const selected = others.find((u) => u.user_id === selectedId) ?? null;
 
   const send = useMutation({
-    mutationFn: async (vars: { target: string; content: string }) => {
-      const { error } = await supabase.rpc("dev_send_og_message_as_bot", {
-        target_user_id: vars.target,
-        message_content: vars.content,
-      });
-      if (error) throw error;
+    mutationFn: async (vars: { target: string; content: string; targetLabel: string }) => {
+      const toastId = toast.loading(`Posting to ${vars.targetLabel}'s OG Bot…`);
+      try {
+        const { data, error } = await supabase.rpc("dev_send_og_message_as_bot", {
+          target_user_id: vars.target,
+          message_content: vars.content,
+        });
+        if (error) throw error;
+        toast.success(`Delivered to ${vars.targetLabel}'s OG Bot history`, { id: toastId });
+        return data;
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "Send failed", { id: toastId });
+        throw e;
+      }
     },
     onSuccess: (_, vars) => {
       setLog((prev) => [
@@ -57,10 +65,6 @@ function DeveloperPage() {
         ...prev,
       ]);
       setDraft("");
-      toast.success("Sent through OG Bot");
-    },
-    onError: (e: unknown) => {
-      toast.error(e instanceof Error ? e.message : "Send failed");
     },
   });
 
