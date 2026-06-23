@@ -174,7 +174,7 @@ export function OgChat({
           table: "og_messages",
           filter: `user_id=eq.${userId}`,
         },
-        (payload) => {
+        (payload: RealtimePostgresInsertPayload<{ role: string; content: string }>) => {
           const row = payload.new as { role: string; content: string };
           if (row.role !== "assistant") return;
           setMessages((prev) => {
