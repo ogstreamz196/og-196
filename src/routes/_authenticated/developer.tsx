@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { BossNav } from "@/components/admin/BossNav";
+import { FreeAccessPanel } from "@/components/admin/FreeAccessPanel";
 import { syncUserActivity, syncAllUsersActivity } from "@/lib/user-log.functions";
 
 export const Route = createFileRoute("/_authenticated/developer")({
