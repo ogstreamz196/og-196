@@ -593,12 +593,12 @@ function Pillars() {
           </h2>
         </div>
 
-        <div className="mt-12 grid gap-5 sm:mt-16 sm:gap-6 md:grid-cols-3">
+        <div className="mt-12 grid gap-4 sm:mt-16 sm:gap-6 md:grid-cols-3">
           {items.map((it) => (
             <article
               key={it.key}
               style={{ transform: `rotate(${it.tilt}deg)` }}
-              className="group relative rounded-3xl border-2 border-white/12 bg-card/80 p-6 backdrop-blur-xl transition-all duration-200 hover:-translate-y-2 hover:rotate-0 hover:border-primary/40 hover:shadow-glow sm:p-8"
+              className="group relative rounded-[2rem] border-2 border-white/15 bg-card/80 p-6 shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)] backdrop-blur-xl transition-all duration-200 hover:-translate-y-2 hover:rotate-0 hover:border-primary/40 hover:shadow-glow sm:p-8"
             >
               <CardEditBadge />
               <div className="flex items-center gap-3">
@@ -611,14 +611,14 @@ function Pillars() {
                 as="h3"
                 contentKey={`welcome.pillar.${it.key}.title`}
                 defaultValue={String(it.title)}
-                className="font-display mt-5 block text-2xl font-semibold tracking-tight sm:mt-6 sm:text-4xl md:text-5xl"
+                className="font-display mt-5 block text-4xl font-black tracking-tight sm:mt-6 sm:text-5xl"
               />
               <EditableContent
                 as="p"
                 multiline
                 contentKey={`welcome.pillar.${it.key}.body`}
                 defaultValue={it.body}
-                className="mt-3 block text-base leading-relaxed text-muted-foreground sm:mt-4 sm:text-lg md:text-xl"
+                className="mt-3 block text-lg leading-relaxed text-muted-foreground sm:mt-4"
               />
             </article>
           ))}
