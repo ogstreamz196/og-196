@@ -51,7 +51,10 @@ function ReceiptLink({ row }: { row: PurchaseRow }) {
   async function open() {
     setLoading(true);
     try {
-      const env = (() => { try { return getStripeEnvironment(); } catch { return stripe!.env; } })();
+      // Use the env encoded in the reference — the session was created
+      // in that account and only exists there. Falling back to the current
+      // client env produces "No such checkout.session" when envs differ.
+      const env = stripe!.env;
       const res = await fetchReceipt({ data: { sessionId: stripe!.sessionId, environment: env } });
       if ("error" in res) { toast.error(res.error); return; }
       window.open(res.url, "_blank", "noopener,noreferrer");
