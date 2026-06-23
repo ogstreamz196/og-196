@@ -70,6 +70,37 @@ function DeveloperPage() {
     },
   });
 
+  const syncOne = useServerFn(syncUserActivity);
+  const syncAll = useServerFn(syncAllUsersActivity);
+
+  const syncOneM = useMutation({
+    mutationFn: async (vars: { userId: string; label: string }) => {
+      const toastId = toast.loading(`Syncing ${vars.label} to Sheets…`);
+      try {
+        const res = await syncOne({ data: { userId: vars.userId } });
+        toast.success(`Synced tab "${res.tab}" (${res.rows} rows)`, { id: toastId });
+        return res;
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "Sync failed", { id: toastId });
+        throw e;
+      }
+    },
+  });
+
+  const syncAllM = useMutation({
+    mutationFn: async () => {
+      const toastId = toast.loading("Syncing all users to Sheets…");
+      try {
+        const res = await syncAll({ data: undefined });
+        toast.success(`Synced ${res.synced}/${res.total} users`, { id: toastId });
+        return res;
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "Sync failed", { id: toastId });
+        throw e;
+      }
+    },
+  });
+
   if (isLoading) return <div className="p-8 text-muted-foreground">Loading…</div>;
   if (!isDev) {
     throw redirect({ to: "/" });
@@ -78,15 +109,31 @@ function DeveloperPage() {
   return (
     <div className="px-4 py-6 md:px-8">
       <BossNav />
-      <header className="mb-6 flex items-center gap-3">
-        <Radio className="h-6 w-6 text-primary" />
-        <div>
-          <h1 className="text-2xl font-bold">Live users</h1>
-          <p className="text-sm text-muted-foreground">
-            Realtime presence — speak through OG Bot in their widget.
-          </p>
+      <header className="mb-6 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <Radio className="h-6 w-6 text-primary" />
+          <div>
+            <h1 className="text-2xl font-bold">Live users</h1>
+            <p className="text-sm text-muted-foreground">
+              Realtime presence — speak through OG Bot in their widget.
+            </p>
+          </div>
         </div>
+        <Button
+          variant="outline"
+          onClick={() => syncAllM.mutate()}
+          disabled={syncAllM.isPending}
+          className="gap-2"
+        >
+          {syncAllM.isPending ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <FileSpreadsheet className="h-4 w-4" />
+          )}
+          Sync all to Sheets
+        </Button>
       </header>
+
 
       <div className="grid gap-4 md:grid-cols-[320px,1fr]">
         <aside className="glass-panel rounded-2xl border border-border p-3">
