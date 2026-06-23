@@ -962,7 +962,7 @@ function LibraryPage() {
           />
           <div className="flex flex-wrap items-center justify-end gap-3 rounded-2xl border border-white/10 bg-background/40 p-4">
             <Button
-              onClick={generateSong}
+              onClick={() => setReviewOpen(true)}
               disabled={genSong || balance < previewCost}
               size="lg"
               className="gap-2 bg-gradient-brand text-primary-foreground shadow-glow"
@@ -972,7 +972,7 @@ function LibraryPage() {
               ) : (
                 <Wand2 className="h-4 w-4" />
               )}
-              Make the song · -{previewCost}
+              Review & make the song · -{previewCost}
             </Button>
           </div>
         </section>
