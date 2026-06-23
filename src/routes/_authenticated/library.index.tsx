@@ -17,6 +17,7 @@ import {
   Mic2,
   Music4,
   Shuffle,
+  MessageCircleHeart,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
