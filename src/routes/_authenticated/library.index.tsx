@@ -610,18 +610,9 @@ function LibraryPage() {
             </div>
             <p className="mt-3 text-sm font-bold tracking-wide leading-relaxed">No previews yet</p>
             <p className="mt-1 text-xs leading-relaxed tracking-wide text-muted-foreground">
-              Tap Create Song Now to make your first track — versions will appear here.
+              Scroll down to write your first track — versions will appear here.
             </p>
-            <Button
-              type="button"
-              size="lg"
-              onClick={() => setInterviewOpen(true)}
-              aria-label="Create Song Now"
-              className="mt-4 h-11 justify-center gap-2 whitespace-nowrap rounded-xl bg-gradient-brand px-5 text-sm font-bold tracking-wide text-primary-foreground shadow-glow"
-            >
-              <Sparkles className="h-4 w-4" />
-              Create Song Now
-            </Button>
+
           </div>
         )}
       </section>
