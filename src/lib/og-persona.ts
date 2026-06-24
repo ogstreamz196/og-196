@@ -275,9 +275,9 @@ export const QUICK_STARTS: { label: string; prompt: string }[] = [
       "I want some honest advice. Ask me what's on my mind first, then help me think it through.",
   },
   {
-    label: "🎵 Write a personalised song",
+    label: "🎵 Write a song for someone",
     prompt:
-      "Help me write a personalised song. Ask me the questions you need to get started.",
+      "Help me write a personalised song for someone in my life. Ask me who it's for, their name, their age or vibe, and how they want to be portrayed — then take it from there.",
   },
   {
     label: "🔎 Look something up",
