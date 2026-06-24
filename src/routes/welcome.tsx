@@ -184,34 +184,6 @@ function AppleIcon({ className }: { className?: string }) {
   );
 }
 
-function AndroidIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden fill="#3DDC84">
-      <path d="M17.6 9.48l1.84-3.18c.16-.31.04-.69-.26-.85-.29-.15-.65-.06-.83.22l-1.88 3.24a11.43 11.43 0 0 0-8.94 0L5.65 5.67a.61.61 0 0 0-.83-.22c-.3.16-.42.54-.26.85L6.4 9.48A10.78 10.78 0 0 0 1 18h22a10.78 10.78 0 0 0-5.4-8.52zM7 15.25a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5zm10 0a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5z"/>
-    </svg>
-  );
-}
-
-function SamsungIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden>
-      <rect x="6" y="2" width="12" height="20" rx="2.5" fill="#1428A0"/>
-      <rect x="7.25" y="4" width="9.5" height="14" rx="0.6" fill="#0a1a6e"/>
-      <circle cx="12" cy="20" r="0.7" fill="#fff"/>
-    </svg>
-  );
-}
-
-function IPhoneIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden>
-      <rect x="6" y="2" width="12" height="20" rx="2.8" fill="#1a1a1a" stroke="#444" strokeWidth="0.5"/>
-      <rect x="7.25" y="4.5" width="9.5" height="13.5" rx="0.6" fill="#0d1117"/>
-      <rect x="10.5" y="3" width="3" height="0.7" rx="0.35" fill="#2a2a2a"/>
-      <circle cx="12" cy="20.2" r="0.6" fill="#2a2a2a"/>
-    </svg>
-  );
-}
 
 
 type Device = {
@@ -220,6 +192,14 @@ type Device = {
   provider: OAuthProvider;
   Icon: (p: { className?: string }) => ReactElement;
   iconClass?: string;
+};
+
+type Phrase = {
+  key: string;
+  emoji: string;
+  label: string;
+  sub: string;
+  provider: OAuthProvider;
 };
 
 const TILE_CLASS =
@@ -237,11 +217,12 @@ const PRIMARY_DEVICES: Device[] = [
   { key: "apple", label: "Apple ID", provider: "apple", Icon: AppleIcon, iconClass: "text-black" },
 ];
 
-const SECONDARY_DEVICES: Device[] = [
-  { key: "android", label: "Android", provider: "google", Icon: AndroidIcon, iconClass: "text-[#3ddc84]" },
-  { key: "samsung", label: "Samsung", provider: "google", Icon: SamsungIcon, iconClass: "text-[#1428a0]" },
-  { key: "iphone", label: "iPhone / iPad", provider: "apple", Icon: IPhoneIcon, iconClass: "text-black" },
+const PERSONALITY_PHRASES: Phrase[] = [
+  { key: "funny", emoji: "🤣", label: "They're so funny", sub: "Roast-worthy in the best way", provider: "google" },
+  { key: "silly", emoji: "🤪", label: "They're so silly", sub: "Goofy energy, all day", provider: "google" },
+  { key: "party", emoji: "🎉", label: "Life of the party", sub: "Always the loudest cheer", provider: "apple" },
 ];
+
 
 function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
   const { signIn, pending } = useOAuthSignIn();
@@ -313,10 +294,45 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
     [pending, signIn, h, auraOn],
   );
 
+  const renderPhrase = useCallback(
+    (p: Phrase, idx: number) => {
+      const isPending = pending === p.provider;
+      return (
+        <button
+          key={p.key}
+          onClick={() => signIn(p.provider)}
+          disabled={pending !== null}
+          aria-label={`${p.label} — sign in to make their song`}
+          style={{ ["--luxe-delay" as string]: `${idx * 0.6}s` }}
+          className={`${h} ${TILE_CLASS} ${auraOn ? "luxe-glow" : ""} flex flex-col items-center justify-between gap-2 px-3 pt-4 pb-3 text-foreground`}
+        >
+          <div className="flex flex-1 items-center justify-center">
+            {isPending ? (
+              <Loader2 className="h-10 w-10 animate-spin text-foreground sm:h-14 sm:w-14" aria-hidden />
+            ) : (
+              <span className="text-[clamp(2.75rem,8vw,5rem)] leading-none drop-shadow-[0_6px_12px_rgba(0,0,0,0.45)] transition-transform duration-200 group-hover:scale-110 group-hover:-rotate-6 group-active:scale-95">
+                {p.emoji}
+              </span>
+            )}
+          </div>
+          <div className="w-full min-w-0 space-y-1">
+            <span className="font-display landing-tile-label block w-full rounded-xl bg-white px-2 py-1.5 text-center text-black shadow-[0_3px_0_0_rgba(0,0,0,0.15)] break-words">
+              {p.label}
+            </span>
+            <span className="landing-tile-sub block text-center text-foreground/70 break-words">
+              {p.sub}
+            </span>
+          </div>
+        </button>
+      );
+    },
+    [pending, signIn, h, auraOn],
+  );
+
   const primaryTiles = useMemo(() => PRIMARY_DEVICES.map((d, i) => renderTile(d, i)), [renderTile]);
   const secondaryTiles = useMemo(
-    () => SECONDARY_DEVICES.map((d, i) => renderTile(d, i + PRIMARY_DEVICES.length)),
-    [renderTile],
+    () => PERSONALITY_PHRASES.map((p, i) => renderPhrase(p, i + PRIMARY_DEVICES.length)),
+    [renderPhrase],
   );
 
   return (
