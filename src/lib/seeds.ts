@@ -14,11 +14,8 @@
 
 // ─── OG Bot persona + chat quick-starts ──────────────────────────────────────
 // Canonical home: src/lib/og-persona.ts (server-only).
-export {
-  OG_BOT_PERSONA,
-  OG_BOT_SAFE_PERSONA,
-  QUICK_STARTS,
-} from "@/lib/og-persona";
+export { QUICK_STARTS, buildSystemPrompt } from "@/lib/og-persona";
+export type { OgMode } from "@/lib/og-persona";
 
 // ─── Insult-learner seed dictionary ──────────────────────────────────────────
 // Canonical home: src/lib/insult-learner.ts (server-only seed set).
