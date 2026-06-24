@@ -76,12 +76,34 @@ const STYLES = ["Story-driven", "Punchy bars", "Sing-along hook", "Spoken word",
 const RELATIONSHIPS = ["Mum", "Dad", "Partner", "Best friend", "Sibling", "Kids", "Crew", "Myself"];
 const LANGUAGES = ["English", "Spanish", "French", "Portuguese", "Hindi", "Urdu", "Punjabi", "Arabic", "Swahili", "Patois", "Yoruba", "German", "Italian", "Tagalog"];
 
+const THEMES = [
+  "A love letter that finally says it out loud",
+  "Roast them with love on their birthday",
+  "A tribute to someone we lost too soon",
+  "Hometown pride — where I'm from made me",
+  "Glow-up anthem after a tough year",
+  "Late-night drive, windows down, no worries",
+  "Apology song that actually means it",
+  "Best friend appreciation, every inside joke",
+  "Wedding day vows turned into a hook",
+  "Underdog story — they doubted me, watch this",
+  "Mum's strength, told the way she'd never tell it",
+  "First-day-at-a-new-job hype track",
+];
+
 const PRESETS: { label: string; emoji: string; values: Partial<typeof EMPTY> }[] = [
-  { label: "Birthday hype", emoji: "🎉", values: { mood: "Hype", genre: "Afrobeats", lyricalStyle: "Sing-along hook" } },
-  { label: "Love letter", emoji: "💌", values: { mood: "Romantic", genre: "R&B", lyricalStyle: "Story-driven" } },
-  { label: "In memory", emoji: "🕊️", values: { mood: "Heartfelt", genre: "Ballad", lyricalStyle: "Story-driven" } },
-  { label: "Hometown anthem", emoji: "🏟️", values: { mood: "Triumphant", genre: "Drill", lyricalStyle: "Anthem" } },
-  { label: "Chill vibes", emoji: "🌊", values: { mood: "Chill", genre: "Indie", lyricalStyle: "Spoken word" } },
+  { label: "Birthday hype", emoji: "🎉", values: { mood: "Hype", genre: "Afrobeats", lyricalStyle: "Sing-along hook", theme: "Roast them with love on their birthday" } },
+  { label: "Love letter", emoji: "💌", values: { mood: "Romantic", genre: "R&B", lyricalStyle: "Story-driven", theme: "A love letter that finally says it out loud" } },
+  { label: "In memory", emoji: "🕊️", values: { mood: "Heartfelt", genre: "Ballad", lyricalStyle: "Story-driven", theme: "A tribute to someone we lost too soon" } },
+  { label: "Hometown anthem", emoji: "🏟️", values: { mood: "Triumphant", genre: "Drill", lyricalStyle: "Anthem", theme: "Hometown pride — where I'm from made me" } },
+  { label: "Chill vibes", emoji: "🌊", values: { mood: "Chill", genre: "Indie", lyricalStyle: "Spoken word", theme: "Late-night drive, windows down, no worries" } },
+  { label: "Glow-up", emoji: "✨", values: { mood: "Triumphant", genre: "Pop", lyricalStyle: "Anthem", theme: "Glow-up anthem after a tough year" } },
+  { label: "Wedding day", emoji: "💍", values: { mood: "Romantic", genre: "Acoustic", lyricalStyle: "Story-driven", theme: "Wedding day vows turned into a hook" } },
+  { label: "Apology", emoji: "🙏", values: { mood: "Heartfelt", genre: "R&B", lyricalStyle: "Spoken word", theme: "Apology song that actually means it" } },
+  { label: "Best friend", emoji: "🤝", values: { mood: "Warm", genre: "Pop", lyricalStyle: "Sing-along hook", theme: "Best friend appreciation, every inside joke" } },
+  { label: "Underdog", emoji: "🥊", values: { mood: "Hype", genre: "Rap", lyricalStyle: "Punchy bars", theme: "Underdog story — they doubted me, watch this" } },
+  { label: "For Mum", emoji: "🌷", values: { mood: "Nostalgic", genre: "Ballad", lyricalStyle: "Story-driven", theme: "Mum's strength, told the way she'd never tell it" } },
+  { label: "Heartbreak", emoji: "💔", values: { mood: "Sad", genre: "R&B", lyricalStyle: "Story-driven", theme: "A love letter that finally says it out loud" } },
 ];
 
 function pick<T>(arr: T[]): T {
@@ -102,17 +124,21 @@ export function CreateSongDialog({ flow, onClose, onSubmit }: CreateSongDialogPr
   }
 
   function shuffle() {
+    const preset = pick(PRESETS);
     setState((s) => ({
       ...s,
       mood: pick(MOODS),
       genre: pick(GENRES),
       lyricalStyle: pick(STYLES),
+      theme: preset.values.theme ?? pick(THEMES),
     }));
   }
 
   function applyPreset(values: Partial<typeof EMPTY>) {
     setState((s) => ({ ...s, ...values }));
+    if (values.theme) setShowDetails(true);
   }
+
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
