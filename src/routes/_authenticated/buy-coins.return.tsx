@@ -1,12 +1,19 @@
 import { useEffect, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { CheckCircle2, Coins, Loader2, AlertTriangle } from "lucide-react";
+import { CheckCircle2, Coins, Loader2, AlertTriangle, Sparkles } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { useProfile } from "@/hooks/use-profile";
 import { useQueryClient } from "@tanstack/react-query";
-import { EditableContent } from "@/components/admin/EditableContent";
 import { PurchaseHistory } from "@/components/PurchaseHistory";
 import { reconcileCoinSession } from "@/lib/payments.functions";
 import { getStripeEnvironment } from "@/lib/stripe";
@@ -20,17 +27,19 @@ export const Route = createFileRoute("/_authenticated/buy-coins/return")({
   component: CheckoutReturn,
 });
 
+type SyncState = "idle" | "syncing" | "done" | "pending" | "error";
+
 function CheckoutReturn() {
   const { session_id } = Route.useSearch();
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const { data: profile } = useProfile();
   const reconcile = useServerFn(reconcileCoinSession);
-  const [state, setState] = useState<"idle" | "syncing" | "done" | "pending" | "error">("idle");
+  const [state, setState] = useState<SyncState>("idle");
   const [errMsg, setErrMsg] = useState<string | null>(null);
+  const [coinsAdded, setCoinsAdded] = useState<number | null>(null);
+  const [open, setOpen] = useState(true);
 
-  // Webhooks should credit coins, but they can be delayed or fail.
-  // Self-heal: call reconcileCoinSession from the return page so a paid
-  // session always credits the user, even if the webhook never arrives.
   useEffect(() => {
     if (!session_id) return;
     try { sessionStorage.removeItem("buyCoins.lastSelection"); } catch { /* ignore */ }
@@ -56,9 +65,10 @@ function CheckoutReturn() {
             return;
           }
           if (res.status === "credited") {
+            setCoinsAdded(res.coins);
             qc.invalidateQueries({ queryKey: ["profile"] });
             qc.invalidateQueries({ queryKey: ["coin-transactions"] });
-            toast.success(`Credited ${res.coins} OG coins`);
+            toast.success(`+${res.coins} OG coins added`);
             setState("done");
             return;
           }
@@ -68,7 +78,6 @@ function CheckoutReturn() {
             setState("done");
             return;
           }
-          // pending — wait and retry
         } catch (e) {
           setErrMsg(e instanceof Error ? e.message : "Network error");
         }
@@ -80,6 +89,24 @@ function CheckoutReturn() {
     return () => { cancelled = true; };
   }, [session_id, qc, reconcile]);
 
+  // Auto-close on success after a short celebratory beat
+  useEffect(() => {
+    if (state !== "done") return;
+    const id = window.setTimeout(() => {
+      setOpen(false);
+    }, 2400);
+    return () => window.clearTimeout(id);
+  }, [state]);
+
+  function handleOpenChange(next: boolean) {
+    setOpen(next);
+    if (!next) {
+      // Always refresh on close so balance shown elsewhere is fresh.
+      qc.invalidateQueries({ queryKey: ["profile"] });
+      navigate({ to: "/buy-coins" });
+    }
+  }
+
   async function retry() {
     if (!session_id) return;
     try {
@@ -89,8 +116,13 @@ function CheckoutReturn() {
       if ("error" in res) { setErrMsg(res.error); setState("error"); return; }
       qc.invalidateQueries({ queryKey: ["profile"] });
       qc.invalidateQueries({ queryKey: ["coin-transactions"] });
-      setState(res.status === "pending" ? "pending" : "done");
-      if (res.status === "credited") toast.success(`Credited ${res.coins} OG coins`);
+      if (res.status === "credited") {
+        setCoinsAdded(res.coins);
+        toast.success(`+${res.coins} OG coins added`);
+        setState("done");
+      } else {
+        setState(res.status === "pending" ? "pending" : "done");
+      }
     } catch (e) {
       setErrMsg(e instanceof Error ? e.message : "Retry failed");
       setState("error");
@@ -99,67 +131,70 @@ function CheckoutReturn() {
 
   return (
     <DashboardShell title="Thanks for your purchase">
-      <div className="mx-auto max-w-lg rounded-2xl border border-border bg-card p-8 text-center shadow-card">
-        {session_id ? (
-          <>
-            {state === "error" ? (
-              <AlertTriangle className="mx-auto h-12 w-12 text-destructive" />
-            ) : (
-              <CheckCircle2 className="mx-auto h-12 w-12 text-primary" />
-            )}
-            <h2 className="mt-4 text-2xl font-bold">
-              <EditableContent contentKey="buyCoins.return.heading" defaultValue="Payment complete" />
-            </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {state === "syncing" && "Crediting your OG coins…"}
-              {state === "done" && (
-                <EditableContent
-                  contentKey="buyCoins.return.subtitle"
-                  defaultValue="OG coins are credited and ready to spend."
-                  multiline
-                />
+      <Dialog open={open && !!session_id} onOpenChange={handleOpenChange}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="items-center text-center">
+            <div className="mb-2 grid h-14 w-14 place-items-center rounded-full bg-primary/10">
+              {state === "error" ? (
+                <AlertTriangle className="h-7 w-7 text-destructive" />
+              ) : state === "done" ? (
+                <CheckCircle2 className="h-7 w-7 text-primary" />
+              ) : (
+                <Loader2 className="h-7 w-7 animate-spin text-primary" />
               )}
-              {state === "pending" && "Stripe hasn't confirmed payment yet. Tap retry in a moment."}
+            </div>
+            <DialogTitle className="text-center text-2xl">
+              {state === "done" && "Purchase complete"}
+              {state === "syncing" && "Crediting your coins…"}
+              {state === "pending" && "Awaiting confirmation"}
+              {state === "error" && "Couldn't credit coins"}
+              {state === "idle" && "Processing…"}
+            </DialogTitle>
+            <DialogDescription className="text-center">
+              {state === "done" && coinsAdded != null && (
+                <span className="inline-flex items-center gap-1.5 text-base font-semibold text-foreground">
+                  <Sparkles className="h-4 w-4 text-coin" />
+                  +{coinsAdded} OG coins added to your wallet
+                </span>
+              )}
+              {state === "done" && coinsAdded == null && "Your OG coins are ready to spend."}
+              {state === "syncing" && "Hang tight — we're syncing your payment with Stripe."}
+              {state === "pending" && "Stripe hasn't confirmed payment yet. Try again in a moment."}
               {state === "error" && (errMsg ?? "Something went wrong crediting your coins.")}
-            </p>
-            <div className="mx-auto mt-6 inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2">
-              <Coins className="h-4 w-4 text-coin" />
-              <span className="font-semibold tabular-nums">{profile?.coin_balance ?? 0}</span>
-              <span className="text-sm text-muted-foreground">current balance</span>
-              {state === "syncing" && (
-                <Loader2 className="ml-2 h-3 w-3 animate-spin text-muted-foreground" />
-              )}
-            </div>
-            <div className="mt-6 flex flex-wrap justify-center gap-2">
-              <Button asChild>
-                <Link to="/">Back to dashboard</Link>
-              </Button>
-              <Button asChild variant="outline">
-                <Link to="/buy-coins">Buy more</Link>
-              </Button>
-              {(state === "pending" || state === "error") && (
-                <Button variant="secondary" onClick={retry}>Retry crediting</Button>
-              )}
-            </div>
-          </>
-        ) : (
-          <>
-            <h2 className="text-2xl font-bold">
-              <EditableContent contentKey="buyCoins.return.missing.heading" defaultValue="No session found" />
-            </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              <EditableContent
-                contentKey="buyCoins.return.missing.subtitle"
-                defaultValue="We couldn't find your checkout session."
-                multiline
-              />
-            </p>
-            <Button asChild className="mt-6">
-              <Link to="/buy-coins">Back to Buy Coins</Link>
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2">
+            <Coins className="h-4 w-4 text-coin" />
+            <span className="font-bold tabular-nums">{profile?.coin_balance ?? 0}</span>
+            <span className="text-sm text-muted-foreground">current balance</span>
+            {state === "syncing" && (
+              <Loader2 className="ml-1 h-3 w-3 animate-spin text-muted-foreground" />
+            )}
+          </div>
+
+          <DialogFooter className="sm:justify-center">
+            {(state === "pending" || state === "error") && (
+              <Button variant="secondary" onClick={retry}>Retry</Button>
+            )}
+            <Button onClick={() => handleOpenChange(false)}>
+              {state === "done" ? "Awesome, close" : "Close"}
             </Button>
-          </>
-        )}
-      </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {!session_id && (
+        <div className="mx-auto max-w-lg rounded-2xl border border-border bg-card p-8 text-center shadow-card">
+          <h2 className="text-2xl font-bold">No session found</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            We couldn't find your checkout session.
+          </p>
+          <Button className="mt-6" onClick={() => navigate({ to: "/buy-coins" })}>
+            Back to Buy Coins
+          </Button>
+        </div>
+      )}
 
       <PurchaseHistory />
     </DashboardShell>
