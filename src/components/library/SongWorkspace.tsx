@@ -331,15 +331,36 @@ export function SongWorkspace({ song, onSaved }: Props) {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="song-title">Title (optional)</Label>
-                <Input
-                  id="song-title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Untitled"
-                />
+              <div className="grid gap-4 sm:grid-cols-[1fr_220px]">
+                <div className="space-y-1.5">
+                  <Label htmlFor="song-title">Title (optional)</Label>
+                  <Input
+                    id="song-title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Untitled"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="song-language">Language</Label>
+                  <Select value={language} onValueChange={setLanguage}>
+                    <SelectTrigger id="song-language">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {LANGUAGES.map((l) => (
+                        <SelectItem key={l} value={l}>{l}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
+              {hasLyrics && languageChanged && (
+                <div className="rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-xs text-foreground/80">
+                  Language changed to <b>{language}</b>. Tap <b>Regenerate lyrics</b> to rewrite in {language},
+                  or keep your existing lyrics and just <b>Regenerate sample</b> in Stage 2.
+                </div>
+              )}
               <div className="space-y-1.5">
                 <Label htmlFor="song-brief">Brief</Label>
                 <Textarea
@@ -350,6 +371,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
                   placeholder="Who is the song about, the mood, references, memories…"
                 />
               </div>
+
 
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
