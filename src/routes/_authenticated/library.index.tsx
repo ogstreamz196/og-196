@@ -1286,41 +1286,20 @@ function ReviewDialog({
               <dl className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {cats.map((c) => {
                   const v = selections[c];
-                  const n = categoryNotes[c]?.trim();
-                  if (!v && !n) return null;
+                  if (!v) return null;
                   return (
                     <div key={c} className="rounded-xl border border-white/10 bg-card/60 p-3">
                       <dt className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                         {META[c].emoji} {META[c].label}
                       </dt>
-                      <dd className="mt-0.5 text-sm font-semibold">
-                        {v || <span className="text-muted-foreground">—</span>}
-                      </dd>
-                      {n && (
-                        <p className="mt-1 text-xs italic text-muted-foreground">"{n}"</p>
-                      )}
+                      <dd className="mt-0.5 text-sm font-semibold">{v}</dd>
                     </div>
                   );
                 })}
               </dl>
             </section>
 
-            {interviewAnswers.length > 0 && (
-              <section aria-labelledby="rv-interview">
-                <h3 id="rv-interview" className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-                  <MessageCircleHeart className="h-3 w-3 text-primary" />
-                  Get to know me — {interviewAnswers.length} answer{interviewAnswers.length === 1 ? "" : "s"}
-                </h3>
-                <ol className="mt-2 space-y-2">
-                  {interviewAnswers.map((qa, i) => (
-                    <li key={i} className="rounded-xl border border-primary/20 bg-primary/[0.06] p-3">
-                      <p className="text-xs font-semibold text-primary/90">Q: {qa.q}</p>
-                      <p className="mt-1 text-sm">A: {qa.a}</p>
-                    </li>
-                  ))}
-                </ol>
-              </section>
-            )}
+
 
             {personalDetails.trim() && (
               <section aria-labelledby="rv-personal">
