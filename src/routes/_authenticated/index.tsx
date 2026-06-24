@@ -400,7 +400,7 @@ function PrimaryCard({
         ))}
       </div>
 
-      <div className="relative flex flex-1 flex-col">
+      <div className="relative z-10 mt-auto flex flex-col rounded-2xl bg-gradient-to-t from-card/95 via-card/80 to-transparent p-3 backdrop-blur-sm sm:p-4">
         <div className="flex items-center gap-2">
           <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border-2 border-white/15 bg-gradient-brand-soft text-primary shadow-glow sm:h-12 sm:w-12">
             {icon}
