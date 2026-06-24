@@ -1226,12 +1226,10 @@ function ReviewDialog({
   onOpenChange,
   title,
   selections,
-  categoryNotes,
   personalDetails,
   extraContext,
   foulMouth,
   lyrics,
-  transcript,
   previewCost,
   generating,
   onConfirm,
@@ -1240,25 +1238,17 @@ function ReviewDialog({
   onOpenChange: (o: boolean) => void;
   title: string;
   selections: Selections;
-  categoryNotes: Record<Category, string>;
   personalDetails: string;
   extraContext: string;
   foulMouth: boolean;
   lyrics: string;
-  transcript: InterviewTurn[];
   previewCost: number;
   generating: boolean;
   onConfirm: () => void | Promise<void>;
 }) {
   const cats: Category[] = ["language", "genre", "mood", "theme", "tempo"];
-  const interviewAnswers: { q: string; a: string }[] = [];
-  for (let i = 0; i < transcript.length - 1; i++) {
-    const cur = transcript[i];
-    const nxt = transcript[i + 1];
-    if (cur.role === "bot" && nxt.role === "user") {
-      interviewAnswers.push({ q: cur.text, a: nxt.text });
-    }
-  }
+
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
