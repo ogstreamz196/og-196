@@ -1193,7 +1193,122 @@ function CategoryCard({
                     (active
                       ? meta.chipActive
                       : "border-white/10 bg-white/[0.04] text-foreground/85 hover:border-white/25 hover:bg-white/10")
-                  }
+}
+
+function DualCategoryCard({
+  cats,
+  selections,
+  chips,
+  onSelect,
+  onPickChip,
+  onRefresh,
+}: {
+  cats: [Category, Category];
+  selections: Selections;
+  chips: Record<Category, string[]>;
+  onSelect: (cat: Category, v: string) => void;
+  onPickChip: (cat: Category, v: string) => void;
+  onRefresh: (cat: Category) => void;
+}) {
+  const [catA, catB] = cats;
+  const metaA = META[catA];
+  const metaB = META[catB];
+  return (
+    <div className="group relative overflow-hidden rounded-3xl border border-white/10 bg-card/70 p-5 shadow-card backdrop-blur-xl transition-all hover:border-white/20 sm:col-span-2 sm:p-6">
+      <div
+        aria-hidden
+        className={`pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-gradient-to-br ${metaA.gradient} blur-2xl`}
+      />
+      <div
+        aria-hidden
+        className={`pointer-events-none absolute -left-12 -bottom-12 h-40 w-40 rounded-full bg-gradient-to-br ${metaB.gradient} blur-2xl`}
+      />
+      <div className="relative grid gap-6 sm:grid-cols-2">
+        {cats.map((cat) => {
+          const meta = META[cat];
+          const Icon = meta.icon;
+          const value = selections[cat];
+          return (
+            <div key={cat} className="space-y-4">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex min-w-0 items-center gap-3">
+                  <div className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl border text-lg ${meta.iconBg}`}>
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0 leading-tight">
+                    <div className={`text-[10px] font-bold uppercase tracking-[0.2em] ${meta.accent}`}>
+                      {meta.emoji} {meta.label}
+                    </div>
+                    <div className="mt-1 text-sm font-semibold text-foreground">
+                      {value ? (
+                        <span className="inline-flex items-center gap-1.5">
+                          <span className={`inline-block h-1.5 w-1.5 rounded-full bg-current ${meta.accent}`} />
+                          {value}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">{meta.helper}</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onRefresh(cat)}
+                  aria-label={`Shuffle ${meta.label} suggestions`}
+                  className={`h-8 shrink-0 gap-1.5 px-2.5 text-xs font-semibold ${meta.accent} hover:bg-white/5`}
+                >
+                  <RefreshCw className="h-3.5 w-3.5" />
+                  Shuffle
+                </Button>
+              </div>
+
+              <Select value={value ?? ""} onValueChange={(v) => onSelect(cat, v)}>
+                <SelectTrigger className="h-11 w-full rounded-xl border-white/10 bg-background/50 text-sm font-medium">
+                  <SelectValue placeholder={meta.placeholder} />
+                </SelectTrigger>
+                <SelectContent className="max-h-72">
+                  {POOLS[cat].map((opt) => (
+                    <SelectItem key={opt} value={opt}>
+                      {opt}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <div className="space-y-2">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                  Quick picks
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {chips[cat].map((chip) => {
+                    const active = value === chip;
+                    return (
+                      <button
+                        key={chip}
+                        type="button"
+                        onClick={() => onPickChip(cat, chip)}
+                        className={
+                          "rounded-full border px-3 py-1.5 text-xs font-semibold transition-all hover:-translate-y-0.5 " +
+                          (active
+                            ? meta.chipActive
+                            : "border-white/10 bg-white/[0.04] text-foreground/85 hover:border-white/25 hover:bg-white/10")
+                        }
+                      >
+                        {chip}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
                 >
                   {chip}
                 </button>
