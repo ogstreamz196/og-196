@@ -740,7 +740,11 @@ function LibraryPage() {
           </p>
 
           {/* Quick-insert chips */}
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div
+            className="mt-4 flex flex-wrap gap-2"
+            role="group"
+            aria-label="Quick-insert personality prompts"
+          >
             {[
               { label: "😂 They're so funny", snippet: "They're so funny — " },
               { label: "🤪 They're so silly", snippet: "They're so silly — " },
@@ -748,22 +752,34 @@ function LibraryPage() {
               { label: "💛 Heart of gold", snippet: "They've got a heart of gold — " },
               { label: "🔥 Total legend", snippet: "An absolute legend because — " },
               { label: "🫶 Always there for me", snippet: "Always there for me when — " },
+              { label: "🧠 Wise beyond their years", snippet: "Wise beyond their years — " },
+              { label: "💪 Tough as nails", snippet: "Tough as nails, never quits — " },
+              { label: "🌞 Lights up the room", snippet: "Lights up every room — " },
+              { label: "🎤 Karaoke menace", snippet: "An absolute karaoke menace — " },
+              { label: "🛟 My rock", snippet: "Honestly, my rock — " },
+              { label: "🥹 Makes me emotional", snippet: "Makes me emotional just thinking about — " },
+              { label: "🚀 Always chasing dreams", snippet: "Always chasing the next big dream — " },
+              { label: "🧃 Effortlessly cool", snippet: "Effortlessly cool without trying — " },
+              { label: "🍕 Foodie soulmate", snippet: "My foodie soulmate — " },
+              { label: "😈 A bit of a menace", snippet: "A loveable menace — " },
             ].map((chip) => (
               <button
                 key={chip.label}
                 type="button"
+                aria-label={`Insert prompt: ${chip.label}`}
                 onClick={() =>
                   setPersonalDetails((v) => {
                     const sep = v.length === 0 ? "" : v.endsWith("\n") ? "" : "\n";
                     return (v + sep + chip.snippet).slice(0, 500);
                   })
                 }
-                className="rounded-full border border-white/15 bg-white/[0.05] px-3.5 py-1.5 text-sm font-semibold text-foreground/85 transition hover:border-primary/60 hover:bg-primary/15 hover:text-foreground"
+                className="rounded-full border border-white/15 bg-white/[0.05] px-3.5 py-1.5 text-sm font-semibold text-foreground/85 transition hover:border-primary/60 hover:bg-primary/15 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
                 {chip.label}
               </button>
             ))}
           </div>
+
 
           {(() => {
             const MAX = 500;
