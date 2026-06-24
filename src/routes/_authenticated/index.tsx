@@ -223,6 +223,10 @@ function DashboardHome() {
         </div>
       </section>
 
+      <TelegramLinkStatus />
+
+
+
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Example prompts */}
         <Card className="rounded-[2rem] border-2 border-white/15 shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)] lg:col-span-2">
