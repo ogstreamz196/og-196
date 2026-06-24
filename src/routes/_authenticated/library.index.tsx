@@ -728,13 +728,14 @@ function LibraryPage() {
 
 
         {/* Personal details — the main writing area */}
-        <div className="relative rounded-xl border border-border bg-background/40 p-4 sm:p-5">
-          <Label htmlFor="personal-details" className="block text-base font-bold text-foreground">
+        <div className="relative rounded-2xl border border-white/10 bg-background/40 p-5 ring-1 ring-white/5 sm:p-6">
+          <Label htmlFor="personal-details" className="block font-display text-xl font-black leading-tight text-foreground sm:text-2xl">
             Tell us about the person this song is for
           </Label>
-          <p className="mt-1 text-xs text-muted-foreground">
+          <p className="mt-2 text-sm text-muted-foreground sm:text-base">
             Names, places, key dates, inside jokes, what they love — anything you want woven into the lyrics.
           </p>
+
 
           {/* Quick-insert chips */}
           <div
