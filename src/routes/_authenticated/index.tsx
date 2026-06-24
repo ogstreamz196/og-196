@@ -215,7 +215,7 @@ function PrimaryCard({
     <Link
       to={to}
       preload="intent"
-      className="group relative flex flex-col justify-between overflow-hidden rounded-[2rem] border-2 border-white/15 bg-card/70 p-5 shadow-card backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:min-h-[560px] sm:p-12"
+      className="group @container relative flex flex-col justify-between overflow-hidden rounded-[2rem] border-2 border-white/15 bg-card/70 p-5 shadow-card backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:min-h-[560px] sm:p-12"
     >
       {/* Ambient gradient layers */}
       <div
@@ -257,14 +257,14 @@ function PrimaryCard({
           <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground sm:text-base">{eyebrow}</p>
           <span className="h-px flex-1 bg-gradient-to-r from-white/15 to-transparent" />
         </div>
-        <h3 className="font-display mt-3 text-[clamp(2rem,11vw,6.5rem)] font-black uppercase leading-[0.95] tracking-[-0.035em] drop-shadow-[0_6px_24px_rgba(80,60,255,0.35)] [overflow-wrap:break-word] sm:mt-4">
+        <h3 className="font-display mt-3 text-[clamp(1.75rem,14cqw,5rem)] font-black uppercase leading-[0.95] tracking-[-0.035em] drop-shadow-[0_6px_24px_rgba(80,60,255,0.35)] [hyphens:none] [word-break:keep-all] [overflow-wrap:normal] sm:mt-4">
           {title.split(" ").map((word, i, arr) => {
             const isLast = i === arr.length - 1;
             return (
               <span
                 key={`${word}-${i}`}
                 className={
-                  "wc-pop mr-[0.25em] inline-block " +
+                  "wc-pop mr-[0.25em] inline-block whitespace-nowrap " +
                   (isLast ? "italic text-gradient-red wc-bounce-soft" : "")
                 }
                 style={{ animationDelay: `${i * 0.12}s` }}
