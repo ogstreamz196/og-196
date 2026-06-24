@@ -10,9 +10,10 @@
  */
 
 @theme inline {
-  --font-sans: "Fredoka", ui-rounded, ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Bagel Fat One", "Fredoka", ui-rounded, system-ui, sans-serif;
-  --font-graffiti: "Permanent Marker", "Bagel Fat One", system-ui, sans-serif;
+  --font-sans: "Unbounded", "Cabin Sketch", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Lilita One", "Unbounded", ui-rounded, system-ui, sans-serif;
+  --font-graffiti: "Luckiest Guy", "Lilita One", system-ui, sans-serif;
+  --font-sketch: "Cabin Sketch", "Lilita One", system-ui, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
