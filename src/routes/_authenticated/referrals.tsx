@@ -171,6 +171,34 @@ function ReferralsPage() {
   const summary = summaryQ.data ?? { total_referred: 0, total_earned: 0, recent: [] };
   const shortLink = link.replace(/^https?:\/\//, "");
 
+  // Paid vs pending breakdown.
+  // Cashback rows are credited the moment a referee burns (>=10 coins),
+  // so every referral_cashback row is "Paid". Pending = referees who
+  // signed up but haven't earned us a cashback row yet.
+  const paidCoins = summary.total_earned;
+  const paidEvents = summary.recent.length;
+  const paidRefereeIds = new Set(
+    summary.recent.map((r) => r.referee_id).filter((id): id is string => !!id),
+  );
+  const pendingReferees = Math.max(0, summary.total_referred - paidRefereeIds.size);
+
+  const downloadQR = (svgId: string, filename: string) => {
+    if (typeof document === "undefined") return;
+    const svg = document.getElementById(svgId) as SVGSVGElement | null;
+    if (!svg) return;
+    const source = new XMLSerializer().serializeToString(svg);
+    const blob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success("QR code saved");
+  };
+
   return (
     <DashboardShell title="Earnings">
       <div className="w-full space-y-8 sm:space-y-10">
