@@ -27,11 +27,14 @@ import { SongCard, type Song } from "@/components/SongCard";
 import { SongCardSkeleton } from "@/components/library/SongCardSkeleton";
 import {
   META,
+  POOLS,
   initialChips,
   pickFresh,
   type Category,
   type Selections,
 } from "@/lib/library-utils";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Disc3 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
