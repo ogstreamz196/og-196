@@ -106,19 +106,39 @@ function OnboardingWizard() {
   const done = Object.values(results).filter((r) => r.status === "ok" || r.status === "fail").length;
   const okCount = Object.values(results).filter((r) => r.status === "ok").length;
   const failCount = Object.values(results).filter((r) => r.status === "fail").length;
+  const verifiedPct = Math.round((okCount / total) * 100);
+  const isReady = okCount === total;
+  const statusLabel = isReady
+    ? "Ready to generate"
+    : failCount > 0
+    ? "Needs attention"
+    : done === 0
+    ? "Not started"
+    : "In progress";
+  const statusTone = isReady
+    ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-500"
+    : failCount > 0
+    ? "border-red-500/40 bg-red-500/10 text-red-500"
+    : "border-amber-500/40 bg-amber-500/10 text-amber-500";
   const groups = Array.from(new Set(STEPS.map((s) => s.group)));
 
   return (
     <DashboardShell title="Onboarding">
       <div className="mx-auto max-w-4xl space-y-6 p-4 sm:p-6">
         <header className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h1 className="flex items-center gap-2 text-2xl font-semibold">
-              <ShieldCheck className="h-6 w-6 text-primary" />
-              Connector onboarding
-            </h1>
+          <div className="space-y-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="flex items-center gap-2 text-2xl font-semibold">
+                <ShieldCheck className="h-6 w-6 text-primary" />
+                Connector onboarding
+              </h1>
+              <Badge variant="outline" className={cn("gap-1.5 px-2.5 py-0.5 text-xs font-semibold", statusTone)}>
+                {isReady ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Loader2 className={cn("h-3.5 w-3.5", done === total ? "" : "animate-spin")} />}
+                {statusLabel} · {verifiedPct}%
+              </Badge>
+            </div>
             <p className="text-sm text-muted-foreground">
-              Run each test, fix the red ones, and you're done. Safe to re-run anytime.
+              {okCount}/{total} connectors verified. Run each test, fix the red ones, and you're done.
             </p>
           </div>
           <div className="flex gap-2">
@@ -132,15 +152,28 @@ function OnboardingWizard() {
           </div>
         </header>
 
-        <Card className="p-4">
-          <div className="mb-2 flex items-center justify-between text-sm">
-            <span>{done}/{total} tested</span>
+        <Card className={cn("p-4", isReady && "border-emerald-500/40 bg-emerald-500/5")}>
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-sm">
+            <div className="flex items-center gap-2 font-medium">
+              <span>Onboarding status</span>
+              <span className={cn("rounded-full px-2 py-0.5 text-xs font-semibold", statusTone)}>
+                {verifiedPct}% verified
+              </span>
+            </div>
             <span className="text-muted-foreground">
-              <span className="text-emerald-500">{okCount} OK</span> · <span className="text-red-500">{failCount} fail</span>
+              <span className="text-emerald-500">{okCount} OK</span> ·{" "}
+              <span className="text-red-500">{failCount} fail</span> ·{" "}
+              <span>{total - done} untested</span>
             </span>
           </div>
-          <Progress value={(done / total) * 100} />
+          <Progress value={verifiedPct} />
+          <div className="mt-2 text-xs text-muted-foreground">
+            {isReady
+              ? "All connectors verified — you're ready to generate."
+              : `${total - okCount} ${total - okCount === 1 ? "check" : "checks"} still needed before you're ready to generate.`}
+          </div>
         </Card>
+
 
         {groups.map((group) => (
           <Card key={group} className="overflow-hidden">
