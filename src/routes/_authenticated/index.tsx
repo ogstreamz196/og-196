@@ -356,7 +356,7 @@ function PrimaryCard({
       {/* HERO VISUAL — big centred animated graphic, takes the eye first */}
       <div className="pointer-events-none absolute -right-10 -top-10 h-56 w-56 rounded-full bg-primary/20 blur-3xl transition-transform duration-700 group-hover:scale-125" />
       <div className="pointer-events-none absolute -left-16 bottom-0 h-48 w-48 rounded-full bg-accent/20 blur-3xl transition-transform duration-700 group-hover:-translate-y-2" />
-      <div className="pointer-events-none absolute inset-0 grid place-items-center [perspective:1000px]">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[55%] grid place-items-center [perspective:1000px]">
         <div
           ref={graphicRef}
           className="relative will-change-transform transition-transform duration-300 ease-out [transform:translate3d(var(--px,0),var(--py,0),0)_rotateX(var(--rx,0))_rotateY(var(--ry,0))]"
