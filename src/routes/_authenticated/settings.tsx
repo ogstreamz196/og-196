@@ -361,18 +361,30 @@ function TelegramConnectSection({ userId }: { userId: string }) {
 
       <div className="mt-4 flex flex-col gap-2 sm:flex-row">
         <Button
-          asChild
+          type="button"
           disabled={!link}
+          onClick={() => {
+            if (!link) return;
+            const w = window.open(link, "_blank", "noopener,noreferrer");
+            if (!w) {
+              // Popup blocked (common inside preview iframe) — fall back to same-tab nav.
+              window.location.href = link;
+            }
+          }}
           className="bg-[#229ED9] font-semibold text-white hover:bg-[#229ED9]/90"
         >
-          <a href={link || "#"} target="_blank" rel="noreferrer">
-            <Send className="mr-2 h-4 w-4" /> Open in Telegram
-          </a>
+          <Send className="mr-2 h-4 w-4" /> Open in Telegram
         </Button>
-        <Button asChild variant="outline">
-          <a href={`https://t.me/${TELEGRAM_BOT_USERNAME}`} target="_blank" rel="noreferrer">
-            <ExternalLink className="mr-2 h-4 w-4" /> Find @{TELEGRAM_BOT_USERNAME}
-          </a>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => {
+            const url = `https://t.me/${TELEGRAM_BOT_USERNAME}`;
+            const w = window.open(url, "_blank", "noopener,noreferrer");
+            if (!w) window.location.href = url;
+          }}
+        >
+          <ExternalLink className="mr-2 h-4 w-4" /> Find @{TELEGRAM_BOT_USERNAME}
         </Button>
       </div>
     </section>
