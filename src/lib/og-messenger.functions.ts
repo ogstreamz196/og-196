@@ -130,6 +130,11 @@ export const chatOgBot = createServerFn({ method: "POST" })
 
     const effectiveLanguage = isVip ? (data.language || "English") : "English";
 
+    const latestUserMsg = [...data.messages].reverse().find((m) => m.role === "user");
+    const songIntent =
+      detectSongIntent(latestUserMsg?.content) ||
+      detectSongIntent(data.pageContext);
+
     const system = buildSystemPrompt({
       mode: data.mode,
       foulMouth,
@@ -139,6 +144,7 @@ export const chatOgBot = createServerFn({ method: "POST" })
       learnedInsults,
       language: effectiveLanguage,
       user: userCtx,
+      songIntent,
     });
 
     // 1b. Learn fresh insults from the latest user message (fire-and-forget upsert).
