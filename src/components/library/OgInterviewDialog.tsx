@@ -209,7 +209,7 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
             Same questions as the creation page — Language, Genre, Mood, Theme, Tempo, then a few personal details.
-            Tap <span className="font-semibold text-foreground">That's enough</span> any time to finish.
+            Tap <span className="font-semibold text-foreground">Generate lyrics</span> at any point to use what you've answered so far.
           </DialogDescription>
           <div
             className="space-y-1 pt-1"
