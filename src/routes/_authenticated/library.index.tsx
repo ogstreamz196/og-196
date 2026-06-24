@@ -636,7 +636,7 @@ function LibraryPage() {
             }}
             disabled={genLyrics}
             className={cn(
-              "relative group flex w-full min-h-14 items-center justify-between gap-3 rounded-2xl border-2 px-5 py-4 text-left transition-all",
+              "relative group grid w-full min-h-14 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border-2 px-4 py-3 text-left transition-all sm:px-5 sm:py-4",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
               "disabled:opacity-60 disabled:cursor-not-allowed",
               foulMouth
@@ -644,31 +644,29 @@ function LibraryPage() {
                 : "border-white/15 bg-white/[0.04] hover:border-white/25",
             )}
           >
-            <div className="flex items-center gap-4">
-              <div aria-hidden className={cn(
-                "grid h-12 w-12 shrink-0 place-items-center rounded-xl text-2xl transition",
-                foulMouth ? "bg-destructive/30" : "bg-white/5",
-              )}>
-                {foulMouth ? "🤬" : "🧼"}
-              </div>
-              <div>
-                <div className="text-base font-bold leading-tight sm:text-lg">OG Foul Mouth</div>
-                <div
-                  id="foul-mouth-status"
-                  aria-live="polite"
-                  className={cn(
-                    "text-sm leading-tight",
-                    foulMouth ? "font-semibold text-destructive-foreground/90" : "text-muted-foreground",
-                  )}
-                >
-                  {foulMouth ? "EXPLICIT — full swearing ON" : "Clean version — tap to go explicit"}
-                </div>
+            <div aria-hidden className={cn(
+              "grid h-11 w-11 shrink-0 place-items-center rounded-xl text-xl transition sm:h-12 sm:w-12 sm:text-2xl",
+              foulMouth ? "bg-destructive/30" : "bg-white/5",
+            )}>
+              {foulMouth ? "🤬" : "🧼"}
+            </div>
+            <div className="min-w-0">
+              <div className="truncate text-sm font-bold leading-tight sm:text-lg">OG Foul Mouth</div>
+              <div
+                id="foul-mouth-status"
+                aria-live="polite"
+                className={cn(
+                  "truncate text-xs leading-tight sm:text-sm",
+                  foulMouth ? "font-semibold text-destructive-foreground/90" : "text-muted-foreground",
+                )}
+              >
+                {foulMouth ? "Explicit · ON" : "Clean · tap to go explicit"}
               </div>
             </div>
             <span
               aria-hidden
               className={cn(
-                "pointer-events-none inline-flex shrink-0 items-center justify-center rounded-full border-2 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] transition",
+                "pointer-events-none inline-flex shrink-0 items-center justify-center rounded-full border-2 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] transition sm:px-4 sm:py-2 sm:text-xs",
                 foulMouth
                   ? "border-destructive bg-destructive text-destructive-foreground shadow-[0_0_18px_-4px_oklch(0.62_0.22_25_/_0.8)]"
                   : "border-white/25 bg-white/10 text-foreground",
@@ -683,7 +681,7 @@ function LibraryPage() {
               onClick={generateLyrics}
               disabled={!canGenerateLyrics || genLyrics}
               size="lg"
-              className="h-[68px] w-full gap-2.5 rounded-2xl bg-gradient-brand text-xl font-black text-primary-foreground shadow-glow ring-1 ring-primary/40 transition-transform hover:scale-[1.01] sm:h-20 sm:text-2xl"
+              className="h-14 w-full gap-2 rounded-2xl bg-gradient-brand text-base font-black text-primary-foreground shadow-glow ring-1 ring-primary/40 transition-transform hover:scale-[1.01] sm:h-20 sm:gap-2.5 sm:text-2xl"
             >
               {genLyrics ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
