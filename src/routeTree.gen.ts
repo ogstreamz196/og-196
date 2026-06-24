@@ -31,6 +31,7 @@ import { Route as AuthenticatedBuyCoinsReturnRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedAdminUserSettingsRouteImport } from './routes/_authenticated/admin.user-settings'
 import { Route as AuthenticatedAdminOgPersonaRouteImport } from './routes/_authenticated/admin.og-persona'
+import { Route as AuthenticatedAdminDebugContextRouteImport } from './routes/_authenticated/admin.debug-context'
 import { Route as AuthenticatedAdminApiKeysRouteImport } from './routes/_authenticated/admin.api-keys'
 import { Route as ApiPublicTelegramWebhookRouteImport } from './routes/api/public/telegram/webhook'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
@@ -151,6 +152,12 @@ const AuthenticatedAdminOgPersonaRoute =
     path: '/admin/og-persona',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminDebugContextRoute =
+  AuthenticatedAdminDebugContextRouteImport.update({
+    id: '/admin/debug-context',
+    path: '/admin/debug-context',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminApiKeysRoute =
   AuthenticatedAdminApiKeysRouteImport.update({
     id: '/admin/api-keys',
@@ -190,6 +197,7 @@ export interface FileRoutesByFullPath {
   '/portal/$slug': typeof PortalSlugRoute
   '/r/$code': typeof RCodeRoute
   '/admin/api-keys': typeof AuthenticatedAdminApiKeysRoute
+  '/admin/debug-context': typeof AuthenticatedAdminDebugContextRoute
   '/admin/og-persona': typeof AuthenticatedAdminOgPersonaRoute
   '/admin/user-settings': typeof AuthenticatedAdminUserSettingsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
@@ -217,6 +225,7 @@ export interface FileRoutesByTo {
   '/r/$code': typeof RCodeRoute
   '/': typeof AuthenticatedIndexRoute
   '/admin/api-keys': typeof AuthenticatedAdminApiKeysRoute
+  '/admin/debug-context': typeof AuthenticatedAdminDebugContextRoute
   '/admin/og-persona': typeof AuthenticatedAdminOgPersonaRoute
   '/admin/user-settings': typeof AuthenticatedAdminUserSettingsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
@@ -246,6 +255,7 @@ export interface FileRoutesById {
   '/r/$code': typeof RCodeRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/admin/api-keys': typeof AuthenticatedAdminApiKeysRoute
+  '/_authenticated/admin/debug-context': typeof AuthenticatedAdminDebugContextRoute
   '/_authenticated/admin/og-persona': typeof AuthenticatedAdminOgPersonaRoute
   '/_authenticated/admin/user-settings': typeof AuthenticatedAdminUserSettingsRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
@@ -275,6 +285,7 @@ export interface FileRouteTypes {
     | '/portal/$slug'
     | '/r/$code'
     | '/admin/api-keys'
+    | '/admin/debug-context'
     | '/admin/og-persona'
     | '/admin/user-settings'
     | '/admin/users'
@@ -302,6 +313,7 @@ export interface FileRouteTypes {
     | '/r/$code'
     | '/'
     | '/admin/api-keys'
+    | '/admin/debug-context'
     | '/admin/og-persona'
     | '/admin/user-settings'
     | '/admin/users'
@@ -330,6 +342,7 @@ export interface FileRouteTypes {
     | '/r/$code'
     | '/_authenticated/'
     | '/_authenticated/admin/api-keys'
+    | '/_authenticated/admin/debug-context'
     | '/_authenticated/admin/og-persona'
     | '/_authenticated/admin/user-settings'
     | '/_authenticated/admin/users'
@@ -513,6 +526,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminOgPersonaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/debug-context': {
+      id: '/_authenticated/admin/debug-context'
+      path: '/admin/debug-context'
+      fullPath: '/admin/debug-context'
+      preLoaderRoute: typeof AuthenticatedAdminDebugContextRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/api-keys': {
       id: '/_authenticated/admin/api-keys'
       path: '/admin/api-keys'
@@ -566,6 +586,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedAdminApiKeysRoute: typeof AuthenticatedAdminApiKeysRoute
+  AuthenticatedAdminDebugContextRoute: typeof AuthenticatedAdminDebugContextRoute
   AuthenticatedAdminOgPersonaRoute: typeof AuthenticatedAdminOgPersonaRoute
   AuthenticatedAdminUserSettingsRoute: typeof AuthenticatedAdminUserSettingsRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRouteWithChildren
@@ -584,6 +605,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedAdminApiKeysRoute: AuthenticatedAdminApiKeysRoute,
+  AuthenticatedAdminDebugContextRoute: AuthenticatedAdminDebugContextRoute,
   AuthenticatedAdminOgPersonaRoute: AuthenticatedAdminOgPersonaRoute,
   AuthenticatedAdminUserSettingsRoute: AuthenticatedAdminUserSettingsRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRouteWithChildren,

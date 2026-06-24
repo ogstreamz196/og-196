@@ -51,7 +51,7 @@ function DebugContextPage() {
 
   if (isLoading) {
     return (
-      <DashboardShell>
+      <DashboardShell title="Lyric context debug">
         <div className="grid place-items-center py-24">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         </div>
@@ -63,7 +63,7 @@ function DebugContextPage() {
   const rows = query.data ?? [];
 
   return (
-    <DashboardShell>
+    <DashboardShell title="Lyric context debug">
       <div className="mx-auto w-full max-w-5xl space-y-6 py-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
