@@ -51,7 +51,8 @@ function DebugContextPage() {
     },
   });
 
-  const { isAdmin, isLoading } = useRole();
+  const [graceElapsed, setGraceElapsed] = useState(false);
+
   const [graceElapsed, setGraceElapsed] = useState(false);
   useEffect(() => {
     const t = setTimeout(() => setGraceElapsed(true), 1500);
