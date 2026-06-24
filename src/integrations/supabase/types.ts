@@ -710,6 +710,33 @@ export type Database = {
           },
         ]
       }
+      user_onboarding_checks: {
+        Row: {
+          checked_at: string
+          detail: string | null
+          key: string
+          latency_ms: number | null
+          ok: boolean
+          user_id: string
+        }
+        Insert: {
+          checked_at?: string
+          detail?: string | null
+          key: string
+          latency_ms?: number | null
+          ok: boolean
+          user_id: string
+        }
+        Update: {
+          checked_at?: string
+          detail?: string | null
+          key?: string
+          latency_ms?: number | null
+          ok?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_preferences: {
         Row: {
           created_at: string
