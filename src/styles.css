@@ -10,10 +10,12 @@
  */
 
 @theme inline {
-  --font-sans: "Unbounded", "Cabin Sketch", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Lilita One", "Unbounded", ui-rounded, system-ui, sans-serif;
-  --font-graffiti: "Luckiest Guy", "Lilita One", system-ui, sans-serif;
-  --font-sketch: "Cabin Sketch", "Lilita One", system-ui, sans-serif;
+  /* Robust fallback stacks — if the webfont fails, UI still reads cleanly.
+     Order: requested face → similar webfont siblings → system equivalents → generic. */
+  --font-sans: "Unbounded", "Cabin Sketch", "Inter", "Segoe UI", Roboto, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Lilita One", "Unbounded", "Arial Black", "Impact", "Helvetica Neue", ui-rounded, system-ui, sans-serif;
+  --font-graffiti: "Luckiest Guy", "Lilita One", "Bangers", "Arial Black", "Impact", system-ui, sans-serif;
+  --font-sketch: "Cabin Sketch", "Comic Sans MS", "Marker Felt", "Lilita One", cursive, system-ui, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
