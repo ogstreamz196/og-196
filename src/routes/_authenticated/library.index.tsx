@@ -742,12 +742,12 @@ function LibraryPage() {
           {/* Quick-insert chips */}
           <div className="mt-4 flex flex-wrap gap-2">
             {[
-              { label: "👤 Their name", snippet: "Their name: " },
-              { label: "🎂 Occasion", snippet: "Occasion: " },
-              { label: "💛 What they love", snippet: "What they love: " },
-              { label: "🤫 Inside joke", snippet: "Inside joke: " },
-              { label: "📍 City / place", snippet: "City: " },
-              { label: "💔 Drama / story", snippet: "Story: " },
+              { label: "😂 They're so funny", snippet: "They're so funny — " },
+              { label: "🤪 They're so silly", snippet: "They're so silly — " },
+              { label: "🎉 Life of the party", snippet: "Always the life of the party — " },
+              { label: "💛 Heart of gold", snippet: "They've got a heart of gold — " },
+              { label: "🔥 Total legend", snippet: "An absolute legend because — " },
+              { label: "🫶 Always there for me", snippet: "Always there for me when — " },
             ].map((chip) => (
               <button
                 key={chip.label}
