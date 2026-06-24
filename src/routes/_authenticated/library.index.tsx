@@ -709,13 +709,13 @@ function LibraryPage() {
 
         <header className="relative space-y-2">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em]">
-            <Sparkles className="h-3.5 w-3.5 text-primary" /> Step 1 — Tell us about you
+            <Sparkles className="h-3.5 w-3.5 text-primary" /> Step 1 — Who's the song for?
           </div>
           <h2 className="font-display text-4xl font-black leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-            Get personal
+            Tell us about them
           </h2>
           <p className="text-base text-muted-foreground sm:text-lg">
-            Names, places, jokes, drama, dreams — anything you want woven into the lyrics. The more specific, the sharper the song.
+            Whoever this song is for — a partner, a friend, a parent, an ex, even yourself. Names, places, jokes, drama, dreams — the more specific, the sharper the song.
           </p>
         </header>
 
@@ -750,10 +750,10 @@ function LibraryPage() {
             <Sparkles className="h-3.5 w-3.5" /> Recommended — best results
           </div>
           <Label htmlFor="personal-details" className="block text-lg font-bold text-foreground sm:text-xl">
-            Tell us anything personal
+            Tell us about the person this song is for
           </Label>
           <p className="mt-1 text-sm text-muted-foreground sm:text-base">
-            Names, nicknames, places, dates, inside jokes, favourite foods, drama — anything you want woven into the lyrics.
+            Their name, nicknames, where they're from, key dates, inside jokes, what they love, the drama — anything you want woven into the lyrics.
           </p>
 
           {/* Quick-insert chips */}
@@ -791,7 +791,7 @@ function LibraryPage() {
             const pct = (len / MAX) * 100;
             let status: "empty" | "tiny" | "warn" | "good" | "near" | "full";
             let msg: string;
-            if (len === 0) { status = "empty"; msg = "👆 Type anything you want — names, places, drama"; }
+            if (len === 0) { status = "empty"; msg = "👆 Start with their name — then add anything that makes them them"; }
             else if (len < 20) { status = "tiny"; msg = "Add a name and an occasion for best results"; }
             else if (!hasName) { status = "warn"; msg = "💡 Add a name (e.g. \"Their name: Aaliyah\")"; }
             else if (!hasDetail) { status = "warn"; msg = "💡 Add an occasion, love, or inside joke"; }
@@ -816,7 +816,7 @@ function LibraryPage() {
                   aria-invalid={status === "full" || status === "near"}
                   value={personalDetails}
                   onChange={(e) => setPersonalDetails(e.target.value.slice(0, MAX))}
-                  placeholder="✍️ Type here — anything personal. Names, places, inside jokes, drama, dreams…&#10;&#10;e.g.&#10;Their name: Aaliyah&#10;Occasion: 30th birthday&#10;Inside joke: the karaoke night we don't talk about"
+                  placeholder="✍️ Type here — who is this song for? Their name, what they love, your history, inside jokes…&#10;&#10;e.g.&#10;Their name: Aaliyah&#10;Occasion: her 30th birthday&#10;Inside joke: the karaoke night we don't talk about"
                   maxLength={MAX}
                   rows={10}
                   className="mt-4 min-h-[240px] resize-y rounded-xl border-primary/30 bg-background/60 text-base leading-relaxed placeholder:text-muted-foreground/70 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/40 aria-[invalid=true]:border-destructive aria-[invalid=true]:focus-visible:ring-destructive/40 sm:text-lg"
