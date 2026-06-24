@@ -239,6 +239,29 @@ function RootComponent() {
     };
   }, [router]);
 
+  // Global copy / right-click block (anti-scrape; lyrics protection).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const blockContext = (e: MouseEvent) => e.preventDefault();
+    const blockCopy = (e: ClipboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      // Allow copying inside inputs the user typed in (form fields) but block
+      // page text copy. The Library lyrics textarea adds its own onCopy block.
+      if (target && (target.tagName === "INPUT")) return;
+      e.preventDefault();
+    };
+    document.addEventListener("contextmenu", blockContext);
+    document.addEventListener("copy", blockCopy);
+    document.addEventListener("cut", blockCopy);
+    return () => {
+      document.removeEventListener("contextmenu", blockContext);
+      document.removeEventListener("copy", blockCopy);
+      document.removeEventListener("cut", blockCopy);
+    };
+  }, []);
+
+
+
 
 
   return (
