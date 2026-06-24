@@ -1158,15 +1158,60 @@ function LibraryPage() {
           if (lyrics.trim()) parts.push(`Existing lyrics draft (excerpt): ${lyrics.trim().slice(0, 240)}`);
           return parts.join("\n");
         })()}
-        onDone={(brief, transcript) => {
+        onDone={(answers, transcript) => {
           setInterviewTranscript(transcript);
-          setPersonalDetails((prev) => {
-            const trimmed = brief.trim();
-            if (!trimmed) return prev;
-            if (!prev.trim()) return trimmed.slice(0, 500);
-            const merged = `${prev.trim()}\n${trimmed}`;
-            return merged.slice(0, 500);
-          });
+
+          // Map each scripted answer into the matching page field. If the
+          // answer matches a chip in the pool exactly (case-insensitive) use
+          // it as the selection; otherwise put it into that category's notes
+          // textarea so nothing the user typed is lost.
+          const cats: Category[] = ["language", "genre", "mood", "theme", "tempo"];
+          const nextSelections: Selections = { ...selections };
+          const nextNotes: Record<Category, string> = { ...categoryNotes };
+          for (const cat of cats) {
+            const raw = (answers[cat] ?? "").trim();
+            if (!raw) continue;
+            const match = POOLS[cat].find(
+              (v) => v.toLowerCase() === raw.toLowerCase(),
+            );
+            if (match) {
+              nextSelections[cat] = match;
+              if (raw.length > match.length) {
+                nextNotes[cat] = raw;
+              }
+            } else {
+              nextNotes[cat] = raw;
+              // Pick a sensible default chip so the Select isn't empty.
+              if (!nextSelections[cat]) {
+                const guess = POOLS[cat].find((v) =>
+                  raw.toLowerCase().includes(v.toLowerCase()),
+                );
+                if (guess) nextSelections[cat] = guess;
+              }
+            }
+          }
+          setSelections(nextSelections);
+          setCategoryNotes(nextNotes);
+
+          // Merge the "get to know me" answers into personal details.
+          const personalBlob = answers.personal
+            .map((s) => s.trim())
+            .filter(Boolean)
+            .join("\n");
+          if (personalBlob) {
+            setPersonalDetails((prev) => {
+              const merged = prev.trim() ? `${prev.trim()}\n${personalBlob}` : personalBlob;
+              return merged.slice(0, 500);
+            });
+          }
+
+          // Jump to the lyrics CTA and auto-generate as soon as the fields
+          // are committed.
+          setTimeout(() => {
+            const el = document.getElementById("lyrics-section");
+            el?.scrollIntoView({ behavior: "smooth", block: "start" });
+            void generateLyrics();
+          }, 60);
         }}
       />
 
