@@ -33,7 +33,7 @@ function BrandLockup({ compact = false }: { compact?: boolean }) {
         alt="OG Streamz"
         className={`${compact ? "h-6" : "h-7"} w-auto rounded-md object-contain`}
       />
-      <span className="text-[8px] font-semibold uppercase tracking-[0.18em] text-muted-foreground leading-tight">
+      <span className="whitespace-nowrap text-[8px] font-semibold uppercase tracking-[0.18em] text-muted-foreground leading-tight">
         Powered by
       </span>
       <img
