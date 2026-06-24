@@ -203,3 +203,63 @@ export const listTelegramDmsForUser = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return (rows ?? []) as TelegramQueueRow[];
   });
+
+/** Admin: mint a fresh single-use Telegram start-link token for a user. */
+export const rotateTelegramLinkToken = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: { userId: string }) => {
+    if (!data?.userId) throw new Error("userId required");
+    return { userId: data.userId };
+  })
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { randomBytes } = await import("crypto");
+    const token = "t_" + randomBytes(16).toString("hex");
+    const { error } = await supabaseAdmin
+      .from("profiles")
+      .update({ telegram_link_token: token })
+      .eq("id", data.userId);
+    if (error) throw new Error(error.message);
+    return { token };
+  });
+
+/** Admin: send a canned verification ping to a linked user. */
+export const sendTelegramTestPing = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: { userId: string }) => {
+    if (!data?.userId) throw new Error("userId required");
+    return { userId: data.userId };
+  })
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row, error } = await supabaseAdmin
+      .from("profiles")
+      .select("telegram_chat_id")
+      .eq("id", data.userId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!row?.telegram_chat_id) throw new Error("User hasn't linked Telegram yet");
+    const text = `🛰️ <b>OG Bot test ping</b>\nLink verified at ${new Date().toUTCString()}`;
+    const messageId = await sendViaGateway(row.telegram_chat_id, text);
+    return { ok: true as const, message_id: messageId ?? null };
+  });
+
+/** Authenticated: current user's own Telegram link status. */
+export const getMyTelegramStatus = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
+      .from("profiles")
+      .select("telegram_chat_id, telegram_username, telegram_linked_at")
+      .eq("id", context.userId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return {
+      linked: !!data?.telegram_chat_id,
+      username: data?.telegram_username ?? null,
+      linkedAt: data?.telegram_linked_at ?? null,
+    };
+  });

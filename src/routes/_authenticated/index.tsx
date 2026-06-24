@@ -28,6 +28,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { TelegramLinkStatus } from "@/components/dashboard/TelegramLinkStatus";
 
 export const Route = createFileRoute("/_authenticated/")({
   component: DashboardHome,
@@ -222,6 +223,10 @@ function DashboardHome() {
           <QuickAction to="/buy-coins" icon={<Coins className="h-6 w-6" />} label="Buy coins" />
         </div>
       </section>
+
+      <TelegramLinkStatus />
+
+
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Example prompts */}
