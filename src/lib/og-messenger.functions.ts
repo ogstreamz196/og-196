@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { buildSystemPrompt, type UserContextSummary } from "@/lib/og-persona";
+import { buildSystemPrompt, detectSongIntent, type UserContextSummary } from "@/lib/og-persona";
 import { extractInsults } from "@/lib/insult-learner";
 
 export type OgChatMessage = { role: "user" | "assistant"; content: string };
