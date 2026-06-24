@@ -1,6 +1,6 @@
 import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { CheckCircle2, XCircle, Loader2, PlayCircle, ExternalLink, ShieldCheck } from "lucide-react";
 import { useRole } from "@/hooks/use-role";
@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { runOnboardingCheck, type CheckResult } from "@/lib/onboarding-checks.functions";
+import { runOnboardingCheck, getOnboardingChecks, type CheckResult } from "@/lib/onboarding-checks.functions";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/admin/onboarding")({
