@@ -74,7 +74,7 @@ export function FreeAccessPanel() {
             <h3 className="font-semibold">Free access for all users</h3>
             <p className="text-sm text-muted-foreground">
               Limited-time promo: every signed-in user gets VIP-only features,
-              including OG Bot foul-mouth mode. Switch off to restore VIP-only access.
+              including OG Bot foul-mouth mode. Turn off to restore VIP-only access.
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
               Status:{" "}
