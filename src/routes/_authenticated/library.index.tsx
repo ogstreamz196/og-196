@@ -503,28 +503,14 @@ function LibraryPage() {
             variant="outline"
             size="sm"
             onClick={() => {
-              const TITLES = [
-                "Late night drive", "Sunday hangover", "Gym warm-up",
-                "Festival anthem", "Heartbreak letter", "Pirate radio cypher",
-                "Summer rooftop", "Last train home", "Glow-up season",
-                "City lights blur", "Toxic ex anthem", "Underdog story",
-              ];
-              const TEMPLATES = [
-                "Their name: Aaliyah\nOccasion: 30th birthday\nInside joke: still can't parallel park\nWhat they love: oat-milk lattes",
-                "Their name: Marcus\nStory: ghosted me after 2 years\nCity: Manchester\nInside joke: \"I'll text you back\" — never did",
-                "Their name: Sam & Jordan\nOccasion: wedding day\nWhat they love: late-night taco runs\nInside joke: the karaoke night we don't talk about",
-                "Their name: Dre\nOccasion: promotion at work\nCity: Brooklyn\nWhat they love: never missing leg day",
-              ];
-              const pick = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
-              setTitle(pick(TITLES));
+              setTitle(randomPick(SURPRISE_TITLES));
               setSelections({
-                language: pick(POOLS.language),
-                genre: pick(POOLS.genre),
-                mood: pick(POOLS.mood),
-                theme: pick(POOLS.theme),
-                
+                language: randomPick(POOLS.language),
+                genre: randomPick(POOLS.genre),
+                mood: randomPick(POOLS.mood),
+                theme: randomPick(POOLS.theme),
               });
-              setPersonalDetails(pick(TEMPLATES).slice(0, 500));
+              setPersonalDetails(randomPick(SURPRISE_TEMPLATES).slice(0, PERSONAL_DETAILS_MAX));
               toast.success("Surprise prompt loaded");
             }}
             className="h-12 shrink-0 gap-1.5 rounded-xl sm:h-14"
