@@ -551,12 +551,7 @@ function LibraryPage() {
             role="group"
             aria-label="Example prompts"
           >
-            {[
-              { label: "💛 Heart of gold", snippet: "They've got a heart of gold — " },
-              { label: "🎉 Life of the party", snippet: "Always the life of the party — " },
-              { label: "🫶 Always there for me", snippet: "Always there for me when — " },
-              { label: "🔥 Total legend", snippet: "An absolute legend because — " },
-            ].map((chip) => (
+            {EXAMPLE_PROMPT_CHIPS.map((chip) => (
               <button
                 key={chip.label}
                 type="button"
@@ -564,7 +559,7 @@ function LibraryPage() {
                 onClick={() =>
                   setPersonalDetails((v) => {
                     const sep = v.length === 0 ? "" : v.endsWith("\n") ? "" : "\n";
-                    return (v + sep + chip.snippet).slice(0, 500);
+                    return (v + sep + chip.snippet).slice(0, PERSONAL_DETAILS_MAX);
                   })
                 }
                 className="rounded-full border border-white/15 bg-white/[0.05] px-3.5 py-1.5 text-sm font-semibold text-foreground/85 transition hover:border-primary/60 hover:bg-primary/15 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
@@ -574,45 +569,20 @@ function LibraryPage() {
             ))}
           </div>
 
-
-
-
           {(() => {
-            const MAX = 500;
-            const len = personalDetails.length;
-            const trimmed = personalDetails.trim();
-            const hasName = /name\s*[:\-]/i.test(trimmed) || /^[A-Z][a-z]+/m.test(trimmed);
-            const hasDetail = /(occasion|love|joke|story|city|place)\s*[:\-]/i.test(trimmed);
-            const pct = (len / MAX) * 100;
-            let status: "empty" | "tiny" | "warn" | "good" | "near" | "full";
-            let msg: string;
-            if (len === 0) { status = "empty"; msg = "👆 Start with their name — then add anything that makes them them"; }
-            else if (len < 20) { status = "tiny"; msg = "Add a name and an occasion for best results"; }
-            else if (!hasName) { status = "warn"; msg = "💡 Add a name (e.g. \"Their name: Aaliyah\")"; }
-            else if (!hasDetail) { status = "warn"; msg = "💡 Add an occasion, love, or inside joke"; }
-            else if (len > MAX - 30) { status = "near"; msg = "Almost at the limit"; }
-            else { status = "good"; msg = "✓ Looking good — the more specific, the better"; }
-            if (len >= MAX) { status = "full"; msg = "Character limit reached"; }
-            const tone =
-              status === "good" ? "text-emerald-400" :
-              status === "warn" || status === "tiny" ? "text-amber-400" :
-              status === "near" || status === "full" ? "text-destructive" :
-              "text-muted-foreground";
-            const barTone =
-              status === "full" || status === "near" ? "bg-destructive" :
-              status === "good" ? "bg-emerald-500" :
-              status === "warn" || status === "tiny" ? "bg-amber-500" :
-              "bg-primary/40";
+            const check = personalDetailsCheck(personalDetails);
+            const { status, message, pct, tone, barTone, length: len } = check;
+            const invalid = status === "full" || status === "near";
             return (
               <>
                 <Textarea
                   id="personal-details"
                   aria-describedby="personal-details-help personal-details-count"
-                  aria-invalid={status === "full" || status === "near"}
+                  aria-invalid={invalid}
                   value={personalDetails}
-                  onChange={(e) => setPersonalDetails(e.target.value.slice(0, MAX))}
+                  onChange={(e) => setPersonalDetails(e.target.value.slice(0, PERSONAL_DETAILS_MAX))}
                   placeholder="✍️ Type here — who is this song for? Their name, what they love, your history, inside jokes…&#10;&#10;e.g.&#10;Their name: Aaliyah&#10;Occasion: her 30th birthday&#10;Inside joke: the karaoke night we don't talk about"
-                  maxLength={MAX}
+                  maxLength={PERSONAL_DETAILS_MAX}
                   rows={10}
                   className="mt-4 min-h-[240px] resize-y rounded-xl border-primary/30 bg-background/60 text-base leading-relaxed placeholder:text-muted-foreground/70 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/40 aria-[invalid=true]:border-destructive aria-[invalid=true]:focus-visible:ring-destructive/40 sm:text-lg"
                 />
@@ -623,16 +593,17 @@ function LibraryPage() {
                   />
                 </div>
                 <div className="mt-1.5 flex items-center justify-between gap-2 text-sm">
-                  <span id="personal-details-help" className={cn("min-w-0 truncate font-medium", tone)} aria-live="polite">{msg}</span>
+                  <span id="personal-details-help" className={cn("min-w-0 truncate font-medium", tone)} aria-live="polite">{message}</span>
                   <span
                     id="personal-details-count"
                     className={cn("shrink-0 tabular-nums font-semibold", tone)}
                   >
-                    {len}/{MAX}
+                    {len}/{PERSONAL_DETAILS_MAX}
                   </span>
                 </div>
               </>
             );
+
           })()}
         </div>
 
