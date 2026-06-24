@@ -28,10 +28,48 @@ type PolymorphicProps<T extends React.ElementType, P = unknown> = AsProp<T> &
 export function Display<T extends React.ElementType = "h1">({
   as,
   className,
+  cartoon = false,
   ...rest
-}: PolymorphicProps<T>) {
+}: PolymorphicProps<T, { cartoon?: boolean }>) {
   const Tag = (as ?? "h1") as React.ElementType;
-  return <Tag className={cn("text-display text-foreground", className)} {...rest} />;
+  return (
+    <Tag
+      className={cn(
+        "text-display text-foreground",
+        cartoon && "font-cartoon",
+        className,
+      )}
+      {...rest}
+    />
+  );
+}
+
+/**
+ * <StickerCard> — sticker tile for the "feel like a child again" polish:
+ * thick black border, hard-edge offset shadow, optional tilt, springy hover.
+ * Compose with brand color utilities (bg-primary, bg-destructive, etc).
+ */
+export function StickerCard({
+  className,
+  tilt,
+  hover = true,
+  ...rest
+}: React.HTMLAttributes<HTMLDivElement> & {
+  tilt?: "left" | "right" | "none";
+  hover?: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "sticker-card",
+        hover && "sticker-card-hover",
+        tilt === "left" && "tilt-l",
+        tilt === "right" && "tilt-r",
+        className,
+      )}
+      {...rest}
+    />
+  );
 }
 
 type HeadingLevel = 1 | 2 | 3;
