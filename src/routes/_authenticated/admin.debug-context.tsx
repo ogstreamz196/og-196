@@ -1,6 +1,8 @@
-import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, ShieldCheck, ArrowLeft, RefreshCw } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Loader2, ShieldCheck, ShieldAlert, ArrowLeft, RefreshCw } from "lucide-react";
+
 import { supabase } from "@/integrations/supabase/client";
 import { useRole } from "@/hooks/use-role";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
@@ -49,16 +51,43 @@ function DebugContextPage() {
     },
   });
 
-  if (isLoading) {
+  const [graceElapsed, setGraceElapsed] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setGraceElapsed(true), 1500);
+    return () => clearTimeout(t);
+  }, []);
+
+  if (isLoading || !graceElapsed) {
     return (
       <DashboardShell title="Lyric context debug">
-        <div className="grid place-items-center py-24">
+        <div className="grid place-items-center gap-3 py-24 text-center">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          <p className="text-sm text-muted-foreground">Checking admin access…</p>
         </div>
       </DashboardShell>
     );
   }
-  if (!isAdmin) return <Navigate to="/" />;
+  if (!isAdmin) {
+    return (
+      <DashboardShell title="Access denied">
+        <div className="mx-auto grid max-w-md place-items-center gap-3 py-24 text-center">
+          <ShieldAlert className="h-10 w-10 text-destructive" />
+          <h1 className="font-display text-2xl font-black">Access denied</h1>
+          <p className="text-sm text-muted-foreground">
+            This area is restricted to admins. If you think this is a mistake, contact an
+            administrator.
+          </p>
+          <Button asChild variant="outline" size="sm" className="mt-2 gap-1.5">
+            <Link to="/">
+              <ArrowLeft className="h-4 w-4" /> Back to home
+            </Link>
+          </Button>
+        </div>
+      </DashboardShell>
+    );
+  }
+
 
   const rows = query.data ?? [];
 
