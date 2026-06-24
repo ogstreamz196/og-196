@@ -516,26 +516,27 @@ function LibraryPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 pb-16 sm:gap-10">
-      {/* Hero — tighter on mobile, stacked controls */}
-      <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-border/60 pb-4 sm:pb-6">
-        <div className="min-w-0 space-y-1">
-          <div className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-            <Music4 className="h-3 w-3 shrink-0 text-primary" /> Music Hub
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 pb-20 sm:gap-12">
+      {/* Hero — premium kicker, oversized headline, generous breathing room */}
+      <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b border-white/10 pb-6 sm:pb-8">
+        <div className="min-w-0 space-y-2">
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.28em] text-primary shadow-[0_0_24px_-10px_oklch(0.7_0.2_300_/_0.8)]">
+            <Music4 className="h-3.5 w-3.5 shrink-0" /> Music Hub
           </div>
-          <h1 className="font-display text-2xl font-black leading-tight tracking-[-0.02em] sm:text-4xl">
+          <h1 className="font-display text-3xl font-black leading-[1.05] tracking-[-0.02em] sm:text-5xl lg:text-6xl">
             Hey <span className="text-gradient-brand">{firstName}</span> — let's write a song.
           </h1>
-          <p className="hidden text-sm text-muted-foreground sm:block">
-            Tell us about them, pick a vibe, generate. 3 steps.
+          <p className="hidden text-base text-muted-foreground sm:block sm:text-lg">
+            Tell us about them, pick a vibe, generate. Three steps to a finished track.
           </p>
         </div>
-        <div className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-primary/30 bg-card/60 px-2.5 py-1.5 sm:gap-2 sm:px-3.5 sm:py-2">
-          <Coins className="h-4 w-4 text-primary" />
-          <span className="text-sm font-black">{balance}</span>
-          <span className="hidden text-[10px] uppercase tracking-wider text-muted-foreground sm:inline">coins</span>
+        <div className="inline-flex shrink-0 items-center gap-2 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 to-card/60 px-3 py-2 shadow-[0_8px_28px_-12px_oklch(0.7_0.2_300_/_0.45)] sm:gap-2.5 sm:px-4 sm:py-2.5">
+          <Coins className="h-5 w-5 text-primary" />
+          <span className="text-lg font-black tabular-nums sm:text-xl">{balance}</span>
+          <span className="hidden text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground sm:inline">coins</span>
         </div>
       </header>
+
 
 
 
@@ -621,25 +622,26 @@ function LibraryPage() {
       )}
 
       {/* Step 1 — Name your song */}
-      <section className="rounded-2xl border-2 border-primary/40 bg-gradient-to-br from-primary/10 via-card/80 to-card/60 p-5 shadow-lg shadow-primary/10 sm:p-6">
+      <section className="rounded-3xl border border-primary/40 bg-gradient-to-br from-primary/15 via-card/80 to-card/60 p-6 shadow-[0_24px_70px_-30px_oklch(0.7_0.2_300_/_0.55)] ring-1 ring-white/5 sm:p-8">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-primary-foreground">
-            <Sparkles className="h-3 w-3" /> Step 1
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-primary-foreground shadow-[0_0_20px_-4px_oklch(0.7_0.2_300_/_0.7)]">
+            <Sparkles className="h-3.5 w-3.5" /> Step 1
           </span>
-          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          <span className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
             Start here
           </span>
         </div>
         <Label
           htmlFor="song-title"
-          className="mt-3 block font-display text-2xl font-black leading-tight tracking-tight sm:text-3xl"
+          className="mt-4 block font-display text-3xl font-black leading-[1.1] tracking-tight sm:text-4xl"
         >
           Name your song
         </Label>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="mt-2 text-base text-muted-foreground sm:text-lg">
           Give it a working title — you can change this later.
         </p>
-        <div className="mt-3 rounded-xl border border-primary/20 bg-primary/5 p-3 text-xs leading-relaxed text-muted-foreground sm:text-sm">
+        <div className="mt-4 rounded-2xl border border-primary/20 bg-primary/5 p-4 text-sm leading-relaxed text-muted-foreground sm:text-base">
+
           <p className="font-semibold text-foreground">What to enter first 👇</p>
           <p className="mt-1">
             Type a short, catchy name that captures the vibe — a moment, a feeling, or a person
@@ -700,19 +702,20 @@ function LibraryPage() {
       {/* Step 1 — Personal */}
       <section
         id="personal-brief"
-        className="flex flex-col gap-5 rounded-2xl border border-border bg-card/60 p-5 sm:p-6"
+        className="flex flex-col gap-6 rounded-3xl border border-white/10 bg-card/70 p-6 shadow-[0_18px_50px_-28px_rgba(0,0,0,0.6)] ring-1 ring-white/5 backdrop-blur-xl sm:p-8"
       >
-        <header className="space-y-1.5">
-          <div className="inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
-            <Sparkles className="h-3 w-3" /> Step 2 · Who's it for?
+        <header className="space-y-2">
+          <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.24em] text-primary">
+            <Sparkles className="h-3.5 w-3.5" /> Step 2 · Who's it for?
           </div>
-          <h2 className="font-display text-2xl font-black leading-tight tracking-tight sm:text-3xl">
+          <h2 className="font-display text-3xl font-black leading-[1.1] tracking-tight sm:text-4xl">
             Tell us about them
           </h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-base text-muted-foreground sm:text-lg">
             Partner, friend, parent, ex, even yourself — the more specific, the sharper the song.
           </p>
         </header>
+
 
 
 
@@ -844,20 +847,21 @@ function LibraryPage() {
       </section>
 
       {/* Step 2 — Pick your sound */}
-      <section className="flex flex-col gap-4 rounded-2xl border border-border bg-card/60 p-5 sm:p-6">
+      <section className="flex flex-col gap-5 rounded-3xl border border-white/10 bg-card/70 p-6 shadow-[0_18px_50px_-28px_rgba(0,0,0,0.6)] ring-1 ring-white/5 backdrop-blur-xl sm:p-8">
         <header className="flex items-end justify-between gap-3">
-          <div className="space-y-1.5">
-            <div className="inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
-              <Disc3 className="h-3 w-3" /> Step 3 · Pick your sound
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.24em] text-primary">
+              <Disc3 className="h-3.5 w-3.5" /> Step 3 · Pick your sound
             </div>
-            <h2 className="font-display text-2xl font-black tracking-tight sm:text-3xl">
+            <h2 className="font-display text-3xl font-black tracking-tight sm:text-4xl">
               Choose the vibe
             </h2>
           </div>
-          <span className="hidden text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:block">
+          <span className="hidden text-xs font-bold uppercase tracking-[0.24em] text-muted-foreground sm:block">
             {totalFilled}/5 picked
           </span>
         </header>
+
 
         <div className="grid grid-cols-1 items-stretch gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {(["language", "genre", "mood", "theme"] as Category[]).map((cat) => (
@@ -890,18 +894,19 @@ function LibraryPage() {
       </section>
 
       {/* Step 3 — Finalize & generate */}
-      <section className="space-y-4 rounded-2xl border border-primary/40 bg-card/60 p-5 sm:p-6">
-        <header className="space-y-1.5">
-          <div className="inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
-            <Wand2 className="h-3 w-3" /> Step 4 · Generate
+      <section className="space-y-5 rounded-3xl border border-primary/40 bg-gradient-to-br from-primary/10 via-card/80 to-card/60 p-6 shadow-[0_24px_70px_-30px_oklch(0.7_0.2_300_/_0.5)] ring-1 ring-white/5 sm:p-8">
+        <header className="space-y-2">
+          <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.24em] text-primary">
+            <Wand2 className="h-3.5 w-3.5" /> Step 4 · Generate
           </div>
-          <h2 className="font-display text-2xl font-black tracking-tight sm:text-3xl">
+          <h2 className="font-display text-3xl font-black tracking-tight sm:text-4xl">
             Write the lyrics
           </h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-base text-muted-foreground sm:text-lg">
             Set the explicit toggle and let OG cook. You'll review before paying for the full song.
           </p>
         </header>
+
 
 
         {/* Foul mouth toggle */}
@@ -973,7 +978,7 @@ function LibraryPage() {
             onClick={generateLyrics}
             disabled={!canGenerateLyrics || genLyrics}
             size="lg"
-            className="h-16 w-full gap-2 rounded-2xl bg-gradient-brand text-lg font-black text-primary-foreground shadow-glow sm:h-[68px] sm:text-xl"
+            className="h-[68px] w-full gap-2.5 rounded-2xl bg-gradient-brand text-xl font-black text-primary-foreground shadow-glow ring-1 ring-primary/40 transition-transform hover:scale-[1.01] sm:h-20 sm:text-2xl"
           >
             {genLyrics ? (
               <Loader2 className="h-5 w-5 animate-spin" />
@@ -983,7 +988,7 @@ function LibraryPage() {
             {lyrics ? "Regenerate lyrics" : "Generate lyrics"} · -{lyricsCost}
           </Button>
           {!canGenerateLyrics && !genLyrics && (
-            <p className="mt-2 text-center text-xs text-muted-foreground">
+            <p className="mt-3 text-center text-sm font-medium text-muted-foreground">
               Pick a language and at least one style detail above to unlock
             </p>
           )}
@@ -1102,22 +1107,22 @@ function CategoryCard({
   const meta = META[cat];
   const Icon = meta.icon;
   return (
-    <div className="group relative flex h-full min-w-0 flex-col overflow-hidden rounded-3xl border border-white/10 bg-card/70 p-5 shadow-card backdrop-blur-xl transition-all hover:border-white/20 sm:p-6">
+    <div className="group relative flex h-full min-w-0 flex-col overflow-hidden rounded-3xl border border-white/10 bg-card/70 p-6 shadow-[0_18px_50px_-28px_rgba(0,0,0,0.55)] ring-1 ring-white/5 backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:border-white/20 hover:shadow-[0_24px_60px_-24px_rgba(0,0,0,0.7)] sm:p-7">
       <div
         aria-hidden
-        className={`pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-gradient-to-br ${meta.gradient} blur-2xl`}
+        className={`pointer-events-none absolute -right-12 -top-12 h-44 w-44 rounded-full bg-gradient-to-br ${meta.gradient} opacity-90 blur-2xl`}
       />
-      <div className="relative space-y-4">
+      <div className="relative space-y-5">
         <div className="flex items-start justify-between gap-2">
           <div className="flex min-w-0 items-center gap-3">
-            <div className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl border text-lg ${meta.iconBg}`}>
+            <div className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl border text-xl ${meta.iconBg}`}>
               <Icon className="h-5 w-5" />
             </div>
             <div className="min-w-0 leading-tight">
-              <div className={`text-[10px] font-bold uppercase tracking-[0.2em] ${meta.accent}`}>
+              <div className={`text-xs font-bold uppercase tracking-[0.22em] ${meta.accent}`}>
                 {meta.emoji} {meta.label}
               </div>
-              <div className="mt-1 text-sm font-semibold text-foreground">
+              <div className="mt-1.5 text-base font-semibold text-foreground">
                 {value ? (
                   <span className="inline-flex items-center gap-1.5">
                     <span className={`inline-block h-1.5 w-1.5 rounded-full bg-current ${meta.accent}`} />
@@ -1135,7 +1140,7 @@ function CategoryCard({
             size="sm"
             onClick={onRefresh}
             aria-label={`Shuffle ${meta.label} suggestions`}
-            className={`h-8 shrink-0 gap-1.5 px-2.5 text-xs font-semibold ${meta.accent} hover:bg-white/5`}
+            className={`h-9 shrink-0 gap-1.5 px-3 text-xs font-bold ${meta.accent} hover:bg-white/5`}
           >
             <RefreshCw className="h-3.5 w-3.5" />
             Shuffle
@@ -1143,23 +1148,24 @@ function CategoryCard({
         </div>
 
         <Select value={value ?? ""} onValueChange={onSelect}>
-          <SelectTrigger className="h-11 w-full rounded-xl border-white/10 bg-background/50 text-sm font-medium">
+          <SelectTrigger className="h-12 w-full rounded-xl border-white/10 bg-background/50 text-base font-semibold">
             <SelectValue placeholder={meta.placeholder} />
           </SelectTrigger>
           <SelectContent className="max-h-72">
             {POOLS[cat].map((opt) => (
-              <SelectItem key={opt} value={opt}>
+              <SelectItem key={opt} value={opt} className="text-base">
                 {opt}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
 
-        <div className="space-y-2">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+
+        <div className="space-y-2.5">
+          <div className="text-xs font-bold uppercase tracking-[0.22em] text-muted-foreground">
             Quick picks
           </div>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-2">
             {chips.map((chip) => {
               const active = value === chip;
               return (
@@ -1168,10 +1174,10 @@ function CategoryCard({
                   type="button"
                   onClick={() => onPickChip(chip)}
                   className={
-                    "rounded-full border px-3 py-1.5 text-xs font-semibold transition-all hover:-translate-y-0.5 " +
+                    "rounded-full border px-3.5 py-2 text-sm font-semibold transition-all hover:-translate-y-0.5 " +
                     (active
                       ? meta.chipActive
-                      : "border-white/10 bg-white/[0.04] text-foreground/85 hover:border-white/25 hover:bg-white/10")
+                      : "border-white/10 bg-white/[0.04] text-foreground/90 hover:border-white/25 hover:bg-white/10")
                   }
                 >
                   {chip}
@@ -1180,6 +1186,7 @@ function CategoryCard({
             })}
           </div>
         </div>
+
       </div>
     </div>
   );
