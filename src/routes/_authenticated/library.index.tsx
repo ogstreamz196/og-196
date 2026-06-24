@@ -800,24 +800,20 @@ function LibraryPage() {
           })()}
         </div>
 
-        {/* Lyric description — auto-filled from category selections; user can edit. */}
-        <div className="relative">
-          <Label htmlFor="extra-context" className="text-sm font-bold uppercase tracking-wider text-muted-foreground sm:text-base">
-            Lyric description
-          </Label>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Your category picks land here automatically. Add or edit anything you want the AI to know before writing.
-          </p>
+        {/* Lyric description — auto-filled from category selections; hidden from user but still wired into generation. */}
+        <div className="sr-only" aria-hidden="true">
+          <Label htmlFor="extra-context">Lyric description</Label>
           <Textarea
             id="extra-context"
             value={extraContext}
             onChange={(e) => setExtraContext(e.target.value)}
-            placeholder="Pick chips above — they'll fill this in. Add more detail if you want."
+            tabIndex={-1}
             maxLength={1000}
             rows={4}
-            className="mt-2 min-h-[120px] resize-y rounded-xl border-white/10 bg-background/40 text-base sm:text-lg"
+            readOnly
           />
         </div>
+
 
       </section>
 
