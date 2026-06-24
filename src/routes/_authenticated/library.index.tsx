@@ -543,16 +543,23 @@ function LibraryPage() {
 
       {/* Library — previews created (above creation options) */}
       <section>
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-            MusicHUB · previews
-          </h2>
+        <div className="mb-5 flex items-end justify-between gap-3">
+          <div className="space-y-1">
+            <div className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
+              <Disc3 className="mr-1.5 inline h-3.5 w-3.5 -translate-y-0.5" />
+              MusicHUB · Previews
+            </div>
+            <h2 className="font-display text-2xl font-black tracking-tight sm:text-3xl">
+              Your tracks
+            </h2>
+          </div>
           {versionedLibrary.length > 0 && (
-            <span className="text-[11px] text-muted-foreground">
+            <span className="shrink-0 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
               {versionedLibrary.length} track{versionedLibrary.length === 1 ? "" : "s"}
             </span>
           )}
         </div>
+
         {library.isLoading ? (
           <div className="grid gap-3">
             {[0, 1, 2].map((i) => (
