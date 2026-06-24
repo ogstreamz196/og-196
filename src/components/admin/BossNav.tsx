@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ShieldCheck, Music2, Globe2, Radio } from "lucide-react";
+import { ShieldCheck, Globe2, Radio } from "lucide-react";
 
 
 /**
