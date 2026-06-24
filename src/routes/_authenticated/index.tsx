@@ -28,6 +28,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { useRole } from "@/hooks/use-role";
 import { useRecentSongs, type RecentSong } from "@/hooks/use-recent-songs";
 import { useAdaptiveOverlay } from "@/hooks/use-adaptive-overlay";
+import ogLogo from "@/assets/ogstreamz-logo.jpg.asset.json";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -155,6 +156,12 @@ function DashboardHome() {
             </span>
           </div>
           <div className="order-1 min-w-0 rounded-3xl bg-background/35 p-5 backdrop-blur-md ring-2 ring-white/10 transition-transform duration-500 group-hover/welcome:-translate-y-1 sm:order-none sm:flex-1 sm:p-7">
+            <img
+              src={ogLogo.url}
+              alt="OG Streamz"
+              loading="lazy"
+              className="mb-4 w-full max-w-md rounded-2xl ring-1 ring-white/10 shadow-[0_18px_50px_-20px_rgba(0,0,0,0.7)]"
+            />
             <p className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.28em] text-muted-foreground sm:text-xl">
               <span className="inline-block animate-[wiggle_1.6s_ease-in-out_infinite] [transform-origin:70%_70%]">👋</span>
               <span className="relative">
