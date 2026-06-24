@@ -894,18 +894,19 @@ function LibraryPage() {
       </section>
 
       {/* Step 3 — Finalize & generate */}
-      <section className="space-y-4 rounded-2xl border border-primary/40 bg-card/60 p-5 sm:p-6">
-        <header className="space-y-1.5">
-          <div className="inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
-            <Wand2 className="h-3 w-3" /> Step 4 · Generate
+      <section className="space-y-5 rounded-3xl border border-primary/40 bg-gradient-to-br from-primary/10 via-card/80 to-card/60 p-6 shadow-[0_24px_70px_-30px_oklch(0.7_0.2_300_/_0.5)] ring-1 ring-white/5 sm:p-8">
+        <header className="space-y-2">
+          <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.24em] text-primary">
+            <Wand2 className="h-3.5 w-3.5" /> Step 4 · Generate
           </div>
-          <h2 className="font-display text-2xl font-black tracking-tight sm:text-3xl">
+          <h2 className="font-display text-3xl font-black tracking-tight sm:text-4xl">
             Write the lyrics
           </h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-base text-muted-foreground sm:text-lg">
             Set the explicit toggle and let OG cook. You'll review before paying for the full song.
           </p>
         </header>
+
 
 
         {/* Foul mouth toggle */}
