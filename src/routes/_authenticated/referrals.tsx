@@ -1,7 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Copy, Check, Gift, Users, Coins, Share2, Link2, UserPlus, Sparkles } from "lucide-react";
+import {
+  Copy,
+  Check,
+  Gift,
+  Users,
+  Coins,
+  Share2,
+  Link2,
+  UserPlus,
+  Sparkles,
+  TrendingUp,
+  Flame,
+  Infinity as InfinityIcon,
+  PiggyBank,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
@@ -26,11 +40,6 @@ type Summary = {
   }[];
 };
 
-/**
- * Copy text to the clipboard with a graceful fallback for browsers/contexts
- * (insecure origin, iframe sandboxing, Safari quirks) that block
- * navigator.clipboard. Returns true on success.
- */
 async function copyTextWithFallback(text: string): Promise<boolean> {
   try {
     if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
@@ -70,8 +79,6 @@ function ReferralsPage() {
   const summaryQ = useQuery({
     queryKey: ["referral-summary", user?.id],
     enabled: !!user,
-    // Poll as a safety net so new cashback events appear without a reload,
-    // even if Realtime is rate-limited or temporarily down.
     refetchInterval: 15_000,
     refetchOnWindowFocus: true,
     queryFn: async (): Promise<Summary> => {
@@ -81,8 +88,6 @@ function ReferralsPage() {
     },
   });
 
-  // Live updates: invalidate the summary whenever a new cashback or referral
-  // row lands for this user.
   useEffect(() => {
     if (!user) return;
     const channel = supabase
@@ -145,13 +150,12 @@ function ReferralsPage() {
       try {
         await navigator.share({
           title: "Join OG Streamz",
-          text: "Make AI songs on OG Streamz — sign up with my link:",
+          text: "Make AI songs on OG Streamz — sign up with my link and we both win:",
           url: link,
         });
         toast.success("Shared — thanks for spreading the word!");
         return;
       } catch (e) {
-        // AbortError = user cancelled, stay silent.
         if (e instanceof Error && e.name === "AbortError") return;
         toast.message("Share sheet unavailable — copying instead");
       }
@@ -160,84 +164,118 @@ function ReferralsPage() {
   };
 
   const summary = summaryQ.data ?? { total_referred: 0, total_earned: 0, recent: [] };
+  const shortLink = link.replace(/^https?:\/\//, "");
 
   return (
     <DashboardShell title="Earnings">
-      <div className="w-full space-y-10 sm:space-y-12">
-        <header className="space-y-2">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
-            <Gift className="h-3 w-3" /> Earnings
-          </div>
-          <h1 className="font-display text-3xl font-black tracking-tight">Earn OG Coins by sharing your OG Link</h1>
-          <p className="text-sm text-muted-foreground">
-            Every time someone you invited burns coins, you bank{" "}
-            <span className="font-semibold text-foreground">10% commission in OG Coins</span> —
-            for life. No cap, no expiry.
-          </p>
-        </header>
+      <div className="w-full space-y-8 sm:space-y-10">
+        {/* HERO — earnings-first */}
+        <section className="relative overflow-hidden rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/20 via-card/80 to-background p-6 shadow-glow sm:p-10">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-primary/30 blur-3xl"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -left-20 bottom-0 h-56 w-56 rounded-full bg-fuchsia-500/20 blur-3xl"
+          />
 
-        {/* How it works */}
-        <section className="rounded-2xl border border-white/10 bg-card/60 p-5">
-          <h2 className="font-display text-lg font-bold">How you earn commission</h2>
-          <div className="mt-4 grid gap-4 sm:grid-cols-3">
-            <Step
-              icon={<Link2 className="h-4 w-4" />}
-              n={1}
-              title="Share your OG Link"
-              body="Copy the link below and drop it in your group chats, socials or DMs."
-            />
-            <Step
-              icon={<UserPlus className="h-4 w-4" />}
-              n={2}
-              title="They sign up & create"
-              body="A friend opens your link, makes an account and starts using OG Streamz."
-            />
-            <Step
-              icon={<Sparkles className="h-4 w-4" />}
-              n={3}
-              title="You bank 10% forever"
-              body="Every time they spend OG Coins, 10% drops straight into your balance."
-            />
+          <div className="relative grid gap-8 lg:grid-cols-[1.2fr_1fr] lg:items-center">
+            <div className="space-y-5">
+              <div className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/15 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
+                <PiggyBank className="h-3 w-3" /> Earnings · 10% lifetime
+              </div>
+              <h1 className="font-display text-4xl font-black leading-[1.05] tracking-tight sm:text-5xl">
+                Earn{" "}
+                <span className="bg-gradient-to-r from-primary via-fuchsia-400 to-amber-300 bg-clip-text text-transparent">
+                  OG Coins
+                </span>{" "}
+                every time your crew creates.
+              </h1>
+              <p className="max-w-xl text-base text-muted-foreground sm:text-lg">
+                Share your OG Link. When someone you invited burns coins making songs, you bank{" "}
+                <span className="font-semibold text-foreground">10% in OG Coins</span> — automatically,
+                forever. No cap, no expiry, no payout fees.
+              </p>
+
+              <div className="flex flex-wrap gap-2 pt-1">
+                <Pill icon={<InfinityIcon className="h-3 w-3" />} label="Lifetime commission" />
+                <Pill icon={<Flame className="h-3 w-3" />} label="Auto-paid on every burn" />
+                <Pill icon={<Coins className="h-3 w-3" />} label="Spend instantly in-app" />
+              </div>
+            </div>
+
+            {/* Big balance card */}
+            <div className="relative rounded-2xl border border-white/15 bg-background/70 p-6 backdrop-blur-xl">
+              <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                <span className="inline-flex items-center gap-1.5">
+                  <Coins className="h-3.5 w-3.5 text-primary" /> Your cashback wallet
+                </span>
+                <span className="inline-flex items-center gap-1 text-emerald-400">
+                  <TrendingUp className="h-3 w-3" /> Live
+                </span>
+              </div>
+              <div className="mt-3 flex items-end gap-2">
+                <div className="font-display text-5xl font-black tabular-nums sm:text-6xl">
+                  {summary.total_earned.toLocaleString()}
+                </div>
+                <div className="pb-2 text-sm font-semibold text-primary">OG Coins</div>
+              </div>
+              <div className="mt-1 text-xs text-muted-foreground">
+                Earned from <span className="font-semibold text-foreground">{summary.total_referred}</span>{" "}
+                {summary.total_referred === 1 ? "referral" : "referrals"} so far
+              </div>
+
+              <div className="mt-5 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Button onClick={share} className="flex-1 gap-2">
+                  <Share2 className="h-4 w-4" /> Share & earn
+                </Button>
+                <Button variant="secondary" onClick={copy} className="gap-2">
+                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  {copied ? "Copied" : "Copy link"}
+                </Button>
+              </div>
+            </div>
           </div>
         </section>
 
-        {/* Running totals — top of page */}
-        <section className="grid gap-3 sm:grid-cols-2">
-          <StatCard
-            icon={<Users className="h-5 w-5" />}
-            label="People you referred"
-            value={summary.total_referred}
-            hint="Confirmed sign-ups via your link"
-          />
-          <StatCard
-            icon={<Coins className="h-5 w-5 text-primary" />}
-            label="Total cashback earned"
-            value={summary.total_earned}
-            hint="OG Coins from 10% on referee burns"
-          />
-        </section>
-
-        {/* Share card */}
-        <section className="rounded-2xl border border-white/10 bg-card/60 p-5 shadow-glow">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-            Your OG Link
+        {/* SHARE CARD — primary action */}
+        <section className="rounded-3xl border border-white/10 bg-card/70 p-5 backdrop-blur-xl sm:p-6">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
+                Your OG Link
+              </div>
+              <div className="mt-1 text-sm text-muted-foreground">
+                Drop it in group chats, your bio, or DMs. Anyone who signs up = lifetime 10%.
+              </div>
+            </div>
+            <span className="hidden rounded-full border border-emerald-400/30 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-300 sm:inline-flex">
+              Active
+            </span>
           </div>
-          <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-            <Input
-              readOnly
-              value={link}
-              onFocus={(e) => e.currentTarget.select()}
-              className="font-mono text-xs"
-            />
+
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+            <div className="relative flex-1">
+              <Link2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                readOnly
+                value={shortLink}
+                onFocus={(e) => e.currentTarget.select()}
+                className="h-11 pl-9 font-mono text-xs sm:text-sm"
+              />
+            </div>
             <div className="flex flex-wrap gap-2">
-              <Button onClick={copy} className="gap-2">
+              <Button onClick={copy} className="h-11 gap-2">
                 {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 {copied ? "Copied" : "Copy"}
               </Button>
-              <Button variant="secondary" onClick={inviteAgain} className="gap-2">
+              <Button variant="secondary" onClick={inviteAgain} className="h-11 gap-2">
                 <Gift className="h-4 w-4" /> Invite again
               </Button>
-              <Button variant="outline" onClick={share} className="gap-2">
+              <Button variant="outline" onClick={share} className="h-11 gap-2">
                 <Share2 className="h-4 w-4" /> Share
               </Button>
             </div>
@@ -247,10 +285,65 @@ function ReferralsPage() {
           </p>
         </section>
 
-        {/* Recent earnings */}
-        <section className="rounded-2xl border border-white/10 bg-card/60 p-5">
+        {/* STATS */}
+        <section className="grid gap-3 sm:grid-cols-3">
+          <StatCard
+            icon={<Users className="h-5 w-5" />}
+            label="People referred"
+            value={summary.total_referred}
+            hint="Confirmed sign-ups via your link"
+            accent="from-sky-500/30"
+          />
+          <StatCard
+            icon={<Coins className="h-5 w-5 text-primary" />}
+            label="OG Coins earned"
+            value={summary.total_earned}
+            hint="10% of every burn — lifetime"
+            accent="from-amber-500/30"
+          />
+          <StatCard
+            icon={<Flame className="h-5 w-5 text-rose-400" />}
+            label="Cashback events"
+            value={summary.recent.length}
+            hint="Recent burns that paid you out"
+            accent="from-rose-500/30"
+          />
+        </section>
+
+        {/* HOW IT WORKS */}
+        <section className="rounded-3xl border border-white/10 bg-card/60 p-5 sm:p-6">
+          <div className="flex flex-wrap items-end justify-between gap-2">
+            <h2 className="font-display text-xl font-black tracking-tight">How you earn</h2>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+              3 steps · zero effort after
+            </span>
+          </div>
+          <div className="mt-5 grid gap-3 sm:grid-cols-3">
+            <Step
+              icon={<Link2 className="h-4 w-4" />}
+              n={1}
+              title="Share your OG Link"
+              body="Drop it in group chats, socials or DMs. One link works everywhere."
+            />
+            <Step
+              icon={<UserPlus className="h-4 w-4" />}
+              n={2}
+              title="They sign up & create"
+              body="A friend opens your link, makes an account and starts cooking tracks."
+            />
+            <Step
+              icon={<Sparkles className="h-4 w-4" />}
+              n={3}
+              title="You bank 10% forever"
+              body="Every OG Coin they burn, 10% drops straight into your balance — auto."
+            />
+          </div>
+        </section>
+
+        {/* HISTORY */}
+        <section className="rounded-3xl border border-white/10 bg-card/60 p-5 sm:p-6">
           <div className="flex items-center justify-between">
-            <h2 className="font-display text-lg font-bold">Cashback history</h2>
+            <h2 className="font-display text-xl font-black tracking-tight">Cashback history</h2>
             <span className="text-xs text-muted-foreground">Last 20 events</span>
           </div>
           <div className="mt-3 divide-y divide-white/5">
@@ -258,8 +351,17 @@ function ReferralsPage() {
               <div className="py-6 text-center text-sm text-muted-foreground">Loading…</div>
             )}
             {!summaryQ.isLoading && summary.recent.length === 0 && (
-              <div className="py-6 text-center text-sm text-muted-foreground">
-                No cashback yet. Share your link to start earning.
+              <div className="flex flex-col items-center gap-2 py-10 text-center">
+                <div className="grid h-12 w-12 place-items-center rounded-full bg-primary/15 text-primary">
+                  <Coins className="h-6 w-6" />
+                </div>
+                <div className="text-sm font-semibold">No cashback yet</div>
+                <div className="max-w-xs text-xs text-muted-foreground">
+                  Share your OG Link to start earning. The first burn from a referee lands here.
+                </div>
+                <Button size="sm" onClick={share} className="mt-2 gap-2">
+                  <Share2 className="h-3.5 w-3.5" /> Share your link
+                </Button>
               </div>
             )}
             {summary.recent.map((tx) => {
@@ -276,7 +378,8 @@ function ReferralsPage() {
                         {tx.referee_name ?? "Referred user"}
                       </div>
                       <div className="truncate text-xs text-muted-foreground">
-                        Burned {burned ?? "?"} coins · you earned +{tx.amount}
+                        Burned {burned ?? "?"} coins · you earned{" "}
+                        <span className="font-semibold text-primary">+{tx.amount}</span>
                       </div>
                     </div>
                   </div>
@@ -289,39 +392,76 @@ function ReferralsPage() {
             })}
           </div>
         </section>
-
       </div>
     </DashboardShell>
   );
 }
 
-function StatCard({
-  icon, label, value, hint,
-}: { icon: React.ReactNode; label: string; value: number; hint: string }) {
+function Pill({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-card/60 p-5">
-      <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-        {icon} {label}
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-semibold text-foreground/85">
+      <span className="text-primary">{icon}</span>
+      {label}
+    </span>
+  );
+}
+
+function StatCard({
+  icon,
+  label,
+  value,
+  hint,
+  accent,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: number;
+  hint: string;
+  accent: string;
+}) {
+  return (
+    <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-card/70 p-5 backdrop-blur-xl transition-all hover:border-white/20">
+      <div
+        aria-hidden
+        className={`pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-gradient-to-br ${accent} to-transparent blur-2xl`}
+      />
+      <div className="relative">
+        <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+          {icon} {label}
+        </div>
+        <div className="mt-2 font-display text-4xl font-black tabular-nums">{value.toLocaleString()}</div>
+        <div className="mt-1 text-xs text-muted-foreground">{hint}</div>
       </div>
-      <div className="mt-2 font-display text-4xl font-black">{value.toLocaleString()}</div>
-      <div className="mt-1 text-xs text-muted-foreground">{hint}</div>
     </div>
   );
 }
 
 function Step({
-  icon, n, title, body,
-}: { icon: React.ReactNode; n: number; title: string; body: string }) {
+  icon,
+  n,
+  title,
+  body,
+}: {
+  icon: React.ReactNode;
+  n: number;
+  title: string;
+  body: string;
+}) {
   return (
-    <div className="rounded-xl border border-white/10 bg-background/40 p-4">
-      <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
-        <span className="grid h-6 w-6 place-items-center rounded-full bg-primary/15 text-primary">
-          {icon}
-        </span>
-        Step {n}
+    <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-background/40 p-4">
+      <div className="absolute right-3 top-2 font-display text-5xl font-black text-white/[0.04]">
+        {n}
       </div>
-      <div className="mt-2 text-sm font-bold text-foreground">{title}</div>
-      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{body}</p>
+      <div className="relative">
+        <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
+          <span className="grid h-6 w-6 place-items-center rounded-full bg-primary/15 text-primary">
+            {icon}
+          </span>
+          Step {n}
+        </div>
+        <div className="mt-2 text-sm font-bold text-foreground">{title}</div>
+        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{body}</p>
+      </div>
     </div>
   );
 }
