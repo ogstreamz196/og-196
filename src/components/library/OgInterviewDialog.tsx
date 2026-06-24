@@ -168,29 +168,28 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
   }
 
 
-  async function finish() {
+  function finish() {
     if (finishing || loading) return;
-    const answered = history.filter((t) => t.role === "user").length;
-    if (answered === 0) {
+    const userTurns = history.filter((t) => t.role === "user").map((t) => t.text.trim());
+    if (userTurns.length === 0) {
       clearDraft();
       onOpenChange(false);
       return;
     }
+    const answers: InterviewAnswers = {
+      language: userTurns[0],
+      genre: userTurns[1],
+      mood: userTurns[2],
+      theme: userTurns[3],
+      tempo: userTurns[4],
+      personal: userTurns.slice(5),
+    };
     setFinishing(true);
     try {
-      const { data, error } = await supabase.functions.invoke("og-interview", {
-        body: { action: "summarize", seed, history },
-      });
-      if (error) throw new Error(invokeError(error, "Couldn't save your details"));
-      const summary = (data?.summary ?? "").toString().trim();
-      if (!summary) throw new Error("Bot returned nothing — try again");
-      onDone(summary, history);
-      toast.success(`Saved ${answered} answer${answered === 1 ? "" : "s"} into your details`);
+      onDone(answers, history);
+      toast.success(`Captured ${userTurns.length} answer${userTurns.length === 1 ? "" : "s"} — generating lyrics`);
       clearDraft();
       onOpenChange(false);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Couldn't finish interview");
-
     } finally {
       setFinishing(false);
     }
