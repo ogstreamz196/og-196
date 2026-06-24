@@ -720,17 +720,8 @@ function LibraryPage() {
           </p>
         </header>
 
-        {/* Big action row — Get to know me + Surprise me */}
-        <div className="relative grid gap-3 sm:grid-cols-2">
-          <Button
-            type="button"
-            size="lg"
-            onClick={() => setInterviewOpen(true)}
-            className="h-14 w-full justify-center gap-2 rounded-2xl bg-gradient-brand text-base font-bold text-primary-foreground shadow-glow sm:h-16 sm:text-lg"
-          >
-            <MessageCircleHeart className="h-5 w-5" />
-            Get to know me
-          </Button>
+        {/* Surprise me — instant template fill */}
+        <div className="relative">
           <Button
             type="button"
             size="lg"
@@ -752,6 +743,7 @@ function LibraryPage() {
             🎲 Surprise me
           </Button>
         </div>
+
 
         {/* Personal details — the main writing area */}
         <div className="relative rounded-2xl border-2 border-primary/40 bg-primary/[0.06] p-5 shadow-glow sm:p-6">
