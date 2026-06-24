@@ -847,20 +847,21 @@ function LibraryPage() {
       </section>
 
       {/* Step 2 — Pick your sound */}
-      <section className="flex flex-col gap-4 rounded-2xl border border-border bg-card/60 p-5 sm:p-6">
+      <section className="flex flex-col gap-5 rounded-3xl border border-white/10 bg-card/70 p-6 shadow-[0_18px_50px_-28px_rgba(0,0,0,0.6)] ring-1 ring-white/5 backdrop-blur-xl sm:p-8">
         <header className="flex items-end justify-between gap-3">
-          <div className="space-y-1.5">
-            <div className="inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
-              <Disc3 className="h-3 w-3" /> Step 3 · Pick your sound
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.24em] text-primary">
+              <Disc3 className="h-3.5 w-3.5" /> Step 3 · Pick your sound
             </div>
-            <h2 className="font-display text-2xl font-black tracking-tight sm:text-3xl">
+            <h2 className="font-display text-3xl font-black tracking-tight sm:text-4xl">
               Choose the vibe
             </h2>
           </div>
-          <span className="hidden text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:block">
+          <span className="hidden text-xs font-bold uppercase tracking-[0.24em] text-muted-foreground sm:block">
             {totalFilled}/5 picked
           </span>
         </header>
+
 
         <div className="grid grid-cols-1 items-stretch gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {(["language", "genre", "mood", "theme"] as Category[]).map((cat) => (
