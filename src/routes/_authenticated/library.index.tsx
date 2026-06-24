@@ -978,7 +978,7 @@ function LibraryPage() {
             onClick={generateLyrics}
             disabled={!canGenerateLyrics || genLyrics}
             size="lg"
-            className="h-16 w-full gap-2 rounded-2xl bg-gradient-brand text-lg font-black text-primary-foreground shadow-glow sm:h-[68px] sm:text-xl"
+            className="h-[68px] w-full gap-2.5 rounded-2xl bg-gradient-brand text-xl font-black text-primary-foreground shadow-glow ring-1 ring-primary/40 transition-transform hover:scale-[1.01] sm:h-20 sm:text-2xl"
           >
             {genLyrics ? (
               <Loader2 className="h-5 w-5 animate-spin" />
