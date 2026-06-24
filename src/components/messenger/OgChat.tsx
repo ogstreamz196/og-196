@@ -49,6 +49,14 @@ function OgAvatar({ size = 36, className = "" }: { size?: number; className?: st
 const STORAGE_KEY_PREFIX = "og-messenger-thread-v3:";
 const SYNC_EVENT = "og-messenger:sync";
 const MAX_PERSISTED = 60;
+const LANG_KEY = "og-bot:language";
+const OG_LANGUAGES = [
+  "English", "Spanish", "French", "Portuguese", "Hindi", "Urdu",
+  "Punjabi", "Arabic", "Swahili", "Patois", "Yoruba", "German",
+  "Italian", "Filipino", "Tagalog", "Cebuano", "Mandarin", "Japanese",
+  "Korean", "Turkish", "Russian", "Polish", "Dutch", "Greek", "Thai",
+  "Vietnamese", "Indonesian", "Malay", "Bengali", "Tamil", "Hebrew",
+];
 
 function storageKey(userId: string | null | undefined) {
   return `${STORAGE_KEY_PREFIX}${userId ?? "anon"}`;
