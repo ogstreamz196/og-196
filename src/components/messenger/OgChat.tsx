@@ -455,6 +455,28 @@ export function OgChat({
               )}
               {foulActive ? "Foul" : "Turn on OG MODE"}
             </button>
+            {isVip ? (
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                className="inline-flex items-center rounded-md border border-amber-400/40 bg-amber-400/10 px-2 py-1 text-[11px] font-semibold text-amber-600 dark:text-amber-300 transition hover:bg-amber-400/20 focus:outline-none focus:ring-2 focus:ring-amber-400/50"
+                title="Reply language (VIP)"
+                aria-label="Reply language"
+              >
+                {OG_LANGUAGES.map((l) => (
+                  <option key={l} value={l}>🌐 {l}</option>
+                ))}
+              </select>
+            ) : (
+              <Link
+                to="/buy-coins"
+                search={{ flow: "vip" } as never}
+                className="inline-flex items-center gap-1 rounded-md border border-border bg-muted px-2 py-1 text-[11px] font-semibold text-muted-foreground transition hover:bg-muted/80"
+                title="VIP unlocks any language"
+              >
+                🌐 English <Crown className="h-3 w-3 text-amber-500" />
+              </Link>
+            )}
             {messages.length > 0 && (
               <button
                 type="button"
