@@ -13,7 +13,7 @@ import {
   Disc3,
   Smile,
   Heart,
-  Gauge,
+  
   Mic2,
   Music4,
   Shuffle,
@@ -91,7 +91,7 @@ export const Route = createFileRoute("/_authenticated/library/")({
   component: LibraryPage,
 });
 
-type Category = "language" | "genre" | "mood" | "theme" | "tempo";
+type Category = "language" | "genre" | "mood" | "theme";
 
 const POOLS: Record<Category, string[]> = {
   language: [
@@ -105,19 +105,18 @@ const POOLS: Record<Category, string[]> = {
     "Hyperpop", "Amapiano", "Dancehall", "Latin Trap", "Garage", "Bossa Nova",
   ],
   mood: [
-    "Happy", "Sad", "Angry", "Romantic", "Hype", "Chill", "Melancholy",
-    "Confident", "Heartbroken", "Nostalgic", "Playful", "Dark",
-    "Hopeful", "Triumphant", "Dreamy", "Rebellious", "Bittersweet",
+    "Happy & Upbeat", "Sad & Slow", "Angry & Hype", "Romantic & Chill",
+    "Hype & Floor-filler", "Chill groove", "Melancholy & Slow burn",
+    "Confident & Bouncy", "Heartbroken ballad", "Nostalgic & Mid-tempo",
+    "Playful & Bouncy", "Dark & Half-time", "Hopeful & Upbeat",
+    "Triumphant marching", "Dreamy & Slow", "Rebellious & Frenetic",
+    "Bittersweet mid-tempo",
   ],
   theme: [
     "Love", "Heartbreak", "Money", "Party", "Family", "Revenge",
     "Friendship", "Hustle", "Loss", "Self-belief", "Summer nights",
     "City lights", "Late-night drive", "First crush", "Coming home",
     "Underdog story", "Toxic ex", "Glow-up",
-  ],
-  tempo: [
-    "Slow burn", "Mid-tempo", "Upbeat", "Hype", "Floor-filler",
-    "Chill groove", "Marching", "Bouncy", "Half-time", "Frenetic",
   ],
 };
 
@@ -158,9 +157,9 @@ const META: Record<
     iconBg: "bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-400/30",
   },
   mood: {
-    label: "Mood",
-    helper: "How should it feel?",
-    placeholder: "Pick a mood",
+    label: "Mood & Tempo",
+    helper: "How should it feel and move?",
+    placeholder: "Pick a vibe",
     icon: Smile,
     gradient: "from-amber-500/50 via-orange-500/25 to-transparent",
     emoji: "✨",
@@ -178,17 +177,6 @@ const META: Record<
     accent: "text-rose-300",
     chipActive: "border-rose-400 bg-rose-500/25 text-rose-100 shadow-[0_0_24px_-6px_theme(colors.rose.400)]",
     iconBg: "bg-rose-500/20 text-rose-300 border-rose-400/30",
-  },
-  tempo: {
-    label: "Tempo",
-    helper: "How fast should it hit?",
-    placeholder: "Pick a tempo",
-    icon: Gauge,
-    gradient: "from-emerald-500/50 via-teal-500/25 to-transparent",
-    emoji: "⚡",
-    accent: "text-emerald-300",
-    chipActive: "border-emerald-400 bg-emerald-500/25 text-emerald-100 shadow-[0_0_24px_-6px_theme(colors.emerald.400)]",
-    iconBg: "bg-emerald-500/20 text-emerald-300 border-emerald-400/30",
   },
 };
 
@@ -239,7 +227,7 @@ function initialChips(): Record<Category, string[]> {
     genre: pickFresh("genre", new Set(), 4),
     mood: pickFresh("mood", new Set(), 4),
     theme: pickFresh("theme", new Set(), 4),
-    tempo: pickFresh("tempo", new Set(), 4),
+    
   };
 }
 
@@ -276,7 +264,7 @@ function LibraryPage() {
 
   // Build a human-readable line from the current category selections.
   const selectionsLine = useMemo(() => {
-    const cats: Category[] = ["language", "genre", "mood", "theme", "tempo"];
+    const cats: Category[] = ["language", "genre", "mood", "theme"];
     return cats
       .map((c) => (selections[c] ? `${META[c].label}: ${selections[c]}` : null))
       .filter(Boolean)
@@ -321,19 +309,18 @@ function LibraryPage() {
   }
 
   const styleTags = useMemo(
-    () => [selections.genre, selections.tempo].filter(Boolean) as string[],
-    [selections.genre, selections.tempo],
+    () => [selections.genre, selections.mood].filter(Boolean) as string[],
+    [selections.genre, selections.mood],
   );
 
   const filledExtras =
     (selections.genre ? 1 : 0) +
     (selections.mood ? 1 : 0) +
-    (selections.theme ? 1 : 0) +
-    (selections.tempo ? 1 : 0);
+    (selections.theme ? 1 : 0);
 
   const totalFilled =
     (title.trim() ? 1 : 0) + (selections.language ? 1 : 0) + filledExtras;
-  const progress = Math.min(100, Math.round((totalFilled / 6) * 100));
+  const progress = Math.min(100, Math.round((totalFilled / 5) * 100));
 
   const canGenerateLyrics =
     !!title.trim() && !!selections.language && filledExtras >= 1 && balance >= lyricsCost;
@@ -344,8 +331,7 @@ function LibraryPage() {
     try {
       const description = [
         selections.theme ? `Theme: ${selections.theme}` : null,
-        selections.mood ? `Mood: ${selections.mood}` : null,
-        selections.tempo ? `Tempo: ${selections.tempo}` : null,
+        selections.mood ? `Mood & Tempo: ${selections.mood}` : null,
       ]
         .filter(Boolean)
         .join(" · ");
@@ -397,7 +383,7 @@ function LibraryPage() {
     }
     setGenSong(true);
     try {
-      const style = [selections.genre, selections.mood, selections.tempo]
+      const style = [selections.genre, selections.mood]
         .filter(Boolean)
         .join(" · ");
       const promptText = [
@@ -698,7 +684,7 @@ function LibraryPage() {
                 genre: pick(POOLS.genre),
                 mood: pick(POOLS.mood),
                 theme: pick(POOLS.theme),
-                tempo: pick(POOLS.tempo),
+                
               });
               setPersonalDetails(pick(TEMPLATES).slice(0, 500));
               toast.success("Surprise prompt loaded");
@@ -869,12 +855,12 @@ function LibraryPage() {
             </h2>
           </div>
           <span className="hidden text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:block">
-            {totalFilled}/6 picked
+            {totalFilled}/5 picked
           </span>
         </header>
 
         <div className="grid gap-3 sm:grid-cols-2">
-          {(["language", "genre", "theme"] as Category[]).map((cat) => (
+          {(["language", "genre", "mood", "theme"] as Category[]).map((cat) => (
             <CategoryCard
               key={cat}
               cat={cat}
@@ -885,21 +871,13 @@ function LibraryPage() {
               onRefresh={() => refreshRow(cat)}
             />
           ))}
-          <DualCategoryCard
-            cats={["mood", "tempo"]}
-            selections={selections}
-            chips={chips}
-            onSelect={setField}
-            onPickChip={pickChip}
-            onRefresh={refreshRow}
-          />
         </div>
 
         {/* Compact mobile progress */}
         <div className="space-y-1.5 sm:hidden">
           <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
             <span>Progress</span>
-            <span>{totalFilled}/6</span>
+            <span>{totalFilled}/5</span>
           </div>
           <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
             <div
@@ -1207,122 +1185,6 @@ function CategoryCard({
 }
 
 
-
-function DualCategoryCard({
-  cats,
-  selections,
-  chips,
-  onSelect,
-  onPickChip,
-  onRefresh,
-}: {
-  cats: [Category, Category];
-  selections: Selections;
-  chips: Record<Category, string[]>;
-  onSelect: (cat: Category, v: string) => void;
-  onPickChip: (cat: Category, v: string) => void;
-  onRefresh: (cat: Category) => void;
-}) {
-  const [catA, catB] = cats;
-  const metaA = META[catA];
-  const metaB = META[catB];
-  return (
-    <div className="group relative overflow-hidden rounded-3xl border border-white/10 bg-card/70 p-5 shadow-card backdrop-blur-xl transition-all hover:border-white/20 sm:col-span-2 sm:p-6">
-      <div
-        aria-hidden
-        className={`pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-gradient-to-br ${metaA.gradient} blur-2xl`}
-      />
-      <div
-        aria-hidden
-        className={`pointer-events-none absolute -left-12 -bottom-12 h-40 w-40 rounded-full bg-gradient-to-br ${metaB.gradient} blur-2xl`}
-      />
-      <div className="relative grid gap-6 sm:grid-cols-2">
-        {cats.map((cat) => {
-          const meta = META[cat];
-          const Icon = meta.icon;
-          const value = selections[cat];
-          return (
-            <div key={cat} className="space-y-4">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex min-w-0 items-center gap-3">
-                  <div className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl border text-lg ${meta.iconBg}`}>
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <div className="min-w-0 leading-tight">
-                    <div className={`text-[10px] font-bold uppercase tracking-[0.2em] ${meta.accent}`}>
-                      {meta.emoji} {meta.label}
-                    </div>
-                    <div className="mt-1 text-sm font-semibold text-foreground">
-                      {value ? (
-                        <span className="inline-flex items-center gap-1.5">
-                          <span className={`inline-block h-1.5 w-1.5 rounded-full bg-current ${meta.accent}`} />
-                          {value}
-                        </span>
-                      ) : (
-                        <span className="text-muted-foreground">{meta.helper}</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onRefresh(cat)}
-                  aria-label={`Shuffle ${meta.label} suggestions`}
-                  className={`h-8 shrink-0 gap-1.5 px-2.5 text-xs font-semibold ${meta.accent} hover:bg-white/5`}
-                >
-                  <RefreshCw className="h-3.5 w-3.5" />
-                  Shuffle
-                </Button>
-              </div>
-
-              <Select value={value ?? ""} onValueChange={(v) => onSelect(cat, v)}>
-                <SelectTrigger className="h-11 w-full rounded-xl border-white/10 bg-background/50 text-sm font-medium">
-                  <SelectValue placeholder={meta.placeholder} />
-                </SelectTrigger>
-                <SelectContent className="max-h-72">
-                  {POOLS[cat].map((opt) => (
-                    <SelectItem key={opt} value={opt}>
-                      {opt}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <div className="space-y-2">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  Quick picks
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {chips[cat].map((chip) => {
-                    const active = value === chip;
-                    return (
-                      <button
-                        key={chip}
-                        type="button"
-                        onClick={() => onPickChip(cat, chip)}
-                        className={
-                          "rounded-full border px-3 py-1.5 text-xs font-semibold transition-all hover:-translate-y-0.5 " +
-                          (active
-                            ? meta.chipActive
-                            : "border-white/10 bg-white/[0.04] text-foreground/85 hover:border-white/25 hover:bg-white/10")
-                        }
-                      >
-                        {chip}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
 function ReviewDialog({
   open,
   onOpenChange,
@@ -1348,7 +1210,7 @@ function ReviewDialog({
   generating: boolean;
   onConfirm: () => void | Promise<void>;
 }) {
-  const cats: Category[] = ["language", "genre", "mood", "theme", "tempo"];
+  const cats: Category[] = ["language", "genre", "mood", "theme"];
 
 
 
