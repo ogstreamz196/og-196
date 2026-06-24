@@ -146,7 +146,7 @@ export const runOnboardingCheck = createServerFn({ method: "POST" })
     } catch (e) {
       result = { ok: false, detail: e instanceof Error ? e.message : "check failed" };
     }
-    const supabase = context.supabase as {
+    const supabase = context.supabase as unknown as {
       from: (t: string) => {
         upsert: (
           row: Record<string, unknown>,
