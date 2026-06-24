@@ -505,7 +505,7 @@ function LibraryPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-3 pb-16 sm:gap-12 sm:px-4 md:gap-14">
+    <div className="flex w-full flex-col space-y-10 pb-16 sm:space-y-12">
       {/* Hero */}
       <header className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-primary/25 via-fuchsia-500/15 to-background p-7 shadow-card sm:p-12">
 

@@ -60,7 +60,7 @@ function DashboardHome() {
   const scrimOpacity = useAdaptiveOverlay(welcomeRef, { min: 0.55, max: 0.92 });
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-14 px-2 sm:px-4">
+    <div className="flex w-full flex-col space-y-10 sm:space-y-12">
       {/* Welcome */}
       <section
         ref={welcomeRef}

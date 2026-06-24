@@ -163,7 +163,7 @@ function ReferralsPage() {
 
   return (
     <DashboardShell title="Earnings">
-      <div className="mx-auto w-full max-w-4xl space-y-6 p-4 sm:p-6">
+      <div className="w-full space-y-10 sm:space-y-12">
         <header className="space-y-2">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
             <Gift className="h-3 w-3" /> Earnings

@@ -99,13 +99,13 @@ export function AppShell({ children }: { children: ReactNode }) {
           <AppSidebar />
 
           <div className="flex min-w-0 flex-1 flex-col">
-            <header className="sticky top-0 z-30 grid h-14 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 border-b border-white/8 bg-background/70 px-2 backdrop-blur-xl sm:h-16 sm:gap-3 sm:px-5 lg:px-7">
+            <header className="sticky top-0 z-30 grid h-14 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 border-b border-white/8 bg-background/70 px-3 backdrop-blur-xl sm:h-16 sm:gap-3 sm:px-5 lg:px-7">
               <SidebarTrigger className="shrink-0" />
 
-              <div className="flex min-w-0 items-center gap-3">
+              <div className="flex min-w-0 items-center gap-2 sm:gap-3">
                 <BrandLockup compact />
-                <div className="hidden min-w-0 md:block">
-                  <h1 className="font-display truncate text-lg font-black leading-tight tracking-tight text-gradient-brand sm:text-2xl lg:text-3xl">
+                <div className="hidden min-w-0 sm:block">
+                  <h1 className="font-display truncate text-base font-black leading-tight tracking-tight text-gradient-brand sm:text-xl lg:text-2xl">
                     {title}
                   </h1>
                 </div>
@@ -167,7 +167,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <AdminEditHint />
 
             <main className="min-w-0 flex-1 overflow-x-hidden">
-              <div className="mx-auto w-full max-w-7xl px-3 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-10">
+              <div className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
                 {children}
               </div>
             </main>
