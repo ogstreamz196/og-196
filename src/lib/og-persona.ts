@@ -227,6 +227,15 @@ export interface BuildPromptOpts {
   learnedInsults?: string[];
   language?: string;
   user: UserContextSummary;
+  /** When true, inject the full songwriting playbook. Detect from the latest user message. */
+  songIntent?: boolean;
+}
+
+const SONG_INTENT_RE = /\b(song|songs|lyric|lyrics|verse|chorus|hook|bridge|rap|melody|beat|track|tune|anthem|ballad|suno|jingle|rhyme|rhymes|sing|singing|sung|drill|afrobeats?|r&b|gospel|cover\s+song|write\s+(?:me\s+)?a\s+(?:song|track|tune))\b/i;
+
+export function detectSongIntent(text: string | null | undefined): boolean {
+  if (!text) return false;
+  return SONG_INTENT_RE.test(text);
 }
 
 export function buildSystemPrompt(opts: BuildPromptOpts): string {
