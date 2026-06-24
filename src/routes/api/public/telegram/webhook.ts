@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createHash, timingSafeEqual } from "crypto";
 
-// Token format we mint in admin.users.$userId.tsx is exactly:
-//   userId.replace(/-/g, '').slice(0, 24)  → 24 lowercase hex chars.
-// Reject anything else so a stray /start payload can never link the wrong
-// telegram_chat_id to a profile.
-const TOKEN_RE = /^([a-f0-9]{24})$/;
+// Accepted tokens:
+//   - Rotated, single-use: "t_" + 32 lowercase hex chars (matched against
+//     profiles.telegram_link_token).
+//   - Legacy deterministic: 24 lowercase hex (first 24 chars of profiles.id
+//     without dashes).
+const TOKEN_RE = /^(t_[a-f0-9]{32}|[a-f0-9]{24})$/;
 
 function deriveSecret(key: string): string {
   return createHash("sha256").update(`telegram-webhook:${key}`).digest("base64url");
