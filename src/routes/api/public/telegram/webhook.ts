@@ -96,6 +96,27 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
           })
           .eq("id", profileId);
 
+        // Fetch profile details for a personalized greeting.
+        const { data: profile } = await supabaseAdmin
+          .from("profiles")
+          .select("display_name, email, coin_balance")
+          .eq("id", profileId)
+          .maybeSingle();
+
+        const tgFirst = (msg?.from?.first_name as string | undefined)?.trim();
+        const name =
+          tgFirst ||
+          profile?.display_name ||
+          (profile?.email ? profile.email.split("@")[0] : null) ||
+          "legend";
+        const balance = profile?.coin_balance ?? 0;
+
+        const greeting =
+          `🔥 Yo <b>${name}</b> — link verified. OG Bot in your pocket now.\n\n` +
+          `💰 Balance: <b>${balance}</b> OG coins\n` +
+          `🎧 I'll DM drops, song updates &amp; referral cashback right here.\n\n` +
+          `Type /help any time. Now go make some noise. 🎤`;
+
         const lovableKey = process.env.LOVABLE_API_KEY;
         if (lovableKey) {
           await fetch("https://connector-gateway.lovable.dev/telegram/sendMessage", {
@@ -107,10 +128,22 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
             },
             body: JSON.stringify({
               chat_id,
-              text: "✅ Linked! OG Bot can now DM you here.",
+              text: greeting,
+              parse_mode: "HTML",
             }),
           }).catch(() => undefined);
         }
+
+        // Mirror the greeting into the in-app OG chat so the user sees it
+        // the next time they open the messenger.
+        await supabaseAdmin
+          .from("og_messages")
+          .insert({
+            user_id: profileId,
+            role: "assistant",
+            content: `✅ Telegram linked. I'll DM you at @${msg?.from?.username ?? "your handle"} from now on.`,
+          })
+          .then(() => undefined, () => undefined);
 
         return Response.json({ ok: true, linked: true });
       },
