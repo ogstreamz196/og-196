@@ -17,7 +17,7 @@ import {
   Bot,
   AudioLines,
 } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useCallback, type PointerEvent as ReactPointerEvent } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useDevMode } from "@/hooks/use-dev-mode";
 import { useProfile } from "@/hooks/use-profile";
