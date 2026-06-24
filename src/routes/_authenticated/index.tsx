@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   Music2,
   MessageSquareMore,
@@ -20,8 +20,21 @@ import {
   Infinity as InfinityIcon,
   Share2,
   TrendingUp,
+  Send,
+  Smartphone,
+  Globe,
 } from "lucide-react";
-import { useRef, useCallback, type PointerEvent as ReactPointerEvent } from "react";
+import { useRef, useState, useCallback, type PointerEvent as ReactPointerEvent } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+
 import { useAuth } from "@/hooks/use-auth";
 import { useDevMode } from "@/hooks/use-dev-mode";
 import { useProfile } from "@/hooks/use-profile";
