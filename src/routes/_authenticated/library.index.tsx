@@ -566,11 +566,14 @@ function LibraryPage() {
           )}
         </div>
         {library.isLoading ? (
-          <div className="grid place-items-center py-10 text-muted-foreground">
-            <Loader2 className="h-5 w-5 animate-spin" />
-          </div>
-        ) : versionedLibrary.length > 0 ? (
           <div className="grid gap-3">
+            {[0, 1, 2].map((i) => (
+              <SongCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : versionedLibrary.length > 0 || genSong ? (
+          <div className="grid gap-3">
+            {genSong && <SongCardSkeleton label="Generating" />}
             {versionedLibrary.map((s) => (
               <div key={s.id} className="relative">
                 <Link
