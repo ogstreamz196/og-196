@@ -866,13 +866,14 @@ function LibraryPage() {
               Choose the vibe
             </h2>
           </div>
-          <span className="hidden text-xs font-bold uppercase tracking-[0.24em] text-muted-foreground sm:block">
-            {totalFilled}/5 picked
+          <span className="hidden rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-bold uppercase tracking-[0.24em] text-muted-foreground sm:inline-block">
+            {totalFilled}/4 picked
           </span>
         </header>
 
 
-        <div className="grid grid-cols-1 items-stretch gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 sm:gap-5">
+
           {(["language", "genre", "mood", "theme"] as Category[]).map((cat) => (
             <CategoryCard
               key={cat}
