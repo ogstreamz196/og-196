@@ -634,58 +634,72 @@ function LibraryPage() {
         </section>
       )}
 
-      {/* Slim track-title bar — entry point into creation */}
-      <section className="flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-card/60 p-3 sm:p-4">
-        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/15 text-lg">
-          🎙️
+      {/* Step 1 — Name your song */}
+      <section className="rounded-2xl border-2 border-primary/40 bg-gradient-to-br from-primary/10 via-card/80 to-card/60 p-5 shadow-lg shadow-primary/10 sm:p-6">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-primary-foreground">
+            <Sparkles className="h-3 w-3" /> Step 1
+          </span>
+          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            Start here
+          </span>
         </div>
-        <div className="min-w-0 flex-1">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-            New song
+        <Label
+          htmlFor="song-title"
+          className="mt-3 block font-display text-2xl font-black leading-tight tracking-tight sm:text-3xl"
+        >
+          Name your song
+        </Label>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Give it a working title — you can change this later.
+        </p>
+        <div className="mt-4 flex flex-wrap items-stretch gap-2">
+          <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-primary/20 text-xl sm:h-14 sm:w-14 sm:text-2xl">
+            🎙️
           </div>
           <Input
             id="song-title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Name this song…"
+            placeholder="e.g. Late night drive"
             maxLength={120}
-            className="h-8 border-0 bg-transparent px-0 text-lg font-bold focus-visible:ring-0 sm:text-xl"
+            className="h-12 min-w-0 flex-1 rounded-xl border-2 border-primary/30 bg-background/80 px-3 text-xl font-bold focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/30 sm:h-14 sm:text-2xl"
           />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const TITLES = [
+                "Late night drive", "Sunday hangover", "Gym warm-up",
+                "Festival anthem", "Heartbreak letter", "Pirate radio cypher",
+                "Summer rooftop", "Last train home", "Glow-up season",
+                "City lights blur", "Toxic ex anthem", "Underdog story",
+              ];
+              const TEMPLATES = [
+                "Their name: Aaliyah\nOccasion: 30th birthday\nInside joke: still can't parallel park\nWhat they love: oat-milk lattes",
+                "Their name: Marcus\nStory: ghosted me after 2 years\nCity: Manchester\nInside joke: \"I'll text you back\" — never did",
+                "Their name: Sam & Jordan\nOccasion: wedding day\nWhat they love: late-night taco runs\nInside joke: the karaoke night we don't talk about",
+                "Their name: Dre\nOccasion: promotion at work\nCity: Brooklyn\nWhat they love: never missing leg day",
+              ];
+              const pick = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
+              setTitle(pick(TITLES));
+              setSelections({
+                language: pick(POOLS.language),
+                genre: pick(POOLS.genre),
+                mood: pick(POOLS.mood),
+                theme: pick(POOLS.theme),
+                tempo: pick(POOLS.tempo),
+              });
+              setPersonalDetails(pick(TEMPLATES).slice(0, 500));
+              toast.success("Surprise prompt loaded");
+            }}
+            className="h-12 shrink-0 gap-1.5 rounded-xl sm:h-14"
+          >
+            <Shuffle className="h-4 w-4" />
+            Surprise me
+          </Button>
         </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            const TITLES = [
-              "Late night drive", "Sunday hangover", "Gym warm-up",
-              "Festival anthem", "Heartbreak letter", "Pirate radio cypher",
-              "Summer rooftop", "Last train home", "Glow-up season",
-              "City lights blur", "Toxic ex anthem", "Underdog story",
-            ];
-            const TEMPLATES = [
-              "Their name: Aaliyah\nOccasion: 30th birthday\nInside joke: still can't parallel park\nWhat they love: oat-milk lattes",
-              "Their name: Marcus\nStory: ghosted me after 2 years\nCity: Manchester\nInside joke: \"I'll text you back\" — never did",
-              "Their name: Sam & Jordan\nOccasion: wedding day\nWhat they love: late-night taco runs\nInside joke: the karaoke night we don't talk about",
-              "Their name: Dre\nOccasion: promotion at work\nCity: Brooklyn\nWhat they love: never missing leg day",
-            ];
-            const pick = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
-            setTitle(pick(TITLES));
-            setSelections({
-              language: pick(POOLS.language),
-              genre: pick(POOLS.genre),
-              mood: pick(POOLS.mood),
-              theme: pick(POOLS.theme),
-              tempo: pick(POOLS.tempo),
-            });
-            setPersonalDetails(pick(TEMPLATES).slice(0, 500));
-            toast.success("Surprise prompt loaded");
-          }}
-          className="shrink-0 gap-1.5"
-        >
-          <Shuffle className="h-4 w-4" />
-          Surprise me
-        </Button>
       </section>
 
       {/* Step 1 — Personal */}
