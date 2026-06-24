@@ -358,14 +358,14 @@ function LibraryPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 pb-20 sm:gap-12">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 pb-20 sm:gap-12">
       {/* Hero — premium kicker, oversized headline, generous breathing room */}
       <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b border-white/10 pb-6 sm:pb-8">
         <div className="min-w-0 space-y-2">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.28em] text-primary shadow-[0_0_24px_-10px_oklch(0.7_0.2_300_/_0.8)]">
             <Music4 className="h-3.5 w-3.5 shrink-0" /> Music Hub
           </div>
-          <h1 className="font-display text-3xl font-black leading-[1.05] tracking-[-0.02em] sm:text-5xl lg:text-6xl">
+          <h1 className="font-display text-2xl font-black leading-[1.1] tracking-[-0.02em] break-words sm:text-5xl lg:text-6xl">
             Hey <span className="text-gradient-brand">{firstName}</span> — let's write a song.
           </h1>
         </div>
@@ -382,13 +382,13 @@ function LibraryPage() {
 
       {/* Library — previews created (above creation options) */}
       <section>
-        <div className="mb-5 flex items-end justify-between gap-3">
-          <div className="space-y-1">
-            <div className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
+        <div className="mb-5 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
+          <div className="min-w-0 space-y-1">
+            <div className="truncate text-xs font-bold uppercase tracking-[0.24em] text-primary">
               <Disc3 className="mr-1.5 inline h-3.5 w-3.5 -translate-y-0.5" />
               MusicHUB · Previews
             </div>
-            <h2 className="font-display text-2xl font-black tracking-tight sm:text-3xl">
+            <h2 className="truncate font-display text-xl font-black tracking-tight sm:text-3xl">
               Your tracks
             </h2>
           </div>
@@ -469,9 +469,9 @@ function LibraryPage() {
       )}
 
       {/* Unified create flow */}
-      <section className="flex flex-col gap-8 rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card/80 to-card/60 p-6 shadow-[0_24px_70px_-30px_oklch(0.7_0.2_300_/_0.5)] ring-1 ring-white/5 sm:p-8">
-        <header className="flex items-end justify-between gap-3 border-b border-white/10 pb-4">
-          <h2 className="font-display text-2xl font-black tracking-tight sm:text-3xl">
+      <section className="flex flex-col gap-6 rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card/80 to-card/60 p-5 shadow-[0_24px_70px_-30px_oklch(0.7_0.2_300_/_0.5)] ring-1 ring-white/5 sm:gap-8 sm:p-8">
+        <header className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3 border-b border-white/10 pb-4">
+          <h2 className="truncate font-display text-xl font-black tracking-tight sm:text-3xl">
             Create a song
           </h2>
           <span className="shrink-0 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
@@ -636,7 +636,7 @@ function LibraryPage() {
             }}
             disabled={genLyrics}
             className={cn(
-              "relative group flex w-full min-h-14 items-center justify-between gap-3 rounded-2xl border-2 px-5 py-4 text-left transition-all",
+              "relative group grid w-full min-h-14 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border-2 px-4 py-3 text-left transition-all sm:px-5 sm:py-4",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
               "disabled:opacity-60 disabled:cursor-not-allowed",
               foulMouth
@@ -644,31 +644,29 @@ function LibraryPage() {
                 : "border-white/15 bg-white/[0.04] hover:border-white/25",
             )}
           >
-            <div className="flex items-center gap-4">
-              <div aria-hidden className={cn(
-                "grid h-12 w-12 shrink-0 place-items-center rounded-xl text-2xl transition",
-                foulMouth ? "bg-destructive/30" : "bg-white/5",
-              )}>
-                {foulMouth ? "🤬" : "🧼"}
-              </div>
-              <div>
-                <div className="text-base font-bold leading-tight sm:text-lg">OG Foul Mouth</div>
-                <div
-                  id="foul-mouth-status"
-                  aria-live="polite"
-                  className={cn(
-                    "text-sm leading-tight",
-                    foulMouth ? "font-semibold text-destructive-foreground/90" : "text-muted-foreground",
-                  )}
-                >
-                  {foulMouth ? "EXPLICIT — full swearing ON" : "Clean version — tap to go explicit"}
-                </div>
+            <div aria-hidden className={cn(
+              "grid h-11 w-11 shrink-0 place-items-center rounded-xl text-xl transition sm:h-12 sm:w-12 sm:text-2xl",
+              foulMouth ? "bg-destructive/30" : "bg-white/5",
+            )}>
+              {foulMouth ? "🤬" : "🧼"}
+            </div>
+            <div className="min-w-0">
+              <div className="truncate text-sm font-bold leading-tight sm:text-lg">OG Foul Mouth</div>
+              <div
+                id="foul-mouth-status"
+                aria-live="polite"
+                className={cn(
+                  "truncate text-xs leading-tight sm:text-sm",
+                  foulMouth ? "font-semibold text-destructive-foreground/90" : "text-muted-foreground",
+                )}
+              >
+                {foulMouth ? "Explicit · ON" : "Clean · tap to go explicit"}
               </div>
             </div>
             <span
               aria-hidden
               className={cn(
-                "pointer-events-none inline-flex shrink-0 items-center justify-center rounded-full border-2 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] transition",
+                "pointer-events-none inline-flex shrink-0 items-center justify-center rounded-full border-2 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] transition sm:px-4 sm:py-2 sm:text-xs",
                 foulMouth
                   ? "border-destructive bg-destructive text-destructive-foreground shadow-[0_0_18px_-4px_oklch(0.62_0.22_25_/_0.8)]"
                   : "border-white/25 bg-white/10 text-foreground",
@@ -683,7 +681,7 @@ function LibraryPage() {
               onClick={generateLyrics}
               disabled={!canGenerateLyrics || genLyrics}
               size="lg"
-              className="h-[68px] w-full gap-2.5 rounded-2xl bg-gradient-brand text-xl font-black text-primary-foreground shadow-glow ring-1 ring-primary/40 transition-transform hover:scale-[1.01] sm:h-20 sm:text-2xl"
+              className="h-14 w-full gap-2 rounded-2xl bg-gradient-brand text-base font-black text-primary-foreground shadow-glow ring-1 ring-primary/40 transition-transform hover:scale-[1.01] sm:h-20 sm:gap-2.5 sm:text-2xl"
             >
               {genLyrics ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
@@ -808,7 +806,7 @@ function CategoryCard({
   const meta = META[cat];
   const Icon = meta.icon;
   return (
-    <div className="group relative flex h-full min-w-0 flex-col overflow-hidden rounded-3xl border border-white/10 bg-card/70 p-6 shadow-[0_18px_50px_-28px_rgba(0,0,0,0.55)] ring-1 ring-white/5 backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:border-white/20 hover:shadow-[0_24px_60px_-24px_rgba(0,0,0,0.7)] sm:p-7">
+    <div className="group relative flex h-full min-w-0 flex-col overflow-hidden rounded-3xl border border-white/10 bg-card/70 p-5 shadow-[0_18px_50px_-28px_rgba(0,0,0,0.55)] ring-1 ring-white/5 backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:border-white/20 hover:shadow-[0_24px_60px_-24px_rgba(0,0,0,0.7)] sm:p-7">
       <div
         aria-hidden
         className={`pointer-events-none absolute -right-12 -top-12 h-44 w-44 rounded-full bg-gradient-to-br ${meta.gradient} opacity-90 blur-2xl`}
