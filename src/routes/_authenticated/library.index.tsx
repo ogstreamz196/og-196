@@ -773,65 +773,34 @@ function LibraryPage() {
 
       </section>
 
-      {/* Step 2 — Pick your sound (categories, theme & tempo merged) */}
-      <section className="space-y-4">
+      {/* Step 2 — Pick your sound */}
+      <section className="flex flex-col gap-4 rounded-2xl border border-border bg-card/60 p-5 sm:p-6">
         <header className="flex items-end justify-between gap-3">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em]">
-              <Disc3 className="h-3.5 w-3.5 text-primary" /> Step 2 — Pick your sound
+          <div className="space-y-1.5">
+            <div className="inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
+              <Disc3 className="h-3 w-3" /> Step 2 · Pick your sound
             </div>
-            <h2 className="mt-2 font-display text-3xl font-black tracking-tight sm:text-4xl">
+            <h2 className="font-display text-2xl font-black tracking-tight sm:text-3xl">
               Choose the vibe
             </h2>
           </div>
-          <div className="hidden text-right text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:block">
-            Progress {totalFilled}/6
-          </div>
+          <span className="hidden text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:block">
+            {totalFilled}/6 picked
+          </span>
         </header>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          {(["language", "genre", "mood"] as Category[]).map((cat) => (
+        <div className="grid gap-3 sm:grid-cols-2">
+          {(["language", "genre", "mood", "theme", "tempo"] as Category[]).map((cat) => (
             <CategoryCard
               key={cat}
               cat={cat}
               value={selections[cat]}
               chips={chips[cat]}
               onSelect={(v) => setField(cat, v)}
-
               onPickChip={(v) => pickChip(cat, v)}
               onRefresh={() => refreshRow(cat)}
             />
           ))}
-
-          {/* Theme & Tempo — paired into a single combined card */}
-          <div className="relative overflow-hidden rounded-3xl border-2 border-dashed border-primary/30 bg-gradient-to-br from-rose-500/10 via-emerald-500/10 to-background p-4 shadow-card sm:col-span-2">
-            <div className="mb-3 flex items-center justify-between gap-2 px-1">
-              <div className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-foreground/80">
-                <span className="text-base">🎯</span>
-                Theme &amp; Tempo
-                <span className="rounded-full bg-primary/20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary">
-                  Paired
-                </span>
-              </div>
-              <span className="text-[10px] font-medium normal-case tracking-normal text-muted-foreground">
-                What the song's about + how fast it hits
-              </span>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {(["theme", "tempo"] as Category[]).map((cat) => (
-                <CategoryCard
-                  key={cat}
-                  cat={cat}
-                  value={selections[cat]}
-                  chips={chips[cat]}
-                  onSelect={(v) => setField(cat, v)}
-
-                  onPickChip={(v) => pickChip(cat, v)}
-                  onRefresh={() => refreshRow(cat)}
-                />
-              ))}
-            </div>
-          </div>
         </div>
 
         {/* Compact mobile progress */}
@@ -850,18 +819,19 @@ function LibraryPage() {
       </section>
 
       {/* Step 3 — Finalize & generate */}
-      <section className="space-y-5 rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/20 via-fuchsia-500/10 to-background p-5 shadow-glow sm:p-8">
-        <header className="space-y-2">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em]">
-            <Wand2 className="h-3.5 w-3.5 text-primary" /> Step 3 — Generate
+      <section className="space-y-4 rounded-2xl border border-primary/40 bg-card/60 p-5 sm:p-6">
+        <header className="space-y-1.5">
+          <div className="inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
+            <Wand2 className="h-3 w-3" /> Step 3 · Generate
           </div>
-          <h2 className="font-display text-3xl font-black tracking-tight sm:text-4xl">
+          <h2 className="font-display text-2xl font-black tracking-tight sm:text-3xl">
             Write the lyrics
           </h2>
-          <p className="text-sm text-muted-foreground sm:text-base">
-            Set the explicit toggle and let OG cook your lyrics. You'll review them before paying for the full song.
+          <p className="text-sm text-muted-foreground">
+            Set the explicit toggle and let OG cook. You'll review before paying for the full song.
           </p>
         </header>
+
 
         {/* Foul mouth toggle */}
         <button
