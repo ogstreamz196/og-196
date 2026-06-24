@@ -213,6 +213,7 @@ export interface BuildPromptOpts {
   bossVoice: string | null;
   bossDictionary: string | null;
   learnedInsults?: string[];
+  language?: string;
   user: UserContextSummary;
 }
 
@@ -244,12 +245,23 @@ export function buildSystemPrompt(opts: BuildPromptOpts): string {
       ? `LEARNED INSULTS — this specific user has thrown these at you before. Drop them back into your replies at random (1 per reply, max), in context, to show you remember. Twist/conjugate as needed. Do NOT use every one — rotate naturally:\n- ${opts.learnedInsults.slice(0, 25).join("\n- ")}`
       : null;
 
+  const lang = (opts.language || "English").trim();
+  const isEnglish = lang.toLowerCase() === "english";
+  const languageBlock = isEnglish
+    ? null
+    : `OUTPUT LANGUAGE: Reply ENTIRELY in ${lang}. This is non-negotiable — every word of your reply, including banter, jokes, advice, song lyrics, briefs, and titles, must be written in ${lang} using the Latin alphabet (romanised / transliterated — no Cyrillic, kanji, Arabic script, etc.). Keep proper nouns, brand names (OG Streamz, OG Bot, OG Coins, Suno, VIP) and section markers like [Verse 1], [Chorus] in English. ${
+        opts.mode === "og" && opts.foulMouth
+          ? `Foul-mouth is ON: translate your filthy British slang and profanity into authentic equivalents in ${lang} — match the savage, sweary energy in the target language, not in English. Keep the affectionate-abuse tone.`
+          : `Match the tone of ${lang} naturally — don't sound like a literal translation.`
+      } If the user writes to you in English, you STILL reply in ${lang}.`;
+
   const parts = [
     base,
     SITE_GLOSSARY,
     SONGWRITING_PLAYBOOK,
     RESEARCH_NOTE,
     opts.mode === "og" && opts.foulMouth ? LEXICON : null,
+    languageBlock,
     learnedBlock,
     opts.bossScript ? `Boss override — script:\n${opts.bossScript}` : null,
     opts.bossVoice ? `Boss override — voice:\n${opts.bossVoice}` : null,

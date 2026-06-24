@@ -14,6 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSettings } from "@/hooks/use-settings";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
+import { useRole } from "@/hooks/use-role";
 
 import { useProfile } from "@/hooks/use-profile";
 import { useVariations } from "@/hooks/use-variations";
@@ -28,7 +29,9 @@ import ogBotAsset from "@/assets/ogbot.png.asset.json";
 const LANGUAGES = [
   "English", "Spanish", "French", "Portuguese", "Hindi", "Urdu",
   "Punjabi", "Arabic", "Swahili", "Patois", "Yoruba", "German",
-  "Italian", "Tagalog", "Mandarin", "Japanese", "Korean", "Turkish",
+  "Italian", "Filipino", "Tagalog", "Cebuano", "Mandarin", "Japanese",
+  "Korean", "Turkish", "Russian", "Polish", "Dutch", "Greek", "Thai",
+  "Vietnamese", "Indonesian", "Malay", "Bengali", "Tamil", "Hebrew",
 ];
 
 const LANG_RE = /Language:\s*(?:write the lyrics in\s*)?([A-Za-z][A-Za-z\s]{1,30})/i;
@@ -73,6 +76,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
   const [brief, setBrief] = useState(song.prompt ?? "");
   const [lyrics, setLyrics] = useState(song.lyrics ?? "");
   const [language, setLanguage] = useState(() => detectLanguage(song.prompt));
+  const { isVip } = useRole();
   const [saving, setSaving] = useState(false);
   const [genLyrics, setGenLyrics] = useState(false);
   const [genPreview, setGenPreview] = useState(false);
@@ -342,8 +346,13 @@ export function SongWorkspace({ song, onSaved }: Props) {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="song-language">Language</Label>
-                  <Select value={language} onValueChange={setLanguage}>
+                  <Label htmlFor="song-language" className="flex items-center gap-2">
+                    Language
+                    {!isVip && (
+                      <span className="rounded-full bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold text-primary">VIP</span>
+                    )}
+                  </Label>
+                  <Select value={language} onValueChange={setLanguage} disabled={!isVip}>
                     <SelectTrigger id="song-language">
                       <SelectValue />
                     </SelectTrigger>
@@ -353,6 +362,11 @@ export function SongWorkspace({ song, onSaved }: Props) {
                       ))}
                     </SelectContent>
                   </Select>
+                  {!isVip && (
+                    <p className="text-[11px] text-muted-foreground">
+                      <Link to="/buy-coins" search={{ flow: "vip" } as never} className="text-primary underline">Get VIP</Link> to write songs in any language (Filipino, Spanish, Hindi, Patois…).
+                    </p>
+                  )}
                 </div>
               </div>
               {hasLyrics && languageChanged && (
