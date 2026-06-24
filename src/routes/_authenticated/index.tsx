@@ -504,7 +504,7 @@ function QuickAction({
   icon,
   label,
 }: {
-  to: "/library" | "/messenger" | "/buy-coins";
+  to: "/library" | "/messenger" | "/buy-coins" | "/referrals";
   icon: React.ReactNode;
   label: string;
 }) {
