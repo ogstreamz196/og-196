@@ -148,6 +148,9 @@ function AdminPanel() {
               <Link to="/admin/api-keys">
                 <Button size="sm" variant="outline">API Keys</Button>
               </Link>
+              <Link to="/admin/debug-context">
+                <Button size="sm" variant="outline">Lyric Context Debug</Button>
+              </Link>
             </div>
           }
         >
