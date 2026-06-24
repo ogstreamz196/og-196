@@ -1059,8 +1059,19 @@ function LibraryPage() {
           <Textarea
             value={lyrics}
             onChange={(e) => setLyrics(e.target.value)}
-            className="min-h-[280px] resize-y rounded-2xl border-white/10 bg-background/40 font-mono text-sm leading-relaxed"
+            onCopy={(e) => e.preventDefault()}
+            onCut={(e) => e.preventDefault()}
+            onContextMenu={(e) => e.preventDefault()}
+            onDragStart={(e) => e.preventDefault()}
+            spellCheck={false}
+            aria-label="Lyrics (copying disabled)"
+            className="min-h-[280px] resize-y rounded-2xl border-white/10 bg-background/40 font-mono text-sm leading-relaxed [-webkit-user-select:none] [user-select:none]"
+            style={{ WebkitUserSelect: "none", userSelect: "none" }}
           />
+          <p className="text-[11px] text-muted-foreground italic">
+            🔒 Lyrics are protected — copy and right-click are disabled.
+          </p>
+
           <div className="flex flex-wrap items-center justify-end gap-3 rounded-2xl border border-white/10 bg-background/40 p-4">
             <Button
               onClick={() => setReviewOpen(true)}
