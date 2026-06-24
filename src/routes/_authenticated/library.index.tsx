@@ -1326,7 +1326,7 @@ function ReviewDialog({
   generating: boolean;
   onConfirm: () => void | Promise<void>;
 }) {
-  const cats: Category[] = ["language", "genre", "mood", "theme", "tempo"];
+  const cats: Category[] = ["language", "genre", "mood", "theme"];
 
 
 
