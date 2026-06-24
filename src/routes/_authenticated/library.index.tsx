@@ -309,19 +309,18 @@ function LibraryPage() {
   }
 
   const styleTags = useMemo(
-    () => [selections.genre, selections.tempo].filter(Boolean) as string[],
-    [selections.genre, selections.tempo],
+    () => [selections.genre, selections.mood].filter(Boolean) as string[],
+    [selections.genre, selections.mood],
   );
 
   const filledExtras =
     (selections.genre ? 1 : 0) +
     (selections.mood ? 1 : 0) +
-    (selections.theme ? 1 : 0) +
-    (selections.tempo ? 1 : 0);
+    (selections.theme ? 1 : 0);
 
   const totalFilled =
     (title.trim() ? 1 : 0) + (selections.language ? 1 : 0) + filledExtras;
-  const progress = Math.min(100, Math.round((totalFilled / 6) * 100));
+  const progress = Math.min(100, Math.round((totalFilled / 5) * 100));
 
   const canGenerateLyrics =
     !!title.trim() && !!selections.language && filledExtras >= 1 && balance >= lyricsCost;
@@ -332,8 +331,7 @@ function LibraryPage() {
     try {
       const description = [
         selections.theme ? `Theme: ${selections.theme}` : null,
-        selections.mood ? `Mood: ${selections.mood}` : null,
-        selections.tempo ? `Tempo: ${selections.tempo}` : null,
+        selections.mood ? `Mood & Tempo: ${selections.mood}` : null,
       ]
         .filter(Boolean)
         .join(" · ");
