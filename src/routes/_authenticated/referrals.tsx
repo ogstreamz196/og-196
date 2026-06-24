@@ -15,7 +15,12 @@ import {
   Flame,
   Infinity as InfinityIcon,
   PiggyBank,
+  CheckCircle2,
+  Hourglass,
+  QrCode,
+  Download,
 } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
