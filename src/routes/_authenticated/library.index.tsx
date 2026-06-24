@@ -264,7 +264,7 @@ function LibraryPage() {
 
   // Build a human-readable line from the current category selections.
   const selectionsLine = useMemo(() => {
-    const cats: Category[] = ["language", "genre", "mood", "theme", "tempo"];
+    const cats: Category[] = ["language", "genre", "mood", "theme"];
     return cats
       .map((c) => (selections[c] ? `${META[c].label}: ${selections[c]}` : null))
       .filter(Boolean)
