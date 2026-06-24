@@ -160,6 +160,9 @@ function OnboardingWizard() {
                           {typeof r.data.latencyMs === "number" && (
                             <span className="ml-2 text-muted-foreground">{r.data.latencyMs}ms</span>
                           )}
+                          {r.checkedAt && (
+                            <span className="ml-2 text-muted-foreground">· {new Date(r.checkedAt).toLocaleString()}</span>
+                          )}
                         </div>
                       )}
                     </div>
