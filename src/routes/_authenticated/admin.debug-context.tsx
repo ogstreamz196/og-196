@@ -53,7 +53,6 @@ function DebugContextPage() {
 
   const [graceElapsed, setGraceElapsed] = useState(false);
 
-  const [graceElapsed, setGraceElapsed] = useState(false);
   useEffect(() => {
     const t = setTimeout(() => setGraceElapsed(true), 1500);
     return () => clearTimeout(t);
