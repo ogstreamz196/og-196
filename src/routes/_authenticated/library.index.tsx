@@ -666,25 +666,23 @@ function LibraryPage() {
 
       </section>
 
-      {/* Step 2 — Pick your sound */}
+      {/* Step 3 — Pick your sound */}
       <section className="flex flex-col gap-5 rounded-3xl border border-white/10 bg-card/70 p-6 shadow-[0_18px_50px_-28px_rgba(0,0,0,0.6)] ring-1 ring-white/5 backdrop-blur-xl sm:p-8">
         <header className="flex items-end justify-between gap-3">
-          <div className="space-y-2">
+          <div className="space-y-1">
             <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.24em] text-primary">
-              <Disc3 className="h-3.5 w-3.5" /> Step 3 · Pick your sound
+              <Disc3 className="h-3.5 w-3.5" /> Step 3
             </div>
             <h2 className="font-display text-3xl font-black tracking-tight sm:text-4xl">
-              Choose the vibe
+              Pick your sound
             </h2>
           </div>
-          <span className="hidden rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-bold uppercase tracking-[0.24em] text-muted-foreground sm:inline-block">
-            {totalFilled}/4 picked
+          <span className="shrink-0 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
+            {totalFilled}/4
           </span>
         </header>
 
-
         <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 sm:gap-5">
-
           {(["language", "genre", "mood", "theme"] as Category[]).map((cat) => (
             <CategoryCard
               key={cat}
@@ -697,36 +695,19 @@ function LibraryPage() {
             />
           ))}
         </div>
-
-
-        {/* Compact mobile progress */}
-        <div className="space-y-1.5 sm:hidden">
-          <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-            <span>Progress</span>
-            <span>{totalFilled}/4</span>
-          </div>
-          <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
-            <div
-              className="h-full rounded-full bg-gradient-brand transition-all duration-500"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-        </div>
       </section>
 
-      {/* Step 3 — Finalize & generate */}
+      {/* Step 4 — Generate */}
       <section className="space-y-5 rounded-3xl border border-primary/40 bg-gradient-to-br from-primary/10 via-card/80 to-card/60 p-6 shadow-[0_24px_70px_-30px_oklch(0.7_0.2_300_/_0.5)] ring-1 ring-white/5 sm:p-8">
-        <header className="space-y-2">
+        <header className="space-y-1">
           <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.24em] text-primary">
-            <Wand2 className="h-3.5 w-3.5" /> Step 4 · Generate
+            <Wand2 className="h-3.5 w-3.5" /> Step 4
           </div>
           <h2 className="font-display text-3xl font-black tracking-tight sm:text-4xl">
             Write the lyrics
           </h2>
-          <p className="text-base text-muted-foreground sm:text-lg">
-            Set the explicit toggle and let OG cook. You'll review before paying for the full song.
-          </p>
         </header>
+
 
 
 
