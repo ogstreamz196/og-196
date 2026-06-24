@@ -91,7 +91,7 @@ export const Route = createFileRoute("/_authenticated/library/")({
   component: LibraryPage,
 });
 
-type Category = "language" | "genre" | "mood" | "theme" | "tempo";
+type Category = "language" | "genre" | "mood" | "theme";
 
 const POOLS: Record<Category, string[]> = {
   language: [
@@ -105,19 +105,18 @@ const POOLS: Record<Category, string[]> = {
     "Hyperpop", "Amapiano", "Dancehall", "Latin Trap", "Garage", "Bossa Nova",
   ],
   mood: [
-    "Happy", "Sad", "Angry", "Romantic", "Hype", "Chill", "Melancholy",
-    "Confident", "Heartbroken", "Nostalgic", "Playful", "Dark",
-    "Hopeful", "Triumphant", "Dreamy", "Rebellious", "Bittersweet",
+    "Happy & Upbeat", "Sad & Slow", "Angry & Hype", "Romantic & Chill",
+    "Hype & Floor-filler", "Chill groove", "Melancholy & Slow burn",
+    "Confident & Bouncy", "Heartbroken ballad", "Nostalgic & Mid-tempo",
+    "Playful & Bouncy", "Dark & Half-time", "Hopeful & Upbeat",
+    "Triumphant marching", "Dreamy & Slow", "Rebellious & Frenetic",
+    "Bittersweet mid-tempo",
   ],
   theme: [
     "Love", "Heartbreak", "Money", "Party", "Family", "Revenge",
     "Friendship", "Hustle", "Loss", "Self-belief", "Summer nights",
     "City lights", "Late-night drive", "First crush", "Coming home",
     "Underdog story", "Toxic ex", "Glow-up",
-  ],
-  tempo: [
-    "Slow burn", "Mid-tempo", "Upbeat", "Hype", "Floor-filler",
-    "Chill groove", "Marching", "Bouncy", "Half-time", "Frenetic",
   ],
 };
 
