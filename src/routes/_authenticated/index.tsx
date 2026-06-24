@@ -220,6 +220,14 @@ function DashboardHome() {
 
       </section>
 
+      {/* Ask OG Bot — prominent CTA */}
+      <AskOgCta />
+
+      {/* Continuity demo */}
+      <ContinuityDemo />
+
+
+
 
       {/* Primary CTAs */}
       <section className="grid grid-cols-1 items-stretch gap-4 sm:gap-6 md:grid-cols-2">
