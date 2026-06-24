@@ -239,13 +239,6 @@ function LibraryPage() {
   const [title, setTitle] = useState("");
   const [selections, setSelections] = useState<Selections>({});
   const [chips, setChips] = useState<Record<Category, string[]>>(() => initialChips());
-  const [categoryNotes, setCategoryNotes] = useState<Record<Category, string>>({
-    language: "",
-    genre: "",
-    mood: "",
-    theme: "",
-    tempo: "",
-  });
   const [lyrics, setLyrics] = useState("");
   const [genLyrics, setGenLyrics] = useState(false);
   const [foulMouth, setFoulMouth] = useState(false);
@@ -254,9 +247,31 @@ function LibraryPage() {
   const [genSong, setGenSong] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<Song | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const [interviewOpen, setInterviewOpen] = useState(false);
-  const [interviewTranscript, setInterviewTranscript] = useState<InterviewTurn[]>([]);
   const [reviewOpen, setReviewOpen] = useState(false);
+
+  // Build a human-readable line from the current category selections.
+  const selectionsLine = useMemo(() => {
+    const cats: Category[] = ["language", "genre", "mood", "theme", "tempo"];
+    return cats
+      .map((c) => (selections[c] ? `${META[c].label}: ${selections[c]}` : null))
+      .filter(Boolean)
+      .join(" · ");
+  }, [selections]);
+
+  // Sync the auto-built line into the lyric description box. Preserve any
+  // free-text the user added below the auto-line on their own.
+  useEffect(() => {
+    setExtraContext((prev) => {
+      const marker = "—".repeat(3);
+      const split = prev.split(`\n${marker}\n`);
+      const userTail = split.length > 1 ? split.slice(1).join(`\n${marker}\n`) : "";
+      if (!selectionsLine && !userTail) return "";
+      if (!selectionsLine) return userTail;
+      return userTail ? `${selectionsLine}\n${marker}\n${userTail}` : selectionsLine;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectionsLine]);
+
 
   function setField(cat: Category, value: string) {
     setSelections((prev) => ({ ...prev, [cat]: value }));
