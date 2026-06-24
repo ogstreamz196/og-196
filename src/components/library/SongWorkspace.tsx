@@ -22,7 +22,29 @@ import { cn } from "@/lib/utils";
 import { StageStepper, type Stage } from "./song-workspace/StageStepper";
 import { VariationsCard } from "./song-workspace/VariationsCard";
 import type { WorkspaceSong } from "./song-workspace/types";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
+
+const LANGUAGES = [
+  "English", "Spanish", "French", "Portuguese", "Hindi", "Urdu",
+  "Punjabi", "Arabic", "Swahili", "Patois", "Yoruba", "German",
+  "Italian", "Tagalog", "Mandarin", "Japanese", "Korean", "Turkish",
+];
+
+const LANG_RE = /Language:\s*(?:write the lyrics in\s*)?([A-Za-z][A-Za-z\s]{1,30})/i;
+
+function detectLanguage(text: string | null | undefined): string {
+  const m = text?.match(LANG_RE);
+  const found = m?.[1]?.trim();
+  if (!found) return "English";
+  return LANGUAGES.find((l) => l.toLowerCase() === found.toLowerCase()) ?? "English";
+}
+
+function setBriefLanguage(brief: string, language: string): string {
+  const line = `Language: write the lyrics in ${language}`;
+  if (LANG_RE.test(brief)) return brief.replace(LANG_RE, line);
+  return brief.trim() ? `${brief.trim()}\n${line}` : line;
+}
 
 interface Props {
   song: WorkspaceSong;
@@ -50,11 +72,15 @@ export function SongWorkspace({ song, onSaved }: Props) {
   const [title, setTitle] = useState(song.title ?? "");
   const [brief, setBrief] = useState(song.prompt ?? "");
   const [lyrics, setLyrics] = useState(song.lyrics ?? "");
+  const [language, setLanguage] = useState(() => detectLanguage(song.prompt));
   const [saving, setSaving] = useState(false);
   const [genLyrics, setGenLyrics] = useState(false);
   const [genPreview, setGenPreview] = useState(false);
   const [unlocking, setUnlocking] = useState(false);
   const lyricsRef = useRef<HTMLTextAreaElement | null>(null);
+
+  const briefLanguage = useMemo(() => detectLanguage(brief), [brief]);
+  const languageChanged = language !== briefLanguage;
 
 
   const {
@@ -149,15 +175,20 @@ export function SongWorkspace({ song, onSaved }: Props) {
     }
     setGenLyrics(true);
     try {
-      if (dirty) await persist({ title: title.trim() || null, prompt: brief });
+      const nextBrief = languageChanged ? setBriefLanguage(brief, language) : brief;
+      if (nextBrief !== brief) setBrief(nextBrief);
+      if (dirty || nextBrief !== (song.prompt ?? "")) {
+        await persist({ title: title.trim() || null, prompt: nextBrief });
+      }
 
       const { data, error } = await supabase.functions.invoke("generate-lyrics", {
         body: {
           song_id: song.id,
           songName: title.trim(),
-          description: brief.trim(),
+          description: nextBrief.trim(),
           styleTags: song.style ? song.style.split("·").map((s) => s.trim()).filter(Boolean) : [],
           foulMouth,
+          language,
         },
       });
 
@@ -300,15 +331,36 @@ export function SongWorkspace({ song, onSaved }: Props) {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="song-title">Title (optional)</Label>
-                <Input
-                  id="song-title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Untitled"
-                />
+              <div className="grid gap-4 sm:grid-cols-[1fr_220px]">
+                <div className="space-y-1.5">
+                  <Label htmlFor="song-title">Title (optional)</Label>
+                  <Input
+                    id="song-title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Untitled"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="song-language">Language</Label>
+                  <Select value={language} onValueChange={setLanguage}>
+                    <SelectTrigger id="song-language">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {LANGUAGES.map((l) => (
+                        <SelectItem key={l} value={l}>{l}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
+              {hasLyrics && languageChanged && (
+                <div className="rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-xs text-foreground/80">
+                  Language changed to <b>{language}</b>. Tap <b>Regenerate lyrics</b> to rewrite in {language},
+                  or keep your existing lyrics and just <b>Regenerate sample</b> in Stage 2.
+                </div>
+              )}
               <div className="space-y-1.5">
                 <Label htmlFor="song-brief">Brief</Label>
                 <Textarea
@@ -319,6 +371,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
                   placeholder="Who is the song about, the mood, references, memories…"
                 />
               </div>
+
 
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
