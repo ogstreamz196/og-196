@@ -15,7 +15,12 @@ import {
   Flame,
   Infinity as InfinityIcon,
   PiggyBank,
+  CheckCircle2,
+  Hourglass,
+  QrCode,
+  Download,
 } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
@@ -166,6 +171,34 @@ function ReferralsPage() {
   const summary = summaryQ.data ?? { total_referred: 0, total_earned: 0, recent: [] };
   const shortLink = link.replace(/^https?:\/\//, "");
 
+  // Paid vs pending breakdown.
+  // Cashback rows are credited the moment a referee burns (>=10 coins),
+  // so every referral_cashback row is "Paid". Pending = referees who
+  // signed up but haven't earned us a cashback row yet.
+  const paidCoins = summary.total_earned;
+  const paidEvents = summary.recent.length;
+  const paidRefereeIds = new Set(
+    summary.recent.map((r) => r.referee_id).filter((id): id is string => !!id),
+  );
+  const pendingReferees = Math.max(0, summary.total_referred - paidRefereeIds.size);
+
+  const downloadQR = (svgId: string, filename: string) => {
+    if (typeof document === "undefined") return;
+    const svg = document.getElementById(svgId) as SVGSVGElement | null;
+    if (!svg) return;
+    const source = new XMLSerializer().serializeToString(svg);
+    const blob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success("QR code saved");
+  };
+
   return (
     <DashboardShell title="Earnings">
       <div className="w-full space-y-8 sm:space-y-10">
@@ -257,58 +290,90 @@ function ReferralsPage() {
             </span>
           </div>
 
-          <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-            <div className="relative flex-1">
-              <Link2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                readOnly
-                value={shortLink}
-                onFocus={(e) => e.currentTarget.select()}
-                className="h-11 pl-9 font-mono text-xs sm:text-sm"
-              />
+          <div className="mt-4 grid gap-4 md:grid-cols-[1fr_auto] md:items-start">
+            <div className="space-y-3">
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <div className="relative flex-1">
+                  <Link2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    readOnly
+                    value={shortLink}
+                    onFocus={(e) => e.currentTarget.select()}
+                    className="h-11 pl-9 font-mono text-xs sm:text-sm"
+                  />
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button onClick={copy} className="h-11 gap-2">
+                    {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    {copied ? "Copied" : "Copy"}
+                  </Button>
+                  <Button variant="secondary" onClick={inviteAgain} className="h-11 gap-2">
+                    <Gift className="h-4 w-4" /> Invite again
+                  </Button>
+                  <Button variant="outline" onClick={share} className="h-11 gap-2">
+                    <Share2 className="h-4 w-4" /> Share
+                  </Button>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Tip: the link must be opened by a brand-new account within 24h of sign-up to count.
+              </p>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <Button onClick={copy} className="h-11 gap-2">
-                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                {copied ? "Copied" : "Copy"}
-              </Button>
-              <Button variant="secondary" onClick={inviteAgain} className="h-11 gap-2">
-                <Gift className="h-4 w-4" /> Invite again
-              </Button>
-              <Button variant="outline" onClick={share} className="h-11 gap-2">
-                <Share2 className="h-4 w-4" /> Share
-              </Button>
-            </div>
+
+            {/* QR card */}
+            {link && (
+              <div className="flex flex-col items-center gap-2 rounded-2xl border border-white/10 bg-background/60 p-3 md:w-44">
+                <div className="rounded-xl bg-white p-2.5">
+                  <QRCodeSVG
+                    id="og-referral-qr"
+                    value={link}
+                    size={144}
+                    level="M"
+                    includeMargin={false}
+                  />
+                </div>
+                <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                  <QrCode className="h-3 w-3" /> Scan to join
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => downloadQR("og-referral-qr", "og-referral-qr.svg")}
+                  className="h-7 gap-1.5 px-2 text-[11px]"
+                >
+                  <Download className="h-3 w-3" /> Save QR
+                </Button>
+              </div>
+            )}
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">
-            Tip: the link must be opened by a brand-new account within 24h of sign-up to count.
-          </p>
         </section>
 
-        {/* STATS */}
+        {/* STATS — Paid vs Pending breakdown */}
         <section className="grid gap-3 sm:grid-cols-3">
           <StatCard
-            icon={<Users className="h-5 w-5" />}
-            label="People referred"
-            value={summary.total_referred}
-            hint="Confirmed sign-ups via your link"
-            accent="from-sky-500/30"
+            icon={<CheckCircle2 className="h-5 w-5 text-emerald-400" />}
+            label="Paid earnings"
+            value={paidCoins}
+            hint={`${paidEvents} settled cashback ${paidEvents === 1 ? "event" : "events"}`}
+            accent="from-emerald-500/30"
           />
           <StatCard
-            icon={<Coins className="h-5 w-5 text-primary" />}
-            label="OG Coins earned"
-            value={summary.total_earned}
-            hint="10% of every burn — lifetime"
+            icon={<Hourglass className="h-5 w-5 text-amber-400" />}
+            label="Pending referees"
+            value={pendingReferees}
+            hint="Signed up — awaiting their first qualifying burn"
             accent="from-amber-500/30"
           />
           <StatCard
-            icon={<Flame className="h-5 w-5 text-rose-400" />}
-            label="Cashback events"
-            value={summary.recent.length}
-            hint="Recent burns that paid you out"
-            accent="from-rose-500/30"
+            icon={<Users className="h-5 w-5 text-sky-400" />}
+            label="Total referred"
+            value={summary.total_referred}
+            hint="Lifetime confirmed sign-ups"
+            accent="from-sky-500/30"
           />
         </section>
+
 
         {/* HOW IT WORKS */}
         <section className="rounded-3xl border border-white/10 bg-card/60 p-5 sm:p-6">
@@ -374,8 +439,11 @@ function ReferralsPage() {
                       {(tx.referee_name ?? "?").slice(0, 1)}
                     </div>
                     <div className="min-w-0">
-                      <div className="truncate text-sm font-semibold">
+                      <div className="flex items-center gap-2 truncate text-sm font-semibold">
                         {tx.referee_name ?? "Referred user"}
+                        <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.16em] text-emerald-300">
+                          <CheckCircle2 className="h-2.5 w-2.5" /> Paid
+                        </span>
                       </div>
                       <div className="truncate text-xs text-muted-foreground">
                         Burned {burned ?? "?"} coins · you earned{" "}
