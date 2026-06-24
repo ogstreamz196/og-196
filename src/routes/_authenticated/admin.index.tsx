@@ -306,13 +306,11 @@ function PricingControls() {
 
   useEffect(() => {
     if (settings) {
-      setValues({
-        signup_credits: String(settings.signup_credits),
-        coins_per_generation: String(settings.coins_per_generation),
-        songs_per_generation: String(settings.songs_per_generation),
-        sample_seconds: String(settings.sample_seconds),
-        coins_per_full_unlock: String(settings.coins_per_full_unlock),
-      });
+      setValues(
+        Object.fromEntries(
+          Object.keys(PRICING_RULES).map((k) => [k, String((settings as any)[k])]),
+        ),
+      );
     }
   }, [settings]);
 
