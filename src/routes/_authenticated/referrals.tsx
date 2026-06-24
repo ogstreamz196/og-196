@@ -308,3 +308,20 @@ function StatCard({
     </div>
   );
 }
+
+function Step({
+  icon, n, title, body,
+}: { icon: React.ReactNode; n: number; title: string; body: string }) {
+  return (
+    <div className="rounded-xl border border-white/10 bg-background/40 p-4">
+      <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
+        <span className="grid h-6 w-6 place-items-center rounded-full bg-primary/15 text-primary">
+          {icon}
+        </span>
+        Step {n}
+      </div>
+      <div className="mt-2 text-sm font-bold text-foreground">{title}</div>
+      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{body}</p>
+    </div>
+  );
+}
