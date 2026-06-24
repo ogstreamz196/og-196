@@ -408,6 +408,8 @@ export type Database = {
           last_page: string | null
           last_page_at: string | null
           telegram_chat_id: number | null
+          telegram_link_token: string | null
+          telegram_linked_at: string | null
           telegram_username: string | null
           total_bot_interactions: number
           updated_at: string
@@ -423,6 +425,8 @@ export type Database = {
           last_page?: string | null
           last_page_at?: string | null
           telegram_chat_id?: number | null
+          telegram_link_token?: string | null
+          telegram_linked_at?: string | null
           telegram_username?: string | null
           total_bot_interactions?: number
           updated_at?: string
@@ -438,6 +442,8 @@ export type Database = {
           last_page?: string | null
           last_page_at?: string | null
           telegram_chat_id?: number | null
+          telegram_link_token?: string | null
+          telegram_linked_at?: string | null
           telegram_username?: string | null
           total_bot_interactions?: number
           updated_at?: string
