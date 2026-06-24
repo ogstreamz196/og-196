@@ -116,6 +116,14 @@ export function OgChat({
   const { mode, toggle: toggleMode } = useOgMode();
   const { isVip } = useRole();
   const transcribe = useServerFn(transcribeOgAudio);
+  const [language, setLanguage] = useState<string>(() => {
+    if (typeof window === "undefined") return "English";
+    return window.localStorage.getItem(LANG_KEY) || "English";
+  });
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(LANG_KEY, language);
+  }, [language]);
 
   // Attachment + mic state
   const [attachment, setAttachment] = useState<{ dataUrl: string; name: string } | null>(null);
