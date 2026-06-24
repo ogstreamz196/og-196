@@ -814,10 +814,10 @@ function EditableField({
           )}
         </div>
         <div className="mt-2 flex items-center justify-end gap-1">
-          <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={onCancel} title="Cancel">
+          <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={onCancel} title="Cancel" aria-label="Cancel edit">
             <X className="h-3.5 w-3.5" />
           </Button>
-          <Button type="button" size="icon" className="h-7 w-7 bg-emerald-500 text-white hover:bg-emerald-600" onClick={onCommit} title="Save">
+          <Button type="button" size="icon" className="h-7 w-7 bg-emerald-500 text-white hover:bg-emerald-600" onClick={onCommit} title="Save" aria-label="Save changes">
             <Check className="h-3.5 w-3.5" />
           </Button>
         </div>
