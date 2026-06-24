@@ -1161,11 +1161,11 @@ function CategoryCard({
         </Select>
 
 
-        <div className="space-y-2">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+        <div className="space-y-2.5">
+          <div className="text-xs font-bold uppercase tracking-[0.22em] text-muted-foreground">
             Quick picks
           </div>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-2">
             {chips.map((chip) => {
               const active = value === chip;
               return (
@@ -1174,10 +1174,10 @@ function CategoryCard({
                   type="button"
                   onClick={() => onPickChip(chip)}
                   className={
-                    "rounded-full border px-3 py-1.5 text-xs font-semibold transition-all hover:-translate-y-0.5 " +
+                    "rounded-full border px-3.5 py-2 text-sm font-semibold transition-all hover:-translate-y-0.5 " +
                     (active
                       ? meta.chipActive
-                      : "border-white/10 bg-white/[0.04] text-foreground/85 hover:border-white/25 hover:bg-white/10")
+                      : "border-white/10 bg-white/[0.04] text-foreground/90 hover:border-white/25 hover:bg-white/10")
                   }
                 >
                   {chip}
@@ -1186,6 +1186,7 @@ function CategoryCard({
             })}
           </div>
         </div>
+
       </div>
     </div>
   );
