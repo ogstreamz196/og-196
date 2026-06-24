@@ -1059,7 +1059,7 @@ function LibraryPage() {
         </button>
 
         {/* Generate CTA */}
-        <div className="relative">
+        <div id="lyrics-section" className="relative scroll-mt-24">
           <Button
             onClick={generateLyrics}
             disabled={!canGenerateLyrics || genLyrics}
