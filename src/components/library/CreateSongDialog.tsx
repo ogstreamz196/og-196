@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Loader2, Sparkles, ChevronDown } from "lucide-react";
+import { Loader2, Sparkles, ChevronDown, Shuffle, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -76,16 +76,42 @@ const STYLES = ["Story-driven", "Punchy bars", "Sing-along hook", "Spoken word",
 const RELATIONSHIPS = ["Mum", "Dad", "Partner", "Best friend", "Sibling", "Kids", "Crew", "Myself"];
 const LANGUAGES = ["English", "Spanish", "French", "Portuguese", "Hindi", "Urdu", "Punjabi", "Arabic", "Swahili", "Patois", "Yoruba", "German", "Italian", "Tagalog"];
 
+const PRESETS: { label: string; emoji: string; values: Partial<typeof EMPTY> }[] = [
+  { label: "Birthday hype", emoji: "🎉", values: { mood: "Hype", genre: "Afrobeats", lyricalStyle: "Sing-along hook" } },
+  { label: "Love letter", emoji: "💌", values: { mood: "Romantic", genre: "R&B", lyricalStyle: "Story-driven" } },
+  { label: "In memory", emoji: "🕊️", values: { mood: "Heartfelt", genre: "Ballad", lyricalStyle: "Story-driven" } },
+  { label: "Hometown anthem", emoji: "🏟️", values: { mood: "Triumphant", genre: "Drill", lyricalStyle: "Anthem" } },
+  { label: "Chill vibes", emoji: "🌊", values: { mood: "Chill", genre: "Indie", lyricalStyle: "Spoken word" } },
+];
+
+function pick<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)]!;
+}
+
 export function CreateSongDialog({ flow, onClose, onSubmit }: CreateSongDialogProps) {
   const [state, setState] = useState(EMPTY);
   const [submitting, setSubmitting] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+  const [openSection, setOpenSection] = useState<string | null>(null);
 
   if (!flow) return null;
   const copy = FLOW_COPY[flow];
 
   function update<K extends keyof typeof EMPTY>(key: K, value: string) {
     setState((s) => ({ ...s, [key]: value }));
+  }
+
+  function shuffle() {
+    setState((s) => ({
+      ...s,
+      mood: pick(MOODS),
+      genre: pick(GENRES),
+      lyricalStyle: pick(STYLES),
+    }));
+  }
+
+  function applyPreset(values: Partial<typeof EMPTY>) {
+    setState((s) => ({ ...s, ...values }));
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -100,6 +126,8 @@ export function CreateSongDialog({ flow, onClose, onSubmit }: CreateSongDialogPr
     }
   }
 
+  const showRelationship = flow === "memory" || flow === "tribute";
+
   return (
     <Sheet open onOpenChange={(o) => !o && onClose()}>
       <SheetContent side="right" className="flex w-full max-w-xl flex-col gap-0 overflow-hidden p-0 sm:max-w-xl">
@@ -112,58 +140,100 @@ export function CreateSongDialog({ flow, onClose, onSubmit }: CreateSongDialogPr
         </SheetHeader>
 
         <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
-          <div className="flex-1 space-y-6 overflow-y-auto px-6 py-5">
-            <ChipSection
-              label="Mood"
-              hint="How should it feel?"
-              options={MOODS}
-              value={state.mood}
-              onChange={(v) => update("mood", v)}
-              customPlaceholder="Add your own mood…"
-            />
+          <div className="flex-1 space-y-4 overflow-y-auto px-5 py-4">
+            {/* Quick-start: presets + shuffle */}
+            <div className="rounded-2xl border border-border bg-background/40 p-3">
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Not sure? Start here
+                </span>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={shuffle}
+                  className="h-7 gap-1.5 px-2.5 text-xs"
+                >
+                  <Shuffle className="h-3.5 w-3.5" />
+                  Shuffle
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {PRESETS.map((p) => (
+                  <button
+                    key={p.label}
+                    type="button"
+                    onClick={() => applyPreset(p.values)}
+                    className="rounded-full border border-border bg-background/60 px-2.5 py-1 text-xs font-medium transition hover:border-primary/60 hover:bg-primary/10"
+                  >
+                    <span className="mr-1">{p.emoji}</span>
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-            <ChipSection
-              label="Genre"
-              hint="Pick a sound"
-              options={GENRES}
-              value={state.genre}
-              onChange={(v) => update("genre", v)}
-              customPlaceholder="Add your own genre…"
-            />
-
-            <ChipSection
-              label="Lyrical style"
-              hint="How should it tell the story?"
-              options={STYLES}
-              value={state.lyricalStyle}
-              onChange={(v) => update("lyricalStyle", v)}
-              customPlaceholder="Add your own style…"
-            />
-
-            <ChipSection
-              label="Language"
-              hint="What language should the lyrics be in?"
-              options={LANGUAGES}
-              value={state.language}
-              onChange={(v) => update("language", v)}
-              customPlaceholder="Add another language…"
-            />
-
-            {(flow === "memory" || flow === "tribute") && (
-              <ChipSection
-                label="Who it's for"
-                hint="Tap one or type a name below"
-                options={RELATIONSHIPS}
-                value={state.relationship}
-                onChange={(v) => update("relationship", v)}
-                customPlaceholder="Or someone else…"
+            {/* Compact dropdown selectors */}
+            <div className="overflow-hidden rounded-2xl border border-border bg-background/30">
+              <SelectRow
+                id="mood"
+                label="Mood"
+                value={state.mood}
+                placeholder="Pick a feeling"
+                options={MOODS}
+                open={openSection === "mood"}
+                onToggle={() => setOpenSection(openSection === "mood" ? null : "mood")}
+                onChange={(v) => update("mood", v)}
               />
-            )}
+              <SelectRow
+                id="genre"
+                label="Genre"
+                value={state.genre}
+                placeholder="Pick a sound"
+                options={GENRES}
+                open={openSection === "genre"}
+                onToggle={() => setOpenSection(openSection === "genre" ? null : "genre")}
+                onChange={(v) => update("genre", v)}
+              />
+              <SelectRow
+                id="style"
+                label="Lyrical style"
+                value={state.lyricalStyle}
+                placeholder="How it tells the story"
+                options={STYLES}
+                open={openSection === "style"}
+                onToggle={() => setOpenSection(openSection === "style" ? null : "style")}
+                onChange={(v) => update("lyricalStyle", v)}
+              />
+              <SelectRow
+                id="language"
+                label="Language"
+                value={state.language}
+                placeholder="English"
+                options={LANGUAGES}
+                open={openSection === "language"}
+                onToggle={() => setOpenSection(openSection === "language" ? null : "language")}
+                onChange={(v) => update("language", v)}
+              />
+              {showRelationship && (
+                <SelectRow
+                  id="relationship"
+                  label="Who it's for"
+                  value={state.relationship}
+                  placeholder="Tap one"
+                  options={RELATIONSHIPS}
+                  open={openSection === "relationship"}
+                  onToggle={() => setOpenSection(openSection === "relationship" ? null : "relationship")}
+                  onChange={(v) => update("relationship", v)}
+                  last
+                />
+              )}
+            </div>
 
             <button
               type="button"
               onClick={() => setShowDetails((v) => !v)}
-              className="flex w-full items-center justify-between rounded-xl border border-dashed border-border bg-background/30 px-4 py-3 text-left text-sm font-semibold transition hover:bg-background/50"
+              className="flex w-full items-center justify-between rounded-xl border border-dashed border-border bg-background/30 px-4 py-2.5 text-left text-sm font-semibold transition hover:bg-background/50"
             >
               <span>Add more details (optional)</span>
               <ChevronDown className={cn("h-4 w-4 transition-transform", showDetails && "rotate-180")} />
@@ -203,49 +273,67 @@ export function CreateSongDialog({ flow, onClose, onSubmit }: CreateSongDialogPr
   );
 }
 
-function ChipSection({
-  label, hint, options, value, onChange, customPlaceholder,
+function SelectRow({
+  id, label, value, placeholder, options, open, onToggle, onChange, last,
 }: {
+  id: string;
   label: string;
-  hint?: string;
-  options: string[];
   value: string;
+  placeholder: string;
+  options: string[];
+  open: boolean;
+  onToggle: () => void;
   onChange: (v: string) => void;
-  customPlaceholder?: string;
+  last?: boolean;
 }) {
   const isCustom = value !== "" && !options.includes(value);
   return (
-    <div className="space-y-2">
-      <div className="flex items-baseline justify-between">
-        <Label className="text-sm font-semibold">{label}</Label>
-        {hint && <span className="text-[11px] text-muted-foreground">{hint}</span>}
-      </div>
-      <div className="flex flex-wrap gap-2">
-        {options.map((opt) => {
-          const active = value === opt;
-          return (
-            <button
-              key={opt}
-              type="button"
-              onClick={() => onChange(active ? "" : opt)}
-              className={cn(
-                "rounded-full border px-3.5 py-1.5 text-xs font-semibold transition",
-                active
-                  ? "border-primary bg-primary text-primary-foreground shadow-glow"
-                  : "border-border bg-background/40 text-foreground hover:border-primary/50 hover:bg-primary/10",
-              )}
-            >
-              {opt}
-            </button>
-          );
-        })}
-      </div>
-      <Input
-        value={isCustom ? value : ""}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={customPlaceholder ?? "Add your own…"}
-        className="h-9 text-sm"
-      />
+    <div className={cn(!last && "border-b border-border")}>
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition hover:bg-background/40"
+      >
+        <span className="text-sm font-semibold">{label}</span>
+        <span className="flex items-center gap-2 min-w-0">
+          <span className={cn("truncate text-sm", value ? "text-foreground" : "text-muted-foreground")}>
+            {value || placeholder}
+          </span>
+          <ChevronDown className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", open && "rotate-180")} />
+        </span>
+      </button>
+      {open && (
+        <div className="space-y-2 border-t border-border bg-background/20 px-4 py-3">
+          <div className="flex flex-wrap gap-1.5">
+            {options.map((opt) => {
+              const active = value === opt;
+              return (
+                <button
+                  key={opt}
+                  type="button"
+                  onClick={() => onChange(active ? "" : opt)}
+                  className={cn(
+                    "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition",
+                    active
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-background/60 hover:border-primary/50 hover:bg-primary/10",
+                  )}
+                >
+                  {active && <Check className="h-3 w-3" />}
+                  {opt}
+                </button>
+              );
+            })}
+          </div>
+          <Input
+            id={id}
+            value={isCustom ? value : ""}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="Or type your own…"
+            className="h-8 text-xs"
+          />
+        </div>
+      )}
     </div>
   );
 }
