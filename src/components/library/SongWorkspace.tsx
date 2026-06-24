@@ -175,15 +175,20 @@ export function SongWorkspace({ song, onSaved }: Props) {
     }
     setGenLyrics(true);
     try {
-      if (dirty) await persist({ title: title.trim() || null, prompt: brief });
+      const nextBrief = languageChanged ? setBriefLanguage(brief, language) : brief;
+      if (nextBrief !== brief) setBrief(nextBrief);
+      if (dirty || nextBrief !== (song.prompt ?? "")) {
+        await persist({ title: title.trim() || null, prompt: nextBrief });
+      }
 
       const { data, error } = await supabase.functions.invoke("generate-lyrics", {
         body: {
           song_id: song.id,
           songName: title.trim(),
-          description: brief.trim(),
+          description: nextBrief.trim(),
           styleTags: song.style ? song.style.split("·").map((s) => s.trim()).filter(Boolean) : [],
           foulMouth,
+          language,
         },
       });
 
