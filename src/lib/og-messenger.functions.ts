@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { buildSystemPrompt, type UserContextSummary } from "@/lib/og-persona";
+import { buildSystemPrompt, detectSongIntent, type UserContextSummary } from "@/lib/og-persona";
 import { extractInsults } from "@/lib/insult-learner";
 
 export type OgChatMessage = { role: "user" | "assistant"; content: string };
@@ -130,6 +130,11 @@ export const chatOgBot = createServerFn({ method: "POST" })
 
     const effectiveLanguage = isVip ? (data.language || "English") : "English";
 
+    const latestUserMsg = [...data.messages].reverse().find((m) => m.role === "user");
+    const songIntent =
+      detectSongIntent(latestUserMsg?.content) ||
+      detectSongIntent(data.pageContext);
+
     const system = buildSystemPrompt({
       mode: data.mode,
       foulMouth,
@@ -139,6 +144,7 @@ export const chatOgBot = createServerFn({ method: "POST" })
       learnedInsults,
       language: effectiveLanguage,
       user: userCtx,
+      songIntent,
     });
 
     // 1b. Learn fresh insults from the latest user message (fire-and-forget upsert).
