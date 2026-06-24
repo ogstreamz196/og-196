@@ -86,6 +86,44 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
           profileId = pid;
         }
 
+        // Verify the chat is real and reachable BEFORE persisting the link
+        // or sending the greeting. Calls Telegram getChat through the gateway
+        // — if it doesn't return ok:true, we treat the link as unverified.
+        const lovableKey = process.env.LOVABLE_API_KEY;
+        let chatVerified = false;
+        if (lovableKey) {
+          try {
+            const verifyRes = await fetch(
+              "https://connector-gateway.lovable.dev/telegram/getChat",
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${lovableKey}`,
+                  "X-Connection-Api-Key": tgKey,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ chat_id }),
+              },
+            );
+            const verifyJson = (await verifyRes.json().catch(() => null)) as
+              | { ok?: boolean; result?: { id?: number; type?: string } }
+              | null;
+            chatVerified =
+              verifyRes.ok &&
+              verifyJson?.ok === true &&
+              Number(verifyJson?.result?.id) === Number(chat_id);
+          } catch {
+            chatVerified = false;
+          }
+        }
+
+        if (!chatVerified) {
+          return Response.json(
+            { ok: true, rejected: "chat_verification_failed" },
+            { status: 200 },
+          );
+        }
+
         await supabaseAdmin
           .from("profiles")
           .update({
@@ -96,7 +134,6 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
           })
           .eq("id", profileId);
 
-        // Fetch profile details for a personalized greeting.
         const { data: profile } = await supabaseAdmin
           .from("profiles")
           .select("display_name, email, coin_balance")
@@ -117,25 +154,20 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
           `🎧 I'll DM drops, song updates &amp; referral cashback right here.\n\n` +
           `Type /help any time. Now go make some noise. 🎤`;
 
-        const lovableKey = process.env.LOVABLE_API_KEY;
-        if (lovableKey) {
-          await fetch("https://connector-gateway.lovable.dev/telegram/sendMessage", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${lovableKey}`,
-              "X-Connection-Api-Key": tgKey,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              chat_id,
-              text: greeting,
-              parse_mode: "HTML",
-            }),
-          }).catch(() => undefined);
-        }
+        await fetch("https://connector-gateway.lovable.dev/telegram/sendMessage", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${lovableKey}`,
+            "X-Connection-Api-Key": tgKey,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            chat_id,
+            text: greeting,
+            parse_mode: "HTML",
+          }),
+        }).catch(() => undefined);
 
-        // Mirror the greeting into the in-app OG chat so the user sees it
-        // the next time they open the messenger.
         await supabaseAdmin
           .from("og_messages")
           .insert({
@@ -145,7 +177,7 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
           })
           .then(() => undefined, () => undefined);
 
-        return Response.json({ ok: true, linked: true });
+        return Response.json({ ok: true, linked: true, verified: true });
       },
     },
   },
