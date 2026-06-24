@@ -13,7 +13,7 @@ export type AppSettings = {
 
 const DEFAULTS: AppSettings = {
   coins_per_generation: 3,
-  coins_per_lyrics_generation: 1,
+  coins_per_lyrics_generation: 3,
   coins_per_full_unlock: 5,
   coins_per_variation_divisor: 2,
   songs_per_generation: 2,
