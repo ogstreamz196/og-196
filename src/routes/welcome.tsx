@@ -108,14 +108,25 @@ function useRedirectIfSignedIn() {
       }
     }
     let cancelled = false;
+    // Initial restore from storage (handles full-page OAuth redirect back).
     supabase.auth.getSession().then(({ data }) => {
       if (!cancelled && data.session) navigate({ to: "/", replace: true });
     });
+    // Subsequent sign-in (popup/web_message flow in preview iframe sets the
+    // session asynchronously after lovable.auth.signInWithOAuth resolves).
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (cancelled) return;
+      if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
+        navigate({ to: "/", replace: true });
+      }
+    });
     return () => {
       cancelled = true;
+      sub.subscription.unsubscribe();
     };
   }, [navigate]);
 }
+
 
 function useOAuthSignIn() {
   const navigate = useNavigate();
