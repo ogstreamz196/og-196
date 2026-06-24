@@ -257,14 +257,14 @@ function PrimaryCard({
           <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground sm:text-base">{eyebrow}</p>
           <span className="h-px flex-1 bg-gradient-to-r from-white/15 to-transparent" />
         </div>
-        <h3 className="font-display mt-3 text-[clamp(2rem,11vw,6.5rem)] font-black uppercase leading-[0.95] tracking-[-0.035em] drop-shadow-[0_6px_24px_rgba(80,60,255,0.35)] [overflow-wrap:break-word] sm:mt-4">
+        <h3 className="font-display mt-3 text-[clamp(1.75rem,14cqw,5rem)] font-black uppercase leading-[0.95] tracking-[-0.035em] drop-shadow-[0_6px_24px_rgba(80,60,255,0.35)] [hyphens:none] [word-break:keep-all] [overflow-wrap:normal] sm:mt-4">
           {title.split(" ").map((word, i, arr) => {
             const isLast = i === arr.length - 1;
             return (
               <span
                 key={`${word}-${i}`}
                 className={
-                  "wc-pop mr-[0.25em] inline-block " +
+                  "wc-pop mr-[0.25em] inline-block whitespace-nowrap " +
                   (isLast ? "italic text-gradient-red wc-bounce-soft" : "")
                 }
                 style={{ animationDelay: `${i * 0.12}s` }}
