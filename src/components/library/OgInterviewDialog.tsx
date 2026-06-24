@@ -17,11 +17,20 @@ import { toast } from "sonner";
 
 export type InterviewTurn = { role: "bot" | "user"; text: string };
 
+export type InterviewAnswers = {
+  language?: string;
+  genre?: string;
+  mood?: string;
+  theme?: string;
+  tempo?: string;
+  personal: string[]; // remaining "get to know me" answers in order
+};
+
 interface OgInterviewDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   seed: string;
-  onDone: (brief: string, transcript: InterviewTurn[]) => void;
+  onDone: (answers: InterviewAnswers, transcript: InterviewTurn[]) => void;
 }
 
 const DRAFT_KEY = "og-interview:draft:v2";
