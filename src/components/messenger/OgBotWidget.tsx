@@ -43,10 +43,10 @@ function buildQuickPrompts(
     ];
   }
   return [
-    { label: "🎵 Write me a song", prompt: `Help me write a personalised song. Ask me the questions you need to get started. ${tone}` },
-    { label: "💡 Title ideas", prompt: "Give me 5 fresh song title ideas. Ask me mood and genre first." },
-    { label: "🪝 Sticky chorus", prompt: "Help me write a sticky chorus. Start by asking what the song is about." },
-    { label: "🎚️ Suno prompt", prompt: "I just need a Suno-ready prompt. Ask key details, then output one tight prompt." },
+    { label: "🎵 Song for someone", prompt: `Help me write a personalised song for someone in my life. Ask me who it's for, their name, their age or vibe, and how they want to be portrayed — then take it from there. ${tone}` },
+    { label: "💡 Title ideas", prompt: "Give me 5 fresh song title ideas. Ask me who the song is for, their vibe, mood and genre first." },
+    { label: "🪝 Sticky chorus", prompt: "Help me write a sticky chorus. Start by asking who the song is for and what you want to say about them." },
+    { label: "🎚️ Suno prompt", prompt: "I just need a Suno-ready prompt. Ask who the song is for, their vibe and how to portray them, then output one tight prompt." },
   ];
 }
 
