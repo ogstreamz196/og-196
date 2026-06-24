@@ -26,10 +26,16 @@ import { cn } from "@/lib/utils";
 import { SongCard, type Song } from "@/components/SongCard";
 import { SongCardSkeleton } from "@/components/library/SongCardSkeleton";
 import {
+  EXAMPLE_PROMPT_CHIPS,
   META,
+  PERSONAL_DETAILS_MAX,
   POOLS,
+  SURPRISE_TEMPLATES,
+  SURPRISE_TITLES,
   initialChips,
+  personalDetailsCheck,
   pickFresh,
+  randomPick,
   type Category,
   type Selections,
 } from "@/lib/library-utils";
