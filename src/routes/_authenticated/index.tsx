@@ -28,6 +28,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { TelegramLinkStatus } from "@/components/dashboard/TelegramLinkStatus";
 
 export const Route = createFileRoute("/_authenticated/")({
   component: DashboardHome,
