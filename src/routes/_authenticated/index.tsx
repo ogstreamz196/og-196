@@ -157,7 +157,7 @@ function DashboardHome() {
                 <span aria-hidden className="absolute -bottom-1 left-0 h-[2px] w-full origin-left scale-x-0 bg-gradient-to-r from-primary via-accent to-primary animate-[shimmer_3s_ease-in-out_infinite] [animation:wc-pop_0.8s_0.3s_cubic-bezier(.34,1.56,.64,1)_forwards]" />
               </span>
             </p>
-            <h1 className="font-display mt-3 text-[clamp(2.25rem,12vw,6rem)] font-black leading-[1.02] tracking-[-0.02em] text-foreground [text-shadow:0_4px_28px_rgba(0,0,0,0.75)] [overflow-wrap:break-word] [word-break:normal]">
+            <h1 className="font-display mt-3 text-[clamp(2rem,4.5vw+1rem,5rem)] font-black leading-[1.05] tracking-[-0.02em] text-foreground [text-shadow:0_4px_28px_rgba(0,0,0,0.75)] [overflow-wrap:break-word] [word-break:normal] [text-wrap:balance] [font-variant-ligatures:none]">
               <span className="inline-block wc-pop">Hello,</span>{" "}
               <span className="font-display inline-flex not-italic font-black uppercase tracking-tight text-gradient-red [overflow-wrap:break-word] [word-break:normal]">
                 {displayName.split("").map((ch, i) => (
@@ -354,7 +354,7 @@ function PrimaryCard({
           <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground sm:text-base">{eyebrow}</p>
           <span className="h-px flex-1 bg-gradient-to-r from-white/15 to-transparent" />
         </div>
-        <h3 className="font-display mt-3 text-[clamp(1.5rem,12cqw,3.5rem)] font-black uppercase leading-[0.95] tracking-[-0.035em] drop-shadow-[0_6px_24px_rgba(80,60,255,0.35)] [hyphens:none] [word-break:keep-all] [overflow-wrap:normal] sm:mt-4">
+        <h3 className="font-display mt-3 text-[clamp(1.4rem,2.5vw+0.75rem,3rem)] font-black uppercase leading-[1.05] tracking-[-0.025em] drop-shadow-[0_6px_24px_rgba(80,60,255,0.35)] [hyphens:none] [word-break:keep-all] [overflow-wrap:normal] [text-wrap:balance] sm:mt-4">
           {title.split(" ").map((word, i, arr) => {
             const isLast = i === arr.length - 1;
             return (
