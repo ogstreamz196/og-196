@@ -195,7 +195,7 @@ function DashboardHome() {
           icon={<Music2 className="h-6 w-6" />}
           eyebrow="Music Hub"
           title="Create a song"
-          body="Generate, refine and remix tracks tailored to your taste with the OG engine."
+          body="Generate. Remix. Release."
           cta="Open Music Hub"
         />
         <PrimaryCard
@@ -203,11 +203,12 @@ function DashboardHome() {
           icon={<MessageSquareMore className="h-6 w-6" />}
           eyebrow="OG Messenger"
           title="Chat to OG Bot"
-          body="Talk to your AI co-producer, brainstorm lyrics, or just shoot the breeze."
+          body="Your AI co-producer."
           cta="Open Messenger"
           variant="accent"
         />
       </section>
+
 
       {/* Quick actions */}
       <section>
