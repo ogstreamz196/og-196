@@ -220,7 +220,7 @@ function ReferralsPage() {
         {/* Share card */}
         <section className="rounded-2xl border border-white/10 bg-card/60 p-5 shadow-glow">
           <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-            Your referral link
+            Your OG Link
           </div>
           <div className="mt-2 flex flex-col gap-2 sm:flex-row">
             <Input
