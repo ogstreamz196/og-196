@@ -529,24 +529,24 @@ function LibraryPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-8 pb-16 sm:gap-10">
-      {/* Hero — slim, single source of truth */}
-      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-border/60 pb-6">
-        <div className="min-w-0 space-y-1.5">
-          <div className="inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-            <Music4 className="h-3 w-3 text-primary" /> Music Hub
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 pb-16 sm:gap-10">
+      {/* Hero — tighter on mobile, stacked controls */}
+      <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-border/60 pb-4 sm:pb-6">
+        <div className="min-w-0 space-y-1">
+          <div className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+            <Music4 className="h-3 w-3 shrink-0 text-primary" /> Music Hub
           </div>
-          <h1 className="font-display text-3xl font-black leading-tight tracking-[-0.02em] sm:text-4xl">
+          <h1 className="font-display text-2xl font-black leading-tight tracking-[-0.02em] sm:text-4xl">
             Hey <span className="text-gradient-brand">{firstName}</span> — let's write a song.
           </h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="hidden text-sm text-muted-foreground sm:block">
             Tell us about them, pick a vibe, generate. 3 steps.
           </p>
         </div>
-        <div className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-primary/30 bg-card/60 px-3.5 py-2">
+        <div className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-primary/30 bg-card/60 px-2.5 py-1.5 sm:gap-2 sm:px-3.5 sm:py-2">
           <Coins className="h-4 w-4 text-primary" />
           <span className="text-sm font-black">{balance}</span>
-          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">coins</span>
+          <span className="hidden text-[10px] uppercase tracking-wider text-muted-foreground sm:inline">coins</span>
         </div>
       </header>
 
