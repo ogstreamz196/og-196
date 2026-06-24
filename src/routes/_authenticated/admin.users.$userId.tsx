@@ -20,6 +20,8 @@ import {
   sendTelegramDm,
   retryTelegramDm,
   listTelegramDmsForUser,
+  rotateTelegramLinkToken,
+  sendTelegramTestPing,
   type TelegramQueueRow,
 } from "@/lib/telegram-admin.functions";
 import { Wrench, Flame } from "lucide-react";
