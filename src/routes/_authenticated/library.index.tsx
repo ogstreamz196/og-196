@@ -227,7 +227,7 @@ function initialChips(): Record<Category, string[]> {
     genre: pickFresh("genre", new Set(), 4),
     mood: pickFresh("mood", new Set(), 4),
     theme: pickFresh("theme", new Set(), 4),
-    tempo: pickFresh("tempo", new Set(), 4),
+    
   };
 }
 
