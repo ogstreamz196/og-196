@@ -288,11 +288,61 @@ function PrimaryCard({
   variant?: "primary" | "accent";
 }) {
   const isAccent = variant === "accent";
+  const graphicRef = useRef<HTMLDivElement | null>(null);
+  const rootRef = useRef<HTMLAnchorElement | null>(null);
+  const draggingRef = useRef(false);
+
+  const applyParallax = useCallback((clientX: number, clientY: number) => {
+    const root = rootRef.current;
+    const el = graphicRef.current;
+    if (!root || !el) return;
+    const rect = root.getBoundingClientRect();
+    const nx = ((clientX - rect.left) / rect.width) * 2 - 1; // -1..1
+    const ny = ((clientY - rect.top) / rect.height) * 2 - 1;
+    el.style.setProperty("--px", `${nx * 18}px`);
+    el.style.setProperty("--py", `${ny * 18}px`);
+    el.style.setProperty("--rx", `${-ny * 12}deg`);
+    el.style.setProperty("--ry", `${nx * 12}deg`);
+    el.style.setProperty("--spin", `${nx * 25}deg`);
+  }, []);
+
+  const reset = useCallback(() => {
+    const el = graphicRef.current;
+    if (!el) return;
+    el.style.setProperty("--px", `0px`);
+    el.style.setProperty("--py", `0px`);
+    el.style.setProperty("--rx", `0deg`);
+    el.style.setProperty("--ry", `0deg`);
+    el.style.setProperty("--spin", `0deg`);
+  }, []);
+
+  const handlePointerMove = (e: ReactPointerEvent<HTMLAnchorElement>) => {
+    if (e.pointerType !== "mouse" && !draggingRef.current) return;
+    applyParallax(e.clientX, e.clientY);
+  };
+  const handlePointerDown = (e: ReactPointerEvent<HTMLAnchorElement>) => {
+    if (e.pointerType === "mouse") return;
+    draggingRef.current = true;
+    (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
+    applyParallax(e.clientX, e.clientY);
+  };
+  const handlePointerUp = (e: ReactPointerEvent<HTMLAnchorElement>) => {
+    draggingRef.current = false;
+    try { (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId); } catch {}
+    reset();
+  };
+
   return (
     <Link
+      ref={rootRef}
       to={to}
       preload="intent"
-      className="group @container relative flex flex-col justify-between overflow-hidden rounded-[2rem] border-2 border-white/15 bg-card/70 p-5 shadow-card backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:min-h-[560px] sm:p-12"
+      onPointerMove={handlePointerMove}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerLeave={reset}
+      onPointerCancel={reset}
+      className="group @container relative flex flex-col justify-between overflow-hidden rounded-[2rem] border-2 border-white/15 bg-card/70 p-5 shadow-card backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:min-h-[560px] sm:p-12 touch-none [perspective:1000px]"
     >
       {/* Ambient gradient layers */}
       <div
@@ -306,8 +356,11 @@ function PrimaryCard({
       {/* HERO VISUAL — big centred animated graphic, takes the eye first */}
       <div className="pointer-events-none absolute -right-10 -top-10 h-56 w-56 rounded-full bg-primary/20 blur-3xl transition-transform duration-700 group-hover:scale-125" />
       <div className="pointer-events-none absolute -left-16 bottom-0 h-48 w-48 rounded-full bg-accent/20 blur-3xl transition-transform duration-700 group-hover:-translate-y-2" />
-      <div className="pointer-events-none absolute inset-0 grid place-items-center">
-        <div className="relative">
+      <div className="pointer-events-none absolute inset-0 grid place-items-center [perspective:1000px]">
+        <div
+          ref={graphicRef}
+          className="relative will-change-transform transition-transform duration-300 ease-out [transform:translate3d(var(--px,0),var(--py,0),0)_rotateX(var(--rx,0))_rotateY(var(--ry,0))]"
+        >
           {/* pulsing rings */}
           <span aria-hidden className="absolute inset-0 -m-6 rounded-full border-2 border-primary/30 animate-[ping_3s_ease-out_infinite]" />
           <span aria-hidden className="absolute inset-0 -m-12 rounded-full border-2 border-accent/20 animate-[ping_4.5s_ease-out_infinite]" />
@@ -315,7 +368,7 @@ function PrimaryCard({
           {/* main graphic */}
           <div
             className={
-              "relative grid h-44 w-44 place-items-center rounded-full border-2 border-white/15 shadow-glow transition-transform duration-700 group-hover:scale-110 sm:h-72 sm:w-72 " +
+              "relative grid h-44 w-44 place-items-center rounded-full border-2 border-white/15 shadow-glow transition-transform duration-500 ease-out group-hover:scale-110 sm:h-72 sm:w-72 [transform:rotate(var(--spin,0))] " +
               (isAccent ? "bg-gradient-to-br from-accent/30 to-primary/40" : "bg-gradient-to-br from-primary/40 to-accent/30")
             }
             style={{ animation: "wc-float 6s ease-in-out infinite" }}
@@ -332,6 +385,7 @@ function PrimaryCard({
           </span>
         </div>
       </div>
+
       {/* Equalizer bars bottom accent */}
       <div className="pointer-events-none absolute bottom-6 left-1/2 flex -translate-x-1/2 items-end gap-1 opacity-70 transition-opacity duration-300 group-hover:opacity-100">
         {[0.4, 0.7, 0.5, 0.9, 0.6, 0.8, 0.45, 0.85, 0.55, 0.7].map((h, i) => (
