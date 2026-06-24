@@ -297,19 +297,36 @@
   html[data-density="spacious"]    { --density-scale: 1.15; --line-height-body: 1.85; }
   html[data-density] body { line-height: var(--line-height-body); }
 
-  /* Responsive typography scale — bubble/cartoon display face needs open tracking, not negative. */
+  /* Responsive typography scale — container-aware so titles always fit their parent. */
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
     letter-spacing: 0.005em;
-    font-weight: 400; /* Bagel Fat One is single-weight */
+    font-weight: 400;
     text-transform: none;
+    /* Safe overflow: wrap long words, hyphenate, never punch out of parent. */
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-break: normal;
+    hyphens: auto;
+    text-wrap: balance;
+    container-type: inline-size;
   }
-  h1 { font-size: clamp(2rem, 3vw + 1rem, 3.75rem); line-height: 1; }
-  h2 { font-size: clamp(1.55rem, 1.8vw + 0.95rem, 2.625rem); line-height: 1.05; }
-  h3 { font-size: clamp(1.2rem, 1.05vw + 0.85rem, 1.75rem); line-height: 1.12; }
-  h4 { font-size: clamp(1.05rem, 0.65vw + 0.85rem, 1.3rem); line-height: 1.2; }
+  /* Container-query units (cqi = 1% of inline container size) keep text fitting
+     the card/section it lives in, not just the viewport. Hard caps via min/max. */
+  h1 { font-size: clamp(1.5rem, min(3vw + 1rem, 9cqi), 3.75rem); line-height: 1.05; }
+  h2 { font-size: clamp(1.25rem, min(1.8vw + 0.95rem, 8cqi), 2.625rem); line-height: 1.1; }
+  h3 { font-size: clamp(1.05rem, min(1.05vw + 0.85rem, 7cqi), 1.75rem); line-height: 1.15; }
+  h4 { font-size: clamp(0.95rem, min(0.65vw + 0.85rem, 6cqi), 1.3rem); line-height: 1.2; }
+  /* shadcn card titles + any explicit display text — same safe-fit treatment. */
+  [data-slot="card-title"], .card-title, .font-display {
+    max-width: 100%;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    text-wrap: balance;
+  }
   p  { line-height: var(--line-height-body, 1.7); }
   .prose p + p { margin-top: 0.75em; }
+
 
   .font-display {
     font-family: var(--font-display);
