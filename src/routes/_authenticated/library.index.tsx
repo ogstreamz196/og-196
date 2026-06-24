@@ -368,9 +368,6 @@ function LibraryPage() {
           <h1 className="font-display text-3xl font-black leading-[1.05] tracking-[-0.02em] sm:text-5xl lg:text-6xl">
             Hey <span className="text-gradient-brand">{firstName}</span> — let's write a song.
           </h1>
-          <p className="hidden text-base text-muted-foreground sm:block sm:text-lg">
-            Tell us about them, pick a vibe, generate. Three steps to a finished track.
-          </p>
         </div>
         <div className="inline-flex shrink-0 items-center gap-2 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 to-card/60 px-3 py-2 shadow-[0_8px_28px_-12px_oklch(0.7_0.2_300_/_0.45)] sm:gap-2.5 sm:px-4 sm:py-2.5">
           <Coins className="h-5 w-5 text-primary" />
@@ -482,9 +479,6 @@ function LibraryPage() {
         >
           Name your song
         </Label>
-        <p className="mt-2 text-sm text-muted-foreground sm:text-base">
-          A short working title — or tap <span className="font-semibold text-foreground">Surprise me</span>.
-        </p>
         <div className="mt-4 flex flex-wrap items-stretch gap-2">
 
           <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-primary/20 text-xl sm:h-14 sm:w-14 sm:text-2xl">
@@ -533,9 +527,6 @@ function LibraryPage() {
           <h2 className="font-display text-3xl font-black leading-[1.1] tracking-tight sm:text-4xl">
             Describe your song
           </h2>
-          <p className="text-sm text-muted-foreground sm:text-base">
-            Who's it for — names, moments, inside jokes. The more specific, the sharper the song.
-          </p>
         </header>
 
         {/* Personal details — the main writing area */}
@@ -763,10 +754,7 @@ function LibraryPage() {
               <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary/20 text-primary">
                 <Mic2 className="h-4 w-4" />
               </div>
-              <div>
-                <p className="text-sm font-bold">Your lyrics</p>
-                <p className="text-[11px] text-muted-foreground">Edit freely before generating</p>
-              </div>
+              <p className="text-sm font-bold">Your lyrics</p>
             </div>
             <Button variant="ghost" size="sm" onClick={generateLyrics} disabled={genLyrics} className="gap-1.5">
               <RefreshCw className={`h-3.5 w-3.5 ${genLyrics ? "animate-spin" : ""}`} />
@@ -785,9 +773,6 @@ function LibraryPage() {
             className="min-h-[280px] resize-y rounded-2xl border-white/10 bg-background/40 font-mono text-sm leading-relaxed [-webkit-user-select:none] [user-select:none]"
             style={{ WebkitUserSelect: "none", userSelect: "none" }}
           />
-          <p className="text-[11px] text-muted-foreground italic">
-            🔒 Lyrics are protected — copy and right-click are disabled.
-          </p>
 
           <div className="flex flex-wrap items-center justify-end gap-3 rounded-2xl border border-white/10 bg-background/40 p-4">
             <Button
