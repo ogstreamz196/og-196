@@ -44,7 +44,7 @@ const primaryNav: NavItem[] = [
 ];
 
 const accountNav: NavItem[] = [
-  { title: "Referrals", url: "/referrals", icon: Gift },
+  { title: "Earnings", url: "/referrals", icon: Gift },
   { title: "Buy Coins", url: "/buy-coins", icon: Coins },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
