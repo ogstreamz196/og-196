@@ -470,12 +470,24 @@ function SectionHeader({
 
 type EditingField = "label" | "description" | "coins" | "price" | null;
 
+const RARITY_TIERS = [
+  { name: "Common",    Icon: Coins,  ring: "ring-slate-400/40",   glow: "",                   pill: "bg-slate-500/15 text-slate-300 ring-slate-400/30" },
+  { name: "Rare",      Icon: Zap,    ring: "ring-sky-400/50",     glow: "shadow-[0_0_30px_-8px_oklch(0.7_0.18_240)]", pill: "bg-sky-500/15 text-sky-300 ring-sky-400/40" },
+  { name: "Epic",      Icon: Gem,    ring: "ring-purple-400/60",  glow: "shadow-[0_0_40px_-10px_oklch(0.7_0.22_300)]", pill: "bg-purple-500/15 text-purple-300 ring-purple-400/40" },
+  { name: "Legendary", Icon: Trophy, ring: "ring-coin/70",        glow: "shadow-[0_0_60px_-10px_oklch(0.8_0.18_85)]",  pill: "bg-coin/20 text-coin ring-coin/50" },
+  { name: "Mythic",    Icon: Flame,  ring: "ring-red-400/60",     glow: "shadow-[0_0_60px_-10px_oklch(0.7_0.22_25)]",  pill: "bg-red-500/15 text-red-300 ring-red-400/40" },
+] as const;
+
 function PackCard({
   pack,
+  tierIndex,
+  totalTiers,
   basePerCoin,
   onBuy,
 }: {
   pack: CoinPack;
+  tierIndex: number;
+  totalTiers: number;
   basePerCoin: number;
   onBuy: (effective: CoinPack) => void;
 }) {
@@ -483,8 +495,6 @@ function PackCard({
   const { enabled } = useAdminEditMode();
   const { get } = useSiteContent();
   const setMut = useSetSiteContent();
-  // Edit mode is admin-only (AdminEditModeProvider already enforces this).
-  // The set_site_content RPC re-checks the role server-side.
   const canEdit = isAdmin && enabled;
 
   const raw = get(packOverrideKey(pack.bundleId), "");
@@ -496,6 +506,12 @@ function PackCard({
   const perCoin = effective.priceCents / 100 / effective.coins;
   const savingsPct = basePerCoin > 0 ? Math.round((1 - perCoin / basePerCoin) * 100) : 0;
   const accent = pack.bestValue || pack.popular;
+  // Map pack position → rarity tier (last pack always gets the top tier).
+  const tierIdx = totalTiers <= 1
+    ? 0
+    : Math.min(RARITY_TIERS.length - 1, Math.round((tierIndex / (totalTiers - 1)) * (RARITY_TIERS.length - 1)));
+  const tier = RARITY_TIERS[tierIdx];
+  const TierIcon = tier.Icon;
 
   const [field, setField] = useState<EditingField>(null);
   const [draft, setDraft] = useState("");
