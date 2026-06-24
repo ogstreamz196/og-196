@@ -30,6 +30,7 @@ import { Route as AuthenticatedLibrarySongIdRouteImport } from './routes/_authen
 import { Route as AuthenticatedBuyCoinsReturnRouteImport } from './routes/_authenticated/buy-coins.return'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedAdminUserSettingsRouteImport } from './routes/_authenticated/admin.user-settings'
+import { Route as AuthenticatedAdminOnboardingRouteImport } from './routes/_authenticated/admin.onboarding'
 import { Route as AuthenticatedAdminOgPersonaRouteImport } from './routes/_authenticated/admin.og-persona'
 import { Route as AuthenticatedAdminDebugContextRouteImport } from './routes/_authenticated/admin.debug-context'
 import { Route as AuthenticatedAdminApiKeysRouteImport } from './routes/_authenticated/admin.api-keys'
@@ -146,6 +147,12 @@ const AuthenticatedAdminUserSettingsRoute =
     path: '/admin/user-settings',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminOnboardingRoute =
+  AuthenticatedAdminOnboardingRouteImport.update({
+    id: '/admin/onboarding',
+    path: '/admin/onboarding',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminOgPersonaRoute =
   AuthenticatedAdminOgPersonaRouteImport.update({
     id: '/admin/og-persona',
@@ -199,6 +206,7 @@ export interface FileRoutesByFullPath {
   '/admin/api-keys': typeof AuthenticatedAdminApiKeysRoute
   '/admin/debug-context': typeof AuthenticatedAdminDebugContextRoute
   '/admin/og-persona': typeof AuthenticatedAdminOgPersonaRoute
+  '/admin/onboarding': typeof AuthenticatedAdminOnboardingRoute
   '/admin/user-settings': typeof AuthenticatedAdminUserSettingsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
@@ -227,6 +235,7 @@ export interface FileRoutesByTo {
   '/admin/api-keys': typeof AuthenticatedAdminApiKeysRoute
   '/admin/debug-context': typeof AuthenticatedAdminDebugContextRoute
   '/admin/og-persona': typeof AuthenticatedAdminOgPersonaRoute
+  '/admin/onboarding': typeof AuthenticatedAdminOnboardingRoute
   '/admin/user-settings': typeof AuthenticatedAdminUserSettingsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
@@ -257,6 +266,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/api-keys': typeof AuthenticatedAdminApiKeysRoute
   '/_authenticated/admin/debug-context': typeof AuthenticatedAdminDebugContextRoute
   '/_authenticated/admin/og-persona': typeof AuthenticatedAdminOgPersonaRoute
+  '/_authenticated/admin/onboarding': typeof AuthenticatedAdminOnboardingRoute
   '/_authenticated/admin/user-settings': typeof AuthenticatedAdminUserSettingsRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/_authenticated/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
@@ -287,6 +297,7 @@ export interface FileRouteTypes {
     | '/admin/api-keys'
     | '/admin/debug-context'
     | '/admin/og-persona'
+    | '/admin/onboarding'
     | '/admin/user-settings'
     | '/admin/users'
     | '/buy-coins/return'
@@ -315,6 +326,7 @@ export interface FileRouteTypes {
     | '/admin/api-keys'
     | '/admin/debug-context'
     | '/admin/og-persona'
+    | '/admin/onboarding'
     | '/admin/user-settings'
     | '/admin/users'
     | '/buy-coins/return'
@@ -344,6 +356,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/api-keys'
     | '/_authenticated/admin/debug-context'
     | '/_authenticated/admin/og-persona'
+    | '/_authenticated/admin/onboarding'
     | '/_authenticated/admin/user-settings'
     | '/_authenticated/admin/users'
     | '/_authenticated/buy-coins/return'
@@ -519,6 +532,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminUserSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/onboarding': {
+      id: '/_authenticated/admin/onboarding'
+      path: '/admin/onboarding'
+      fullPath: '/admin/onboarding'
+      preLoaderRoute: typeof AuthenticatedAdminOnboardingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/og-persona': {
       id: '/_authenticated/admin/og-persona'
       path: '/admin/og-persona'
@@ -588,6 +608,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminApiKeysRoute: typeof AuthenticatedAdminApiKeysRoute
   AuthenticatedAdminDebugContextRoute: typeof AuthenticatedAdminDebugContextRoute
   AuthenticatedAdminOgPersonaRoute: typeof AuthenticatedAdminOgPersonaRoute
+  AuthenticatedAdminOnboardingRoute: typeof AuthenticatedAdminOnboardingRoute
   AuthenticatedAdminUserSettingsRoute: typeof AuthenticatedAdminUserSettingsRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRouteWithChildren
   AuthenticatedBuyCoinsReturnRoute: typeof AuthenticatedBuyCoinsReturnRoute
@@ -607,6 +628,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminApiKeysRoute: AuthenticatedAdminApiKeysRoute,
   AuthenticatedAdminDebugContextRoute: AuthenticatedAdminDebugContextRoute,
   AuthenticatedAdminOgPersonaRoute: AuthenticatedAdminOgPersonaRoute,
+  AuthenticatedAdminOnboardingRoute: AuthenticatedAdminOnboardingRoute,
   AuthenticatedAdminUserSettingsRoute: AuthenticatedAdminUserSettingsRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRouteWithChildren,
   AuthenticatedBuyCoinsReturnRoute: AuthenticatedBuyCoinsReturnRoute,
