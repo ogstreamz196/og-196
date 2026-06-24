@@ -168,7 +168,7 @@ function DashboardHome() {
               ))}
             </span>
           </div>
-          <div className="order-1 min-w-0 rounded-3xl bg-background/35 p-5 text-center backdrop-blur-md ring-2 ring-white/10 transition-transform duration-500 group-hover/welcome:-translate-y-1 sm:order-none sm:flex-1 sm:p-8">
+          <div className="order-1 w-full min-w-0 basis-full rounded-3xl bg-background/35 p-5 text-center backdrop-blur-md ring-2 ring-white/10 transition-transform duration-500 group-hover/welcome:-translate-y-1 sm:order-none sm:p-8">
             <p className="inline-flex items-center justify-center gap-2 text-xs uppercase tracking-[0.28em] text-muted-foreground sm:text-xl">
               <span className="inline-block animate-[wiggle_1.6s_ease-in-out_infinite] [transform-origin:70%_70%]">👋</span>
               <span className="relative">
