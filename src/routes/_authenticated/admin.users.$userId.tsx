@@ -409,6 +409,23 @@ function TelegramDmCard({
   const sendFn = useServerFn(sendTelegramDm);
   const retryFn = useServerFn(retryTelegramDm);
   const listFn = useServerFn(listTelegramDmsForUser);
+  const rotateFn = useServerFn(rotateTelegramLinkToken);
+  const pingFn = useServerFn(sendTelegramTestPing);
+
+  const rotate = useMutation({
+    mutationFn: async () => rotateFn({ data: { userId } }),
+    onSuccess: (res) => {
+      setActiveToken(res.token);
+      toast.success("Fresh start-link token minted");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const testPing = useMutation({
+    mutationFn: async () => pingFn({ data: { userId } }),
+    onSuccess: () => toast.success("Test ping sent ✅"),
+    onError: (e: Error) => toast.error(`Ping failed: ${e.message}`),
+  });
 
   const queueQ = useQuery({
     queryKey: ["telegram-dm-queue", userId],
