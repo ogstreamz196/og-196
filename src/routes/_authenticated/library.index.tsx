@@ -1120,8 +1120,6 @@ function CategoryCard({
   cat,
   value,
   chips,
-  note,
-  onNoteChange,
   onSelect,
   onPickChip,
   onRefresh,
@@ -1129,12 +1127,11 @@ function CategoryCard({
   cat: Category;
   value: string | undefined;
   chips: string[];
-  note: string;
-  onNoteChange: (v: string) => void;
   onSelect: (v: string) => void;
   onPickChip: (v: string) => void;
   onRefresh: () => void;
 }) {
+
   const meta = META[cat];
   const Icon = meta.icon;
   return (
