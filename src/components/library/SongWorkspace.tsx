@@ -72,11 +72,15 @@ export function SongWorkspace({ song, onSaved }: Props) {
   const [title, setTitle] = useState(song.title ?? "");
   const [brief, setBrief] = useState(song.prompt ?? "");
   const [lyrics, setLyrics] = useState(song.lyrics ?? "");
+  const [language, setLanguage] = useState(() => detectLanguage(song.prompt));
   const [saving, setSaving] = useState(false);
   const [genLyrics, setGenLyrics] = useState(false);
   const [genPreview, setGenPreview] = useState(false);
   const [unlocking, setUnlocking] = useState(false);
   const lyricsRef = useRef<HTMLTextAreaElement | null>(null);
+
+  const briefLanguage = useMemo(() => detectLanguage(brief), [brief]);
+  const languageChanged = language !== briefLanguage;
 
 
   const {
