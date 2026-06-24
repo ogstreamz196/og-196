@@ -407,59 +407,93 @@ export function OgChat({
       )}
     >
       {showHeader && (
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 px-3 py-2 text-xs">
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <OgAvatar size={18} />
-            <span>
-              OG Bot · {balance} coin{balance === 1 ? "" : "s"}
+        <div className="space-y-2.5 border-b border-border/60 bg-muted/30 px-3 py-3">
+          {/* Foul-mouth hero toggle — the main highlight */}
+          <button
+            type="button"
+            onClick={toggleFoul}
+            disabled={setFoulMouth.isPending || mode === "safe"}
+            aria-pressed={foulActive}
+            aria-label="Toggle foul mouth"
+            className={cn(
+              "group relative flex w-full items-center justify-between gap-3 overflow-hidden rounded-2xl border-2 px-4 py-3 text-left shadow-sm transition-all active:scale-[0.99] disabled:opacity-50",
+              foulActive
+                ? "border-destructive bg-gradient-to-br from-destructive/25 via-destructive/15 to-destructive/10 shadow-[0_6px_24px_-8px_hsl(var(--destructive)/0.6)] hover:shadow-[0_8px_28px_-6px_hsl(var(--destructive)/0.7)]"
+                : "border-border bg-card hover:border-destructive/60 hover:bg-destructive/5",
+            )}
+          >
+            <span className="flex min-w-0 items-center gap-3">
+              <span
+                className={cn(
+                  "grid h-11 w-11 shrink-0 place-items-center rounded-xl text-2xl transition-transform group-hover:scale-110",
+                  foulActive
+                    ? "bg-destructive text-destructive-foreground shadow-[0_0_18px_-2px_hsl(var(--destructive)/0.8)]"
+                    : "bg-muted text-muted-foreground",
+                )}
+                aria-hidden="true"
+              >
+                {foulActive ? "🤬" : <Skull className="h-5 w-5" />}
+              </span>
+              <span className="flex min-w-0 flex-col leading-tight">
+                <span className={cn(
+                  "text-[15px] font-black uppercase tracking-wide",
+                  foulActive ? "text-destructive" : "text-foreground",
+                )}>
+                  Foul Mouth
+                </span>
+                <span className="truncate text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  {mode === "safe"
+                    ? "Switch to OG mode first"
+                    : foulActive
+                      ? "ON · full savage, no filter"
+                      : "OFF · clean & friendly — tap to unleash"}
+                </span>
+              </span>
             </span>
-          </div>
-          <div className="flex flex-wrap items-center gap-1.5">
+            {/* Big visual switch */}
+            <span
+              className={cn(
+                "relative h-7 w-12 shrink-0 rounded-full border-2 transition-colors",
+                foulActive
+                  ? "border-destructive bg-destructive"
+                  : "border-border bg-muted",
+              )}
+              aria-hidden="true"
+            >
+              <span
+                className={cn(
+                  "absolute top-1/2 h-5 w-5 -translate-y-1/2 rounded-full bg-background shadow-md transition-all",
+                  foulActive ? "left-[calc(100%-1.4rem)]" : "left-0.5",
+                )}
+              />
+            </span>
+          </button>
+
+          {/* Secondary controls row */}
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <span className="mr-auto inline-flex items-center gap-1.5 text-muted-foreground">
+              <OgAvatar size={18} />
+              <span className="font-semibold">{balance} coin{balance === 1 ? "" : "s"}</span>
+            </span>
             <button
               type="button"
               onClick={toggleMode}
               className={cn(
-                "inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] font-semibold transition",
+                "inline-flex items-center gap-1.5 rounded-lg border-2 px-3 py-1.5 text-[12px] font-bold transition",
                 mode === "og"
-                  ? "border-primary/40 bg-primary/10 text-primary"
+                  ? "border-primary/60 bg-primary/15 text-primary"
                   : "border-border bg-muted text-muted-foreground",
               )}
               title={mode === "og" ? "OG mode — tap for Safe" : "Safe mode — tap for OG"}
             >
-              {mode === "og" ? <Sparkles className="h-3 w-3" /> : <ShieldCheck className="h-3 w-3" />}
-              {mode === "og" ? "OG" : "Safe"}
-            </button>
-            <button
-              type="button"
-              onClick={toggleFoul}
-              disabled={setFoulMouth.isPending || mode === "safe"}
-              className={cn(
-                "inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] font-semibold transition disabled:opacity-40",
-                foulActive
-                  ? "border-destructive/40 bg-destructive/10 text-destructive hover:bg-destructive/20"
-                  : "border-border bg-muted text-muted-foreground hover:bg-muted/80",
-              )}
-              title={
-                mode === "safe"
-                  ? "Switch to OG mode to enable foul mouth"
-                  : foulActive
-                    ? "Foul mouth ON — tap for clean"
-                    : "Foul mouth OFF — tap to unleash"
-              }
-              aria-label="Toggle foul mouth"
-            >
-              {foulActive ? (
-                <span className="text-sm leading-none">🖕</span>
-              ) : (
-                <Skull className="h-3 w-3" />
-              )}
-              {foulActive ? "Foul" : "Turn on OG MODE"}
+              {mode === "og" ? <Sparkles className="h-3.5 w-3.5" /> : <ShieldCheck className="h-3.5 w-3.5" />}
+              {mode === "og" ? "OG mode" : "Safe mode"}
             </button>
             {isVip ? (
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
-                className="inline-flex items-center rounded-md border border-amber-400/40 bg-amber-400/10 px-2 py-1 text-[11px] font-semibold text-amber-600 dark:text-amber-300 transition hover:bg-amber-400/20 focus:outline-none focus:ring-2 focus:ring-amber-400/50"
+                className="inline-flex items-center rounded-lg border-2 border-amber-400/50 bg-amber-400/10 px-3 py-1.5 text-[12px] font-bold text-amber-600 dark:text-amber-300 transition hover:bg-amber-400/20 focus:outline-none focus:ring-2 focus:ring-amber-400/50"
                 title="Reply language (VIP)"
                 aria-label="Reply language"
               >
@@ -471,20 +505,20 @@ export function OgChat({
               <Link
                 to="/buy-coins"
                 search={{ flow: "vip" } as never}
-                className="inline-flex items-center gap-1 rounded-md border border-border bg-muted px-2 py-1 text-[11px] font-semibold text-muted-foreground transition hover:bg-muted/80"
+                className="inline-flex items-center gap-1.5 rounded-lg border-2 border-border bg-muted px-3 py-1.5 text-[12px] font-bold text-muted-foreground transition hover:bg-muted/80"
                 title="VIP unlocks any language"
               >
-                🌐 English <Crown className="h-3 w-3 text-amber-500" />
+                🌐 English <Crown className="h-3.5 w-3.5 text-amber-500" />
               </Link>
             )}
             {messages.length > 0 && (
               <button
                 type="button"
                 onClick={clearChat}
-                className="inline-flex items-center gap-1 rounded-md border border-border bg-muted px-2 py-1 text-[11px] font-medium text-muted-foreground transition hover:bg-muted/80"
+                className="inline-flex items-center gap-1 rounded-lg border-2 border-border bg-muted px-2.5 py-1.5 text-[12px] font-semibold text-muted-foreground transition hover:bg-muted/80"
                 title="Clear chat history"
               >
-                <Trash2 className="h-3 w-3" /> Clear
+                <Trash2 className="h-3.5 w-3.5" /> Clear
               </button>
             )}
           </div>
