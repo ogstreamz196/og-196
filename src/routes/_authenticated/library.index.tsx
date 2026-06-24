@@ -859,7 +859,7 @@ function LibraryPage() {
           </span>
         </header>
 
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 items-stretch gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {(["language", "genre", "mood", "theme"] as Category[]).map((cat) => (
             <CategoryCard
               key={cat}
@@ -872,6 +872,7 @@ function LibraryPage() {
             />
           ))}
         </div>
+
 
         {/* Compact mobile progress */}
         <div className="space-y-1.5 sm:hidden">
