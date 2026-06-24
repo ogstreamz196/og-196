@@ -717,7 +717,7 @@ export function OgChat({
         {/* Unified composer pill — attachment | mic | textarea | send (Telegram/WhatsApp pattern) */}
         <div
           className={cn(
-            "flex items-end gap-1 rounded-3xl border border-border bg-background px-2 py-1.5 shadow-sm transition focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/20",
+            "flex items-end gap-1.5 rounded-full border border-white/10 bg-background/80 px-3 py-2 shadow-[0_14px_36px_-18px_rgba(0,0,0,0.55)] ring-1 ring-white/5 backdrop-blur-xl transition focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/30 sm:px-4 sm:py-2.5",
             (isOut || !user) && "opacity-70",
           )}
         >
@@ -727,9 +727,9 @@ export function OgChat({
             disabled={!user || m.isPending}
             aria-label="Attach image"
             title="Attach image"
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:opacity-40"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-white/5 hover:text-foreground disabled:opacity-40"
           >
-            <Paperclip className="h-[18px] w-[18px]" />
+            <Paperclip className="h-5 w-5" />
           </button>
           <button
             type="button"
@@ -738,18 +738,18 @@ export function OgChat({
             aria-label={recording ? "Stop recording" : "Voice input"}
             title={recording ? "Stop recording" : "Voice input"}
             className={cn(
-              "grid h-9 w-9 shrink-0 place-items-center rounded-full transition disabled:opacity-40",
+              "grid h-11 w-11 shrink-0 place-items-center rounded-full transition disabled:opacity-40",
               recording
                 ? "bg-destructive text-destructive-foreground hover:bg-destructive/90 animate-pulse"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
             )}
           >
             {transcribing ? (
-              <Loader2 className="h-[18px] w-[18px] animate-spin" />
+              <Loader2 className="h-5 w-5 animate-spin" />
             ) : recording ? (
-              <MicOff className="h-[18px] w-[18px]" />
+              <MicOff className="h-5 w-5" />
             ) : (
-              <Mic className="h-[18px] w-[18px]" />
+              <Mic className="h-5 w-5" />
             )}
           </button>
           <textarea
@@ -759,7 +759,7 @@ export function OgChat({
               setInput(e.target.value);
               const el = e.currentTarget;
               el.style.height = "0px";
-              el.style.height = Math.min(el.scrollHeight, 160) + "px";
+              el.style.height = Math.min(el.scrollHeight, 180) + "px";
             }}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
@@ -782,22 +782,23 @@ export function OgChat({
             disabled={m.isPending || isOut || !user || transcribing}
             maxLength={2000}
             autoFocus
-            className="min-h-[36px] max-h-[160px] flex-1 resize-none bg-transparent px-2 py-1.5 text-[15px] leading-snug placeholder:text-muted-foreground/70 focus:outline-none disabled:cursor-not-allowed"
+            className="min-h-[40px] max-h-[180px] flex-1 resize-none bg-transparent px-3 py-2 text-base leading-relaxed placeholder:text-muted-foreground/70 focus:outline-none disabled:cursor-not-allowed sm:text-lg"
           />
           <button
             type="submit"
             disabled={m.isPending || (!input.trim() && !attachment) || isOut || !user}
             aria-label="Send"
             title="Send"
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground shadow-[0_4px_12px_-4px_hsl(var(--primary)/0.5)] transition hover:scale-105 active:scale-95 disabled:bg-muted disabled:text-muted-foreground disabled:shadow-none"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-gradient-brand text-primary-foreground shadow-[0_8px_22px_-6px_hsl(var(--primary)/0.6)] ring-1 ring-primary/40 transition hover:scale-105 active:scale-95 disabled:bg-muted disabled:text-muted-foreground disabled:shadow-none disabled:ring-0"
           >
-            {m.isPending ? <Loader2 className="h-[18px] w-[18px] animate-spin" /> : <Send className="h-[18px] w-[18px]" />}
+            {m.isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
           </button>
         </div>
-        <p className="mt-1.5 px-2 text-[10px] text-muted-foreground/70">
-          Enter to send · Shift+Enter for newline · {balance} coin{balance === 1 ? "" : "s"} left
+        <p className="mt-2 px-2 text-xs font-medium text-muted-foreground/80">
+          Enter to send · Shift+Enter for newline · <span className="font-bold text-foreground/90">{balance}</span> coin{balance === 1 ? "" : "s"} left
         </p>
       </form>
+
 
 
     </div>
