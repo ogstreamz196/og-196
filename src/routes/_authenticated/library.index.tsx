@@ -702,19 +702,20 @@ function LibraryPage() {
       {/* Step 1 — Personal */}
       <section
         id="personal-brief"
-        className="flex flex-col gap-5 rounded-2xl border border-border bg-card/60 p-5 sm:p-6"
+        className="flex flex-col gap-6 rounded-3xl border border-white/10 bg-card/70 p-6 shadow-[0_18px_50px_-28px_rgba(0,0,0,0.6)] ring-1 ring-white/5 backdrop-blur-xl sm:p-8"
       >
-        <header className="space-y-1.5">
-          <div className="inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
-            <Sparkles className="h-3 w-3" /> Step 2 · Who's it for?
+        <header className="space-y-2">
+          <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.24em] text-primary">
+            <Sparkles className="h-3.5 w-3.5" /> Step 2 · Who's it for?
           </div>
-          <h2 className="font-display text-2xl font-black leading-tight tracking-tight sm:text-3xl">
+          <h2 className="font-display text-3xl font-black leading-[1.1] tracking-tight sm:text-4xl">
             Tell us about them
           </h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-base text-muted-foreground sm:text-lg">
             Partner, friend, parent, ex, even yourself — the more specific, the sharper the song.
           </p>
         </header>
+
 
 
 
