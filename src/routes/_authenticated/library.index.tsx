@@ -358,14 +358,14 @@ function LibraryPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 pb-20 sm:gap-12">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 pb-20 sm:gap-12">
       {/* Hero — premium kicker, oversized headline, generous breathing room */}
       <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b border-white/10 pb-6 sm:pb-8">
         <div className="min-w-0 space-y-2">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.28em] text-primary shadow-[0_0_24px_-10px_oklch(0.7_0.2_300_/_0.8)]">
             <Music4 className="h-3.5 w-3.5 shrink-0" /> Music Hub
           </div>
-          <h1 className="font-display text-3xl font-black leading-[1.05] tracking-[-0.02em] sm:text-5xl lg:text-6xl">
+          <h1 className="font-display text-2xl font-black leading-[1.1] tracking-[-0.02em] break-words sm:text-5xl lg:text-6xl">
             Hey <span className="text-gradient-brand">{firstName}</span> — let's write a song.
           </h1>
         </div>
@@ -382,13 +382,13 @@ function LibraryPage() {
 
       {/* Library — previews created (above creation options) */}
       <section>
-        <div className="mb-5 flex items-end justify-between gap-3">
-          <div className="space-y-1">
-            <div className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
+        <div className="mb-5 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
+          <div className="min-w-0 space-y-1">
+            <div className="truncate text-xs font-bold uppercase tracking-[0.24em] text-primary">
               <Disc3 className="mr-1.5 inline h-3.5 w-3.5 -translate-y-0.5" />
               MusicHUB · Previews
             </div>
-            <h2 className="font-display text-2xl font-black tracking-tight sm:text-3xl">
+            <h2 className="truncate font-display text-xl font-black tracking-tight sm:text-3xl">
               Your tracks
             </h2>
           </div>
