@@ -504,58 +504,27 @@ function LibraryPage() {
   }
 
   return (
-    <div className="flex w-full flex-col space-y-10 pb-16 sm:space-y-12">
-      {/* Hero */}
-      <header className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-primary/25 via-fuchsia-500/15 to-background p-7 shadow-card sm:p-12">
-
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-primary/30 blur-3xl"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -bottom-24 -left-10 h-72 w-72 rounded-full bg-fuchsia-500/20 blur-3xl"
-        />
-        <div className="relative grid gap-5 sm:grid-cols-[1fr_auto] sm:items-end">
-          <div className="min-w-0 space-y-3">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground backdrop-blur">
-              <Music4 className="h-3 w-3 text-primary" /> Create a song
-            </div>
-            <h1 className="font-display text-4xl font-black leading-[0.95] tracking-[-0.03em] sm:text-6xl">
-              Hey <em className="not-italic bg-gradient-to-br from-slate-100 via-white to-slate-400 bg-clip-text text-transparent drop-shadow-[0_1px_0_rgba(0,0,0,0.4)]">{firstName}</em>.
-            </h1>
-            <p className="text-base text-muted-foreground sm:text-lg">
-              Pick your vibe. We'll do the rest.
-            </p>
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-8 pb-16 sm:gap-10">
+      {/* Hero — slim, single source of truth */}
+      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-border/60 pb-6">
+        <div className="min-w-0 space-y-1.5">
+          <div className="inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+            <Music4 className="h-3 w-3 text-primary" /> Music Hub
           </div>
-          <div className="flex shrink-0 items-center gap-2 self-start sm:self-end">
-            <div className="inline-flex items-center gap-2 rounded-2xl border border-primary/30 bg-background/60 px-4 py-2.5 shadow-glow backdrop-blur">
-              <Coins className="h-5 w-5 text-primary" />
-              <div className="leading-tight">
-                <div className="text-base font-black">{balance}</div>
-                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                  coins
-                </div>
-              </div>
-            </div>
-          </div>
+          <h1 className="font-display text-3xl font-black leading-tight tracking-[-0.02em] sm:text-4xl">
+            Hey <span className="text-gradient-brand">{firstName}</span> — let's write a song.
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Tell us about them, pick a vibe, generate. 3 steps.
+          </p>
         </div>
-
-        {/* Progress */}
-        <div className="relative mt-7 space-y-2">
-          <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-            <span>Progress</span>
-            <span>{totalFilled}/6</span>
-          </div>
-          <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
-            <div
-              className="h-full rounded-full bg-gradient-brand transition-all duration-500"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
+        <div className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-primary/30 bg-card/60 px-3.5 py-2">
+          <Coins className="h-4 w-4 text-primary" />
+          <span className="text-sm font-black">{balance}</span>
+          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">coins</span>
         </div>
-
       </header>
+
 
 
 
