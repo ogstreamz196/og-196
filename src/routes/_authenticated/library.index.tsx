@@ -1112,38 +1112,25 @@ function CategoryCard({
         className={`pointer-events-none absolute -right-12 -top-12 h-44 w-44 rounded-full bg-gradient-to-br ${meta.gradient} opacity-90 blur-2xl`}
       />
       <div className="relative space-y-5">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex min-w-0 items-center gap-3">
-            <div className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl border text-xl ${meta.iconBg}`}>
-              <Icon className="h-5 w-5" />
+        <div className="flex min-w-0 items-center gap-3">
+          <div className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl border text-xl ${meta.iconBg}`}>
+            <Icon className="h-5 w-5" />
+          </div>
+          <div className="min-w-0 leading-tight">
+            <div className={`text-xs font-bold uppercase tracking-[0.22em] ${meta.accent}`}>
+              {meta.emoji} {meta.label}
             </div>
-            <div className="min-w-0 leading-tight">
-              <div className={`text-xs font-bold uppercase tracking-[0.22em] ${meta.accent}`}>
-                {meta.emoji} {meta.label}
-              </div>
-              <div className="mt-1.5 text-base font-semibold text-foreground">
-                {value ? (
-                  <span className="inline-flex items-center gap-1.5">
-                    <span className={`inline-block h-1.5 w-1.5 rounded-full bg-current ${meta.accent}`} />
-                    {value}
-                  </span>
-                ) : (
-                  <span className="text-muted-foreground">{meta.helper}</span>
-                )}
-              </div>
+            <div className="mt-1.5 text-base font-semibold text-foreground">
+              {value ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <span className={`inline-block h-1.5 w-1.5 rounded-full bg-current ${meta.accent}`} />
+                  {value}
+                </span>
+              ) : (
+                <span className="text-muted-foreground">{meta.helper}</span>
+              )}
             </div>
           </div>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={onRefresh}
-            aria-label={`Shuffle ${meta.label} suggestions`}
-            className={`h-9 shrink-0 gap-1.5 px-3 text-xs font-bold ${meta.accent} hover:bg-white/5`}
-          >
-            <RefreshCw className="h-3.5 w-3.5" />
-            Shuffle
-          </Button>
         </div>
 
         <Select value={value ?? ""} onValueChange={onSelect}>
@@ -1161,8 +1148,21 @@ function CategoryCard({
 
 
         <div className="space-y-2.5">
-          <div className="text-xs font-bold uppercase tracking-[0.22em] text-muted-foreground">
-            Quick picks
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-xs font-bold uppercase tracking-[0.22em] text-muted-foreground">
+              Quick picks
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={onRefresh}
+              aria-label={`Shuffle ${meta.label} suggestions`}
+              className={`h-8 shrink-0 gap-1.5 px-2.5 text-xs font-bold ${meta.accent} hover:bg-white/5`}
+            >
+              <RefreshCw className="h-3.5 w-3.5" />
+              Shuffle
+            </Button>
           </div>
           <div className="flex flex-wrap gap-2">
             {chips.map((chip) => {
