@@ -1322,20 +1322,6 @@ function DualCategoryCard({
     </div>
   );
 }
-                >
-                  {chip}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-
-
-      </div>
-    </div>
-  );
-}
 
 function ReviewDialog({
   open,
