@@ -361,18 +361,18 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
             <div className="flex gap-2">
               <Button
                 type="button"
-                variant="ghost"
+                variant="secondary"
                 size="sm"
                 onClick={finish}
-                disabled={finishing}
+                disabled={finishing || history.filter((t) => t.role === "user").length === 0}
                 className="gap-1.5 text-xs font-semibold"
               >
                 {finishing ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
                 ) : (
-                  <X className="h-3.5 w-3.5" />
+                  <Sparkles className="h-3.5 w-3.5" />
                 )}
-                That's enough
+                Generate lyrics
               </Button>
               <Button
                 type="button"
