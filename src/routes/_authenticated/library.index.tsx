@@ -383,7 +383,7 @@ function LibraryPage() {
     }
     setGenSong(true);
     try {
-      const style = [selections.genre, selections.mood, selections.tempo]
+      const style = [selections.genre, selections.mood]
         .filter(Boolean)
         .join(" · ");
       const promptText = [
