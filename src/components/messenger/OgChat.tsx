@@ -622,18 +622,19 @@ export function OgChat({
                 </span>
                 <div
                   className={cn(
-                    "px-4 py-2.5 text-[15px] leading-[1.45] break-words",
+                    "px-5 py-3 text-base leading-[1.55] break-words sm:text-[17px]",
                     isUser
                       ? isVip
-                        ? "rounded-2xl rounded-br-sm whitespace-pre-wrap font-medium text-amber-50 bg-gradient-to-br from-amber-500 via-amber-600 to-yellow-700 shadow-[0_8px_24px_-8px_rgba(217,119,6,0.7)] ring-1 ring-amber-300/60"
-                        : "rounded-2xl rounded-br-sm bg-primary text-primary-foreground whitespace-pre-wrap font-medium shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.6)]"
-                      : "rounded-2xl rounded-bl-sm bg-card border-2 border-border text-foreground shadow-sm",
+                        ? "rounded-3xl rounded-br-md whitespace-pre-wrap font-medium text-amber-50 bg-gradient-to-br from-amber-500 via-amber-600 to-yellow-700 shadow-[0_14px_36px_-12px_rgba(217,119,6,0.65)] ring-1 ring-amber-300/60"
+                        : "rounded-3xl rounded-br-md bg-primary text-primary-foreground whitespace-pre-wrap font-medium shadow-[0_14px_36px_-12px_hsl(var(--primary)/0.55)]"
+                      : "rounded-3xl rounded-bl-md bg-card/80 border border-white/10 text-foreground shadow-[0_10px_30px_-18px_rgba(0,0,0,0.6)] ring-1 ring-white/5 backdrop-blur-sm",
                   )}
                 >
                   {msg.role === "assistant" ? (
-                    <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1.5 prose-p:leading-relaxed prose-ul:my-2 prose-ol:my-2 prose-headings:my-2 prose-code:text-primary">
+                    <div className="prose prose-base dark:prose-invert max-w-none prose-p:my-2 prose-p:leading-relaxed prose-ul:my-2 prose-ol:my-2 prose-headings:my-2 prose-code:text-primary">
                       <ReactMarkdown>{msg.content}</ReactMarkdown>
                     </div>
+
                   ) : (
                     msg.content
                   )}
