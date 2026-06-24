@@ -13,7 +13,7 @@ import {
   Disc3,
   Smile,
   Heart,
-  Gauge,
+  
   Mic2,
   Music4,
   Shuffle,
