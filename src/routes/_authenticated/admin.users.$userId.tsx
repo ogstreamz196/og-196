@@ -505,26 +505,57 @@ function TelegramDmCard({
             rows={4}
             maxLength={4000}
           />
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <span className="text-[11px] text-muted-foreground">{text.length}/4000</span>
-            <Button
-              onClick={() => send.mutate()}
-              disabled={send.isPending || text.trim().length === 0}
-            >
-              {send.isPending ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Send className="mr-2 h-4 w-4" />
-              )}
-              Send via OG Bot
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => testPing.mutate()}
+                disabled={testPing.isPending}
+              >
+                {testPing.isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <CheckCircle2 className="mr-2 h-4 w-4" />
+                )}
+                Send test ping
+              </Button>
+              <Button
+                onClick={() => send.mutate()}
+                disabled={send.isPending || text.trim().length === 0}
+              >
+                {send.isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="mr-2 h-4 w-4" />
+                )}
+                Send via OG Bot
+              </Button>
+            </div>
           </div>
         </div>
       ) : (
         <div className="rounded-xl border border-dashed border-border bg-background/40 p-3">
-          <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-            Personal registration link
-          </Label>
+          <div className="flex items-center justify-between gap-2">
+            <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Personal registration link
+            </Label>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => rotate.mutate()}
+              disabled={rotate.isPending}
+            >
+              {rotate.isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <RotateCw className="mr-2 h-4 w-4" />
+              )}
+              Regenerate token
+            </Button>
+          </div>
           <div className="mt-1 flex items-center gap-2">
             <Input readOnly value={connectLink} className="font-mono text-xs" onFocus={(e) => e.currentTarget.select()} />
             <Button type="button" variant="outline" size="icon" onClick={copy} title="Copy link" aria-label="Copy registration link">
@@ -532,7 +563,9 @@ function TelegramDmCard({
             </Button>
           </div>
           <p className="mt-2 text-[11px] text-muted-foreground">
-            Send this to the user — once they tap Start in Telegram, OG Bot will be able to DM them here.
+            {activeToken.startsWith("t_")
+              ? "Fresh single-use token minted. Share this link — it replaces any previous one."
+              : "Send this to the user — once they tap Start in Telegram, OG Bot can DM them."}
           </p>
         </div>
       )}
