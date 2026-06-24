@@ -653,6 +653,15 @@ function LibraryPage() {
         <p className="mt-1 text-sm text-muted-foreground">
           Give it a working title — you can change this later.
         </p>
+        <div className="mt-3 rounded-xl border border-primary/20 bg-primary/5 p-3 text-xs leading-relaxed text-muted-foreground sm:text-sm">
+          <p className="font-semibold text-foreground">What to enter first 👇</p>
+          <p className="mt-1">
+            Type a short, catchy name that captures the vibe — a moment, a feeling, or a person
+            (e.g. <span className="italic">"Late night drive"</span>,{" "}
+            <span className="italic">"Mum's birthday"</span>). Stuck? Tap{" "}
+            <span className="font-semibold text-foreground">Surprise me</span> for instant ideas.
+          </p>
+        </div>
         <div className="mt-4 flex flex-wrap items-stretch gap-2">
           <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-primary/20 text-xl sm:h-14 sm:w-14 sm:text-2xl">
             🎙️
