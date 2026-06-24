@@ -1,6 +1,8 @@
-import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, ShieldCheck, ArrowLeft, RefreshCw } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Loader2, ShieldCheck, ShieldAlert, ArrowLeft, RefreshCw } from "lucide-react";
+
 import { supabase } from "@/integrations/supabase/client";
 import { useRole } from "@/hooks/use-role";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
