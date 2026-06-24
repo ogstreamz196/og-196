@@ -1,13 +1,14 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   Home,
-  Music2,
-  MessagesSquare,
+  Disc3,
   Coins,
   Settings,
   Shield,
   LogOut,
   Gift,
+  Sparkles,
+  type LucideIcon,
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,23 +34,33 @@ import ogStreamzLogo from "@/assets/ogstreamz-logo.jpg.asset.json";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
 
 type AppRoute = "/" | "/library" | "/messenger" | "/buy-coins" | "/settings" | "/developer" | "/admin" | "/referrals";
-type NavItem = { title: string; url: AppRoute; icon: typeof Home; adminOnly?: boolean };
+type NavItem = {
+  title: string;
+  url: AppRoute;
+  icon?: LucideIcon;
+  image?: string;
+  badge?: string;
+  accent?: string;
+  spin?: boolean;
+  adminOnly?: boolean;
+};
 
 const primaryNav: NavItem[] = [
-  { title: "Home", url: "/", icon: Home },
-  { title: "MusicHUB", url: "/library", icon: Music2 },
-  { title: "OG Messenger", url: "/messenger", icon: MessagesSquare },
+  { title: "Home", url: "/", icon: Home, accent: "from-sky-400/30 to-indigo-500/30" },
+  { title: "MusicHUB", url: "/library", icon: Disc3, badge: "Studio", accent: "from-fuchsia-500/40 to-amber-400/40", spin: true },
+  { title: "OG Messenger", url: "/messenger", image: ogBotAsset.url, badge: "Bot", accent: "from-primary/40 to-emerald-400/40" },
 ];
 
 const accountNav: NavItem[] = [
-  { title: "Earnings", url: "/referrals", icon: Gift },
-  { title: "Buy Coins", url: "/buy-coins", icon: Coins },
-  { title: "Settings", url: "/settings", icon: Settings },
+  { title: "Earnings", url: "/referrals", icon: Gift, accent: "from-pink-500/30 to-rose-400/30" },
+  { title: "Buy Coins", url: "/buy-coins", icon: Coins, accent: "from-amber-400/40 to-yellow-300/40" },
+  { title: "Settings", url: "/settings", icon: Settings, accent: "from-slate-400/25 to-zinc-400/25" },
 ];
 
 export function AppSidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { setOpenMobile, isMobile } = useSidebar();
+  const { setOpenMobile, isMobile, state } = useSidebar();
+  const collapsed = state === "collapsed";
   const { user } = useAuth();
   const dev = useDevMode();
   const { isAdmin } = useRole();
@@ -70,25 +81,58 @@ export function AppSidebar() {
   const renderItems = (items: NavItem[]) =>
     visible(items).map((item) => {
       const active = isActive(item.url);
-      const isMessenger = item.url === "/messenger";
+      const Icon = item.icon;
       return (
         <SidebarMenuItem key={item.url}>
           <SidebarMenuButton
             asChild
             isActive={active}
             tooltip={item.title}
-            className={`group/nav font-display h-12 rounded-2xl border-2 px-3 text-[17px] tracking-wide uppercase transition-all duration-150 ease-out hover:-translate-y-0.5 active:translate-y-0.5 ${
+            className={`group/nav font-display relative h-14 overflow-hidden rounded-2xl border-2 px-3 text-[18px] tracking-wide uppercase transition-all duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0.5 ${
               active
-                ? "border-primary/40 bg-gradient-brand text-primary-foreground shadow-[0_6px_0_0_hsl(var(--primary)/0.4),0_14px_28px_-10px_hsl(var(--primary)/0.6)] hover:bg-gradient-brand active:shadow-[0_2px_0_0_hsl(var(--primary)/0.4)]"
+                ? "border-primary/50 bg-gradient-brand text-primary-foreground shadow-[0_6px_0_0_hsl(var(--primary)/0.4),0_14px_28px_-10px_hsl(var(--primary)/0.6)] hover:bg-gradient-brand active:shadow-[0_2px_0_0_hsl(var(--primary)/0.4)]"
                 : "border-transparent hover:border-white/10 hover:bg-white/[0.04] hover:shadow-[0_4px_0_0_hsl(var(--primary)/0.25)] active:shadow-[0_1px_0_0_hsl(var(--primary)/0.2)]"
-            } ${isMessenger ? "hover:text-primary" : ""}`}
+            }`}
           >
             <Link to={item.url} onClick={() => isMobile && setOpenMobile(false)} className="flex items-center gap-3">
-              <item.icon className={`h-5 w-5 shrink-0 transition-transform duration-200 group-hover/nav:scale-110 group-hover/nav:-rotate-6 ${isMessenger && !active ? "text-primary" : ""}`} />
-              <span className="truncate">{item.title}</span>
-              {isMessenger && (
-                <span className="font-display ml-auto rounded-full bg-primary/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary shadow-[0_2px_0_0_hsl(var(--primary)/0.4)]">
-                  Bot
+              {/* Animated accent sheen on hover */}
+              <span
+                aria-hidden
+                className={`pointer-events-none absolute inset-0 -z-0 bg-gradient-to-r opacity-0 transition-opacity duration-300 group-hover/nav:opacity-100 ${item.accent ?? "from-primary/20 to-transparent"}`}
+              />
+              {/* Icon tile */}
+              <span
+                className={`relative z-10 grid h-10 w-10 shrink-0 place-items-center rounded-xl border transition-all duration-200 ${
+                  active
+                    ? "border-white/30 bg-white/15 shadow-[0_0_18px_-2px_hsl(var(--primary)/0.6)]"
+                    : "border-white/10 bg-white/[0.04] group-hover/nav:border-primary/40 group-hover/nav:bg-white/10 group-hover/nav:shadow-[0_0_14px_-2px_hsl(var(--primary)/0.5)]"
+                }`}
+              >
+                {item.image ? (
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    draggable={false}
+                    className="h-7 w-7 rounded-md object-cover transition-transform duration-300 group-hover/nav:scale-110 group-hover/nav:rotate-3 pointer-events-none select-none"
+                  />
+                ) : Icon ? (
+                  <Icon
+                    className={`h-5 w-5 transition-transform duration-300 group-hover/nav:scale-110 ${
+                      item.spin ? "group-hover/nav:animate-spin" : "group-hover/nav:-rotate-6"
+                    }`}
+                  />
+                ) : null}
+              </span>
+              <span className="relative z-10 truncate">{item.title}</span>
+              {item.badge && !collapsed && (
+                <span
+                  className={`relative z-10 font-display ml-auto rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider shadow-[0_2px_0_0_hsl(var(--primary)/0.4)] ${
+                    active
+                      ? "bg-white/25 text-primary-foreground"
+                      : "bg-primary/20 text-primary"
+                  }`}
+                >
+                  {item.badge}
                 </span>
               )}
             </Link>
@@ -96,6 +140,7 @@ export function AppSidebar() {
         </SidebarMenuItem>
       );
     });
+
 
   return (
     <Sidebar collapsible="icon">
@@ -153,18 +198,34 @@ export function AppSidebar() {
                     asChild
                     isActive={isActive("/admin")}
                     tooltip="Admin"
-                    className={`group/nav font-display h-12 rounded-2xl border-2 px-3 text-[17px] tracking-wide uppercase transition-all duration-150 ease-out hover:-translate-y-0.5 active:translate-y-0.5 ${
+                    className={`group/nav font-display relative h-14 overflow-hidden rounded-2xl border-2 px-3 text-[18px] tracking-wide uppercase transition-all duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0.5 ${
                       isActive("/admin")
-                        ? "border-primary/40 bg-gradient-brand text-primary-foreground shadow-[0_6px_0_0_hsl(var(--primary)/0.4),0_14px_28px_-10px_hsl(var(--primary)/0.6)] hover:bg-gradient-brand active:shadow-[0_2px_0_0_hsl(var(--primary)/0.4)]"
+                        ? "border-primary/50 bg-gradient-brand text-primary-foreground shadow-[0_6px_0_0_hsl(var(--primary)/0.4),0_14px_28px_-10px_hsl(var(--primary)/0.6)] hover:bg-gradient-brand active:shadow-[0_2px_0_0_hsl(var(--primary)/0.4)]"
                         : "border-transparent hover:border-white/10 hover:bg-white/[0.04] hover:shadow-[0_4px_0_0_hsl(var(--primary)/0.25)] active:shadow-[0_1px_0_0_hsl(var(--primary)/0.2)]"
                     }`}
                   >
                     <Link to="/admin" onClick={() => isMobile && setOpenMobile(false)} className="flex items-center gap-3">
-                      <Shield className="h-5 w-5 shrink-0 transition-transform duration-200 group-hover/nav:scale-110 group-hover/nav:-rotate-6" />
-                      <span className="truncate">Admin</span>
+                      <span
+                        aria-hidden
+                        className="pointer-events-none absolute inset-0 -z-0 bg-gradient-to-r from-red-500/30 to-amber-400/30 opacity-0 transition-opacity duration-300 group-hover/nav:opacity-100"
+                      />
+                      <span
+                        className={`relative z-10 grid h-10 w-10 shrink-0 place-items-center rounded-xl border transition-all duration-200 ${
+                          isActive("/admin")
+                            ? "border-white/30 bg-white/15 shadow-[0_0_18px_-2px_hsl(var(--primary)/0.6)]"
+                            : "border-white/10 bg-white/[0.04] group-hover/nav:border-primary/40 group-hover/nav:bg-white/10"
+                        }`}
+                      >
+                        <Shield className="h-5 w-5 transition-transform duration-300 group-hover/nav:scale-110 group-hover/nav:-rotate-6" />
+                      </span>
+                      <span className="relative z-10 truncate">Admin</span>
+                      {!collapsed && (
+                        <Sparkles className="relative z-10 ml-auto h-4 w-4 text-amber-300 opacity-0 transition-opacity group-hover/nav:opacity-100" />
+                      )}
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
