@@ -16,6 +16,10 @@ import {
   Radio,
   Bot,
   AudioLines,
+  Gift,
+  Infinity as InfinityIcon,
+  Share2,
+  TrendingUp,
 } from "lucide-react";
 import { useRef, useCallback, type PointerEvent as ReactPointerEvent } from "react";
 import { useAuth } from "@/hooks/use-auth";
