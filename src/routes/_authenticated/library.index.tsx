@@ -61,6 +61,31 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
+
+function SongCardSkeleton({ label }: { label?: string }) {
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-card/60 p-4">
+      <div className="flex items-center gap-4">
+        <Skeleton className="h-14 w-14 shrink-0 rounded-xl" />
+        <div className="min-w-0 flex-1 space-y-2">
+          <Skeleton className="h-4 w-2/3" />
+          <Skeleton className="h-3 w-1/3" />
+          <div className="flex gap-2">
+            <Skeleton className="h-2 flex-1 rounded-full" />
+          </div>
+        </div>
+        <Skeleton className="hidden h-8 w-20 rounded-lg sm:block" />
+      </div>
+      {label && (
+        <div className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
+          <Loader2 className="h-3 w-3 animate-spin" />
+          {label}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/_authenticated/library/")({
   component: LibraryPage,
@@ -504,24 +529,24 @@ function LibraryPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-8 pb-16 sm:gap-10">
-      {/* Hero — slim, single source of truth */}
-      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-border/60 pb-6">
-        <div className="min-w-0 space-y-1.5">
-          <div className="inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-            <Music4 className="h-3 w-3 text-primary" /> Music Hub
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 pb-16 sm:gap-10">
+      {/* Hero — tighter on mobile, stacked controls */}
+      <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-border/60 pb-4 sm:pb-6">
+        <div className="min-w-0 space-y-1">
+          <div className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+            <Music4 className="h-3 w-3 shrink-0 text-primary" /> Music Hub
           </div>
-          <h1 className="font-display text-3xl font-black leading-tight tracking-[-0.02em] sm:text-4xl">
+          <h1 className="font-display text-2xl font-black leading-tight tracking-[-0.02em] sm:text-4xl">
             Hey <span className="text-gradient-brand">{firstName}</span> — let's write a song.
           </h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="hidden text-sm text-muted-foreground sm:block">
             Tell us about them, pick a vibe, generate. 3 steps.
           </p>
         </div>
-        <div className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-primary/30 bg-card/60 px-3.5 py-2">
+        <div className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-primary/30 bg-card/60 px-2.5 py-1.5 sm:gap-2 sm:px-3.5 sm:py-2">
           <Coins className="h-4 w-4 text-primary" />
           <span className="text-sm font-black">{balance}</span>
-          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">coins</span>
+          <span className="hidden text-[10px] uppercase tracking-wider text-muted-foreground sm:inline">coins</span>
         </div>
       </header>
 
@@ -541,11 +566,14 @@ function LibraryPage() {
           )}
         </div>
         {library.isLoading ? (
-          <div className="grid place-items-center py-10 text-muted-foreground">
-            <Loader2 className="h-5 w-5 animate-spin" />
-          </div>
-        ) : versionedLibrary.length > 0 ? (
           <div className="grid gap-3">
+            {[0, 1, 2].map((i) => (
+              <SongCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : versionedLibrary.length > 0 || genSong ? (
+          <div className="grid gap-3">
+            {genSong && <SongCardSkeleton label="Generating" />}
             {versionedLibrary.map((s) => (
               <div key={s.id} className="relative">
                 <Link
@@ -584,6 +612,26 @@ function LibraryPage() {
           </div>
         )}
       </section>
+
+      {/* Lyrics generating skeleton */}
+      {genLyrics && !lyrics && (
+        <section className="space-y-3 rounded-2xl border border-primary/30 bg-card/60 p-5 sm:p-6">
+          <div className="flex items-center gap-2">
+            <Loader2 className="h-4 w-4 animate-spin text-primary" />
+            <p className="text-sm font-bold">OG is writing your lyrics…</p>
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-3 w-1/3" />
+            <Skeleton className="h-3 w-full" />
+            <Skeleton className="h-3 w-11/12" />
+            <Skeleton className="h-3 w-10/12" />
+            <Skeleton className="mt-3 h-3 w-1/4" />
+            <Skeleton className="h-3 w-full" />
+            <Skeleton className="h-3 w-9/12" />
+            <Skeleton className="h-3 w-11/12" />
+          </div>
+        </section>
+      )}
 
       {/* Slim track-title bar — entry point into creation */}
       <section className="flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-card/60 p-3 sm:p-4">
