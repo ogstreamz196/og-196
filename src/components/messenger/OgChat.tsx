@@ -643,12 +643,20 @@ export function OgChat({
             </div>
           );
         })}
-        {showSkeleton && (
-          <div className="flex items-end gap-3">
+        {(showSkeleton || m.isPending) && (
+          <div
+            className="flex items-end gap-3"
+            role="status"
+            aria-live="polite"
+            aria-label="OG Bot is typing"
+          >
             <OgAvatar size={40} className="shrink-0 animate-pulse" />
             <div className="flex flex-col gap-1.5 min-w-[60%] max-w-[78%]">
-              <span className="px-2 text-[10px] font-black uppercase tracking-[0.18em] text-foreground/70">
+              <span className="px-2 text-[10px] font-black uppercase tracking-[0.18em] text-foreground/70 inline-flex items-center gap-1.5">
                 OG Bot
+                <span className="font-bold normal-case tracking-normal text-muted-foreground/80">
+                  is typing<span className="inline-block animate-pulse">…</span>
+                </span>
               </span>
               <div className="rounded-2xl rounded-bl-sm bg-card border-2 border-border px-4 py-3 inline-flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]" />
@@ -661,6 +669,7 @@ export function OgChat({
                 <div className="h-3 w-[70%] rounded-md bg-gradient-to-r from-muted via-muted/40 to-muted bg-[length:200%_100%] animate-[shimmer_1.6s_linear_infinite]" />
                 <div className="h-3 w-[55%] rounded-md bg-gradient-to-r from-muted via-muted/40 to-muted bg-[length:200%_100%] animate-[shimmer_1.6s_linear_infinite]" />
               </div>
+              <span className="sr-only">OG Bot is generating a response</span>
             </div>
           </div>
         )}
