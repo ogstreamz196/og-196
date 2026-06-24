@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Coins, Loader2, Receipt, ExternalLink, Crown, Undo2, RefreshCw, Bell, BellOff, Clock, CreditCard, Landmark, Smartphone } from "lucide-react";
-
+import { Coins, Loader2, Receipt, ExternalLink, Crown, Undo2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import {
   getCoinPurchaseHistory,
@@ -298,64 +297,7 @@ function RefundDetailsDrawer({ refund, onClose }: { refund: RefundRow; onClose: 
   );
 }
 
-const EMAIL_OPT_IN_KEY = "refund-email-notify";
-
-function SettlementTimeline() {
-  const items = [
-    {
-      icon: CreditCard,
-      label: "Credit & debit cards",
-      window: "5–10 business days",
-      note: "Issuing bank decides when the credit lands on your statement.",
-    },
-    {
-      icon: Landmark,
-      label: "Bank debits (SEPA, ACH, BACS)",
-      window: "Up to 14 business days",
-      note: "Bank-to-bank reversals are slower than card refunds.",
-    },
-    {
-      icon: Smartphone,
-      label: "Apple Pay / Google Pay",
-      window: "5–10 business days",
-      note: "Settles back to the underlying card, not the wallet.",
-    },
-  ];
-  return (
-    <div className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
-      <div className="flex items-center gap-2">
-        <Clock className="h-4 w-4 text-amber-500" />
-        <h4 className="text-sm font-bold">Estimated time to refund</h4>
-      </div>
-      <p className="mt-1 text-xs text-muted-foreground">
-        Once a refund is approved on our side, settlement back to the original payment method depends on the network. Typical windows:
-      </p>
-      <ul className="mt-3 space-y-2.5">
-        {items.map((it) => {
-          const Icon = it.icon;
-          return (
-            <li key={it.label} className="flex items-start gap-3">
-              <Icon className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <p className="text-xs font-semibold">{it.label}</p>
-                  <span className="text-[11px] font-bold tabular-nums text-amber-500">{it.window}</span>
-                </div>
-                <p className="text-[11px] text-muted-foreground">{it.note}</p>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-      <p className="mt-3 text-[11px] text-muted-foreground">
-        These are payment-network estimates. Weekends and bank holidays can extend the window. You'll see "Refunded" here as soon as your bank confirms.
-      </p>
-    </div>
-  );
-}
-
 function RefundsPanel() {
-
   const fetcher = useServerFn(getMyRefunds);
   const { data, isLoading, error, refetch, isFetching, dataUpdatedAt } = useQuery({
     queryKey: ["my-refunds"],
@@ -368,21 +310,6 @@ function RefundsPanel() {
     refetchOnWindowFocus: true,
   });
   const [selected, setSelected] = useState<RefundRow | null>(null);
-  const [emailNotify, setEmailNotify] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    return window.localStorage.getItem(EMAIL_OPT_IN_KEY) === "1";
-  });
-  function toggleEmailNotify() {
-    setEmailNotify((prev) => {
-      const next = !prev;
-      try {
-        window.localStorage.setItem(EMAIL_OPT_IN_KEY, next ? "1" : "0");
-      } catch {}
-      toast(next ? "Email alerts on for refund status changes" : "Email alerts off");
-      return next;
-    });
-  }
-
 
   async function refreshFromStripe() {
     try {
@@ -416,27 +343,13 @@ function RefundsPanel() {
           } else {
             toast(`Refund status: ${r.status}`, { id: `refund-${r.stripe_refund_id}` });
           }
-          if (emailNotify && r.status !== "pending" && r.status !== "requires_action") {
-            // Email delivery hooks in once the project's email domain is
-            // scaffolded. Until then we log the intent so QA can verify the
-            // trigger fires on each status transition.
-            console.info("[refund-email-intent]", {
-              refundId: r.stripe_refund_id,
-              from: before,
-              to: r.status,
-              amount: r.amount,
-              currency: r.currency,
-            });
-          }
         }
       }
     }
     lastStatusRef.current = next;
-  }, [rows, emailNotify]);
+  }, [rows]);
 
-  const hasPending = useMemo(() => rows.some((r) => r.status === "pending" || r.status === "requires_action"), [rows]);
   const lastUpdated = dataUpdatedAt ? new Date(dataUpdatedAt).toLocaleTimeString() : null;
-
 
   return (
     <section className="mx-auto mt-6 w-full max-w-3xl rounded-2xl border border-border bg-card p-6 shadow-card">
@@ -453,21 +366,6 @@ function RefundsPanel() {
           )}
           <button
             type="button"
-            onClick={toggleEmailNotify}
-            aria-pressed={emailNotify}
-            title={emailNotify ? "Email alerts: ON" : "Email alerts: OFF"}
-            className={
-              "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition " +
-              (emailNotify
-                ? "border-primary bg-primary/15 text-primary"
-                : "border-border bg-background text-muted-foreground hover:text-foreground")
-            }
-          >
-            {emailNotify ? <Bell className="h-3 w-3" /> : <BellOff className="h-3 w-3" />}
-            {emailNotify ? "Email alerts on" : "Email alerts off"}
-          </button>
-          <button
-            type="button"
             onClick={refreshFromStripe}
             disabled={isFetching}
             className="inline-flex items-center gap-1 text-xs text-muted-foreground underline hover:text-foreground disabled:opacity-50"
@@ -477,9 +375,6 @@ function RefundsPanel() {
           </button>
         </div>
       </header>
-
-      {hasPending && <SettlementTimeline />}
-
 
       {isLoading ? (
         <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
