@@ -82,7 +82,7 @@ function OnboardingWizard() {
       return { key, data };
     },
     onSuccess: ({ key, data }) => {
-      setResults((r) => ({ ...r, [key]: { status: data.ok ? "ok" : "fail", data } }));
+      setResults((r) => ({ ...r, [key]: { status: data.ok ? "ok" : "fail", data, checkedAt: new Date().toISOString() } }));
     },
     onError: (err, key) => {
       setResults((r) => ({
