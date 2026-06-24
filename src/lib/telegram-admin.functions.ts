@@ -250,23 +250,8 @@ export const sendTelegramTestPing = createServerFn({ method: "POST" })
 export const getMyTelegramStatus = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const supabase = context.supabase as {
-      from: (t: string) => {
-        select: (c: string) => {
-          eq: (k: string, v: string) => {
-            maybeSingle: () => Promise<{
-              data: {
-                telegram_chat_id: number | null;
-                telegram_username: string | null;
-                telegram_linked_at: string | null;
-              } | null;
-              error: { message: string } | null;
-            }>;
-          };
-        };
-      };
-    };
-    const { data, error } = await supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
       .from("profiles")
       .select("telegram_chat_id, telegram_username, telegram_linked_at")
       .eq("id", context.userId)
