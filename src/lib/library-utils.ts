@@ -137,3 +137,84 @@ export function initialChips(): Record<Category, string[]> {
     theme: pickFresh("theme", new Set(), 4),
   };
 }
+
+// --- "Surprise me" data ---------------------------------------------------
+
+export const SURPRISE_TITLES: string[] = [
+  "Late night drive", "Sunday hangover", "Gym warm-up",
+  "Festival anthem", "Heartbreak letter", "Pirate radio cypher",
+  "Summer rooftop", "Last train home", "Glow-up season",
+  "City lights blur", "Toxic ex anthem", "Underdog story",
+];
+
+export const SURPRISE_TEMPLATES: string[] = [
+  "Their name: Aaliyah\nOccasion: 30th birthday\nInside joke: still can't parallel park\nWhat they love: oat-milk lattes",
+  "Their name: Marcus\nStory: ghosted me after 2 years\nCity: Manchester\nInside joke: \"I'll text you back\" — never did",
+  "Their name: Sam & Jordan\nOccasion: wedding day\nWhat they love: late-night taco runs\nInside joke: the karaoke night we don't talk about",
+  "Their name: Dre\nOccasion: promotion at work\nCity: Brooklyn\nWhat they love: never missing leg day",
+];
+
+export type PromptChip = { label: string; snippet: string };
+
+export const EXAMPLE_PROMPT_CHIPS: PromptChip[] = [
+  { label: "💛 Heart of gold", snippet: "They've got a heart of gold — " },
+  { label: "🎉 Life of the party", snippet: "Always the life of the party — " },
+  { label: "🫶 Always there for me", snippet: "Always there for me when — " },
+  { label: "🔥 Total legend", snippet: "An absolute legend because — " },
+];
+
+export function randomPick<T>(arr: readonly T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+// --- Personal details validator ------------------------------------------
+
+export const PERSONAL_DETAILS_MAX = 500;
+
+export type PersonalDetailsStatus = "empty" | "tiny" | "warn" | "good" | "near" | "full";
+
+export type PersonalDetailsCheck = {
+  status: PersonalDetailsStatus;
+  message: string;
+  /** 0..100 fill percentage. */
+  pct: number;
+  /** Tailwind text-color utility for status/counter. */
+  tone: string;
+  /** Tailwind bg-color utility for the progress bar. */
+  barTone: string;
+  length: number;
+};
+
+export function personalDetailsCheck(
+  text: string,
+  max = PERSONAL_DETAILS_MAX,
+): PersonalDetailsCheck {
+  const len = text.length;
+  const trimmed = text.trim();
+  const hasName = /name\s*[:\-]/i.test(trimmed) || /^[A-Z][a-z]+/m.test(trimmed);
+  const hasDetail = /(occasion|love|joke|story|city|place)\s*[:\-]/i.test(trimmed);
+  const pct = (len / max) * 100;
+
+  let status: PersonalDetailsStatus;
+  let message: string;
+  if (len === 0) { status = "empty"; message = "👆 Start with their name — then add anything that makes them them"; }
+  else if (len < 20) { status = "tiny"; message = "Add a name and an occasion for best results"; }
+  else if (!hasName) { status = "warn"; message = "💡 Add a name (e.g. \"Their name: Aaliyah\")"; }
+  else if (!hasDetail) { status = "warn"; message = "💡 Add an occasion, love, or inside joke"; }
+  else if (len > max - 30) { status = "near"; message = "Almost at the limit"; }
+  else { status = "good"; message = "✓ Looking good — the more specific, the better"; }
+  if (len >= max) { status = "full"; message = "Character limit reached"; }
+
+  const tone =
+    status === "good" ? "text-emerald-400" :
+    status === "warn" || status === "tiny" ? "text-amber-400" :
+    status === "near" || status === "full" ? "text-destructive" :
+    "text-muted-foreground";
+  const barTone =
+    status === "full" || status === "near" ? "bg-destructive" :
+    status === "good" ? "bg-emerald-500" :
+    status === "warn" || status === "tiny" ? "bg-amber-500" :
+    "bg-primary/40";
+
+  return { status, message, pct, tone, barTone, length: len };
+}
