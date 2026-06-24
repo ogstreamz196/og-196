@@ -76,7 +76,7 @@ function OnboardingWizard() {
     }
   };
 
-  if (isLoading) return <DashboardShell><div className="p-6 text-muted-foreground">Loading…</div></DashboardShell>;
+  if (isLoading) return <DashboardShell title="Onboarding"><div className="p-6 text-muted-foreground">Loading…</div></DashboardShell>;
   if (!isAdmin) return <Navigate to="/" />;
 
   const total = STEPS.length;
@@ -86,7 +86,7 @@ function OnboardingWizard() {
   const groups = Array.from(new Set(STEPS.map((s) => s.group)));
 
   return (
-    <DashboardShell>
+    <DashboardShell title="Onboarding">
       <div className="mx-auto max-w-4xl space-y-6 p-4 sm:p-6">
         <header className="flex flex-wrap items-center justify-between gap-3">
           <div>
