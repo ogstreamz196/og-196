@@ -816,7 +816,7 @@ function LibraryPage() {
                   aria-invalid={status === "full" || status === "near"}
                   value={personalDetails}
                   onChange={(e) => setPersonalDetails(e.target.value.slice(0, MAX))}
-                  placeholder="✍️ Type here — anything personal. Names, places, inside jokes, drama, dreams…&#10;&#10;e.g.&#10;Their name: Aaliyah&#10;Occasion: 30th birthday&#10;Inside joke: the karaoke night we don't talk about"
+                  placeholder="✍️ Type here — who is this song for? Their name, what they love, your history, inside jokes…&#10;&#10;e.g.&#10;Their name: Aaliyah&#10;Occasion: her 30th birthday&#10;Inside joke: the karaoke night we don't talk about"
                   maxLength={MAX}
                   rows={10}
                   className="mt-4 min-h-[240px] resize-y rounded-xl border-primary/30 bg-background/60 text-base leading-relaxed placeholder:text-muted-foreground/70 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/40 aria-[invalid=true]:border-destructive aria-[invalid=true]:focus-visible:ring-destructive/40 sm:text-lg"
