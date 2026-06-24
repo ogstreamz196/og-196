@@ -583,26 +583,43 @@ function PackCard({
   return (
     <div
       className={cn(
-        "relative flex flex-col rounded-2xl border bg-card p-5 shadow-card transition-all",
-        accent ? "border-primary shadow-glow" : "border-border",
-        canEdit && "ring-1 ring-primary/30",
+        "relative flex flex-col overflow-hidden rounded-2xl border-2 bg-card p-5 transition-all ring-1 hover:-translate-y-0.5",
+        tier.ring,
+        tier.glow || "shadow-card",
+        accent ? "border-coin/60" : "border-border",
+        canEdit && "ring-primary/40",
       )}
     >
+      {/* Holographic top stripe */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-coin/60 to-transparent opacity-60" />
+
+      {/* Rarity tier pill */}
+      <div className={cn(
+        "absolute left-3 top-3 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.18em] ring-1",
+        tier.pill,
+      )}>
+        <TierIcon className="h-3 w-3" /> {tier.name}
+      </div>
+
       {pack.popular && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-gradient-brand px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-primary-foreground shadow whitespace-nowrap">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-gradient-brand px-3 py-1 text-[11px] font-black uppercase tracking-wider text-primary-foreground shadow whitespace-nowrap">
           <Sparkles className="h-3 w-3" /> Most popular
         </div>
       )}
       {pack.bestValue && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-coin px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-background shadow whitespace-nowrap">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-coin px-3 py-1 text-[11px] font-black uppercase tracking-wider text-background shadow whitespace-nowrap">
           <Crown className="h-3 w-3" /> Best value
         </div>
       )}
       {savingsPct > 0 && !canEdit && (
-        <div className="absolute right-3 top-3 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400 ring-1 ring-emerald-500/30">
-          Save {savingsPct}%
+        <div className="absolute right-3 top-3 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-emerald-400 ring-1 ring-emerald-500/30">
+          −{savingsPct}%
         </div>
       )}
+
+      {/* spacer so the rarity pill doesn't collide with content */}
+      <div className="h-6" aria-hidden />
+
 
       {/* Label row */}
       <EditableField
