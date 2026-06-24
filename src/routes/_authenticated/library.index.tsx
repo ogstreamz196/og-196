@@ -859,7 +859,7 @@ function LibraryPage() {
           </span>
         </header>
 
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 items-stretch gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {(["language", "genre", "mood", "theme"] as Category[]).map((cat) => (
             <CategoryCard
               key={cat}
@@ -872,6 +872,7 @@ function LibraryPage() {
             />
           ))}
         </div>
+
 
         {/* Compact mobile progress */}
         <div className="space-y-1.5 sm:hidden">
@@ -1101,7 +1102,7 @@ function CategoryCard({
   const meta = META[cat];
   const Icon = meta.icon;
   return (
-    <div className="group relative overflow-hidden rounded-3xl border border-white/10 bg-card/70 p-5 shadow-card backdrop-blur-xl transition-all hover:border-white/20 sm:p-6">
+    <div className="group relative flex h-full min-w-0 flex-col overflow-hidden rounded-3xl border border-white/10 bg-card/70 p-5 shadow-card backdrop-blur-xl transition-all hover:border-white/20 sm:p-6">
       <div
         aria-hidden
         className={`pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-gradient-to-br ${meta.gradient} blur-2xl`}
