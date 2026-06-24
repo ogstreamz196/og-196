@@ -1193,7 +1193,20 @@ function CategoryCard({
                     (active
                       ? meta.chipActive
                       : "border-white/10 bg-white/[0.04] text-foreground/85 hover:border-white/25 hover:bg-white/10")
+                  }
+                >
+                  {chip}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
+
+
 
 function DualCategoryCard({
   cats,
