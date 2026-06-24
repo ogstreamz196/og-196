@@ -198,18 +198,34 @@ export function AppSidebar() {
                     asChild
                     isActive={isActive("/admin")}
                     tooltip="Admin"
-                    className={`group/nav font-display h-12 rounded-2xl border-2 px-3 text-[17px] tracking-wide uppercase transition-all duration-150 ease-out hover:-translate-y-0.5 active:translate-y-0.5 ${
+                    className={`group/nav font-display relative h-14 overflow-hidden rounded-2xl border-2 px-3 text-[18px] tracking-wide uppercase transition-all duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0.5 ${
                       isActive("/admin")
-                        ? "border-primary/40 bg-gradient-brand text-primary-foreground shadow-[0_6px_0_0_hsl(var(--primary)/0.4),0_14px_28px_-10px_hsl(var(--primary)/0.6)] hover:bg-gradient-brand active:shadow-[0_2px_0_0_hsl(var(--primary)/0.4)]"
+                        ? "border-primary/50 bg-gradient-brand text-primary-foreground shadow-[0_6px_0_0_hsl(var(--primary)/0.4),0_14px_28px_-10px_hsl(var(--primary)/0.6)] hover:bg-gradient-brand active:shadow-[0_2px_0_0_hsl(var(--primary)/0.4)]"
                         : "border-transparent hover:border-white/10 hover:bg-white/[0.04] hover:shadow-[0_4px_0_0_hsl(var(--primary)/0.25)] active:shadow-[0_1px_0_0_hsl(var(--primary)/0.2)]"
                     }`}
                   >
                     <Link to="/admin" onClick={() => isMobile && setOpenMobile(false)} className="flex items-center gap-3">
-                      <Shield className="h-5 w-5 shrink-0 transition-transform duration-200 group-hover/nav:scale-110 group-hover/nav:-rotate-6" />
-                      <span className="truncate">Admin</span>
+                      <span
+                        aria-hidden
+                        className="pointer-events-none absolute inset-0 -z-0 bg-gradient-to-r from-red-500/30 to-amber-400/30 opacity-0 transition-opacity duration-300 group-hover/nav:opacity-100"
+                      />
+                      <span
+                        className={`relative z-10 grid h-10 w-10 shrink-0 place-items-center rounded-xl border transition-all duration-200 ${
+                          isActive("/admin")
+                            ? "border-white/30 bg-white/15 shadow-[0_0_18px_-2px_hsl(var(--primary)/0.6)]"
+                            : "border-white/10 bg-white/[0.04] group-hover/nav:border-primary/40 group-hover/nav:bg-white/10"
+                        }`}
+                      >
+                        <Shield className="h-5 w-5 transition-transform duration-300 group-hover/nav:scale-110 group-hover/nav:-rotate-6" />
+                      </span>
+                      <span className="relative z-10 truncate">Admin</span>
+                      {!collapsed && (
+                        <Sparkles className="relative z-10 ml-auto h-4 w-4 text-amber-300 opacity-0 transition-opacity group-hover/nav:opacity-100" />
+                      )}
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
