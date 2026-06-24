@@ -1214,25 +1214,8 @@ function CategoryCard({
           </div>
         </div>
 
-        <div className="space-y-1.5">
-          <label
-            htmlFor={`note-${cat}`}
-            className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground"
-          >
-            <span>Add your own {meta.label.toLowerCase()} notes</span>
-            <span className="text-[10px] normal-case tracking-normal text-muted-foreground/70">
-              {note.length}/200
-            </span>
-          </label>
-          <Textarea
-            id={`note-${cat}`}
-            value={note}
-            maxLength={200}
-            onChange={(e) => onNoteChange(e.target.value.slice(0, 200))}
-            placeholder={`e.g. extra ${meta.label.toLowerCase()} details for the AI to weave in…`}
-            className="min-h-[64px] resize-y rounded-xl border-white/10 bg-background/40 text-xs"
-          />
-        </div>
+
+
       </div>
     </div>
   );
