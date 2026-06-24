@@ -12,8 +12,6 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
-import { toast } from "sonner";
 
 export type InterviewTurn = { role: "bot" | "user"; text: string };
 
