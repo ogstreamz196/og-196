@@ -860,7 +860,7 @@ function LibraryPage() {
         </header>
 
         <div className="grid gap-3 sm:grid-cols-2">
-          {(["language", "genre", "theme"] as Category[]).map((cat) => (
+          {(["language", "genre", "mood", "theme"] as Category[]).map((cat) => (
             <CategoryCard
               key={cat}
               cat={cat}
@@ -871,21 +871,13 @@ function LibraryPage() {
               onRefresh={() => refreshRow(cat)}
             />
           ))}
-          <DualCategoryCard
-            cats={["mood", "tempo"]}
-            selections={selections}
-            chips={chips}
-            onSelect={setField}
-            onPickChip={pickChip}
-            onRefresh={refreshRow}
-          />
         </div>
 
         {/* Compact mobile progress */}
         <div className="space-y-1.5 sm:hidden">
           <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
             <span>Progress</span>
-            <span>{totalFilled}/6</span>
+            <span>{totalFilled}/5</span>
           </div>
           <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
             <div
