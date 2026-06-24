@@ -195,7 +195,7 @@ function DashboardHome() {
           icon={<Music2 className="h-6 w-6" />}
           eyebrow="Music Hub"
           title="Create a song"
-          body="Generate, refine and remix tracks tailored to your taste with the OG engine."
+          body="Generate. Remix. Release."
           cta="Open Music Hub"
         />
         <PrimaryCard
@@ -203,11 +203,12 @@ function DashboardHome() {
           icon={<MessageSquareMore className="h-6 w-6" />}
           eyebrow="OG Messenger"
           title="Chat to OG Bot"
-          body="Talk to your AI co-producer, brainstorm lyrics, or just shoot the breeze."
+          body="Your AI co-producer."
           cta="Open Messenger"
           variant="accent"
         />
       </section>
+
 
       {/* Quick actions */}
       <section>
@@ -302,38 +303,58 @@ function PrimaryCard({
             : "bg-[radial-gradient(circle_at_top_right,oklch(0.55_0.22_268/0.32),transparent_55%),radial-gradient(circle_at_bottom_left,oklch(0.65_0.18_200/0.18),transparent_60%)]")
         }
       />
-      {/* Decorative graphic right side */}
-      <div className="pointer-events-none absolute -right-10 -top-10 h-56 w-56 rounded-full bg-primary/10 blur-3xl transition-transform duration-700 group-hover:scale-110" />
-      <div className="pointer-events-none absolute right-4 top-6 opacity-[0.07] transition-all duration-700 group-hover:rotate-12 group-hover:opacity-[0.14] sm:right-8 sm:top-10">
-        {isAccent ? (
-          <Bot className="h-28 w-28 sm:h-64 sm:w-64" strokeWidth={1.25} />
-        ) : (
-          <Disc3 className="h-28 w-28 animate-[spin_18s_linear_infinite] sm:h-64 sm:w-64" strokeWidth={1.25} />
-        )}
+      {/* HERO VISUAL — big centred animated graphic, takes the eye first */}
+      <div className="pointer-events-none absolute -right-10 -top-10 h-56 w-56 rounded-full bg-primary/20 blur-3xl transition-transform duration-700 group-hover:scale-125" />
+      <div className="pointer-events-none absolute -left-16 bottom-0 h-48 w-48 rounded-full bg-accent/20 blur-3xl transition-transform duration-700 group-hover:-translate-y-2" />
+      <div className="pointer-events-none absolute inset-0 grid place-items-center">
+        <div className="relative">
+          {/* pulsing rings */}
+          <span aria-hidden className="absolute inset-0 -m-6 rounded-full border-2 border-primary/30 animate-[ping_3s_ease-out_infinite]" />
+          <span aria-hidden className="absolute inset-0 -m-12 rounded-full border-2 border-accent/20 animate-[ping_4.5s_ease-out_infinite]" />
+          <span aria-hidden className="absolute inset-0 -m-20 rounded-full border-2 border-primary/10 animate-[ping_6s_ease-out_infinite]" />
+          {/* main graphic */}
+          <div
+            className={
+              "relative grid h-44 w-44 place-items-center rounded-full border-2 border-white/15 shadow-glow transition-transform duration-700 group-hover:scale-110 sm:h-72 sm:w-72 " +
+              (isAccent ? "bg-gradient-to-br from-accent/30 to-primary/40" : "bg-gradient-to-br from-primary/40 to-accent/30")
+            }
+            style={{ animation: "wc-float 6s ease-in-out infinite" }}
+          >
+            {isAccent ? (
+              <Bot className="h-24 w-24 text-foreground drop-shadow-[0_8px_30px_rgba(80,60,255,0.55)] sm:h-40 sm:w-40 wc-wiggle" strokeWidth={1.4} />
+            ) : (
+              <Disc3 className="h-24 w-24 text-foreground drop-shadow-[0_8px_30px_rgba(80,60,255,0.55)] sm:h-40 sm:w-40 animate-[spin_8s_linear_infinite]" strokeWidth={1.4} />
+            )}
+          </div>
+          {/* orbiting sparkle */}
+          <span aria-hidden className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 [transform-origin:0_-90px] animate-[spin_5s_linear_infinite]">
+            <Sparkles className="h-4 w-4 -translate-y-24 text-primary drop-shadow-[0_0_12px_rgba(120,100,255,0.9)]" />
+          </span>
+        </div>
       </div>
-      {/* Equalizer bars bottom-right accent */}
-      <div className="pointer-events-none absolute bottom-6 right-6 flex items-end gap-1 opacity-40 transition-opacity duration-300 group-hover:opacity-90">
-        {[0.4, 0.7, 0.5, 0.9, 0.6, 0.8, 0.45].map((h, i) => (
+      {/* Equalizer bars bottom accent */}
+      <div className="pointer-events-none absolute bottom-6 left-1/2 flex -translate-x-1/2 items-end gap-1 opacity-70 transition-opacity duration-300 group-hover:opacity-100">
+        {[0.4, 0.7, 0.5, 0.9, 0.6, 0.8, 0.45, 0.85, 0.55, 0.7].map((h, i) => (
           <span
             key={i}
             className="w-1 rounded-full bg-gradient-to-t from-primary/60 to-primary"
             style={{
-              height: `${h * 36}px`,
-              animation: `eqPulse 1.${(i % 6) + 2}s ease-in-out ${i * 0.1}s infinite alternate`,
+              height: `${h * 40}px`,
+              animation: `eqPulse 1.${(i % 6) + 2}s ease-in-out ${i * 0.08}s infinite alternate`,
             }}
           />
         ))}
       </div>
 
       <div className="relative flex flex-1 flex-col">
-        <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl border-2 border-white/15 bg-gradient-brand-soft text-primary shadow-glow sm:mb-6 sm:h-20 sm:w-20">
-          {icon}
-        </div>
         <div className="flex items-center gap-2">
+          <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border-2 border-white/15 bg-gradient-brand-soft text-primary shadow-glow sm:h-12 sm:w-12">
+            {icon}
+          </div>
           <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground sm:text-base">{eyebrow}</p>
           <span className="h-px flex-1 bg-gradient-to-r from-white/15 to-transparent" />
         </div>
-        <h3 className="font-display mt-3 text-[clamp(1.75rem,14cqw,5rem)] font-black uppercase leading-[0.95] tracking-[-0.035em] drop-shadow-[0_6px_24px_rgba(80,60,255,0.35)] [hyphens:none] [word-break:keep-all] [overflow-wrap:normal] sm:mt-4">
+        <h3 className="font-display mt-3 text-[clamp(1.5rem,12cqw,3.5rem)] font-black uppercase leading-[0.95] tracking-[-0.035em] drop-shadow-[0_6px_24px_rgba(80,60,255,0.35)] [hyphens:none] [word-break:keep-all] [overflow-wrap:normal] sm:mt-4">
           {title.split(" ").map((word, i, arr) => {
             const isLast = i === arr.length - 1;
             return (
@@ -351,32 +372,9 @@ function PrimaryCard({
             );
           })}
         </h3>
-        <p className="mt-4 max-w-md text-base leading-relaxed text-muted-foreground sm:mt-6 sm:text-xl">{body}</p>
-
-        {/* Feature chips */}
-        <div className="mt-5 flex flex-wrap gap-2 sm:mt-7 sm:gap-2.5">
-          {(isAccent
-            ? [
-                { icon: <Sparkles className="h-4 w-4" />, label: "AI co-producer" },
-                { icon: <MessageSquareMore className="h-4 w-4" />, label: "Lyric brainstorm" },
-                { icon: <Wand2 className="h-4 w-4" />, label: "Voice ideas" },
-              ]
-            : [
-                { icon: <Mic2 className="h-4 w-4" />, label: "Lyrics" },
-                { icon: <AudioLines className="h-4 w-4" />, label: "Beats" },
-                { icon: <Radio className="h-4 w-4" />, label: "Remix" },
-              ]
-          ).map((chip) => (
-            <span
-              key={chip.label}
-              className="inline-flex items-center gap-1.5 rounded-full border-2 border-white/15 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-foreground/80 backdrop-blur-sm sm:px-3.5 sm:text-sm"
-            >
-              {chip.icon}
-              {chip.label}
-            </span>
-          ))}
-        </div>
+        <p className="mt-2 max-w-md text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground sm:mt-3 sm:text-base">{body}</p>
       </div>
+
 
       <div className="relative mt-6 inline-flex items-center gap-2 text-base font-bold text-primary sm:mt-10 sm:text-lg">
         <span className="rounded-full border-2 border-primary/40 bg-primary/15 px-4 py-2 backdrop-blur-sm transition-colors group-hover:bg-primary/25 sm:px-5 sm:py-2.5">
