@@ -492,6 +492,7 @@ export type Database = {
           created_at: string
           duration_seconds: number | null
           error_message: string | null
+          extra_context: string | null
           generation_started_at: string | null
           id: string
           is_variation: boolean
@@ -520,6 +521,7 @@ export type Database = {
           created_at?: string
           duration_seconds?: number | null
           error_message?: string | null
+          extra_context?: string | null
           generation_started_at?: string | null
           id?: string
           is_variation?: boolean
@@ -548,6 +550,7 @@ export type Database = {
           created_at?: string
           duration_seconds?: number | null
           error_message?: string | null
+          extra_context?: string | null
           generation_started_at?: string | null
           id?: string
           is_variation?: boolean
