@@ -157,9 +157,9 @@ const META: Record<
     iconBg: "bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-400/30",
   },
   mood: {
-    label: "Mood",
-    helper: "How should it feel?",
-    placeholder: "Pick a mood",
+    label: "Mood & Tempo",
+    helper: "How should it feel and move?",
+    placeholder: "Pick a vibe",
     icon: Smile,
     gradient: "from-amber-500/50 via-orange-500/25 to-transparent",
     emoji: "✨",
