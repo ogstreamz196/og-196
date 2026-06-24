@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   Music2,
   MessageSquareMore,
@@ -20,8 +20,21 @@ import {
   Infinity as InfinityIcon,
   Share2,
   TrendingUp,
+  Send,
+  Smartphone,
+  Globe,
 } from "lucide-react";
-import { useRef, useCallback, type PointerEvent as ReactPointerEvent } from "react";
+import { useRef, useState, useCallback, type PointerEvent as ReactPointerEvent } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+
 import { useAuth } from "@/hooks/use-auth";
 import { useDevMode } from "@/hooks/use-dev-mode";
 import { useProfile } from "@/hooks/use-profile";
@@ -207,6 +220,14 @@ function DashboardHome() {
 
       </section>
 
+      {/* Ask OG Bot — prominent CTA */}
+      <AskOgCta />
+
+      {/* Continuity demo */}
+      <ContinuityDemo />
+
+
+
 
       {/* Primary CTAs */}
       <section className="grid grid-cols-1 items-stretch gap-4 sm:gap-6 md:grid-cols-2">
@@ -343,6 +364,181 @@ function DashboardHome() {
     </div>
   );
 }
+
+function AskOgCta() {
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const [prompt, setPrompt] = useState("");
+  const [service, setService] = useState<"musichub" | "messenger">("musichub");
+
+  const handleStart = () => {
+    const text = prompt.trim();
+    if (text && typeof window !== "undefined") {
+      try {
+        window.localStorage.setItem("og:pending-prompt", JSON.stringify({ service, text, at: Date.now() }));
+      } catch {}
+    }
+    setOpen(false);
+    navigate({ to: service === "musichub" ? "/library" : "/messenger" });
+  };
+
+  return (
+    <section>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <button
+            type="button"
+            className="group relative flex w-full items-center justify-between gap-4 overflow-hidden rounded-[2rem] border-2 border-primary/50 bg-gradient-to-r from-primary/25 via-accent/20 to-primary/25 p-6 text-left shadow-[0_24px_60px_-20px_rgba(80,60,255,0.55)] backdrop-blur-xl transition-all hover:-translate-y-1 hover:border-primary hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:p-8"
+          >
+            <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-primary/40 blur-3xl transition-transform duration-700 group-hover:scale-110" />
+            <div className="relative flex items-center gap-5">
+              <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-primary/30 ring-2 ring-primary/60 sm:h-16 sm:w-16">
+                <Sparkles className="h-7 w-7 text-primary sm:h-8 sm:w-8" />
+              </span>
+              <div className="min-w-0">
+                <div className="text-[10px] font-bold uppercase tracking-[0.28em] text-primary">Ask OG Bot</div>
+                <h2 className="font-display mt-1 text-2xl font-black leading-tight sm:text-4xl">
+                  Start any task — pick a service & go
+                </h2>
+                <p className="mt-1 text-sm text-muted-foreground sm:text-base">
+                  Describe what you want. Send it to MusicHub or Messenger.
+                </p>
+              </div>
+            </div>
+            <span className="relative hidden shrink-0 items-center gap-2 rounded-full border border-primary/50 bg-background/70 px-5 py-3 text-sm font-bold text-primary shadow-glow sm:inline-flex">
+              <Wand2 className="h-4 w-4" /> Open prompt
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </span>
+          </button>
+        </DialogTrigger>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="font-display text-2xl font-black">What do you want to do?</DialogTitle>
+            <DialogDescription>
+              Pick a service and tell OG Bot what to spin up. We'll drop you in with your prompt ready.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-white/[0.04] p-1.5">
+              {(["musichub", "messenger"] as const).map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setService(s)}
+                  className={cn(
+                    "flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-bold transition-colors",
+                    service === s
+                      ? "bg-primary text-primary-foreground shadow"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {s === "musichub" ? <Music2 className="h-4 w-4" /> : <MessageSquareMore className="h-4 w-4" />}
+                  {s === "musichub" ? "MusicHub" : "Messenger"}
+                </button>
+              ))}
+            </div>
+            <Textarea
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder={
+                service === "musichub"
+                  ? "e.g. Make a moody drill track about chasing the bag…"
+                  : "e.g. Help me plan a release week for my new EP…"
+              }
+              rows={4}
+              className="resize-none rounded-xl text-base"
+            />
+            <Button onClick={handleStart} size="lg" className="w-full gap-2 rounded-xl text-base font-bold">
+              <Send className="h-4 w-4" />
+              Start in {service === "musichub" ? "MusicHub" : "Messenger"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </section>
+  );
+}
+
+function ContinuityDemo() {
+  return (
+    <section className="relative overflow-hidden rounded-[2rem] border-2 border-white/15 bg-card/55 p-6 shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)] backdrop-blur-xl sm:p-8">
+      <div aria-hidden className="pointer-events-none absolute -left-16 -bottom-16 h-56 w-56 rounded-full bg-accent/20 blur-3xl" />
+      <div className="relative mb-5 flex items-center gap-3">
+        <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary/20 ring-1 ring-primary/40">
+          <InfinityIcon className="h-5 w-5 text-primary" />
+        </span>
+        <div>
+          <div className="text-[10px] font-bold uppercase tracking-[0.28em] text-primary">Continue the conversation</div>
+          <h2 className="font-display text-xl font-black sm:text-2xl">One bot, one memory, every surface.</h2>
+        </div>
+      </div>
+      <div className="relative grid gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-stretch">
+        <ChatBubbleCard
+          channel="Web Messenger"
+          icon={<Globe className="h-4 w-4" />}
+          userMsg="Yo OG, I need a hook about late nights and big dreams."
+          botMsg="On it — drill or trap? I'll draft 4 bars."
+        />
+        <div className="flex items-center justify-center text-primary sm:flex-col">
+          <ArrowRight className="h-6 w-6 sm:hidden" />
+          <ArrowRight className="hidden h-6 w-6 sm:block" />
+          <span className="ml-2 text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground sm:ml-0 sm:mt-1">
+            synced
+          </span>
+        </div>
+        <ChatBubbleCard
+          channel="MusicHub · Telegram"
+          icon={<Smartphone className="h-4 w-4" />}
+          userMsg="Drill. Make it dark."
+          botMsg="Got it — using the late nights / big dreams hook from earlier. Generating now."
+          highlight
+        />
+      </div>
+      <p className="relative mt-5 text-center text-xs text-muted-foreground sm:text-sm">
+        Every OG Bot — web, Messenger, Telegram, MusicHub — shares the same memory. Pick up exactly where you left off.
+      </p>
+    </section>
+  );
+}
+
+function ChatBubbleCard({
+  channel,
+  icon,
+  userMsg,
+  botMsg,
+  highlight = false,
+}: {
+  channel: string;
+  icon: React.ReactNode;
+  userMsg: string;
+  botMsg: string;
+  highlight?: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex flex-col gap-3 rounded-2xl border bg-background/60 p-4 backdrop-blur",
+        highlight ? "border-primary/50 shadow-[0_10px_30px_-15px_rgba(80,60,255,0.6)]" : "border-white/10",
+      )}
+    >
+      <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+        {icon} {channel}
+      </div>
+      <div className="ml-auto max-w-[85%] rounded-2xl rounded-tr-sm bg-primary/85 px-3 py-2 text-sm text-primary-foreground">
+        {userMsg}
+      </div>
+      <div className="mr-auto flex max-w-[85%] items-start gap-2">
+        <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-accent/30 ring-1 ring-accent/50">
+          <Bot className="h-3.5 w-3.5 text-accent-foreground" />
+        </span>
+        <div className="rounded-2xl rounded-tl-sm bg-white/[0.06] px-3 py-2 text-sm text-foreground ring-1 ring-white/10">
+          {botMsg}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
 function PrimaryCard({
   to,
