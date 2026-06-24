@@ -320,7 +320,7 @@ function LibraryPage() {
 
   const totalFilled =
     (title.trim() ? 1 : 0) + (selections.language ? 1 : 0) + filledExtras;
-  const progress = Math.min(100, Math.round((totalFilled / 5) * 100));
+  const progress = Math.min(100, Math.round((totalFilled / 4) * 100));
 
   const canGenerateLyrics =
     !!title.trim() && !!selections.language && filledExtras >= 1 && balance >= lyricsCost;
