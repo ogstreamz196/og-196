@@ -50,7 +50,30 @@ type Status = "idle" | "running" | "ok" | "fail";
 function OnboardingWizard() {
   const { isAdmin, isLoading } = useRole();
   const runCheck = useServerFn(runOnboardingCheck);
-  const [results, setResults] = useState<Record<string, { status: Status; data?: CheckResult }>>({});
+  const loadChecks = useServerFn(getOnboardingChecks);
+  const [results, setResults] = useState<Record<string, { status: Status; data?: CheckResult; checkedAt?: string }>>({});
+
+  const saved = useQuery({
+    queryKey: ["onboarding-checks"],
+    enabled: isAdmin,
+    queryFn: () => loadChecks(),
+  });
+
+  useEffect(() => {
+    if (!saved.data) return;
+    setResults((prev) => {
+      const next = { ...prev };
+      for (const row of saved.data) {
+        if (next[row.key]?.status === "running") continue;
+        next[row.key] = {
+          status: row.ok ? "ok" : "fail",
+          data: { ok: row.ok, detail: row.detail, latencyMs: row.latencyMs },
+          checkedAt: row.checked_at,
+        };
+      }
+      return next;
+    });
+  }, [saved.data]);
 
   const single = useMutation({
     mutationFn: async (key: string) => {
