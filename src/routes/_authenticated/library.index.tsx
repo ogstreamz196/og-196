@@ -543,16 +543,23 @@ function LibraryPage() {
 
       {/* Library — previews created (above creation options) */}
       <section>
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-            MusicHUB · previews
-          </h2>
+        <div className="mb-5 flex items-end justify-between gap-3">
+          <div className="space-y-1">
+            <div className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
+              <Disc3 className="mr-1.5 inline h-3.5 w-3.5 -translate-y-0.5" />
+              MusicHUB · Previews
+            </div>
+            <h2 className="font-display text-2xl font-black tracking-tight sm:text-3xl">
+              Your tracks
+            </h2>
+          </div>
           {versionedLibrary.length > 0 && (
-            <span className="text-[11px] text-muted-foreground">
+            <span className="shrink-0 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
               {versionedLibrary.length} track{versionedLibrary.length === 1 ? "" : "s"}
             </span>
           )}
         </div>
+
         {library.isLoading ? (
           <div className="grid gap-3">
             {[0, 1, 2].map((i) => (
@@ -588,16 +595,17 @@ function LibraryPage() {
             ))}
           </div>
         ) : (
-          <div className="rounded-3xl border border-dashed border-white/10 bg-card/40 p-8 text-center">
-            <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-primary/20 to-fuchsia-500/10">
-              <LibraryIcon className="h-5 w-5 text-primary" />
+          <div className="rounded-3xl border border-dashed border-white/15 bg-card/40 p-10 text-center ring-1 ring-white/5">
+            <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-primary/30 to-fuchsia-500/15 shadow-[0_12px_30px_-12px_oklch(0.7_0.2_300_/_0.6)]">
+              <LibraryIcon className="h-6 w-6 text-primary" />
             </div>
-            <p className="mt-3 text-sm font-bold tracking-wide leading-relaxed">No previews yet</p>
-            <p className="mt-1 text-xs leading-relaxed tracking-wide text-muted-foreground">
+            <p className="mt-4 font-display text-xl font-black leading-tight sm:text-2xl">No previews yet</p>
+            <p className="mt-2 text-base leading-relaxed text-muted-foreground">
               Scroll down to write your first track — versions will appear here.
             </p>
 
           </div>
+
         )}
       </section>
 
@@ -720,13 +728,14 @@ function LibraryPage() {
 
 
         {/* Personal details — the main writing area */}
-        <div className="relative rounded-xl border border-border bg-background/40 p-4 sm:p-5">
-          <Label htmlFor="personal-details" className="block text-base font-bold text-foreground">
+        <div className="relative rounded-2xl border border-white/10 bg-background/40 p-5 ring-1 ring-white/5 sm:p-6">
+          <Label htmlFor="personal-details" className="block font-display text-xl font-black leading-tight text-foreground sm:text-2xl">
             Tell us about the person this song is for
           </Label>
-          <p className="mt-1 text-xs text-muted-foreground">
+          <p className="mt-2 text-sm text-muted-foreground sm:text-base">
             Names, places, key dates, inside jokes, what they love — anything you want woven into the lyrics.
           </p>
+
 
           {/* Quick-insert chips */}
           <div
