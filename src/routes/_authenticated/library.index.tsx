@@ -841,21 +841,25 @@ function LibraryPage() {
           })()}
         </div>
 
-        {/* Extra context */}
+        {/* Lyric description — auto-filled from category selections; user can edit. */}
         <div className="relative">
           <Label htmlFor="extra-context" className="text-sm font-bold uppercase tracking-wider text-muted-foreground sm:text-base">
-            Extra context <span className="font-normal normal-case">(optional)</span>
+            Lyric description
           </Label>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Your category picks land here automatically. Add or edit anything you want the AI to know before writing.
+          </p>
           <Textarea
             id="extra-context"
             value={extraContext}
             onChange={(e) => setExtraContext(e.target.value)}
-            placeholder="Anything else the AI should know before writing…"
+            placeholder="Pick chips above — they'll fill this in. Add more detail if you want."
             maxLength={1000}
-            rows={3}
-            className="mt-2 min-h-[96px] resize-y rounded-xl border-white/10 bg-background/40 text-base sm:text-lg"
+            rows={4}
+            className="mt-2 min-h-[120px] resize-y rounded-xl border-white/10 bg-background/40 text-base sm:text-lg"
           />
         </div>
+
       </section>
 
       {/* Step 2 — Pick your sound (categories, theme & tempo merged) */}
