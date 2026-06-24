@@ -16,8 +16,10 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as RCodeRouteImport } from './routes/r.$code'
+import { Route as PortalSlugRouteImport } from './routes/portal.$slug'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedReferralsRouteImport } from './routes/_authenticated/referrals'
+import { Route as AuthenticatedPortalsRouteImport } from './routes/_authenticated/portals'
 import { Route as AuthenticatedMessengerRouteImport } from './routes/_authenticated/messenger'
 import { Route as AuthenticatedDeveloperRouteImport } from './routes/_authenticated/developer'
 import { Route as AuthenticatedLibraryIndexRouteImport } from './routes/_authenticated/library.index'
@@ -69,6 +71,11 @@ const RCodeRoute = RCodeRouteImport.update({
   path: '/r/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PortalSlugRoute = PortalSlugRouteImport.update({
+  id: '/portal/$slug',
+  path: '/portal/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -77,6 +84,11 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
 const AuthenticatedReferralsRoute = AuthenticatedReferralsRouteImport.update({
   id: '/referrals',
   path: '/referrals',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPortalsRoute = AuthenticatedPortalsRouteImport.update({
+  id: '/portals',
+  path: '/portals',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedMessengerRoute = AuthenticatedMessengerRouteImport.update({
@@ -180,8 +192,10 @@ export interface FileRoutesByFullPath {
   '/welcome': typeof WelcomeRoute
   '/developer': typeof AuthenticatedDeveloperRoute
   '/messenger': typeof AuthenticatedMessengerRoute
+  '/portals': typeof AuthenticatedPortalsRoute
   '/referrals': typeof AuthenticatedReferralsRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/portal/$slug': typeof PortalSlugRoute
   '/r/$code': typeof RCodeRoute
   '/admin/api-keys': typeof AuthenticatedAdminApiKeysRoute
   '/admin/debug-context': typeof AuthenticatedAdminDebugContextRoute
@@ -205,8 +219,10 @@ export interface FileRoutesByTo {
   '/welcome': typeof WelcomeRoute
   '/developer': typeof AuthenticatedDeveloperRoute
   '/messenger': typeof AuthenticatedMessengerRoute
+  '/portals': typeof AuthenticatedPortalsRoute
   '/referrals': typeof AuthenticatedReferralsRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/portal/$slug': typeof PortalSlugRoute
   '/r/$code': typeof RCodeRoute
   '/': typeof AuthenticatedIndexRoute
   '/admin/api-keys': typeof AuthenticatedAdminApiKeysRoute
@@ -233,8 +249,10 @@ export interface FileRoutesById {
   '/welcome': typeof WelcomeRoute
   '/_authenticated/developer': typeof AuthenticatedDeveloperRoute
   '/_authenticated/messenger': typeof AuthenticatedMessengerRoute
+  '/_authenticated/portals': typeof AuthenticatedPortalsRoute
   '/_authenticated/referrals': typeof AuthenticatedReferralsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/portal/$slug': typeof PortalSlugRoute
   '/r/$code': typeof RCodeRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/admin/api-keys': typeof AuthenticatedAdminApiKeysRoute
@@ -262,8 +280,10 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/developer'
     | '/messenger'
+    | '/portals'
     | '/referrals'
     | '/settings'
+    | '/portal/$slug'
     | '/r/$code'
     | '/admin/api-keys'
     | '/admin/debug-context'
@@ -287,8 +307,10 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/developer'
     | '/messenger'
+    | '/portals'
     | '/referrals'
     | '/settings'
+    | '/portal/$slug'
     | '/r/$code'
     | '/'
     | '/admin/api-keys'
@@ -314,8 +336,10 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/_authenticated/developer'
     | '/_authenticated/messenger'
+    | '/_authenticated/portals'
     | '/_authenticated/referrals'
     | '/_authenticated/settings'
+    | '/portal/$slug'
     | '/r/$code'
     | '/_authenticated/'
     | '/_authenticated/admin/api-keys'
@@ -340,6 +364,7 @@ export interface RootRouteChildren {
   MPreviewRoute: typeof MPreviewRoute
   TrustRoute: typeof TrustRoute
   WelcomeRoute: typeof WelcomeRoute
+  PortalSlugRoute: typeof PortalSlugRoute
   RCodeRoute: typeof RCodeRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   ApiPublicTelegramWebhookRoute: typeof ApiPublicTelegramWebhookRoute
@@ -396,6 +421,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/portal/$slug': {
+      id: '/portal/$slug'
+      path: '/portal/$slug'
+      fullPath: '/portal/$slug'
+      preLoaderRoute: typeof PortalSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/settings': {
       id: '/_authenticated/settings'
       path: '/settings'
@@ -408,6 +440,13 @@ declare module '@tanstack/react-router' {
       path: '/referrals'
       fullPath: '/referrals'
       preLoaderRoute: typeof AuthenticatedReferralsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/portals': {
+      id: '/_authenticated/portals'
+      path: '/portals'
+      fullPath: '/portals'
+      preLoaderRoute: typeof AuthenticatedPortalsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/messenger': {
@@ -542,6 +581,7 @@ const AuthenticatedAdminUsersRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDeveloperRoute: typeof AuthenticatedDeveloperRoute
   AuthenticatedMessengerRoute: typeof AuthenticatedMessengerRoute
+  AuthenticatedPortalsRoute: typeof AuthenticatedPortalsRoute
   AuthenticatedReferralsRoute: typeof AuthenticatedReferralsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
@@ -561,6 +601,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDeveloperRoute: AuthenticatedDeveloperRoute,
   AuthenticatedMessengerRoute: AuthenticatedMessengerRoute,
+  AuthenticatedPortalsRoute: AuthenticatedPortalsRoute,
   AuthenticatedReferralsRoute: AuthenticatedReferralsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
@@ -586,6 +627,7 @@ const rootRouteChildren: RootRouteChildren = {
   MPreviewRoute: MPreviewRoute,
   TrustRoute: TrustRoute,
   WelcomeRoute: WelcomeRoute,
+  PortalSlugRoute: PortalSlugRoute,
   RCodeRoute: RCodeRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   ApiPublicTelegramWebhookRoute: ApiPublicTelegramWebhookRoute,
