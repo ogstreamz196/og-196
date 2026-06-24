@@ -472,34 +472,20 @@ function LibraryPage() {
 
       {/* Step 1 — Name your song */}
       <section className="rounded-3xl border border-primary/40 bg-gradient-to-br from-primary/15 via-card/80 to-card/60 p-6 shadow-[0_24px_70px_-30px_oklch(0.7_0.2_300_/_0.55)] ring-1 ring-white/5 sm:p-8">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-primary-foreground shadow-[0_0_20px_-4px_oklch(0.7_0.2_300_/_0.7)]">
-            <Sparkles className="h-3.5 w-3.5" /> Step 1
-          </span>
-          <span className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-            Start here
-          </span>
+        <div className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-primary-foreground">
+          <Sparkles className="h-3.5 w-3.5" /> Step 1
         </div>
         <Label
           htmlFor="song-title"
-          className="mt-4 block font-display text-3xl font-black leading-[1.1] tracking-tight sm:text-4xl"
+          className="mt-3 block font-display text-3xl font-black leading-[1.1] tracking-tight sm:text-4xl"
         >
           Name your song
         </Label>
-        <p className="mt-2 text-base text-muted-foreground sm:text-lg">
-          Give it a working title — you can change this later.
+        <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+          A short working title — or tap <span className="font-semibold text-foreground">Surprise me</span>.
         </p>
-        <div className="mt-4 rounded-2xl border border-primary/20 bg-primary/5 p-4 text-sm leading-relaxed text-muted-foreground sm:text-base">
-
-          <p className="font-semibold text-foreground">What to enter first 👇</p>
-          <p className="mt-1">
-            Type a short, catchy name that captures the vibe — a moment, a feeling, or a person
-            (e.g. <span className="italic">"Late night drive"</span>,{" "}
-            <span className="italic">"Mum's birthday"</span>). Stuck? Tap{" "}
-            <span className="font-semibold text-foreground">Surprise me</span> for instant ideas.
-          </p>
-        </div>
         <div className="mt-4 flex flex-wrap items-stretch gap-2">
+
           <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-primary/20 text-xl sm:h-14 sm:w-14 sm:text-2xl">
             🎙️
           </div>
