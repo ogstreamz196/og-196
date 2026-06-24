@@ -10,8 +10,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { supabase } from "@/integrations/supabase/client";
-import { invokeError } from "@/lib/invoke-error";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
