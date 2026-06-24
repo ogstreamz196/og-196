@@ -255,63 +255,77 @@ function BuyCoinsPage() {
 
 
   return (
-    <DashboardShell title="OG Coins Store">
+    <DashboardShell title="OG Coin Vault">
       <PaymentTestModeBanner />
       <div className="mx-auto w-full max-w-6xl space-y-6">
-        {/* Compact, consistent hero */}
-        <SectionCard>
-          <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        {/* Arcade-style hero */}
+        <section className="relative overflow-hidden rounded-3xl border-2 border-coin/40 bg-gradient-to-br from-background via-card to-background shadow-glow">
+          {/* scanline + glow fx */}
+          <div className="pointer-events-none absolute inset-0 opacity-[0.07]" style={{ backgroundImage: "repeating-linear-gradient(0deg, currentColor 0 1px, transparent 1px 4px)" }} />
+          <div className="pointer-events-none absolute -left-16 -top-20 h-64 w-64 rounded-full bg-coin/25 blur-3xl" />
+          <div className="pointer-events-none absolute -right-20 -bottom-24 h-72 w-72 rounded-full bg-primary/25 blur-3xl" />
+
+          <div className="relative flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
             <div className="flex items-start gap-4 min-w-0">
-              <SectionIcon>
-                <Store className="h-5 w-5" />
-              </SectionIcon>
+              <div className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-coin/40 to-coin/10 text-coin shadow-glow ring-2 ring-coin/40">
+                <Coins className="h-8 w-8 drop-shadow" />
+              </div>
               <div className="min-w-0">
-                <SectionEyebrow>The Coin Shop</SectionEyebrow>
-                <h1 className="mt-1 font-display text-3xl font-black tracking-tight sm:text-4xl">
-                  <EditableContent contentKey="buyCoins.heading" defaultValue="Grab some coins." />
+                <p className="inline-flex items-center gap-1.5 rounded-full bg-coin/15 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.25em] text-coin ring-1 ring-coin/40">
+                  <Flame className="h-3 w-3" /> The Coin Vault
+                </p>
+                <h1 className="mt-2 font-display text-4xl font-black tracking-tight sm:text-5xl">
+                  <EditableContent contentKey="buyCoins.heading" defaultValue="Stock up. Power up." />
                 </h1>
-                <p className="mt-1 max-w-xl text-sm text-muted-foreground sm:text-[15px]">
+                <p className="mt-2 max-w-xl text-sm text-muted-foreground sm:text-[15px]">
                   <EditableContent
                     contentKey="buyCoins.subtitle"
-                    defaultValue="1 coin = 1 message or 1 track. Coins never expire."
+                    defaultValue="1 coin = 1 message or 1 track. Coins never expire — collect the bigger bundles to unlock fatter savings."
                     multiline
                   />
                 </p>
               </div>
             </div>
+
+            {/* HUD wallet */}
             <div className="flex items-center gap-3 sm:flex-col sm:items-end">
-              <div className="inline-flex items-center gap-2 rounded-full border border-coin/40 bg-coin/10 px-3 py-1.5 text-coin shadow-sm">
-                <Coins className="h-4 w-4" />
-                <span className="text-base font-black tabular-nums leading-none">
-                  {profile?.coin_balance ?? 0}
-                </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider">Balance</span>
+              <div className="rounded-2xl border-2 border-coin/50 bg-background/60 px-4 py-3 backdrop-blur-md shadow-glow">
+                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] text-coin">
+                  <Wallet className="h-3 w-3" /> Wallet
+                </div>
+                <div className="mt-1 flex items-baseline gap-1.5">
+                  <Coins className="h-5 w-5 text-coin" />
+                  <span className="text-3xl font-black tabular-nums leading-none">{profile?.coin_balance ?? 0}</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">OG</span>
+                </div>
               </div>
               <AdminEditModeToggle />
             </div>
           </div>
-        </SectionCard>
+        </section>
 
 
-        {/* Coin packs */}
+        {/* Coin bundles */}
         <SectionCard>
           <SectionHeader
-            eyebrow="One-time top-ups"
-            title="Pick your pack"
-            subtitle="Bigger packs = better price per coin. Coins never expire."
-            icon={<Tag className="h-5 w-5" />}
+            eyebrow="Coin Bundles"
+            title="Pick your loot"
+            subtitle="Bigger crates = better price per coin. Rare tiers stack extra savings."
+            icon={<Gem className="h-5 w-5" />}
             action={
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-emerald-400 ring-1 ring-emerald-500/30">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-emerald-400 ring-1 ring-emerald-500/30">
                 <TrendingDown className="h-3.5 w-3.5" /> Save up to {Math.round((1 - (COIN_PACKS[COIN_PACKS.length - 1].priceCents / 100 / COIN_PACKS[COIN_PACKS.length - 1].coins) / basePerCoin) * 100)}%
               </span>
             }
           />
           <div className="px-5 pb-5 sm:px-6 sm:pb-6">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {COIN_PACKS.map((t) => (
+              {COIN_PACKS.map((t, i) => (
                 <PackCard
                   key={t.bundleId}
                   pack={t}
+                  tierIndex={i}
+                  totalTiers={COIN_PACKS.length}
                   basePerCoin={basePerCoin}
                   onBuy={(effective) => pickSelection({ type: "coins", pack: effective })}
                 />
@@ -328,6 +342,7 @@ function BuyCoinsPage() {
             </p>
           </div>
         </SectionCard>
+
 
 
         {/* VIP monthly subscription */}
