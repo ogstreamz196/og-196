@@ -172,7 +172,7 @@ export const getOnboardingChecks = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context);
-    const supabase = context.supabase as {
+    const supabase = context.supabase as unknown as {
       from: (t: string) => {
         select: (cols: string) => {
           eq: (
