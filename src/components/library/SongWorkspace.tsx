@@ -22,7 +22,29 @@ import { cn } from "@/lib/utils";
 import { StageStepper, type Stage } from "./song-workspace/StageStepper";
 import { VariationsCard } from "./song-workspace/VariationsCard";
 import type { WorkspaceSong } from "./song-workspace/types";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
+
+const LANGUAGES = [
+  "English", "Spanish", "French", "Portuguese", "Hindi", "Urdu",
+  "Punjabi", "Arabic", "Swahili", "Patois", "Yoruba", "German",
+  "Italian", "Tagalog", "Mandarin", "Japanese", "Korean", "Turkish",
+];
+
+const LANG_RE = /Language:\s*(?:write the lyrics in\s*)?([A-Za-z][A-Za-z\s]{1,30})/i;
+
+function detectLanguage(text: string | null | undefined): string {
+  const m = text?.match(LANG_RE);
+  const found = m?.[1]?.trim();
+  if (!found) return "English";
+  return LANGUAGES.find((l) => l.toLowerCase() === found.toLowerCase()) ?? "English";
+}
+
+function setBriefLanguage(brief: string, language: string): string {
+  const line = `Language: write the lyrics in ${language}`;
+  if (LANG_RE.test(brief)) return brief.replace(LANG_RE, line);
+  return brief.trim() ? `${brief.trim()}\n${line}` : line;
+}
 
 interface Props {
   song: WorkspaceSong;
