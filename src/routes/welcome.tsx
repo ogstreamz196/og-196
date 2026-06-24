@@ -18,7 +18,7 @@ import {
   useAdminEditMode,
 } from "@/components/admin/AdminEditMode";
 import { useRole } from "@/hooks/use-role";
-import { TutorialBubbles, type TutorialStep } from "@/components/TutorialBubbles";
+
 import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -337,22 +337,6 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
 
 
 
-const TUTORIAL_STEPS: TutorialStep[] = [
-  {
-    id: "tap-device",
-    selector: "#sign-in",
-    title: "Start here 👇",
-    body: "Tap the tile that matches your device — Google, Apple, Android, Samsung or iPhone — to sign in.",
-    placement: "top",
-  },
-  {
-    id: "scroll-styles",
-    selector: "#studio",
-    title: "Scroll down",
-    body: "See the song styles you can prompt — drill, afrobeats, pop, R&B and more.",
-    placement: "bottom",
-  },
-];
 
 function WelcomePage() {
   // Single session check for the whole page (AuthButtons is mounted twice).
@@ -367,7 +351,7 @@ function WelcomePage() {
         <HowItWorks />
         <ClosingCta />
         <Footer />
-        <TutorialBubbles steps={TUTORIAL_STEPS} storageKey="welcome.tutorial.dismissed" />
+        
         <div className="fixed bottom-4 right-4 z-50">
           <AdminEditModeToggle />
         </div>
