@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Coins, Check, ArrowLeft, Crown, Star, Zap, ShieldCheck, Lock, Sparkles, Infinity as InfinityIcon, TrendingDown, Gift, Pencil, X, Loader2, CreditCard, Plus, Minus, SlidersHorizontal, Store, Tag, ToggleLeft, ToggleRight } from "lucide-react";
+import { Coins, Check, ArrowLeft, Crown, Star, Zap, ShieldCheck, Lock, Sparkles, Infinity as InfinityIcon, TrendingDown, Gift, Pencil, X, Loader2, CreditCard, Plus, Minus, SlidersHorizontal, Store, Tag, ToggleLeft, ToggleRight, Gem, Trophy, Flame, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
@@ -255,63 +255,77 @@ function BuyCoinsPage() {
 
 
   return (
-    <DashboardShell title="OG Coins Store">
+    <DashboardShell title="OG Coin Vault">
       <PaymentTestModeBanner />
       <div className="mx-auto w-full max-w-6xl space-y-6">
-        {/* Compact, consistent hero */}
-        <SectionCard>
-          <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        {/* Arcade-style hero */}
+        <section className="relative overflow-hidden rounded-3xl border-2 border-coin/40 bg-gradient-to-br from-background via-card to-background shadow-glow">
+          {/* scanline + glow fx */}
+          <div className="pointer-events-none absolute inset-0 opacity-[0.07]" style={{ backgroundImage: "repeating-linear-gradient(0deg, currentColor 0 1px, transparent 1px 4px)" }} />
+          <div className="pointer-events-none absolute -left-16 -top-20 h-64 w-64 rounded-full bg-coin/25 blur-3xl" />
+          <div className="pointer-events-none absolute -right-20 -bottom-24 h-72 w-72 rounded-full bg-primary/25 blur-3xl" />
+
+          <div className="relative flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
             <div className="flex items-start gap-4 min-w-0">
-              <SectionIcon>
-                <Store className="h-5 w-5" />
-              </SectionIcon>
+              <div className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-coin/40 to-coin/10 text-coin shadow-glow ring-2 ring-coin/40">
+                <Coins className="h-8 w-8 drop-shadow" />
+              </div>
               <div className="min-w-0">
-                <SectionEyebrow>The Coin Shop</SectionEyebrow>
-                <h1 className="mt-1 font-display text-3xl font-black tracking-tight sm:text-4xl">
-                  <EditableContent contentKey="buyCoins.heading" defaultValue="Grab some coins." />
+                <p className="inline-flex items-center gap-1.5 rounded-full bg-coin/15 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.25em] text-coin ring-1 ring-coin/40">
+                  <Flame className="h-3 w-3" /> The Coin Vault
+                </p>
+                <h1 className="mt-2 font-display text-4xl font-black tracking-tight sm:text-5xl">
+                  <EditableContent contentKey="buyCoins.heading" defaultValue="Stock up. Power up." />
                 </h1>
-                <p className="mt-1 max-w-xl text-sm text-muted-foreground sm:text-[15px]">
+                <p className="mt-2 max-w-xl text-sm text-muted-foreground sm:text-[15px]">
                   <EditableContent
                     contentKey="buyCoins.subtitle"
-                    defaultValue="1 coin = 1 message or 1 track. Coins never expire."
+                    defaultValue="1 coin = 1 message or 1 track. Coins never expire — collect the bigger bundles to unlock fatter savings."
                     multiline
                   />
                 </p>
               </div>
             </div>
+
+            {/* HUD wallet */}
             <div className="flex items-center gap-3 sm:flex-col sm:items-end">
-              <div className="inline-flex items-center gap-2 rounded-full border border-coin/40 bg-coin/10 px-3 py-1.5 text-coin shadow-sm">
-                <Coins className="h-4 w-4" />
-                <span className="text-base font-black tabular-nums leading-none">
-                  {profile?.coin_balance ?? 0}
-                </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider">Balance</span>
+              <div className="rounded-2xl border-2 border-coin/50 bg-background/60 px-4 py-3 backdrop-blur-md shadow-glow">
+                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] text-coin">
+                  <Wallet className="h-3 w-3" /> Wallet
+                </div>
+                <div className="mt-1 flex items-baseline gap-1.5">
+                  <Coins className="h-5 w-5 text-coin" />
+                  <span className="text-3xl font-black tabular-nums leading-none">{profile?.coin_balance ?? 0}</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">OG</span>
+                </div>
               </div>
               <AdminEditModeToggle />
             </div>
           </div>
-        </SectionCard>
+        </section>
 
 
-        {/* Coin packs */}
+        {/* Coin bundles */}
         <SectionCard>
           <SectionHeader
-            eyebrow="One-time top-ups"
-            title="Pick your pack"
-            subtitle="Bigger packs = better price per coin. Coins never expire."
-            icon={<Tag className="h-5 w-5" />}
+            eyebrow="Coin Bundles"
+            title="Pick your loot"
+            subtitle="Bigger crates = better price per coin. Rare tiers stack extra savings."
+            icon={<Gem className="h-5 w-5" />}
             action={
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-emerald-400 ring-1 ring-emerald-500/30">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-emerald-400 ring-1 ring-emerald-500/30">
                 <TrendingDown className="h-3.5 w-3.5" /> Save up to {Math.round((1 - (COIN_PACKS[COIN_PACKS.length - 1].priceCents / 100 / COIN_PACKS[COIN_PACKS.length - 1].coins) / basePerCoin) * 100)}%
               </span>
             }
           />
           <div className="px-5 pb-5 sm:px-6 sm:pb-6">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {COIN_PACKS.map((t) => (
+              {COIN_PACKS.map((t, i) => (
                 <PackCard
                   key={t.bundleId}
                   pack={t}
+                  tierIndex={i}
+                  totalTiers={COIN_PACKS.length}
                   basePerCoin={basePerCoin}
                   onBuy={(effective) => pickSelection({ type: "coins", pack: effective })}
                 />
@@ -330,11 +344,12 @@ function BuyCoinsPage() {
         </SectionCard>
 
 
+
         {/* VIP monthly subscription */}
         <SectionCard className="border-coin/40">
           <SectionHeader
-            eyebrow="Monthly membership"
-            title={<EditableContent contentKey="buyCoins.vip.heading" defaultValue="Or go all-in with OG VIP" />}
+            eyebrow="Membership Pass"
+            title={<EditableContent contentKey="buyCoins.vip.heading" defaultValue="Unlock the OG VIP Pass" />}
             subtitle={<EditableContent contentKey="buyCoins.vip.subtitle" defaultValue="Unlock exclusive privileges across OG Streamz — billed monthly, cancel anytime." multiline />}
             icon={<Crown className="h-5 w-5 text-coin" />}
           />
@@ -455,12 +470,24 @@ function SectionHeader({
 
 type EditingField = "label" | "description" | "coins" | "price" | null;
 
+const RARITY_TIERS = [
+  { name: "Common",    Icon: Coins,  ring: "ring-slate-400/40",   glow: "",                   pill: "bg-slate-500/15 text-slate-300 ring-slate-400/30" },
+  { name: "Rare",      Icon: Zap,    ring: "ring-sky-400/50",     glow: "shadow-[0_0_30px_-8px_oklch(0.7_0.18_240)]", pill: "bg-sky-500/15 text-sky-300 ring-sky-400/40" },
+  { name: "Epic",      Icon: Gem,    ring: "ring-purple-400/60",  glow: "shadow-[0_0_40px_-10px_oklch(0.7_0.22_300)]", pill: "bg-purple-500/15 text-purple-300 ring-purple-400/40" },
+  { name: "Legendary", Icon: Trophy, ring: "ring-coin/70",        glow: "shadow-[0_0_60px_-10px_oklch(0.8_0.18_85)]",  pill: "bg-coin/20 text-coin ring-coin/50" },
+  { name: "Mythic",    Icon: Flame,  ring: "ring-red-400/60",     glow: "shadow-[0_0_60px_-10px_oklch(0.7_0.22_25)]",  pill: "bg-red-500/15 text-red-300 ring-red-400/40" },
+] as const;
+
 function PackCard({
   pack,
+  tierIndex,
+  totalTiers,
   basePerCoin,
   onBuy,
 }: {
   pack: CoinPack;
+  tierIndex: number;
+  totalTiers: number;
   basePerCoin: number;
   onBuy: (effective: CoinPack) => void;
 }) {
@@ -468,8 +495,6 @@ function PackCard({
   const { enabled } = useAdminEditMode();
   const { get } = useSiteContent();
   const setMut = useSetSiteContent();
-  // Edit mode is admin-only (AdminEditModeProvider already enforces this).
-  // The set_site_content RPC re-checks the role server-side.
   const canEdit = isAdmin && enabled;
 
   const raw = get(packOverrideKey(pack.bundleId), "");
@@ -481,6 +506,12 @@ function PackCard({
   const perCoin = effective.priceCents / 100 / effective.coins;
   const savingsPct = basePerCoin > 0 ? Math.round((1 - perCoin / basePerCoin) * 100) : 0;
   const accent = pack.bestValue || pack.popular;
+  // Map pack position → rarity tier (last pack always gets the top tier).
+  const tierIdx = totalTiers <= 1
+    ? 0
+    : Math.min(RARITY_TIERS.length - 1, Math.round((tierIndex / (totalTiers - 1)) * (RARITY_TIERS.length - 1)));
+  const tier = RARITY_TIERS[tierIdx];
+  const TierIcon = tier.Icon;
 
   const [field, setField] = useState<EditingField>(null);
   const [draft, setDraft] = useState("");
@@ -552,26 +583,43 @@ function PackCard({
   return (
     <div
       className={cn(
-        "relative flex flex-col rounded-2xl border bg-card p-5 shadow-card transition-all",
-        accent ? "border-primary shadow-glow" : "border-border",
-        canEdit && "ring-1 ring-primary/30",
+        "relative flex flex-col overflow-hidden rounded-2xl border-2 bg-card p-5 transition-all ring-1 hover:-translate-y-0.5",
+        tier.ring,
+        tier.glow || "shadow-card",
+        accent ? "border-coin/60" : "border-border",
+        canEdit && "ring-primary/40",
       )}
     >
+      {/* Holographic top stripe */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-coin/60 to-transparent opacity-60" />
+
+      {/* Rarity tier pill */}
+      <div className={cn(
+        "absolute left-3 top-3 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.18em] ring-1",
+        tier.pill,
+      )}>
+        <TierIcon className="h-3 w-3" /> {tier.name}
+      </div>
+
       {pack.popular && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-gradient-brand px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-primary-foreground shadow whitespace-nowrap">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-gradient-brand px-3 py-1 text-[11px] font-black uppercase tracking-wider text-primary-foreground shadow whitespace-nowrap">
           <Sparkles className="h-3 w-3" /> Most popular
         </div>
       )}
       {pack.bestValue && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-coin px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-background shadow whitespace-nowrap">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-coin px-3 py-1 text-[11px] font-black uppercase tracking-wider text-background shadow whitespace-nowrap">
           <Crown className="h-3 w-3" /> Best value
         </div>
       )}
       {savingsPct > 0 && !canEdit && (
-        <div className="absolute right-3 top-3 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400 ring-1 ring-emerald-500/30">
-          Save {savingsPct}%
+        <div className="absolute right-3 top-3 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-emerald-400 ring-1 ring-emerald-500/30">
+          −{savingsPct}%
         </div>
       )}
+
+      {/* spacer so the rarity pill doesn't collide with content */}
+      <div className="h-6" aria-hidden />
+
 
       {/* Label row */}
       <EditableField
