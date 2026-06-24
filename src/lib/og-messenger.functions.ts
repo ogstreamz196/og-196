@@ -128,6 +128,8 @@ export const chatOgBot = createServerFn({ method: "POST" })
 
     const learnedInsults = (learnedRes.data ?? []).map((r: { phrase: string }) => r.phrase);
 
+    const effectiveLanguage = isVip ? (data.language || "English") : "English";
+
     const system = buildSystemPrompt({
       mode: data.mode,
       foulMouth,
@@ -135,6 +137,7 @@ export const chatOgBot = createServerFn({ method: "POST" })
       bossVoice: personaMap.get("og_persona.voice") ?? null,
       bossDictionary: personaMap.get("og_persona.dictionary") ?? null,
       learnedInsults,
+      language: effectiveLanguage,
       user: userCtx,
     });
 
