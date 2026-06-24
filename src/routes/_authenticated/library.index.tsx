@@ -178,17 +178,6 @@ const META: Record<
     chipActive: "border-rose-400 bg-rose-500/25 text-rose-100 shadow-[0_0_24px_-6px_theme(colors.rose.400)]",
     iconBg: "bg-rose-500/20 text-rose-300 border-rose-400/30",
   },
-  tempo: {
-    label: "Tempo",
-    helper: "How fast should it hit?",
-    placeholder: "Pick a tempo",
-    icon: Gauge,
-    gradient: "from-emerald-500/50 via-teal-500/25 to-transparent",
-    emoji: "⚡",
-    accent: "text-emerald-300",
-    chipActive: "border-emerald-400 bg-emerald-500/25 text-emerald-100 shadow-[0_0_24px_-6px_theme(colors.emerald.400)]",
-    iconBg: "bg-emerald-500/20 text-emerald-300 border-emerald-400/30",
-  },
 };
 
 const GENRE_MOOD_BIAS: Record<string, string[]> = {
