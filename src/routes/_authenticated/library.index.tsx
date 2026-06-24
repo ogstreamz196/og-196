@@ -320,7 +320,7 @@ function LibraryPage() {
 
   const totalFilled =
     (title.trim() ? 1 : 0) + (selections.language ? 1 : 0) + filledExtras;
-  const progress = Math.min(100, Math.round((totalFilled / 5) * 100));
+  const progress = Math.min(100, Math.round((totalFilled / 4) * 100));
 
   const canGenerateLyrics =
     !!title.trim() && !!selections.language && filledExtras >= 1 && balance >= lyricsCost;
@@ -866,13 +866,14 @@ function LibraryPage() {
               Choose the vibe
             </h2>
           </div>
-          <span className="hidden text-xs font-bold uppercase tracking-[0.24em] text-muted-foreground sm:block">
-            {totalFilled}/5 picked
+          <span className="hidden rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-bold uppercase tracking-[0.24em] text-muted-foreground sm:inline-block">
+            {totalFilled}/4 picked
           </span>
         </header>
 
 
-        <div className="grid grid-cols-1 items-stretch gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 sm:gap-5">
+
           {(["language", "genre", "mood", "theme"] as Category[]).map((cat) => (
             <CategoryCard
               key={cat}
@@ -891,7 +892,7 @@ function LibraryPage() {
         <div className="space-y-1.5 sm:hidden">
           <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
             <span>Progress</span>
-            <span>{totalFilled}/5</span>
+            <span>{totalFilled}/4</span>
           </div>
           <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
             <div
