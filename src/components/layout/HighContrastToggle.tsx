@@ -42,8 +42,8 @@ export function HighContrastToggle({ className }: { className?: string }) {
       size="icon"
       onClick={toggle}
       aria-pressed={on}
-      aria-label={on ? "Disable high contrast" : "Enable high contrast"}
-      title={on ? "High contrast: ON" : "High contrast: OFF"}
+      aria-label={on ? "Turn off high contrast" : "Turn on high contrast"}
+      title={on ? "Turn off high contrast" : "Turn on high contrast"}
       className={cn(
         "h-9 w-9 hover:bg-white/5",
         on && "bg-primary/20 text-primary ring-2 ring-primary/60",
