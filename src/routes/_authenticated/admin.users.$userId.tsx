@@ -401,8 +401,9 @@ function TelegramDmCard({
   tgUsername: string | null;
 }) {
   const linked = !!chatId;
-  const token = userId.replace(/-/g, "").slice(0, 24);
-  const connectLink = `https://t.me/${TELEGRAM_BOT_USERNAME}?start=${token}`;
+  const fallbackToken = userId.replace(/-/g, "").slice(0, 24);
+  const [activeToken, setActiveToken] = useState<string>(fallbackToken);
+  const connectLink = `https://t.me/${TELEGRAM_BOT_USERNAME}?start=${activeToken}`;
   const [text, setText] = useState("");
   const qc = useQueryClient();
   const sendFn = useServerFn(sendTelegramDm);
