@@ -155,20 +155,20 @@ function DashboardHome() {
               ))}
             </span>
           </div>
-          <div className="order-1 min-w-0 rounded-3xl bg-background/35 p-5 backdrop-blur-md ring-2 ring-white/10 transition-transform duration-500 group-hover/welcome:-translate-y-1 sm:order-none sm:flex-1 sm:p-7">
-            <p className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.28em] text-muted-foreground sm:text-xl">
+          <div className="order-1 min-w-0 rounded-3xl bg-background/35 p-5 text-center backdrop-blur-md ring-2 ring-white/10 transition-transform duration-500 group-hover/welcome:-translate-y-1 sm:order-none sm:flex-1 sm:p-8">
+            <p className="inline-flex items-center justify-center gap-2 text-xs uppercase tracking-[0.28em] text-muted-foreground sm:text-xl">
               <span className="inline-block animate-[wiggle_1.6s_ease-in-out_infinite] [transform-origin:70%_70%]">👋</span>
               <span className="relative">
                 Welcome back
                 <span aria-hidden className="absolute -bottom-1 left-0 h-[2px] w-full origin-left scale-x-0 bg-gradient-to-r from-primary via-accent to-primary animate-[shimmer_3s_ease-in-out_infinite] [animation:wc-pop_0.8s_0.3s_cubic-bezier(.34,1.56,.64,1)_forwards]" />
               </span>
             </p>
-            <div className="mt-3 flex items-center gap-4 sm:gap-6">
+            <div className="mt-5 flex flex-col items-center gap-5 sm:gap-7">
               <img
                 src={ogLogo.url}
                 alt="OG Streamz"
                 loading="lazy"
-                className="h-24 w-auto shrink-0 rounded-2xl ring-1 ring-white/10 shadow-[0_18px_50px_-20px_rgba(0,0,0,0.7)] sm:h-32 md:h-40"
+                className="mx-auto h-40 w-auto rounded-3xl ring-1 ring-white/10 shadow-[0_24px_70px_-20px_rgba(0,0,0,0.8)] sm:h-56 md:h-72 lg:h-80"
               />
               <h1 className="font-display min-w-0 text-[clamp(2rem,4.5vw+1rem,5rem)] font-black leading-[1.05] tracking-[-0.02em] text-foreground [text-shadow:0_4px_28px_rgba(0,0,0,0.75)] [overflow-wrap:break-word] [word-break:normal] [text-wrap:balance] [font-variant-ligatures:none]">
                 <span className="inline-block wc-pop">Hello,</span>{" "}
@@ -185,8 +185,9 @@ function DashboardHome() {
                 </span>
               </h1>
             </div>
-            <p className="mt-4 max-w-2xl text-sm leading-[1.45] text-foreground [text-shadow:0_1px_12px_rgba(0,0,0,0.75)] sm:text-2xl md:text-3xl">
-              Jump back into your music workspace or pick up a chat with{" "}
+            <p className="mx-auto mt-5 max-w-2xl text-sm leading-[1.5] text-foreground [text-shadow:0_1px_12px_rgba(0,0,0,0.75)] sm:text-xl md:text-2xl">
+              Dive into <span className="font-bold text-primary">MusicHub</span> to create tracks, or open{" "}
+              <span className="font-bold text-primary">OG Streamz Messenger</span> to chat with{" "}
               <span className="relative inline-block font-bold text-primary">
                 OG Bot
                 <span aria-hidden className="ml-1 inline-flex gap-0.5 align-middle">
@@ -195,8 +196,13 @@ function DashboardHome() {
                   <span className="h-1.5 w-1.5 rounded-full bg-primary animate-[bounce_1.2s_ease-in-out_infinite] [animation-delay:0.3s]" />
                 </span>
               </span>
+              .
+            </p>
+            <p className="mx-auto mt-3 max-w-2xl text-xs leading-relaxed text-muted-foreground sm:text-base">
+              Every OG Bot is linked and synced — start a conversation in one place, pick it right back up anywhere else. One memory, one assistant, ready for any task.
             </p>
           </div>
+
         </div>
 
       </section>
