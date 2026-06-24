@@ -659,15 +659,12 @@ function LibraryPage() {
 
 
         {/* Personal details — the main writing area */}
-        <div className="relative rounded-2xl border-2 border-primary/40 bg-primary/[0.06] p-5 shadow-glow sm:p-6">
-          <div className="absolute -top-3 left-4 inline-flex items-center gap-1 rounded-full bg-gradient-brand px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-primary-foreground shadow">
-            <Sparkles className="h-3.5 w-3.5" /> Recommended — best results
-          </div>
-          <Label htmlFor="personal-details" className="block text-lg font-bold text-foreground sm:text-xl">
+        <div className="relative rounded-xl border border-border bg-background/40 p-4 sm:p-5">
+          <Label htmlFor="personal-details" className="block text-base font-bold text-foreground">
             Tell us about the person this song is for
           </Label>
-          <p className="mt-1 text-sm text-muted-foreground sm:text-base">
-            Their name, nicknames, where they're from, key dates, inside jokes, what they love, the drama — anything you want woven into the lyrics.
+          <p className="mt-1 text-xs text-muted-foreground">
+            Names, places, key dates, inside jokes, what they love — anything you want woven into the lyrics.
           </p>
 
           {/* Quick-insert chips */}
