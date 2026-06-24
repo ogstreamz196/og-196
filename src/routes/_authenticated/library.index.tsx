@@ -709,7 +709,7 @@ function LibraryPage() {
       >
         <header className="space-y-1.5">
           <div className="inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
-            <Sparkles className="h-3 w-3" /> Step 1 · Who's it for?
+            <Sparkles className="h-3 w-3" /> Step 2 · Who's it for?
           </div>
           <h2 className="font-display text-2xl font-black leading-tight tracking-tight sm:text-3xl">
             Tell us about them
@@ -837,7 +837,7 @@ function LibraryPage() {
         <header className="flex items-end justify-between gap-3">
           <div className="space-y-1.5">
             <div className="inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
-              <Disc3 className="h-3 w-3" /> Step 2 · Pick your sound
+              <Disc3 className="h-3 w-3" /> Step 3 · Pick your sound
             </div>
             <h2 className="font-display text-2xl font-black tracking-tight sm:text-3xl">
               Choose the vibe
@@ -881,7 +881,7 @@ function LibraryPage() {
       <section className="space-y-4 rounded-2xl border border-primary/40 bg-card/60 p-5 sm:p-6">
         <header className="space-y-1.5">
           <div className="inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
-            <Wand2 className="h-3 w-3" /> Step 3 · Generate
+            <Wand2 className="h-3 w-3" /> Step 4 · Generate
           </div>
           <h2 className="font-display text-2xl font-black tracking-tight sm:text-3xl">
             Write the lyrics
