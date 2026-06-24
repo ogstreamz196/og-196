@@ -11,23 +11,23 @@ function captureRedirect(beforeLoad: (ctx: any) => unknown, ctx: any = {}) {
   try {
     beforeLoad(ctx);
   } catch (thrown) {
-    return thrown as { to?: string; href?: string };
+    return thrown as { options?: { to?: string; href?: string } };
   }
   throw new Error("beforeLoad did not throw a redirect");
 }
 
 describe("legacy portal routes redirect to MusicHUB", () => {
   it("/portals redirects to /library", () => {
-    const redirect = captureRedirect(PortalsRoute.options.beforeLoad!);
-    expect(redirect?.to ?? redirect?.href).toBe("/library");
+    const r = captureRedirect(PortalsRoute.options.beforeLoad!);
+    expect(r?.options?.to ?? r?.options?.href).toBe("/library");
   });
 
   it("/portal/$slug redirects to /library for any slug", () => {
     for (const slug of ["alpha", "beta-portal", "123"]) {
-      const redirect = captureRedirect(PortalSlugRoute.options.beforeLoad!, {
+      const r = captureRedirect(PortalSlugRoute.options.beforeLoad!, {
         params: { slug },
       });
-      expect(redirect?.to ?? redirect?.href).toBe("/library");
+      expect(r?.options?.to ?? r?.options?.href).toBe("/library");
     }
   });
 });
