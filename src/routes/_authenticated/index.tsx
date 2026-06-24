@@ -156,12 +156,6 @@ function DashboardHome() {
             </span>
           </div>
           <div className="order-1 min-w-0 rounded-3xl bg-background/35 p-5 backdrop-blur-md ring-2 ring-white/10 transition-transform duration-500 group-hover/welcome:-translate-y-1 sm:order-none sm:flex-1 sm:p-7">
-            <img
-              src={ogLogo.url}
-              alt="OG Streamz"
-              loading="lazy"
-              className="mb-4 w-full max-w-md rounded-2xl ring-1 ring-white/10 shadow-[0_18px_50px_-20px_rgba(0,0,0,0.7)]"
-            />
             <p className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.28em] text-muted-foreground sm:text-xl">
               <span className="inline-block animate-[wiggle_1.6s_ease-in-out_infinite] [transform-origin:70%_70%]">👋</span>
               <span className="relative">
@@ -169,20 +163,28 @@ function DashboardHome() {
                 <span aria-hidden className="absolute -bottom-1 left-0 h-[2px] w-full origin-left scale-x-0 bg-gradient-to-r from-primary via-accent to-primary animate-[shimmer_3s_ease-in-out_infinite] [animation:wc-pop_0.8s_0.3s_cubic-bezier(.34,1.56,.64,1)_forwards]" />
               </span>
             </p>
-            <h1 className="font-display mt-3 text-[clamp(2rem,4.5vw+1rem,5rem)] font-black leading-[1.05] tracking-[-0.02em] text-foreground [text-shadow:0_4px_28px_rgba(0,0,0,0.75)] [overflow-wrap:break-word] [word-break:normal] [text-wrap:balance] [font-variant-ligatures:none]">
-              <span className="inline-block wc-pop">Hello,</span>{" "}
-              <span className="font-display inline-flex not-italic font-black uppercase tracking-tight text-gradient-red [overflow-wrap:break-word] [word-break:normal]">
-                {displayName.split("").map((ch, i) => (
-                  <span
-                    key={`${ch}-${i}`}
-                    className="inline-block wc-pop hover:animate-[wiggle_0.6s_ease-in-out]"
-                    style={{ animationDelay: `${0.25 + i * 0.05}s`, whiteSpace: ch === " " ? "pre" : undefined }}
-                  >
-                    {ch}
-                  </span>
-                ))}
-              </span>
-            </h1>
+            <div className="mt-3 flex items-center gap-4 sm:gap-6">
+              <img
+                src={ogLogo.url}
+                alt="OG Streamz"
+                loading="lazy"
+                className="h-24 w-auto shrink-0 rounded-2xl ring-1 ring-white/10 shadow-[0_18px_50px_-20px_rgba(0,0,0,0.7)] sm:h-32 md:h-40"
+              />
+              <h1 className="font-display min-w-0 text-[clamp(2rem,4.5vw+1rem,5rem)] font-black leading-[1.05] tracking-[-0.02em] text-foreground [text-shadow:0_4px_28px_rgba(0,0,0,0.75)] [overflow-wrap:break-word] [word-break:normal] [text-wrap:balance] [font-variant-ligatures:none]">
+                <span className="inline-block wc-pop">Hello,</span>{" "}
+                <span className="font-display inline-flex not-italic font-black uppercase tracking-tight text-gradient-red [overflow-wrap:break-word] [word-break:normal]">
+                  {displayName.split("").map((ch, i) => (
+                    <span
+                      key={`${ch}-${i}`}
+                      className="inline-block wc-pop hover:animate-[wiggle_0.6s_ease-in-out]"
+                      style={{ animationDelay: `${0.25 + i * 0.05}s`, whiteSpace: ch === " " ? "pre" : undefined }}
+                    >
+                      {ch}
+                    </span>
+                  ))}
+                </span>
+              </h1>
+            </div>
             <p className="mt-4 max-w-2xl text-sm leading-[1.45] text-foreground [text-shadow:0_1px_12px_rgba(0,0,0,0.75)] sm:text-2xl md:text-3xl">
               Jump back into your music workspace or pick up a chat with{" "}
               <span className="relative inline-block font-bold text-primary">
