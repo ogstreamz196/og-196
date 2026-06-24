@@ -855,7 +855,7 @@ function LibraryPage() {
             </h2>
           </div>
           <span className="hidden text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:block">
-            {totalFilled}/6 picked
+            {totalFilled}/5 picked
           </span>
         </header>
 
