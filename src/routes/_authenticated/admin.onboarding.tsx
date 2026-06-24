@@ -1,6 +1,6 @@
 import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { CheckCircle2, XCircle, Loader2, PlayCircle, ExternalLink, ShieldCheck } from "lucide-react";
 import { useRole } from "@/hooks/use-role";
@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { runOnboardingCheck, type CheckResult } from "@/lib/onboarding-checks.functions";
+import { runOnboardingCheck, getOnboardingChecks, type CheckResult } from "@/lib/onboarding-checks.functions";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/admin/onboarding")({
@@ -50,7 +50,30 @@ type Status = "idle" | "running" | "ok" | "fail";
 function OnboardingWizard() {
   const { isAdmin, isLoading } = useRole();
   const runCheck = useServerFn(runOnboardingCheck);
-  const [results, setResults] = useState<Record<string, { status: Status; data?: CheckResult }>>({});
+  const loadChecks = useServerFn(getOnboardingChecks);
+  const [results, setResults] = useState<Record<string, { status: Status; data?: CheckResult; checkedAt?: string }>>({});
+
+  const saved = useQuery({
+    queryKey: ["onboarding-checks"],
+    enabled: isAdmin,
+    queryFn: () => loadChecks(),
+  });
+
+  useEffect(() => {
+    if (!saved.data) return;
+    setResults((prev) => {
+      const next = { ...prev };
+      for (const row of saved.data) {
+        if (next[row.key]?.status === "running") continue;
+        next[row.key] = {
+          status: row.ok ? "ok" : "fail",
+          data: { ok: row.ok, detail: row.detail, latencyMs: row.latencyMs },
+          checkedAt: row.checked_at,
+        };
+      }
+      return next;
+    });
+  }, [saved.data]);
 
   const single = useMutation({
     mutationFn: async (key: string) => {
@@ -59,7 +82,7 @@ function OnboardingWizard() {
       return { key, data };
     },
     onSuccess: ({ key, data }) => {
-      setResults((r) => ({ ...r, [key]: { status: data.ok ? "ok" : "fail", data } }));
+      setResults((r) => ({ ...r, [key]: { status: data.ok ? "ok" : "fail", data, checkedAt: new Date().toISOString() } }));
     },
     onError: (err, key) => {
       setResults((r) => ({
@@ -136,6 +159,9 @@ function OnboardingWizard() {
                           {r.data.detail}
                           {typeof r.data.latencyMs === "number" && (
                             <span className="ml-2 text-muted-foreground">{r.data.latencyMs}ms</span>
+                          )}
+                          {r.checkedAt && (
+                            <span className="ml-2 text-muted-foreground">· {new Date(r.checkedAt).toLocaleString()}</span>
                           )}
                         </div>
                       )}

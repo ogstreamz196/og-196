@@ -130,6 +130,8 @@ async function runOne(key: string): Promise<CheckResult> {
   }
 }
 
+export type SavedCheck = CheckResult & { key: string; checked_at: string };
+
 export const runOnboardingCheck = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { key: string }) => {
@@ -138,9 +140,61 @@ export const runOnboardingCheck = createServerFn({ method: "POST" })
   })
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
+    let result: CheckResult;
     try {
-      return await runOne(data.key);
+      result = await runOne(data.key);
     } catch (e) {
-      return { ok: false, detail: e instanceof Error ? e.message : "check failed" } satisfies CheckResult;
+      result = { ok: false, detail: e instanceof Error ? e.message : "check failed" };
     }
+    const supabase = context.supabase as unknown as {
+      from: (t: string) => {
+        upsert: (
+          row: Record<string, unknown>,
+          opts?: { onConflict?: string },
+        ) => Promise<{ error: { message: string } | null }>;
+      };
+    };
+    await supabase.from("user_onboarding_checks").upsert(
+      {
+        user_id: context.userId,
+        key: data.key,
+        ok: result.ok,
+        detail: result.detail,
+        latency_ms: result.latencyMs ?? null,
+        checked_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id,key" },
+    );
+    return result;
+  });
+
+export const getOnboardingChecks = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const supabase = context.supabase as unknown as {
+      from: (t: string) => {
+        select: (cols: string) => {
+          eq: (
+            c: string,
+            v: string,
+          ) => Promise<{
+            data: Array<{ key: string; ok: boolean; detail: string | null; latency_ms: number | null; checked_at: string }> | null;
+            error: { message: string } | null;
+          }>;
+        };
+      };
+    };
+    const { data, error } = await supabase
+      .from("user_onboarding_checks")
+      .select("key, ok, detail, latency_ms, checked_at")
+      .eq("user_id", context.userId);
+    if (error) throw new Error(error.message);
+    return (data ?? []).map((r) => ({
+      key: r.key,
+      ok: r.ok,
+      detail: r.detail ?? "",
+      latencyMs: r.latency_ms ?? undefined,
+      checked_at: r.checked_at,
+    })) satisfies SavedCheck[];
   });
