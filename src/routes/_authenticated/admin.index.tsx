@@ -279,8 +279,10 @@ function AdminPanel() {
 type FieldRule = { min: number; max: number; integer?: boolean; label: string; help?: string };
 const PRICING_RULES: Record<string, FieldRule> = {
   signup_credits: { min: 0, max: 1000, integer: true, label: "Free-tier signup OG Coins", help: "Granted once on first sign-in." },
-  coins_per_generation: { min: 0, max: 10000, integer: true, label: "Coins per generation" },
-  songs_per_generation: { min: 1, max: 4, integer: true, label: "Songs per generation" },
+  coins_per_generation: { min: 0, max: 10000, integer: true, label: "Coins per song generation", help: "Charged when a user generates new audio tracks." },
+  coins_per_lyrics_generation: { min: 0, max: 10000, integer: true, label: "Coins per lyrics generation", help: "Charged each time AI lyrics are generated or regenerated." },
+  songs_per_generation: { min: 1, max: 4, integer: true, label: "Songs per generation", help: "How many audio variations are produced per request." },
+  coins_per_variation_divisor: { min: 1, max: 20, integer: true, label: "Variation cost divisor", help: "Reveal cost per extra variation = generation cost ÷ this number." },
   sample_seconds: { min: 5, max: 600, integer: true, label: "Sample length (seconds)", help: "Max preview duration the player will stream." },
   coins_per_full_unlock: { min: 0, max: 100000, integer: true, label: "Coins to unlock full song", help: "Charged when a user downloads the HQ full version." },
 };
