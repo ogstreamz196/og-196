@@ -3,7 +3,6 @@ import {
   Home,
   Music2,
   MessagesSquare,
-  DoorOpen,
   Coins,
   Settings,
   Shield,
