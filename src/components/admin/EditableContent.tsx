@@ -101,11 +101,11 @@ export function EditableContent({
           />
         )}
         <Button type="button" size="icon" variant="ghost" className="h-7 w-7 shrink-0"
-          disabled={setMut.isPending} onClick={save} title="Save site-wide">
+          disabled={setMut.isPending} onClick={save} title="Save site-wide" aria-label="Save site-wide">
           {setMut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
         </Button>
         <Button type="button" size="icon" variant="ghost" className="h-7 w-7 shrink-0"
-          onClick={() => { setDraft(current); setEditing(false); }} title="Cancel">
+          onClick={() => { setDraft(current); setEditing(false); }} title="Cancel" aria-label="Cancel edit">
           <X className="h-3.5 w-3.5" />
         </Button>
       </Tag>

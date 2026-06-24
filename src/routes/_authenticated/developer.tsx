@@ -225,6 +225,7 @@ function DeveloperPage() {
                       size="icon"
                       variant="ghost"
                       title="Sync this user to Sheets"
+                      aria-label={`Sync ${label} to Sheets`}
                       onClick={() => syncOneM.mutate({ userId: u.user_id, label })}
                       disabled={syncOneM.isPending}
                     >
