@@ -585,132 +585,77 @@ function LibraryPage() {
         )}
       </section>
 
-      {/* ====== Clear boundary: library ends ↑ · creation starts ↓ ====== */}
-      <div
-        role="separator"
-        aria-label="Library above. Song creation starts below."
-        className="relative my-2"
-      >
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-gradient-to-r from-transparent via-primary/40 to-transparent"
-        />
-        <div className="relative mx-auto flex w-full max-w-3xl flex-col items-center gap-3 rounded-3xl border-2 border-primary/40 bg-gradient-to-br from-primary/15 via-fuchsia-500/10 to-background px-5 py-5 text-center shadow-glow backdrop-blur sm:flex-row sm:justify-between sm:px-8">
-          <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
-            <LibraryIcon className="h-4 w-4 text-primary" /> Library above
-          </div>
-          <div className="text-sm font-black uppercase tracking-[0.18em] sm:text-base">
-            <span className="bg-gradient-brand bg-clip-text text-transparent">
-              ↓ Start a new song below ↓
-            </span>
-          </div>
-          <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
-            <Mic2 className="h-4 w-4 text-primary" /> Studio
-          </div>
+      {/* Slim track-title bar — entry point into creation */}
+      <section className="flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-card/60 p-3 sm:p-4">
+        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/15 text-lg">
+          🎙️
         </div>
-      </div>
-
-      {/* Title card */}
-      <section className="rounded-3xl border border-white/10 bg-card/60 p-5 shadow-card backdrop-blur-xl sm:p-7">
-        <div className="flex items-center gap-3">
-          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-primary/30 to-fuchsia-500/20 text-xl">
-            🎙️
+        <div className="min-w-0 flex-1">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            New song
           </div>
-          <div className="min-w-0 flex-1">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-              Track title
-            </div>
-            <Input
-              id="song-title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Name this song..."
-              maxLength={120}
-              className="border-0 bg-transparent px-0 text-xl font-bold focus-visible:ring-0 sm:text-2xl"
-            />
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              const TITLES = [
-                "Late night drive", "Sunday hangover", "Gym warm-up",
-                "Festival anthem", "Heartbreak letter", "Pirate radio cypher",
-                "Summer rooftop", "Last train home", "Glow-up season",
-                "City lights blur", "Toxic ex anthem", "Underdog story",
-              ];
-              const LYRICS_SAMPLES = [
-                "[Verse]\nNeon on the windshield, city talking back\nMidnight running engines on the same old track\n\n[Chorus]\nDrive, drive, don't look behind\nLeave the noise, leave it all behind",
-                "[Verse]\nWoke up with the curtains screaming sunlight\nLast night's promises evaporate, alright\n\n[Chorus]\nSunday hangover, holding my head\nReplay the things that we should've said",
-                "[Verse]\nSpotlight hits, the crowd goes silent waiting\nEvery heartbeat in the room participating\n\n[Chorus]\nHands up, this is our anthem now\nWe rise, we shake, we take a bow",
-                "[Verse]\nI wrote your name on every page I'm turning\nStill the candle of your memory keeps burning\n\n[Chorus]\nLetter never sent, I read it every night\nWords I never said, the love I couldn't write",
-              ];
-              const pick = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
-              setTitle(pick(TITLES));
-              setSelections({
-                language: pick(POOLS.language),
-                genre: pick(POOLS.genre),
-                mood: pick(POOLS.mood),
-                theme: pick(POOLS.theme),
-                tempo: pick(POOLS.tempo),
-              });
-              setLyrics(pick(LYRICS_SAMPLES));
-
-              setFoulMouth(Math.random() < 0.5);
-              toast.success("Surprise prompt loaded");
-            }}
-            className="shrink-0 gap-1.5"
-          >
-            <Shuffle className="h-4 w-4" />
-            Surprise me
-          </Button>
+          <Input
+            id="song-title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Name this song…"
+            maxLength={120}
+            className="h-8 border-0 bg-transparent px-0 text-lg font-bold focus-visible:ring-0 sm:text-xl"
+          />
         </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            const TITLES = [
+              "Late night drive", "Sunday hangover", "Gym warm-up",
+              "Festival anthem", "Heartbreak letter", "Pirate radio cypher",
+              "Summer rooftop", "Last train home", "Glow-up season",
+              "City lights blur", "Toxic ex anthem", "Underdog story",
+            ];
+            const TEMPLATES = [
+              "Their name: Aaliyah\nOccasion: 30th birthday\nInside joke: still can't parallel park\nWhat they love: oat-milk lattes",
+              "Their name: Marcus\nStory: ghosted me after 2 years\nCity: Manchester\nInside joke: \"I'll text you back\" — never did",
+              "Their name: Sam & Jordan\nOccasion: wedding day\nWhat they love: late-night taco runs\nInside joke: the karaoke night we don't talk about",
+              "Their name: Dre\nOccasion: promotion at work\nCity: Brooklyn\nWhat they love: never missing leg day",
+            ];
+            const pick = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
+            setTitle(pick(TITLES));
+            setSelections({
+              language: pick(POOLS.language),
+              genre: pick(POOLS.genre),
+              mood: pick(POOLS.mood),
+              theme: pick(POOLS.theme),
+              tempo: pick(POOLS.tempo),
+            });
+            setPersonalDetails(pick(TEMPLATES).slice(0, 500));
+            toast.success("Surprise prompt loaded");
+          }}
+          className="shrink-0 gap-1.5"
+        >
+          <Shuffle className="h-4 w-4" />
+          Surprise me
+        </Button>
       </section>
 
-      {/* Step 1 — Personal (moved to top of creation flow) */}
+      {/* Step 1 — Personal */}
       <section
         id="personal-brief"
-        className="relative overflow-hidden rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/25 via-fuchsia-500/15 to-background p-5 shadow-glow sm:p-8 lg:p-10 flex flex-col gap-7"
+        className="flex flex-col gap-5 rounded-2xl border border-border bg-card/60 p-5 sm:p-6"
       >
-        <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-primary/30 blur-3xl" />
-        <div aria-hidden className="pointer-events-none absolute -left-20 bottom-0 h-64 w-64 rounded-full bg-fuchsia-500/20 blur-3xl" />
-
-        <header className="relative space-y-2">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em]">
-            <Sparkles className="h-3.5 w-3.5 text-primary" /> Step 1 — Who's the song for?
+        <header className="space-y-1.5">
+          <div className="inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
+            <Sparkles className="h-3 w-3" /> Step 1 · Who's it for?
           </div>
-          <h2 className="font-display text-4xl font-black leading-tight tracking-tight sm:text-5xl lg:text-6xl">
+          <h2 className="font-display text-2xl font-black leading-tight tracking-tight sm:text-3xl">
             Tell us about them
           </h2>
-          <p className="text-base text-muted-foreground sm:text-lg">
-            Whoever this song is for — a partner, a friend, a parent, an ex, even yourself. Names, places, jokes, drama, dreams — the more specific, the sharper the song.
+          <p className="text-sm text-muted-foreground">
+            Partner, friend, parent, ex, even yourself — the more specific, the sharper the song.
           </p>
         </header>
 
-        {/* Surprise me — instant template fill */}
-        <div className="relative">
-          <Button
-            type="button"
-            size="lg"
-            variant="outline"
-            onClick={() => {
-              const TEMPLATES = [
-                "Their name: Aaliyah\nOccasion: 30th birthday\nInside joke: still can't parallel park\nWhat they love: oat-milk lattes",
-                "Their name: Marcus\nStory: ghosted me after 2 years\nCity: Manchester\nInside joke: \"I'll text you back\" — never did",
-                "Their name: Sam & Jordan\nOccasion: wedding day\nWhat they love: late-night taco runs\nInside joke: the karaoke night we don't talk about",
-                "Their name: Dre\nOccasion: promotion at work\nCity: Brooklyn\nWhat they love: never missing leg day",
-              ];
-              const pick = <T,>(a: T[]) => a[Math.floor(Math.random() * a.length)];
-              setPersonalDetails(pick(TEMPLATES).slice(0, 500));
-              toast.success("Surprise brief loaded");
-            }}
-            className="h-14 w-full justify-center gap-2 rounded-2xl border-2 border-primary/40 bg-primary/10 text-base font-bold text-foreground hover:border-primary hover:bg-primary/20 sm:h-16 sm:text-lg"
-          >
-            <Shuffle className="h-5 w-5 text-primary" />
-            🎲 Surprise me
-          </Button>
-        </div>
 
 
         {/* Personal details — the main writing area */}
