@@ -14,6 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSettings } from "@/hooks/use-settings";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
+import { useRole } from "@/hooks/use-role";
 
 import { useProfile } from "@/hooks/use-profile";
 import { useVariations } from "@/hooks/use-variations";
