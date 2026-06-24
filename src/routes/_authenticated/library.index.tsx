@@ -469,9 +469,9 @@ function LibraryPage() {
       )}
 
       {/* Unified create flow */}
-      <section className="flex flex-col gap-8 rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card/80 to-card/60 p-6 shadow-[0_24px_70px_-30px_oklch(0.7_0.2_300_/_0.5)] ring-1 ring-white/5 sm:p-8">
-        <header className="flex items-end justify-between gap-3 border-b border-white/10 pb-4">
-          <h2 className="font-display text-2xl font-black tracking-tight sm:text-3xl">
+      <section className="flex flex-col gap-6 rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card/80 to-card/60 p-5 shadow-[0_24px_70px_-30px_oklch(0.7_0.2_300_/_0.5)] ring-1 ring-white/5 sm:gap-8 sm:p-8">
+        <header className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3 border-b border-white/10 pb-4">
+          <h2 className="truncate font-display text-xl font-black tracking-tight sm:text-3xl">
             Create a song
           </h2>
           <span className="shrink-0 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
@@ -808,7 +808,7 @@ function CategoryCard({
   const meta = META[cat];
   const Icon = meta.icon;
   return (
-    <div className="group relative flex h-full min-w-0 flex-col overflow-hidden rounded-3xl border border-white/10 bg-card/70 p-6 shadow-[0_18px_50px_-28px_rgba(0,0,0,0.55)] ring-1 ring-white/5 backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:border-white/20 hover:shadow-[0_24px_60px_-24px_rgba(0,0,0,0.7)] sm:p-7">
+    <div className="group relative flex h-full min-w-0 flex-col overflow-hidden rounded-3xl border border-white/10 bg-card/70 p-5 shadow-[0_18px_50px_-28px_rgba(0,0,0,0.55)] ring-1 ring-white/5 backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:border-white/20 hover:shadow-[0_24px_60px_-24px_rgba(0,0,0,0.7)] sm:p-7">
       <div
         aria-hidden
         className={`pointer-events-none absolute -right-12 -top-12 h-44 w-44 rounded-full bg-gradient-to-br ${meta.gradient} opacity-90 blur-2xl`}
