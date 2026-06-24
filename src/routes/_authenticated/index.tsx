@@ -16,6 +16,10 @@ import {
   Radio,
   Bot,
   AudioLines,
+  Gift,
+  Infinity as InfinityIcon,
+  Share2,
+  TrendingUp,
 } from "lucide-react";
 import { useRef, useCallback, type PointerEvent as ReactPointerEvent } from "react";
 import { useAuth } from "@/hooks/use-auth";
@@ -211,16 +215,66 @@ function DashboardHome() {
       </section>
 
 
+      {/* Earn promo — 10% lifetime cashback */}
+      <section>
+        <Link
+          to="/referrals"
+          preload="intent"
+          className="group relative flex flex-col gap-5 overflow-hidden rounded-[2rem] border-2 border-primary/40 bg-gradient-to-br from-primary/20 via-card/80 to-background p-6 shadow-[0_24px_60px_-20px_rgba(80,60,255,0.45)] backdrop-blur-xl transition-all hover:-translate-y-1 hover:border-primary/60 hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:p-8 md:flex-row md:items-center md:justify-between"
+        >
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-primary/30 blur-3xl transition-transform duration-700 group-hover:scale-110"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -left-12 bottom-0 h-40 w-40 rounded-full bg-accent/25 blur-3xl"
+          />
+          <div className="relative space-y-3 md:max-w-2xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/15 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+              <Gift className="h-3 w-3" /> Earn · 10% lifetime
+            </div>
+            <h2 className="font-display text-3xl font-black leading-[1.05] tracking-tight sm:text-4xl">
+              Earn{" "}
+              <span className="bg-gradient-to-r from-primary via-fuchsia-400 to-amber-300 bg-clip-text text-transparent">
+                OG Coins
+              </span>{" "}
+              every time your crew creates.
+            </h2>
+            <p className="text-sm text-muted-foreground sm:text-base">
+              Share your OG Link. Every coin a referee burns drops{" "}
+              <span className="font-semibold text-foreground">10% back to you</span> — automatic, lifetime, no cap.
+            </p>
+            <div className="flex flex-wrap gap-2 pt-1">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.05] px-2.5 py-1 text-[11px] font-semibold text-foreground/85">
+                <InfinityIcon className="h-3 w-3 text-primary" /> Lifetime
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.05] px-2.5 py-1 text-[11px] font-semibold text-foreground/85">
+                <TrendingUp className="h-3 w-3 text-emerald-400" /> Auto-paid
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.05] px-2.5 py-1 text-[11px] font-semibold text-foreground/85">
+                <Coins className="h-3 w-3 text-amber-300" /> Spend in-app
+              </span>
+            </div>
+          </div>
+          <div className="relative flex shrink-0 items-center gap-2 self-start rounded-full border border-primary/40 bg-background/70 px-5 py-3 text-sm font-bold text-primary shadow-glow backdrop-blur md:self-auto">
+            <Share2 className="h-4 w-4" /> Start earning
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </div>
+        </Link>
+      </section>
+
       {/* Quick actions */}
       <section>
         <h2 className="mb-5 text-lg uppercase tracking-[0.28em] text-muted-foreground sm:text-xl">
           ⚡ Quick actions
         </h2>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
           <QuickAction to="/library" icon={<Plus className="h-6 w-6" />} label="New song" />
           <QuickAction to="/library" icon={<Library className="h-6 w-6" />} label="MusicHUB" />
           <QuickAction to="/messenger" icon={<Wand2 className="h-6 w-6" />} label="Ask OG" />
           <QuickAction to="/buy-coins" icon={<Coins className="h-6 w-6" />} label="Buy coins" />
+          <QuickAction to="/referrals" icon={<Gift className="h-6 w-6" />} label="Earn 10%" />
         </div>
       </section>
 
@@ -450,7 +504,7 @@ function QuickAction({
   icon,
   label,
 }: {
-  to: "/library" | "/messenger" | "/buy-coins";
+  to: "/library" | "/messenger" | "/buy-coins" | "/referrals";
   icon: React.ReactNode;
   label: string;
 }) {
