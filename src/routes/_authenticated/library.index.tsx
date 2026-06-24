@@ -730,41 +730,28 @@ function LibraryPage() {
         {/* Personal details — the main writing area */}
         <div className="relative rounded-2xl border border-white/10 bg-background/40 p-5 ring-1 ring-white/5 sm:p-6">
           <Label htmlFor="personal-details" className="block font-display text-xl font-black leading-tight text-foreground sm:text-2xl">
-            Tell us about the person this song is for
+            Describe your song
           </Label>
           <p className="mt-2 text-sm text-muted-foreground sm:text-base">
-            Names, places, key dates, inside jokes, what they love — anything you want woven into the lyrics.
+            Who's it for and what makes them special? Names, moments, inside jokes — anything goes.
           </p>
 
-
-          {/* Quick-insert chips */}
+          {/* A few example prompts to spark ideas */}
           <div
             className="mt-4 flex flex-wrap gap-2"
             role="group"
-            aria-label="Quick-insert personality prompts"
+            aria-label="Example prompts"
           >
             {[
-              { label: "😂 They're so funny", snippet: "They're so funny — " },
-              { label: "🤪 They're so silly", snippet: "They're so silly — " },
-              { label: "🎉 Life of the party", snippet: "Always the life of the party — " },
               { label: "💛 Heart of gold", snippet: "They've got a heart of gold — " },
-              { label: "🔥 Total legend", snippet: "An absolute legend because — " },
+              { label: "🎉 Life of the party", snippet: "Always the life of the party — " },
               { label: "🫶 Always there for me", snippet: "Always there for me when — " },
-              { label: "🧠 Wise beyond their years", snippet: "Wise beyond their years — " },
-              { label: "💪 Tough as nails", snippet: "Tough as nails, never quits — " },
-              { label: "🌞 Lights up the room", snippet: "Lights up every room — " },
-              { label: "🎤 Karaoke menace", snippet: "An absolute karaoke menace — " },
-              { label: "🛟 My rock", snippet: "Honestly, my rock — " },
-              { label: "🥹 Makes me emotional", snippet: "Makes me emotional just thinking about — " },
-              { label: "🚀 Always chasing dreams", snippet: "Always chasing the next big dream — " },
-              { label: "🧃 Effortlessly cool", snippet: "Effortlessly cool without trying — " },
-              { label: "🍕 Foodie soulmate", snippet: "My foodie soulmate — " },
-              { label: "😈 A bit of a menace", snippet: "A loveable menace — " },
+              { label: "🔥 Total legend", snippet: "An absolute legend because — " },
             ].map((chip) => (
               <button
                 key={chip.label}
                 type="button"
-                aria-label={`Insert prompt: ${chip.label}`}
+                aria-label={`Insert example: ${chip.label}`}
                 onClick={() =>
                   setPersonalDetails((v) => {
                     const sep = v.length === 0 ? "" : v.endsWith("\n") ? "" : "\n";
@@ -777,6 +764,8 @@ function LibraryPage() {
               </button>
             ))}
           </div>
+
+
 
 
           {(() => {
