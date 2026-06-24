@@ -988,7 +988,7 @@ function LibraryPage() {
             {lyrics ? "Regenerate lyrics" : "Generate lyrics"} · -{lyricsCost}
           </Button>
           {!canGenerateLyrics && !genLyrics && (
-            <p className="mt-2 text-center text-xs text-muted-foreground">
+            <p className="mt-3 text-center text-sm font-medium text-muted-foreground">
               Pick a language and at least one style detail above to unlock
             </p>
           )}
