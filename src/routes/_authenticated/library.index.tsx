@@ -709,13 +709,13 @@ function LibraryPage() {
 
         <header className="relative space-y-2">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em]">
-            <Sparkles className="h-3.5 w-3.5 text-primary" /> Step 1 — Tell us about you
+            <Sparkles className="h-3.5 w-3.5 text-primary" /> Step 1 — Who's the song for?
           </div>
           <h2 className="font-display text-4xl font-black leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-            Get personal
+            Tell us about them
           </h2>
           <p className="text-base text-muted-foreground sm:text-lg">
-            Names, places, jokes, drama, dreams — anything you want woven into the lyrics. The more specific, the sharper the song.
+            Whoever this song is for — a partner, a friend, a parent, an ex, even yourself. Names, places, jokes, drama, dreams — the more specific, the sharper the song.
           </p>
         </header>
 
