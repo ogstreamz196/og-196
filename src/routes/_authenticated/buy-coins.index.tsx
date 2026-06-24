@@ -348,8 +348,8 @@ function BuyCoinsPage() {
         {/* VIP monthly subscription */}
         <SectionCard className="border-coin/40">
           <SectionHeader
-            eyebrow="Monthly membership"
-            title={<EditableContent contentKey="buyCoins.vip.heading" defaultValue="Or go all-in with OG VIP" />}
+            eyebrow="Membership Pass"
+            title={<EditableContent contentKey="buyCoins.vip.heading" defaultValue="Unlock the OG VIP Pass" />}
             subtitle={<EditableContent contentKey="buyCoins.vip.subtitle" defaultValue="Unlock exclusive privileges across OG Streamz — billed monthly, cancel anytime." multiline />}
             icon={<Crown className="h-5 w-5 text-coin" />}
           />
