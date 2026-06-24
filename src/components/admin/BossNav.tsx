@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ShieldCheck, Music2, Globe2, Radio } from "lucide-react";
+import { ShieldCheck, Globe2, Radio } from "lucide-react";
 
 
 /**
@@ -19,12 +19,6 @@ export function BossNav() {
             className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/15 px-3 py-1 font-medium text-primary transition hover:bg-primary/25"
           >
             <ShieldCheck className="h-3.5 w-3.5" /> Bot Control Center
-          </Link>
-          <Link
-            to="/portals"
-            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/60 px-3 py-1 font-medium text-foreground/80 transition hover:bg-card"
-          >
-            <Music2 className="h-3.5 w-3.5" /> Music Hub Portal
           </Link>
           <Link
             to="/developer"

@@ -34,7 +34,7 @@ export function HomeHero({ balance, isAdmin, isVip }: HomeHeroProps) {
 
       <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
         <Link
-          to="/portals"
+          to="/library"
           className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-gradient-brand px-7 py-3 text-sm font-semibold text-primary-foreground shadow-glow transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_60px_-12px_oklch(0.55_0.22_268/0.7)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           <Wand2 className="h-4 w-4 transition-transform duration-300 group-hover:rotate-12" />

@@ -12,14 +12,14 @@ export function EngineHighlight() {
           <h2 className="mt-4 text-3xl font-bold md:text-4xl">The brain behind every beat</h2>
           <p className="mt-3 text-base leading-relaxed text-muted-foreground">
             OG Bot doesn't just generate audio — it understands style, mood, and structure.
-            From the flagship Song Studio to custom portals, every track is shaped by AI that thinks like a producer.
+            Every track in your MusicHUB is shaped by AI that thinks like a producer.
           </p>
         </div>
         <Link
-          to="/portals"
+          to="/library"
           className="inline-flex shrink-0 items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-glow transition hover:opacity-90"
         >
-          <Play className="h-4 w-4" /> Enter Song Studio
+          <Play className="h-4 w-4" /> Open MusicHUB
         </Link>
       </div>
     </section>

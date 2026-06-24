@@ -19,7 +19,7 @@ const ROUTES = [
   "/referrals",
   "/settings",
   "/messenger",
-  "/portals",
+  
   "/developer",
   "/admin",
   "/trust",

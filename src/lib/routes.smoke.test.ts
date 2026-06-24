@@ -18,7 +18,7 @@ const KEY_LINKS = [
   "/buy-coins",
   "/buy-coins/return",
   "/settings",
-  "/portals",
+  
   "/developer",
   "/referrals",
   "/admin",

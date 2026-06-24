@@ -49,7 +49,6 @@ const routeTitles: Record<string, string> = {
   "/": "Home",
   "/library": "MusicHUB",
   "/messenger": "OG Messenger",
-  "/portals": "Portals",
   "/buy-coins": "Buy Coins",
   "/settings": "Settings",
   "/admin": "Admin Controls",
