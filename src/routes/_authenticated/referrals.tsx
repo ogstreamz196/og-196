@@ -439,8 +439,11 @@ function ReferralsPage() {
                       {(tx.referee_name ?? "?").slice(0, 1)}
                     </div>
                     <div className="min-w-0">
-                      <div className="truncate text-sm font-semibold">
+                      <div className="flex items-center gap-2 truncate text-sm font-semibold">
                         {tx.referee_name ?? "Referred user"}
+                        <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.16em] text-emerald-300">
+                          <CheckCircle2 className="h-2.5 w-2.5" /> Paid
+                        </span>
                       </div>
                       <div className="truncate text-xs text-muted-foreground">
                         Burned {burned ?? "?"} coins · you earned{" "}
