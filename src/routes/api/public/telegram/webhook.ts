@@ -50,27 +50,40 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
         const rawToken = startMatch[1].toLowerCase();
         const tokenMatch = rawToken.match(TOKEN_RE);
         if (!tokenMatch) {
-          // Mismatched format — never write to profiles.
           return Response.json({ ok: true, rejected: "bad_token_format" });
         }
         const token = tokenMatch[1];
-        const uuidPrefix = tokenToUuidPrefix(token);
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const { data: candidates } = await supabaseAdmin
-          .from("profiles")
-          .select("id")
-          .ilike("id::text", `${uuidPrefix}%`)
-          .limit(2);
 
-        // Require exactly one candidate AND a perfect token reconstruction.
-        if (!candidates || candidates.length !== 1) {
-          return Response.json({ ok: true, rejected: "no_or_ambiguous_match" });
-        }
-        const profileId = candidates[0].id as string;
-        const reconstructed = profileId.replace(/-/g, "").slice(0, 24).toLowerCase();
-        if (reconstructed !== token) {
-          return Response.json({ ok: true, rejected: "token_mismatch" });
+        let profileId: string | null = null;
+
+        if (token.startsWith("t_")) {
+          const { data: byToken } = await supabaseAdmin
+            .from("profiles")
+            .select("id")
+            .eq("telegram_link_token", token)
+            .limit(2);
+          if (!byToken || byToken.length !== 1) {
+            return Response.json({ ok: true, rejected: "no_or_ambiguous_match" });
+          }
+          profileId = byToken[0].id as string;
+        } else {
+          const uuidPrefix = tokenToUuidPrefix(token);
+          const { data: candidates } = await supabaseAdmin
+            .from("profiles")
+            .select("id")
+            .ilike("id::text", `${uuidPrefix}%`)
+            .limit(2);
+          if (!candidates || candidates.length !== 1) {
+            return Response.json({ ok: true, rejected: "no_or_ambiguous_match" });
+          }
+          const pid = candidates[0].id as string;
+          const reconstructed = pid.replace(/-/g, "").slice(0, 24).toLowerCase();
+          if (reconstructed !== token) {
+            return Response.json({ ok: true, rejected: "token_mismatch" });
+          }
+          profileId = pid;
         }
 
         await supabaseAdmin
@@ -78,6 +91,8 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
           .update({
             telegram_chat_id: chat_id,
             telegram_username: msg?.from?.username ?? null,
+            telegram_linked_at: new Date().toISOString(),
+            telegram_link_token: null,
           })
           .eq("id", profileId);
 
