@@ -246,20 +246,75 @@ export const sendTelegramTestPing = createServerFn({ method: "POST" })
     return { ok: true as const, message_id: messageId ?? null };
   });
 
-/** Authenticated: current user's own Telegram link status. */
+export type TelegramStatusState = "verified" | "failed" | "pending" | "unlinked";
+
+/** Authenticated: current user's own Telegram link status with live verification. */
 export const getMyTelegramStatus = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin
       .from("profiles")
-      .select("telegram_chat_id, telegram_username, telegram_linked_at")
+      .select(
+        "telegram_chat_id, telegram_username, telegram_linked_at, telegram_link_token",
+      )
       .eq("id", context.userId)
       .maybeSingle();
     if (error) throw new Error(error.message);
+
+    const chatId = data?.telegram_chat_id ?? null;
+    const linked = !!chatId;
+    const hasPendingToken = !!data?.telegram_link_token;
+
+    let state: TelegramStatusState = "unlinked";
+    let verifyError: string | null = null;
+
+    if (linked) {
+      // Live ping: call getChat through the gateway to confirm the connection.
+      const lovableKey = process.env.LOVABLE_API_KEY;
+      const tgKey = process.env.TELEGRAM_API_KEY;
+      if (!lovableKey || !tgKey) {
+        state = "failed";
+        verifyError = "Telegram connector not configured";
+      } else {
+        try {
+          const res = await fetch(`${GATEWAY_URL}/getChat`, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${lovableKey}`,
+              "X-Connection-Api-Key": tgKey,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ chat_id: chatId }),
+          });
+          const body = (await res.json().catch(() => null)) as
+            | { ok?: boolean; description?: string; result?: { id?: number } }
+            | null;
+          if (
+            res.ok &&
+            body?.ok === true &&
+            Number(body?.result?.id) === Number(chatId)
+          ) {
+            state = "verified";
+          } else {
+            state = "failed";
+            verifyError = body?.description ?? `HTTP ${res.status}`;
+          }
+        } catch (e) {
+          state = "failed";
+          verifyError = e instanceof Error ? e.message : "verify failed";
+        }
+      }
+    } else if (hasPendingToken) {
+      state = "pending";
+    }
+
     return {
-      linked: !!data?.telegram_chat_id,
+      linked,
+      state,
+      verifyError,
       username: data?.telegram_username ?? null,
       linkedAt: data?.telegram_linked_at ?? null,
+      hasPendingToken,
     };
   });
