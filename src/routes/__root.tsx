@@ -110,9 +110,40 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      // High-priority preload of the Google Fonts CSS so @font-face entries
+      // are discovered before any text paints (cuts FOUT/FOIT noticeably).
+      {
+        rel: "preload",
+        as: "style",
+        href: "https://fonts.googleapis.com/css2?family=Lilita+One&family=Unbounded:wght@400;500;600;700;800&family=Luckiest+Guy&family=Cabin+Sketch:wght@400;700&display=swap",
+      },
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Lilita+One&family=Unbounded:wght@400;500;600;700;800&family=Luckiest+Guy&family=Cabin+Sketch:wght@400;700&display=swap",
+      },
+      // Preload the most critical glyph subsets (Latin woff2) so the display
+      // and body faces are ready on first paint. crossOrigin is required for
+      // font preloads to match the <link rel="stylesheet"> fetch.
+      {
+        rel: "preload",
+        as: "font",
+        type: "font/woff2",
+        href: "https://fonts.gstatic.com/s/lilitaone/v17/i7dPIFZ9Zz-WBtRtedDbYEF8RXi4EwQ.woff2",
+        crossOrigin: "anonymous",
+      },
+      {
+        rel: "preload",
+        as: "font",
+        type: "font/woff2",
+        href: "https://fonts.gstatic.com/s/luckiestguy/v25/_gP_1RrxsjcxVyin9l9n_j2hTd52ijl7aQ.woff2",
+        crossOrigin: "anonymous",
+      },
+      {
+        rel: "preload",
+        as: "font",
+        type: "font/woff2",
+        href: "https://fonts.gstatic.com/s/cabinsketch/v23/QGYpz_kZZAGCONcK2A4bGOj8mNhNy_r-Kw.woff2",
+        crossOrigin: "anonymous",
       },
     ],
   }),
