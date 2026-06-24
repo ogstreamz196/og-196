@@ -76,6 +76,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
   const [brief, setBrief] = useState(song.prompt ?? "");
   const [lyrics, setLyrics] = useState(song.lyrics ?? "");
   const [language, setLanguage] = useState(() => detectLanguage(song.prompt));
+  const { isVip } = useRole();
   const [saving, setSaving] = useState(false);
   const [genLyrics, setGenLyrics] = useState(false);
   const [genPreview, setGenPreview] = useState(false);
