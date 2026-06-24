@@ -750,10 +750,10 @@ function LibraryPage() {
             <Sparkles className="h-3.5 w-3.5" /> Recommended — best results
           </div>
           <Label htmlFor="personal-details" className="block text-lg font-bold text-foreground sm:text-xl">
-            Tell us anything personal
+            Tell us about the person this song is for
           </Label>
           <p className="mt-1 text-sm text-muted-foreground sm:text-base">
-            Names, nicknames, places, dates, inside jokes, favourite foods, drama — anything you want woven into the lyrics.
+            Their name, nicknames, where they're from, key dates, inside jokes, what they love, the drama — anything you want woven into the lyrics.
           </p>
 
           {/* Quick-insert chips */}
