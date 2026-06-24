@@ -516,26 +516,27 @@ function LibraryPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 pb-16 sm:gap-10">
-      {/* Hero — tighter on mobile, stacked controls */}
-      <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-border/60 pb-4 sm:pb-6">
-        <div className="min-w-0 space-y-1">
-          <div className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-            <Music4 className="h-3 w-3 shrink-0 text-primary" /> Music Hub
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 pb-20 sm:gap-12">
+      {/* Hero — premium kicker, oversized headline, generous breathing room */}
+      <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b border-white/10 pb-6 sm:pb-8">
+        <div className="min-w-0 space-y-2">
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.28em] text-primary shadow-[0_0_24px_-10px_oklch(0.7_0.2_300_/_0.8)]">
+            <Music4 className="h-3.5 w-3.5 shrink-0" /> Music Hub
           </div>
-          <h1 className="font-display text-2xl font-black leading-tight tracking-[-0.02em] sm:text-4xl">
+          <h1 className="font-display text-3xl font-black leading-[1.05] tracking-[-0.02em] sm:text-5xl lg:text-6xl">
             Hey <span className="text-gradient-brand">{firstName}</span> — let's write a song.
           </h1>
-          <p className="hidden text-sm text-muted-foreground sm:block">
-            Tell us about them, pick a vibe, generate. 3 steps.
+          <p className="hidden text-base text-muted-foreground sm:block sm:text-lg">
+            Tell us about them, pick a vibe, generate. Three steps to a finished track.
           </p>
         </div>
-        <div className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-primary/30 bg-card/60 px-2.5 py-1.5 sm:gap-2 sm:px-3.5 sm:py-2">
-          <Coins className="h-4 w-4 text-primary" />
-          <span className="text-sm font-black">{balance}</span>
-          <span className="hidden text-[10px] uppercase tracking-wider text-muted-foreground sm:inline">coins</span>
+        <div className="inline-flex shrink-0 items-center gap-2 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 to-card/60 px-3 py-2 shadow-[0_8px_28px_-12px_oklch(0.7_0.2_300_/_0.45)] sm:gap-2.5 sm:px-4 sm:py-2.5">
+          <Coins className="h-5 w-5 text-primary" />
+          <span className="text-lg font-black tabular-nums sm:text-xl">{balance}</span>
+          <span className="hidden text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground sm:inline">coins</span>
         </div>
       </header>
+
 
 
 
