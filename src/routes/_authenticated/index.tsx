@@ -64,7 +64,7 @@ function DashboardHome() {
       {/* Welcome */}
       <section
         ref={welcomeRef}
-        className="relative flex flex-col gap-3 overflow-hidden rounded-[2.5rem] border-2 border-white/15 bg-card/55 p-8 shadow-[0_24px_60px_-20px_rgba(80,60,255,0.45)] backdrop-blur-2xl sm:p-12"
+        className="group/welcome relative flex flex-col gap-3 overflow-hidden rounded-[2.5rem] border-2 border-white/15 bg-card/55 p-6 shadow-[0_24px_60px_-20px_rgba(80,60,255,0.45)] backdrop-blur-2xl sm:p-12"
       >
         {/* Adaptive dark scrim */}
         <div
@@ -77,40 +77,116 @@ function DashboardHome() {
           aria-hidden
           className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/95 via-background/70 to-background/30"
         />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,oklch(0.55_0.22_268/0.28),transparent_60%)]" />
-        {/* Cartoon floating blobs */}
-        <div aria-hidden className="pointer-events-none absolute -right-10 top-8 h-40 w-40 rounded-full bg-primary/30 blur-2xl animate-[float_6s_ease-in-out_infinite]" />
-        <div aria-hidden className="pointer-events-none absolute -left-12 bottom-0 h-32 w-32 rounded-full bg-accent/30 blur-2xl animate-[float_8s_ease-in-out_infinite_reverse]" />
+        {/* Conic rotating halo */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -inset-32 opacity-40 [background:conic-gradient(from_0deg,oklch(0.55_0.22_268/0.35),transparent_35%,oklch(0.7_0.22_25/0.3)_60%,transparent_85%,oklch(0.55_0.22_268/0.35))] animate-[spin_22s_linear_infinite] blur-3xl"
+        />
+        {/* Floating cartoon blobs */}
+        <div aria-hidden className="pointer-events-none absolute -right-10 top-8 h-40 w-40 rounded-full bg-primary/30 blur-2xl wc-blob" />
+        <div aria-hidden className="pointer-events-none absolute -left-12 bottom-0 h-32 w-32 rounded-full bg-accent/30 blur-2xl wc-float-slow" />
+        {/* Sparkle particles */}
+        <div aria-hidden className="pointer-events-none absolute inset-0">
+          {[
+            { top: "12%", left: "8%", d: "0s",   s: "h-2 w-2" },
+            { top: "22%", left: "92%", d: "0.6s", s: "h-1.5 w-1.5" },
+            { top: "68%", left: "14%", d: "1.2s", s: "h-1 w-1" },
+            { top: "82%", left: "78%", d: "0.3s", s: "h-2 w-2" },
+            { top: "44%", left: "55%", d: "1.8s", s: "h-1 w-1" },
+          ].map((p, i) => (
+            <span
+              key={i}
+              className={`absolute rounded-full bg-white/80 shadow-[0_0_12px_4px_rgba(255,255,255,0.45)] ${p.s} animate-[wc-pop_2.4s_ease-in-out_infinite]`}
+              style={{ top: p.top, left: p.left, animationDelay: p.d }}
+            />
+          ))}
+        </div>
+
+        {/* Top marquee status strip */}
+        <div className="relative -mx-6 -mt-6 mb-2 overflow-hidden border-b border-white/10 bg-white/[0.03] py-2 sm:-mx-12 sm:-mt-12 sm:mb-4">
+          <div className="flex animate-[wc-shimmer_22s_linear_infinite] whitespace-nowrap text-xs font-bold uppercase tracking-[0.3em] text-foreground/70 [background:linear-gradient(90deg,transparent,oklch(1_0_0/0.15),transparent)] [background-size:200%_100%] sm:text-sm">
+            {Array.from({ length: 2 }).map((_, k) => (
+              <div key={k} className="flex shrink-0 items-center gap-6 px-6">
+                <span className="inline-flex items-center gap-2"><Disc3 className="h-4 w-4 animate-[spin_4s_linear_infinite] text-primary" /> Live studio</span>
+                <span className="opacity-40">✦</span>
+                <span className="inline-flex items-center gap-2"><Radio className="h-4 w-4 text-accent" /> OG Bot online</span>
+                <span className="opacity-40">✦</span>
+                <span className="inline-flex items-center gap-2"><AudioLines className="h-4 w-4 text-primary" /> Beats ready</span>
+                <span className="opacity-40">✦</span>
+                <span className="inline-flex items-center gap-2"><Sparkles className="h-4 w-4 text-accent" /> Mint a hit</span>
+                <span className="opacity-40">✦</span>
+              </div>
+            ))}
+          </div>
+        </div>
 
         <div className="relative flex flex-col gap-3 sm:flex sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-4">
           <div className="order-2 flex w-full flex-row items-center gap-2 sm:order-none sm:w-auto sm:flex-row sm:items-center sm:text-lg">
             {isVip && (
-              <Badge variant="secondary" className="justify-center gap-1 rounded-full border-2 border-white/20 px-3 py-1.5 text-xs shadow-glow sm:gap-1.5 sm:px-5 sm:py-2.5 sm:text-lg">
-                <Sparkles className="h-4 w-4 sm:h-6 sm:w-6" /> VIP
+              <Badge variant="secondary" className="justify-center gap-1 rounded-full border-2 border-white/20 px-3 py-1.5 text-xs shadow-glow wc-bounce-soft sm:gap-1.5 sm:px-5 sm:py-2.5 sm:text-lg">
+                <Sparkles className="h-4 w-4 animate-[wiggle_2s_ease-in-out_infinite] sm:h-6 sm:w-6" /> VIP
               </Badge>
             )}
             <Badge variant="outline" className="justify-center gap-1.5 rounded-full border-2 border-white/20 bg-white/5 px-3 py-1.5 text-xs sm:gap-2 sm:px-5 sm:py-2.5 sm:text-lg">
               <Coins className="h-4 w-4 shrink-0 text-primary animate-[bounce_2s_ease-in-out_infinite] sm:h-6 sm:w-6" />
               <span className="truncate">{balance} OG coins</span>
             </Badge>
+            {/* Live mini equalizer */}
+            <span aria-hidden className="ml-1 hidden items-end gap-[3px] rounded-full border-2 border-white/15 bg-white/[0.04] px-3 py-2 sm:inline-flex">
+              <span className="inline-flex items-center gap-1.5 pr-2 text-xs font-bold uppercase tracking-[0.2em] text-foreground/70">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+                </span>
+                Live
+              </span>
+              {[0.5, 0.9, 0.6, 1, 0.7].map((h, i) => (
+                <span
+                  key={i}
+                  className="w-[3px] rounded-full bg-gradient-to-t from-primary/60 to-primary"
+                  style={{ height: `${h * 18}px`, animation: `eqPulse 0.${(i % 5) + 4}s ease-in-out ${i * 0.08}s infinite alternate` }}
+                />
+              ))}
+            </span>
           </div>
-          <div className="order-1 min-w-0 rounded-3xl bg-background/35 p-5 backdrop-blur-md ring-2 ring-white/10 sm:order-none sm:flex-1 sm:p-7">
-            <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground sm:text-xl">
-              👋 Welcome back
+          <div className="order-1 min-w-0 rounded-3xl bg-background/35 p-5 backdrop-blur-md ring-2 ring-white/10 transition-transform duration-500 group-hover/welcome:-translate-y-1 sm:order-none sm:flex-1 sm:p-7">
+            <p className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.28em] text-muted-foreground sm:text-xl">
+              <span className="inline-block animate-[wiggle_1.6s_ease-in-out_infinite] [transform-origin:70%_70%]">👋</span>
+              <span className="relative">
+                Welcome back
+                <span aria-hidden className="absolute -bottom-1 left-0 h-[2px] w-full origin-left scale-x-0 bg-gradient-to-r from-primary via-accent to-primary animate-[shimmer_3s_ease-in-out_infinite] [animation:wc-pop_0.8s_0.3s_cubic-bezier(.34,1.56,.64,1)_forwards]" />
+              </span>
             </p>
             <h1 className="font-display mt-3 text-[clamp(2.25rem,12vw,6rem)] font-black leading-[1.02] tracking-[-0.02em] text-foreground [text-shadow:0_4px_28px_rgba(0,0,0,0.75)] [overflow-wrap:break-word] [word-break:normal]">
-              Hello,{" "}
-              <span className="font-display inline not-italic font-black uppercase tracking-tight text-gradient-red [overflow-wrap:break-word] [word-break:normal]">
-                {displayName}
+              <span className="inline-block wc-pop">Hello,</span>{" "}
+              <span className="font-display inline-flex not-italic font-black uppercase tracking-tight text-gradient-red [overflow-wrap:break-word] [word-break:normal]">
+                {displayName.split("").map((ch, i) => (
+                  <span
+                    key={`${ch}-${i}`}
+                    className="inline-block wc-pop hover:animate-[wiggle_0.6s_ease-in-out]"
+                    style={{ animationDelay: `${0.25 + i * 0.05}s`, whiteSpace: ch === " " ? "pre" : undefined }}
+                  >
+                    {ch}
+                  </span>
+                ))}
               </span>
             </h1>
             <p className="mt-4 max-w-2xl text-sm leading-[1.45] text-foreground [text-shadow:0_1px_12px_rgba(0,0,0,0.75)] sm:text-2xl md:text-3xl">
-              Jump back into your music workspace or pick up a chat with OG Bot.
+              Jump back into your music workspace or pick up a chat with{" "}
+              <span className="relative inline-block font-bold text-primary">
+                OG Bot
+                <span aria-hidden className="ml-1 inline-flex gap-0.5 align-middle">
+                  <span className="h-1.5 w-1.5 rounded-full bg-primary animate-[bounce_1.2s_ease-in-out_infinite] [animation-delay:0s]" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-primary animate-[bounce_1.2s_ease-in-out_infinite] [animation-delay:0.15s]" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-primary animate-[bounce_1.2s_ease-in-out_infinite] [animation-delay:0.3s]" />
+                </span>
+              </span>
             </p>
           </div>
         </div>
 
       </section>
+
 
       {/* Primary CTAs */}
       <section className="grid grid-cols-1 items-stretch gap-4 sm:gap-6 md:grid-cols-2">
