@@ -684,7 +684,7 @@ function LibraryPage() {
                 genre: pick(POOLS.genre),
                 mood: pick(POOLS.mood),
                 theme: pick(POOLS.theme),
-                tempo: pick(POOLS.tempo),
+                
               });
               setPersonalDetails(pick(TEMPLATES).slice(0, 500));
               toast.success("Surprise prompt loaded");
