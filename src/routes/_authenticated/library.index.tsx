@@ -874,7 +874,7 @@ function LibraryPage() {
         </header>
 
         <div className="grid gap-3 sm:grid-cols-2">
-          {(["language", "genre", "mood", "theme", "tempo"] as Category[]).map((cat) => (
+          {(["language", "genre", "theme"] as Category[]).map((cat) => (
             <CategoryCard
               key={cat}
               cat={cat}
@@ -885,6 +885,14 @@ function LibraryPage() {
               onRefresh={() => refreshRow(cat)}
             />
           ))}
+          <DualCategoryCard
+            cats={["mood", "tempo"]}
+            selections={selections}
+            chips={chips}
+            onSelect={setField}
+            onPickChip={pickChip}
+            onRefresh={refreshRow}
+          />
         </div>
 
         {/* Compact mobile progress */}
