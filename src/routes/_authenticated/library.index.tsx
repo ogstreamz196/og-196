@@ -595,16 +595,17 @@ function LibraryPage() {
             ))}
           </div>
         ) : (
-          <div className="rounded-3xl border border-dashed border-white/10 bg-card/40 p-8 text-center">
-            <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-primary/20 to-fuchsia-500/10">
-              <LibraryIcon className="h-5 w-5 text-primary" />
+          <div className="rounded-3xl border border-dashed border-white/15 bg-card/40 p-10 text-center ring-1 ring-white/5">
+            <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-primary/30 to-fuchsia-500/15 shadow-[0_12px_30px_-12px_oklch(0.7_0.2_300_/_0.6)]">
+              <LibraryIcon className="h-6 w-6 text-primary" />
             </div>
-            <p className="mt-3 text-sm font-bold tracking-wide leading-relaxed">No previews yet</p>
-            <p className="mt-1 text-xs leading-relaxed tracking-wide text-muted-foreground">
+            <p className="mt-4 font-display text-xl font-black leading-tight sm:text-2xl">No previews yet</p>
+            <p className="mt-2 text-base leading-relaxed text-muted-foreground">
               Scroll down to write your first track — versions will appear here.
             </p>
 
           </div>
+
         )}
       </section>
 
