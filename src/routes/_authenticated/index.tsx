@@ -28,6 +28,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { useRole } from "@/hooks/use-role";
 import { useRecentSongs, type RecentSong } from "@/hooks/use-recent-songs";
 import { useAdaptiveOverlay } from "@/hooks/use-adaptive-overlay";
+import ogLogo from "@/assets/ogstreamz-logo.jpg.asset.json";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
