@@ -17,8 +17,8 @@ import {
   Mic2,
   Music4,
   Shuffle,
-  MessageCircleHeart,
 } from "lucide-react";
+
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -29,7 +29,7 @@ import { useSettings } from "@/hooks/use-settings";
 import { invokeError } from "@/lib/invoke-error";
 import { cn } from "@/lib/utils";
 import { SongCard, type Song } from "@/components/SongCard";
-import { OgInterviewDialog, type InterviewTurn } from "@/components/library/OgInterviewDialog";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -239,13 +239,6 @@ function LibraryPage() {
   const [title, setTitle] = useState("");
   const [selections, setSelections] = useState<Selections>({});
   const [chips, setChips] = useState<Record<Category, string[]>>(() => initialChips());
-  const [categoryNotes, setCategoryNotes] = useState<Record<Category, string>>({
-    language: "",
-    genre: "",
-    mood: "",
-    theme: "",
-    tempo: "",
-  });
   const [lyrics, setLyrics] = useState("");
   const [genLyrics, setGenLyrics] = useState(false);
   const [foulMouth, setFoulMouth] = useState(false);
@@ -254,9 +247,31 @@ function LibraryPage() {
   const [genSong, setGenSong] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<Song | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const [interviewOpen, setInterviewOpen] = useState(false);
-  const [interviewTranscript, setInterviewTranscript] = useState<InterviewTurn[]>([]);
   const [reviewOpen, setReviewOpen] = useState(false);
+
+  // Build a human-readable line from the current category selections.
+  const selectionsLine = useMemo(() => {
+    const cats: Category[] = ["language", "genre", "mood", "theme", "tempo"];
+    return cats
+      .map((c) => (selections[c] ? `${META[c].label}: ${selections[c]}` : null))
+      .filter(Boolean)
+      .join(" · ");
+  }, [selections]);
+
+  // Sync the auto-built line into the lyric description box. Preserve any
+  // free-text the user added below the auto-line on their own.
+  useEffect(() => {
+    setExtraContext((prev) => {
+      const marker = "—".repeat(3);
+      const split = prev.split(`\n${marker}\n`);
+      const userTail = split.length > 1 ? split.slice(1).join(`\n${marker}\n`) : "";
+      if (!selectionsLine && !userTail) return "";
+      if (!selectionsLine) return userTail;
+      return userTail ? `${selectionsLine}\n${marker}\n${userTail}` : selectionsLine;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectionsLine]);
+
 
   function setField(cat: Category, value: string) {
     setSelections((prev) => ({ ...prev, [cat]: value }));
@@ -302,21 +317,15 @@ function LibraryPage() {
     if (!canGenerateLyrics) return;
     setGenLyrics(true);
     try {
-      const noteParts = (["language", "genre", "mood", "theme", "tempo"] as Category[])
-        .map((c) => {
-          const n = categoryNotes[c]?.trim();
-          return n ? `${META[c].label} notes: ${n}` : null;
-        })
-        .filter(Boolean) as string[];
       const description = [
         selections.theme ? `Theme: ${selections.theme}` : null,
         selections.mood ? `Mood: ${selections.mood}` : null,
         selections.tempo ? `Tempo: ${selections.tempo}` : null,
-        ...noteParts,
       ]
         .filter(Boolean)
         .join(" · ");
-      const combinedExtra = [extraContext.trim(), ...noteParts].filter(Boolean).join("\n");
+      const combinedExtra = extraContext.trim();
+
       const { data, error } = await supabase.functions.invoke("generate-lyrics", {
         body: {
           songName: title.trim(),
@@ -363,27 +372,17 @@ function LibraryPage() {
     }
     setGenSong(true);
     try {
-      const cats: Category[] = ["language", "genre", "mood", "theme", "tempo"];
-      const noteParts = cats
-        .map((c) => {
-          const n = categoryNotes[c]?.trim();
-          return n ? `${META[c].label} notes: ${n}` : null;
-        })
-        .filter(Boolean) as string[];
-      const styleNoteParts = (["genre", "mood", "tempo"] as Category[])
-        .map((c) => categoryNotes[c]?.trim())
-        .filter(Boolean) as string[];
-      const style = [selections.genre, selections.mood, selections.tempo, ...styleNoteParts]
+      const style = [selections.genre, selections.mood, selections.tempo]
         .filter(Boolean)
         .join(" · ");
       const promptText = [
         title.trim(),
         selections.theme ? `About: ${selections.theme}` : null,
         selections.language ? `Language: ${selections.language}` : null,
-        ...noteParts,
       ]
         .filter(Boolean)
         .join(" — ");
+
 
       const { data: row, error: insertErr } = await supabase
         .from("songs")
@@ -556,35 +555,8 @@ function LibraryPage() {
           </div>
         </div>
 
-        {/* OG Bot wizard — guided start-to-finish */}
-        <div className="relative mt-7 grid grid-cols-[minmax(0,1fr)] gap-3 rounded-2xl border-2 border-primary/40 bg-primary/[0.08] p-4 shadow-glow backdrop-blur sm:mt-8 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-5 sm:p-5">
-          <div className="flex min-w-0 items-start gap-3 sm:items-center">
-            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-gradient-brand text-primary-foreground shadow-glow">
-              <Wand2 className="h-5 w-5" />
-            </span>
-            <div className="min-w-0">
-              <p className="truncate text-xs font-bold uppercase tracking-[0.24em] leading-relaxed bg-gradient-to-r from-slate-100 via-white to-slate-400 bg-clip-text text-transparent">
-                New here? Let OG guide you
-
-              </p>
-              <p className="text-sm leading-relaxed tracking-wide text-foreground sm:text-base">
-                OG Bot interviews you, then fills the brief so you can hit generate.
-              </p>
-            </div>
-          </div>
-          <Button
-            type="button"
-            size="lg"
-            onClick={() => setInterviewOpen(true)}
-            aria-label="Create Song Now"
-            className="h-12 w-full shrink-0 justify-center gap-2 whitespace-nowrap rounded-xl bg-gradient-brand text-sm font-bold tracking-wide text-primary-foreground shadow-glow sm:w-auto sm:px-6"
-          >
-            <Sparkles className="h-4 w-4" />
-            Create Song Now
-          </Button>
-        </div>
-
       </header>
+
 
 
       {/* Library — previews created (above creation options) */}
@@ -637,18 +609,9 @@ function LibraryPage() {
             </div>
             <p className="mt-3 text-sm font-bold tracking-wide leading-relaxed">No previews yet</p>
             <p className="mt-1 text-xs leading-relaxed tracking-wide text-muted-foreground">
-              Tap Create Song Now to make your first track — versions will appear here.
+              Scroll down to write your first track — versions will appear here.
             </p>
-            <Button
-              type="button"
-              size="lg"
-              onClick={() => setInterviewOpen(true)}
-              aria-label="Create Song Now"
-              className="mt-4 h-11 justify-center gap-2 whitespace-nowrap rounded-xl bg-gradient-brand px-5 text-sm font-bold tracking-wide text-primary-foreground shadow-glow"
-            >
-              <Sparkles className="h-4 w-4" />
-              Create Song Now
-            </Button>
+
           </div>
         )}
       </section>
@@ -723,8 +686,8 @@ function LibraryPage() {
                 theme: pick(POOLS.theme),
                 tempo: pick(POOLS.tempo),
               });
-              setCategoryNotes({ language: "", genre: "", mood: "", theme: "", tempo: "" });
               setLyrics(pick(LYRICS_SAMPLES));
+
               setFoulMouth(Math.random() < 0.5);
               toast.success("Surprise prompt loaded");
             }}
@@ -756,17 +719,8 @@ function LibraryPage() {
           </p>
         </header>
 
-        {/* Big action row — Get to know me + Surprise me */}
-        <div className="relative grid gap-3 sm:grid-cols-2">
-          <Button
-            type="button"
-            size="lg"
-            onClick={() => setInterviewOpen(true)}
-            className="h-14 w-full justify-center gap-2 rounded-2xl bg-gradient-brand text-base font-bold text-primary-foreground shadow-glow sm:h-16 sm:text-lg"
-          >
-            <MessageCircleHeart className="h-5 w-5" />
-            Get to know me
-          </Button>
+        {/* Surprise me — instant template fill */}
+        <div className="relative">
           <Button
             type="button"
             size="lg"
@@ -788,6 +742,7 @@ function LibraryPage() {
             🎲 Surprise me
           </Button>
         </div>
+
 
         {/* Personal details — the main writing area */}
         <div className="relative rounded-2xl border-2 border-primary/40 bg-primary/[0.06] p-5 shadow-glow sm:p-6">
@@ -836,7 +791,7 @@ function LibraryPage() {
             const pct = (len / MAX) * 100;
             let status: "empty" | "tiny" | "warn" | "good" | "near" | "full";
             let msg: string;
-            if (len === 0) { status = "empty"; msg = "👆 Type anything you want — or tap Get to know me"; }
+            if (len === 0) { status = "empty"; msg = "👆 Type anything you want — names, places, drama"; }
             else if (len < 20) { status = "tiny"; msg = "Add a name and an occasion for best results"; }
             else if (!hasName) { status = "warn"; msg = "💡 Add a name (e.g. \"Their name: Aaliyah\")"; }
             else if (!hasDetail) { status = "warn"; msg = "💡 Add an occasion, love, or inside joke"; }
@@ -886,21 +841,25 @@ function LibraryPage() {
           })()}
         </div>
 
-        {/* Extra context */}
+        {/* Lyric description — auto-filled from category selections; user can edit. */}
         <div className="relative">
           <Label htmlFor="extra-context" className="text-sm font-bold uppercase tracking-wider text-muted-foreground sm:text-base">
-            Extra context <span className="font-normal normal-case">(optional)</span>
+            Lyric description
           </Label>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Your category picks land here automatically. Add or edit anything you want the AI to know before writing.
+          </p>
           <Textarea
             id="extra-context"
             value={extraContext}
             onChange={(e) => setExtraContext(e.target.value)}
-            placeholder="Anything else the AI should know before writing…"
+            placeholder="Pick chips above — they'll fill this in. Add more detail if you want."
             maxLength={1000}
-            rows={3}
-            className="mt-2 min-h-[96px] resize-y rounded-xl border-white/10 bg-background/40 text-base sm:text-lg"
+            rows={4}
+            className="mt-2 min-h-[120px] resize-y rounded-xl border-white/10 bg-background/40 text-base sm:text-lg"
           />
         </div>
+
       </section>
 
       {/* Step 2 — Pick your sound (categories, theme & tempo merged) */}
@@ -926,9 +885,8 @@ function LibraryPage() {
               cat={cat}
               value={selections[cat]}
               chips={chips[cat]}
-              note={categoryNotes[cat]}
-              onNoteChange={(v) => setCategoryNotes((prev) => ({ ...prev, [cat]: v }))}
               onSelect={(v) => setField(cat, v)}
+
               onPickChip={(v) => pickChip(cat, v)}
               onRefresh={() => refreshRow(cat)}
             />
@@ -955,9 +913,8 @@ function LibraryPage() {
                   cat={cat}
                   value={selections[cat]}
                   chips={chips[cat]}
-                  note={categoryNotes[cat]}
-                  onNoteChange={(v) => setCategoryNotes((prev) => ({ ...prev, [cat]: v }))}
                   onSelect={(v) => setField(cat, v)}
+
                   onPickChip={(v) => pickChip(cat, v)}
                   onRefresh={() => refreshRow(cat)}
                 />
@@ -1102,8 +1059,19 @@ function LibraryPage() {
           <Textarea
             value={lyrics}
             onChange={(e) => setLyrics(e.target.value)}
-            className="min-h-[280px] resize-y rounded-2xl border-white/10 bg-background/40 font-mono text-sm leading-relaxed"
+            onCopy={(e) => e.preventDefault()}
+            onCut={(e) => e.preventDefault()}
+            onContextMenu={(e) => e.preventDefault()}
+            onDragStart={(e) => e.preventDefault()}
+            spellCheck={false}
+            aria-label="Lyrics (copying disabled)"
+            className="min-h-[280px] resize-y rounded-2xl border-white/10 bg-background/40 font-mono text-sm leading-relaxed [-webkit-user-select:none] [user-select:none]"
+            style={{ WebkitUserSelect: "none", userSelect: "none" }}
           />
+          <p className="text-[11px] text-muted-foreground italic">
+            🔒 Lyrics are protected — copy and right-click are disabled.
+          </p>
+
           <div className="flex flex-wrap items-center justify-end gap-3 rounded-2xl border border-white/10 bg-background/40 p-4">
             <Button
               onClick={() => setReviewOpen(true)}
@@ -1143,96 +1111,22 @@ function LibraryPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <OgInterviewDialog
-        open={interviewOpen}
-        onOpenChange={setInterviewOpen}
-        seed={(() => {
-          const parts: string[] = [];
-          if (title.trim()) parts.push(`Working title: ${title.trim()}`);
-          const styleBits = [selections.genre, selections.mood, selections.theme, selections.tempo, selections.language]
-            .filter(Boolean)
-            .join(" · ");
-          if (styleBits) parts.push(`Vibe so far: ${styleBits}`);
-          if (personalDetails.trim()) parts.push(`Personal details: ${personalDetails.trim()}`);
-          if (extraContext.trim()) parts.push(`Extra context: ${extraContext.trim()}`);
-          if (lyrics.trim()) parts.push(`Existing lyrics draft (excerpt): ${lyrics.trim().slice(0, 240)}`);
-          return parts.join("\n");
-        })()}
-        onDone={(answers, transcript) => {
-          setInterviewTranscript(transcript);
-
-          // Map each scripted answer into the matching page field. If the
-          // answer matches a chip in the pool exactly (case-insensitive) use
-          // it as the selection; otherwise put it into that category's notes
-          // textarea so nothing the user typed is lost.
-          const cats: Category[] = ["language", "genre", "mood", "theme", "tempo"];
-          const nextSelections: Selections = { ...selections };
-          const nextNotes: Record<Category, string> = { ...categoryNotes };
-          for (const cat of cats) {
-            const raw = (answers[cat] ?? "").trim();
-            if (!raw) continue;
-            const match = POOLS[cat].find(
-              (v) => v.toLowerCase() === raw.toLowerCase(),
-            );
-            if (match) {
-              nextSelections[cat] = match;
-              if (raw.length > match.length) {
-                nextNotes[cat] = raw;
-              }
-            } else {
-              nextNotes[cat] = raw;
-              // Pick a sensible default chip so the Select isn't empty.
-              if (!nextSelections[cat]) {
-                const guess = POOLS[cat].find((v) =>
-                  raw.toLowerCase().includes(v.toLowerCase()),
-                );
-                if (guess) nextSelections[cat] = guess;
-              }
-            }
-          }
-          setSelections(nextSelections);
-          setCategoryNotes(nextNotes);
-
-          // Merge the "get to know me" answers into personal details.
-          const personalBlob = answers.personal
-            .map((s) => s.trim())
-            .filter(Boolean)
-            .join("\n");
-          if (personalBlob) {
-            setPersonalDetails((prev) => {
-              const merged = prev.trim() ? `${prev.trim()}\n${personalBlob}` : personalBlob;
-              return merged.slice(0, 500);
-            });
-          }
-
-          // Jump to the lyrics CTA and auto-generate as soon as the fields
-          // are committed.
-          setTimeout(() => {
-            const el = document.getElementById("lyrics-section");
-            el?.scrollIntoView({ behavior: "smooth", block: "start" });
-            void generateLyrics();
-          }, 60);
-        }}
-      />
-
-
       <ReviewDialog
         open={reviewOpen}
         onOpenChange={(o) => !genSong && setReviewOpen(o)}
         title={title}
         selections={selections}
-        categoryNotes={categoryNotes}
         personalDetails={personalDetails}
         extraContext={extraContext}
         foulMouth={foulMouth}
         lyrics={lyrics}
-        transcript={interviewTranscript}
         previewCost={previewCost}
         generating={genSong}
         onConfirm={async () => {
           await generateSong();
         }}
       />
+
     </div>
   );
 }
@@ -1241,8 +1135,6 @@ function CategoryCard({
   cat,
   value,
   chips,
-  note,
-  onNoteChange,
   onSelect,
   onPickChip,
   onRefresh,
@@ -1250,12 +1142,11 @@ function CategoryCard({
   cat: Category;
   value: string | undefined;
   chips: string[];
-  note: string;
-  onNoteChange: (v: string) => void;
   onSelect: (v: string) => void;
   onPickChip: (v: string) => void;
   onRefresh: () => void;
 }) {
+
   const meta = META[cat];
   const Icon = meta.icon;
   return (
@@ -1338,25 +1229,8 @@ function CategoryCard({
           </div>
         </div>
 
-        <div className="space-y-1.5">
-          <label
-            htmlFor={`note-${cat}`}
-            className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground"
-          >
-            <span>Add your own {meta.label.toLowerCase()} notes</span>
-            <span className="text-[10px] normal-case tracking-normal text-muted-foreground/70">
-              {note.length}/200
-            </span>
-          </label>
-          <Textarea
-            id={`note-${cat}`}
-            value={note}
-            maxLength={200}
-            onChange={(e) => onNoteChange(e.target.value.slice(0, 200))}
-            placeholder={`e.g. extra ${meta.label.toLowerCase()} details for the AI to weave in…`}
-            className="min-h-[64px] resize-y rounded-xl border-white/10 bg-background/40 text-xs"
-          />
-        </div>
+
+
       </div>
     </div>
   );
@@ -1367,12 +1241,10 @@ function ReviewDialog({
   onOpenChange,
   title,
   selections,
-  categoryNotes,
   personalDetails,
   extraContext,
   foulMouth,
   lyrics,
-  transcript,
   previewCost,
   generating,
   onConfirm,
@@ -1381,25 +1253,17 @@ function ReviewDialog({
   onOpenChange: (o: boolean) => void;
   title: string;
   selections: Selections;
-  categoryNotes: Record<Category, string>;
   personalDetails: string;
   extraContext: string;
   foulMouth: boolean;
   lyrics: string;
-  transcript: InterviewTurn[];
   previewCost: number;
   generating: boolean;
   onConfirm: () => void | Promise<void>;
 }) {
   const cats: Category[] = ["language", "genre", "mood", "theme", "tempo"];
-  const interviewAnswers: { q: string; a: string }[] = [];
-  for (let i = 0; i < transcript.length - 1; i++) {
-    const cur = transcript[i];
-    const nxt = transcript[i + 1];
-    if (cur.role === "bot" && nxt.role === "user") {
-      interviewAnswers.push({ q: cur.text, a: nxt.text });
-    }
-  }
+
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -1437,41 +1301,20 @@ function ReviewDialog({
               <dl className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {cats.map((c) => {
                   const v = selections[c];
-                  const n = categoryNotes[c]?.trim();
-                  if (!v && !n) return null;
+                  if (!v) return null;
                   return (
                     <div key={c} className="rounded-xl border border-white/10 bg-card/60 p-3">
                       <dt className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                         {META[c].emoji} {META[c].label}
                       </dt>
-                      <dd className="mt-0.5 text-sm font-semibold">
-                        {v || <span className="text-muted-foreground">—</span>}
-                      </dd>
-                      {n && (
-                        <p className="mt-1 text-xs italic text-muted-foreground">"{n}"</p>
-                      )}
+                      <dd className="mt-0.5 text-sm font-semibold">{v}</dd>
                     </div>
                   );
                 })}
               </dl>
             </section>
 
-            {interviewAnswers.length > 0 && (
-              <section aria-labelledby="rv-interview">
-                <h3 id="rv-interview" className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-                  <MessageCircleHeart className="h-3 w-3 text-primary" />
-                  Get to know me — {interviewAnswers.length} answer{interviewAnswers.length === 1 ? "" : "s"}
-                </h3>
-                <ol className="mt-2 space-y-2">
-                  {interviewAnswers.map((qa, i) => (
-                    <li key={i} className="rounded-xl border border-primary/20 bg-primary/[0.06] p-3">
-                      <p className="text-xs font-semibold text-primary/90">Q: {qa.q}</p>
-                      <p className="mt-1 text-sm">A: {qa.a}</p>
-                    </li>
-                  ))}
-                </ol>
-              </section>
-            )}
+
 
             {personalDetails.trim() && (
               <section aria-labelledby="rv-personal">
