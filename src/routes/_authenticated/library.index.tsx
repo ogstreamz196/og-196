@@ -792,7 +792,7 @@ function LibraryPage() {
             const pct = (len / MAX) * 100;
             let status: "empty" | "tiny" | "warn" | "good" | "near" | "full";
             let msg: string;
-            if (len === 0) { status = "empty"; msg = "👆 Type anything you want — or tap Get to know me"; }
+            if (len === 0) { status = "empty"; msg = "👆 Type anything you want — names, places, drama"; }
             else if (len < 20) { status = "tiny"; msg = "Add a name and an occasion for best results"; }
             else if (!hasName) { status = "warn"; msg = "💡 Add a name (e.g. \"Their name: Aaliyah\")"; }
             else if (!hasDetail) { status = "warn"; msg = "💡 Add an occasion, love, or inside joke"; }
