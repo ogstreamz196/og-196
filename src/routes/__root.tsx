@@ -110,6 +110,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      // Warm the image origin used for song cover thumbnails so they decode
+      // without stalling the animated hero on first paint.
+      { rel: "preconnect", href: "https://khjoyiqxupykicqnvhlc.supabase.co", crossOrigin: "anonymous" },
+      { rel: "dns-prefetch", href: "https://khjoyiqxupykicqnvhlc.supabase.co" },
       // High-priority preload of the Google Fonts CSS so @font-face entries
       // are discovered before any text paints (cuts FOUT/FOIT noticeably).
       {

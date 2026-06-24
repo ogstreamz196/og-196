@@ -447,6 +447,9 @@ function RecentRow({ song }: { song: RecentSong }) {
               alt=""
               loading="lazy"
               decoding="async"
+              width={56}
+              height={56}
+              sizes="56px"
               className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
             />
           ) : (
