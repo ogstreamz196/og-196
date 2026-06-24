@@ -825,3 +825,86 @@ button.graffiti-accent:hover {
   & > :is(p, li) { line-height: 1.5; text-wrap: pretty; }
   & > :first-child { margin-top: 0; }
 }
+
+/* ---------------------------------------------------------------------------
+ * Premium typography & layout presets
+ * Reusable across routes so we don't copy-paste long className soup.
+ * Pair with the <Display />, <Heading />, <Body />, <Kicker />, <Section />
+ * components in src/components/ui/typography.tsx.
+ * ------------------------------------------------------------------------ */
+
+@utility text-display {
+  font-family: var(--font-display, ui-sans-serif, system-ui, sans-serif);
+  font-weight: 800;
+  font-size: clamp(2.25rem, 1.4rem + 3.6vw, 4.5rem);
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+@utility text-h1 {
+  font-family: var(--font-display, ui-sans-serif, system-ui, sans-serif);
+  font-weight: 800;
+  font-size: clamp(1.875rem, 1.25rem + 2vw, 3rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+@utility text-h2 {
+  font-family: var(--font-display, ui-sans-serif, system-ui, sans-serif);
+  font-weight: 700;
+  font-size: clamp(1.5rem, 1.1rem + 1.2vw, 2.25rem);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+@utility text-h3 {
+  font-weight: 700;
+  font-size: clamp(1.25rem, 1rem + 0.6vw, 1.625rem);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+@utility text-body-lg {
+  font-size: 1.125rem;
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+@utility text-body {
+  font-size: 1rem;
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+@utility text-body-sm {
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+@utility text-kicker {
+  font-size: 0.75rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+/* Consistent section padding across main views */
+@utility section-pad {
+  padding-block: clamp(2.5rem, 1.5rem + 3vw, 5rem);
+  padding-inline: clamp(1rem, 0.5rem + 1.5vw, 2.5rem);
+}
+@utility section-pad-tight {
+  padding-block: clamp(1.5rem, 1rem + 1.5vw, 2.75rem);
+  padding-inline: clamp(1rem, 0.5rem + 1.5vw, 2rem);
+}
+@utility section-stack {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.5rem, 1rem + 1.2vw, 2.5rem);
+}
+@utility container-app {
+  width: 100%;
+  margin-inline: auto;
+  max-width: 80rem;
+}
+
