@@ -892,7 +892,7 @@ function LibraryPage() {
         <div className="space-y-1.5 sm:hidden">
           <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
             <span>Progress</span>
-            <span>{totalFilled}/5</span>
+            <span>{totalFilled}/4</span>
           </div>
           <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
             <div
