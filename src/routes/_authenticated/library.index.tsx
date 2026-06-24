@@ -539,29 +539,24 @@ function LibraryPage() {
         id="personal-brief"
         className="flex flex-col gap-6 rounded-3xl border border-white/10 bg-card/70 p-6 shadow-[0_18px_50px_-28px_rgba(0,0,0,0.6)] ring-1 ring-white/5 backdrop-blur-xl sm:p-8"
       >
-        <header className="space-y-2">
+        <header className="space-y-1">
           <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.24em] text-primary">
-            <Sparkles className="h-3.5 w-3.5" /> Step 2 · Who's it for?
+            <Sparkles className="h-3.5 w-3.5" /> Step 2
           </div>
           <h2 className="font-display text-3xl font-black leading-[1.1] tracking-tight sm:text-4xl">
-            Tell us about them
+            Describe your song
           </h2>
-          <p className="text-base text-muted-foreground sm:text-lg">
-            Partner, friend, parent, ex, even yourself — the more specific, the sharper the song.
+          <p className="text-sm text-muted-foreground sm:text-base">
+            Who's it for — names, moments, inside jokes. The more specific, the sharper the song.
           </p>
         </header>
 
-
-
-
         {/* Personal details — the main writing area */}
         <div className="relative rounded-2xl border border-white/10 bg-background/40 p-5 ring-1 ring-white/5 sm:p-6">
-          <Label htmlFor="personal-details" className="block font-display text-xl font-black leading-tight text-foreground sm:text-2xl">
+          <Label htmlFor="personal-details" className="sr-only">
             Describe your song
           </Label>
-          <p className="mt-2 text-sm text-muted-foreground sm:text-base">
-            Who's it for and what makes them special? Names, moments, inside jokes — anything goes.
-          </p>
+
 
           {/* A few example prompts to spark ideas */}
           <div
