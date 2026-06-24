@@ -341,7 +341,7 @@ export function OgInterviewDialog({ open, onOpenChange, seed, onDone }: OgInterv
             placeholder={
               loading
                 ? "Waiting for the next question…"
-                : "Your answer — Enter to send, Shift+Enter for new line, Esc to finish"
+                : "Your answer — Enter to send, Shift+Enter for new line, Esc to generate lyrics"
             }
             disabled={loading || finishing}
             rows={2}
