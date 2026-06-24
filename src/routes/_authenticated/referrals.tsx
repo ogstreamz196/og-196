@@ -162,19 +162,44 @@ function ReferralsPage() {
   const summary = summaryQ.data ?? { total_referred: 0, total_earned: 0, recent: [] };
 
   return (
-    <DashboardShell title="Referrals">
+    <DashboardShell title="Earnings">
       <div className="mx-auto w-full max-w-4xl space-y-6 p-4 sm:p-6">
         <header className="space-y-2">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
-            <Gift className="h-3 w-3" /> Referrals
+            <Gift className="h-3 w-3" /> Earnings
           </div>
-          <h1 className="font-display text-3xl font-black tracking-tight">Invite friends, earn coins</h1>
+          <h1 className="font-display text-3xl font-black tracking-tight">Earn OG Coins by sharing your OG Link</h1>
           <p className="text-sm text-muted-foreground">
-            Share your link. When someone signs up through it, you get{" "}
-            <span className="font-semibold text-foreground">10% cashback in OG Coins</span> every
-            time they burn coins — forever.
+            Every time someone you invited burns coins, you bank{" "}
+            <span className="font-semibold text-foreground">10% commission in OG Coins</span> —
+            for life. No cap, no expiry.
           </p>
         </header>
+
+        {/* How it works */}
+        <section className="rounded-2xl border border-white/10 bg-card/60 p-5">
+          <h2 className="font-display text-lg font-bold">How you earn commission</h2>
+          <div className="mt-4 grid gap-4 sm:grid-cols-3">
+            <Step
+              icon={<Link2 className="h-4 w-4" />}
+              n={1}
+              title="Share your OG Link"
+              body="Copy the link below and drop it in your group chats, socials or DMs."
+            />
+            <Step
+              icon={<UserPlus className="h-4 w-4" />}
+              n={2}
+              title="They sign up & create"
+              body="A friend opens your link, makes an account and starts using OG Streamz."
+            />
+            <Step
+              icon={<Sparkles className="h-4 w-4" />}
+              n={3}
+              title="You bank 10% forever"
+              body="Every time they spend OG Coins, 10% drops straight into your balance."
+            />
+          </div>
+        </section>
 
         {/* Running totals — top of page */}
         <section className="grid gap-3 sm:grid-cols-2">
