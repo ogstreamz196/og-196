@@ -219,14 +219,14 @@ function DashboardHome() {
 
             </div>
             <p className="mx-auto mt-5 max-w-2xl text-sm leading-[1.5] text-foreground [text-shadow:0_1px_12px_rgba(0,0,0,0.75)] sm:text-xl md:text-2xl">
-              Dive into <span className="font-bold text-primary">MusicHub</span> to create tracks, or open{" "}
-              <span className="font-bold text-primary">OG Streamz Messenger</span> to chat with{" "}
-              <span className="relative inline-block font-bold text-primary">
+              Dive into <span className="text-gradient-red font-black tracking-tight text-[0.92em]">MusicHub</span> to create tracks, or open{" "}
+              <span className="text-gradient-red font-black tracking-tight text-[0.92em]">OG Streamz Messenger</span> to chat with{" "}
+              <span className="relative inline-block text-gradient-red font-black tracking-tight text-[0.92em]">
                 OG Bot
                 <span aria-hidden className="ml-1 inline-flex gap-0.5 align-middle">
-                  <span className="h-1.5 w-1.5 rounded-full bg-primary animate-[bounce_1.2s_ease-in-out_infinite] [animation-delay:0s]" />
-                  <span className="h-1.5 w-1.5 rounded-full bg-primary animate-[bounce_1.2s_ease-in-out_infinite] [animation-delay:0.15s]" />
-                  <span className="h-1.5 w-1.5 rounded-full bg-primary animate-[bounce_1.2s_ease-in-out_infinite] [animation-delay:0.3s]" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-[bounce_1.2s_ease-in-out_infinite] [animation-delay:0s]" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-[bounce_1.2s_ease-in-out_infinite] [animation-delay:0.15s]" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-[bounce_1.2s_ease-in-out_infinite] [animation-delay:0.3s]" />
                 </span>
               </span>
               .
