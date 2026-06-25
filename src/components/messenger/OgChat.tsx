@@ -3,9 +3,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import ReactMarkdown from "react-markdown";
-import { Send, Trash2, Sparkles, Skull, ShieldCheck, Paperclip, Mic, MicOff, Crown, X, Loader2, ArrowDown } from "lucide-react";
+import { Send, Trash2, Sparkles, Skull, ShieldCheck, Paperclip, Mic, MicOff, Crown, X, Loader2, ArrowDown, Radio } from "lucide-react";
 import { chatOgBot, type OgChatMessage } from "@/lib/og-messenger.functions";
 import { transcribeOgAudio } from "@/lib/og-transcribe.functions";
+import { postCommunityMessage } from "@/lib/community.functions";
 import { QUICK_STARTS } from "@/lib/og-persona";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
@@ -14,6 +15,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { useRole } from "@/hooks/use-role";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { useOgMode } from "@/hooks/use-og-mode";
+import { useShareLive } from "@/hooks/use-share-live";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import type { RealtimePostgresInsertPayload } from "@supabase/supabase-js";
@@ -115,6 +117,8 @@ export function OgChat({
   const setFoulMouth = useSetFoulMouth();
   const { mode, toggle: toggleMode } = useOgMode();
   const { isVip } = useRole();
+  const shareLive = useShareLive();
+  const postCommunity = useServerFn(postCommunityMessage);
   const transcribe = useServerFn(transcribeOgAudio);
   const [language, setLanguage] = useState<string>(() => {
     if (typeof window === "undefined") return "English";
@@ -315,6 +319,22 @@ export function OgChat({
     if (!t && !att) return;
     if (m.isPending) return;
     if (!user) return toast.error("Sign in to chat with OG Bot.");
+
+    // Share Live: route to the EXCLUSIVE OG Community shared chat.
+    if (shareLive.enabled) {
+      if (!t) return toast.error("Community messages must be text (no attachments yet).");
+      setInput("");
+      setAttachment(null);
+      postCommunity({ data: { content: t } })
+        .then(() => {
+          toast.success("Posted to OG Community", {
+            action: { label: "Open", onClick: () => { window.location.href = "/community"; } },
+          });
+        })
+        .catch((e: Error) => toast.error(e.message));
+      return;
+    }
+
     if ((profile?.coin_balance ?? 0) <= 0) {
       return toast.error("Out of OG coins — resets to 5 tomorrow, or top up to keep going.");
     }
@@ -522,6 +542,30 @@ export function OgChat({
             >
               {mode === "og" ? <Sparkles className="h-3.5 w-3.5" /> : <ShieldCheck className="h-3.5 w-3.5" />}
               {mode === "og" ? "OG mode" : "Safe mode"}
+            </button>
+            <button
+              type="button"
+              onClick={() => shareLive.setEnabled(!shareLive.enabled)}
+              aria-pressed={shareLive.enabled}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-lg border-2 px-3 py-1.5 text-[12px] font-bold transition",
+                shareLive.enabled
+                  ? "border-emerald-400/60 bg-emerald-400/15 text-emerald-500 dark:text-emerald-300 shadow-[0_0_14px_-4px_oklch(0.78_0.18_155)]"
+                  : "border-border bg-muted text-muted-foreground hover:border-emerald-400/40",
+              )}
+              title={
+                shareLive.enabled
+                  ? "Share Live: ON — sending to OG Community"
+                  : shareLive.telegramLinked
+                    ? "Share Live: OFF — tap to broadcast to OG Community"
+                    : "Connect Telegram to auto-enable Share Live"
+              }
+            >
+              <Radio className={cn("h-3.5 w-3.5", shareLive.enabled && "animate-pulse")} />
+              {shareLive.enabled ? "Share Live · ON" : "Share Live"}
+              {shareLive.enabled && shareLive.isAuto && (
+                <span className="ml-0.5 rounded-full bg-emerald-500/20 px-1.5 text-[9px] font-black uppercase tracking-wider">auto</span>
+              )}
             </button>
             {isVip ? (
               <select
