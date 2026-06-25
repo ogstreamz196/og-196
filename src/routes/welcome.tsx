@@ -360,6 +360,7 @@ function WelcomePage() {
         <Hero />
         <Pillars />
         <HowItWorks />
+        <FoulMouthHype />
         <ClosingCta />
         <Footer />
         
