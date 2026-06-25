@@ -214,9 +214,6 @@ function DashboardHome() {
               </span>
               .
             </p>
-            <p className="mx-auto mt-3 max-w-2xl text-xs leading-relaxed text-muted-foreground sm:text-base">
-              Every OG Bot is linked and synced — start a conversation in one place, pick it right back up anywhere else. One memory, one assistant, ready for any task.
-            </p>
           </div>
 
         </div>
