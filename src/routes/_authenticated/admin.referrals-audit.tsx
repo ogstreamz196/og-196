@@ -308,7 +308,7 @@ function ReferralsAuditPage() {
             </table>
           </div>
         </section>
-      </div>
+
         <section className="rounded-2xl border border-white/10 bg-card/60">
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/5 p-4">
             <div className="flex items-center gap-2">
