@@ -114,13 +114,13 @@ export function DodgyLogo({
         style={{ width: size, height: size, transition: isFine ? undefined : "transform 0.3s" }}
       >
         <img
-          src={ogBotAsset.url}
-          alt="OG Bot"
+          src={src ?? ogBotAsset.url}
+          alt={alt}
           width={512}
           height={512}
           decoding="async"
           draggable={false}
-          className="h-full w-full select-none rounded-2xl object-contain shadow-glow"
+          className={`h-full w-full select-none object-contain shadow-glow ${imageClassName}`}
         />
       </div>
       <style>{`@keyframes wcBob { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-6px) } }`}</style>
