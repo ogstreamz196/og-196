@@ -313,7 +313,7 @@ export function OgChat({
     return () => clearTimeout(t);
   }, [m.isPending, showSkeleton]);
 
-  function sendText(text: string) {
+  function sendText(text: string, opts?: { forcePrivate?: boolean }) {
     const t = text.trim();
     const att = attachment;
     if (!t && !att) return;
@@ -321,7 +321,9 @@ export function OgChat({
     if (!user) return toast.error("Sign in to chat with OG Bot.");
 
     // Share Live: route to the EXCLUSIVE OG Community shared chat.
-    if (shareLive.enabled) {
+    // Quick-start chips always send privately — they belong to the empty
+    // state of the private OG-GPT view, not the live community feed.
+    if (shareLive.enabled && !opts?.forcePrivate) {
       if (!t) return toast.error("Community messages must be text (no attachments yet).");
       setInput("");
       setAttachment(null);
