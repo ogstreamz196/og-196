@@ -140,8 +140,15 @@ async function verifyTelegramChat(chat_id: number): Promise<boolean> {
 async function maybeBootstrapBossTelegram(
   admin: Awaited<ReturnType<typeof loadAdmin>>,
   chat_id: number,
-  msg: { from?: { username?: string; first_name?: string } },
+  msg: {
+    chat?: { type?: string };
+    from?: { id?: number; username?: string; first_name?: string };
+  },
 ): Promise<boolean> {
+  if (chat_id <= 0 || msg?.chat?.type !== "private" || Number(msg?.from?.id) !== chat_id) {
+    return false;
+  }
+
   const username = msg?.from?.username?.trim().replace(/^@/, "").toLowerCase();
   if (username !== BOSS_TELEGRAM_USERNAME) return false;
 
