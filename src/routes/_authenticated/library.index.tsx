@@ -635,6 +635,7 @@ function LibraryPage() {
             </div>
           )}
           <button
+            id="foul-mouth-toggle"
             type="button"
             role="switch"
             aria-checked={foulMouth}
