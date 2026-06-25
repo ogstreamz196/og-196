@@ -107,7 +107,8 @@ function loadCorner(): Corner {
 
 export function OgBotWidget() {
   const [open, setOpen] = useState(false);
-  const [pos, setPos] = useState<Pos>(() => loadPos());
+  const [corner, setCorner] = useState<Corner>(() => loadCorner());
+  const [pos, setPos] = useState<Pos>(() => cornerToPos(loadCorner()));
   const [dragging, setDragging] = useState(false);
   const [isMobile, setIsMobile] = useState(
     typeof window !== "undefined" ? window.innerWidth < MOBILE_BP : false,
@@ -140,17 +141,29 @@ export function OgBotWidget() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    window.sessionStorage.setItem(POS_KEY, JSON.stringify(pos));
-  }, [pos]);
+    window.localStorage.setItem(POS_KEY, corner);
+  }, [corner]);
+
+  // Re-snap to a free corner whenever the route, viewport, or saved corner changes.
+  useEffect(() => {
+    if (typeof window === "undefined" || dragging) return;
+    // Wait for layout to settle before probing elementFromPoint.
+    const id = window.setTimeout(() => {
+      const free = findFreeCorner(corner);
+      setPos(cornerToPos(free));
+      if (free !== corner) setCorner(free);
+    }, 50);
+    return () => window.clearTimeout(id);
+  }, [pathname, corner, isMobile, dragging]);
 
   useEffect(() => {
     function onResize() {
       setIsMobile(window.innerWidth < MOBILE_BP);
-      setPos((p) => clamp(p));
+      setPos(cornerToPos(corner));
     }
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
-  }, []);
+  }, [corner]);
 
   // Lock body scroll when the mobile sheet is open.
   useEffect(() => {
@@ -184,7 +197,8 @@ export function OgBotWidget() {
     const dy = e.clientY - d.startY;
     if (!d.moved && Math.hypot(dx, dy) > 4) d.moved = true;
     if (d.moved) {
-      setPos(clamp({ x: d.origX + dx, y: d.origY + dy }));
+      // Free movement while dragging — snap on release.
+      setPos({ x: d.origX + dx, y: d.origY + dy });
     }
   }, []);
 
@@ -195,8 +209,17 @@ export function OgBotWidget() {
     setDragging(false);
     if (d && !d.moved) {
       setOpen((v) => !v);
+      return;
+    }
+    if (d) {
+      // Snap to the nearest corner the user dragged toward.
+      const target = nearestCorner({ x: d.origX + (e.clientX - d.startX), y: d.origY + (e.clientY - d.startY) });
+      setCorner(target);
+      setPos(cornerToPos(target));
     }
   }, []);
+
+
 
   function panelStyle(): React.CSSProperties {
     if (typeof window === "undefined") return {};
