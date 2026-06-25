@@ -195,7 +195,14 @@ function DashboardHome() {
                     <span
                       key={`${ch}-${i}`}
                       className="inline-block wc-pop hover:animate-[wiggle_0.6s_ease-in-out]"
-                      style={{ animationDelay: `${0.25 + i * 0.05}s`, whiteSpace: ch === " " ? "pre" : undefined }}
+                      style={{
+                        animationDelay: `${0.25 + i * 0.05}s`,
+                        whiteSpace: ch === " " ? "pre" : undefined,
+                        background: "inherit",
+                        WebkitBackgroundClip: "text",
+                        backgroundClip: "text",
+                        color: "transparent",
+                      }}
                     >
                       {ch}
                     </span>
