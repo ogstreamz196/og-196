@@ -51,6 +51,8 @@ import { cn } from "@/lib/utils";
 import { TelegramLinkStatus } from "@/components/dashboard/TelegramLinkStatus";
 import { TelegramLinkChecklist } from "@/components/dashboard/TelegramLinkChecklist";
 import { TelegramConnectPrompt } from "@/components/dashboard/TelegramConnectPrompt";
+import { DodgyLogo } from "@/components/welcome/DodgyLogo";
+import { DodgyText } from "@/components/welcome/DodgyText";
 
 export const Route = createFileRoute("/_authenticated/")({
   component: DashboardHome,
@@ -182,33 +184,38 @@ function DashboardHome() {
               </span>
             </p>
             <div className="mt-5 flex flex-col items-center gap-5 sm:gap-7">
-              <img
+              <DodgyLogo
                 src={ogLogo.url}
                 alt="OG Streamz"
-                loading="lazy"
-                className="mx-auto h-40 w-auto rounded-3xl ring-1 ring-white/10 shadow-[0_24px_70px_-20px_rgba(0,0,0,0.8)] sm:h-56 md:h-72 lg:h-80"
+                size={160}
+                maxDrift={110}
+                dodgeRadius={180}
+                imageClassName="rounded-3xl ring-1 ring-white/10 shadow-[0_24px_70px_-20px_rgba(0,0,0,0.8)]"
+                className="mx-auto"
               />
-              <h1 className="font-display flex min-w-0 flex-col items-center gap-1 text-[clamp(1.5rem,3.2vw+0.75rem,3.75rem)] font-black leading-[1.05] tracking-[-0.02em] text-foreground [text-shadow:0_4px_28px_rgba(0,0,0,0.75)] [overflow-wrap:anywhere] [text-wrap:balance] [font-variant-ligatures:none] sm:gap-2">
-                <span className="block wc-pop">Hello,</span>
-                <span className="paint-drip font-display block max-w-full not-italic font-black uppercase tracking-tight text-gradient-red [overflow-wrap:anywhere] text-[clamp(1.5rem,2.6vw+0.75rem,3rem)]">
-                  {displayName.split("").map((ch, i) => (
-                    <span
-                      key={`${ch}-${i}`}
-                      className="inline-block wc-pop hover:animate-[wiggle_0.6s_ease-in-out]"
-                      style={{
-                        animationDelay: `${0.25 + i * 0.05}s`,
-                        whiteSpace: ch === " " ? "pre" : undefined,
-                        background: "inherit",
-                        WebkitBackgroundClip: "text",
-                        backgroundClip: "text",
-                        color: "transparent",
-                      }}
-                    >
-                      {ch}
-                    </span>
-                  ))}
-                </span>
-              </h1>
+              <DodgyText dodgeRadius={160} maxDrift={28} className="w-full">
+                <h1 className="font-display flex min-w-0 flex-col items-center gap-1 text-[clamp(1.5rem,3.2vw+0.75rem,3.75rem)] font-black leading-[1.05] tracking-[-0.02em] text-foreground [text-shadow:0_4px_28px_rgba(0,0,0,0.75)] [overflow-wrap:anywhere] [text-wrap:balance] [font-variant-ligatures:none] sm:gap-2">
+                  <span className="block wc-pop">Hello,</span>
+                  <span className="paint-drip font-display block max-w-full not-italic font-black uppercase tracking-tight text-gradient-red [overflow-wrap:anywhere] text-[clamp(1.5rem,2.6vw+0.75rem,3rem)]">
+                    {displayName.split("").map((ch, i) => (
+                      <span
+                        key={`${ch}-${i}`}
+                        className="inline-block wc-pop hover:animate-[wiggle_0.6s_ease-in-out]"
+                        style={{
+                          animationDelay: `${0.25 + i * 0.05}s`,
+                          whiteSpace: ch === " " ? "pre" : undefined,
+                          background: "inherit",
+                          WebkitBackgroundClip: "text",
+                          backgroundClip: "text",
+                          color: "transparent",
+                        }}
+                      >
+                        {ch}
+                      </span>
+                    ))}
+                  </span>
+                </h1>
+              </DodgyText>
 
             </div>
             <p className="mx-auto mt-5 max-w-2xl text-sm leading-[1.5] text-foreground [text-shadow:0_1px_12px_rgba(0,0,0,0.75)] sm:text-xl md:text-2xl">
