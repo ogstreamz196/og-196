@@ -118,10 +118,11 @@ export function BindReferrerCard() {
 
       <div className="mt-4 flex flex-col gap-2 sm:flex-row">
         <Input
+          id="og-leader-code-input"
           value={input}
           onChange={(e) => { setInput(e.target.value); setLookup(null); }}
-          placeholder="https://ogstreamz.co.uk/r/… or referrer ID"
-          className="flex-1"
+          placeholder="Paste OG Leader code, ID, or referral link"
+          className="flex-1 font-mono text-xs sm:text-sm"
         />
         <Button onClick={lookupReferrer} disabled={busy || !input.trim()} variant="secondary" className="gap-2">
           <Search className="h-4 w-4" /> Find
