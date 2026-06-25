@@ -164,6 +164,31 @@ function AdminPanel() {
           {null}
         </AdminSection>
 
+        <div className="mb-3 flex flex-wrap items-center justify-end gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() =>
+              window.dispatchEvent(
+                new CustomEvent("admin-collapsible:set-all", { detail: { open: true } }),
+              )
+            }
+          >
+            Expand all
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() =>
+              window.dispatchEvent(
+                new CustomEvent("admin-collapsible:set-all", { detail: { open: false } }),
+              )
+            }
+          >
+            Collapse all
+          </Button>
+        </div>
+
 
         <AdminCollapsible storageKey="og-coins" title="OG Coins" subtitle="Boss coin operations" defaultOpen>
           <OgCoinsPanel />
