@@ -255,11 +255,6 @@ async function notifyBossesAndSync(ev: {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
   // All admins/bosses with a Telegram chat id
-  const { data: bossRows } = await supabaseAdmin.rpc("list_boss_telegram_targets" as never).then(
-    () => ({ data: null }),
-    () => ({ data: null }),
-  );
-  // Fallback inline query since no rpc exists
   const { data: roleRows } = await supabaseAdmin
     .from("user_roles")
     .select("user_id, role")
