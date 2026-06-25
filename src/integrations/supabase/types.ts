@@ -480,6 +480,7 @@ export type Database = {
           last_page: string | null
           last_page_at: string | null
           last_sign_in_at: string | null
+          referral_code: string | null
           sign_in_count: number
           telegram_chat_id: number | null
           telegram_link_token: string | null
@@ -505,6 +506,7 @@ export type Database = {
           last_page?: string | null
           last_page_at?: string | null
           last_sign_in_at?: string | null
+          referral_code?: string | null
           sign_in_count?: number
           telegram_chat_id?: number | null
           telegram_link_token?: string | null
@@ -530,6 +532,7 @@ export type Database = {
           last_page?: string | null
           last_page_at?: string | null
           last_sign_in_at?: string | null
+          referral_code?: string | null
           sign_in_count?: number
           telegram_chat_id?: number | null
           telegram_link_token?: string | null
@@ -1089,6 +1092,7 @@ export type Database = {
       gen_bot_token_string: { Args: never; Returns: string }
       gen_og_bot_invite_code: { Args: never; Returns: string }
       gen_og_bot_token: { Args: never; Returns: string }
+      gen_og_referral_code: { Args: never; Returns: string }
       get_my_referrer: { Args: never; Returns: Json }
       get_referral_summary: { Args: never; Returns: Json }
       has_role: {
@@ -1118,6 +1122,7 @@ export type Database = {
         }[]
       }
       lookup_referrer: { Args: { p_referrer: string }; Returns: Json }
+      lookup_referrer_by_code: { Args: { p_code: string }; Returns: Json }
       mint_coins: {
         Args: { p_amount: number; p_reason?: string; p_target: string }
         Returns: number
