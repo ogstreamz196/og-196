@@ -445,7 +445,7 @@ function Hero() {
         </div>
 
         <div className="mt-6 flex justify-center sm:mt-8">
-          <DodgyLogo size={128} className="sm:[--s:160px]" />
+          <DodgyLogo size={256} className="sm:[--s:320px]" />
         </div>
 
 
