@@ -233,14 +233,7 @@ function LibraryPage() {
     }
     setGenSong(true);
     try {
-      // Soft client hint only — the backend enforces global + per-user concurrency
-      // limits and is the single source of truth (returns 429 when over capacity).
-      const { data: inflight } = await supabase
-        .from("songs")
-        .select("id")
-        .eq("user_id", user.id)
-        .in("status", ["queued", "processing", "pending"])
-        .limit(1);
+      // Backend enforces global + per-user concurrency limits (returns 429 when over capacity).
       const style = [selections.genre, selections.mood]
         .filter(Boolean)
         .join(" · ");
