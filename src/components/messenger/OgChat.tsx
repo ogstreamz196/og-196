@@ -117,6 +117,8 @@ export function OgChat({
   const setFoulMouth = useSetFoulMouth();
   const { mode, toggle: toggleMode } = useOgMode();
   const { isVip } = useRole();
+  const shareLive = useShareLive();
+  const postCommunity = useServerFn(postCommunityMessage);
   const transcribe = useServerFn(transcribeOgAudio);
   const [language, setLanguage] = useState<string>(() => {
     if (typeof window === "undefined") return "English";
