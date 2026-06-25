@@ -304,7 +304,7 @@ export function OgBotWidget() {
           onPointerCancel={onPointerUp}
           style={{ top: pos.y, left: pos.x, touchAction: "none" }}
           className={cn(
-            "fixed z-50 grid h-14 w-14 select-none place-items-center overflow-hidden rounded-full",
+            "fixed z-50 grid h-24 w-24 sm:h-28 sm:w-28 select-none place-items-center overflow-hidden rounded-full",
             "bg-gradient-brand text-primary-foreground shadow-glow ring-2 ring-primary-foreground/20",
             "transition-transform hover:scale-105 active:scale-95",
             dragging ? "scale-110 cursor-grabbing" : "cursor-grab",
@@ -312,15 +312,15 @@ export function OgBotWidget() {
           aria-label={open ? "Close OG Bot" : "Open OG Bot — drag to reposition"}
         >
           {dragging ? (
-            <GripVertical className="h-5 w-5" />
+            <GripVertical className="h-8 w-8" />
           ) : open ? (
-            <X className="h-6 w-6" />
+            <X className="h-9 w-9" />
           ) : (
             <>
               <img
                 src={ogBotAsset.url}
                 alt=""
-                className="h-10 w-10 rounded-full object-cover"
+                className="h-20 w-20 sm:h-24 sm:w-24 rounded-full object-cover"
                 draggable={false}
               />
               <span
