@@ -191,7 +191,7 @@ export function AppSidebar() {
 
         {isAdmin && (
           <SidebarGroup>
-            <SidebarGroupLabel>Admin</SidebarGroupLabel>
+            <SidebarGroupLabel>Boss Console</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
