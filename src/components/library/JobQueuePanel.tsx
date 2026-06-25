@@ -1,11 +1,34 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Loader2, RefreshCw, CheckCircle2, AlertTriangle, Clock3, ListChecks } from "lucide-react";
+import {
+  Loader2,
+  RefreshCw,
+  CheckCircle2,
+  AlertTriangle,
+  Clock3,
+  ListChecks,
+  Eye,
+  Play,
+  Pause,
+  Download,
+  Lock,
+  Unlock,
+  ExternalLink,
+} from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import { invokeError } from "@/lib/invoke-error";
+import { useSettings } from "@/hooks/use-settings";
+import { useProfile } from "@/hooks/use-profile";
 import type { Song } from "@/components/SongCard";
 
 type JobStatus = "queued" | "generating" | "completed" | "failed";
@@ -14,7 +37,7 @@ function classify(status: string): JobStatus {
   if (status === "completed") return "completed";
   if (status === "failed") return "failed";
   if (status === "processing") return "generating";
-  return "queued"; // draft / pending / queued
+  return "queued";
 }
 
 const META: Record<JobStatus, { label: string; icon: typeof Clock3; cls: string; dot: string }> = {
@@ -26,12 +49,12 @@ const META: Record<JobStatus, { label: string; icon: typeof Clock3; cls: string;
 
 export function JobQueuePanel({ songs }: { songs: Song[] }) {
   const [retrying, setRetrying] = useState<string | null>(null);
+  const [detailsSong, setDetailsSong] = useState<Song | null>(null);
 
   const jobs = useMemo(() => {
-    return songs
-      .map((s) => ({ song: s, kind: classify(s.status) }))
-      .filter((j) => j.kind !== "completed")
-      .slice(0, 8);
+    const active = songs.filter((s) => classify(s.status) !== "completed");
+    const recentCompleted = songs.filter((s) => classify(s.status) === "completed").slice(0, 4);
+    return [...active.slice(0, 8), ...recentCompleted].map((s) => ({ song: s, kind: classify(s.status) }));
   }, [songs]);
 
   const counts = useMemo(() => {
@@ -61,7 +84,7 @@ export function JobQueuePanel({ songs }: { songs: Song[] }) {
     }
   }
 
-  if (jobs.length === 0 && counts.failed === 0) return null;
+  if (jobs.length === 0) return null;
 
   return (
     <section className="rounded-3xl border border-white/10 bg-card/40 p-5 ring-1 ring-white/5 sm:p-6">
@@ -72,11 +95,11 @@ export function JobQueuePanel({ songs }: { songs: Song[] }) {
           </div>
           <div>
             <h3 className="font-display text-lg font-black tracking-tight sm:text-xl">Generation queue</h3>
-            <p className="text-xs text-muted-foreground">Live status of your in-flight tracks</p>
+            <p className="text-xs text-muted-foreground">Live status — updates instantly</p>
           </div>
         </div>
         <div className="flex flex-wrap gap-1.5 text-[11px] font-bold uppercase tracking-wider">
-          {(["queued", "generating", "failed"] as JobStatus[]).map((k) => (
+          {(["queued", "generating", "completed", "failed"] as JobStatus[]).map((k) => (
             <span key={k} className={cn("inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1", META[k].cls)}>
               <span className={cn("h-1.5 w-1.5 rounded-full", META[k].dot)} />
               {counts[k]} {META[k].label}
@@ -85,57 +108,342 @@ export function JobQueuePanel({ songs }: { songs: Song[] }) {
         </div>
       </div>
 
-      {jobs.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No active jobs. Recent failures are listed above.</p>
-      ) : (
-        <ul className="grid gap-2">
-          {jobs.map(({ song, kind }) => {
-            const m = META[kind];
-            const Icon = m.icon;
-            return (
-              <li
-                key={song.id}
-                className="flex items-center gap-3 rounded-2xl border border-white/10 bg-background/40 p-3"
-              >
-                <span className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-xl border", m.cls)}>
-                  <Icon className={cn("h-4 w-4", kind === "generating" && "animate-spin")} />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <Link
-                    to="/library/$songId"
-                    params={{ songId: song.id }}
-                    className="block truncate text-sm font-bold hover:underline"
-                  >
-                    {song.title || "Untitled"}
-                  </Link>
-                  <p className="truncate text-[11px] uppercase tracking-wider text-muted-foreground">
-                    {m.label}
-                    {kind === "failed" && (song as { error_message?: string }).error_message
-                      ? ` · ${(song as { error_message?: string }).error_message}`
-                      : ""}
-                  </p>
-                </div>
-                {kind === "failed" && (
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => retry(song)}
-                    disabled={retrying === song.id}
-                    className="shrink-0"
-                  >
-                    {retrying === song.id ? (
-                      <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                    ) : (
-                      <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
-                    )}
-                    Retry
-                  </Button>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      )}
+      <ul className="grid gap-2">
+        {jobs.map(({ song, kind }) => {
+          const m = META[kind];
+          const Icon = m.icon;
+          return (
+            <li
+              key={song.id}
+              className="flex items-center gap-3 rounded-2xl border border-white/10 bg-background/40 p-3"
+            >
+              <span className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-xl border", m.cls)}>
+                <Icon className={cn("h-4 w-4", kind === "generating" && "animate-spin")} />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-bold">{song.title || "Untitled"}</p>
+                <p className="truncate text-[11px] uppercase tracking-wider text-muted-foreground">
+                  {m.label}
+                  {kind === "failed" && song.error_message ? ` · ${song.error_message}` : ""}
+                </p>
+              </div>
+              {kind === "failed" && (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => retry(song)}
+                  disabled={retrying === song.id}
+                  className="shrink-0"
+                >
+                  {retrying === song.id ? (
+                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
+                  )}
+                  Retry
+                </Button>
+              )}
+              {kind === "completed" && (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => setDetailsSong(song)}
+                  className="shrink-0"
+                >
+                  <Eye className="mr-1.5 h-3.5 w-3.5" />
+                  View details
+                </Button>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+
+      <JobDetailsDrawer
+        song={detailsSong}
+        open={!!detailsSong}
+        onOpenChange={(o) => !o && setDetailsSong(null)}
+      />
     </section>
+  );
+}
+
+function JobDetailsDrawer({
+  song,
+  open,
+  onOpenChange,
+}: {
+  song: Song | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const { data: settings } = useSettings();
+  const { data: profile, refetch: refetchProfile } = useProfile();
+  const sampleSeconds = settings?.sample_seconds ?? 30;
+  const unlockCost = (settings as { coins_per_full_unlock?: number } | undefined)?.coins_per_full_unlock ?? 5;
+
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [fullUrl, setFullUrl] = useState<string | null>(null);
+  const [unlocked, setUnlocked] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [unlocking, setUnlocking] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Reset on open / song change and fetch unlock status + preview URL
+  useEffect(() => {
+    if (!open || !song) return;
+    let cancelled = false;
+    setPreviewUrl(null);
+    setFullUrl(null);
+    setPlaying(false);
+    setProgress(0);
+    setLoading(true);
+    (async () => {
+      try {
+        const { data: row } = await supabase
+          .from("songs")
+          .select("unlocked")
+          .eq("id", song.id)
+          .maybeSingle();
+        if (cancelled) return;
+        const isUnlocked = !!(row as { unlocked?: boolean } | null)?.unlocked;
+        setUnlocked(isUnlocked);
+
+        const { data, error } = await supabase.functions.invoke("song-url", {
+          body: { song_id: song.id, mode: "preview" },
+        });
+        if (error) throw error;
+        if (!cancelled) setPreviewUrl(data.url as string);
+
+        if (isUnlocked) {
+          const { data: full } = await supabase.functions.invoke("song-url", {
+            body: { song_id: song.id, mode: "full" },
+          });
+          if (!cancelled && full?.url) setFullUrl(full.url as string);
+        }
+      } catch (e) {
+        if (!cancelled) toast.error(e instanceof Error ? e.message : "Couldn't load track");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, song?.id]);
+
+  // Cap preview at sampleSeconds
+  useEffect(() => {
+    const el = audioRef.current;
+    if (!el) return;
+    const onTime = () => {
+      setProgress(el.currentTime);
+      if (!unlocked && el.currentTime >= sampleSeconds) {
+        el.pause();
+        el.currentTime = 0;
+        setPlaying(false);
+      }
+    };
+    el.addEventListener("timeupdate", onTime);
+    return () => el.removeEventListener("timeupdate", onTime);
+  }, [sampleSeconds, unlocked]);
+
+  // Stop playback when drawer closes
+  useEffect(() => {
+    if (!open && audioRef.current) {
+      audioRef.current.pause();
+      setPlaying(false);
+    }
+  }, [open]);
+
+  async function togglePlay() {
+    if (!previewUrl) return;
+    const el = audioRef.current!;
+    if (playing) {
+      el.pause();
+      setPlaying(false);
+    } else {
+      if (el.src !== previewUrl) el.src = previewUrl;
+      await el.play();
+      setPlaying(true);
+    }
+  }
+
+  async function handleUnlock() {
+    if (!song) return;
+    setUnlocking(true);
+    try {
+      const { error } = await supabase.functions.invoke("unlock-full-song", {
+        body: { song_id: song.id },
+      });
+      if (error) throw new Error(invokeError(error, "Unlock failed"));
+      setUnlocked(true);
+      toast.success(`Unlocked · -${unlockCost} coins`);
+      refetchProfile?.();
+      const { data: full } = await supabase.functions.invoke("song-url", {
+        body: { song_id: song.id, mode: "full" },
+      });
+      if (full?.url) setFullUrl(full.url as string);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Unlock failed");
+    } finally {
+      setUnlocking(false);
+    }
+  }
+
+  async function handleDownload() {
+    if (!song || !unlocked) return;
+    setDownloading(true);
+    try {
+      let url = fullUrl;
+      if (!url) {
+        const { data, error } = await supabase.functions.invoke("song-url", {
+          body: { song_id: song.id, mode: "full" },
+        });
+        if (error) throw new Error(invokeError(error, "Download failed"));
+        url = data.url as string;
+        setFullUrl(url);
+      }
+      const a = document.createElement("a");
+      a.href = url!;
+      a.download = `${song.title || "song"}.mp3`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Download failed");
+    } finally {
+      setDownloading(false);
+    }
+  }
+
+  const pct = Math.min(100, (progress / sampleSeconds) * 100);
+  const balance = profile?.coin_balance ?? 0;
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-md">
+        <SheetHeader>
+          <SheetTitle className="truncate">{song?.title || "Untitled"}</SheetTitle>
+          <SheetDescription>
+            {song?.style || song?.prompt || "Track details"}
+          </SheetDescription>
+        </SheetHeader>
+
+        <div className="mt-6 space-y-5">
+          {/* Cover */}
+          <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-gradient-to-br from-primary/30 to-fuchsia-500/15">
+            {song?.cover_url ? (
+              <img src={song.cover_url} alt="" className="h-full w-full object-cover" />
+            ) : null}
+          </div>
+
+          {/* Player */}
+          <div className="rounded-2xl border border-white/10 bg-background/40 p-4">
+            <div className="flex items-center gap-3">
+              <Button
+                size="icon"
+                onClick={togglePlay}
+                disabled={!previewUrl || loading}
+                className="h-12 w-12 rounded-full"
+                aria-label={playing ? "Pause preview" : "Play preview"}
+              >
+                {loading ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : playing ? (
+                  <Pause className="h-5 w-5" />
+                ) : (
+                  <Play className="h-5 w-5" />
+                )}
+              </Button>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  {unlocked ? "Full track" : `${sampleSeconds}s preview`}
+                </p>
+                <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                  <div className="h-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+                </div>
+              </div>
+            </div>
+            <audio ref={audioRef} preload="metadata" className="hidden" />
+          </div>
+
+          {/* Unlock prompt */}
+          {!unlocked ? (
+            <div className="rounded-2xl border border-amber-400/30 bg-amber-400/5 p-4">
+              <div className="flex items-center gap-2 text-amber-200">
+                <Lock className="h-4 w-4" />
+                <p className="text-sm font-bold uppercase tracking-wider">Locked</p>
+              </div>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Spend <span className="font-bold text-foreground">{unlockCost} coins</span> to unlock the full
+                track and get the download link.
+              </p>
+              <Button
+                className="mt-3 w-full"
+                onClick={handleUnlock}
+                disabled={unlocking || balance < unlockCost}
+              >
+                {unlocking ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Unlock className="mr-2 h-4 w-4" />
+                )}
+                {balance < unlockCost ? "Not enough coins" : `Unlock for ${unlockCost} coins`}
+              </Button>
+              <p className="mt-2 text-center text-[11px] text-muted-foreground">
+                Balance: {balance} coins
+              </p>
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-emerald-400/30 bg-emerald-400/5 p-4">
+              <div className="flex items-center gap-2 text-emerald-200">
+                <Unlock className="h-4 w-4" />
+                <p className="text-sm font-bold uppercase tracking-wider">Unlocked</p>
+              </div>
+              <p className="mt-2 text-sm text-muted-foreground">
+                The full track is yours. Download the HQ MP3 anytime.
+              </p>
+              <div className="mt-3 grid gap-2">
+                <Button onClick={handleDownload} disabled={downloading || !fullUrl}>
+                  {downloading ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Download className="mr-2 h-4 w-4" />
+                  )}
+                  Download HQ MP3
+                </Button>
+                {fullUrl && (
+                  <a
+                    href={fullUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-1.5 rounded-md border border-white/10 px-3 py-2 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:bg-white/5"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    Open full link
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Footer link to dedicated page */}
+          {song && (
+            <Link
+              to="/library/$songId"
+              params={{ songId: song.id }}
+              onClick={() => onOpenChange(false)}
+              className="block text-center text-xs font-bold uppercase tracking-wider text-primary hover:underline"
+            >
+              Open dedicated track page →
+            </Link>
+          )}
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }
