@@ -302,15 +302,15 @@ function DashboardHome() {
 
       {/* Quick actions */}
       <section>
-        <h2 className="mb-5 text-lg uppercase tracking-[0.28em] text-muted-foreground sm:text-xl">
+        <h2 className="mb-4 text-sm uppercase tracking-[0.28em] text-muted-foreground sm:text-base">
           ⚡ Quick actions
         </h2>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
-          <QuickAction to="/library" icon={<Plus className="h-6 w-6" />} label="New song" />
-          <QuickAction to="/library" icon={<Library className="h-6 w-6" />} label="MusicHUB" />
-          <QuickAction to="/messenger" icon={<Wand2 className="h-6 w-6" />} label="Ask OG" />
-          <QuickAction to="/buy-coins" icon={<Coins className="h-6 w-6" />} label="Buy coins" />
-          <QuickAction to="/referrals" icon={<Gift className="h-6 w-6" />} label="Earn 10%" />
+        <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 sm:gap-4">
+          <QuickAction to="/library" icon={<Plus className="h-7 w-7" />} label="Create" tone="violet" />
+          <QuickAction to="/library" icon={<Library className="h-7 w-7" />} label="Music" tone="cyan" />
+          <QuickAction to="/messenger" icon={<Wand2 className="h-7 w-7" />} label="Ask OG" tone="pink" />
+          <QuickAction to="/buy-coins" icon={<Coins className="h-7 w-7" />} label="Coins" tone="amber" />
+          <QuickAction to="/referrals" icon={<Gift className="h-7 w-7" />} label="Earn" tone="emerald" />
         </div>
       </section>
 
