@@ -433,6 +433,16 @@ function Hero() {
 
       <div className="relative mx-auto w-full max-w-6xl text-center">
 
+        <div className="mx-auto mb-3 inline-flex max-w-full flex-wrap items-center justify-center gap-2 rounded-full border-2 border-primary/40 bg-primary/15 px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-primary shadow-[0_0_28px_-8px_oklch(0.7_0.2_300_/_0.7)] sm:text-sm">
+          <span>🎵 MusicHUB</span>
+          <span aria-hidden className="text-primary/50">·</span>
+          <span className="inline-flex items-center gap-1.5 normal-case tracking-normal text-foreground">
+            Powered by
+            <OgBotLogo className="h-5 w-5 sm:h-6 sm:w-6" />
+            <span className="font-black uppercase tracking-tight">OG Bot</span>
+          </span>
+        </div>
+
         <div className="wc-pop mx-auto mt-6 flex w-full max-w-full flex-col items-center justify-center gap-3 rounded-[2rem] border-2 border-white/25 bg-white/10 px-4 py-4 text-4xl font-black uppercase tracking-[0.04em] backdrop-blur-xl sm:mt-12 sm:inline-flex sm:w-auto sm:flex-row sm:flex-nowrap sm:gap-6 sm:rounded-full sm:px-8 sm:py-4 sm:text-xl sm:tracking-[0.18em] md:gap-8 md:px-10 md:py-5 md:text-3xl">
           <span className="font-display order-2 block w-full text-center font-black leading-none sm:order-1 sm:w-auto sm:text-right">Bespoke tracks</span>
           <OgBotLogo className="order-1 block aspect-square h-auto w-full max-w-full object-contain sm:order-2 sm:h-64 sm:w-64 sm:max-w-none md:h-[22rem] md:w-[22rem] lg:h-[26rem] lg:w-[26rem]" />
