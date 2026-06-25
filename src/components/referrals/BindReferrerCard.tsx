@@ -151,6 +151,37 @@ export function BindReferrerCard() {
                 </div>
               )}
             </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {code && (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="secondary"
+                  className="h-8 gap-1.5"
+                  onClick={() => {
+                    const url = `https://ogstreamz.co.uk/r/${code}`;
+                    navigator.clipboard?.writeText(url);
+                    toast.success("Referrer link copied");
+                  }}
+                >
+                  <Copy className="h-3.5 w-3.5" /> Copy referrer link
+                </Button>
+              )}
+              {id && (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  className="h-8 gap-1.5"
+                  onClick={() => {
+                    navigator.clipboard?.writeText(id);
+                    toast.success("Leader ID copied");
+                  }}
+                >
+                  <Copy className="h-3.5 w-3.5" /> Copy Leader ID
+                </Button>
+              )}
+            </div>
             <div className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/5 p-2.5 text-xs text-amber-200">
               This bond is permanent — it cannot be changed, swapped, or reset by anyone, ever.
             </div>
