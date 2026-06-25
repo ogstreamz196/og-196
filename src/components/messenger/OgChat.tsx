@@ -319,6 +319,22 @@ export function OgChat({
     if (!t && !att) return;
     if (m.isPending) return;
     if (!user) return toast.error("Sign in to chat with OG Bot.");
+
+    // Share Live: route to the EXCLUSIVE OG Community shared chat.
+    if (shareLive.enabled) {
+      if (!t) return toast.error("Community messages must be text (no attachments yet).");
+      setInput("");
+      setAttachment(null);
+      postCommunity({ data: { content: t } })
+        .then(() => {
+          toast.success("Posted to OG Community", {
+            action: { label: "Open", onClick: () => { window.location.href = "/community"; } },
+          });
+        })
+        .catch((e: Error) => toast.error(e.message));
+      return;
+    }
+
     if ((profile?.coin_balance ?? 0) <= 0) {
       return toast.error("Out of OG coins — resets to 5 tomorrow, or top up to keep going.");
     }
