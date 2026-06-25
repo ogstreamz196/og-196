@@ -8,6 +8,7 @@ import { chatOgBot, type OgChatMessage } from "@/lib/og-messenger.functions";
 import { transcribeOgAudio } from "@/lib/og-transcribe.functions";
 import { postCommunityMessage } from "@/lib/community.functions";
 import { QUICK_STARTS } from "@/lib/og-persona";
+import { routeOgMessage } from "@/lib/og-chat-routing";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 import { useDevMode } from "@/hooks/use-dev-mode";
@@ -316,15 +317,24 @@ export function OgChat({
   function sendText(text: string, opts?: { forcePrivate?: boolean }) {
     const t = text.trim();
     const att = attachment;
-    if (!t && !att) return;
     if (m.isPending) return;
     if (!user) return toast.error("Sign in to chat with OG Bot.");
 
-    // Share Live: route to the EXCLUSIVE OG Community shared chat.
-    // Quick-start chips always send privately — they belong to the empty
-    // state of the private OG-GPT view, not the live community feed.
-    if (shareLive.enabled && !opts?.forcePrivate) {
-      if (!t) return toast.error("Community messages must be text (no attachments yet).");
+    const target = routeOgMessage({
+      text: t,
+      hasAttachment: !!att,
+      shareLive: shareLive.enabled,
+      forcePrivate: opts?.forcePrivate,
+    });
+
+    if (target === "noop") {
+      if (shareLive.enabled && att && !t) {
+        return toast.error("Community messages must be text (no attachments yet).");
+      }
+      return;
+    }
+
+    if (target === "community") {
       setInput("");
       setAttachment(null);
       postCommunity({ data: { content: t } })
@@ -337,6 +347,7 @@ export function OgChat({
       return;
     }
 
+    // private
     if ((profile?.coin_balance ?? 0) <= 0) {
       return toast.error("Out of OG coins — resets to 5 tomorrow, or top up to keep going.");
     }
@@ -640,18 +651,40 @@ export function OgChat({
                 </p>
               </div>
               {showQuickStarts && (
-                <div className="flex flex-wrap justify-center gap-2 pt-2">
-                  {QUICK_STARTS.map((q) => (
-                    <button
-                      key={q.label}
-                      type="button"
-                      onClick={() => sendText(q.prompt, { forcePrivate: true })}
-                      disabled={m.isPending || isOut || !user}
-                      className="rounded-full border-2 border-primary/40 bg-primary/10 px-4 py-1.5 text-xs font-bold text-foreground transition hover:-translate-y-0.5 hover:rotate-[-1deg] hover:border-primary hover:bg-primary/20 active:translate-y-0 disabled:opacity-40"
-                    >
-                      {q.label}
-                    </button>
-                  ))}
+                <div className="flex flex-col items-center gap-2 pt-2">
+                  <div
+                    className={cn(
+                      "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-wider",
+                      shareLive.enabled
+                        ? "border-amber-400/60 bg-amber-400/10 text-amber-300"
+                        : "border-primary/40 bg-primary/10 text-primary",
+                    )}
+                    title={
+                      shareLive.enabled
+                        ? "Live Chat is ON, but quick-starts always send privately to OG-GPT"
+                        : "Quick-starts send to your private OG-GPT chat"
+                    }
+                  >
+                    <ShieldCheck className="h-3 w-3" />
+                    {shareLive.enabled
+                      ? "Quick-starts bypass Live Chat → Private OG-GPT"
+                      : "Sends to Private OG-GPT"}
+                  </div>
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {QUICK_STARTS.map((q) => (
+                      <button
+                        key={q.label}
+                        type="button"
+                        data-testid="og-quickstart-chip"
+                        data-target="private"
+                        onClick={() => sendText(q.prompt, { forcePrivate: true })}
+                        disabled={m.isPending || isOut || !user}
+                        className="rounded-full border-2 border-primary/40 bg-primary/10 px-4 py-1.5 text-xs font-bold text-foreground transition hover:-translate-y-0.5 hover:rotate-[-1deg] hover:border-primary hover:bg-primary/20 active:translate-y-0 disabled:opacity-40"
+                      >
+                        {q.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
