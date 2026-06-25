@@ -623,6 +623,17 @@ function LibraryPage() {
 
         {/* Foul mouth + Generate */}
         <div className="space-y-4">
+          {!foulMouth && (
+            <div className="flex items-start gap-3 rounded-2xl border-2 border-destructive/40 bg-destructive/10 p-3 shadow-[0_0_28px_-10px_oklch(0.62_0.22_25_/_0.8)] sm:p-4">
+              <span aria-hidden className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-destructive/25 text-lg sm:h-10 sm:w-10">
+                <Flame className="h-5 w-5 text-destructive" />
+              </span>
+              <div className="min-w-0 text-sm leading-snug sm:text-base">
+                <p className="font-black uppercase tracking-wide text-destructive">Don't leave it on clean!</p>
+                <p className="mt-0.5 text-foreground/85">Flip <span className="font-bold">Foul Mouth</span> on for the unfiltered, no-rules OG version. The clean one is just a demo.</p>
+              </div>
+            </div>
+          )}
           <button
             type="button"
             role="switch"
