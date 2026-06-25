@@ -27,6 +27,9 @@ export function DodgyLogo({
   maxDrift = 90,
   dodgeRadius = 160,
   className = "",
+  src,
+  alt = "OG Bot",
+  imageClassName = "rounded-2xl",
 }: Props) {
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const rafRef = useRef<number | null>(null);
