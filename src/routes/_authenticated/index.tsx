@@ -51,6 +51,8 @@ import { cn } from "@/lib/utils";
 import { TelegramLinkStatus } from "@/components/dashboard/TelegramLinkStatus";
 import { TelegramLinkChecklist } from "@/components/dashboard/TelegramLinkChecklist";
 import { TelegramConnectPrompt } from "@/components/dashboard/TelegramConnectPrompt";
+import { DodgyLogo } from "@/components/welcome/DodgyLogo";
+import { DodgyText } from "@/components/welcome/DodgyText";
 
 export const Route = createFileRoute("/_authenticated/")({
   component: DashboardHome,
