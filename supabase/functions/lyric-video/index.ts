@@ -205,7 +205,16 @@ async function renderAndStore(
   }
 }
 
+function sliceLyricsForPreview(lyrics: string, previewDuration: number, fullDuration: number): string {
+  const lines = lyrics.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  if (lines.length === 0) return "";
+  const ratio = Math.min(1, previewDuration / Math.max(1, fullDuration));
+  const take = Math.max(1, Math.min(lines.length, Math.ceil(lines.length * ratio)));
+  return lines.slice(0, take).join("\n");
+}
+
 function buildAssSubtitles(lyrics: string, duration: number, title: string, watermark: boolean): string {
+
   const lines = lyrics.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
   if (lines.length === 0) lines.push(title || "♪ Instrumental ♪");
   const per = duration / lines.length;
