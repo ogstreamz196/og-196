@@ -8,6 +8,7 @@ import { chatOgBot, type OgChatMessage } from "@/lib/og-messenger.functions";
 import { transcribeOgAudio } from "@/lib/og-transcribe.functions";
 import { postCommunityMessage } from "@/lib/community.functions";
 import { QUICK_STARTS } from "@/lib/og-persona";
+import { routeOgMessage } from "@/lib/og-chat-routing";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 import { useDevMode } from "@/hooks/use-dev-mode";
@@ -316,15 +317,24 @@ export function OgChat({
   function sendText(text: string, opts?: { forcePrivate?: boolean }) {
     const t = text.trim();
     const att = attachment;
-    if (!t && !att) return;
     if (m.isPending) return;
     if (!user) return toast.error("Sign in to chat with OG Bot.");
 
-    // Share Live: route to the EXCLUSIVE OG Community shared chat.
-    // Quick-start chips always send privately — they belong to the empty
-    // state of the private OG-GPT view, not the live community feed.
-    if (shareLive.enabled && !opts?.forcePrivate) {
-      if (!t) return toast.error("Community messages must be text (no attachments yet).");
+    const target = routeOgMessage({
+      text: t,
+      hasAttachment: !!att,
+      shareLive: shareLive.enabled,
+      forcePrivate: opts?.forcePrivate,
+    });
+
+    if (target === "noop") {
+      if (shareLive.enabled && att && !t) {
+        return toast.error("Community messages must be text (no attachments yet).");
+      }
+      return;
+    }
+
+    if (target === "community") {
       setInput("");
       setAttachment(null);
       postCommunity({ data: { content: t } })
@@ -337,6 +347,7 @@ export function OgChat({
       return;
     }
 
+    // private
     if ((profile?.coin_balance ?? 0) <= 0) {
       return toast.error("Out of OG coins — resets to 5 tomorrow, or top up to keep going.");
     }
