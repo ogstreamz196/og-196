@@ -29,12 +29,29 @@ export function DodgyLogo({
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const mq = window.matchMedia("(pointer: fine) and (hover: hover)");
-    const update = () => setIsFine(mq.matches);
+    // Enable dodge only when ALL of:
+    //  - primary pointer is fine (mouse/trackpad, not finger)
+    //  - hover is truly supported (rules out hybrid tablets in touch mode)
+    //  - viewport is desktop-sized (≥1024px) — rules out small 2-in-1s
+    //  - user hasn't asked for reduced motion
+    const queries = [
+      window.matchMedia("(pointer: fine)"),
+      window.matchMedia("(hover: hover)"),
+      window.matchMedia("(min-width: 1024px)"),
+      window.matchMedia("(prefers-reduced-motion: no-preference)"),
+    ];
+    const update = () => setIsFine(queries.every((q) => q.matches));
     update();
-    mq.addEventListener?.("change", update);
-    return () => mq.removeEventListener?.("change", update);
+    queries.forEach((q) => q.addEventListener?.("change", update));
+    // Hybrid devices (Surface, iPad + trackpad): downgrade on first touch.
+    const onTouch = () => setIsFine(false);
+    window.addEventListener("touchstart", onTouch, { once: true, passive: true });
+    return () => {
+      queries.forEach((q) => q.removeEventListener?.("change", update));
+      window.removeEventListener("touchstart", onTouch);
+    };
   }, []);
+
 
   useEffect(() => {
     const el = wrapRef.current;
