@@ -22,12 +22,13 @@ export type TelegramWebhookStatus = {
 export const getTelegramWebhookStatus = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<TelegramWebhookStatus> => {
-    const supabase = context.supabase as {
+    const supabase = context.supabase as unknown as {
       rpc: (
         fn: "has_role",
         args: { _user_id: string; _role: "admin" },
       ) => Promise<{ data: boolean | null; error: { message: string } | null }>;
     };
+
     const { data: isAdmin, error: roleErr } = await supabase.rpc("has_role", {
       _user_id: context.userId,
       _role: "admin",
