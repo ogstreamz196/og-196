@@ -1046,6 +1046,10 @@ export type Database = {
         Args: { p_limit?: number; p_search?: string }
         Returns: Json
       }
+      admin_referral_reconciliation: {
+        Args: { p_limit?: number }
+        Returns: Json
+      }
       admin_update_profile_label: {
         Args: {
           admin_notes: string
