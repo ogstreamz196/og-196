@@ -126,7 +126,7 @@ export function AppSidebar() {
                   />
                 ) : null}
               </span>
-              <span className="relative z-10 truncate">{item.title}</span>
+              <span className="relative z-10 min-w-0 flex-1 break-words">{item.title}</span>
               {item.badge && !collapsed && (
                 <span
                   className={`relative z-10 font-display ml-auto rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider shadow-[0_2px_0_0_hsl(var(--primary)/0.4)] ${
