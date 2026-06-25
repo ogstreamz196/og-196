@@ -1042,6 +1042,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_referral_audit: {
+        Args: { p_limit?: number; p_search?: string }
+        Returns: Json
+      }
       admin_update_profile_label: {
         Args: {
           admin_notes: string
