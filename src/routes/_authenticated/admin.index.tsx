@@ -306,10 +306,13 @@ function AdminPanel() {
             </div>
           )}
         </div>
+        </div>
+        </AdminCollapsible>
       </div>
     </DashboardShell>
   );
 }
+
 
 type FieldRule = { min: number; max: number; integer?: boolean; label: string; help?: string };
 const PRICING_RULES: Record<string, FieldRule> = {
