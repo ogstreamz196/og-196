@@ -27,6 +27,7 @@ import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { BindReferrerCard } from "@/components/referrals/BindReferrerCard";
 
 export const Route = createFileRoute("/_authenticated/referrals")({
   component: ReferralsPage,
