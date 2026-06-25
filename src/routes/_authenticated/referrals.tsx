@@ -19,6 +19,7 @@ import {
   Hourglass,
   QrCode,
   Download,
+  KeyRound,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { supabase } from "@/integrations/supabase/client";
@@ -271,11 +272,28 @@ function ReferralsPage() {
                   {copied ? "Copied" : "Copy link"}
                 </Button>
               </div>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  if (typeof document === "undefined") return;
+                  const el = document.getElementById("bind-referrer");
+                  el?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  setTimeout(() => {
+                    const input = document.getElementById("og-leader-code-input") as HTMLInputElement | null;
+                    input?.focus();
+                  }, 400);
+                }}
+                className="mt-2 w-full gap-2 border-rose-500/40 bg-rose-500/10 text-rose-200 hover:bg-rose-500/20"
+              >
+                <KeyRound className="h-4 w-4" /> Connect OG Leader (enter code)
+              </Button>
             </div>
           </div>
         </section>
 
-        <BindReferrerCard />
+        <div id="bind-referrer" className="scroll-mt-24">
+          <BindReferrerCard />
+        </div>
 
         {/* SHARE CARD — primary action */}
         <section className="rounded-3xl border border-white/10 bg-card/70 p-5 backdrop-blur-xl sm:p-6">
@@ -321,6 +339,33 @@ function ReferralsPage() {
               <p className="text-xs text-muted-foreground">
                 Tip: the link must be opened by a brand-new account within 24h of sign-up to count.
               </p>
+
+              {/* OG Leader Code — same identifier as the referral link, formatted for typing */}
+              {user && (
+                <div className="rounded-2xl border border-primary/30 bg-primary/5 p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
+                      Your OG Leader code
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={async () => {
+                        const ok = await copyTextWithFallback(user.id);
+                        ok ? toast.success("OG Leader code copied") : toast.error("Couldn't copy");
+                      }}
+                      className="h-7 gap-1.5 px-2 text-[11px]"
+                    >
+                      <Copy className="h-3 w-3" /> Copy code
+                    </Button>
+                  </div>
+                  <div className="mt-1 break-all font-mono text-xs sm:text-sm">{user.id}</div>
+                  <div className="mt-1 text-[11px] text-muted-foreground">
+                    Share this code with anyone you invite — they paste it into "Connect OG Leader" to lock you in as their referrer for life.
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* QR card */}
