@@ -49,11 +49,11 @@ Hard rules:
 /** Post a user message to the community + trigger a short OG Bot reply. */
 export const postCommunityMessage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { content: string }) => {
+  .inputValidator((data: { content: string; foulMouth?: boolean }) => {
     const content = String(data?.content ?? "").trim();
     if (!content) throw new Error("Message required");
     if (content.length > 1000) throw new Error("Message too long (1000 chars max)");
-    return { content };
+    return { content, foulMouth: Boolean(data?.foulMouth) };
   })
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
