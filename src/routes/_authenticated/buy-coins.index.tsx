@@ -366,7 +366,7 @@ function BuyCoinsPage() {
                 </div>
                 <ul className="mt-3 grid gap-1.5 text-sm text-muted-foreground sm:grid-cols-2">
                   <li className="flex items-center gap-2"><Star className="h-3.5 w-3.5 shrink-0 text-coin" /> Foul-mouth OG Bot unlocked</li>
-                  <li className="flex items-center gap-2"><Star className="h-3.5 w-3.5 shrink-0 text-coin" /> Priority OG Messenger replies</li>
+                  <li className="flex items-center gap-2"><Star className="h-3.5 w-3.5 shrink-0 text-coin" /> Priority OG-GPT replies</li>
                   <li className="flex items-center gap-2"><Star className="h-3.5 w-3.5 shrink-0 text-coin" /> VIP badge across the hub</li>
                   <li className="flex items-center gap-2"><Gift className="h-3.5 w-3.5 shrink-0 text-coin" /> Instant Stripe refunds</li>
                 </ul>
@@ -404,7 +404,7 @@ function BuyCoinsPage() {
         <p className="text-center text-xs text-muted-foreground">
           <EditableContent
             contentKey="buyCoins.footer"
-            defaultValue="Questions? Tap OG Messenger and we'll sort it. VAT included where applicable."
+            defaultValue="Questions? Tap OG-GPT and we'll sort it. VAT included where applicable."
             multiline
           />
         </p>

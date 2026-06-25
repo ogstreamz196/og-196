@@ -94,10 +94,10 @@ function OgPersonaPage() {
             <span className="text-xs font-semibold uppercase tracking-widest">Boss only</span>
           </div>
           <h2 className="mt-2 flex items-center gap-2 text-lg font-bold">
-            <Bot className="h-5 w-5 text-primary" /> OG Messenger Persona
+            <Bot className="h-5 w-5 text-primary" /> OG-GPT Persona
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Script, voice, and dictionary control how OG Bot talks site-wide — synced to the OG Messenger page and the bottom-right widget for every user.
+            Script, voice, and dictionary control how OG Bot talks site-wide — synced to the OG-GPT page and the bottom-right widget for every user.
           </p>
         </div>
 

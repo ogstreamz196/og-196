@@ -30,7 +30,7 @@ const FLOW_COPY: Record<CreationFlow, { title: string; description: string }> = 
     description: "For someone special. Tap what fits, add a note if you like.",
   },
   messenger: {
-    title: "With OG Messenger",
+    title: "With OG-GPT",
     description: "Brainstorm with OG Bot. Pick a starting vibe.",
   },
 };

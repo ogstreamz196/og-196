@@ -4,7 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 /**
  * Transcribe a short audio clip via the Lovable AI Gateway
  * (OpenAI-compatible /v1/audio/transcriptions). Used by the mic
- * button in OG Messenger to drop dictation straight into the composer.
+ * button in OG-GPT to drop dictation straight into the composer.
  */
 export const transcribeOgAudio = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

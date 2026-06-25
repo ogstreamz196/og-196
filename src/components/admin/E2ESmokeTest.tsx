@@ -7,7 +7,7 @@ import { runE2ESmokeTest, type SmokeResult } from "@/lib/e2e-smoke-test.function
 
 /**
  * One-click full-stack smoke test panel:
- * verifies sign-in → create song → suno-generate → status poll → OG Messenger.
+ * verifies sign-in → create song → suno-generate → status poll → OG-GPT.
  * Each step is rendered independently with its own status + latency.
  */
 export function E2ESmokeTest() {
@@ -36,7 +36,7 @@ export function E2ESmokeTest() {
         <div>
           <h3 className="text-lg font-bold">End-to-end smoke test</h3>
           <p className="text-xs text-muted-foreground">
-            Sign-in → create song → suno-generate → status poll → OG Messenger round-trip.
+            Sign-in → create song → suno-generate → status poll → OG-GPT round-trip.
           </p>
         </div>
         <Button onClick={onRun} disabled={running} className="gap-2">

@@ -48,7 +48,8 @@ type NavItem = {
 const primaryNav: NavItem[] = [
   { title: "Home", url: "/", icon: Home, accent: "from-sky-400/30 to-indigo-500/30" },
   { title: "MusicHUB", url: "/library", icon: Disc3, badge: "Studio", accent: "from-fuchsia-500/40 to-amber-400/40", spin: true },
-  { title: "OG Messenger", url: "/messenger", image: ogBotAsset.url, badge: "Bot · Live", accent: "from-primary/40 to-cyan-400/40" },
+  { title: "OG-GPT", url: "/messenger", image: ogBotAsset.url, badge: "Live", accent: "from-primary/40 to-cyan-400/40" },
+
 ];
 
 const accountNav: NavItem[] = [
@@ -89,7 +90,8 @@ export function AppSidebar() {
             asChild
             isActive={active}
             tooltip={item.title}
-            className={`group/nav font-display relative h-14 overflow-hidden rounded-2xl border-2 px-3 text-[18px] tracking-wide uppercase transition-all duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0.5 ${
+            className={`group/nav font-display relative min-h-14 overflow-hidden rounded-2xl border-2 px-3 py-2 text-[15px] leading-tight tracking-wide uppercase transition-all duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0.5 ${
+
               active
                 ? "border-primary/50 bg-gradient-brand text-primary-foreground shadow-[0_6px_0_0_hsl(var(--primary)/0.4),0_14px_28px_-10px_hsl(var(--primary)/0.6)] hover:bg-gradient-brand active:shadow-[0_2px_0_0_hsl(var(--primary)/0.4)]"
                 : "border-transparent hover:border-white/10 hover:bg-white/[0.04] hover:shadow-[0_4px_0_0_hsl(var(--primary)/0.25)] active:shadow-[0_1px_0_0_hsl(var(--primary)/0.2)]"
@@ -124,7 +126,7 @@ export function AppSidebar() {
                   />
                 ) : null}
               </span>
-              <span className="relative z-10 truncate">{item.title}</span>
+              <span className="relative z-10 min-w-0 flex-1 break-words">{item.title}</span>
               {item.badge && !collapsed && (
                 <span
                   className={`relative z-10 font-display ml-auto rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider shadow-[0_2px_0_0_hsl(var(--primary)/0.4)] ${
@@ -199,7 +201,7 @@ export function AppSidebar() {
                     asChild
                     isActive={isActive("/admin")}
                     tooltip="Admin"
-                    className={`group/nav font-display relative h-14 overflow-hidden rounded-2xl border-2 px-3 text-[18px] tracking-wide uppercase transition-all duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0.5 ${
+                    className={`group/nav font-display relative min-h-14 overflow-hidden rounded-2xl border-2 px-3 py-2 text-[15px] leading-tight tracking-wide uppercase transition-all duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0.5 ${
                       isActive("/admin")
                         ? "border-primary/50 bg-gradient-brand text-primary-foreground shadow-[0_6px_0_0_hsl(var(--primary)/0.4),0_14px_28px_-10px_hsl(var(--primary)/0.6)] hover:bg-gradient-brand active:shadow-[0_2px_0_0_hsl(var(--primary)/0.4)]"
                         : "border-transparent hover:border-white/10 hover:bg-white/[0.04] hover:shadow-[0_4px_0_0_hsl(var(--primary)/0.25)] active:shadow-[0_1px_0_0_hsl(var(--primary)/0.2)]"
@@ -219,7 +221,7 @@ export function AppSidebar() {
                       >
                         <Shield className="h-5 w-5 transition-transform duration-300 group-hover/nav:scale-110 group-hover/nav:-rotate-6" />
                       </span>
-                      <span className="relative z-10 truncate">Admin & Settings</span>
+                      <span className="relative z-10 min-w-0 flex-1 break-words">Admin & Settings</span>
                       {!collapsed && (
                         <Sparkles className="relative z-10 ml-auto h-4 w-4 text-amber-300 opacity-0 transition-opacity group-hover/nav:opacity-100" />
                       )}
