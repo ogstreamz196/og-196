@@ -129,12 +129,7 @@ export const runTelegramSmokeTest = createServerFn({ method: "POST" })
           : hasUrl
             ? "Webhook registered but not yet verified"
             : "Webhook not registered",
-      data: r.last_error_message
-        ? {
-            last_error_date: r.last_error_date ?? null,
-            last_error_message: r.last_error_message,
-          }
-        : null,
+      url: null,
     });
 
     return {
