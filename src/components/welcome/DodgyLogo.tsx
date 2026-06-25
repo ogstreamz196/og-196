@@ -11,6 +11,11 @@ type Props = {
   /** Cursor radius (px) that triggers dodging. */
   dodgeRadius?: number;
   className?: string;
+  /** Optional override image (defaults to OG Bot). */
+  src?: string;
+  alt?: string;
+  /** Rounded radius class for the image. */
+  imageClassName?: string;
 };
 
 /**
