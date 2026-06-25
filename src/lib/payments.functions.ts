@@ -26,15 +26,21 @@ async function resolveOrCreateCustomer(
     throw new Error("Invalid userId");
   }
   if (options.userId) {
-    const found = await stripe.customers.search({
-      query: `metadata['userId']:'${options.userId}'`,
-      limit: 1,
-    });
-    if (found.data.length) return found.data[0].id;
+    try {
+      const found = await stripe.customers.search({
+        query: `metadata['userId']:'${options.userId}'`,
+        limit: 1,
+      });
+      if (found?.data?.length) return found.data[0].id;
+    } catch (err) {
+      // Stripe search index may not be available yet for newly-created customers,
+      // or the API key may lack search permissions. Fall back to email lookup.
+      console.warn("stripe.customers.search failed, falling back", err);
+    }
   }
   if (options.email) {
     const existing = await stripe.customers.list({ email: options.email, limit: 1 });
-    if (existing.data.length) {
+    if (existing?.data?.length) {
       const customer = existing.data[0];
       if (options.userId && customer.metadata?.userId !== options.userId) {
         await stripe.customers.update(customer.id, {
