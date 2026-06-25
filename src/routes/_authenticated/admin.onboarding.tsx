@@ -231,8 +231,63 @@ function OnboardingWizard() {
             <li>Full reference list: <a className="inline-flex items-center gap-1 underline" href="/.lovable/SECRETS.md" target="_blank" rel="noreferrer">SECRETS.md <ExternalLink className="h-3 w-3" /></a></li>
           </ul>
         </Card>
+
+        <StripeWebhookViewer />
       </div>
     </DashboardShell>
+  );
+}
+
+function StripeWebhookViewer() {
+  const load = useServerFn(listStripeWebhookEvents);
+  const q = useQuery({ queryKey: ["stripe-webhook-events"], queryFn: () => load() });
+  return (
+    <Card className="overflow-hidden">
+      <div className="flex items-center justify-between border-b bg-muted/40 px-4 py-2 text-sm font-medium">
+        <span>Stripe webhook events (last 25)</span>
+        <Button size="sm" variant="outline" onClick={() => q.refetch()} disabled={q.isFetching}>
+          {q.isFetching ? <Loader2 className="h-4 w-4 animate-spin" /> : "Refresh"}
+        </Button>
+      </div>
+      {q.isLoading ? (
+        <div className="p-4 text-sm text-muted-foreground">Loading…</div>
+      ) : q.error ? (
+        <div className="p-4 text-sm text-red-500">{(q.error as Error).message}</div>
+      ) : !q.data || q.data.length === 0 ? (
+        <div className="p-4 text-sm text-muted-foreground">No webhook events received yet.</div>
+      ) : (
+        <ul className="divide-y text-sm">
+          {q.data.map((e) => (
+            <li key={e.eventId} className="flex flex-wrap items-center gap-3 px-4 py-3">
+              {e.credited ? (
+                <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+              ) : (
+                <XCircle className="h-5 w-5 text-amber-500" />
+              )}
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-mono text-xs">{e.eventType}</span>
+                  <Badge variant="outline" className="text-[10px] uppercase">{e.environment}</Badge>
+                  {e.status && <Badge variant="secondary" className="text-[10px]">{e.status}</Badge>}
+                </div>
+                <div className="truncate text-xs text-muted-foreground">
+                  {e.objectId ?? "—"} · {new Date(e.receivedAt).toLocaleString()}
+                </div>
+                {e.credited ? (
+                  <div className="text-xs text-emerald-500">
+                    +{e.credited.amount} OG → {e.credited.userEmail ?? e.credited.userId.slice(0, 8)}
+                  </div>
+                ) : (
+                  <div className="text-xs text-amber-500">
+                    No balance update recorded for this event.
+                  </div>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Card>
   );
 }
 
