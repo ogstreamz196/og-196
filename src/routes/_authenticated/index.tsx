@@ -334,6 +334,8 @@ function DashboardHome() {
       </section>
 
       <TelegramLinkStatus />
+      <TelegramLinkChecklist />
+
 
 
 
