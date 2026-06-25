@@ -42,6 +42,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Disc3, Flame } from "lucide-react";
 import ogBotLogo from "@/assets/ogbot.png.asset.json";
+import { FoulMouthReminder } from "@/components/FoulMouthReminder";
+import { PoweredByOgBot } from "@/components/PoweredByOgBot";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
