@@ -29,6 +29,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { BindReferrerCard } from "@/components/referrals/BindReferrerCard";
+import { Lock, ShieldAlert } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/referrals")({
   component: ReferralsPage,
@@ -107,6 +108,16 @@ function ReferralsPage() {
       const { data, error } = await supabase.rpc("get_referral_summary");
       if (error) throw error;
       return (data ?? { total_referred: 0, total_earned: 0, recent: [] }) as Summary;
+    },
+  });
+
+  const myRefQ = useQuery({
+    queryKey: ["my-referrer", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_my_referrer");
+      if (error) throw error;
+      return data as { has_referrer: boolean; referrer_name?: string; referrer_code?: string; bound_at?: string };
     },
   });
 
@@ -219,6 +230,40 @@ function ReferralsPage() {
   return (
     <DashboardShell title="Earnings">
       <div className="w-full space-y-8 sm:space-y-10">
+        {/* Binding status banner */}
+        {myRefQ.data?.has_referrer ? (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 px-4 py-3 text-sm">
+            <div className="flex items-center gap-2">
+              <Lock className="h-4 w-4 text-emerald-400" />
+              <span className="font-semibold text-emerald-300">Bound</span>
+              <span className="text-muted-foreground">
+                to <span className="font-semibold text-foreground">{myRefQ.data.referrer_name}</span>
+                {myRefQ.data.referrer_code ? <> · <span className="font-mono">{myRefQ.data.referrer_code}</span></> : null}
+              </span>
+            </div>
+            {myRefQ.data.bound_at && (
+              <span className="text-xs text-muted-foreground">
+                Locked {new Date(myRefQ.data.bound_at).toLocaleString()}
+              </span>
+            )}
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm">
+            <div className="flex items-center gap-2">
+              <ShieldAlert className="h-4 w-4 text-amber-400" />
+              <span className="font-semibold text-amber-300">Not bound</span>
+              <span className="text-muted-foreground">No OG Leader locked yet — you can bind one (once, forever) below.</span>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => document.getElementById("bind-referrer")?.scrollIntoView({ behavior: "smooth" })}
+            >
+              Bind now
+            </Button>
+          </div>
+        )}
+
         {/* HERO — earnings-first */}
         <section className="relative overflow-hidden rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/20 via-card/80 to-background p-6 shadow-glow sm:p-10">
           <div
