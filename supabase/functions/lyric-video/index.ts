@@ -168,9 +168,16 @@ async function renderAndStore(
       } catch { /* fall back to gradient */ }
     }
 
-    // 3. Build the subtitle file from lyrics, evenly distributed across the duration
-    const duration = mode === "preview" ? 30 : Math.max(15, song.duration_seconds ?? 180);
-    const ass = buildAssSubtitles(song.lyrics ?? "", duration, song.title ?? "", mode === "preview");
+    // 3. Build the subtitle file from lyrics.
+    //    PREVIEW must NOT leak the entire lyric set — slice to a proportional
+    //    window of the song so users only see ~the first 30s worth of lines.
+    const fullDuration = Math.max(15, song.duration_seconds ?? 180);
+    const duration = mode === "preview" ? 30 : fullDuration;
+    const lyricsForRender = mode === "preview"
+      ? sliceLyricsForPreview(song.lyrics ?? "", duration, fullDuration)
+      : (song.lyrics ?? "");
+    const ass = buildAssSubtitles(lyricsForRender, duration, song.title ?? "", mode === "preview");
+
 
     // 4. Render via ffmpeg.wasm
     const mp4 = await renderMp4({ audioBytes, coverBytes, assText: ass, duration });
@@ -198,7 +205,16 @@ async function renderAndStore(
   }
 }
 
+function sliceLyricsForPreview(lyrics: string, previewDuration: number, fullDuration: number): string {
+  const lines = lyrics.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  if (lines.length === 0) return "";
+  const ratio = Math.min(1, previewDuration / Math.max(1, fullDuration));
+  const take = Math.max(1, Math.min(lines.length, Math.ceil(lines.length * ratio)));
+  return lines.slice(0, take).join("\n");
+}
+
 function buildAssSubtitles(lyrics: string, duration: number, title: string, watermark: boolean): string {
+
   const lines = lyrics.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
   if (lines.length === 0) lines.push(title || "♪ Instrumental ♪");
   const per = duration / lines.length;

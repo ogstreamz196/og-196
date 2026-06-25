@@ -59,6 +59,36 @@ export function LyricVideoSection({ songId, songTitle, mp3Unlocked, onBalanceCha
     return () => { cancelled = true; };
   }, [songId, mp3Unlocked]);
 
+  // Poll while rendering so the UI flips to "ready" as soon as the edge fn finishes.
+  useEffect(() => {
+    if (!mp3Unlocked || status !== "processing") return;
+    let cancelled = false;
+    const tick = async () => {
+      const { data } = await supabase.functions.invoke("lyric-video", {
+        body: { song_id: songId, action: "status" },
+      });
+      if (cancelled || !data) return;
+      setStatus((data.status as Status) ?? "processing");
+      setVideoUnlocked(!!data.unlocked);
+      setError(data.error ?? null);
+      if (data.has_preview && !previewUrl) {
+        const { data: p } = await supabase.functions.invoke("lyric-video", {
+          body: { song_id: songId, action: "url", mode: "preview" },
+        });
+        if (!cancelled && p?.url) setPreviewUrl(p.url as string);
+      }
+      if (data.unlocked && data.has_full && !fullUrl) {
+        const { data: f } = await supabase.functions.invoke("lyric-video", {
+          body: { song_id: songId, action: "url", mode: "full" },
+        });
+        if (!cancelled && f?.url) setFullUrl(f.url as string);
+      }
+    };
+    const id = setInterval(tick, 3000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [songId, mp3Unlocked, status, previewUrl, fullUrl]);
+
+
   async function renderPreview() {
     setRenderingPreview(true);
     setError(null);
