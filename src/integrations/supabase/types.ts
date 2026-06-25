@@ -68,6 +68,45 @@ export type Database = {
         }
         Relationships: []
       }
+      boss_notification_prefs: {
+        Row: {
+          notify_every_signin: boolean
+          notify_new_country: boolean
+          notify_new_device: boolean
+          notify_on_signup: boolean
+          notify_suspicious: boolean
+          quiet_hours_end: number | null
+          quiet_hours_start: number | null
+          sheets_sync_enabled: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          notify_every_signin?: boolean
+          notify_new_country?: boolean
+          notify_new_device?: boolean
+          notify_on_signup?: boolean
+          notify_suspicious?: boolean
+          quiet_hours_end?: number | null
+          quiet_hours_start?: number | null
+          sheets_sync_enabled?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          notify_every_signin?: boolean
+          notify_new_country?: boolean
+          notify_new_device?: boolean
+          notify_on_signup?: boolean
+          notify_suspicious?: boolean
+          quiet_hours_end?: number | null
+          quiet_hours_start?: number | null
+          sheets_sync_enabled?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bot_tokens: {
         Row: {
           allowed_domain: string | null
@@ -404,9 +443,17 @@ export type Database = {
           custom_bot_name: string
           display_name: string | null
           email: string | null
+          gps_consent: boolean
+          gps_consent_at: string | null
           id: string
+          last_city: string | null
+          last_country: string | null
+          last_device: string | null
+          last_ip: string | null
           last_page: string | null
           last_page_at: string | null
+          last_sign_in_at: string | null
+          sign_in_count: number
           telegram_chat_id: number | null
           telegram_link_token: string | null
           telegram_linked_at: string | null
@@ -421,9 +468,17 @@ export type Database = {
           custom_bot_name?: string
           display_name?: string | null
           email?: string | null
+          gps_consent?: boolean
+          gps_consent_at?: string | null
           id: string
+          last_city?: string | null
+          last_country?: string | null
+          last_device?: string | null
+          last_ip?: string | null
           last_page?: string | null
           last_page_at?: string | null
+          last_sign_in_at?: string | null
+          sign_in_count?: number
           telegram_chat_id?: number | null
           telegram_link_token?: string | null
           telegram_linked_at?: string | null
@@ -438,9 +493,17 @@ export type Database = {
           custom_bot_name?: string
           display_name?: string | null
           email?: string | null
+          gps_consent?: boolean
+          gps_consent_at?: string | null
           id?: string
+          last_city?: string | null
+          last_country?: string | null
+          last_device?: string | null
+          last_ip?: string | null
           last_page?: string | null
           last_page_at?: string | null
+          last_sign_in_at?: string | null
+          sign_in_count?: number
           telegram_chat_id?: number | null
           telegram_link_token?: string | null
           telegram_linked_at?: string | null
@@ -466,6 +529,75 @@ export type Database = {
           created_at?: string
           referee_id?: string
           referrer_id?: string
+        }
+        Relationships: []
+      }
+      sign_in_events: {
+        Row: {
+          browser: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          device_type: string | null
+          gps_lat: number | null
+          gps_lng: number | null
+          id: string
+          ip: string | null
+          is_new_country: boolean
+          is_new_device: boolean
+          is_signup: boolean
+          landing_path: string | null
+          lat: number | null
+          lng: number | null
+          os: string | null
+          referrer: string | null
+          region: string | null
+          ua_raw: string | null
+          user_id: string
+        }
+        Insert: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          gps_lat?: number | null
+          gps_lng?: number | null
+          id?: string
+          ip?: string | null
+          is_new_country?: boolean
+          is_new_device?: boolean
+          is_signup?: boolean
+          landing_path?: string | null
+          lat?: number | null
+          lng?: number | null
+          os?: string | null
+          referrer?: string | null
+          region?: string | null
+          ua_raw?: string | null
+          user_id: string
+        }
+        Update: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          gps_lat?: number | null
+          gps_lng?: number | null
+          id?: string
+          ip?: string | null
+          is_new_country?: boolean
+          is_new_device?: boolean
+          is_signup?: boolean
+          landing_path?: string | null
+          lat?: number | null
+          lng?: number | null
+          os?: string | null
+          referrer?: string | null
+          region?: string | null
+          ua_raw?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -728,6 +860,51 @@ export type Database = {
           created_at?: string
           kind?: string | null
           update_id?: number
+        }
+        Relationships: []
+      }
+      user_devices: {
+        Row: {
+          browser: string | null
+          device_type: string | null
+          first_country: string | null
+          first_seen_at: string
+          id: string
+          ip_subnet: string | null
+          last_country: string | null
+          last_seen_at: string
+          os: string | null
+          sign_in_count: number
+          ua_hash: string
+          user_id: string
+        }
+        Insert: {
+          browser?: string | null
+          device_type?: string | null
+          first_country?: string | null
+          first_seen_at?: string
+          id?: string
+          ip_subnet?: string | null
+          last_country?: string | null
+          last_seen_at?: string
+          os?: string | null
+          sign_in_count?: number
+          ua_hash: string
+          user_id: string
+        }
+        Update: {
+          browser?: string | null
+          device_type?: string | null
+          first_country?: string | null
+          first_seen_at?: string
+          id?: string
+          ip_subnet?: string | null
+          last_country?: string | null
+          last_seen_at?: string
+          os?: string | null
+          sign_in_count?: number
+          ua_hash?: string
+          user_id?: string
         }
         Relationships: []
       }
