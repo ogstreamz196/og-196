@@ -58,6 +58,19 @@ Deno.serve(async (req) => {
     if (!prompt && !lyrics) return json({ error: "Provide a prompt or lyrics" }, 400);
 
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
+
+    // Capacity gate: global + per-user concurrent caps (peak mode aware).
+    {
+      const { data: cap, error: capErr } = await admin.rpc("check_generation_capacity", { p_user: user.id });
+      if (capErr) return json({ error: capErr.message }, 500);
+      if (cap && cap.ok === false) {
+        const msg = cap.reason === "global_capacity_full"
+          ? `Studio is at capacity (${cap.global_active}/${cap.global_cap} jobs running). Try again in a moment.`
+          : `You already have ${cap.user_active} song${cap.user_active === 1 ? "" : "s"} generating (limit ${cap.user_cap}${cap.peak ? ", peak mode" : ""}). Wait for one to finish.`;
+        return json({ error: msg, code: cap.reason, capacity: cap }, 429);
+      }
+    }
+
     let coinCost = await getSetting(admin, "coins_per_generation", 3);
 
     // If this generation came from a portal, force the hardcoded language into the Suno prompt
