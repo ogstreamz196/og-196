@@ -40,7 +40,7 @@ async function stripePing(env: "live" | "sandbox"): Promise<CheckResult> {
   if (miss) return miss;
   if (!process.env.LOVABLE_API_KEY) return { ok: false, detail: "LOVABLE_API_KEY missing" };
   try {
-    const { createStripeClient, getStripeErrorMessage } = await import("./stripe.server");
+    const { createStripeClient } = await import("./stripe.server");
     const stripe = createStripeClient(env);
     const { result, latencyMs } = await timed(() => stripe.balance.retrieve());
     const avail = result.available?.[0];
