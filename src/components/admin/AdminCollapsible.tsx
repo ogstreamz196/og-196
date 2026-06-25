@@ -42,6 +42,15 @@ export function AdminCollapsible({
     try { localStorage.setItem(key, open ? "1" : "0"); } catch { /* ignore */ }
   }, [key, open]);
 
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ open: boolean }>).detail;
+      if (detail && typeof detail.open === "boolean") setOpen(detail.open);
+    };
+    window.addEventListener("admin-collapsible:set-all", handler);
+    return () => window.removeEventListener("admin-collapsible:set-all", handler);
+  }, []);
+
   return (
     <section
       className={cn(
