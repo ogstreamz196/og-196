@@ -360,6 +360,7 @@ function WelcomePage() {
         <Hero />
         <Pillars />
         <HowItWorks />
+        <FoulMouthHype />
         <ClosingCta />
         <Footer />
         
@@ -431,6 +432,16 @@ function Hero() {
       </Sticker>
 
       <div className="relative mx-auto w-full max-w-6xl text-center">
+
+        <div className="mx-auto mb-3 inline-flex max-w-full flex-wrap items-center justify-center gap-2 rounded-full border-2 border-primary/40 bg-primary/15 px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-primary shadow-[0_0_28px_-8px_oklch(0.7_0.2_300_/_0.7)] sm:text-sm">
+          <span>🎵 MusicHUB</span>
+          <span aria-hidden className="text-primary/50">·</span>
+          <span className="inline-flex items-center gap-1.5 normal-case tracking-normal text-foreground">
+            Powered by
+            <OgBotLogo className="h-5 w-5 sm:h-6 sm:w-6" />
+            <span className="font-black uppercase tracking-tight">OG Bot</span>
+          </span>
+        </div>
 
         <div className="wc-pop mx-auto mt-6 flex w-full max-w-full flex-col items-center justify-center gap-3 rounded-[2rem] border-2 border-white/25 bg-white/10 px-4 py-4 text-4xl font-black uppercase tracking-[0.04em] backdrop-blur-xl sm:mt-12 sm:inline-flex sm:w-auto sm:flex-row sm:flex-nowrap sm:gap-6 sm:rounded-full sm:px-8 sm:py-4 sm:text-xl sm:tracking-[0.18em] md:gap-8 md:px-10 md:py-5 md:text-3xl">
           <span className="font-display order-2 block w-full text-center font-black leading-none sm:order-1 sm:w-auto sm:text-right">Bespoke tracks</span>
@@ -663,6 +674,59 @@ function HowItWorks() {
                 className="mt-2 block text-lg text-muted-foreground sm:mt-3" />
             </div>
           ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FoulMouthHype() {
+  return (
+    <section className="relative border-t border-white/10">
+      <div className="relative mx-auto max-w-5xl px-4 py-16 sm:px-8 sm:py-24">
+        <div className="relative overflow-hidden rounded-[2.5rem] border-2 border-destructive/40 bg-gradient-to-br from-destructive/25 via-destructive/10 to-transparent p-6 shadow-[0_30px_80px_-30px_oklch(0.62_0.22_25_/_0.7)] sm:p-12">
+          <div aria-hidden className="pointer-events-none absolute -right-12 -top-12 h-56 w-56 rounded-full bg-destructive/30 blur-3xl" />
+          <div aria-hidden className="pointer-events-none absolute -bottom-16 -left-10 h-56 w-56 rounded-full bg-primary/30 blur-3xl" />
+
+          <div className="relative grid items-center gap-8 md:grid-cols-[auto_minmax(0,1fr)]">
+            <div className="flex items-center justify-center">
+              <div className="relative">
+                <span aria-hidden className="absolute -inset-3 animate-pulse rounded-full bg-destructive/30 blur-2xl" />
+                <div className="relative grid h-28 w-28 place-items-center rounded-[2rem] border-2 border-destructive/60 bg-background/60 text-6xl shadow-[0_0_40px_-6px_oklch(0.62_0.22_25_/_0.8)] sm:h-36 sm:w-36 sm:text-8xl">
+                  🤬
+                </div>
+              </div>
+            </div>
+
+            <div className="min-w-0 text-center md:text-left">
+              <p className="inline-flex items-center gap-2 rounded-full border border-destructive/60 bg-destructive/20 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-destructive sm:text-xs">
+                ⚠ Before you walk away
+              </p>
+              <h2 className="font-display mt-4 text-balance text-4xl font-black leading-[0.95] tracking-[-0.03em] sm:text-6xl md:text-7xl">
+                Don't forget to flip{" "}
+                <span className="italic text-destructive">Foul Mouth</span> ON.
+              </h2>
+              <p className="mt-4 text-lg leading-relaxed text-foreground/85 sm:text-2xl">
+                The clean version is cute. <span className="font-black text-foreground">Foul Mouth</span> is where{" "}
+                <span className="inline-flex items-center gap-1.5 align-middle">
+                  <OgBotLogo className="h-6 w-6" />
+                  <span className="font-black">OG Bot</span>
+                </span>{" "}
+                actually goes off — savage roasts, real bars, no filter.
+              </p>
+              <p className="mt-4 text-base font-semibold text-muted-foreground sm:text-lg">
+                Free to try. No card. One tap inside MusicHUB.
+              </p>
+              <div className="mt-7">
+                <a
+                  href="#sign-in"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-brand px-7 py-4 text-lg font-black uppercase tracking-wide text-primary-foreground shadow-glow ring-1 ring-primary/40 transition-transform hover:scale-[1.03] sm:text-xl"
+                >
+                  🔥 Try OG Bot free
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

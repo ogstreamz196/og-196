@@ -21,7 +21,7 @@ function MessengerPage() {
   return (
     <DashboardShell title="OG Messenger">
       {/* Full-bleed chat surface that fills the viewport under the dashboard chrome */}
-      <div className="mx-auto flex h-[calc(100dvh-7rem)] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-white/10 bg-card/70 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.7)] ring-1 ring-white/5 backdrop-blur-xl">
+      <div className="mx-auto flex h-[calc(100dvh-11rem)] min-h-[480px] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-white/10 bg-card/70 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.7)] ring-1 ring-white/5 backdrop-blur-xl sm:h-[calc(100dvh-12rem)]">
         {/* Premium sticky header — gradient surface, larger avatar, kicker + name + status */}
         <header className="relative flex items-center gap-4 border-b border-white/10 bg-gradient-to-r from-primary/15 via-card/90 to-card/80 px-5 py-4 backdrop-blur-xl sm:px-7 sm:py-5">
           <div

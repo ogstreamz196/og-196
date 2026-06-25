@@ -40,7 +40,8 @@ import {
   type Selections,
 } from "@/lib/library-utils";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Disc3 } from "lucide-react";
+import { Disc3, Flame } from "lucide-react";
+import ogBotLogo from "@/assets/ogbot.png.asset.json";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -362,8 +363,14 @@ function LibraryPage() {
       {/* Hero — premium kicker, oversized headline, generous breathing room */}
       <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b border-white/10 pb-6 sm:pb-8">
         <div className="min-w-0 space-y-2">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.28em] text-primary shadow-[0_0_24px_-10px_oklch(0.7_0.2_300_/_0.8)]">
-            <Music4 className="h-3.5 w-3.5 shrink-0" /> Music Hub
+          <div className="inline-flex flex-wrap items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.22em] text-primary shadow-[0_0_24px_-10px_oklch(0.7_0.2_300_/_0.8)] sm:gap-2 sm:px-3 sm:tracking-[0.28em]">
+            <Music4 className="h-3.5 w-3.5 shrink-0" /> MusicHUB
+            <span aria-hidden className="text-primary/50">·</span>
+            <span className="inline-flex items-center gap-1.5 normal-case tracking-normal text-foreground/85">
+              Powered by
+              <img src={ogBotLogo.url} alt="" className="h-4 w-4 rounded-full object-cover ring-1 ring-primary/50" />
+              <span className="font-black uppercase tracking-tight">OG Bot</span>
+            </span>
           </div>
           <h1 className="font-display text-2xl font-black leading-[1.1] tracking-[-0.02em] break-words sm:text-5xl lg:text-6xl">
             Hey <span className="text-gradient-brand">{firstName}</span> — let's write a song.
@@ -616,6 +623,17 @@ function LibraryPage() {
 
         {/* Foul mouth + Generate */}
         <div className="space-y-4">
+          {!foulMouth && (
+            <div className="flex items-start gap-3 rounded-2xl border-2 border-destructive/40 bg-destructive/10 p-3 shadow-[0_0_28px_-10px_oklch(0.62_0.22_25_/_0.8)] sm:p-4">
+              <span aria-hidden className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-destructive/25 text-lg sm:h-10 sm:w-10">
+                <Flame className="h-5 w-5 text-destructive" />
+              </span>
+              <div className="min-w-0 text-sm leading-snug sm:text-base">
+                <p className="font-black uppercase tracking-wide text-destructive">Don't leave it on clean!</p>
+                <p className="mt-0.5 text-foreground/85">Flip <span className="font-bold">Foul Mouth</span> on for the unfiltered, no-rules OG version. The clean one is just a demo.</p>
+              </div>
+            </div>
+          )}
           <button
             type="button"
             role="switch"
