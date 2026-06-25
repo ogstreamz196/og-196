@@ -281,7 +281,8 @@ function SettingsPage() {
         <TelegramConnectSection userId={user?.id ?? ""} />
 
         {/* Privacy & permissions */}
-        <PrivacySection userId={user?.id ?? ""} gpsConsent={Boolean(profile?.gps_consent)} onChanged={() => refetch()} />
+        <PrivacySection userId={user?.id ?? ""} />
+
 
 
 
