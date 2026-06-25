@@ -17,6 +17,7 @@ import { HardwiredCapabilities } from "@/components/admin/HardwiredCapabilities"
 import { AppToggles } from "@/components/admin/AppToggles";
 import { OgBotPing } from "@/components/admin/OgBotPing";
 import { TelegramWebhookStatus } from "@/components/admin/TelegramWebhookStatus";
+import { TelegramSmokeTest } from "@/components/admin/TelegramSmokeTest";
 
 import { AdminSection } from "@/components/admin/AdminSection";
 import { AdminEditableLabel, AdminEditableBalance } from "@/components/admin/AdminEditMode";
@@ -175,6 +176,7 @@ function AdminPanel() {
         <OgBotPing />
 
         <TelegramWebhookStatus />
+        <TelegramSmokeTest />
 
 
         <HardwiredCapabilities />
