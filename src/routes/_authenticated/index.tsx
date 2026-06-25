@@ -710,24 +710,36 @@ function PrimaryCard({
   );
 }
 
+const QUICK_TONES = {
+  violet: "from-violet-500/30 to-fuchsia-500/20 text-violet-200 ring-violet-400/40",
+  cyan: "from-cyan-500/30 to-sky-500/20 text-cyan-200 ring-cyan-400/40",
+  pink: "from-pink-500/30 to-rose-500/20 text-pink-200 ring-pink-400/40",
+  amber: "from-amber-500/30 to-orange-500/20 text-amber-200 ring-amber-400/40",
+  emerald: "from-emerald-500/30 to-teal-500/20 text-emerald-200 ring-emerald-400/40",
+} as const;
+
 function QuickAction({
   to,
   icon,
   label,
+  tone,
 }: {
   to: "/library" | "/messenger" | "/buy-coins" | "/referrals";
   icon: React.ReactNode;
   label: string;
+  tone: keyof typeof QUICK_TONES;
 }) {
   return (
     <Link
       to={to}
-      className="group flex h-auto items-center justify-start gap-4 rounded-2xl border-2 border-white/10 bg-white/[0.03] px-6 py-5 backdrop-blur-md transition-all duration-200 hover:-translate-y-1 hover:border-primary/50 hover:bg-white/[0.07] hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="group flex flex-col items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-2 py-4 text-center backdrop-blur-md transition-all duration-200 hover:-translate-y-1 hover:border-primary/50 hover:bg-white/[0.08] hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:py-5"
     >
-      <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-gradient-brand-soft text-primary shadow-glow transition-transform duration-200 group-hover:scale-110 group-hover:rotate-6">
+      <span
+        className={`grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-gradient-to-br ${QUICK_TONES[tone]} shadow-glow ring-1 transition-transform duration-200 group-hover:scale-110 group-hover:rotate-6 sm:h-14 sm:w-14`}
+      >
         {icon}
       </span>
-      <span className="text-xl font-bold">{label}</span>
+      <span className="text-sm font-bold leading-tight sm:text-base">{label}</span>
     </Link>
   );
 }
