@@ -831,8 +831,6 @@ async function handleTelegramUpdate(
           })
           .then(() => undefined, () => undefined);
 
-        return Response.json({ ok: true, linked: true, verified: true });
-      },
-    },
-  },
-});
+  return Response.json({ ok: true, linked: true, verified: true });
+}
+
