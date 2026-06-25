@@ -78,10 +78,25 @@ function ReferralsPage() {
   const qc = useQueryClient();
   const [copied, setCopied] = useState(false);
 
+  const codeQ = useQuery({
+    queryKey: ["my-referral-code", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("referral_code")
+        .eq("id", user!.id)
+        .maybeSingle();
+      if (error) throw error;
+      return (data?.referral_code as string | null) ?? null;
+    },
+  });
+  const myCode = codeQ.data ?? null;
+
   const link = useMemo(() => {
     if (!user) return "";
-    return `https://ogstreamz.co.uk/r/${user.id}`;
-  }, [user]);
+    return `https://ogstreamz.co.uk/r/${myCode ?? user.id}`;
+  }, [user, myCode]);
 
   const summaryQ = useQuery({
     queryKey: ["referral-summary", user?.id],
@@ -340,29 +355,33 @@ function ReferralsPage() {
                 Tip: the link must be opened by a brand-new account within 24h of sign-up to count.
               </p>
 
-              {/* OG Leader Code — same identifier as the referral link, formatted for typing */}
+              {/* OG Leader Code — short, shareable, one-of-a-kind */}
               {user && (
                 <div className="rounded-2xl border border-primary/30 bg-primary/5 p-3">
                   <div className="flex items-center justify-between gap-2">
                     <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
-                      Your OG Leader code
+                      Your unique OG Leader code
                     </div>
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
+                      disabled={!myCode}
                       onClick={async () => {
-                        const ok = await copyTextWithFallback(user.id);
-                        ok ? toast.success("OG Leader code copied") : toast.error("Couldn't copy");
+                        if (!myCode) return;
+                        const ok = await copyTextWithFallback(myCode);
+                        ok ? toast.success(`Code ${myCode} copied`) : toast.error("Couldn't copy");
                       }}
                       className="h-7 gap-1.5 px-2 text-[11px]"
                     >
                       <Copy className="h-3 w-3" /> Copy code
                     </Button>
                   </div>
-                  <div className="mt-1 break-all font-mono text-xs sm:text-sm">{user.id}</div>
+                  <div className="mt-1 font-mono text-lg font-bold tracking-widest text-foreground">
+                    {codeQ.isLoading ? "Loading…" : (myCode ?? "—")}
+                  </div>
                   <div className="mt-1 text-[11px] text-muted-foreground">
-                    Share this code with anyone you invite — they paste it into "Connect OG Leader" to lock you in as their referrer for life.
+                    Share this code with anyone you invite. They paste it into "Connect OG Leader" to lock you in as their OG Leader for life — you then earn 10% of every coin they burn.
                   </div>
                 </div>
               )}
