@@ -29,6 +29,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { BindReferrerCard } from "@/components/referrals/BindReferrerCard";
+import { Lock, ShieldAlert } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/referrals")({
   component: ReferralsPage,
