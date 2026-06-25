@@ -8,7 +8,7 @@ export type TelegramSmokeStep = {
   ok: boolean;
   latencyMs: number;
   detail: string;
-  data?: Record<string, unknown> | null;
+  url: string | null;
 };
 
 export type TelegramSmokeResult = {
