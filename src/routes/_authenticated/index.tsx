@@ -190,7 +190,7 @@ function DashboardHome() {
               />
               <h1 className="font-display min-w-0 text-[clamp(2rem,4.5vw+1rem,5rem)] font-black leading-[1.05] tracking-[-0.02em] text-foreground [text-shadow:0_4px_28px_rgba(0,0,0,0.75)] [overflow-wrap:break-word] [word-break:normal] [text-wrap:balance] [font-variant-ligatures:none]">
                 <span className="inline-block wc-pop">Hello,</span>{" "}
-                <span className="font-display inline-flex not-italic font-black uppercase tracking-tight text-gradient-red [overflow-wrap:break-word] [word-break:normal]">
+                <span className="paint-drip font-display inline-flex not-italic font-black uppercase tracking-tight text-gradient-red [overflow-wrap:break-word] [word-break:normal]">
                   {displayName.split("").map((ch, i) => (
                     <span
                       key={`${ch}-${i}`}
