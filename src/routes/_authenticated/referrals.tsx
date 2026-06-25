@@ -19,6 +19,7 @@ import {
   Hourglass,
   QrCode,
   Download,
+  KeyRound,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { supabase } from "@/integrations/supabase/client";
