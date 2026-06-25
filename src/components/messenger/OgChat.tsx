@@ -313,7 +313,7 @@ export function OgChat({
     return () => clearTimeout(t);
   }, [m.isPending, showSkeleton]);
 
-  function sendText(text: string) {
+  function sendText(text: string, opts?: { forcePrivate?: boolean }) {
     const t = text.trim();
     const att = attachment;
     if (!t && !att) return;
@@ -321,7 +321,9 @@ export function OgChat({
     if (!user) return toast.error("Sign in to chat with OG Bot.");
 
     // Share Live: route to the EXCLUSIVE OG Community shared chat.
-    if (shareLive.enabled) {
+    // Quick-start chips always send privately — they belong to the empty
+    // state of the private OG-GPT view, not the live community feed.
+    if (shareLive.enabled && !opts?.forcePrivate) {
       if (!t) return toast.error("Community messages must be text (no attachments yet).");
       setInput("");
       setAttachment(null);
@@ -643,7 +645,7 @@ export function OgChat({
                     <button
                       key={q.label}
                       type="button"
-                      onClick={() => sendText(q.prompt)}
+                      onClick={() => sendText(q.prompt, { forcePrivate: true })}
                       disabled={m.isPending || isOut || !user}
                       className="rounded-full border-2 border-primary/40 bg-primary/10 px-4 py-1.5 text-xs font-bold text-foreground transition hover:-translate-y-0.5 hover:rotate-[-1deg] hover:border-primary hover:bg-primary/20 active:translate-y-0 disabled:opacity-40"
                     >
