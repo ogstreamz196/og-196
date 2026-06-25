@@ -220,38 +220,38 @@ function DashboardHome() {
 
       </section>
 
-      {/* Ask OG Bot — prominent CTA */}
-      <AskOgCta />
-
-      {/* Continuity demo */}
-      <ContinuityDemo />
-
-
-
-
-      {/* Primary CTAs */}
-      <section className="grid grid-cols-1 items-stretch gap-4 sm:gap-6 md:grid-cols-2">
-        <PrimaryCard
-          to="/library"
-          icon={<Music2 className="h-6 w-6" />}
-          eyebrow="Music Hub"
-          title="Create a song"
-          body="Generate. Remix. Release."
-          cta="Open Music Hub"
-        />
-        <PrimaryCard
-          to="/messenger"
-          icon={<MessageSquareMore className="h-6 w-6" />}
-          eyebrow="OG Messenger"
-          title="Chat to OG Bot"
-          body="Your AI co-producer."
-          cta="Open Messenger"
-          variant="accent"
-        />
+      {/* Primary CTAs — MusicHub + OG Messenger at the top */}
+      <section className="space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-sm uppercase tracking-[0.28em] text-muted-foreground sm:text-base">
+            🚀 Jump in
+          </h2>
+          <span className="hidden text-xs font-semibold uppercase tracking-[0.22em] text-primary sm:inline">
+            Powered by OG Bot
+          </span>
+        </div>
+        <div className="grid grid-cols-1 items-stretch gap-4 sm:gap-6 md:grid-cols-2">
+          <PrimaryCard
+            to="/library"
+            icon={<Music2 className="h-6 w-6" />}
+            eyebrow="MusicHub · Powered by OG Bot"
+            title="Create a song"
+            body="Generate. Remix. Release in minutes."
+            cta="Open MusicHub"
+          />
+          <PrimaryCard
+            to="/messenger"
+            icon={<MessageSquareMore className="h-6 w-6" />}
+            eyebrow="OG Messenger · Powered by OG Bot"
+            title="Chat to OG Bot"
+            body="Your AI co-producer & assistant."
+            cta="Open Messenger"
+            variant="accent"
+          />
+        </div>
       </section>
 
-
-      {/* Earn promo — 10% lifetime cashback */}
+      {/* Earn promo — stack OG Coins for real rewards (coming soon) */}
       <section>
         <Link
           to="/referrals"
@@ -267,19 +267,27 @@ function DashboardHome() {
             className="pointer-events-none absolute -left-12 bottom-0 h-40 w-40 rounded-full bg-accent/25 blur-3xl"
           />
           <div className="relative space-y-3 md:max-w-2xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/15 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-              <Gift className="h-3 w-3" /> Earn · 10% lifetime
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/15 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                <Gift className="h-3 w-3" /> Earn · 10% lifetime
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-400/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-amber-300">
+                <Sparkles className="h-3 w-3" /> Real rewards · coming soon
+              </span>
             </div>
             <h2 className="font-display text-3xl font-black leading-[1.05] tracking-tight sm:text-4xl">
-              Earn{" "}
+              Stack{" "}
               <span className="bg-gradient-to-r from-primary via-fuchsia-400 to-amber-300 bg-clip-text text-transparent">
                 OG Coins
               </span>{" "}
-              every time your crew creates.
+              now — redeem for real, valuable items soon.
             </h2>
             <p className="text-sm text-muted-foreground sm:text-base">
-              Share your OG Link. Every coin a referee burns drops{" "}
-              <span className="font-semibold text-foreground">10% back to you</span> — automatic, lifetime, no cap.
+              Share your OG Link, earn{" "}
+              <span className="font-semibold text-foreground">10% lifetime cashback</span> on every coin your crew
+              burns, and bank a balance ready for upcoming{" "}
+              <span className="font-semibold text-amber-300">real-world drops, merch and exclusive perks</span>.
+              Stack up while it's early.
             </p>
             <div className="flex flex-wrap gap-2 pt-1">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.05] px-2.5 py-1 text-[11px] font-semibold text-foreground/85">
@@ -289,16 +297,22 @@ function DashboardHome() {
                 <TrendingUp className="h-3 w-3 text-emerald-400" /> Auto-paid
               </span>
               <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.05] px-2.5 py-1 text-[11px] font-semibold text-foreground/85">
-                <Coins className="h-3 w-3 text-amber-300" /> Spend in-app
+                <Gift className="h-3 w-3 text-amber-300" /> Redeem soon
               </span>
             </div>
           </div>
           <div className="relative flex shrink-0 items-center gap-2 self-start rounded-full border border-primary/40 bg-background/70 px-5 py-3 text-sm font-bold text-primary shadow-glow backdrop-blur md:self-auto">
-            <Share2 className="h-4 w-4" /> Start earning
+            <Share2 className="h-4 w-4" /> Start stacking
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </div>
         </Link>
       </section>
+
+      {/* Ask OG Bot — prompt CTA */}
+      <AskOgCta />
+
+      {/* Continuity demo */}
+      <ContinuityDemo />
 
       {/* Quick actions */}
       <section>
