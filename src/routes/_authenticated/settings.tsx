@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Crown, Bot, ShieldCheck, Coins, Plus, Minus, LogOut, UserCog, Mail, Fingerprint, KeyRound, Send, Copy, ExternalLink, MapPin } from "lucide-react";
+import { Loader2, Crown, Bot, ShieldCheck, Coins, Plus, Minus, LogOut, UserCog, Mail, Fingerprint, KeyRound, Send, Copy, ExternalLink, MapPin, Bell, HardDrive, RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useDevMode } from "@/hooks/use-dev-mode";
@@ -473,31 +473,164 @@ function PrivacySection({ userId }: { userId: string }) {
   const checked = Boolean(consentQuery.data?.gps_consent);
   const at = consentQuery.data?.gps_consent_at;
 
+  // Browser-level permission state (read-only mirror of the OS prompts).
+  const [notifPerm, setNotifPerm] = useState<NotificationPermission | "unsupported">(
+    typeof Notification === "undefined" ? "unsupported" : Notification.permission,
+  );
+  const [storagePersisted, setStoragePersisted] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        if (navigator.storage?.persisted) {
+          const v = await navigator.storage.persisted();
+          if (!cancelled) setStoragePersisted(v);
+        }
+      } catch {
+        /* noop */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  async function requestNotifications() {
+    if (typeof Notification === "undefined") return;
+    try {
+      const res = await Notification.requestPermission();
+      setNotifPerm(res);
+      toast.success(res === "granted" ? "Notifications on" : "Notifications kept off");
+    } catch {
+      /* noop */
+    }
+  }
+
+  async function requestPersistentStorage() {
+    try {
+      const v = (await navigator.storage?.persist?.()) ?? false;
+      setStoragePersisted(v);
+      toast.success(v ? "Offline storage enabled" : "Browser denied persistent storage");
+    } catch {
+      toast.error("Couldn't request persistent storage");
+    }
+  }
+
+  function resetPrompt() {
+    try {
+      localStorage.removeItem(`og:perms:asked:${userId}`);
+      toast.success("Permission prompt will show again on your next visit");
+    } catch {
+      /* noop */
+    }
+  }
+
   return (
     <section className="rounded-2xl border border-border bg-card p-6 shadow-card space-y-4">
-      <header className="flex items-center gap-2">
-        <ShieldCheck className="h-5 w-5 text-primary" />
-        <div>
-          <h2 className="font-semibold leading-tight">Privacy & permissions</h2>
-          <p className="text-xs text-muted-foreground">Control what we collect. You can change this anytime.</p>
+      <header className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="h-5 w-5 text-primary" />
+          <div>
+            <h2 className="font-semibold leading-tight">Privacy & permissions</h2>
+            <p className="text-xs text-muted-foreground">
+              Review what's on. Change anything anytime — nothing is shared without your say-so.
+            </p>
+          </div>
         </div>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={resetPrompt}
+          className="shrink-0 text-xs"
+          title="Show the initial permissions dialog again on next visit"
+        >
+          <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
+          Re-show prompt
+        </Button>
       </header>
 
+      {/* Location */}
       <div className="flex items-center justify-between rounded-xl border border-border bg-background/40 p-3">
         <div className="flex items-center gap-3 min-w-0">
           <MapPin className="h-5 w-5 text-primary shrink-0" />
           <div className="min-w-0">
             <Label className="text-sm font-medium">Share precise location</Label>
             <p className="text-xs text-muted-foreground">
-              Used for local drops and smarter recs. Off by default.
-              {checked && at ? ` · Granted ${new Date(at).toLocaleDateString()}` : ""}
+              Local drops & smarter recs.
+              {checked && at ? ` Granted ${new Date(at).toLocaleDateString()}.` : " Off."}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           {toggle.isPending && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
-          <Switch checked={checked} disabled={toggle.isPending} onCheckedChange={(v) => toggle.mutate(v)} />
+          <Switch
+            checked={checked}
+            disabled={toggle.isPending}
+            onCheckedChange={(v) => toggle.mutate(v)}
+          />
         </div>
+      </div>
+
+      {/* Notifications */}
+      <div className="flex items-center justify-between rounded-xl border border-border bg-background/40 p-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <Bell className="h-5 w-5 text-primary shrink-0" />
+          <div className="min-w-0">
+            <Label className="text-sm font-medium">Notifications</Label>
+            <p className="text-xs text-muted-foreground">
+              Song-ready pings & coin alerts.{" "}
+              <span className="font-medium">
+                {notifPerm === "granted"
+                  ? "On."
+                  : notifPerm === "denied"
+                    ? "Blocked in your browser."
+                    : notifPerm === "unsupported"
+                      ? "Not supported here."
+                      : "Off."}
+              </span>
+            </p>
+          </div>
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={requestNotifications}
+          disabled={notifPerm === "granted" || notifPerm === "denied" || notifPerm === "unsupported"}
+        >
+          {notifPerm === "granted" ? "Enabled" : "Enable"}
+        </Button>
+      </div>
+
+      {/* Offline storage */}
+      <div className="flex items-center justify-between rounded-xl border border-border bg-background/40 p-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <HardDrive className="h-5 w-5 text-primary shrink-0" />
+          <div className="min-w-0">
+            <Label className="text-sm font-medium">Offline storage</Label>
+            <p className="text-xs text-muted-foreground">
+              Keeps your library cached.{" "}
+              <span className="font-medium">
+                {storagePersisted === true
+                  ? "Persistent."
+                  : storagePersisted === false
+                    ? "Best-effort (may be evicted)."
+                    : "Unknown."}
+              </span>
+            </p>
+          </div>
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={requestPersistentStorage}
+          disabled={storagePersisted === true}
+        >
+          {storagePersisted === true ? "Enabled" : "Enable"}
+        </Button>
       </div>
     </section>
   );
