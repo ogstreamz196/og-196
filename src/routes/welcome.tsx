@@ -443,11 +443,6 @@ function Hero() {
           </span>
         </div>
 
-        <div className="wc-pop mx-auto mt-6 flex w-full max-w-full flex-col items-center justify-center gap-3 rounded-[2rem] border-2 border-white/25 bg-white/10 px-4 py-4 text-4xl font-black uppercase tracking-[0.04em] backdrop-blur-xl sm:mt-12 sm:inline-flex sm:w-auto sm:flex-row sm:flex-nowrap sm:gap-6 sm:rounded-full sm:px-8 sm:py-4 sm:text-xl sm:tracking-[0.18em] md:gap-8 md:px-10 md:py-5 md:text-3xl">
-          <span className="font-display order-2 block w-full text-center font-black leading-none sm:order-1 sm:w-auto sm:text-right">Bespoke tracks</span>
-          <OgBotLogo className="order-1 block aspect-square h-auto w-full max-w-full object-contain sm:order-2 sm:h-64 sm:w-64 sm:max-w-none md:h-[22rem] md:w-[22rem] lg:h-[26rem] lg:w-[26rem]" />
-          <span className="font-display order-3 block w-full text-center font-black leading-none sm:w-auto sm:text-left">Made for you</span>
-        </div>
 
 
 
