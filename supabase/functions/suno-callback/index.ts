@@ -156,11 +156,11 @@ Deno.serve(async (req) => {
     return new Response("waiting", { status: 200 });
   }
 
-  // Respect admin "single variant" preference: Suno always returns 2 clips per task,
-  // but bosses can cap how many we materialise as song rows. Default = 1 (no sibling).
+  // Respect admin "songs per generation" setting (default 1). Suno always returns
+  // 2 clips per task, but we only materialise as many song rows as the boss allows.
   let maxVariants = 1;
   try {
-    const { data: vs } = await admin.from("app_settings").select("value").eq("key", "max_variants_per_generation").maybeSingle();
+    const { data: vs } = await admin.from("app_settings").select("value").eq("key", "songs_per_generation").maybeSingle();
     const v = vs?.value;
     const n = typeof v === "number" ? v : typeof v === "string" ? parseInt(v, 10) : NaN;
     if (Number.isFinite(n) && n >= 1 && n <= 4) maxVariants = n;
