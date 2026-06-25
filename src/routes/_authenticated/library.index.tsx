@@ -42,6 +42,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Disc3, Flame } from "lucide-react";
 import ogBotLogo from "@/assets/ogbot.png.asset.json";
+import ogStreamzLogo from "@/assets/ogstreamz-logo.jpg.asset.json";
 import { FoulMouthReminder } from "@/components/FoulMouthReminder";
 import { PoweredByOgBot } from "@/components/PoweredByOgBot";
 import { JobQueuePanel } from "@/components/library/JobQueuePanel";
