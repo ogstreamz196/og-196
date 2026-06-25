@@ -246,6 +246,46 @@ export const sendTelegramTestPing = createServerFn({ method: "POST" })
     return { ok: true as const, message_id: messageId ?? null };
   });
 
+/** Authenticated: mint a fresh personal Telegram start-link token for yourself. */
+export const rotateMyTelegramLinkToken = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { randomBytes } = await import("crypto");
+    const token = "t_" + randomBytes(16).toString("hex");
+    const { error } = await supabaseAdmin
+      .from("profiles")
+      .update({ telegram_link_token: token })
+      .eq("id", context.userId);
+    if (error) throw new Error(error.message);
+    return { token };
+  });
+
+/** Authenticated: return your current Telegram token, creating one if needed. */
+export const getMyTelegramLinkToken = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
+      .from("profiles")
+      .select("telegram_link_token")
+      .eq("id", context.userId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+
+    const existing = data?.telegram_link_token;
+    if (existing) return { token: existing };
+
+    const { randomBytes } = await import("crypto");
+    const token = "t_" + randomBytes(16).toString("hex");
+    const { error: updateError } = await supabaseAdmin
+      .from("profiles")
+      .update({ telegram_link_token: token })
+      .eq("id", context.userId);
+    if (updateError) throw new Error(updateError.message);
+    return { token };
+  });
+
 export type TelegramStatusState = "verified" | "failed" | "pending" | "unlinked";
 
 /** Authenticated: current user's own Telegram link status with live verification. */

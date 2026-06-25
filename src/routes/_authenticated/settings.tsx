@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { Loader2, Crown, Bot, ShieldCheck, Coins, Plus, Minus, LogOut, UserCog, Mail, Fingerprint, KeyRound, Send, Copy, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -16,6 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { PreferencesPanel } from "@/components/settings/PreferencesPanel";
 import { VipStatusCard } from "@/components/settings/VipStatusCard";
+import { getMyTelegramLinkToken, rotateMyTelegramLinkToken } from "@/lib/telegram-admin.functions";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   component: SettingsPage,
@@ -318,10 +320,28 @@ function RoleRow({ icon, title, description, checked, pending, onChange }: {
 const TELEGRAM_BOT_USERNAME = "OGStreamzBot";
 
 function TelegramConnectSection({ userId }: { userId: string }) {
-  const token = userId ? userId.replace(/-/g, "").slice(0, 24) : "";
-  const link = userId
+  const qc = useQueryClient();
+  const getTokenFn = useServerFn(getMyTelegramLinkToken);
+  const rotateTokenFn = useServerFn(rotateMyTelegramLinkToken);
+  const tokenQuery = useQuery({
+    queryKey: ["my-telegram-link-token"],
+    queryFn: () => getTokenFn(),
+    enabled: !!userId,
+    staleTime: 60_000,
+  });
+  const token = tokenQuery.data?.token ?? "";
+  const link = token
     ? `https://t.me/${TELEGRAM_BOT_USERNAME}?start=${token}`
     : "";
+
+  const rotate = useMutation({
+    mutationFn: () => rotateTokenFn(),
+    onSuccess: (res) => {
+      qc.setQueryData(["my-telegram-link-token"], res);
+      toast.success("Fresh Telegram link ready");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   const copy = async () => {
     if (!link) return;
@@ -357,12 +377,15 @@ function TelegramConnectSection({ userId }: { userId: string }) {
             <Copy className="h-4 w-4" />
           </Button>
         </div>
+        <p className="mt-2 text-[11px] text-muted-foreground">
+          Always use this button/link — typing plain /start in Telegram cannot connect your profile.
+        </p>
       </div>
 
       <div className="mt-4 flex flex-col gap-2 sm:flex-row">
         <Button
           type="button"
-          disabled={!link}
+          disabled={!link || tokenQuery.isLoading}
           onClick={() => {
             if (!link) return;
             const w = window.open(link, "_blank", "noopener,noreferrer");
@@ -373,7 +396,16 @@ function TelegramConnectSection({ userId }: { userId: string }) {
           }}
           className="bg-[#229ED9] font-semibold text-white hover:bg-[#229ED9]/90"
         >
-          <Send className="mr-2 h-4 w-4" /> Open in Telegram
+          {tokenQuery.isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />} Open in Telegram
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => rotate.mutate()}
+          disabled={rotate.isPending}
+        >
+          {rotate.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <KeyRound className="mr-2 h-4 w-4" />}
+          Fresh link
         </Button>
         <Button
           type="button"
