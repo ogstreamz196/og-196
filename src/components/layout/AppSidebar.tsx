@@ -8,7 +8,6 @@ import {
   LogOut,
   Gift,
   Sparkles,
-  Users,
   type LucideIcon,
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";

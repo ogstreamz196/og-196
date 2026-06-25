@@ -88,7 +88,7 @@ export function TelegramConnectPrompt() {
           size="sm"
           className="bg-gradient-to-r from-cyan-500 to-blue-500 font-semibold text-white hover:from-cyan-400 hover:to-blue-400"
         >
-          <Link to="/community">
+          <Link to="/messenger" search={{ live: "1" }}>
             Join community <ExternalLink className="ml-1.5 h-3.5 w-3.5" />
           </Link>
         </Button>
@@ -144,7 +144,7 @@ export function TelegramConnectPrompt() {
               variant="outline"
               className="border-cyan-400/50 bg-cyan-500/10 font-bold text-cyan-100 hover:bg-cyan-500/20"
             >
-              <Link to="/community">
+              <Link to="/messenger" search={{ live: "1" }}>
                 <Users className="mr-2 h-4 w-4" /> Join OG Community
               </Link>
             </Button>

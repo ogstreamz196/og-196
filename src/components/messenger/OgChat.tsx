@@ -328,7 +328,7 @@ export function OgChat({
       postCommunity({ data: { content: t } })
         .then(() => {
           toast.success("Posted to OG Community", {
-            action: { label: "Open", onClick: () => { window.location.href = "/community"; } },
+            action: { label: "Open", onClick: () => { window.location.href = "/messenger?live=1"; } },
           });
         })
         .catch((e: Error) => toast.error(e.message));
