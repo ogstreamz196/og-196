@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { Send, Users, Sparkles, ExternalLink, X, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -10,8 +11,6 @@ import {
 import { Button } from "@/components/ui/button";
 
 const TELEGRAM_BOT_USERNAME = "OGStreamzBot";
-/** Public OG Community group. Update via env or app_settings later. */
-const TELEGRAM_COMMUNITY_URL = "https://t.me/ogstreamzcommunity";
 
 const DISMISS_KEY = "og.telegram.prompt.dismissed";
 
