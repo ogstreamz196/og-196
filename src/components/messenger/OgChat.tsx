@@ -210,8 +210,41 @@ export function OgChat({
 
 
 
+  // Smart auto-scroll: only stick to bottom when the user is already near it,
+  // so reading older messages isn't interrupted by new replies streaming in.
+  const [atBottom, setAtBottom] = useState(true);
+  const [hasNew, setHasNew] = useState(false);
+
+  function scrollToBottom(behavior: ScrollBehavior = "smooth") {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior });
+    setAtBottom(true);
+    setHasNew(false);
+  }
+
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    const el = scrollRef.current;
+    if (!el) return;
+    function onScroll() {
+      const target = scrollRef.current;
+      if (!target) return;
+      const distance = target.scrollHeight - target.scrollTop - target.clientHeight;
+      const near = distance < 80;
+      setAtBottom(near);
+      if (near) setHasNew(false);
+    }
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    if (atBottom) {
+      scrollToBottom("smooth");
+    } else {
+      setHasNew(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages]);
 
   useEffect(() => {
@@ -226,11 +259,12 @@ export function OgChat({
     }
   }, [seed]);
 
-  // Re-scroll while skeleton is mounted so it stays in view.
+  // Re-scroll while skeleton is mounted so it stays in view if user was at bottom.
   useEffect(() => {
-    if (showSkeleton) {
-      scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    if (showSkeleton && atBottom) {
+      scrollToBottom("smooth");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showSkeleton]);
 
   const m = useMutation({
