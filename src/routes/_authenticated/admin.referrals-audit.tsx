@@ -65,6 +65,37 @@ function ReferralsAuditPage() {
     },
   });
 
+  const reconQ = useQuery({
+    queryKey: ["admin-referral-reconciliation"],
+    enabled: isAdmin,
+    refetchInterval: 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("admin_referral_reconciliation", { p_limit: 200 });
+      if (error) throw error;
+      return data as {
+        rows: Array<{
+          referrer_id: string;
+          referrer_name: string | null;
+          referrer_email: string | null;
+          referral_code: string | null;
+          total_burned: number;
+          burn_count: number;
+          expected_payout: number;
+          actual_payout: number;
+          payout_count: number;
+          delta: number;
+        }>;
+        totals: {
+          total_burned: number;
+          expected_payout: number;
+          actual_payout: number;
+          delta: number;
+          mismatches: number;
+        };
+      };
+    },
+  });
+
   if (roleLoading) {
     return (
       <DashboardShell title="Referral audit">
