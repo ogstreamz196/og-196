@@ -1004,6 +1004,7 @@ export type Database = {
         Args: { amount: number; boss_notes?: string; target_user_id: string }
         Returns: number
       }
+      check_generation_capacity: { Args: { p_user: string }; Returns: Json }
       claim_referral: { Args: { p_referrer: string }; Returns: boolean }
       create_og_bot_invite: {
         Args: {
