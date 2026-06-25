@@ -20,6 +20,7 @@ import { TelegramWebhookStatus } from "@/components/admin/TelegramWebhookStatus"
 import { BossNotificationsPanel } from "@/components/admin/BossNotificationsPanel";
 import { TelegramSmokeTest } from "@/components/admin/TelegramSmokeTest";
 import { E2ESmokeTest } from "@/components/admin/E2ESmokeTest";
+import { FoulMouthSmokeTest } from "@/components/admin/FoulMouthSmokeTest";
 
 import { AdminSection } from "@/components/admin/AdminSection";
 import { AdminCollapsible } from "@/components/admin/AdminCollapsible";
@@ -203,6 +204,11 @@ function AdminPanel() {
         <AdminCollapsible storageKey="e2e-smoke" title="End-to-end smoke test" subtitle="Full stack flow">
           <E2ESmokeTest />
         </AdminCollapsible>
+
+        <AdminCollapsible storageKey="foul-smoke" title="Foul-mouth smoke test" subtitle="Live Chat VIP gating + reply quality">
+          <FoulMouthSmokeTest />
+        </AdminCollapsible>
+
 
         <AdminCollapsible storageKey="boss-notifs" title="Boss notifications" subtitle="DM preferences">
           <BossNotificationsPanel />
