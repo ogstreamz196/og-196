@@ -20,6 +20,7 @@ import { TelegramWebhookStatus } from "@/components/admin/TelegramWebhookStatus"
 import { BossNotificationsPanel } from "@/components/admin/BossNotificationsPanel";
 import { TelegramSmokeTest } from "@/components/admin/TelegramSmokeTest";
 import { E2ESmokeTest } from "@/components/admin/E2ESmokeTest";
+import { FoulMouthSmokeTest } from "@/components/admin/FoulMouthSmokeTest";
 
 import { AdminSection } from "@/components/admin/AdminSection";
 import { AdminCollapsible } from "@/components/admin/AdminCollapsible";
