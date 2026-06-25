@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/use-auth";
+import { useFoulMouth } from "@/hooks/use-foul-mouth";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
 
 function initials(name: string | null) {
@@ -37,6 +38,7 @@ export function CommunityRoom() {
   const qc = useQueryClient();
   const listFn = useServerFn(listCommunityMessages);
   const postFn = useServerFn(postCommunityMessage);
+  const { foulMouth } = useFoulMouth();
 
   const { data, isLoading } = useQuery({
     queryKey: ["community-messages"],
@@ -78,7 +80,7 @@ export function CommunityRoom() {
   }, [messages.length]);
 
   const send = useMutation({
-    mutationFn: (content: string) => postFn({ data: { content } }),
+    mutationFn: (content: string) => postFn({ data: { content, foulMouth } }),
     onSuccess: () => setText(""),
     onError: (err: Error) => toast.error(err.message),
   });

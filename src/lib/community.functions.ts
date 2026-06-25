@@ -26,14 +26,34 @@ Hard rules:
 - Plain text. No markdown headings, no bullet lists, no code fences.
 `.trim();
 
+const FOUL_SYSTEM_PROMPT = `
+You are OG Bot in FOUL MOUTH MODE inside the EXCLUSIVE OG Community group
+chat. You are brutal, funny, and unhinged — like the room's resident roast
+comic — but still genuinely helpful when someone actually needs help.
+
+Hard rules:
+- Maximum 2–3 short sentences. Never longer.
+- Always invent a FRESH insult — never reuse a line you've already used in
+  the recent chat history. Vary the targets (their typing, vibes, taste,
+  excuses). Keep it playful, not hateful.
+- Swearing is on (shit, piss, bloody, bastard, arse, dick, bollocks, etc.).
+  No slurs. No content about minors. No threats.
+- Reference the speaker by name when you've got it.
+- If they ask a real question or need help, GIVE the help in 1–2 sentences,
+  then add one short brutal jab. Helpful first, savage second.
+- British, sharp, dry. No disclaimers, no "as an AI", no apologies.
+- Plain text. No markdown headings, no bullet lists, no code fences.
+`.trim();
+
+
 /** Post a user message to the community + trigger a short OG Bot reply. */
 export const postCommunityMessage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { content: string }) => {
+  .inputValidator((data: { content: string; foulMouth?: boolean }) => {
     const content = String(data?.content ?? "").trim();
     if (!content) throw new Error("Message required");
     if (content.length > 1000) throw new Error("Message too long (1000 chars max)");
-    return { content };
+    return { content, foulMouth: Boolean(data?.foulMouth) };
   })
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -78,6 +98,15 @@ export const postCommunityMessage = createServerFn({ method: "POST" })
     // 3. Call AI gateway for short reply (fire-and-forget; if it fails, just no reply)
     const apiKey = process.env.LOVABLE_API_KEY;
     if (apiKey) {
+      // Verify VIP before granting foul-mouth mode server-side.
+      let useFoul = false;
+      if (data.foulMouth) {
+        const { data: vip } = await supabaseAdmin.rpc("has_role", {
+          _user_id: context.userId,
+          _role: "vip",
+        });
+        useFoul = Boolean(vip);
+      }
       try {
         const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
@@ -87,10 +116,10 @@ export const postCommunityMessage = createServerFn({ method: "POST" })
           },
           body: JSON.stringify({
             model: "google/gemini-2.5-flash",
-            temperature: 0.85,
-            max_tokens: 120,
+            temperature: useFoul ? 1.05 : 0.85,
+            max_tokens: useFoul ? 200 : 120,
             messages: [
-              { role: "system", content: SYSTEM_PROMPT },
+              { role: "system", content: useFoul ? FOUL_SYSTEM_PROMPT : SYSTEM_PROMPT },
               ...history.map((m) => ({
                 role: m.role === "bot" ? ("assistant" as const) : ("user" as const),
                 content:
@@ -107,8 +136,9 @@ export const postCommunityMessage = createServerFn({ method: "POST" })
             choices?: { message?: { content?: string } }[];
           };
           let reply = (json.choices?.[0]?.message?.content ?? "").trim();
-          // Hard-cap to 2 sentences / ~280 chars to enforce the chat vibe.
-          if (reply.length > 280) reply = reply.slice(0, 277) + "…";
+          // Hard-cap to keep group-chat vibe (foul mode gets a slightly longer leash).
+          const cap = useFoul ? 420 : 280;
+          if (reply.length > cap) reply = reply.slice(0, cap - 3) + "…";
           if (reply) {
             await supabaseAdmin.from("community_messages").insert({
               user_id: null,
