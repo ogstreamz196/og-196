@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/messenger")({
   }),
   head: () => ({
     meta: [
-      { title: "OG Messenger · Private chat & Live Community" },
+      { title: "OG-GPT · Private chat & Live Community" },
       {
         name: "description",
         content:
@@ -52,7 +52,7 @@ function MessengerPage() {
   }
 
   return (
-    <DashboardShell title="OG Messenger">
+    <DashboardShell title="OG-GPT">
       <div className="mx-auto mb-3 w-full max-w-5xl">
         <FoulMouthReminder enabled={foulMouth} onAction={handleFoulToggle} />
       </div>
@@ -97,7 +97,7 @@ function MessengerPage() {
                   : "border-primary/30 bg-primary/10 text-primary"
               }`}
             >
-              {liveChat ? "Live · EXCLUSIVE OG Community" : "OG Messenger · Powered by OG Bot"}
+              {liveChat ? "Live · EXCLUSIVE OG Community" : "OG-GPT · Powered by OG Bot"}
             </div>
             <h1 className="truncate font-display text-2xl font-black leading-tight tracking-tight sm:text-3xl">
               {liveChat ? "OG Community" : "OG Bot"}

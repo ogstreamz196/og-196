@@ -125,7 +125,7 @@ export function TelegramConnectPrompt() {
             Get OG Bot in your pocket — drops, replies, and song-ready alerts.
             Then join the{" "}
             <span className="font-bold text-cyan-200">EXCLUSIVE OG Community</span>{" "}
-            where every member shares one OG Messenger feed.
+            where every member shares one OG-GPT feed.
           </p>
 
           <div className="mt-4 flex flex-wrap gap-2">

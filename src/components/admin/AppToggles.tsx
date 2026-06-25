@@ -20,7 +20,7 @@ const MUSIC_HUB_TOGGLES: ToggleDef[] = [
 
 const OG_BOT_TOGGLES: ToggleDef[] = [
   { key: "ob_widget_enabled", label: "Floating widget", desc: "Show the OG Bot bubble on every page." },
-  { key: "ob_messenger_enabled", label: "OG Messenger", desc: "Turn on the full-page chat experience." },
+  { key: "ob_messenger_enabled", label: "OG-GPT", desc: "Turn on the full-page chat experience." },
   { key: "ob_proactive_greetings", label: "Proactive greetings", desc: "Let OG Bot start the conversation when a visitor lands." },
   { key: "ob_voice_replies", label: "Voice replies", desc: "Read replies aloud using OG Bot's voice." },
   { key: "ob_foul_mouth", label: "Foul-mouth mode", desc: "Allow OG Bot to use unfiltered slang and adult language." },

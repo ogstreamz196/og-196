@@ -687,12 +687,12 @@ export function SongWorkspace({ song, onSaved }: Props) {
               <CardTitle className="flex items-center gap-2 text-lg">
                 <MessageSquareMore className="h-4 w-4" /> Need a hand?
               </CardTitle>
-              <CardDescription>Brainstorm with OG Messenger.</CardDescription>
+              <CardDescription>Brainstorm with OG-GPT.</CardDescription>
             </CardHeader>
             <CardContent>
               <Button asChild variant="outline" className="w-full gap-2">
                 <Link to="/messenger">
-                  Open OG Messenger <ExternalLink className="h-3.5 w-3.5" />
+                  Open OG-GPT <ExternalLink className="h-3.5 w-3.5" />
                 </Link>
               </Button>
             </CardContent>
