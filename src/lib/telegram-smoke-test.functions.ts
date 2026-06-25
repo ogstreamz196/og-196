@@ -77,6 +77,7 @@ export const runTelegramSmokeTest = createServerFn({ method: "POST" })
             ok: false,
             latencyMs: 0,
             detail: "Telegram connector not configured (missing LOVABLE_API_KEY or TELEGRAM_API_KEY)",
+            url: null,
           },
         ],
       };
@@ -95,13 +96,7 @@ export const runTelegramSmokeTest = createServerFn({ method: "POST" })
       detail: meOk
         ? `@${me.body.result.username} · id ${me.body.result.id} · ${me.body.result.first_name}`
         : me.body?.description ?? `HTTP ${me.status}`,
-      data: meOk
-        ? {
-            id: me.body.result.id,
-            username: me.body.result.username,
-            first_name: me.body.result.first_name,
-          }
-        : null,
+      url: null,
     });
 
     // Step 2 — getWebhookInfo
@@ -119,15 +114,7 @@ export const runTelegramSmokeTest = createServerFn({ method: "POST" })
           ? `URL set · ${r.pending_update_count ?? 0} pending · ip ${r.ip_address ?? "—"}`
           : "No webhook URL registered"
         : wh.body?.description ?? `HTTP ${wh.status}`,
-      data: whOk
-        ? {
-            url: r.url ?? null,
-            pending_update_count: r.pending_update_count ?? 0,
-            max_connections: r.max_connections ?? null,
-            ip_address: r.ip_address ?? null,
-            allowed_updates: r.allowed_updates ?? null,
-          }
-        : null,
+      url: whOk ? r.url ?? null : null,
     });
 
     // Step 3 — webhook delivery health (last_error_message)
