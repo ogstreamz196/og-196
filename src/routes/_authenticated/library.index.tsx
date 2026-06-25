@@ -44,6 +44,7 @@ import { Disc3, Flame } from "lucide-react";
 import ogBotLogo from "@/assets/ogbot.png.asset.json";
 import { FoulMouthReminder } from "@/components/FoulMouthReminder";
 import { PoweredByOgBot } from "@/components/PoweredByOgBot";
+import { JobQueuePanel } from "@/components/library/JobQueuePanel";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -425,6 +426,12 @@ function LibraryPage() {
             </span>
           )}
         </div>
+
+        {versionedLibrary.length > 0 && (
+          <div className="mb-4">
+            <JobQueuePanel songs={versionedLibrary} />
+          </div>
+        )}
 
         {library.isLoading ? (
           <div className="grid gap-3">
