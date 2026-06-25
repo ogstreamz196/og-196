@@ -21,6 +21,12 @@ export function BossNav() {
             <ShieldCheck className="h-3.5 w-3.5" /> Bot Control Center
           </Link>
           <Link
+            to="/admin/users-pro"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/60 px-3 py-1 font-medium text-foreground/80 transition hover:bg-card"
+          >
+            <Users className="h-3.5 w-3.5" /> Users Pro
+          </Link>
+          <Link
             to="/developer"
             className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/60 px-3 py-1 font-medium text-foreground/80 transition hover:bg-card"
           >
