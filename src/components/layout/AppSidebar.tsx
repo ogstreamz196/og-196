@@ -76,7 +76,8 @@ export function AppSidebar() {
   const isActive = (url: string) =>
     url === "/" ? pathname === "/" : pathname === url || pathname.startsWith(url + "/");
 
-  const visible = (items: NavItem[]) => items.filter((i) => !i.adminOnly || isAdmin);
+  const visible = (items: NavItem[]) =>
+    items.filter((i) => (!i.adminOnly || isAdmin) && !(isAdmin && i.url === "/settings"));
 
   const renderItems = (items: NavItem[]) =>
     visible(items).map((item) => {
