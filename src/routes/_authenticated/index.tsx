@@ -232,21 +232,23 @@ function DashboardHome() {
             Powered by OG Bot
           </span>
         </div>
-        <div className="grid grid-cols-1 items-stretch gap-4 sm:gap-6 md:grid-cols-2">
+        <div className="grid grid-cols-2 items-stretch gap-3 sm:gap-5">
           <PrimaryCard
             to="/library"
-            icon={<Music2 className="h-6 w-6" />}
-            eyebrow="MusicHub · Powered by OG Bot"
+            image={musicHubHero}
+            imageAlt="Neon vinyl with equalizer bars"
+            eyebrow="MusicHub"
             title="Create a song"
-            body="Generate. Remix. Release in minutes."
+            body="Generate · Remix · Release"
             cta="Open MusicHub"
           />
           <PrimaryCard
             to="/messenger"
-            icon={<MessageSquareMore className="h-6 w-6" />}
-            eyebrow="OG Messenger · Powered by OG Bot"
+            image={ogBotAsset.url}
+            imageAlt="OG Bot avatar"
+            eyebrow="OG Messenger"
             title="Chat to OG Bot"
-            body="Your AI co-producer & assistant."
+            body="Your AI co-producer"
             cta="Open Messenger"
             variant="accent"
           />
