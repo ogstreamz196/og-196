@@ -34,6 +34,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import ogBotAsset from "@/assets/ogbot.png.asset.json";
+import musicHubHero from "@/assets/musichub-hero.jpg";
 
 import { useAuth } from "@/hooks/use-auth";
 import { useDevMode } from "@/hooks/use-dev-mode";
