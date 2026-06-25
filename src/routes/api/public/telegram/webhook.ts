@@ -25,6 +25,26 @@ function tokenToUuidPrefix(token: string): string {
   return `${token.slice(0, 8)}-${token.slice(8, 12)}-${token.slice(12, 16)}-${token.slice(16, 20)}-${token.slice(20, 24)}`;
 }
 
+async function sendTelegramReply(tgKey: string, chat_id: number, text: string) {
+  const lovableKey = process.env.LOVABLE_API_KEY;
+  if (!lovableKey) return;
+
+  await fetch("https://connector-gateway.lovable.dev/telegram/sendMessage", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${lovableKey}`,
+      "X-Connection-Api-Key": tgKey,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      chat_id,
+      text,
+      parse_mode: "HTML",
+      disable_web_page_preview: true,
+    }),
+  }).catch(() => undefined);
+}
+
 export const Route = createFileRoute("/api/public/telegram/webhook")({
   server: {
     handlers: {
@@ -45,11 +65,41 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
 
         const startMatch =
           typeof text === "string" ? text.match(/^\/start\s+(\S+)/i) : null;
-        if (!startMatch) return Response.json({ ok: true, ignored: true });
+
+        if (typeof text === "string" && /^\/help\b/i.test(text.trim())) {
+          await sendTelegramReply(
+            tgKey,
+            chat_id,
+            "🛠️ <b>OG Bot is online.</b>\n\nTo link your account, open OG Streamz → Settings → Connect Telegram, then tap your personal Telegram link.\n\nAfter linking, I can DM song updates, coin alerts, referrals and general chat replies here.",
+          );
+          return Response.json({ ok: true, help: true });
+        }
+
+        if (!startMatch) {
+          if (typeof text === "string" && /^\/start\b/i.test(text.trim())) {
+            await sendTelegramReply(
+              tgKey,
+              chat_id,
+              "🔥 <b>OG Bot is alive.</b>\n\nYou opened me without your private link token, so I can't connect this Telegram chat to your OG profile yet.\n\nGo to OG Streamz → Settings → <b>Connect Telegram</b>, tap your personal link, then hit Start again.",
+            );
+            return Response.json({ ok: true, missing_token: true });
+          }
+          await sendTelegramReply(
+            tgKey,
+            chat_id,
+            "👋 <b>OG Bot is online.</b>\n\nSend /help or connect your OG profile from Settings to unlock account updates here.",
+          );
+          return Response.json({ ok: true, unlinked_reply: true });
+        }
 
         const rawToken = startMatch[1].toLowerCase();
         const tokenMatch = rawToken.match(TOKEN_RE);
         if (!tokenMatch) {
+          await sendTelegramReply(
+            tgKey,
+            chat_id,
+            "⚠️ That Telegram connect link is invalid. Please generate/open a fresh link from OG Streamz → Settings → Connect Telegram.",
+          );
           return Response.json({ ok: true, rejected: "bad_token_format" });
         }
         const token = tokenMatch[1];
@@ -65,6 +115,11 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
             .eq("telegram_link_token", token)
             .limit(2);
           if (!byToken || byToken.length !== 1) {
+            await sendTelegramReply(
+              tgKey,
+              chat_id,
+              "⚠️ That Telegram connect link has expired or was already used. Please generate/open a fresh link from OG Streamz → Settings.",
+            );
             return Response.json({ ok: true, rejected: "no_or_ambiguous_match" });
           }
           profileId = byToken[0].id as string;
@@ -76,11 +131,21 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
             .ilike("id::text", `${uuidPrefix}%`)
             .limit(2);
           if (!candidates || candidates.length !== 1) {
+            await sendTelegramReply(
+              tgKey,
+              chat_id,
+              "⚠️ I couldn't match that link to an OG profile. Please open the Telegram button directly from OG Streamz Settings.",
+            );
             return Response.json({ ok: true, rejected: "no_or_ambiguous_match" });
           }
           const pid = candidates[0].id as string;
           const reconstructed = pid.replace(/-/g, "").slice(0, 24).toLowerCase();
           if (reconstructed !== token) {
+            await sendTelegramReply(
+              tgKey,
+              chat_id,
+              "⚠️ This connect token doesn't match your OG profile. Please open a fresh Telegram link from Settings.",
+            );
             return Response.json({ ok: true, rejected: "token_mismatch" });
           }
           profileId = pid;
@@ -118,6 +183,11 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
         }
 
         if (!chatVerified) {
+          await sendTelegramReply(
+            tgKey,
+            chat_id,
+            "⚠️ I received your Start request, but Telegram chat verification failed. Please tap Start again in a moment.",
+          );
           return Response.json(
             { ok: true, rejected: "chat_verification_failed" },
             { status: 200 },
@@ -154,19 +224,7 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
           `🎧 I'll DM drops, song updates &amp; referral cashback right here.\n\n` +
           `Type /help any time. Now go make some noise. 🎤`;
 
-        await fetch("https://connector-gateway.lovable.dev/telegram/sendMessage", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${lovableKey}`,
-            "X-Connection-Api-Key": tgKey,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            chat_id,
-            text: greeting,
-            parse_mode: "HTML",
-          }),
-        }).catch(() => undefined);
+        await sendTelegramReply(tgKey, chat_id, greeting);
 
         await supabaseAdmin
           .from("og_messages")
