@@ -53,11 +53,9 @@ function MessengerPage() {
 
   return (
     <DashboardShell title="OG Messenger">
-      {!liveChat && (
-        <div className="mx-auto mb-3 w-full max-w-5xl">
-          <FoulMouthReminder enabled={foulMouth} onAction={handleFoulToggle} />
-        </div>
-      )}
+      <div className="mx-auto mb-3 w-full max-w-5xl">
+        <FoulMouthReminder enabled={foulMouth} onAction={handleFoulToggle} />
+      </div>
 
       <div className="mx-auto flex h-[calc(100dvh-15rem)] min-h-[460px] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-white/10 bg-card/70 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.7)] ring-1 ring-white/5 backdrop-blur-xl sm:h-[calc(100dvh-16rem)]">
         {/* Header — adapts to current mode */}
