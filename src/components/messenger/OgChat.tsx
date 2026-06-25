@@ -645,7 +645,7 @@ export function OgChat({
                     <button
                       key={q.label}
                       type="button"
-                      onClick={() => sendText(q.prompt)}
+                      onClick={() => sendText(q.prompt, { forcePrivate: true })}
                       disabled={m.isPending || isOut || !user}
                       className="rounded-full border-2 border-primary/40 bg-primary/10 px-4 py-1.5 text-xs font-bold text-foreground transition hover:-translate-y-0.5 hover:rotate-[-1deg] hover:border-primary hover:bg-primary/20 active:translate-y-0 disabled:opacity-40"
                     >
