@@ -76,7 +76,8 @@ export function AppSidebar() {
   const isActive = (url: string) =>
     url === "/" ? pathname === "/" : pathname === url || pathname.startsWith(url + "/");
 
-  const visible = (items: NavItem[]) => items.filter((i) => !i.adminOnly || isAdmin);
+  const visible = (items: NavItem[]) =>
+    items.filter((i) => (!i.adminOnly || isAdmin) && !(isAdmin && i.url === "/settings"));
 
   const renderItems = (items: NavItem[]) =>
     visible(items).map((item) => {
@@ -190,7 +191,7 @@ export function AppSidebar() {
 
         {isAdmin && (
           <SidebarGroup>
-            <SidebarGroupLabel>Admin</SidebarGroupLabel>
+            <SidebarGroupLabel>Boss Console</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
@@ -218,7 +219,7 @@ export function AppSidebar() {
                       >
                         <Shield className="h-5 w-5 transition-transform duration-300 group-hover/nav:scale-110 group-hover/nav:-rotate-6" />
                       </span>
-                      <span className="relative z-10 truncate">Admin</span>
+                      <span className="relative z-10 truncate">Admin & Settings</span>
                       {!collapsed && (
                         <Sparkles className="relative z-10 ml-auto h-4 w-4 text-amber-300 opacity-0 transition-opacity group-hover/nav:opacity-100" />
                       )}
