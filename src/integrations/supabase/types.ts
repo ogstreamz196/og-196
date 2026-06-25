@@ -664,7 +664,9 @@ export type Database = {
           lyric_video_error: string | null
           lyric_video_full_path: string | null
           lyric_video_preview_path: string | null
+          lyric_video_progress: number
           lyric_video_rendered_at: string | null
+          lyric_video_stage: string | null
           lyric_video_status: string
           lyric_video_unlocked: boolean
           lyrics: string | null
@@ -699,7 +701,9 @@ export type Database = {
           lyric_video_error?: string | null
           lyric_video_full_path?: string | null
           lyric_video_preview_path?: string | null
+          lyric_video_progress?: number
           lyric_video_rendered_at?: string | null
+          lyric_video_stage?: string | null
           lyric_video_status?: string
           lyric_video_unlocked?: boolean
           lyrics?: string | null
@@ -734,7 +738,9 @@ export type Database = {
           lyric_video_error?: string | null
           lyric_video_full_path?: string | null
           lyric_video_preview_path?: string | null
+          lyric_video_progress?: number
           lyric_video_rendered_at?: string | null
+          lyric_video_stage?: string | null
           lyric_video_status?: string
           lyric_video_unlocked?: boolean
           lyrics?: string | null
