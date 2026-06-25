@@ -74,7 +74,7 @@ const MOODS = ["Warm", "Hopeful", "Heartfelt", "Hype", "Sad", "Romantic", "Nosta
 const GENRES = ["Rap", "Drill", "Pop", "Afrobeats", "R&B", "Dance", "Acoustic", "Ballad", "Reggae", "Indie"];
 const STYLES = ["Story-driven", "Punchy bars", "Sing-along hook", "Spoken word", "Anthem", "Lullaby"];
 const RELATIONSHIPS = ["Mum", "Dad", "Partner", "Best friend", "Sibling", "Kids", "Crew", "Myself"];
-const LANGUAGES = ["English", "Spanish", "French", "Portuguese", "Hindi", "Urdu", "Punjabi", "Arabic", "Swahili", "Patois", "Yoruba", "German", "Italian", "Tagalog"];
+const LANGUAGES = ["English", "Spanish", "French", "Portuguese", "Hindi", "Gujarati", "Marathi", "Bengali", "Tamil", "Telugu", "Kannada", "Malayalam", "Urdu", "Punjabi", "Arabic", "Swahili", "Patois", "Yoruba", "German", "Italian", "Tagalog"];
 
 const THEMES = [
   "A love letter that finally says it out loud",
