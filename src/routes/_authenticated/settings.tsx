@@ -280,6 +280,11 @@ function SettingsPage() {
         {/* Connect Telegram */}
         <TelegramConnectSection userId={user?.id ?? ""} />
 
+        {/* Privacy & permissions */}
+        <PrivacySection userId={user?.id ?? ""} gpsConsent={Boolean(profile?.gps_consent)} onChanged={() => refetch()} />
+
+
+
 
         {/* Session */}
         <section className="rounded-2xl border border-border bg-card p-6 shadow-card flex items-center justify-between">
