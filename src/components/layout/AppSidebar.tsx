@@ -90,7 +90,8 @@ export function AppSidebar() {
             asChild
             isActive={active}
             tooltip={item.title}
-            className={`group/nav font-display relative h-14 overflow-hidden rounded-2xl border-2 px-3 text-[18px] tracking-wide uppercase transition-all duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0.5 ${
+            className={`group/nav font-display relative min-h-14 overflow-hidden rounded-2xl border-2 px-3 py-2 text-[15px] leading-tight tracking-wide uppercase transition-all duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0.5 ${
+
               active
                 ? "border-primary/50 bg-gradient-brand text-primary-foreground shadow-[0_6px_0_0_hsl(var(--primary)/0.4),0_14px_28px_-10px_hsl(var(--primary)/0.6)] hover:bg-gradient-brand active:shadow-[0_2px_0_0_hsl(var(--primary)/0.4)]"
                 : "border-transparent hover:border-white/10 hover:bg-white/[0.04] hover:shadow-[0_4px_0_0_hsl(var(--primary)/0.25)] active:shadow-[0_1px_0_0_hsl(var(--primary)/0.2)]"
