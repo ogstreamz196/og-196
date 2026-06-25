@@ -661,6 +661,12 @@ export type Database = {
           generation_started_at: string | null
           id: string
           is_variation: boolean
+          lyric_video_error: string | null
+          lyric_video_full_path: string | null
+          lyric_video_preview_path: string | null
+          lyric_video_rendered_at: string | null
+          lyric_video_status: string
+          lyric_video_unlocked: boolean
           lyrics: string | null
           lyrics_progress: number | null
           lyrics_stage: string | null
@@ -690,6 +696,12 @@ export type Database = {
           generation_started_at?: string | null
           id?: string
           is_variation?: boolean
+          lyric_video_error?: string | null
+          lyric_video_full_path?: string | null
+          lyric_video_preview_path?: string | null
+          lyric_video_rendered_at?: string | null
+          lyric_video_status?: string
+          lyric_video_unlocked?: boolean
           lyrics?: string | null
           lyrics_progress?: number | null
           lyrics_stage?: string | null
@@ -719,6 +731,12 @@ export type Database = {
           generation_started_at?: string | null
           id?: string
           is_variation?: boolean
+          lyric_video_error?: string | null
+          lyric_video_full_path?: string | null
+          lyric_video_preview_path?: string | null
+          lyric_video_rendered_at?: string | null
+          lyric_video_status?: string
+          lyric_video_unlocked?: boolean
           lyrics?: string | null
           lyrics_progress?: number | null
           lyrics_stage?: string | null
