@@ -82,23 +82,30 @@ Deno.serve(async (req) => {
       const reference = `lyric_video:${song_id}`;
       let charged = false;
       if (!song.lyric_video_unlocked) {
-        // Idempotent deduction — partial unique index on (reference where type='lyric_video_unlock')
+        // Idempotency: marker row protects against double-charge on rapid retries.
         const { data: existing } = await admin.from("coin_transactions")
           .select("id").eq("reference", reference).eq("type", "lyric_video_unlock").maybeSingle();
         if (!existing) {
-          const { error: dErr } = await admin.rpc("deduct_coins", {
-            p_user: userId, p_amount: cost, p_reference: reference,
-          });
-          if (dErr) {
-            // deduct_coins uses 'generation' type for txns; we still want the row to be tagged
-            // as a lyric_video_unlock so the partial unique index protects us. Patch the row:
-          }
-          // Stamp the most recent matching transaction with the proper type+reference for
-          // ledger clarity & idempotency (best effort).
-          await admin.from("coin_transactions").insert({
+          // Insert marker FIRST so a concurrent retry sees it before we deduct.
+          const { error: markErr } = await admin.from("coin_transactions").insert({
             user_id: userId, amount: 0, type: "lyric_video_unlock", reference,
           });
-          charged = true;
+          if (markErr) {
+            // Likely a concurrent request beat us to it — treat as already-charged.
+          } else {
+            const { error: dErr } = await admin.rpc("deduct_coins", {
+              p_user: userId, p_amount: cost, p_reference: reference,
+            });
+            if (dErr) {
+              // Roll back the marker so the user can retry after topping up.
+              await admin.from("coin_transactions").delete()
+                .eq("reference", reference).eq("type", "lyric_video_unlock");
+              const msg = dErr.message?.includes("insufficient_coins")
+                ? "Not enough coins" : (dErr.message ?? "Charge failed");
+              return jsonResponse({ error: msg, code: "charge_failed" }, 402);
+            }
+            charged = true;
+          }
         }
         await admin.from("songs").update({ lyric_video_unlocked: true }).eq("id", song_id);
       }
