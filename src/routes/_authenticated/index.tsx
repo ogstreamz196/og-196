@@ -74,9 +74,10 @@ function DashboardHome() {
   const { isVip } = useRole();
   const { data: recentSongs = [] } = useRecentSongs(user?.id);
 
-  const displayName = dev.isDev
-    ? "Developer"
-    : (profile?.display_name?.trim() || user?.email?.split("@")[0] || "there");
+  const displayName =
+    profile?.display_name?.trim() ||
+    user?.email?.split("@")[0] ||
+    (dev.isDev ? "Developer" : "there");
   const balance = profile?.coin_balance ?? 0;
   const hasSongs = recentSongs.length > 0;
   const welcomeRef = useRef<HTMLElement | null>(null);
