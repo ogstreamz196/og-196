@@ -1057,6 +1057,10 @@ export type Database = {
       }
       check_generation_capacity: { Args: { p_user: string }; Returns: Json }
       claim_referral: { Args: { p_referrer: string }; Returns: boolean }
+      claim_referrer_permanent: {
+        Args: { p_acknowledged: boolean; p_referrer: string }
+        Returns: Json
+      }
       create_og_bot_invite: {
         Args: {
           p_claim_expires_at?: string
@@ -1085,6 +1089,7 @@ export type Database = {
       gen_bot_token_string: { Args: never; Returns: string }
       gen_og_bot_invite_code: { Args: never; Returns: string }
       gen_og_bot_token: { Args: never; Returns: string }
+      get_my_referrer: { Args: never; Returns: Json }
       get_referral_summary: { Args: never; Returns: Json }
       has_role: {
         Args: {
@@ -1112,6 +1117,7 @@ export type Database = {
           uses_remaining: number
         }[]
       }
+      lookup_referrer: { Args: { p_referrer: string }; Returns: Json }
       mint_coins: {
         Args: { p_amount: number; p_reason?: string; p_target: string }
         Returns: number
