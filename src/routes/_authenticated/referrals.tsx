@@ -27,6 +27,7 @@ import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { BindReferrerCard } from "@/components/referrals/BindReferrerCard";
 
 export const Route = createFileRoute("/_authenticated/referrals")({
   component: ReferralsPage,
@@ -273,6 +274,8 @@ function ReferralsPage() {
             </div>
           </div>
         </section>
+
+        <BindReferrerCard />
 
         {/* SHARE CARD — primary action */}
         <section className="rounded-3xl border border-white/10 bg-card/70 p-5 backdrop-blur-xl sm:p-6">
