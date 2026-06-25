@@ -77,7 +77,16 @@ export function AdminCollapsible({
           )}
         />
       </button>
-      {open && <div className="border-t border-border/60 p-2 sm:p-3">{children}</div>}
+      <div
+        className={cn(
+          "grid transition-all duration-300 ease-out",
+          open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+        )}
+      >
+        <div className="overflow-hidden">
+          <div className="border-t border-border/60 p-2 sm:p-3">{children}</div>
+        </div>
+      </div>
     </section>
   );
 }
