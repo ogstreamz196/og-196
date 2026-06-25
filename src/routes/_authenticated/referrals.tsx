@@ -542,11 +542,12 @@ function ReferralsPage() {
               </div>
             )}
             {summary.recent.map((tx) => {
-              const burned = tx.reference?.match(/burn:(\d+)/)?.[1];
+              const burned = Number(tx.reference?.match(/burn:(\d+)/)?.[1] ?? 0);
+              const refTail = tx.reference?.match(/ref:([^|]+)$/)?.[1] ?? null;
               const when = new Date(tx.created_at);
               return (
-                <div key={tx.id} className="flex items-center justify-between gap-3 py-3">
-                  <div className="flex min-w-0 items-center gap-3">
+                <div key={tx.id} className="flex items-start justify-between gap-3 py-3">
+                  <div className="flex min-w-0 items-start gap-3">
                     <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary/15 text-xs font-bold uppercase text-primary">
                       {(tx.referee_name ?? "?").slice(0, 1)}
                     </div>
@@ -557,10 +558,15 @@ function ReferralsPage() {
                           <CheckCircle2 className="h-2.5 w-2.5" /> Paid
                         </span>
                       </div>
-                      <div className="truncate text-xs text-muted-foreground">
-                        Burned {burned ?? "?"} coins · you earned{" "}
-                        <span className="font-semibold text-primary">+{tx.amount}</span>
+                      <div className="mt-0.5 font-mono text-[11px] text-muted-foreground">
+                        {burned > 0 ? <>{burned} burned × 10% = </> : <>Cashback = </>}
+                        <span className="font-semibold text-primary">+{tx.amount} OG</span>
                       </div>
+                      {refTail && (
+                        <div className="truncate font-mono text-[10px] text-muted-foreground/70">
+                          gen: {refTail}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="text-right text-xs text-muted-foreground">

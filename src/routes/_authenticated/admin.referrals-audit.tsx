@@ -76,6 +76,11 @@ function ReferralsAuditPage() {
 
   const users = auditQ.data?.users ?? [];
   const ledger = auditQ.data?.ledger ?? [];
+  const leaderboard = [...users]
+    .filter((u) => (u.invitees ?? 0) > 0 || (u.earned ?? 0) > 0)
+    .sort((a, b) => (b.earned ?? 0) - (a.earned ?? 0))
+    .slice(0, 25);
+  const totalPaid = users.reduce((sum, u) => sum + (u.earned ?? 0), 0);
 
   return (
     <DashboardShell title="Referral audit">
@@ -193,6 +198,45 @@ function ReferralsAuditPage() {
                     <td className="p-3 text-right tabular-nums">{u.invitees}</td>
                     <td className="p-3 text-right tabular-nums text-primary">+{u.earned}</td>
                     <td className="p-3 text-right tabular-nums">{u.coin_balance}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-white/10 bg-card/60">
+          <div className="flex items-center justify-between border-b border-white/5 p-4">
+            <h2 className="font-display text-lg font-bold">Top OG Leaders · total 10% payouts</h2>
+            <span className="text-xs text-muted-foreground">
+              {leaderboard.length} leaders · {totalPaid} OG paid total
+            </span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[600px] text-xs">
+              <thead className="text-left text-[10px] uppercase tracking-wider text-muted-foreground">
+                <tr className="border-b border-white/5">
+                  <th className="p-3">#</th>
+                  <th className="p-3">OG Leader</th>
+                  <th className="p-3">Code</th>
+                  <th className="p-3 text-right">Invitees</th>
+                  <th className="p-3 text-right">Total payout (OG)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {leaderboard.length === 0 && (
+                  <tr><td colSpan={5} className="p-6 text-center text-muted-foreground">No payouts yet</td></tr>
+                )}
+                {leaderboard.map((u, i) => (
+                  <tr key={u.id} className="border-b border-white/5">
+                    <td className="p-3 text-muted-foreground tabular-nums">{i + 1}</td>
+                    <td className="p-3">
+                      <div className="font-semibold">{u.display_name ?? u.email?.split("@")[0] ?? "—"}</div>
+                      <div className="text-muted-foreground">{u.email}</div>
+                    </td>
+                    <td className="p-3 font-mono text-[11px]">{u.referral_code ?? "—"}</td>
+                    <td className="p-3 text-right tabular-nums">{u.invitees}</td>
+                    <td className="p-3 text-right tabular-nums text-primary">+{u.earned}</td>
                   </tr>
                 ))}
               </tbody>
