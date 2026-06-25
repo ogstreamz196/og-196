@@ -9,7 +9,9 @@
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "audit:routes": "node scripts/audit-routes.mjs",
+    "prebuild": "node scripts/audit-routes.mjs"
   },
   "dependencies": {
     "@fontsource/fredoka": "^5.2.10",
