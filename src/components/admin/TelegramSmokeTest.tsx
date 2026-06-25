@@ -101,9 +101,9 @@ export function TelegramSmokeTest() {
               <div className="min-w-0 flex-1">
                 <p className="font-medium">{s.name}</p>
                 <p className="break-words text-muted-foreground">{s.detail}</p>
-                {s.data?.url ? (
+                {s.url ? (
                   <p className="mt-0.5 truncate font-mono text-[10px] text-muted-foreground">
-                    {String(s.data.url)}
+                    {s.url}
                   </p>
                 ) : null}
               </div>
