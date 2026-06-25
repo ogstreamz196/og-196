@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createHash, timingSafeEqual } from "crypto";
+import { buildSystemPrompt, detectSongIntent, type UserContextSummary } from "@/lib/og-persona";
 
 // Accepted tokens:
 //   - Rotated, single-use: "t_" + 32 lowercase hex chars (matched against
@@ -18,31 +19,449 @@ function safeEqual(a: string, b: string): boolean {
   return la.length === lb.length && timingSafeEqual(la, lb);
 }
 
-// Convert a 24-hex token into a UUID prefix with dashes
-// ("aaaaaaaabbbbccccddddeeee" → "aaaaaaaa-bbbb-cccc-dddd-eeee") so we can
-// do a tight `ilike` lookup against profiles.id (text-cast).
 function tokenToUuidPrefix(token: string): string {
   return `${token.slice(0, 8)}-${token.slice(8, 12)}-${token.slice(12, 16)}-${token.slice(16, 20)}-${token.slice(20, 24)}`;
 }
 
-async function sendTelegramReply(tgKey: string, chat_id: number, text: string) {
+async function tg(method: string, body: Record<string, unknown>) {
+  const tgKey = process.env.TELEGRAM_API_KEY;
   const lovableKey = process.env.LOVABLE_API_KEY;
-  if (!lovableKey) return;
-
-  await fetch("https://connector-gateway.lovable.dev/telegram/sendMessage", {
+  if (!tgKey || !lovableKey) return null;
+  const r = await fetch(`https://connector-gateway.lovable.dev/telegram/${method}`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${lovableKey}`,
       "X-Connection-Api-Key": tgKey,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
+    body: JSON.stringify(body),
+  }).catch(() => null);
+  return r;
+}
+
+async function reply(chat_id: number, text: string) {
+  await tg("sendMessage", {
+    chat_id,
+    text,
+    parse_mode: "HTML",
+    disable_web_page_preview: true,
+  });
+}
+
+const HELP_USER = `🤖 <b>OG Bot commands</b>
+/help — this menu
+/balance — your OG coin balance
+/me — your linked profile
+
+Otherwise just chat — I'm your full OG assistant (same brain as the in-app messenger).`;
+
+const HELP_ADMIN = `${HELP_USER}
+
+👑 <b>Boss / admin commands</b>
+/users [query] — list/search profiles (name or email)
+/whois &lt;email|uuid&gt; — full profile + balance
+/addcoins &lt;email|uuid&gt; &lt;amount&gt; [reason] — credit OG coins (negative to debit)
+/setcoins &lt;email|uuid&gt; &lt;amount&gt; [reason] — set absolute balance
+/stats — quick platform stats
+/broadcast &lt;message&gt; — DM every linked Telegram user`;
+
+type AdminProfile = {
+  id: string;
+  display_name: string | null;
+  email: string | null;
+  coin_balance: number | null;
+  telegram_chat_id: number | null;
+  telegram_username: string | null;
+};
+
+async function findProfile(
+  admin: Awaited<ReturnType<typeof loadAdmin>>,
+  needle: string,
+): Promise<AdminProfile | null> {
+  const v = needle.trim().replace(/^@/, "");
+  // UUID?
+  if (/^[0-9a-f-]{32,36}$/i.test(v)) {
+    const { data } = await admin
+      .from("profiles")
+      .select("id, display_name, email, coin_balance, telegram_chat_id, telegram_username")
+      .eq("id", v)
+      .maybeSingle();
+    if (data) return data as AdminProfile;
+  }
+  const { data } = await admin
+    .from("profiles")
+    .select("id, display_name, email, coin_balance, telegram_chat_id, telegram_username")
+    .or(`email.ilike.${v},display_name.ilike.${v},telegram_username.ilike.${v}`)
+    .limit(2);
+  if (data && data.length === 1) return data[0] as AdminProfile;
+  return null;
+}
+
+async function loadAdmin() {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  return supabaseAdmin;
+}
+
+async function isAdmin(admin: Awaited<ReturnType<typeof loadAdmin>>, userId: string) {
+  const { data } = await admin
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId);
+  const roles = (data ?? []).map((r) => r.role);
+  return { admin: roles.includes("admin") || roles.includes("dev"), roles };
+}
+
+function fmtProfile(p: AdminProfile): string {
+  return [
+    `<b>${p.display_name ?? "(no name)"}</b>`,
+    p.email ? `📧 ${p.email}` : null,
+    `🆔 <code>${p.id}</code>`,
+    `💰 ${p.coin_balance ?? 0} OG coins`,
+    p.telegram_username ? `✈️ @${p.telegram_username}` : null,
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+async function runAdminCommand(
+  admin: Awaited<ReturnType<typeof loadAdmin>>,
+  chat_id: number,
+  text: string,
+): Promise<boolean> {
+  const [cmd, ...rest] = text.trim().split(/\s+/);
+  const arg = rest.join(" ");
+
+  if (cmd === "/users" || cmd === "/find") {
+    const q = arg.trim();
+    const query = admin
+      .from("profiles")
+      .select("id, display_name, email, coin_balance, telegram_username")
+      .order("created_at", { ascending: false })
+      .limit(10);
+    const { data, error } = q
+      ? await admin
+          .from("profiles")
+          .select("id, display_name, email, coin_balance, telegram_username")
+          .or(`email.ilike.%${q}%,display_name.ilike.%${q}%,telegram_username.ilike.%${q}%`)
+          .limit(10)
+      : await query;
+    if (error) {
+      await reply(chat_id, `❌ ${error.message}`);
+      return true;
+    }
+    const rows = (data ?? []) as AdminProfile[];
+    if (!rows.length) {
+      await reply(chat_id, "No profiles matched.");
+      return true;
+    }
+    const list = rows
+      .map(
+        (p, i) =>
+          `${i + 1}. <b>${p.display_name ?? "(no name)"}</b> — ${p.email ?? "no email"} · 💰${p.coin_balance ?? 0}\n   <code>${p.id}</code>`,
+      )
+      .join("\n");
+    await reply(chat_id, `👥 <b>Profiles</b>${q ? ` matching "${q}"` : ""}:\n\n${list}`);
+    return true;
+  }
+
+  if (cmd === "/whois") {
+    if (!arg) {
+      await reply(chat_id, "Usage: /whois &lt;email|uuid&gt;");
+      return true;
+    }
+    const p = await findProfile(admin, arg);
+    if (!p) {
+      await reply(chat_id, `No unique match for "${arg}".`);
+      return true;
+    }
+    await reply(chat_id, fmtProfile(p));
+    return true;
+  }
+
+  if (cmd === "/addcoins" || cmd === "/setcoins") {
+    const m = arg.match(/^(\S+)\s+(-?\d+)(?:\s+(.+))?$/);
+    if (!m) {
+      await reply(chat_id, `Usage: ${cmd} &lt;email|uuid&gt; &lt;amount&gt; [reason]`);
+      return true;
+    }
+    const [, who, amtStr, reason] = m;
+    const amount = parseInt(amtStr, 10);
+    const target = await findProfile(admin, who);
+    if (!target) {
+      await reply(chat_id, `No unique match for "${who}".`);
+      return true;
+    }
+    const note = (reason ?? `telegram_${cmd.slice(1)}`).slice(0, 200);
+    let newBalance: number | null = null;
+    if (cmd === "/addcoins") {
+      if (amount === 0) {
+        await reply(chat_id, "Amount must be non-zero.");
+        return true;
+      }
+      const updated = Math.max(0, (target.coin_balance ?? 0) + amount);
+      const { error: upErr } = await admin
+        .from("profiles")
+        .update({ coin_balance: updated })
+        .eq("id", target.id);
+      if (upErr) {
+        await reply(chat_id, `❌ ${upErr.message}`);
+        return true;
+      }
+      await admin.from("coin_transactions").insert({
+        user_id: target.id,
+        amount,
+        type: amount > 0 ? "admin_mint" : "admin_deduct",
+        reference: note,
+      });
+      newBalance = updated;
+    } else {
+      if (amount < 0) {
+        await reply(chat_id, "Balance must be 0 or positive.");
+        return true;
+      }
+      const delta = amount - (target.coin_balance ?? 0);
+      const { error: upErr } = await admin
+        .from("profiles")
+        .update({ coin_balance: amount })
+        .eq("id", target.id);
+      if (upErr) {
+        await reply(chat_id, `❌ ${upErr.message}`);
+        return true;
+      }
+      if (delta !== 0) {
+        await admin.from("coin_transactions").insert({
+          user_id: target.id,
+          amount: delta,
+          type: delta > 0 ? "admin_mint" : "admin_deduct",
+          reference: note,
+        });
+      }
+      newBalance = amount;
+    }
+    await reply(
       chat_id,
-      text,
-      parse_mode: "HTML",
-      disable_web_page_preview: true,
-    }),
-  }).catch(() => undefined);
+      `✅ ${target.display_name ?? target.email ?? target.id} balance: <b>${newBalance}</b> OG coins`,
+    );
+    // DM the affected user too if they're linked
+    if (target.telegram_chat_id) {
+      await reply(
+        target.telegram_chat_id,
+        `💰 Your OG coin balance was updated by Boss.\nNew balance: <b>${newBalance}</b> OG coins.`,
+      );
+    }
+    return true;
+  }
+
+  if (cmd === "/stats") {
+    const [{ count: users }, { count: linked }, { data: coinAgg }] = await Promise.all([
+      admin.from("profiles").select("id", { count: "exact", head: true }),
+      admin
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .not("telegram_chat_id", "is", null),
+      admin.from("profiles").select("coin_balance"),
+    ]);
+    const totalCoins = (coinAgg ?? []).reduce(
+      (a: number, r: { coin_balance: number | null }) => a + (r.coin_balance ?? 0),
+      0,
+    );
+    await reply(
+      chat_id,
+      `📊 <b>Stats</b>\n👥 Users: <b>${users ?? 0}</b>\n✈️ Telegram-linked: <b>${linked ?? 0}</b>\n💰 Total coins in circulation: <b>${totalCoins}</b>`,
+    );
+    return true;
+  }
+
+  if (cmd === "/broadcast") {
+    if (!arg.trim()) {
+      await reply(chat_id, "Usage: /broadcast &lt;message&gt;");
+      return true;
+    }
+    const { data } = await admin
+      .from("profiles")
+      .select("telegram_chat_id")
+      .not("telegram_chat_id", "is", null);
+    let sent = 0;
+    for (const row of (data ?? []) as { telegram_chat_id: number }[]) {
+      await reply(row.telegram_chat_id, `📣 <b>OG Streamz</b>\n\n${arg}`);
+      sent++;
+    }
+    await reply(chat_id, `✅ Broadcast sent to ${sent} users.`);
+    return true;
+  }
+
+  return false;
+}
+
+async function runChatAI(
+  admin: Awaited<ReturnType<typeof loadAdmin>>,
+  profileId: string,
+  chat_id: number,
+  userText: string,
+  roles: string[],
+) {
+  const apiKey = process.env.LOVABLE_API_KEY;
+  if (!apiKey) {
+    await reply(chat_id, "AI gateway not configured.");
+    return;
+  }
+
+  const { data: profile } = await admin
+    .from("profiles")
+    .select("display_name, email, coin_balance")
+    .eq("id", profileId)
+    .maybeSingle();
+  if (!profile) {
+    await reply(chat_id, "Profile not found.");
+    return;
+  }
+
+  const isVip = roles.includes("vip") || roles.includes("admin") || roles.includes("dev");
+  const isAdminUser = roles.includes("admin") || roles.includes("dev");
+
+  // Charge 1 coin per message — skip for admins/dev.
+  if (!isAdminUser) {
+    if ((profile.coin_balance ?? 0) <= 0) {
+      await reply(
+        chat_id,
+        "💸 Out of OG coins. Top up in the app to keep chatting.",
+      );
+      return;
+    }
+    const { error: deductErr } = await admin.rpc("deduct_coins", {
+      p_user: profileId,
+      p_amount: 1,
+      p_reference: "telegram_chat",
+    });
+    if (deductErr) {
+      await reply(chat_id, `❌ ${deductErr.message}`);
+      return;
+    }
+  }
+
+  // Pull persona overrides + foul preference
+  const [prefRes, siteRes, historyRes] = await Promise.all([
+    admin.from("user_preferences").select("foul_mouth").eq("user_id", profileId).maybeSingle(),
+    admin
+      .from("site_content")
+      .select("key, value")
+      .in("key", ["og_persona.script", "og_persona.voice", "og_persona.dictionary"]),
+    admin
+      .from("og_messages")
+      .select("role, content")
+      .eq("user_id", profileId)
+      .order("created_at", { ascending: false })
+      .limit(20),
+  ]);
+
+  const personaMap = new Map<string, string>(
+    (siteRes.data ?? []).map((r: { key: string; value: string }) => [r.key, r.value]),
+  );
+  const foulMouth = isVip ? (prefRes.data?.foul_mouth ?? true) : false;
+
+  const userCtx: UserContextSummary = {
+    display_name: profile.display_name,
+    email: profile.email,
+    coin_balance: profile.coin_balance ?? 0,
+    is_admin: isAdminUser,
+    is_vip: isVip,
+    page_context: "telegram",
+  };
+
+  const system = buildSystemPrompt({
+    mode: "og",
+    foulMouth,
+    bossScript: personaMap.get("og_persona.script") ?? null,
+    bossVoice: personaMap.get("og_persona.voice") ?? null,
+    bossDictionary: personaMap.get("og_persona.dictionary") ?? null,
+    learnedInsults: [],
+    language: "English",
+    user: userCtx,
+    songIntent: detectSongIntent(userText),
+  });
+
+  const history = ((historyRes.data ?? []) as { role: string; content: string }[])
+    .reverse()
+    .map((m) => ({
+      role: m.role === "assistant" ? ("assistant" as const) : ("user" as const),
+      content: m.content,
+    }));
+
+  // Save user message
+  await admin.from("og_messages").insert({
+    user_id: profileId,
+    role: "user",
+    content: userText,
+  });
+
+  try {
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        temperature: foulMouth ? 0.9 : 0.75,
+        messages: [
+          { role: "system", content: system },
+          ...history,
+          { role: "user", content: userText },
+        ],
+      }),
+    });
+
+    if (!res.ok) {
+      if (!isAdminUser) {
+        await admin.rpc("mint_coins_admin", {
+          target_user_id: profileId,
+          amount: 1,
+          admin_notes: "telegram_chat_refund",
+        });
+      }
+      if (res.status === 429) {
+        await reply(chat_id, "⏱️ OG Bot is rate-limited, try again soon.");
+      } else if (res.status === 402) {
+        await reply(chat_id, "💳 AI credits exhausted — Boss needs to top up Lovable AI.");
+      } else {
+        await reply(chat_id, `OG Bot couldn't respond right now (HTTP ${res.status}).`);
+      }
+      return;
+    }
+
+    const json = (await res.json().catch(() => ({}))) as {
+      choices?: { message?: { content?: string } }[];
+    };
+    const replyText = (json.choices?.[0]?.message?.content ?? "").trim() || "…";
+
+    await admin.from("og_messages").insert({
+      user_id: profileId,
+      role: "assistant",
+      content: replyText,
+    });
+
+    // Telegram caps messages at ~4096 chars
+    const chunks = replyText.match(/[\s\S]{1,3800}/g) ?? [replyText];
+    for (const c of chunks) {
+      await tg("sendMessage", {
+        chat_id,
+        text: c,
+        disable_web_page_preview: true,
+      });
+    }
+  } catch (err) {
+    if (!isAdminUser) {
+      await admin
+        .rpc("mint_coins_admin", {
+          target_user_id: profileId,
+          amount: 1,
+          admin_notes: "telegram_chat_refund",
+        })
+        .then(() => undefined, () => undefined);
+    }
+    await reply(chat_id, `❌ ${(err as Error).message}`);
+  }
 }
 
 export const Route = createFileRoute("/api/public/telegram/webhook")({
@@ -62,31 +481,91 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
         const text: string | undefined = msg?.text;
         if (!chat_id) return Response.json({ ok: true, ignored: true });
 
+        const admin = await loadAdmin();
+
+        // Look up linked profile by chat_id FIRST so already-linked users
+        // get full chat + admin commands without needing /start.
+        const { data: linkedProfile } = await admin
+          .from("profiles")
+          .select("id")
+          .eq("telegram_chat_id", chat_id)
+          .maybeSingle();
+
         const startMatch =
           typeof text === "string" ? text.match(/^\/start\s+(\S+)/i) : null;
 
+        // ===== Linked user path =====
+        if (linkedProfile && typeof text === "string") {
+          const trimmed = text.trim();
+          const { admin: isBoss, roles } = await isAdmin(admin, linkedProfile.id);
+
+          if (/^\/help\b/i.test(trimmed)) {
+            await reply(chat_id, isBoss ? HELP_ADMIN : HELP_USER);
+            return Response.json({ ok: true, help: true });
+          }
+          if (/^\/balance\b/i.test(trimmed)) {
+            const { data: p } = await admin
+              .from("profiles")
+              .select("coin_balance")
+              .eq("id", linkedProfile.id)
+              .maybeSingle();
+            await reply(chat_id, `💰 Balance: <b>${p?.coin_balance ?? 0}</b> OG coins`);
+            return Response.json({ ok: true, balance: true });
+          }
+          if (/^\/me\b/i.test(trimmed)) {
+            const { data: p } = await admin
+              .from("profiles")
+              .select("id, display_name, email, coin_balance, telegram_chat_id, telegram_username")
+              .eq("id", linkedProfile.id)
+              .maybeSingle();
+            await reply(chat_id, p ? fmtProfile(p as AdminProfile) : "Profile not found.");
+            return Response.json({ ok: true, me: true });
+          }
+          if (/^\/start\b/i.test(trimmed)) {
+            await reply(
+              chat_id,
+              `✅ Already linked. Type /help for commands or just chat.`,
+            );
+            return Response.json({ ok: true, already_linked: true });
+          }
+
+          // Admin commands
+          if (isBoss && trimmed.startsWith("/")) {
+            const handled = await runAdminCommand(admin, chat_id, trimmed);
+            if (handled) return Response.json({ ok: true, admin_cmd: true });
+          }
+
+          // Reject unknown slash commands for non-admins
+          if (trimmed.startsWith("/")) {
+            await reply(chat_id, "Unknown command. Type /help.");
+            return Response.json({ ok: true, unknown_cmd: true });
+          }
+
+          // Otherwise route to AI chat
+          await runChatAI(admin, linkedProfile.id, chat_id, text, roles);
+          return Response.json({ ok: true, chatted: true });
+        }
+
+        // ===== Not linked yet =====
         if (typeof text === "string" && /^\/help\b/i.test(text.trim())) {
-          await sendTelegramReply(
-            tgKey,
+          await reply(
             chat_id,
-            "🛠️ <b>OG Bot is online.</b>\n\nTo link your account, open OG Streamz → Settings → Connect Telegram, then tap your personal Telegram link.\n\nAfter linking, I can DM song updates, coin alerts, referrals and general chat replies here.",
+            "🛠️ <b>OG Bot is online.</b>\n\nTo link your account, open OG Streamz → Settings → Connect Telegram, then tap your personal Telegram link.\n\nAfter linking, you can chat with me (same brain as the in-app messenger) and admins get full user/coin management commands.",
           );
           return Response.json({ ok: true, help: true });
         }
 
         if (!startMatch) {
           if (typeof text === "string" && /^\/start\b/i.test(text.trim())) {
-            await sendTelegramReply(
-              tgKey,
+            await reply(
               chat_id,
               "🔥 <b>OG Bot is alive.</b>\n\nYou opened me without your private link token, so I can't connect this Telegram chat to your OG profile yet.\n\nGo to OG Streamz → Settings → <b>Connect Telegram</b>, tap your personal link, then hit Start again.",
             );
             return Response.json({ ok: true, missing_token: true });
           }
-          await sendTelegramReply(
-            tgKey,
+          await reply(
             chat_id,
-            "👋 <b>OG Bot is online.</b>\n\nSend /help or connect your OG profile from Settings to unlock account updates here.",
+            "👋 <b>OG Bot is online.</b>\n\nLink your OG profile from Settings → Connect Telegram to unlock the full assistant here.",
           );
           return Response.json({ ok: true, unlinked_reply: true });
         }
@@ -94,8 +573,7 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
         const rawToken = startMatch[1].toLowerCase();
         const tokenMatch = rawToken.match(TOKEN_RE);
         if (!tokenMatch) {
-          await sendTelegramReply(
-            tgKey,
+          await reply(
             chat_id,
             "⚠️ That Telegram connect link is invalid. Please generate/open a fresh link from OG Streamz → Settings → Connect Telegram.",
           );
@@ -103,19 +581,16 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
         }
         const token = tokenMatch[1];
 
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
         let profileId: string | null = null;
 
         if (token.startsWith("t_")) {
-          const { data: byToken } = await supabaseAdmin
+          const { data: byToken } = await admin
             .from("profiles")
             .select("id")
             .eq("telegram_link_token", token)
             .limit(2);
           if (!byToken || byToken.length !== 1) {
-            await sendTelegramReply(
-              tgKey,
+            await reply(
               chat_id,
               "⚠️ That Telegram connect link has expired or was already used. Please generate/open a fresh link from OG Streamz → Settings.",
             );
@@ -124,14 +599,13 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
           profileId = byToken[0].id as string;
         } else {
           const uuidPrefix = tokenToUuidPrefix(token);
-          const { data: candidates } = await supabaseAdmin
+          const { data: candidates } = await admin
             .from("profiles")
             .select("id")
             .ilike("id::text", `${uuidPrefix}%`)
             .limit(2);
           if (!candidates || candidates.length !== 1) {
-            await sendTelegramReply(
-              tgKey,
+            await reply(
               chat_id,
               "⚠️ I couldn't match that link to an OG profile. Please open the Telegram button directly from OG Streamz Settings.",
             );
@@ -140,8 +614,7 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
           const pid = candidates[0].id as string;
           const reconstructed = pid.replace(/-/g, "").slice(0, 24).toLowerCase();
           if (reconstructed !== token) {
-            await sendTelegramReply(
-              tgKey,
+            await reply(
               chat_id,
               "⚠️ This connect token doesn't match your OG profile. Please open a fresh Telegram link from Settings.",
             );
@@ -150,40 +623,22 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
           profileId = pid;
         }
 
-        // Verify the chat is real and reachable BEFORE persisting the link
-        // or sending the greeting. Calls Telegram getChat through the gateway
-        // — if it doesn't return ok:true, we treat the link as unverified.
-        const lovableKey = process.env.LOVABLE_API_KEY;
-        let chatVerified = false;
-        if (lovableKey) {
-          try {
-            const verifyRes = await fetch(
-              "https://connector-gateway.lovable.dev/telegram/getChat",
-              {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${lovableKey}`,
-                  "X-Connection-Api-Key": tgKey,
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ chat_id }),
-              },
-            );
-            const verifyJson = (await verifyRes.json().catch(() => null)) as
-              | { ok?: boolean; result?: { id?: number; type?: string } }
-              | null;
-            chatVerified =
-              verifyRes.ok &&
-              verifyJson?.ok === true &&
-              Number(verifyJson?.result?.id) === Number(chat_id);
-          } catch {
-            chatVerified = false;
-          }
-        }
+        // Verify chat reachable
+        const verifyRes = await tg("getChat", { chat_id });
+        const verifyJson = verifyRes
+          ? ((await verifyRes.json().catch(() => null)) as {
+              ok?: boolean;
+              result?: { id?: number };
+            } | null)
+          : null;
+        const chatVerified =
+          !!verifyRes &&
+          verifyRes.ok &&
+          verifyJson?.ok === true &&
+          Number(verifyJson?.result?.id) === Number(chat_id);
 
         if (!chatVerified) {
-          await sendTelegramReply(
-            tgKey,
+          await reply(
             chat_id,
             "⚠️ I received your Start request, but Telegram chat verification failed. Please tap Start again in a moment.",
           );
@@ -193,7 +648,7 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
           );
         }
 
-        await supabaseAdmin
+        await admin
           .from("profiles")
           .update({
             telegram_chat_id: chat_id,
@@ -203,11 +658,13 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
           })
           .eq("id", profileId);
 
-        const { data: profile } = await supabaseAdmin
+        const { data: profile } = await admin
           .from("profiles")
           .select("display_name, email, coin_balance")
           .eq("id", profileId)
           .maybeSingle();
+
+        const { admin: isBoss } = await isAdmin(admin, profileId);
 
         const tgFirst = (msg?.from?.first_name as string | undefined)?.trim();
         const name =
@@ -220,12 +677,15 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
         const greeting =
           `🔥 Yo <b>${name}</b> — link verified. OG Bot in your pocket now.\n\n` +
           `💰 Balance: <b>${balance}</b> OG coins\n` +
-          `🎧 I'll DM drops, song updates &amp; referral cashback right here.\n\n` +
-          `Type /help any time. Now go make some noise. 🎤`;
+          `🎧 Just chat — same brain as the in-app messenger.\n` +
+          (isBoss
+            ? `👑 Boss mode unlocked — type /help for admin commands.\n\n`
+            : `Type /help for commands.\n\n`) +
+          `Now go make some noise. 🎤`;
 
-        await sendTelegramReply(tgKey, chat_id, greeting);
+        await reply(chat_id, greeting);
 
-        await supabaseAdmin
+        await admin
           .from("og_messages")
           .insert({
             user_id: profileId,
