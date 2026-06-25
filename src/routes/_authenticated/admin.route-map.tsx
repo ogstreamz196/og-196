@@ -148,8 +148,7 @@ function RouteMapPage() {
                       </Button>
                     ) : (
                       <Button asChild size="sm" variant="outline" className="gap-1.5 text-xs">
-                        {/* @ts-expect-error dynamic route path narrowing is overkill for an audit tool */}
-                        <Link to={r.path}>
+                        <Link to={r.path as never}>
                           Open <ExternalLink className="h-3.5 w-3.5" />
                         </Link>
                       </Button>
