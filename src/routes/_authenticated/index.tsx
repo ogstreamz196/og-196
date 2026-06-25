@@ -49,6 +49,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { TelegramLinkStatus } from "@/components/dashboard/TelegramLinkStatus";
+import { TelegramLinkChecklist } from "@/components/dashboard/TelegramLinkChecklist";
 
 export const Route = createFileRoute("/_authenticated/")({
   component: DashboardHome,
@@ -333,6 +334,8 @@ function DashboardHome() {
       </section>
 
       <TelegramLinkStatus />
+      <TelegramLinkChecklist />
+
 
 
 

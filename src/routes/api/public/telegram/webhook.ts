@@ -546,6 +546,14 @@ async function runChatAI(
   }
 }
 
+function startMatchKind(text: string | undefined): string {
+  if (typeof text !== "string") return "non_text";
+  const t = text.trim();
+  if (/^\/start\b/i.test(t)) return "start";
+  if (/^\//.test(t)) return "command";
+  return "message";
+}
+
 export const Route = createFileRoute("/api/public/telegram/webhook")({
   server: {
     handlers: {
@@ -558,12 +566,58 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
         if (!safeEqual(got, expected)) return new Response("unauthorized", { status: 401 });
 
         const update = await request.json().catch(() => null);
+        const updateId: number | undefined =
+          typeof update?.update_id === "number" ? update.update_id : undefined;
         const msg = update?.message ?? update?.edited_message;
         const chat_id: number | undefined = msg?.chat?.id;
         const text: string | undefined = msg?.text;
         if (!chat_id) return Response.json({ ok: true, ignored: true });
 
         const admin = await loadAdmin();
+
+        // ---- Idempotency: claim this update_id atomically. Telegram retries
+        // on slow handlers, so without this a single /start could link twice
+        // or a chat message could be charged twice.
+        if (typeof updateId === "number") {
+          const { error: dupErr } = await admin
+            .from("telegram_processed_updates")
+            .insert({ update_id: updateId, chat_id, kind: startMatchKind(text) });
+          if (dupErr) {
+            const code = (dupErr as { code?: string }).code;
+            if (code === "23505") {
+              return Response.json({ ok: true, duplicate: true, update_id: updateId });
+            }
+            console.error("[telegram] processed_updates insert failed", dupErr);
+          }
+        }
+
+        try {
+          return await handleTelegramUpdate(admin, chat_id, text, msg);
+        } catch (err) {
+          console.error("[telegram] handler error", err);
+          await reply(
+            chat_id,
+            "⚠️ OG Bot hit an internal error handling that update. Boss has been notified.",
+          ).catch(() => undefined);
+          return Response.json(
+            { ok: false, error: (err as Error)?.message ?? "handler_error" },
+            { status: 200 },
+          );
+        }
+      },
+    },
+  },
+});
+
+async function handleTelegramUpdate(
+  admin: Awaited<ReturnType<typeof loadAdmin>>,
+  chat_id: number,
+  text: string | undefined,
+  msg: {
+    chat?: { id?: number; type?: string };
+    from?: { id?: number; username?: string; first_name?: string };
+  },
+): Promise<Response> {
 
         // Look up linked profile by chat_id FIRST so already-linked users
         // get full chat + admin commands without needing /start.
@@ -777,8 +831,6 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
           })
           .then(() => undefined, () => undefined);
 
-        return Response.json({ ok: true, linked: true, verified: true });
-      },
-    },
-  },
-});
+  return Response.json({ ok: true, linked: true, verified: true });
+}
+
