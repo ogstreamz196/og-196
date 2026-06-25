@@ -74,9 +74,10 @@ function DashboardHome() {
   const { isVip } = useRole();
   const { data: recentSongs = [] } = useRecentSongs(user?.id);
 
-  const displayName = dev.isDev
-    ? "Developer"
-    : (profile?.display_name?.trim() || user?.email?.split("@")[0] || "there");
+  const displayName =
+    profile?.display_name?.trim() ||
+    user?.email?.split("@")[0] ||
+    (dev.isDev ? "Developer" : "there");
   const balance = profile?.coin_balance ?? 0;
   const hasSongs = recentSongs.length > 0;
   const welcomeRef = useRef<HTMLElement | null>(null);
@@ -194,7 +195,14 @@ function DashboardHome() {
                     <span
                       key={`${ch}-${i}`}
                       className="inline-block wc-pop hover:animate-[wiggle_0.6s_ease-in-out]"
-                      style={{ animationDelay: `${0.25 + i * 0.05}s`, whiteSpace: ch === " " ? "pre" : undefined }}
+                      style={{
+                        animationDelay: `${0.25 + i * 0.05}s`,
+                        whiteSpace: ch === " " ? "pre" : undefined,
+                        background: "inherit",
+                        WebkitBackgroundClip: "text",
+                        backgroundClip: "text",
+                        color: "transparent",
+                      }}
                     >
                       {ch}
                     </span>
