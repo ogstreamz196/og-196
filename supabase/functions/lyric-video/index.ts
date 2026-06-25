@@ -149,17 +149,25 @@ async function renderAndStore(
   mode: Mode,
   admin: ReturnType<typeof adminClient>,
 ): Promise<{ ok: true; path: string } | { ok: false; error: string }> {
-  await admin.from("songs").update({ lyric_video_status: "processing", lyric_video_error: null }).eq("id", song.id);
+  const setProgress = async (progress: number, stage: string) => {
+    await admin.from("songs").update({
+      lyric_video_status: "processing",
+      lyric_video_progress: Math.max(0, Math.min(100, Math.round(progress))),
+      lyric_video_stage: stage,
+      lyric_video_error: null,
+    }).eq("id", song.id);
+  };
+  await setProgress(2, mode === "preview" ? "Queued preview render" : "Queued full render");
 
   try {
-    // 1. Download source audio (full for "full", sample for "preview" if available)
+    await setProgress(8, "Downloading audio");
     const audioPath = mode === "full" ? song.audio_path : (song.sample_path ?? song.audio_path);
     if (!audioPath) throw new Error("Audio not available");
     const { data: audioBlob, error: dlErr } = await admin.storage.from(BUCKET).download(audioPath);
     if (dlErr || !audioBlob) throw new Error(dlErr?.message ?? "Audio download failed");
     const audioBytes = new Uint8Array(await audioBlob.arrayBuffer());
 
-    // 2. Cover image (optional). Fetch into bytes if it's an http URL.
+    await setProgress(18, "Fetching cover art");
     let coverBytes: Uint8Array | null = null;
     if (song.cover_url) {
       try {
@@ -168,9 +176,7 @@ async function renderAndStore(
       } catch { /* fall back to gradient */ }
     }
 
-    // 3. Build the subtitle file from lyrics.
-    //    PREVIEW must NOT leak the entire lyric set — slice to a proportional
-    //    window of the song so users only see ~the first 30s worth of lines.
+    await setProgress(25, "Building subtitles");
     const fullDuration = Math.max(15, song.duration_seconds ?? 180);
     const duration = mode === "preview" ? 30 : fullDuration;
     const lyricsForRender = mode === "preview"
@@ -178,11 +184,21 @@ async function renderAndStore(
       : (song.lyrics ?? "");
     const ass = buildAssSubtitles(lyricsForRender, duration, song.title ?? "", mode === "preview");
 
+    await setProgress(30, "Rendering video");
+    const mp4 = await renderMp4({
+      audioBytes, coverBytes, assText: ass, duration,
+      onProgress: (pct) => {
+        // Map ffmpeg's 0..1 to the 30..90 band reserved for encoding.
+        const mapped = 30 + Math.max(0, Math.min(1, pct)) * 60;
+        // Fire-and-forget — don't block ffmpeg loop on the DB write.
+        admin.from("songs").update({
+          lyric_video_progress: Math.round(mapped),
+          lyric_video_stage: "Encoding frames",
+        }).eq("id", song.id).then(() => {}, () => {});
+      },
+    });
 
-    // 4. Render via ffmpeg.wasm
-    const mp4 = await renderMp4({ audioBytes, coverBytes, assText: ass, duration });
-
-    // 5. Upload
+    await setProgress(92, "Uploading MP4");
     const outPath = `${song.id}/lyric-${mode}-${Date.now()}.mp4`;
     const { error: upErr } = await admin.storage.from(BUCKET).upload(outPath, mp4, {
       contentType: "video/mp4", upsert: true,
@@ -193,6 +209,8 @@ async function renderAndStore(
       lyric_video_status: "completed",
       lyric_video_rendered_at: new Date().toISOString(),
       lyric_video_error: null,
+      lyric_video_progress: 100,
+      lyric_video_stage: mode === "preview" ? "Preview ready" : "Full video ready",
     };
     update[mode === "preview" ? "lyric_video_preview_path" : "lyric_video_full_path"] = outPath;
     await admin.from("songs").update(update).eq("id", song.id);
@@ -200,10 +218,15 @@ async function renderAndStore(
     return { ok: true, path: outPath };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    await admin.from("songs").update({ lyric_video_status: "failed", lyric_video_error: msg }).eq("id", song.id);
+    await admin.from("songs").update({
+      lyric_video_status: "failed",
+      lyric_video_error: msg,
+      lyric_video_stage: "Render failed",
+    }).eq("id", song.id);
     return { ok: false, error: msg };
   }
 }
+
 
 function sliceLyricsForPreview(lyrics: string, previewDuration: number, fullDuration: number): string {
   const lines = lyrics.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
