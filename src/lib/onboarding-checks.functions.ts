@@ -94,9 +94,9 @@ async function runOne(key: string): Promise<CheckResult> {
     case "google_search_console":
       return gatewayGet("google_search_console", "/webmasters/v3/sites");
     case "stripe_live":
-      return present("STRIPE_LIVE_API_KEY") ?? { ok: true, detail: "Live key present." };
+      return stripePing("live");
     case "stripe_sandbox":
-      return present("STRIPE_SANDBOX_API_KEY") ?? { ok: true, detail: "Sandbox key present." };
+      return stripePing("sandbox");
     case "payments_live_webhook":
       return present("PAYMENTS_LIVE_WEBHOOK_SECRET") ?? { ok: true, detail: "Live webhook secret present." };
     case "payments_sandbox_webhook":
