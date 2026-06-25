@@ -158,6 +158,9 @@ function AdminPanel() {
               <Link to="/admin/debug-context">
                 <Button size="sm" variant="outline">Lyric Context Debug</Button>
               </Link>
+              <Link to="/admin/referrals-audit">
+                <Button size="sm" variant="outline">Referral audit</Button>
+              </Link>
             </div>
           }
         >
