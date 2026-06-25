@@ -76,6 +76,11 @@ function ReferralsAuditPage() {
 
   const users = auditQ.data?.users ?? [];
   const ledger = auditQ.data?.ledger ?? [];
+  const leaderboard = [...users]
+    .filter((u) => (u.invitees ?? 0) > 0 || (u.earned ?? 0) > 0)
+    .sort((a, b) => (b.earned ?? 0) - (a.earned ?? 0))
+    .slice(0, 25);
+  const totalPaid = users.reduce((sum, u) => sum + (u.earned ?? 0), 0);
 
   return (
     <DashboardShell title="Referral audit">
