@@ -383,6 +383,23 @@ function LibraryPage() {
         </div>
       </header>
 
+      {/* Persistent Foul Mouth reminder — one tap takes you to the toggle */}
+      <div className="sticky top-14 z-20 -mx-4 px-4 sm:top-16 sm:-mx-6 sm:px-6">
+        <FoulMouthReminder
+          enabled={foulMouth}
+          onAction={() => {
+            const el = document.getElementById("foul-mouth-toggle");
+            if (el) {
+              el.scrollIntoView({ behavior: "smooth", block: "center" });
+              el.focus({ preventScroll: true });
+            }
+            setFoulMouth((v) => !v);
+          }}
+        />
+      </div>
+
+
+
 
 
 
