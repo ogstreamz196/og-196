@@ -274,6 +274,8 @@ function ReferralsPage() {
           </div>
         </section>
 
+        <BindReferrerCard />
+
         {/* SHARE CARD — primary action */}
         <section className="rounded-3xl border border-white/10 bg-card/70 p-5 backdrop-blur-xl sm:p-6">
           <div className="flex flex-wrap items-center justify-between gap-2">
