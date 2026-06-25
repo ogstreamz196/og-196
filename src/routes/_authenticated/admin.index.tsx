@@ -19,6 +19,7 @@ import { OgBotPing } from "@/components/admin/OgBotPing";
 import { TelegramWebhookStatus } from "@/components/admin/TelegramWebhookStatus";
 import { BossNotificationsPanel } from "@/components/admin/BossNotificationsPanel";
 import { TelegramSmokeTest } from "@/components/admin/TelegramSmokeTest";
+import { E2ESmokeTest } from "@/components/admin/E2ESmokeTest";
 
 import { AdminSection } from "@/components/admin/AdminSection";
 import { AdminEditableLabel, AdminEditableBalance } from "@/components/admin/AdminEditMode";
@@ -178,6 +179,7 @@ function AdminPanel() {
 
         <TelegramWebhookStatus />
         <TelegramSmokeTest />
+        <E2ESmokeTest />
 
         <BossNotificationsPanel />
 
