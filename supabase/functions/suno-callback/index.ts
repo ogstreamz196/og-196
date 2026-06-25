@@ -171,10 +171,15 @@ Deno.serve(async (req) => {
     for (let i = 0; i < clips.length; i++) {
       const clip = clips[i];
 
+      // Idempotency: if we've already materialised a row for this Suno clip
+      // (parent or sibling), skip — repeated callbacks must not duplicate.
       if (clip.clipId) {
         const { data: existing } = await admin
           .from("songs").select("id").eq("suno_clip_id", clip.clipId).maybeSingle();
-        if (existing) continue;
+        if (existing) {
+          console.log("Skipping duplicate clip", clip.clipId, "→ existing song", existing.id);
+          continue;
+        }
       }
 
       // --- Phase 1: short sample (fast) ---
@@ -184,7 +189,7 @@ Deno.serve(async (req) => {
       }
       const sampleBuf = new Uint8Array(await sampleRes.arrayBuffer());
 
-      let targetId = i === 0 ? songId : null;
+      let targetId: string | null = i === 0 ? songId : null;
       if (!targetId) {
         const { data: sib, error: sibErr } = await admin.from("songs").insert({
           user_id: parentSong.user_id,
@@ -194,11 +199,19 @@ Deno.serve(async (req) => {
           title: clip.title ?? parentSong.title,
           status: "processing",
           suno_task_id: parentSong.suno_task_id,
+          suno_clip_id: clip.clipId ?? null,
           portal_id: parentSong.portal_id ?? null,
           is_variation: true,
           revealed: false,
         }).select("id").single();
-        if (sibErr) throw sibErr;
+        if (sibErr) {
+          // Unique-index race: another concurrent callback already inserted this clip.
+          if ((sibErr as { code?: string }).code === "23505") {
+            console.log("Sibling insert race for clip", clip.clipId, "— already exists, skipping");
+            continue;
+          }
+          throw sibErr;
+        }
         targetId = sib.id;
       }
 

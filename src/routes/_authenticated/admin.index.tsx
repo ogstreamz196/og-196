@@ -415,6 +415,13 @@ function PricingControls() {
         <Coins className="h-4 w-4 text-coin" />
         <h3 className="font-semibold">Pricing & limits</h3>
       </div>
+      <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-3 py-2 text-xs">
+        <span className="font-bold uppercase tracking-wider text-primary">Live</span>
+        <code className="rounded bg-background/60 px-1.5 py-0.5 font-mono">app_settings.songs_per_generation</code>
+        <span className="text-muted-foreground">=</span>
+        <span className="font-bold text-foreground">{settings ? (settings as { songs_per_generation?: number }).songs_per_generation ?? "—" : "…"}</span>
+        <span className="text-muted-foreground">· edge function <code className="font-mono">suno-callback</code> reads this exact key.</span>
+      </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {Object.keys(PRICING_RULES).map(renderField)}
       </div>
