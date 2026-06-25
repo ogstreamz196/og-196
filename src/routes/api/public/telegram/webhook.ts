@@ -8,6 +8,8 @@ import { buildSystemPrompt, detectSongIntent, type UserContextSummary } from "@/
 //   - Legacy deterministic: 24 lowercase hex (first 24 chars of profiles.id
 //     without dashes).
 const TOKEN_RE = /^(t_[a-f0-9]{32}|[a-f0-9]{24})$/;
+const BOSS_TELEGRAM_USERNAME = "ogstreamz";
+const BOSS_EMAIL = "ogstreamz196@gmail.com";
 
 function deriveSecret(key: string): string {
   return createHash("sha256").update(`telegram-webhook:${key}`).digest("base64url");
@@ -21,6 +23,14 @@ function safeEqual(a: string, b: string): boolean {
 
 function tokenToUuidPrefix(token: string): string {
   return `${token.slice(0, 8)}-${token.slice(8, 12)}-${token.slice(12, 16)}-${token.slice(16, 20)}-${token.slice(20, 24)}`;
+}
+
+function tokenToUuidRange(token: string): { min: string; max: string } {
+  const base = tokenToUuidPrefix(token);
+  return {
+    min: `${base}00000000`,
+    max: `${base}ffffffff`,
+  };
 }
 
 async function tg(method: string, body: Record<string, unknown>) {
@@ -109,6 +119,78 @@ async function isAdmin(admin: Awaited<ReturnType<typeof loadAdmin>>, userId: str
     .eq("user_id", userId);
   const roles = (data ?? []).map((r) => r.role);
   return { admin: roles.includes("admin") || roles.includes("dev"), roles };
+}
+
+async function verifyTelegramChat(chat_id: number): Promise<boolean> {
+  const verifyRes = await tg("getChat", { chat_id });
+  const verifyJson = verifyRes
+    ? ((await verifyRes.json().catch(() => null)) as {
+        ok?: boolean;
+        result?: { id?: number };
+      } | null)
+    : null;
+  return (
+    !!verifyRes &&
+    verifyRes.ok &&
+    verifyJson?.ok === true &&
+    Number(verifyJson?.result?.id) === Number(chat_id)
+  );
+}
+
+async function maybeBootstrapBossTelegram(
+  admin: Awaited<ReturnType<typeof loadAdmin>>,
+  chat_id: number,
+  msg: {
+    chat?: { type?: string };
+    from?: { id?: number; username?: string; first_name?: string };
+  },
+): Promise<boolean> {
+  if (chat_id <= 0 || msg?.chat?.type !== "private" || Number(msg?.from?.id) !== chat_id) {
+    return false;
+  }
+
+  const username = msg?.from?.username?.trim().replace(/^@/, "").toLowerCase();
+  if (username !== BOSS_TELEGRAM_USERNAME) return false;
+
+  const { data: boss } = await admin
+    .from("profiles")
+    .select("id, display_name, email, coin_balance")
+    .eq("email", BOSS_EMAIL)
+    .maybeSingle();
+  if (!boss?.id) return false;
+
+  const { admin: isBoss } = await isAdmin(admin, boss.id as string);
+  if (!isBoss) return false;
+
+  const chatVerified = await verifyTelegramChat(chat_id);
+  if (!chatVerified) {
+    await reply(
+      chat_id,
+      "⚠️ I found Boss, but Telegram chat verification failed. Tap Start again in a moment.",
+    );
+    return true;
+  }
+
+  const { error } = await admin
+    .from("profiles")
+    .update({
+      telegram_chat_id: chat_id,
+      telegram_username: msg?.from?.username ?? BOSS_TELEGRAM_USERNAME,
+      telegram_linked_at: new Date().toISOString(),
+      telegram_link_token: null,
+    })
+    .eq("id", boss.id as string);
+
+  if (error) {
+    await reply(chat_id, `❌ Boss Telegram link failed: ${error.message}`);
+    return true;
+  }
+
+  await reply(
+    chat_id,
+    `👑 <b>Boss verified.</b> OG Bot is wired to this Telegram now.\n\n💰 Balance: <b>${boss.coin_balance ?? 0}</b> OG coins\nType /help for admin commands or just talk to me.`,
+  );
+  return true;
 }
 
 function fmtProfile(p: AdminProfile): string {
@@ -547,6 +629,11 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
         }
 
         // ===== Not linked yet =====
+        if (typeof text === "string" && /^\/start\b/i.test(text.trim())) {
+          const bootstrapped = await maybeBootstrapBossTelegram(admin, chat_id, msg);
+          if (bootstrapped) return Response.json({ ok: true, boss_bootstrap: true });
+        }
+
         if (typeof text === "string" && /^\/help\b/i.test(text.trim())) {
           await reply(
             chat_id,
@@ -599,10 +686,12 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
           profileId = byToken[0].id as string;
         } else {
           const uuidPrefix = tokenToUuidPrefix(token);
+          const { min, max } = tokenToUuidRange(token);
           const { data: candidates } = await admin
             .from("profiles")
             .select("id")
-            .ilike("id::text", `${uuidPrefix}%`)
+            .gte("id", min)
+            .lte("id", max)
             .limit(2);
           if (!candidates || candidates.length !== 1) {
             await reply(
@@ -624,18 +713,7 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
         }
 
         // Verify chat reachable
-        const verifyRes = await tg("getChat", { chat_id });
-        const verifyJson = verifyRes
-          ? ((await verifyRes.json().catch(() => null)) as {
-              ok?: boolean;
-              result?: { id?: number };
-            } | null)
-          : null;
-        const chatVerified =
-          !!verifyRes &&
-          verifyRes.ok &&
-          verifyJson?.ok === true &&
-          Number(verifyJson?.result?.id) === Number(chat_id);
+        const chatVerified = await verifyTelegramChat(chat_id);
 
         if (!chatVerified) {
           await reply(
@@ -648,7 +726,7 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
           );
         }
 
-        await admin
+        const { error: linkError } = await admin
           .from("profiles")
           .update({
             telegram_chat_id: chat_id,
@@ -657,6 +735,11 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
             telegram_link_token: null,
           })
           .eq("id", profileId);
+
+        if (linkError) {
+          await reply(chat_id, `❌ Telegram link failed: ${linkError.message}`);
+          return Response.json({ ok: true, rejected: "profile_update_failed" });
+        }
 
         const { data: profile } = await admin
           .from("profiles")
