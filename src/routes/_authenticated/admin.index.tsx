@@ -306,10 +306,10 @@ function AdminPanel() {
             </div>
           )}
         </div>
-        </div>
         </AdminCollapsible>
       </div>
     </DashboardShell>
+
   );
 }
 
