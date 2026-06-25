@@ -784,8 +784,7 @@ function LibraryPage() {
         </section>
       )}
 
-
-
+      <PoweredByOgBot />
 
       <AlertDialog open={!!pendingDelete} onOpenChange={(o) => !o && setPendingDelete(null)}>
         <AlertDialogContent>
