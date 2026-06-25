@@ -30,6 +30,7 @@ import { invokeError } from "@/lib/invoke-error";
 import { useSettings } from "@/hooks/use-settings";
 import { useProfile } from "@/hooks/use-profile";
 import type { Song } from "@/components/SongCard";
+import { LyricVideoSection } from "@/components/library/LyricVideoSection";
 
 type JobStatus = "queued" | "generating" | "completed" | "failed";
 
@@ -429,6 +430,16 @@ function JobDetailsDrawer({
                 )}
               </div>
             </div>
+          )}
+
+          {/* Lyric video pipeline — preview free, full requires unlock */}
+          {song && (
+            <LyricVideoSection
+              songId={song.id}
+              songTitle={song.title || ""}
+              mp3Unlocked={unlocked}
+              onBalanceChange={refetchProfile}
+            />
           )}
 
           {/* Footer link to dedicated page */}
