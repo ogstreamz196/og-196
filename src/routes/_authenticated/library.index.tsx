@@ -427,6 +427,12 @@ function LibraryPage() {
           )}
         </div>
 
+        {versionedLibrary.length > 0 && (
+          <div className="mb-4">
+            <JobQueuePanel songs={versionedLibrary} />
+          </div>
+        )}
+
         {library.isLoading ? (
           <div className="grid gap-3">
             {[0, 1, 2].map((i) => (
