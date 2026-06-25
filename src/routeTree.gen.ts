@@ -22,6 +22,7 @@ import { Route as AuthenticatedReferralsRouteImport } from './routes/_authentica
 import { Route as AuthenticatedPortalsRouteImport } from './routes/_authenticated/portals'
 import { Route as AuthenticatedMessengerRouteImport } from './routes/_authenticated/messenger'
 import { Route as AuthenticatedDeveloperRouteImport } from './routes/_authenticated/developer'
+import { Route as AuthenticatedCommunityRouteImport } from './routes/_authenticated/community'
 import { Route as AuthenticatedLibraryIndexRouteImport } from './routes/_authenticated/library.index'
 import { Route as AuthenticatedBuyCoinsIndexRouteImport } from './routes/_authenticated/buy-coins.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
@@ -100,6 +101,11 @@ const AuthenticatedMessengerRoute = AuthenticatedMessengerRouteImport.update({
 const AuthenticatedDeveloperRoute = AuthenticatedDeveloperRouteImport.update({
   id: '/developer',
   path: '/developer',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCommunityRoute = AuthenticatedCommunityRouteImport.update({
+  id: '/community',
+  path: '/community',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedLibraryIndexRoute =
@@ -197,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/m-preview': typeof MPreviewRoute
   '/trust': typeof TrustRoute
   '/welcome': typeof WelcomeRoute
+  '/community': typeof AuthenticatedCommunityRoute
   '/developer': typeof AuthenticatedDeveloperRoute
   '/messenger': typeof AuthenticatedMessengerRoute
   '/portals': typeof AuthenticatedPortalsRoute
@@ -225,6 +232,7 @@ export interface FileRoutesByTo {
   '/m-preview': typeof MPreviewRoute
   '/trust': typeof TrustRoute
   '/welcome': typeof WelcomeRoute
+  '/community': typeof AuthenticatedCommunityRoute
   '/developer': typeof AuthenticatedDeveloperRoute
   '/messenger': typeof AuthenticatedMessengerRoute
   '/portals': typeof AuthenticatedPortalsRoute
@@ -256,6 +264,7 @@ export interface FileRoutesById {
   '/m-preview': typeof MPreviewRoute
   '/trust': typeof TrustRoute
   '/welcome': typeof WelcomeRoute
+  '/_authenticated/community': typeof AuthenticatedCommunityRoute
   '/_authenticated/developer': typeof AuthenticatedDeveloperRoute
   '/_authenticated/messenger': typeof AuthenticatedMessengerRoute
   '/_authenticated/portals': typeof AuthenticatedPortalsRoute
@@ -288,6 +297,7 @@ export interface FileRouteTypes {
     | '/m-preview'
     | '/trust'
     | '/welcome'
+    | '/community'
     | '/developer'
     | '/messenger'
     | '/portals'
@@ -316,6 +326,7 @@ export interface FileRouteTypes {
     | '/m-preview'
     | '/trust'
     | '/welcome'
+    | '/community'
     | '/developer'
     | '/messenger'
     | '/portals'
@@ -346,6 +357,7 @@ export interface FileRouteTypes {
     | '/m-preview'
     | '/trust'
     | '/welcome'
+    | '/_authenticated/community'
     | '/_authenticated/developer'
     | '/_authenticated/messenger'
     | '/_authenticated/portals'
@@ -476,6 +488,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDeveloperRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/community': {
+      id: '/_authenticated/community'
+      path: '/community'
+      fullPath: '/community'
+      preLoaderRoute: typeof AuthenticatedCommunityRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/library/': {
       id: '/_authenticated/library/'
       path: '/library'
@@ -599,6 +618,7 @@ const AuthenticatedAdminUsersRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedCommunityRoute: typeof AuthenticatedCommunityRoute
   AuthenticatedDeveloperRoute: typeof AuthenticatedDeveloperRoute
   AuthenticatedMessengerRoute: typeof AuthenticatedMessengerRoute
   AuthenticatedPortalsRoute: typeof AuthenticatedPortalsRoute
@@ -620,6 +640,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedCommunityRoute: AuthenticatedCommunityRoute,
   AuthenticatedDeveloperRoute: AuthenticatedDeveloperRoute,
   AuthenticatedMessengerRoute: AuthenticatedMessengerRoute,
   AuthenticatedPortalsRoute: AuthenticatedPortalsRoute,
