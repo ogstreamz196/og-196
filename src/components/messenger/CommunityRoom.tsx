@@ -80,7 +80,7 @@ export function CommunityRoom() {
   }, [messages.length]);
 
   const send = useMutation({
-    mutationFn: (content: string) => postFn({ data: { content } }),
+    mutationFn: (content: string) => postFn({ data: { content, foulMouth } }),
     onSuccess: () => setText(""),
     onError: (err: Error) => toast.error(err.message),
   });
