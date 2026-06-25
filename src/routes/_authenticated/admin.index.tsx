@@ -174,6 +174,9 @@ function AdminPanel() {
 
         <OgBotPing />
 
+        <TelegramWebhookStatus />
+
+
         <HardwiredCapabilities />
 
 
