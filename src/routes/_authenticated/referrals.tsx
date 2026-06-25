@@ -78,10 +78,25 @@ function ReferralsPage() {
   const qc = useQueryClient();
   const [copied, setCopied] = useState(false);
 
+  const codeQ = useQuery({
+    queryKey: ["my-referral-code", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("referral_code")
+        .eq("id", user!.id)
+        .maybeSingle();
+      if (error) throw error;
+      return (data?.referral_code as string | null) ?? null;
+    },
+  });
+  const myCode = codeQ.data ?? null;
+
   const link = useMemo(() => {
     if (!user) return "";
-    return `https://ogstreamz.co.uk/r/${user.id}`;
-  }, [user]);
+    return `https://ogstreamz.co.uk/r/${myCode ?? user.id}`;
+  }, [user, myCode]);
 
   const summaryQ = useQuery({
     queryKey: ["referral-summary", user?.id],
