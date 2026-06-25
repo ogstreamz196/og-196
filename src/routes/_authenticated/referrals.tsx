@@ -272,11 +272,28 @@ function ReferralsPage() {
                   {copied ? "Copied" : "Copy link"}
                 </Button>
               </div>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  if (typeof document === "undefined") return;
+                  const el = document.getElementById("bind-referrer");
+                  el?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  setTimeout(() => {
+                    const input = document.getElementById("og-leader-code-input") as HTMLInputElement | null;
+                    input?.focus();
+                  }, 400);
+                }}
+                className="mt-2 w-full gap-2 border-rose-500/40 bg-rose-500/10 text-rose-200 hover:bg-rose-500/20"
+              >
+                <KeyRound className="h-4 w-4" /> Connect OG Leader (enter code)
+              </Button>
             </div>
           </div>
         </section>
 
-        <BindReferrerCard />
+        <div id="bind-referrer" className="scroll-mt-24">
+          <BindReferrerCard />
+        </div>
 
         {/* SHARE CARD — primary action */}
         <section className="rounded-3xl border border-white/10 bg-card/70 p-5 backdrop-blur-xl sm:p-6">
