@@ -34,6 +34,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import ogBotAsset from "@/assets/ogbot.png.asset.json";
+import musicHubHero from "@/assets/musichub-hero.jpg";
 
 import { useAuth } from "@/hooks/use-auth";
 import { useDevMode } from "@/hooks/use-dev-mode";
@@ -230,21 +232,23 @@ function DashboardHome() {
             Powered by OG Bot
           </span>
         </div>
-        <div className="grid grid-cols-1 items-stretch gap-4 sm:gap-6 md:grid-cols-2">
+        <div className="grid grid-cols-2 items-stretch gap-3 sm:gap-5">
           <PrimaryCard
             to="/library"
-            icon={<Music2 className="h-6 w-6" />}
-            eyebrow="MusicHub · Powered by OG Bot"
+            image={musicHubHero}
+            imageAlt="Neon vinyl with equalizer bars"
+            eyebrow="MusicHub"
             title="Create a song"
-            body="Generate. Remix. Release in minutes."
+            body="Generate · Remix · Release"
             cta="Open MusicHub"
           />
           <PrimaryCard
             to="/messenger"
-            icon={<MessageSquareMore className="h-6 w-6" />}
-            eyebrow="OG Messenger · Powered by OG Bot"
+            image={ogBotAsset.url}
+            imageAlt="OG Bot avatar"
+            eyebrow="OG Messenger"
             title="Chat to OG Bot"
-            body="Your AI co-producer & assistant."
+            body="Your AI co-producer"
             cta="Open Messenger"
             variant="accent"
           />
@@ -556,7 +560,8 @@ function ChatBubbleCard({
 
 function PrimaryCard({
   to,
-  icon,
+  image,
+  imageAlt,
   eyebrow,
   title,
   body,
@@ -564,7 +569,8 @@ function PrimaryCard({
   variant = "primary",
 }: {
   to: "/library" | "/messenger";
-  icon: React.ReactNode;
+  image: string;
+  imageAlt: string;
   eyebrow: string;
   title: string;
   body: string;
@@ -572,157 +578,80 @@ function PrimaryCard({
   variant?: "primary" | "accent";
 }) {
   const isAccent = variant === "accent";
-  const graphicRef = useRef<HTMLDivElement | null>(null);
-  const rootRef = useRef<HTMLAnchorElement | null>(null);
-  const draggingRef = useRef(false);
-
-  const applyParallax = useCallback((clientX: number, clientY: number) => {
-    const root = rootRef.current;
-    const el = graphicRef.current;
-    if (!root || !el) return;
-    const rect = root.getBoundingClientRect();
-    const nx = ((clientX - rect.left) / rect.width) * 2 - 1; // -1..1
-    const ny = ((clientY - rect.top) / rect.height) * 2 - 1;
-    el.style.setProperty("--px", `${nx * 18}px`);
-    el.style.setProperty("--py", `${ny * 18}px`);
-    el.style.setProperty("--rx", `${-ny * 12}deg`);
-    el.style.setProperty("--ry", `${nx * 12}deg`);
-    el.style.setProperty("--spin", `${nx * 25}deg`);
-  }, []);
-
-  const reset = useCallback(() => {
-    const el = graphicRef.current;
-    if (!el) return;
-    el.style.setProperty("--px", `0px`);
-    el.style.setProperty("--py", `0px`);
-    el.style.setProperty("--rx", `0deg`);
-    el.style.setProperty("--ry", `0deg`);
-    el.style.setProperty("--spin", `0deg`);
-  }, []);
-
-  const handlePointerMove = (e: ReactPointerEvent<HTMLAnchorElement>) => {
-    if (e.pointerType !== "mouse" && !draggingRef.current) return;
-    applyParallax(e.clientX, e.clientY);
-  };
-  const handlePointerDown = (e: ReactPointerEvent<HTMLAnchorElement>) => {
-    if (e.pointerType === "mouse") return;
-    draggingRef.current = true;
-    (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
-    applyParallax(e.clientX, e.clientY);
-  };
-  const handlePointerUp = (e: ReactPointerEvent<HTMLAnchorElement>) => {
-    draggingRef.current = false;
-    try { (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId); } catch {}
-    reset();
-  };
-
   return (
     <Link
-      ref={rootRef}
       to={to}
       preload="intent"
-      onPointerMove={handlePointerMove}
-      onPointerDown={handlePointerDown}
-      onPointerUp={handlePointerUp}
-      onPointerLeave={reset}
-      onPointerCancel={reset}
-      className="group @container relative flex flex-col justify-between overflow-hidden rounded-[2rem] border-2 border-white/15 bg-card/70 p-5 shadow-card backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:min-h-[560px] sm:p-12 touch-none [perspective:1000px]"
+      className="group relative flex flex-col overflow-hidden rounded-3xl border-2 border-white/15 bg-card/70 shadow-card backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-primary/60 hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
     >
-      {/* Ambient gradient layers */}
+      {/* Ambient gradient */}
       <div
+        aria-hidden
         className={
-          "pointer-events-none absolute inset-0 opacity-70 transition-opacity duration-500 group-hover:opacity-100 " +
+          "pointer-events-none absolute inset-0 opacity-80 " +
           (isAccent
-            ? "bg-[radial-gradient(circle_at_top_right,oklch(0.65_0.18_310/0.28),transparent_55%),radial-gradient(circle_at_bottom_left,oklch(0.55_0.22_268/0.22),transparent_60%)]"
-            : "bg-[radial-gradient(circle_at_top_right,oklch(0.55_0.22_268/0.32),transparent_55%),radial-gradient(circle_at_bottom_left,oklch(0.65_0.18_200/0.18),transparent_60%)]")
+            ? "bg-[radial-gradient(circle_at_top,oklch(0.65_0.18_310/0.32),transparent_65%)]"
+            : "bg-[radial-gradient(circle_at_top,oklch(0.55_0.22_268/0.32),transparent_65%)]")
         }
       />
-      {/* HERO VISUAL — big centred animated graphic, takes the eye first */}
-      <div className="pointer-events-none absolute -right-10 -top-10 h-56 w-56 rounded-full bg-primary/20 blur-3xl transition-transform duration-700 group-hover:scale-125" />
-      <div className="pointer-events-none absolute -left-16 bottom-0 h-48 w-48 rounded-full bg-accent/20 blur-3xl transition-transform duration-700 group-hover:-translate-y-2" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[55%] grid place-items-center [perspective:1000px]">
+
+      {/* HERO IMAGE — large, meaningful, fills the top */}
+      <div className="relative aspect-square w-full overflow-hidden">
+        <img
+          src={image}
+          alt={imageAlt}
+          loading="lazy"
+          width={768}
+          height={768}
+          className={
+            "h-full w-full object-cover transition-transform duration-700 group-hover:scale-110 " +
+            (isAccent ? "p-4 sm:p-6" : "")
+          }
+        />
         <div
-          ref={graphicRef}
-          className="relative will-change-transform transition-transform duration-300 ease-out [transform:translate3d(var(--px,0),var(--py,0),0)_rotateX(var(--rx,0))_rotateY(var(--ry,0))]"
-        >
-          {/* pulsing rings */}
-          <span aria-hidden className="absolute inset-0 -m-6 rounded-full border-2 border-primary/30 animate-[ping_3s_ease-out_infinite]" />
-          <span aria-hidden className="absolute inset-0 -m-12 rounded-full border-2 border-accent/20 animate-[ping_4.5s_ease-out_infinite]" />
-          <span aria-hidden className="absolute inset-0 -m-20 rounded-full border-2 border-primary/10 animate-[ping_6s_ease-out_infinite]" />
-          {/* main graphic */}
-          <div
-            className={
-              "relative grid h-44 w-44 place-items-center rounded-full border-2 border-white/15 shadow-glow transition-transform duration-500 ease-out group-hover:scale-110 sm:h-72 sm:w-72 [transform:rotate(var(--spin,0))] " +
-              (isAccent ? "bg-gradient-to-br from-accent/30 to-primary/40" : "bg-gradient-to-br from-primary/40 to-accent/30")
-            }
-            style={{ animation: "wc-float 6s ease-in-out infinite" }}
-          >
-            {isAccent ? (
-              <Bot className="h-24 w-24 text-foreground drop-shadow-[0_8px_30px_rgba(80,60,255,0.55)] sm:h-40 sm:w-40 wc-wiggle" strokeWidth={1.4} />
-            ) : (
-              <Disc3 className="h-24 w-24 text-foreground drop-shadow-[0_8px_30px_rgba(80,60,255,0.55)] sm:h-40 sm:w-40 animate-[spin_8s_linear_infinite]" strokeWidth={1.4} />
-            )}
-          </div>
-          {/* orbiting sparkle */}
-          <span aria-hidden className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 [transform-origin:0_-90px] animate-[spin_5s_linear_infinite]">
-            <Sparkles className="h-4 w-4 -translate-y-24 text-primary drop-shadow-[0_0_12px_rgba(120,100,255,0.9)]" />
-          </span>
-        </div>
-      </div>
-
-      {/* Equalizer bars bottom accent */}
-      <div className="pointer-events-none absolute bottom-6 left-1/2 flex -translate-x-1/2 items-end gap-1 opacity-70 transition-opacity duration-300 group-hover:opacity-100">
-        {[0.4, 0.7, 0.5, 0.9, 0.6, 0.8, 0.45, 0.85, 0.55, 0.7].map((h, i) => (
-          <span
-            key={i}
-            className="w-1 rounded-full bg-gradient-to-t from-primary/60 to-primary"
-            style={{
-              height: `${h * 40}px`,
-              animation: `eqPulse 1.${(i % 6) + 2}s ease-in-out ${i * 0.08}s infinite alternate`,
-            }}
-          />
-        ))}
-      </div>
-
-      <div className="relative z-10 mt-auto flex flex-col rounded-2xl bg-gradient-to-t from-card/95 via-card/80 to-transparent p-3 backdrop-blur-sm sm:p-4">
-        <div className="flex items-center gap-2">
-          <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border-2 border-white/15 bg-gradient-brand-soft text-primary shadow-glow sm:h-12 sm:w-12">
-            {icon}
-          </div>
-          <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground sm:text-base">{eyebrow}</p>
-          <span className="h-px flex-1 bg-gradient-to-r from-white/15 to-transparent" />
-        </div>
-        <h3 className="font-display mt-3 text-[clamp(1.4rem,2.5vw+0.75rem,3rem)] font-black uppercase leading-[1.05] tracking-[-0.025em] drop-shadow-[0_6px_24px_rgba(80,60,255,0.35)] [hyphens:none] [word-break:keep-all] [overflow-wrap:normal] [text-wrap:balance] sm:mt-4">
-          {title.split(" ").map((word, i, arr) => {
-            const isLast = i === arr.length - 1;
-            return (
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-card via-card/30 to-transparent"
+        />
+        {/* Equalizer overlay only for music card */}
+        {!isAccent && (
+          <div className="pointer-events-none absolute bottom-2 left-1/2 flex -translate-x-1/2 items-end gap-1 opacity-90">
+            {[0.4, 0.7, 0.5, 0.9, 0.6, 0.8, 0.45, 0.85, 0.55, 0.7].map((h, i) => (
               <span
-                key={`${word}-${i}`}
-                className={
-                  "wc-pop mr-[0.25em] inline-block whitespace-nowrap " +
-                  (isLast ? "italic text-gradient-red wc-bounce-soft" : "")
-                }
-                style={{ animationDelay: `${i * 0.12}s` }}
-              >
-                {word}
-                {isLast ? "." : ""}
-              </span>
-            );
-          })}
-        </h3>
-        <p className="mt-2 max-w-md text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground sm:mt-3 sm:text-base">{body}</p>
+                key={i}
+                className="w-1 rounded-full bg-gradient-to-t from-primary/70 to-primary"
+                style={{
+                  height: `${h * 22}px`,
+                  animation: `eqPulse 1.${(i % 6) + 2}s ease-in-out ${i * 0.08}s infinite alternate`,
+                }}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
-
-      <div className="relative mt-6 inline-flex items-center gap-2 text-base font-bold text-primary sm:mt-10 sm:text-lg">
-        <span className="rounded-full border-2 border-primary/40 bg-primary/15 px-4 py-2 backdrop-blur-sm transition-colors group-hover:bg-primary/25 sm:px-5 sm:py-2.5">
-          {cta}
-        </span>
-        <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+      {/* Text + CTA */}
+      <div className="relative z-10 flex flex-1 flex-col gap-2 p-3 sm:p-5">
+        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-primary sm:text-xs">
+          {eyebrow}
+        </p>
+        <h3 className="font-display text-xl font-black uppercase leading-[1.05] tracking-tight text-foreground sm:text-3xl">
+          {title}
+        </h3>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground sm:text-sm">
+          {body}
+        </p>
+        <div className="mt-auto inline-flex items-center gap-1.5 pt-2 text-sm font-bold text-primary sm:text-base">
+          <span className="rounded-full border-2 border-primary/40 bg-primary/15 px-3 py-1.5 backdrop-blur-sm transition-colors group-hover:bg-primary/25 sm:px-4 sm:py-2">
+            {cta}
+          </span>
+          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 sm:h-5 sm:w-5" />
+        </div>
       </div>
     </Link>
   );
 }
+
+
 
 const QUICK_TONES = {
   violet: "from-violet-500/30 to-fuchsia-500/20 text-violet-200 ring-violet-400/40",
