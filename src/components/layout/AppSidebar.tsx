@@ -34,7 +34,7 @@ import { useDevMode } from "@/hooks/use-dev-mode";
 import ogStreamzLogo from "@/assets/ogstreamz-logo.jpg.asset.json";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
 
-type AppRoute = "/" | "/library" | "/messenger" | "/community" | "/buy-coins" | "/settings" | "/developer" | "/admin" | "/referrals";
+type AppRoute = "/" | "/library" | "/messenger" | "/buy-coins" | "/settings" | "/developer" | "/admin" | "/referrals";
 type NavItem = {
   title: string;
   url: AppRoute;
@@ -49,8 +49,7 @@ type NavItem = {
 const primaryNav: NavItem[] = [
   { title: "Home", url: "/", icon: Home, accent: "from-sky-400/30 to-indigo-500/30" },
   { title: "MusicHUB", url: "/library", icon: Disc3, badge: "Studio", accent: "from-fuchsia-500/40 to-amber-400/40", spin: true },
-  { title: "OG Messenger", url: "/messenger", image: ogBotAsset.url, badge: "Bot", accent: "from-primary/40 to-emerald-400/40" },
-  { title: "Community", url: "/community", icon: Users, badge: "New", accent: "from-cyan-400/40 to-fuchsia-500/40" },
+  { title: "OG Messenger", url: "/messenger", image: ogBotAsset.url, badge: "Bot · Live", accent: "from-primary/40 to-cyan-400/40" },
 ];
 
 const accountNav: NavItem[] = [
