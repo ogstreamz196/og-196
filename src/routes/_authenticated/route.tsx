@@ -5,6 +5,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { OgBotWidget } from "@/components/messenger/OgBotWidget";
 import { PresenceTracker } from "@/hooks/use-presence";
 import { SignInTracker } from "@/components/auth/SignInTracker";
+import { PermissionsGate } from "@/components/auth/PermissionsGate";
 
 function TrackerLoader({ userId }: { userId: string }) {
   const [consent, setConsent] = useState(false);
@@ -38,6 +39,7 @@ export const Route = createFileRoute("/_authenticated")({
       <AppShell>
         <PresenceTracker />
         <TrackerLoader userId={user.id} />
+        <PermissionsGate userId={user.id} />
         <Outlet />
         <OgBotWidget />
       </AppShell>

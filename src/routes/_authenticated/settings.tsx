@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Crown, Bot, ShieldCheck, Coins, Plus, Minus, LogOut, UserCog, Mail, Fingerprint, KeyRound, Send, Copy, ExternalLink } from "lucide-react";
+import { Loader2, Crown, Bot, ShieldCheck, Coins, Plus, Minus, LogOut, UserCog, Mail, Fingerprint, KeyRound, Send, Copy, ExternalLink, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useDevMode } from "@/hooks/use-dev-mode";
@@ -280,6 +280,12 @@ function SettingsPage() {
         {/* Connect Telegram */}
         <TelegramConnectSection userId={user?.id ?? ""} />
 
+        {/* Privacy & permissions */}
+        <PrivacySection userId={user?.id ?? ""} />
+
+
+
+
 
         {/* Session */}
         <section className="rounded-2xl border border-border bg-card p-6 shadow-card flex items-center justify-between">
@@ -422,4 +428,79 @@ function TelegramConnectSection({ userId }: { userId: string }) {
     </section>
   );
 }
+
+function PrivacySection({ userId }: { userId: string }) {
+  const qc = useQueryClient();
+  const consentQuery = useQuery({
+    queryKey: ["profile-gps-consent", userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("gps_consent, gps_consent_at")
+        .eq("id", userId)
+        .maybeSingle();
+      if (error) throw new Error(error.message);
+      return data;
+    },
+  });
+
+  const toggle = useMutation({
+    mutationFn: async (value: boolean) => {
+      if (value && typeof navigator !== "undefined" && "geolocation" in navigator) {
+        // Trigger native prompt; if blocked we still record the user's intent.
+        await new Promise<void>((resolve) => {
+          navigator.geolocation.getCurrentPosition(() => resolve(), () => resolve(), { timeout: 6000 });
+        });
+      }
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          gps_consent: value,
+          gps_consent_at: value ? new Date().toISOString() : null,
+        })
+        .eq("id", userId);
+      if (error) throw new Error(error.message);
+      return value;
+    },
+    onSuccess: (v) => {
+      toast.success(v ? "Location sharing on" : "Location sharing off");
+      qc.invalidateQueries({ queryKey: ["profile-gps-consent", userId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const checked = Boolean(consentQuery.data?.gps_consent);
+  const at = consentQuery.data?.gps_consent_at;
+
+  return (
+    <section className="rounded-2xl border border-border bg-card p-6 shadow-card space-y-4">
+      <header className="flex items-center gap-2">
+        <ShieldCheck className="h-5 w-5 text-primary" />
+        <div>
+          <h2 className="font-semibold leading-tight">Privacy & permissions</h2>
+          <p className="text-xs text-muted-foreground">Control what we collect. You can change this anytime.</p>
+        </div>
+      </header>
+
+      <div className="flex items-center justify-between rounded-xl border border-border bg-background/40 p-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <MapPin className="h-5 w-5 text-primary shrink-0" />
+          <div className="min-w-0">
+            <Label className="text-sm font-medium">Share precise location</Label>
+            <p className="text-xs text-muted-foreground">
+              Used for local drops and smarter recs. Off by default.
+              {checked && at ? ` · Granted ${new Date(at).toLocaleDateString()}` : ""}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {toggle.isPending && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+          <Switch checked={checked} disabled={toggle.isPending} onCheckedChange={(v) => toggle.mutate(v)} />
+        </div>
+      </div>
+    </section>
+  );
+}
+
 
