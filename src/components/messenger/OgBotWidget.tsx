@@ -50,37 +50,59 @@ function buildQuickPrompts(
   ];
 }
 
-const POS_KEY = "og-bot:widget-pos";
-const ORB_SIZE = 56;
+const POS_KEY = "og-bot:widget-corner";
+const ORB_SIZE = 112; // matches sm:h-28 / w-28
 const PANEL_W = 380;
 const PANEL_H = 580;
-const MARGIN = 12;
+const MARGIN = 16;
 const MOBILE_BP = 640;
 
+type Corner = "br" | "bl" | "tr" | "tl";
 type Pos = { x: number; y: number };
 
-function clamp(p: Pos): Pos {
-  if (typeof window === "undefined") return p;
-  const maxX = window.innerWidth - ORB_SIZE - MARGIN;
-  const maxY = window.innerHeight - ORB_SIZE - MARGIN;
-  return {
-    x: Math.min(Math.max(MARGIN, p.x), Math.max(MARGIN, maxX)),
-    y: Math.min(Math.max(MARGIN, p.y), Math.max(MARGIN, maxY)),
-  };
+function cornerToPos(corner: Corner): Pos {
+  if (typeof window === "undefined") return { x: 24, y: 24 };
+  const right = window.innerWidth - ORB_SIZE - MARGIN;
+  const bottom = window.innerHeight - ORB_SIZE - MARGIN;
+  switch (corner) {
+    case "tl": return { x: MARGIN, y: MARGIN };
+    case "tr": return { x: right, y: MARGIN };
+    case "bl": return { x: MARGIN, y: bottom };
+    case "br":
+    default:   return { x: right, y: bottom };
+  }
 }
 
-function loadPos(): Pos {
-  if (typeof window === "undefined") return { x: 24, y: 24 };
-  try {
-    const raw = window.sessionStorage.getItem(POS_KEY);
-    if (raw) return clamp(JSON.parse(raw));
-  } catch {
-    /* ignore */
+function nearestCorner(p: Pos): Corner {
+  if (typeof window === "undefined") return "br";
+  const left = p.x + ORB_SIZE / 2 < window.innerWidth / 2;
+  const top = p.y + ORB_SIZE / 2 < window.innerHeight / 2;
+  return (top ? (left ? "tl" : "tr") : (left ? "bl" : "br")) as Corner;
+}
+
+/** Try nearest corner; if it overlaps a real element, try the others. */
+function findFreeCorner(preferred: Corner): Corner {
+  if (typeof document === "undefined") return preferred;
+  const order: Corner[] = [preferred, ...(["br", "tr", "bl", "tl"] as Corner[]).filter((c) => c !== preferred)];
+  for (const c of order) {
+    const p = cornerToPos(c);
+    const cx = p.x + ORB_SIZE / 2;
+    const cy = p.y + ORB_SIZE / 2;
+    const el = document.elementFromPoint(cx, cy) as HTMLElement | null;
+    if (!el || el === document.body || el === document.documentElement) return c;
+    // Treat interactive controls as overlap; passive content is OK
+    if (!el.closest("button, a, input, textarea, [role='button'], [data-no-overlap]")) return c;
   }
-  return clamp({
-    x: window.innerWidth - ORB_SIZE - 24,
-    y: window.innerHeight - ORB_SIZE - 24,
-  });
+  return preferred;
+}
+
+function loadCorner(): Corner {
+  if (typeof window === "undefined") return "br";
+  try {
+    const raw = window.localStorage.getItem(POS_KEY);
+    if (raw === "tl" || raw === "tr" || raw === "bl" || raw === "br") return raw;
+  } catch { /* ignore */ }
+  return "br";
 }
 
 export function OgBotWidget() {
