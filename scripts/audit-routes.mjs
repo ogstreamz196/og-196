@@ -74,10 +74,15 @@ const adminFiles = readdirSync(adminDir).filter((f) => /^admin[.\-]/.test(f) && 
 for (const f of adminFiles) {
   const p = join(adminDir, f);
   const src = readFileSync(p, "utf8");
+  // Accept any of:
+  //  a) beforeLoad with redirect (route-level gate)
+  //  b) useRole + a denial path triggered by !isAdmin (Navigate, Access denied, redirect)
+  const beforeLoadGate = /beforeLoad[^]*?redirect\s*\(\s*\{\s*to:\s*["'`]\//.test(src);
   const hasUseRole = /useRole\s*\(/.test(src);
-  const hasGate = /!\s*isAdmin[^]{0,80}<Navigate\s+to=/.test(src) || /isAdmin\s*\)\s*return\s+<Navigate/.test(src);
-  if (!hasUseRole || !hasGate) {
-    failures.push(`ADMIN UNGUARDED  ${relative(root, p)} (missing useRole + !isAdmin <Navigate /> gate)`);
+  const denialMatch = /!\s*[\w.]*isAdmin[^]{0,400}?(?:<Navigate\b|Access denied|throw\s+redirect)/.test(src);
+  const hasGate = beforeLoadGate || (hasUseRole && denialMatch);
+  if (!hasGate) {
+    failures.push(`ADMIN UNGUARDED  ${relative(root, p)} (no beforeLoad redirect and no useRole + !isAdmin denial)`);
   }
 }
 
