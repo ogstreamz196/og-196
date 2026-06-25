@@ -711,6 +711,23 @@ export function OgChat({
 
 
       </div>
+      {!atBottom && (
+        <button
+          type="button"
+          onClick={() => scrollToBottom("smooth")}
+          aria-label="Jump to latest message"
+          className={cn(
+            "absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-primary/40 bg-background/90 px-3.5 py-1.5 text-xs font-bold text-foreground shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.6)] backdrop-blur-md transition hover:scale-105 active:scale-95",
+            hasNew && "border-primary bg-primary text-primary-foreground shadow-glow animate-[pop_0.25s_ease-out]",
+          )}
+        >
+          <ArrowDown className="h-3.5 w-3.5" />
+          {hasNew ? "New messages" : "Jump to latest"}
+        </button>
+      )}
+      </div>
+
+
 
 
       {isOut && user && (
