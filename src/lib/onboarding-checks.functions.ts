@@ -34,6 +34,26 @@ function present(name: string): CheckResult | null {
     : { ok: false, detail: `${name} is not set — paste it in Project Settings → Secrets.` };
 }
 
+async function stripePing(env: "live" | "sandbox"): Promise<CheckResult> {
+  const keyName = env === "sandbox" ? "STRIPE_SANDBOX_API_KEY" : "STRIPE_LIVE_API_KEY";
+  const miss = present(keyName);
+  if (miss) return miss;
+  if (!process.env.LOVABLE_API_KEY) return { ok: false, detail: "LOVABLE_API_KEY missing" };
+  try {
+    const { createStripeClient, getStripeErrorMessage } = await import("./stripe.server");
+    const stripe = createStripeClient(env);
+    const { result, latencyMs } = await timed(() => stripe.balance.retrieve());
+    const avail = result.available?.[0];
+    const detail = avail
+      ? `Live API ok · balance ${(avail.amount / 100).toFixed(2)} ${avail.currency.toUpperCase()}`
+      : `API ok · livemode=${result.livemode}`;
+    return { ok: true, detail, latencyMs };
+  } catch (e) {
+    const { getStripeErrorMessage } = await import("./stripe.server");
+    return { ok: false, detail: `Stripe ${env}: ${getStripeErrorMessage(e)}` };
+  }
+}
+
 async function gatewayGet(connector: string, path: string): Promise<CheckResult> {
   const lovable = process.env.LOVABLE_API_KEY;
   const connKey = process.env[`${connector.toUpperCase()}_API_KEY`];
