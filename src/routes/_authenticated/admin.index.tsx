@@ -205,6 +205,11 @@ function AdminPanel() {
           <E2ESmokeTest />
         </AdminCollapsible>
 
+        <AdminCollapsible storageKey="foul-smoke" title="Foul-mouth smoke test" subtitle="Live Chat VIP gating + reply quality">
+          <FoulMouthSmokeTest />
+        </AdminCollapsible>
+
+
         <AdminCollapsible storageKey="boss-notifs" title="Boss notifications" subtitle="DM preferences">
           <BossNotificationsPanel />
         </AdminCollapsible>
