@@ -5,6 +5,7 @@ export type AppSettings = {
   coins_per_generation: number;
   coins_per_lyrics_generation: number;
   coins_per_full_unlock: number;
+  coins_per_lyric_video: number;
   coins_per_variation_divisor: number;
   songs_per_generation: number;
   sample_seconds: number;
@@ -15,6 +16,7 @@ const DEFAULTS: AppSettings = {
   coins_per_generation: 3,
   coins_per_lyrics_generation: 3,
   coins_per_full_unlock: 5,
+  coins_per_lyric_video: 5,
   coins_per_variation_divisor: 2,
   songs_per_generation: 2,
   sample_seconds: 30,
