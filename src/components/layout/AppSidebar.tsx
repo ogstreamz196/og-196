@@ -48,7 +48,8 @@ type NavItem = {
 const primaryNav: NavItem[] = [
   { title: "Home", url: "/", icon: Home, accent: "from-sky-400/30 to-indigo-500/30" },
   { title: "MusicHUB", url: "/library", icon: Disc3, badge: "Studio", accent: "from-fuchsia-500/40 to-amber-400/40", spin: true },
-  { title: "OG-GPT", url: "/messenger", image: ogBotAsset.url, badge: "Bot · Live", accent: "from-primary/40 to-cyan-400/40" },
+  { title: "OG-GPT", url: "/messenger", image: ogBotAsset.url, badge: "Live", accent: "from-primary/40 to-cyan-400/40" },
+
 ];
 
 const accountNav: NavItem[] = [
