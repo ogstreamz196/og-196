@@ -28,6 +28,7 @@ import heartbreakCoverAsset from "@/assets/album-heartbreak.jpg.asset.json";
 import drillCoverAsset from "@/assets/album-drill.jpg.asset.json";
 import afrobeatsCoverAsset from "@/assets/album-afrobeats.jpg.asset.json";
 import { WelcomeBackdrop } from "@/components/layout/WelcomeBackdrop";
+import { DodgyLogo } from "@/components/welcome/DodgyLogo";
 
 function OgBotLogo({ className = "h-8 w-8" }: { className?: string }) {
   return (
