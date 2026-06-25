@@ -98,6 +98,15 @@ export const postCommunityMessage = createServerFn({ method: "POST" })
     // 3. Call AI gateway for short reply (fire-and-forget; if it fails, just no reply)
     const apiKey = process.env.LOVABLE_API_KEY;
     if (apiKey) {
+      // Verify VIP before granting foul-mouth mode server-side.
+      let useFoul = false;
+      if (data.foulMouth) {
+        const { data: vip } = await supabaseAdmin.rpc("has_role", {
+          _user_id: context.userId,
+          _role: "vip",
+        });
+        useFoul = Boolean(vip);
+      }
       try {
         const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
@@ -107,10 +116,10 @@ export const postCommunityMessage = createServerFn({ method: "POST" })
           },
           body: JSON.stringify({
             model: "google/gemini-2.5-flash",
-            temperature: 0.85,
-            max_tokens: 120,
+            temperature: useFoul ? 1.05 : 0.85,
+            max_tokens: useFoul ? 200 : 120,
             messages: [
-              { role: "system", content: SYSTEM_PROMPT },
+              { role: "system", content: useFoul ? FOUL_SYSTEM_PROMPT : SYSTEM_PROMPT },
               ...history.map((m) => ({
                 role: m.role === "bot" ? ("assistant" as const) : ("user" as const),
                 content:
