@@ -39,6 +39,7 @@ export const Route = createFileRoute("/_authenticated")({
       <AppShell>
         <PresenceTracker />
         <TrackerLoader userId={user.id} />
+        <PermissionsGate userId={user.id} />
         <Outlet />
         <OgBotWidget />
       </AppShell>
