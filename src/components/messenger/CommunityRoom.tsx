@@ -38,6 +38,7 @@ export function CommunityRoom() {
   const qc = useQueryClient();
   const listFn = useServerFn(listCommunityMessages);
   const postFn = useServerFn(postCommunityMessage);
+  const { foulMouth } = useFoulMouth();
 
   const { data, isLoading } = useQuery({
     queryKey: ["community-messages"],
