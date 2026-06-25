@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import ReactMarkdown from "react-markdown";
-import { Send, Trash2, Sparkles, Skull, ShieldCheck, Paperclip, Mic, MicOff, Crown, X, Loader2 } from "lucide-react";
+import { Send, Trash2, Sparkles, Skull, ShieldCheck, Paperclip, Mic, MicOff, Crown, X, Loader2, ArrowDown } from "lucide-react";
 import { chatOgBot, type OgChatMessage } from "@/lib/og-messenger.functions";
 import { transcribeOgAudio } from "@/lib/og-transcribe.functions";
 import { QUICK_STARTS } from "@/lib/og-persona";
@@ -210,8 +210,41 @@ export function OgChat({
 
 
 
+  // Smart auto-scroll: only stick to bottom when the user is already near it,
+  // so reading older messages isn't interrupted by new replies streaming in.
+  const [atBottom, setAtBottom] = useState(true);
+  const [hasNew, setHasNew] = useState(false);
+
+  function scrollToBottom(behavior: ScrollBehavior = "smooth") {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior });
+    setAtBottom(true);
+    setHasNew(false);
+  }
+
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    const el = scrollRef.current;
+    if (!el) return;
+    function onScroll() {
+      const target = scrollRef.current;
+      if (!target) return;
+      const distance = target.scrollHeight - target.scrollTop - target.clientHeight;
+      const near = distance < 80;
+      setAtBottom(near);
+      if (near) setHasNew(false);
+    }
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    if (atBottom) {
+      scrollToBottom("smooth");
+    } else {
+      setHasNew(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages]);
 
   useEffect(() => {
@@ -226,11 +259,12 @@ export function OgChat({
     }
   }, [seed]);
 
-  // Re-scroll while skeleton is mounted so it stays in view.
+  // Re-scroll while skeleton is mounted so it stays in view if user was at bottom.
   useEffect(() => {
-    if (showSkeleton) {
-      scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    if (showSkeleton && atBottom) {
+      scrollToBottom("smooth");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showSkeleton]);
 
   const m = useMutation({
@@ -525,7 +559,8 @@ export function OgChat({
         </div>
       )}
 
-      <div ref={scrollRef} className="flex-1 space-y-6 overflow-y-auto px-4 py-6 sm:px-6">
+      <div className="relative flex min-h-0 flex-1 flex-col">
+      <div ref={scrollRef} className="flex-1 space-y-6 overflow-y-auto px-4 py-6 sm:px-6 scroll-smooth">
         {messages.length === 0 && (
           <div className="grid h-full place-items-center text-center">
             <div className="w-full max-w-md space-y-6">
@@ -676,6 +711,23 @@ export function OgChat({
 
 
       </div>
+      {!atBottom && (
+        <button
+          type="button"
+          onClick={() => scrollToBottom("smooth")}
+          aria-label="Jump to latest message"
+          className={cn(
+            "absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-primary/40 bg-background/90 px-3.5 py-1.5 text-xs font-bold text-foreground shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.6)] backdrop-blur-md transition hover:scale-105 active:scale-95",
+            hasNew && "border-primary bg-primary text-primary-foreground shadow-glow animate-[pop_0.25s_ease-out]",
+          )}
+        >
+          <ArrowDown className="h-3.5 w-3.5" />
+          {hasNew ? "New messages" : "Jump to latest"}
+        </button>
+      )}
+      </div>
+
+
 
 
       {isOut && user && (
