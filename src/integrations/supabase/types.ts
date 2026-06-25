@@ -710,6 +710,27 @@ export type Database = {
           },
         ]
       }
+      telegram_processed_updates: {
+        Row: {
+          chat_id: number | null
+          created_at: string
+          kind: string | null
+          update_id: number
+        }
+        Insert: {
+          chat_id?: number | null
+          created_at?: string
+          kind?: string | null
+          update_id: number
+        }
+        Update: {
+          chat_id?: number | null
+          created_at?: string
+          kind?: string | null
+          update_id?: number
+        }
+        Relationships: []
+      }
       user_onboarding_checks: {
         Row: {
           checked_at: string
