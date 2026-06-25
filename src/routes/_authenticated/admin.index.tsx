@@ -179,6 +179,10 @@ function AdminPanel() {
         <TelegramWebhookStatus />
         <TelegramSmokeTest />
 
+        <BossNotificationsPanel />
+
+
+
 
         <HardwiredCapabilities />
 
