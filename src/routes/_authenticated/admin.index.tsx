@@ -163,36 +163,57 @@ function AdminPanel() {
         </AdminSection>
 
 
-        <OgCoinsPanel />
+        <AdminCollapsible storageKey="og-coins" title="OG Coins" subtitle="Boss coin operations" defaultOpen>
+          <OgCoinsPanel />
+        </AdminCollapsible>
 
-        <PricingControls />
+        <AdminCollapsible storageKey="pricing" title="Pricing & limits" subtitle="Generation, unlock and signup costs">
+          <PricingControls />
+        </AdminCollapsible>
 
-        <AppToggles />
+        <AdminCollapsible storageKey="app-toggles" title="App toggles" subtitle="Global feature flags">
+          <AppToggles />
+        </AdminCollapsible>
 
-        <MintCoinsPanel />
+        <AdminCollapsible storageKey="mint-coins" title="Mint coins" subtitle="Grant or deduct user balance">
+          <MintCoinsPanel />
+        </AdminCollapsible>
 
-        <PortalManager />
+        <AdminCollapsible storageKey="portals" title="Portals" subtitle="Manage portal definitions">
+          <PortalManager />
+        </AdminCollapsible>
 
-        <BossAuditLog />
+        <AdminCollapsible storageKey="boss-audit" title="Boss audit log" subtitle="Recent admin actions">
+          <BossAuditLog />
+        </AdminCollapsible>
 
-        <OgBotPing />
+        <AdminCollapsible storageKey="og-bot-ping" title="OG Bot ping" subtitle="Verify OG Bot connectivity">
+          <OgBotPing />
+        </AdminCollapsible>
 
-        <TelegramWebhookStatus />
-        <TelegramSmokeTest />
-        <E2ESmokeTest />
+        <AdminCollapsible storageKey="telegram-webhook" title="Telegram webhook" subtitle="Live delivery status">
+          <TelegramWebhookStatus />
+        </AdminCollapsible>
 
-        <BossNotificationsPanel />
+        <AdminCollapsible storageKey="telegram-smoke" title="Telegram smoke test" subtitle="getMe + webhook check">
+          <TelegramSmokeTest />
+        </AdminCollapsible>
 
+        <AdminCollapsible storageKey="e2e-smoke" title="End-to-end smoke test" subtitle="Full stack flow">
+          <E2ESmokeTest />
+        </AdminCollapsible>
 
+        <AdminCollapsible storageKey="boss-notifs" title="Boss notifications" subtitle="DM preferences">
+          <BossNotificationsPanel />
+        </AdminCollapsible>
 
+        <AdminCollapsible storageKey="capabilities" title="Hardwired capabilities" subtitle="Connector & runtime status">
+          <HardwiredCapabilities />
+        </AdminCollapsible>
 
-        <HardwiredCapabilities />
-
-
-
-
-
+        <AdminCollapsible storageKey="recent-songs" title="Recent generations" subtitle="Unlock, lock, retry" defaultOpen>
         <div className="rounded-2xl border border-border bg-card shadow-card">
+
           {songsQuery.isLoading ? (
             <div className="grid place-items-center py-16"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
           ) : songsQuery.data && songsQuery.data.length > 0 ? (
