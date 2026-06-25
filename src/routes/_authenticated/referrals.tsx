@@ -111,6 +111,16 @@ function ReferralsPage() {
     },
   });
 
+  const myRefQ = useQuery({
+    queryKey: ["my-referrer", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_my_referrer");
+      if (error) throw error;
+      return data as { has_referrer: boolean; referrer_name?: string; referrer_code?: string; bound_at?: string };
+    },
+  });
+
   useEffect(() => {
     if (!user) return;
     const channel = supabase
