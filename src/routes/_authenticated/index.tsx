@@ -50,6 +50,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { TelegramLinkStatus } from "@/components/dashboard/TelegramLinkStatus";
 import { TelegramLinkChecklist } from "@/components/dashboard/TelegramLinkChecklist";
+import { TelegramConnectPrompt } from "@/components/dashboard/TelegramConnectPrompt";
 
 export const Route = createFileRoute("/_authenticated/")({
   component: DashboardHome,
@@ -330,6 +331,7 @@ function DashboardHome() {
         </div>
       </section>
 
+      <TelegramConnectPrompt />
       <TelegramLinkStatus />
       <TelegramLinkChecklist />
 
