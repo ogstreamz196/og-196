@@ -27,11 +27,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
 
 const LANGUAGES = [
-  "English", "Spanish", "French", "Portuguese", "Hindi", "Urdu",
-  "Punjabi", "Arabic", "Swahili", "Patois", "Yoruba", "German",
+  "English", "Spanish", "French", "Portuguese", "Hindi", "Gujarati",
+  "Marathi", "Bengali", "Tamil", "Telugu", "Kannada", "Malayalam",
+  "Urdu", "Punjabi", "Arabic", "Swahili", "Patois", "Yoruba", "German",
   "Italian", "Filipino", "Tagalog", "Cebuano", "Mandarin", "Japanese",
   "Korean", "Turkish", "Russian", "Polish", "Dutch", "Greek", "Thai",
-  "Vietnamese", "Indonesian", "Malay", "Bengali", "Tamil", "Hebrew",
+  "Vietnamese", "Indonesian", "Malay", "Hebrew",
 ];
 
 const LANG_RE = /Language:\s*(?:write the lyrics in\s*)?([A-Za-z][A-Za-z\s]{1,30})/i;

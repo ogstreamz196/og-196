@@ -47,8 +47,9 @@ export const SONG_RELATIONSHIPS = [
 ] as const;
 
 export const SONG_LANGUAGES = [
-  "English", "Spanish", "French", "Portuguese", "Hindi", "Urdu",
-  "Punjabi", "Arabic", "Swahili", "Patois", "Yoruba", "German",
+  "English", "Spanish", "French", "Portuguese", "Hindi", "Gujarati",
+  "Marathi", "Bengali", "Tamil", "Telugu", "Kannada", "Malayalam",
+  "Urdu", "Punjabi", "Arabic", "Swahili", "Patois", "Yoruba", "German",
   "Italian", "Tagalog",
 ] as const;
 
@@ -71,11 +72,12 @@ export const SONG_THEMES = [
 // Canonical home: inline in src/components/messenger/OgChat.tsx — kept here
 // in case you want one global list across both surfaces.
 export const OG_BOT_LANGUAGES = [
-  "English", "Spanish", "French", "Portuguese", "Hindi", "Urdu",
-  "Punjabi", "Arabic", "Swahili", "Patois", "Yoruba", "German",
+  "English", "Spanish", "French", "Portuguese", "Hindi", "Gujarati",
+  "Marathi", "Bengali", "Tamil", "Telugu", "Kannada", "Malayalam",
+  "Urdu", "Punjabi", "Arabic", "Swahili", "Patois", "Yoruba", "German",
   "Italian", "Filipino", "Tagalog", "Cebuano", "Mandarin", "Japanese",
   "Korean", "Turkish", "Russian", "Polish", "Dutch", "Greek", "Thai",
-  "Vietnamese", "Indonesian", "Malay", "Bengali", "Tamil", "Hebrew",
+  "Vietnamese", "Indonesian", "Malay", "Hebrew",
 ] as const;
 
 // ─── Song-creation one-tap presets ───────────────────────────────────────────
