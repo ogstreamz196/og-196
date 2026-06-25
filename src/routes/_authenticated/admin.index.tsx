@@ -16,6 +16,8 @@ import { BossNav } from "@/components/admin/BossNav";
 import { HardwiredCapabilities } from "@/components/admin/HardwiredCapabilities";
 import { AppToggles } from "@/components/admin/AppToggles";
 import { OgBotPing } from "@/components/admin/OgBotPing";
+import { TelegramWebhookStatus } from "@/components/admin/TelegramWebhookStatus";
+
 import { AdminSection } from "@/components/admin/AdminSection";
 import { AdminEditableLabel, AdminEditableBalance } from "@/components/admin/AdminEditMode";
 import { Button } from "@/components/ui/button";
