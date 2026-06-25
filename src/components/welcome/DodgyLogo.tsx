@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
+import { DODGE_QUERIES, shouldDodgeCursor } from "./dodgy-logo-detect";
+
 
 type Props = {
   /** Pixel size of the logo. */
@@ -29,28 +31,23 @@ export function DodgyLogo({
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    // Enable dodge only when ALL of:
-    //  - primary pointer is fine (mouse/trackpad, not finger)
-    //  - hover is truly supported (rules out hybrid tablets in touch mode)
-    //  - viewport is desktop-sized (≥1024px) — rules out small 2-in-1s
-    //  - user hasn't asked for reduced motion
-    const queries = [
-      window.matchMedia("(pointer: fine)"),
-      window.matchMedia("(hover: hover)"),
-      window.matchMedia("(min-width: 1024px)"),
-      window.matchMedia("(prefers-reduced-motion: no-preference)"),
-    ];
-    const update = () => setIsFine(queries.every((q) => q.matches));
+    let touched = false;
+    const queries = DODGE_QUERIES.map((q) => window.matchMedia(q));
+    const update = () => setIsFine(shouldDodgeCursor((q) => window.matchMedia(q), { touched }));
     update();
     queries.forEach((q) => q.addEventListener?.("change", update));
-    // Hybrid devices (Surface, iPad + trackpad): downgrade on first touch.
-    const onTouch = () => setIsFine(false);
+    // Hybrid devices (Surface, iPad + trackpad): downgrade on first real touch.
+    const onTouch = () => {
+      touched = true;
+      update();
+    };
     window.addEventListener("touchstart", onTouch, { once: true, passive: true });
     return () => {
       queries.forEach((q) => q.removeEventListener?.("change", update));
       window.removeEventListener("touchstart", onTouch);
     };
   }, []);
+
 
 
   useEffect(() => {
