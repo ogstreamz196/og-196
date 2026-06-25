@@ -149,12 +149,23 @@ Deno.serve(async (req) => {
     return new Response("streaming", { status: 200 });
   }
 
-  const clips = clipsRaw.filter((c) => !!c.audioUrl && hostAllowed(c.audioUrl!));
+  let clips = clipsRaw.filter((c) => !!c.audioUrl && hostAllowed(c.audioUrl!));
 
   if (clips.length === 0) {
     console.log("No audio clips ready yet (or all rejected by host allow-list)");
     return new Response("waiting", { status: 200 });
   }
+
+  // Respect admin "single variant" preference: Suno always returns 2 clips per task,
+  // but bosses can cap how many we materialise as song rows. Default = 1 (no sibling).
+  let maxVariants = 1;
+  try {
+    const { data: vs } = await admin.from("app_settings").select("value").eq("key", "max_variants_per_generation").maybeSingle();
+    const v = vs?.value;
+    const n = typeof v === "number" ? v : typeof v === "string" ? parseInt(v, 10) : NaN;
+    if (Number.isFinite(n) && n >= 1 && n <= 4) maxVariants = n;
+  } catch { /* default to 1 */ }
+  if (clips.length > maxVariants) clips = clips.slice(0, maxVariants);
 
   try {
     for (let i = 0; i < clips.length; i++) {
