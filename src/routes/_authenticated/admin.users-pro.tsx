@@ -48,9 +48,9 @@ function UsersProPage() {
     enabled: role.isAdmin || role.isBoss,
   });
 
-  if (role.loading) {
+  if (role.isLoading) {
     return (
-      <DashboardShell>
+      <DashboardShell title="Users Pro">
         <div className="py-20 text-center text-muted-foreground">
           <Loader2 className="mx-auto h-6 w-6 animate-spin" />
         </div>
@@ -60,7 +60,7 @@ function UsersProPage() {
   if (!role.isAdmin && !role.isBoss) return <Navigate to="/" />;
 
   return (
-    <DashboardShell>
+    <DashboardShell title="Users Pro">
       <BossNav />
       <div className="mx-auto max-w-6xl space-y-6 px-4 pb-16 md:px-8">
         <header className="flex flex-wrap items-end justify-between gap-3">
