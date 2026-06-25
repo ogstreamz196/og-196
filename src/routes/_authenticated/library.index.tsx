@@ -233,6 +233,18 @@ function LibraryPage() {
     }
     setGenSong(true);
     try {
+      // Hard-cap: only one in-flight generation per user to avoid wasted coins.
+      const { data: inflight } = await supabase
+        .from("songs")
+        .select("id")
+        .eq("user_id", user.id)
+        .in("status", ["queued", "processing"])
+        .limit(1);
+      if (inflight && inflight.length > 0) {
+        toast.error("A song is already generating. Wait for it to finish before starting another.");
+        navigate({ to: "/library/$songId", params: { songId: inflight[0].id } });
+        return;
+      }
       const style = [selections.genre, selections.mood]
         .filter(Boolean)
         .join(" · ");
