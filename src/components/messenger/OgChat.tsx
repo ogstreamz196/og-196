@@ -559,7 +559,8 @@ export function OgChat({
         </div>
       )}
 
-      <div ref={scrollRef} className="flex-1 space-y-6 overflow-y-auto px-4 py-6 sm:px-6">
+      <div className="relative flex min-h-0 flex-1 flex-col">
+      <div ref={scrollRef} className="flex-1 space-y-6 overflow-y-auto px-4 py-6 sm:px-6 scroll-smooth">
         {messages.length === 0 && (
           <div className="grid h-full place-items-center text-center">
             <div className="w-full max-w-md space-y-6">
