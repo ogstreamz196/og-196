@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/use-auth";
+import { useFoulMouth } from "@/hooks/use-foul-mouth";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
 
 function initials(name: string | null) {
