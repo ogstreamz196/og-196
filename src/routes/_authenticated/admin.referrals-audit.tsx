@@ -58,7 +58,7 @@ function ReferralsAuditPage() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc("admin_referral_audit", {
         p_limit: 200,
-        p_search: query || null,
+        p_search: query || undefined,
       });
       if (error) throw error;
       return data as { users: AuditUser[]; ledger: LedgerRow[] };
