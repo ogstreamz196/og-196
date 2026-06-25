@@ -188,9 +188,9 @@ function DashboardHome() {
                 loading="lazy"
                 className="mx-auto h-40 w-auto rounded-3xl ring-1 ring-white/10 shadow-[0_24px_70px_-20px_rgba(0,0,0,0.8)] sm:h-56 md:h-72 lg:h-80"
               />
-              <h1 className="font-display min-w-0 text-[clamp(2rem,4.5vw+1rem,5rem)] font-black leading-[1.05] tracking-[-0.02em] text-foreground [text-shadow:0_4px_28px_rgba(0,0,0,0.75)] [overflow-wrap:break-word] [word-break:normal] [text-wrap:balance] [font-variant-ligatures:none]">
-                <span className="inline-block wc-pop">Hello,</span>{" "}
-                <span className="paint-drip font-display inline-flex not-italic font-black uppercase tracking-tight text-gradient-red [overflow-wrap:break-word] [word-break:normal]">
+              <h1 className="font-display flex min-w-0 flex-col items-center gap-1 text-[clamp(1.5rem,3.2vw+0.75rem,3.75rem)] font-black leading-[1.05] tracking-[-0.02em] text-foreground [text-shadow:0_4px_28px_rgba(0,0,0,0.75)] [overflow-wrap:anywhere] [text-wrap:balance] [font-variant-ligatures:none] sm:gap-2">
+                <span className="block wc-pop">Hello,</span>
+                <span className="paint-drip font-display block max-w-full not-italic font-black uppercase tracking-tight text-gradient-red [overflow-wrap:anywhere] text-[clamp(1.5rem,2.6vw+0.75rem,3rem)]">
                   {displayName.split("").map((ch, i) => (
                     <span
                       key={`${ch}-${i}`}
@@ -209,6 +209,7 @@ function DashboardHome() {
                   ))}
                 </span>
               </h1>
+
             </div>
             <p className="mx-auto mt-5 max-w-2xl text-sm leading-[1.5] text-foreground [text-shadow:0_1px_12px_rgba(0,0,0,0.75)] sm:text-xl md:text-2xl">
               Dive into <span className="font-bold text-primary">MusicHub</span> to create tracks, or open{" "}
