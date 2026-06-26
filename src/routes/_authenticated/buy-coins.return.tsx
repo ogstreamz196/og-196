@@ -13,6 +13,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useProfile } from "@/hooks/use-profile";
+import { useAuth } from "@/hooks/use-auth";
 import { useQueryClient } from "@tanstack/react-query";
 import { PurchaseHistory } from "@/components/PurchaseHistory";
 import { reconcileCoinSession } from "@/lib/payments.functions";
@@ -33,8 +34,25 @@ function CheckoutReturn() {
   const { session_id } = Route.useSearch();
   const qc = useQueryClient();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { data: profile, refetch: refetchProfile } = useProfile();
   const reconcile = useServerFn(reconcileCoinSession);
+
+  // Push a fresh coin_balance into every cached profile query (any user id
+  // variant) so the sidebar HUD, dashboard wallet and other consumers
+  // re-render instantly — without waiting for the next refetch round-trip.
+  const applyBalance = (balance: number) => {
+    qc.setQueriesData<Record<string, unknown> | null | undefined>(
+      { queryKey: ["profile"] },
+      (prev) => (prev ? { ...prev, coin_balance: balance } : prev),
+    );
+    if (user?.id) {
+      qc.setQueryData<Record<string, unknown> | null | undefined>(
+        ["profile", user.id],
+        (prev) => (prev ? { ...prev, coin_balance: balance } : prev),
+      );
+    }
+  };
   const [state, setState] = useState<SyncState>("idle");
   const [errMsg, setErrMsg] = useState<string | null>(null);
   const [coinsAdded, setCoinsAdded] = useState<number | null>(null);
