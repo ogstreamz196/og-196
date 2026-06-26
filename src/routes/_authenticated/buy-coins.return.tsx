@@ -68,7 +68,7 @@ function CheckoutReturn() {
             setCoinsAdded(res.coins);
             qc.invalidateQueries({ queryKey: ["profile"] });
             qc.invalidateQueries({ queryKey: ["coin-transactions"] });
-            toast.success(`+${res.coins} OG coins added`);
+            toast.success(`+${res.coins} OG coins added`, { description: `Order ${session_id}` });
             setState("done");
             return;
           }
