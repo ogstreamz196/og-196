@@ -147,12 +147,14 @@ function CheckoutReturn() {
       if (res.status === "credited") {
         setCoinsAdded(res.coins);
         setConfirmedBalance(res.balance);
+        applyBalance(res.balance);
         toast.success(`+${res.coins} OG coins added`);
         setState("done");
       } else {
         if (res.status === "already_credited") {
           setCoinsAdded(res.coins);
           setConfirmedBalance(res.balance);
+          applyBalance(res.balance);
         }
         setState(res.status === "pending" ? "pending" : "done");
       }
