@@ -87,16 +87,11 @@ async function creditCoinsForSession(session: any, env: StripeEnv) {
     return;
   }
 
-  const { data: profile, error: readErr } = await supabase
-    .from("profiles").select("coin_balance").eq("id", userId).maybeSingle();
-  if (readErr || !profile) {
-    log("error", "profile not found for credit", { userId, err: String(readErr?.message ?? "") });
-    return;
-  }
-  const newBalance = (profile.coin_balance ?? 0) + coins;
-
-  const { error: updateErr } = await supabase
-    .from("profiles").update({ coin_balance: newBalance }).eq("id", userId);
+  // Atomic increment — prevents lost updates when concurrent generations
+  // race with this credit (previous read-modify-write pattern lost a +5
+  // credit on 2026-06-26 and required manual reconciliation).
+  const { data: newBalance, error: updateErr } = await supabase
+    .rpc("increment_coin_balance", { _user_id: userId, _delta: coins });
   if (updateErr) {
     log("error", "balance update failed", { userId, err: updateErr.message });
     return;
@@ -106,7 +101,7 @@ async function creditCoinsForSession(session: any, env: StripeEnv) {
     user_id: userId, amount: coins, type: "stripe_purchase", reference,
   });
   if (txErr) log("error", "tx log failed", { reference, err: txErr.message });
-  else log("info", "coins credited", { userId, coins, reference });
+  else log("info", "coins credited", { userId, coins, reference, newBalance });
 }
 
 // ─── VIP role + subscription mirror ────────────────────────────────────────
