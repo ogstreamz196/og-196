@@ -24,7 +24,7 @@ const RULES = {
 const LANDING_PAGES = [
   "src/routes/welcome.tsx",
   "src/routes/trust.tsx",
-  "src/routes/portal.$slug.tsx",
+  // portal.$slug.tsx is now a redirect-only route (Portals page was removed).
 ];
 
 function read(path: string) {
