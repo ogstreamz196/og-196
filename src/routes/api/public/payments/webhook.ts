@@ -80,28 +80,26 @@ async function creditCoinsForSession(session: any, env: StripeEnv) {
   const sessionId: string = session?.id ?? "unknown_session";
   const reference = `stripe:${env}:${sessionId}`;
 
-  const { data: existing } = await supabase
-    .from("coin_transactions").select("id").eq("reference", reference).maybeSingle();
-  if (existing) {
-    log("info", "coins already credited", { reference });
+  // Atomic + idempotent: the DB helper inserts the Stripe ledger row and only
+  // the caller that wins that insert increments the wallet. This prevents both
+  // lost credits and double credits when the return-page reconcile races the
+  // Stripe webhook.
+  const { data: result, error: creditErr } = await supabase
+    .rpc("credit_coin_transaction", {
+      _user_id: userId,
+      _amount: coins,
+      _type: "stripe_purchase",
+      _reference: reference,
+    });
+  if (creditErr) {
+    log("error", "coin credit failed", { userId, reference, err: creditErr.message });
     return;
   }
 
-  // Atomic increment — prevents lost updates when concurrent generations
-  // race with this credit (previous read-modify-write pattern lost a +5
-  // credit on 2026-06-26 and required manual reconciliation).
-  const { data: newBalance, error: updateErr } = await supabase
-    .rpc("increment_coin_balance", { _user_id: userId, _delta: coins });
-  if (updateErr) {
-    log("error", "balance update failed", { userId, err: updateErr.message });
-    return;
-  }
-
-  const { error: txErr } = await supabase.from("coin_transactions").insert({
-    user_id: userId, amount: coins, type: "stripe_purchase", reference,
-  });
-  if (txErr) log("error", "tx log failed", { reference, err: txErr.message });
-  else log("info", "coins credited", { userId, coins, reference, newBalance });
+  const credited = Boolean((result as { credited?: boolean } | null)?.credited);
+  const newBalance = Number((result as { balance?: number } | null)?.balance ?? 0);
+  if (credited) log("info", "coins credited", { userId, coins, reference, newBalance });
+  else log("info", "coins already credited", { userId, coins, reference, newBalance });
 }
 
 // ─── VIP role + subscription mirror ────────────────────────────────────────

@@ -96,6 +96,27 @@ function makeQuery(name: keyof Tables) {
 
 const fakeAdmin = {
   from(name: keyof Tables) { return makeQuery(name); },
+  rpc(name: string, args: any) {
+    if (name !== "credit_coin_transaction") {
+      return Promise.resolve({ data: null, error: { message: `unknown rpc ${name}` } });
+    }
+    const existing = tables.coin_transactions.find(
+      (r) => r.type === args._type && r.reference === args._reference,
+    );
+    const profile = tables.profiles.find((r) => r.id === args._user_id);
+    if (!profile) return Promise.resolve({ data: null, error: { message: "profile_not_found" } });
+    if (existing) {
+      return Promise.resolve({ data: { credited: false, balance: profile.coin_balance ?? 0 }, error: null });
+    }
+    tables.coin_transactions.push({
+      user_id: args._user_id,
+      amount: args._amount,
+      type: args._type,
+      reference: args._reference,
+    });
+    profile.coin_balance = (profile.coin_balance ?? 0) + args._amount;
+    return Promise.resolve({ data: { credited: true, balance: profile.coin_balance }, error: null });
+  },
 };
 
 vi.mock("@/integrations/supabase/client.server", () => ({
