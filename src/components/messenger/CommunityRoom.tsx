@@ -1,10 +1,11 @@
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Send, Users, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   listCommunityMessages,
+  listOlderCommunityMessages,
   postCommunityMessage,
   clearCommunityMessages,
   type CommunityMessage,
@@ -30,15 +31,14 @@ function formatTime(iso: string) {
   }
 }
 
-/**
- * Shared OG Community room — embedded inside the Messenger page when
- * "Live Chat Mode" is enabled.
- */
+const TYPING_TTL_MS = 4000;
+
 export function CommunityRoom() {
   const { user } = useAuth();
   const myId = user?.id ?? null;
   const qc = useQueryClient();
   const listFn = useServerFn(listCommunityMessages);
+  const olderFn = useServerFn(listOlderCommunityMessages);
   const postFn = useServerFn(postCommunityMessage);
   const clearFn = useServerFn(clearCommunityMessages);
   const { foulMouth } = useFoulMouth();
@@ -51,9 +51,17 @@ export function CommunityRoom() {
     staleTime: 10_000,
   });
   const messages: CommunityMessage[] = data?.messages ?? [];
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const [text, setText] = useState("");
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingOlder, setLoadingOlder] = useState(false);
+  const [typingUsers, setTypingUsers] = useState<Record<string, { name: string; at: number }>>({});
+  const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const lastTypingSentRef = useRef(0);
+  const stickToBottomRef = useRef(true);
 
+  // Realtime: new messages
   useEffect(() => {
     const channel = supabase
       .channel("community-messages")
@@ -78,15 +86,111 @@ export function CommunityRoom() {
     };
   }, [qc]);
 
+  // Realtime: typing indicator via broadcast
+  useEffect(() => {
+    if (!myId) return;
+    const channel = supabase.channel("community-typing", {
+      config: { broadcast: { self: false } },
+    });
+    channel.on("broadcast", { event: "typing" }, ({ payload }) => {
+      const { userId, name } = (payload ?? {}) as { userId?: string; name?: string };
+      if (!userId || userId === myId) return;
+      setTypingUsers((prev) => ({
+        ...prev,
+        [userId]: { name: name || "Someone", at: Date.now() },
+      }));
+    });
+    channel.subscribe();
+    typingChannelRef.current = channel;
+    const interval = setInterval(() => {
+      const now = Date.now();
+      setTypingUsers((prev) => {
+        let changed = false;
+        const next: typeof prev = {};
+        for (const [k, v] of Object.entries(prev)) {
+          if (now - v.at < TYPING_TTL_MS) next[k] = v;
+          else changed = true;
+        }
+        return changed ? next : prev;
+      });
+    }, 1000);
+    return () => {
+      clearInterval(interval);
+      supabase.removeChannel(channel);
+      typingChannelRef.current = null;
+    };
+  }, [myId]);
+
+  const broadcastTyping = useCallback(() => {
+    if (!myId) return;
+    const now = Date.now();
+    if (now - lastTypingSentRef.current < 1500) return;
+    lastTypingSentRef.current = now;
+    const ch = typingChannelRef.current;
+    if (!ch) return;
+    ch.send({
+      type: "broadcast",
+      event: "typing",
+      payload: {
+        userId: myId,
+        name: user?.user_metadata?.display_name || user?.email?.split("@")[0] || "OG member",
+      },
+    });
+  }, [myId, user]);
+
+  // Auto-scroll to bottom on new messages (only if user is already near bottom)
   useEffect(() => {
     const el = scrollRef.current;
-    if (!el) return;
+    if (!el || !stickToBottomRef.current) return;
     el.scrollTop = el.scrollHeight;
   }, [messages.length]);
 
+  // Infinite scroll: load older when scrolled to top
+  const onScroll = useCallback(async () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+    stickToBottomRef.current = nearBottom;
+    if (el.scrollTop > 40 || loadingOlder || !hasMore || messages.length === 0) return;
+    const oldest = messages[0];
+    if (!oldest) return;
+    setLoadingOlder(true);
+    const prevHeight = el.scrollHeight;
+    try {
+      const res = await olderFn({ data: { before: oldest.created_at, limit: 50 } });
+      if (res.messages.length === 0) {
+        setHasMore(false);
+      } else {
+        setHasMore(res.hasMore);
+        qc.setQueryData<{ messages: CommunityMessage[] } | undefined>(
+          ["community-messages"],
+          (prev) => {
+            const existing = prev?.messages ?? [];
+            const seen = new Set(existing.map((m) => m.id));
+            const merged = [...res.messages.filter((m) => !seen.has(m.id)), ...existing];
+            return { messages: merged };
+          },
+        );
+        // Preserve scroll position after prepending
+        requestAnimationFrame(() => {
+          if (scrollRef.current) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight - prevHeight;
+          }
+        });
+      }
+    } catch (err) {
+      toast.error((err as Error).message);
+    } finally {
+      setLoadingOlder(false);
+    }
+  }, [hasMore, loadingOlder, messages, olderFn, qc]);
+
   const send = useMutation({
     mutationFn: (content: string) => postFn({ data: { content, foulMouth } }),
-    onSuccess: () => setText(""),
+    onSuccess: () => {
+      setText("");
+      stickToBottomRef.current = true;
+    },
     onError: (err: Error) => toast.error(err.message),
   });
 
@@ -105,6 +209,8 @@ export function CommunityRoom() {
     if (!t || send.isPending) return;
     send.mutate(t);
   }
+
+  const activeTypers = Object.values(typingUsers);
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col gap-2 p-2 sm:p-3">
@@ -136,8 +242,19 @@ export function CommunityRoom() {
       )}
       <div
         ref={scrollRef}
+        onScroll={onScroll}
         className="flex-1 space-y-3 overflow-y-auto overscroll-contain rounded-2xl border border-border/40 bg-background/40 p-2 backdrop-blur-md sm:p-3"
       >
+        {loadingOlder && (
+          <div className="flex items-center justify-center py-2 text-xs text-muted-foreground">
+            <Loader2 className="mr-2 h-3 w-3 animate-spin" /> Loading older messages…
+          </div>
+        )}
+        {!hasMore && messages.length > 0 && (
+          <div className="py-1 text-center text-[10px] uppercase tracking-wider text-muted-foreground/60">
+            Beginning of chat
+          </div>
+        )}
         {isLoading ? (
           <div className="flex h-full items-center justify-center text-muted-foreground">
             <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Loading community…
@@ -195,15 +312,38 @@ export function CommunityRoom() {
         )}
       </div>
 
+      {activeTypers.length > 0 && (
+        <div className="flex items-center gap-2 px-2 text-xs text-muted-foreground">
+          <span className="flex gap-1">
+            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary [animation-delay:-0.3s]" />
+            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary [animation-delay:-0.15s]" />
+            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary" />
+          </span>
+          <span className="truncate">
+            {activeTypers.length === 1
+              ? `${activeTypers[0].name} is typing…`
+              : activeTypers.length === 2
+                ? `${activeTypers[0].name} and ${activeTypers[1].name} are typing…`
+                : `${activeTypers.length} people are typing…`}
+          </span>
+        </div>
+      )}
+
       <form
         onSubmit={submit}
-        className="flex items-end gap-2 rounded-2xl border border-border/40 bg-background/60 p-2 backdrop-blur-md"
+        className="sticky bottom-0 flex items-end gap-2 rounded-2xl border border-border/40 bg-background/80 p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur-md"
       >
         <Textarea
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={(e) => {
+            setText(e.target.value);
+            broadcastTyping();
+          }}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
+            // On desktop: Enter sends, Shift+Enter newline.
+            // On mobile (touch): Enter always inserts newline; tap Send to submit.
+            const isTouch = typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches;
+            if (e.key === "Enter" && !e.shiftKey && !isTouch) {
               e.preventDefault();
               submit(e as unknown as React.FormEvent);
             }
@@ -211,7 +351,8 @@ export function CommunityRoom() {
           placeholder="Say something to the OG Community…"
           rows={1}
           maxLength={1000}
-          className="min-h-[44px] max-h-32 resize-none border-0 bg-transparent text-sm focus-visible:ring-0"
+          enterKeyHint="send"
+          className="min-h-[44px] max-h-32 resize-none border-0 bg-transparent text-base focus-visible:ring-0 sm:text-sm"
           disabled={send.isPending}
         />
         <Button
