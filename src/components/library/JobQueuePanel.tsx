@@ -93,6 +93,44 @@ export function JobQueuePanel({ songs }: { songs: Song[] }) {
     return () => window.clearInterval(id);
   }, [hasActive]);
 
+  // Collapse sibling rows from the same Suno task into a single tile so a
+  // generation shows ONE clear loading state, then flips to completed when
+  // the final row lands — never as multiple partial rows.
+  const dedupedSongs = useMemo(() => {
+    const byTask = new Map<string, Song>();
+    const standalone: Song[] = [];
+    for (const s of songs) {
+      const taskId = (s as { suno_task_id?: string | null }).suno_task_id;
+      if (!taskId) { standalone.push(s); continue; }
+      const prev = byTask.get(taskId);
+      if (!prev) { byTask.set(taskId, s); continue; }
+      const rank = (st: string) => st === "completed" ? 3 : st === "processing" ? 2 : st === "failed" ? 1 : 0;
+      if (rank(s.status) > rank(prev.status)) byTask.set(taskId, s);
+    }
+    return [...standalone, ...byTask.values()];
+  }, [songs]);
+
+  const jobs = useMemo(() => {
+    const active = dedupedSongs.filter((s) => classify(s.status) !== "completed");
+    const recentCompleted = dedupedSongs.filter((s) => classify(s.status) === "completed").slice(0, 4);
+    return [...active.slice(0, 8), ...recentCompleted].map((s) => {
+      const kind = classify(s.status);
+      const startedAt = new Date(s.created_at).getTime();
+      const elapsed = Number.isFinite(startedAt) ? Math.max(0, now - startedAt) : 0;
+      const inFlight = kind === "queued" || kind === "generating";
+      const slow = inFlight && elapsed > SLOW_THRESHOLD_MS;
+      const stuck = inFlight && elapsed > STUCK_THRESHOLD_MS;
+      return { song: s, kind, elapsed, inFlight, slow, stuck };
+    });
+  }, [dedupedSongs, now]);
+
+  const counts = useMemo(() => {
+    const c: Record<JobStatus, number> = { queued: 0, generating: 0, completed: 0, failed: 0 };
+    for (const s of dedupedSongs) c[classify(s.status)]++;
+    return c;
+  }, [dedupedSongs]);
+
+
   async function retry(song: Song) {
     setRetrying(song.id);
     try {
