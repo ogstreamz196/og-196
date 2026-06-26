@@ -119,15 +119,10 @@ export const postCommunityMessage = createServerFn({ method: "POST" })
     // 3. Call AI gateway for short reply (fire-and-forget; if it fails, just no reply)
     const apiKey = process.env.LOVABLE_API_KEY;
     if (apiKey) {
-      // Verify VIP before granting foul-mouth mode server-side.
-      let useFoul = false;
-      if (data.foulMouth) {
-        const { data: vip } = await supabaseAdmin.rpc("has_role", {
-          _user_id: context.userId,
-          _role: "vip",
-        });
-        useFoul = Boolean(vip);
-      }
+      // Live chat = foul mouth by default for everyone.
+      // VIPs still get it (and can toggle off via their preference), but the
+      // group room always leans savage unless the client explicitly opts out.
+      const useFoul = data.foulMouth !== false;
       try {
         const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
