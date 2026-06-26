@@ -898,22 +898,8 @@ function CustomPackCard({ onBuy }: { onBuy: (units: number) => void }) {
   // Per-coin price using consistent GBP rounding (3 dp for fractional pennies).
   const perCoin = CUSTOM_COIN_UNIT.priceCents / 100 / CUSTOM_COIN_UNIT.coins;
 
-  const dec = () => {
-    if (atMin) {
-      setBumpError(`Minimum top-up is ${minCoins} coins.`);
-      return;
-    }
-    setBumpError(null);
-    setUnits((u) => Math.max(CUSTOM_COIN_UNIT.minUnits, u - 1));
-  };
-  const inc = () => {
-    if (atMax) {
-      setBumpError(`Maximum custom top-up is ${maxCoins} coins.`);
-      return;
-    }
-    setBumpError(null);
-    setUnits((u) => Math.min(CUSTOM_COIN_UNIT.maxUnits, u + 1));
-  };
+
+
 
   const bump = (delta: number) => {
     const next = Math.min(
