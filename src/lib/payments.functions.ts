@@ -619,11 +619,24 @@ export const createBillingPortalSession = createServerFn({ method: "POST" })
       // Fallback: search Stripe by metadata.userId (covers users who subscribed
       // before the subscriptions table was wired up).
       if (!customerId) {
-        const found = await stripe.customers.search({
-          query: `metadata['userId']:'${userId}'`,
-          limit: 1,
-        });
-        customerId = found.data[0]?.id ?? null;
+        try {
+          const found = await stripe.customers.search({
+            query: `metadata['userId']:'${userId}'`,
+            limit: 1,
+          });
+          customerId = found?.data?.[0]?.id ?? null;
+        } catch (err) {
+          // Stripe search can fail if the index isn't ready or the key
+          // lacks the search permission. Fall back to email lookup.
+          console.warn("billingPortal customer search failed, falling back", err);
+          const { data: prof } = await supabase
+            .from("profiles").select("email").eq("id", userId).maybeSingle();
+          const email = (prof?.email as string | undefined) ?? undefined;
+          if (email) {
+            const list = await stripe.customers.list({ email, limit: 1 });
+            customerId = list?.data?.[0]?.id ?? null;
+          }
+        }
       }
       if (!customerId) return { error: "No active subscription found." };
 
