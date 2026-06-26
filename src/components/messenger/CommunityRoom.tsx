@@ -1,11 +1,12 @@
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { Send, Users, Loader2 } from "lucide-react";
+import { Send, Users, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   listCommunityMessages,
   postCommunityMessage,
+  clearCommunityMessages,
   type CommunityMessage,
 } from "@/lib/community.functions";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/use-auth";
 import { useFoulMouth } from "@/hooks/use-foul-mouth";
+import { useRole } from "@/hooks/use-role";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
 
 function initials(name: string | null) {
