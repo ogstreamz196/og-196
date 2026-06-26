@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ShieldCheck, Globe2, Radio, Users } from "lucide-react";
+import { ShieldCheck, Globe2, Radio, Users, Scale } from "lucide-react";
 
 
 /**
@@ -25,6 +25,12 @@ export function BossNav() {
             className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/60 px-3 py-1 font-medium text-foreground/80 transition hover:bg-card"
           >
             <Users className="h-3.5 w-3.5" /> Users Pro
+          </Link>
+          <Link
+            to="/admin/coin-audit"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/60 px-3 py-1 font-medium text-foreground/80 transition hover:bg-card"
+          >
+            <Scale className="h-3.5 w-3.5" /> Coin Audit
           </Link>
           <Link
             to="/developer"

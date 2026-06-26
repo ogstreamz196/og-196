@@ -68,7 +68,7 @@ function CheckoutReturn() {
             setCoinsAdded(res.coins);
             qc.invalidateQueries({ queryKey: ["profile"] });
             qc.invalidateQueries({ queryKey: ["coin-transactions"] });
-            toast.success(`+${res.coins} OG coins added`);
+            toast.success(`+${res.coins} OG coins added`, { description: `Order ${session_id}` });
             setState("done");
             return;
           }
@@ -162,6 +162,14 @@ function CheckoutReturn() {
               {state === "pending" && "Stripe hasn't confirmed payment yet. Try again in a moment."}
               {state === "error" && (errMsg ?? "Something went wrong crediting your coins.")}
             </DialogDescription>
+            {session_id && (
+              <div className="mt-2 text-center text-[11px] text-muted-foreground">
+                Order ref:{" "}
+                <code className="select-all rounded bg-muted/50 px-1.5 py-0.5 font-mono text-[10px]">
+                  {session_id}
+                </code>
+              </div>
+            )}
           </DialogHeader>
 
           <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2">
