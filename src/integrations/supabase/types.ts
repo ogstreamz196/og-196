@@ -1114,6 +1114,10 @@ export type Database = {
         Args: { p_delta?: number }
         Returns: number
       }
+      increment_coin_balance: {
+        Args: { _delta: number; _user_id: string }
+        Returns: number
+      }
       list_og_bot_remote_tokens_safe: {
         Args: never
         Returns: {
