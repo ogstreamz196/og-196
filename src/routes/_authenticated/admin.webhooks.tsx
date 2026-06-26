@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { listStripeWebhookEvents, type StripeEventRow } from "@/lib/stripe-events.functions";
 import { useRole } from "@/hooks/use-role";
 import { formatDistanceToNow } from "date-fns";
+import { E2ESmokeTest } from "@/components/admin/E2ESmokeTest";
 
 export const Route = createFileRoute("/_authenticated/admin/webhooks")({
   component: WebhooksAdminPage,
