@@ -34,11 +34,39 @@ import { LyricVideoSection } from "@/components/library/LyricVideoSection";
 
 type JobStatus = "queued" | "generating" | "completed" | "failed";
 
+// Suno generations typically finish within 60-120s. After 3 min we surface
+// a "taking longer than usual" hint, after 8 min we treat the job as stuck
+// and let the user retry without waiting for the watchdog.
+const SLOW_THRESHOLD_MS = 3 * 60 * 1000;
+const STUCK_THRESHOLD_MS = 8 * 60 * 1000;
+
 function classify(status: string): JobStatus {
   if (status === "completed") return "completed";
   if (status === "failed") return "failed";
   if (status === "processing") return "generating";
   return "queued";
+}
+
+function formatElapsed(ms: number): string {
+  const s = Math.max(0, Math.floor(ms / 1000));
+  const m = Math.floor(s / 60);
+  return m > 0 ? `${m}m ${s % 60}s` : `${s}s`;
+}
+
+function friendlyError(raw?: string | null): string {
+  if (!raw) return "Generation failed — tap retry to try again.";
+  const msg = raw.toLowerCase();
+  if (msg.includes("insufficient") || msg.includes("balance") || msg.includes("coins"))
+    return "Not enough coins — top up and retry.";
+  if (msg.includes("timeout") || msg.includes("timed out") || msg.includes("stuck"))
+    return "Provider timed out — safe to retry, you weren't charged.";
+  if (msg.includes("rate") || msg.includes("429"))
+    return "Rate limited — wait a moment and retry.";
+  if (msg.includes("network") || msg.includes("fetch") || msg.includes("econn"))
+    return "Network hiccup — retry usually fixes it.";
+  if (msg.includes("moderation") || msg.includes("policy") || msg.includes("forbidden"))
+    return "Blocked by Suno content policy — edit the prompt and retry.";
+  return raw.length > 140 ? `${raw.slice(0, 140)}…` : raw;
 }
 
 const META: Record<JobStatus, { label: string; icon: typeof Clock3; cls: string; dot: string }> = {
