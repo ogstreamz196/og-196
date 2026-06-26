@@ -107,9 +107,9 @@ export function CommunityRoom() {
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-1 flex-col gap-2 p-3">
+    <div className="flex h-full min-h-0 flex-1 flex-col gap-2 p-2 sm:p-3">
       {canClear && (
-        <div className="flex items-center justify-between rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-1.5">
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-destructive/30 bg-destructive/5 px-2.5 py-1.5 sm:px-3">
           <span className="text-[10px] font-bold uppercase tracking-wider text-destructive/80">
             Dev controls
           </span>
@@ -136,7 +136,7 @@ export function CommunityRoom() {
       )}
       <div
         ref={scrollRef}
-        className="flex-1 space-y-3 overflow-y-auto rounded-2xl border border-border/40 bg-background/40 p-3 backdrop-blur-md"
+        className="flex-1 space-y-3 overflow-y-auto overscroll-contain rounded-2xl border border-border/40 bg-background/40 p-2 backdrop-blur-md sm:p-3"
       >
         {isLoading ? (
           <div className="flex h-full items-center justify-center text-muted-foreground">
@@ -172,7 +172,7 @@ export function CommunityRoom() {
                   )}
                 </span>
                 <div
-                  className={`min-w-0 max-w-[78%] rounded-2xl px-3 py-2 text-sm shadow-sm ${
+                  className={`min-w-0 max-w-[85%] rounded-2xl px-3 py-2 text-sm shadow-sm sm:max-w-[78%] ${
                     isBot
                       ? "border border-primary/30 bg-primary/10 text-foreground"
                       : mine
