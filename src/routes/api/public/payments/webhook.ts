@@ -168,11 +168,14 @@ async function syncVipFromSubscription(subscription: any, env: StripeEnv) {
   const userId = await upsertSubscriptionRow(subscription, env);
   if (!userId) return;
   const status = subscription?.status as string | undefined;
-  // Active / trialing / past_due (grace) keep VIP. cancel_at_period_end with
-  // future period_end still keeps access until that date — we keep the role
-  // and let `customer.subscription.deleted` revoke at expiry.
-  const keep = status === "active" || status === "trialing" || status === "past_due";
-  const ctx = { subId: subscription.id, status, env };
+  const cancelAtPeriodEnd = !!subscription?.cancel_at_period_end;
+  // Active / trialing / past_due (grace) keep VIP. Per product decision:
+  // when the user requests cancellation (cancel_at_period_end=true), revoke
+  // VIP perks immediately rather than waiting for period end.
+  const keep =
+    !cancelAtPeriodEnd &&
+    (status === "active" || status === "trialing" || status === "past_due");
+  const ctx = { subId: subscription.id, status, cancelAtPeriodEnd, env };
   if (keep) await grantVipRole(userId, ctx);
   else await revokeVipRole(userId, ctx);
 }
