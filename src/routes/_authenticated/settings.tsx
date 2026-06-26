@@ -223,7 +223,7 @@ function SettingsPage() {
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">
-              Need more coins? <Link to="/buy-coins" className="text-primary underline">Top up</Link>.
+              Need more coins? <Link to="/buy-coins" search={{}} className="text-primary underline">Top up</Link>.
             </p>
           )}
         </section>
