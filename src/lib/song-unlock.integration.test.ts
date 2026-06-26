@@ -21,7 +21,12 @@ import { randomUUID } from "crypto";
 function canSeed(): boolean {
   if (!process.env.PGHOST) return false;
   try {
-    return execFileSync("psql", ["-tA", "-c", "SELECT 1"], { encoding: "utf8" }).trim() === "1";
+    const out = execFileSync(
+      "psql",
+      ["-tA", "-c", "SELECT has_schema_privilege(current_user, 'auth', 'USAGE')"],
+      { encoding: "utf8" },
+    ).trim();
+    return out === "t";
   } catch { return false; }
 }
 const HAS_DB = canSeed();
