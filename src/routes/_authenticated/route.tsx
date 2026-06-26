@@ -52,7 +52,7 @@ export const Route = createFileRoute("/_authenticated")({
         <TrackerLoader userId={user.id} />
         <PermissionsGate userId={user.id} />
         <Outlet />
-        <OgBotWidget />
+        <ConditionalOgBotWidget />
       </AppShell>
     );
   },
