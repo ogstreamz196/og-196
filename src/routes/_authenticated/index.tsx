@@ -331,7 +331,7 @@ function DashboardHome() {
       <AskOgCta />
 
       {/* Continuity demo */}
-      <ContinuityDemo />
+      {/* <ContinuityDemo /> hidden per request */}
 
       {/* Quick actions */}
       <section>
