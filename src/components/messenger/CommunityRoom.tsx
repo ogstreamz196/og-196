@@ -108,6 +108,32 @@ export function CommunityRoom() {
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col gap-2 p-3">
+      {canClear && (
+        <div className="flex items-center justify-between rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-1.5">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-destructive/80">
+            Dev controls
+          </span>
+          <Button
+            type="button"
+            variant="destructive"
+            size="sm"
+            className="h-7 gap-1.5 text-xs"
+            disabled={clear.isPending}
+            onClick={() => {
+              if (window.confirm("Wipe ALL live community messages? This cannot be undone.")) {
+                clear.mutate();
+              }
+            }}
+          >
+            {clear.isPending ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Trash2 className="h-3.5 w-3.5" />
+            )}
+            Clear live chat
+          </Button>
+        </div>
+      )}
       <div
         ref={scrollRef}
         className="flex-1 space-y-3 overflow-y-auto rounded-2xl border border-border/40 bg-background/40 p-3 backdrop-blur-md"
