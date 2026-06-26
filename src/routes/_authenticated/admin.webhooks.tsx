@@ -40,7 +40,7 @@ function WebhooksAdminPage() {
     return (
       <DashboardShell title="Webhook delivery">
         <div className="mx-auto w-full max-w-4xl px-4 py-8">
-          <p className="text-sm text-muted-foreground">Admin access required.</p>
+          <p className="text-sm text-muted-foreground">Access denied. Admin only.</p>
         </div>
       </DashboardShell>
     );
