@@ -23,8 +23,8 @@ const RULES = {
 
 const LANDING_PAGES = [
   "src/routes/welcome.tsx",
-  "src/routes/trust.tsx",
-  "src/routes/portal.$slug.tsx",
+  // trust.tsx is a long-form info page (no card shell) — exempt from card parity.
+  // portal.$slug.tsx is now a redirect-only route (Portals page was removed).
 ];
 
 function read(path: string) {
