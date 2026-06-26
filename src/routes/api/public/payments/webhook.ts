@@ -84,7 +84,7 @@ async function creditCoinsForSession(session: any, env: StripeEnv) {
   // the caller that wins that insert increments the wallet. This prevents both
   // lost credits and double credits when the return-page reconcile races the
   // Stripe webhook.
-  const { data: result, error: creditErr } = await supabase
+  const { data: result, error: creditErr } = await (supabase as any)
     .rpc("credit_coin_transaction", {
       _user_id: userId,
       _amount: coins,

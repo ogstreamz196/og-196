@@ -342,7 +342,7 @@ export const reconcileCoinSession = createServerFn({ method: "POST" })
       if (!coins || coins <= 0) return { error: "Could not determine coin amount" };
 
       const reference = `stripe:${data.environment}:${session.id}`;
-      const { data: result, error: creditErr } = await supabaseAdmin
+      const { data: result, error: creditErr } = await (supabaseAdmin as any)
         .rpc("credit_coin_transaction", {
           _user_id: userId,
           _amount: coins,
