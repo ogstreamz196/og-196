@@ -90,6 +90,15 @@ export function CommunityRoom() {
     onError: (err: Error) => toast.error(err.message),
   });
 
+  const clear = useMutation({
+    mutationFn: () => clearFn(),
+    onSuccess: () => {
+      qc.setQueryData(["community-messages"], { messages: [] });
+      toast.success("Live chat cleared");
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+
   function submit(e: React.FormEvent) {
     e.preventDefault();
     const t = text.trim();
