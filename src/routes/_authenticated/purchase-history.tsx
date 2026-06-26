@@ -10,7 +10,7 @@ export const Route = createFileRoute("/_authenticated/purchase-history")({
 
 function PurchaseHistoryPage() {
   return (
-    <DashboardShell>
+    <DashboardShell title="Purchase history">
       <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-8">
         <header className="flex items-center gap-3">
           <Receipt className="h-6 w-6 text-primary" />
