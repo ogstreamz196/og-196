@@ -300,8 +300,8 @@ function ReferralsPage() {
               </div>
             </div>
 
-            {/* Big balance card */}
-            <div className="relative rounded-2xl border border-white/15 bg-background/70 p-6 backdrop-blur-xl">
+            {/* Big balance card + bind referrer (merged) */}
+            <div id="bind-referrer" className="scroll-mt-24 relative rounded-2xl border border-white/15 bg-background/70 p-6 backdrop-blur-xl">
               <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
                 <span className="inline-flex items-center gap-1.5">
                   <Coins className="h-3.5 w-3.5 text-primary" /> Your cashback wallet
@@ -332,28 +332,17 @@ function ReferralsPage() {
                   {copied ? "Copied" : "Copy link"}
                 </Button>
               </div>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  if (typeof document === "undefined") return;
-                  const el = document.getElementById("bind-referrer");
-                  el?.scrollIntoView({ behavior: "smooth", block: "start" });
-                  setTimeout(() => {
-                    const input = document.getElementById("og-leader-code-input") as HTMLInputElement | null;
-                    input?.focus();
-                  }, 400);
-                }}
-                className="mt-2 w-full gap-2 border-rose-500/40 bg-rose-500/10 text-rose-200 hover:bg-rose-500/20"
-              >
-                <KeyRound className="h-4 w-4" /> Connect OG Leader (enter code)
-              </Button>
+
+              {/* Merged: Connect OG Leader binding card */}
+              <div className="mt-5 border-t border-white/10 pt-5">
+                <div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-rose-300">
+                  <KeyRound className="h-3.5 w-3.5" /> Connect your OG Leader
+                </div>
+                <BindReferrerCard />
+              </div>
             </div>
           </div>
         </section>
-
-        <div id="bind-referrer" className="scroll-mt-24">
-          <BindReferrerCard />
-        </div>
 
         {/* SHARE CARD — primary action */}
         <section className="rounded-3xl border border-white/10 bg-card/70 p-5 backdrop-blur-xl sm:p-6">
