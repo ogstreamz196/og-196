@@ -190,7 +190,7 @@ function CheckoutReturn() {
           <p className="mt-2 text-sm text-muted-foreground">
             We couldn't find your checkout session.
           </p>
-          <Button className="mt-6" onClick={() => navigate({ to: "/buy-coins" })}>
+          <Button className="mt-6" onClick={() => navigate({ to: "/buy-coins", search: {} })}>
             Back to Buy Coins
           </Button>
         </div>
