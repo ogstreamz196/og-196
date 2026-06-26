@@ -898,111 +898,140 @@ function CustomPackCard({ onBuy }: { onBuy: (units: number) => void }) {
   // Per-coin price using consistent GBP rounding (3 dp for fractional pennies).
   const perCoin = CUSTOM_COIN_UNIT.priceCents / 100 / CUSTOM_COIN_UNIT.coins;
 
-  const dec = () => {
-    if (atMin) {
-      setBumpError(`Minimum top-up is ${minCoins} coins.`);
+
+
+
+  const bump = (delta: number) => {
+    const next = Math.min(
+      CUSTOM_COIN_UNIT.maxUnits,
+      Math.max(CUSTOM_COIN_UNIT.minUnits, units + delta),
+    );
+    if (next === units) {
+      setBumpError(
+        delta < 0
+          ? `Minimum top-up is ${minCoins} coins.`
+          : `Maximum custom top-up is ${maxCoins} coins.`,
+      );
       return;
     }
     setBumpError(null);
-    setUnits((u) => Math.max(CUSTOM_COIN_UNIT.minUnits, u - 1));
+    setUnits(next);
   };
-  const inc = () => {
-    if (atMax) {
-      setBumpError(`Maximum custom top-up is ${maxCoins} coins.`);
-      return;
-    }
-    setBumpError(null);
-    setUnits((u) => Math.min(CUSTOM_COIN_UNIT.maxUnits, u + 1));
-  };
+
+  const quickPicks = [5, 10, 25, 50].filter((n) => n <= CUSTOM_COIN_UNIT.maxUnits);
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-5 shadow-card sm:p-6">
+    <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-4 shadow-card sm:p-6">
       <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-primary/15 blur-3xl" />
-      <div className="relative grid gap-5 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center">
-        <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-primary/15 text-primary">
-          <SlidersHorizontal className="h-6 w-6" />
-        </div>
 
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="font-display text-lg font-black tracking-tight sm:text-xl">Custom amount</h3>
+      {/* Header */}
+      <div className="relative flex items-start gap-3 sm:gap-4">
+        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-primary/15 text-primary sm:h-14 sm:w-14">
+          <SlidersHorizontal className="h-5 w-5 sm:h-6 sm:w-6" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <h3 className="font-display text-lg font-black tracking-tight sm:text-xl">Custom amount</h3>
+          <div className="mt-1 flex flex-wrap items-center gap-1.5">
             <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
-              {CURRENCY_SYMBOL}{(CUSTOM_COIN_UNIT.priceCents / 100).toFixed(2)} per {CUSTOM_COIN_UNIT.coins} coins
+              {CURRENCY_SYMBOL}{(CUSTOM_COIN_UNIT.priceCents / 100).toFixed(2)} = {CUSTOM_COIN_UNIT.coins} coins
             </span>
             <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               ≈ {CURRENCY_SYMBOL}{perCoin.toFixed(3)} / coin
             </span>
           </div>
-          <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
-            Tap − or + to add or remove {CUSTOM_COIN_UNIT.coins} coins at a time. Min {minCoins}, max {maxCoins}.
+          <p className="mt-1 text-[12px] leading-snug text-muted-foreground sm:text-sm">
+            Each tap adds {CURRENCY_SYMBOL}{(CUSTOM_COIN_UNIT.priceCents / 100).toFixed(2)} and {CUSTOM_COIN_UNIT.coins} coins. Min {minCoins} · max {maxCoins}.
           </p>
-
-          <div className="mt-4 flex items-center gap-3">
-            <Button
-              type="button"
-              size="icon"
-              variant="outline"
-              className="h-11 w-11 shrink-0 rounded-full disabled:opacity-40"
-              onClick={dec}
-              disabled={atMin}
-              aria-label={`Remove ${CUSTOM_COIN_UNIT.coins} coins`}
-              aria-disabled={atMin}
-              title={atMin ? `Already at minimum (${minCoins} coins)` : `Remove ${CUSTOM_COIN_UNIT.coins} coins`}
-            >
-              <Minus className="h-5 w-5" />
-            </Button>
-            <div className="flex-1 rounded-2xl border border-border bg-background/60 px-4 py-3 text-center">
-              <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">You get</div>
-              <div className="mt-0.5 flex items-baseline justify-center gap-1.5 leading-none">
-                <Coins className="h-5 w-5 shrink-0 text-coin" />
-                <span className="text-[clamp(1.75rem,6vw,2.25rem)] font-black tabular-nums text-foreground">{coins}</span>
-                <span className="text-xs font-bold text-coin">OG Coins</span>
-              </div>
-            </div>
-            <Button
-              type="button"
-              size="icon"
-              variant="outline"
-              className="h-11 w-11 shrink-0 rounded-full disabled:opacity-40"
-              onClick={inc}
-              disabled={atMax}
-              aria-label={`Add ${CUSTOM_COIN_UNIT.coins} coins`}
-              aria-disabled={atMax}
-              title={atMax ? `Already at maximum (${maxCoins} coins)` : `Add ${CUSTOM_COIN_UNIT.coins} coins`}
-            >
-              <Plus className="h-5 w-5" />
-            </Button>
-          </div>
-          {bumpError ? (
-            <p role="alert" className="mt-2 text-[11px] font-semibold text-red-500">
-              {bumpError}
-            </p>
-          ) : (atMin || atMax) ? (
-            <p className="mt-2 text-[11px] text-muted-foreground">
-              {atMin ? `You're at the minimum (${minCoins} coins).` : `You're at the maximum (${maxCoins} coins).`}
-            </p>
-          ) : null}
         </div>
+      </div>
 
-        <div className="flex items-center justify-between gap-3 sm:flex-col sm:items-end sm:justify-center">
-          <div className="text-right">
-            <div className="text-[clamp(1.5rem,5vw,2rem)] font-black tabular-nums leading-none">
-              {CURRENCY_SYMBOL}{(totalCents / 100).toFixed(2)}
-            </div>
-            <div className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              {units} × {CURRENCY_SYMBOL}{(CUSTOM_COIN_UNIT.priceCents / 100).toFixed(2)} · one-time
-            </div>
+      {/* Stepper — full width on mobile, centered counter */}
+      <div className="relative mt-4 flex items-stretch gap-2 sm:gap-3">
+        <Button
+          type="button"
+          variant="outline"
+          className="h-14 w-14 shrink-0 rounded-2xl p-0 text-2xl disabled:opacity-40 sm:h-16 sm:w-16"
+          onClick={() => bump(-1)}
+          disabled={atMin}
+          aria-label={`Remove ${CUSTOM_COIN_UNIT.coins} coins`}
+          title={atMin ? `Already at minimum (${minCoins} coins)` : `Remove ${CUSTOM_COIN_UNIT.coins} coins`}
+        >
+          <Minus className="h-6 w-6" />
+        </Button>
+        <div className="flex min-w-0 flex-1 flex-col items-center justify-center rounded-2xl border border-border bg-background/60 px-3 py-2">
+          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">You get</div>
+          <div className="mt-0.5 flex items-baseline justify-center gap-1.5 leading-none">
+            <Coins className="h-5 w-5 shrink-0 text-coin" />
+            <span className="text-[clamp(1.75rem,8vw,2.5rem)] font-black tabular-nums text-foreground">{coins}</span>
+            <span className="text-[11px] font-bold text-coin">OG</span>
           </div>
-          <Button
-            size="lg"
-            onClick={() => onBuy(units)}
-            className="bg-gradient-brand font-bold text-primary-foreground shadow-glow transition-transform hover:-translate-y-0.5 hover:opacity-90 active:translate-y-0"
+          <div className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground tabular-nums">
+            {units} × {CURRENCY_SYMBOL}{(CUSTOM_COIN_UNIT.priceCents / 100).toFixed(2)}
+          </div>
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          className="h-14 w-14 shrink-0 rounded-2xl p-0 text-2xl disabled:opacity-40 sm:h-16 sm:w-16"
+          onClick={() => bump(1)}
+          disabled={atMax}
+          aria-label={`Add ${CUSTOM_COIN_UNIT.coins} coins`}
+          title={atMax ? `Already at maximum (${maxCoins} coins)` : `Add ${CUSTOM_COIN_UNIT.coins} coins`}
+        >
+          <Plus className="h-6 w-6" />
+        </Button>
+      </div>
+
+      {/* Quick picks */}
+      <div className="relative mt-3 flex flex-wrap gap-1.5">
+        {quickPicks.map((q) => (
+          <button
+            key={q}
+            type="button"
+            onClick={() => { setBumpError(null); setUnits(q); }}
+            className={cn(
+              "rounded-full border px-3 py-1 text-[11px] font-bold uppercase tracking-wider transition",
+              units === q
+                ? "border-primary bg-primary/20 text-primary"
+                : "border-border bg-background/60 text-muted-foreground hover:border-primary/50 hover:text-foreground",
+            )}
           >
-            <CreditCard className="mr-2 h-4 w-4" /> Buy {coins} coins · {CURRENCY_SYMBOL}{(totalCents / 100).toFixed(2)}
-          </Button>
+            +{q * CUSTOM_COIN_UNIT.coins} · {CURRENCY_SYMBOL}{((q * CUSTOM_COIN_UNIT.priceCents) / 100).toFixed(2)}
+          </button>
+        ))}
+      </div>
+
+      {bumpError ? (
+        <p role="alert" className="relative mt-2 text-[11px] font-semibold text-red-500">
+          {bumpError}
+        </p>
+      ) : (atMin || atMax) ? (
+        <p className="relative mt-2 text-[11px] text-muted-foreground">
+          {atMin ? `You're at the minimum (${minCoins} coins).` : `You're at the maximum (${maxCoins} coins).`}
+        </p>
+      ) : null}
+
+      {/* Total + CTA — stacked mobile, inline desktop */}
+      <div className="relative mt-4 flex flex-col gap-3 border-t border-border/60 pt-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="text-left sm:text-left">
+          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Total</div>
+          <div className="text-[clamp(1.75rem,7vw,2.25rem)] font-black tabular-nums leading-none">
+            {CURRENCY_SYMBOL}{(totalCents / 100).toFixed(2)}
+          </div>
+          <div className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            one-time · {coins} OG coins
+          </div>
         </div>
+        <Button
+          size="lg"
+          onClick={() => onBuy(units)}
+          className="w-full bg-gradient-brand font-bold text-primary-foreground shadow-glow transition-transform hover:-translate-y-0.5 hover:opacity-90 active:translate-y-0 sm:w-auto"
+        >
+          <CreditCard className="mr-2 h-4 w-4" /> Buy · {CURRENCY_SYMBOL}{(totalCents / 100).toFixed(2)}
+        </Button>
       </div>
     </div>
   );
 }
+
 
