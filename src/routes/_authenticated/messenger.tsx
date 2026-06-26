@@ -57,10 +57,10 @@ function MessengerPage() {
         <FoulMouthReminder enabled={foulMouth} onAction={handleFoulToggle} />
       </div>
 
-      <div className="mx-auto flex h-[calc(100dvh-15rem)] min-h-[460px] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-white/10 bg-card/70 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.7)] ring-1 ring-white/5 backdrop-blur-xl sm:h-[calc(100dvh-16rem)]">
+      <div className="mx-auto flex h-[calc(100dvh-12rem)] min-h-[460px] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-card/70 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.7)] ring-1 ring-white/5 backdrop-blur-xl sm:h-[calc(100dvh-16rem)] sm:rounded-3xl">
         {/* Header — adapts to current mode */}
         <header
-          className={`relative flex items-center gap-4 border-b border-white/10 px-5 py-4 backdrop-blur-xl transition-colors sm:px-7 sm:py-5 ${
+          className={`relative grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 border-b border-white/10 px-3 py-3 backdrop-blur-xl transition-colors sm:gap-4 sm:px-7 sm:py-5 ${
             liveChat
               ? "bg-gradient-to-r from-cyan-500/20 via-sky-500/10 to-fuchsia-500/15"
               : "bg-gradient-to-r from-primary/15 via-card/90 to-card/80"
@@ -76,43 +76,47 @@ function MessengerPage() {
               }`}
             />
             {liveChat ? (
-              <span className="relative grid h-14 w-14 place-items-center rounded-full bg-cyan-500/25 ring-2 ring-cyan-400/60 ring-offset-2 ring-offset-card sm:h-16 sm:w-16">
-                <Users className="h-6 w-6 text-cyan-100 sm:h-7 sm:w-7" />
+              <span className="relative grid h-11 w-11 place-items-center rounded-full bg-cyan-500/25 ring-2 ring-cyan-400/60 ring-offset-2 ring-offset-card sm:h-16 sm:w-16">
+                <Users className="h-5 w-5 text-cyan-100 sm:h-7 sm:w-7" />
               </span>
             ) : (
               <img
                 src={ogBotAsset.url}
                 alt="OG Bot"
-                className="relative h-14 w-14 rounded-full object-cover ring-2 ring-primary/60 ring-offset-2 ring-offset-card sm:h-16 sm:w-16"
+                className="relative h-11 w-11 rounded-full object-cover ring-2 ring-primary/60 ring-offset-2 ring-offset-card sm:h-16 sm:w-16"
               />
             )}
-            <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-card bg-emerald-400 shadow-[0_0_10px_-1px_oklch(0.78_0.18_155)]" />
+            <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-card bg-emerald-400 shadow-[0_0_10px_-1px_oklch(0.78_0.18_155)] sm:h-3.5 sm:w-3.5" />
           </div>
 
-          <div className="min-w-0 flex-1 space-y-1">
+          <div className="min-w-0 space-y-0.5 sm:space-y-1">
             <div
-              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.22em] ${
+              className={`inline-flex max-w-full items-center gap-1.5 truncate rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] sm:text-[10px] sm:tracking-[0.22em] ${
                 liveChat
                   ? "border-cyan-400/40 bg-cyan-500/10 text-cyan-200"
                   : "border-primary/30 bg-primary/10 text-primary"
               }`}
             >
-              {liveChat ? "Live · EXCLUSIVE OG Community" : "OG-GPT · Powered by OG Bot"}
+              <span className="truncate">
+                {liveChat ? "Live · OG Community" : "OG-GPT · OG Bot"}
+              </span>
             </div>
-            <h1 className="truncate font-display text-2xl font-black leading-tight tracking-tight sm:text-3xl">
+            <h1 className="truncate font-display text-lg font-black leading-tight tracking-tight sm:text-3xl">
               {liveChat ? "OG Community" : "OG Bot"}
             </h1>
-            <p className="flex items-center gap-1.5 truncate text-sm font-semibold text-emerald-400">
+            <p className="flex items-center gap-1.5 truncate text-xs font-semibold text-emerald-400 sm:text-sm">
               <span className="relative inline-flex h-2 w-2 shrink-0">
                 <span className="absolute inset-0 animate-ping rounded-full bg-emerald-400/70" />
                 <span className="relative inline-block h-2 w-2 rounded-full bg-emerald-400" />
               </span>
-              {liveChat ? "Everyone talks · OG Bot listens & replies" : "Online · your songwriting partner"}
+              <span className="truncate">
+                {liveChat ? "Everyone talks · Bot replies" : "Online · songwriting partner"}
+              </span>
             </p>
           </div>
 
           {/* Live Chat Mode toggle */}
-          <div className="flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-background/40 px-3 py-2">
+          <div className="flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-background/40 px-2 py-1.5 sm:gap-2 sm:px-3 sm:py-2">
             {liveChat ? (
               <Users className="h-4 w-4 text-cyan-300" />
             ) : (
