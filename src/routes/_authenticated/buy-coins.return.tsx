@@ -86,6 +86,7 @@ function CheckoutReturn() {
           if (res.status === "credited") {
             setCoinsAdded(res.coins);
             setConfirmedBalance(res.balance);
+            applyBalance(res.balance);
             qc.invalidateQueries({ queryKey: ["profile"] });
             qc.invalidateQueries({ queryKey: ["coin-transactions"] });
             await refetchProfile();
@@ -97,6 +98,7 @@ function CheckoutReturn() {
             if (res.status === "already_credited") {
               setCoinsAdded(res.coins);
               setConfirmedBalance(res.balance);
+              applyBalance(res.balance);
             }
             qc.invalidateQueries({ queryKey: ["profile"] });
             qc.invalidateQueries({ queryKey: ["coin-transactions"] });
