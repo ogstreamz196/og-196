@@ -40,7 +40,10 @@ export function CommunityRoom() {
   const qc = useQueryClient();
   const listFn = useServerFn(listCommunityMessages);
   const postFn = useServerFn(postCommunityMessage);
+  const clearFn = useServerFn(clearCommunityMessages);
   const { foulMouth } = useFoulMouth();
+  const { isDev, isAdmin } = useRole();
+  const canClear = isDev || isAdmin;
 
   const { data, isLoading } = useQuery({
     queryKey: ["community-messages"],
