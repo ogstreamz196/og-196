@@ -3,6 +3,7 @@ import { useNavigate, useRouterState, Link } from "@tanstack/react-router";
 import { Search, ShieldCheck, LogOut, Crown } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SwipeToOpenSidebar } from "@/components/layout/SwipeToOpenSidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -94,6 +95,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     <AdminEditModeProvider>
       <SidebarProvider>
         <WelcomeBackdrop />
+        <SwipeToOpenSidebar />
         <div className="relative flex min-h-dvh w-full bg-background/80 text-foreground">
           <AppSidebar />
 
