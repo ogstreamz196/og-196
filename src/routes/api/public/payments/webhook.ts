@@ -312,7 +312,7 @@ async function handleChargeRefunded(charge: any, env: StripeEnv) {
 }
 
 // ─── dispatch ──────────────────────────────────────────────────────────────
-async function handleEvent(event: { id: string; type: string; data: { object: any } }, env: StripeEnv) {
+export async function handleEvent(event: { id: string; type: string; data: { object: any } }, env: StripeEnv) {
   log("info", "handling event", { eventId: event.id, type: event.type, env });
   switch (event.type) {
     case "checkout.session.completed":
