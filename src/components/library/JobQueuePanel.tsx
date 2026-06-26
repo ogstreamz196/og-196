@@ -34,11 +34,39 @@ import { LyricVideoSection } from "@/components/library/LyricVideoSection";
 
 type JobStatus = "queued" | "generating" | "completed" | "failed";
 
+// Suno generations typically finish within 60-120s. After 3 min we surface
+// a "taking longer than usual" hint, after 8 min we treat the job as stuck
+// and let the user retry without waiting for the watchdog.
+const SLOW_THRESHOLD_MS = 3 * 60 * 1000;
+const STUCK_THRESHOLD_MS = 8 * 60 * 1000;
+
 function classify(status: string): JobStatus {
   if (status === "completed") return "completed";
   if (status === "failed") return "failed";
   if (status === "processing") return "generating";
   return "queued";
+}
+
+function formatElapsed(ms: number): string {
+  const s = Math.max(0, Math.floor(ms / 1000));
+  const m = Math.floor(s / 60);
+  return m > 0 ? `${m}m ${s % 60}s` : `${s}s`;
+}
+
+function friendlyError(raw?: string | null): string {
+  if (!raw) return "Generation failed — tap retry to try again.";
+  const msg = raw.toLowerCase();
+  if (msg.includes("insufficient") || msg.includes("balance") || msg.includes("coins"))
+    return "Not enough coins — top up and retry.";
+  if (msg.includes("timeout") || msg.includes("timed out") || msg.includes("stuck"))
+    return "Provider timed out — safe to retry, you weren't charged.";
+  if (msg.includes("rate") || msg.includes("429"))
+    return "Rate limited — wait a moment and retry.";
+  if (msg.includes("network") || msg.includes("fetch") || msg.includes("econn"))
+    return "Network hiccup — retry usually fixes it.";
+  if (msg.includes("moderation") || msg.includes("policy") || msg.includes("forbidden"))
+    return "Blocked by Suno content policy — edit the prompt and retry.";
+  return raw.length > 140 ? `${raw.slice(0, 140)}…` : raw;
 }
 
 const META: Record<JobStatus, { label: string; icon: typeof Clock3; cls: string; dot: string }> = {
@@ -52,6 +80,19 @@ export function JobQueuePanel({ songs }: { songs: Song[] }) {
   const [retrying, setRetrying] = useState<string | null>(null);
   const [detailsSong, setDetailsSong] = useState<Song | null>(null);
 
+  // Tick once per second while there are in-flight jobs so the elapsed/stall
+  // indicators stay accurate without forcing a parent refetch.
+  const hasActive = useMemo(
+    () => songs.some((s) => { const k = classify(s.status); return k === "queued" || k === "generating"; }),
+    [songs],
+  );
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!hasActive) return;
+    const id = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(id);
+  }, [hasActive]);
+
   // Collapse sibling rows from the same Suno task into a single tile so a
   // generation shows ONE clear loading state, then flips to completed when
   // the final row lands — never as multiple partial rows.
@@ -63,7 +104,6 @@ export function JobQueuePanel({ songs }: { songs: Song[] }) {
       if (!taskId) { standalone.push(s); continue; }
       const prev = byTask.get(taskId);
       if (!prev) { byTask.set(taskId, s); continue; }
-      // Prefer the row that is furthest along: completed > processing > others.
       const rank = (st: string) => st === "completed" ? 3 : st === "processing" ? 2 : st === "failed" ? 1 : 0;
       if (rank(s.status) > rank(prev.status)) byTask.set(taskId, s);
     }
@@ -73,14 +113,23 @@ export function JobQueuePanel({ songs }: { songs: Song[] }) {
   const jobs = useMemo(() => {
     const active = dedupedSongs.filter((s) => classify(s.status) !== "completed");
     const recentCompleted = dedupedSongs.filter((s) => classify(s.status) === "completed").slice(0, 4);
-    return [...active.slice(0, 8), ...recentCompleted].map((s) => ({ song: s, kind: classify(s.status) }));
-  }, [dedupedSongs]);
+    return [...active.slice(0, 8), ...recentCompleted].map((s) => {
+      const kind = classify(s.status);
+      const startedAt = new Date(s.created_at).getTime();
+      const elapsed = Number.isFinite(startedAt) ? Math.max(0, now - startedAt) : 0;
+      const inFlight = kind === "queued" || kind === "generating";
+      const slow = inFlight && elapsed > SLOW_THRESHOLD_MS;
+      const stuck = inFlight && elapsed > STUCK_THRESHOLD_MS;
+      return { song: s, kind, elapsed, inFlight, slow, stuck };
+    });
+  }, [dedupedSongs, now]);
 
   const counts = useMemo(() => {
     const c: Record<JobStatus, number> = { queued: 0, generating: 0, completed: 0, failed: 0 };
     for (const s of dedupedSongs) c[classify(s.status)]++;
     return c;
   }, [dedupedSongs]);
+
 
   async function retry(song: Song) {
     setRetrying(song.id);
@@ -128,25 +177,40 @@ export function JobQueuePanel({ songs }: { songs: Song[] }) {
       </div>
 
       <ul className="grid gap-2">
-        {jobs.map(({ song, kind }) => {
+        {jobs.map(({ song, kind, elapsed, inFlight, slow, stuck }) => {
           const m = META[kind];
           const Icon = m.icon;
+          const showRetry = kind === "failed" || stuck;
+          const subline = kind === "failed"
+            ? friendlyError(song.error_message)
+            : inFlight
+              ? `${m.label} · ${formatElapsed(elapsed)}${stuck ? " · looks stuck" : slow ? " · taking longer than usual" : ""}`
+              : m.label;
           return (
             <li
               key={song.id}
-              className="flex items-center gap-3 rounded-2xl border border-white/10 bg-background/40 p-3"
+              className={cn(
+                "flex items-center gap-3 rounded-2xl border border-white/10 bg-background/40 p-3",
+                stuck && "border-rose-500/40 bg-rose-500/5",
+                slow && !stuck && "border-amber-400/40 bg-amber-400/5",
+              )}
             >
               <span className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-xl border", m.cls)}>
                 <Icon className={cn("h-4 w-4", kind === "generating" && "animate-spin")} />
               </span>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-bold">{song.title || "Untitled"}</p>
-                <p className="truncate text-[11px] uppercase tracking-wider text-muted-foreground">
-                  {m.label}
-                  {kind === "failed" && song.error_message ? ` · ${song.error_message}` : ""}
+                <p
+                  className={cn(
+                    "truncate text-[11px] uppercase tracking-wider",
+                    kind === "failed" || stuck ? "text-rose-200" : slow ? "text-amber-200" : "text-muted-foreground",
+                  )}
+                  title={kind === "failed" ? song.error_message ?? undefined : undefined}
+                >
+                  {subline}
                 </p>
               </div>
-              {kind === "failed" && (
+              {showRetry && (
                 <Button
                   size="sm"
                   variant="secondary"
