@@ -186,6 +186,30 @@ export const listCommunityMessages = createServerFn({ method: "GET" })
     return { messages: ((data ?? []) as CommunityMessage[]).reverse() };
   });
 
+/** Load a page of older messages strictly before the given ISO timestamp. */
+export const listOlderCommunityMessages = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: { before: string; limit?: number }) => {
+    const before = String(data?.before ?? "");
+    if (!before) throw new Error("before required");
+    const limit = Math.min(Math.max(Number(data?.limit ?? 50), 1), 100);
+    return { before, limit };
+  })
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows, error } = await supabaseAdmin
+      .from("community_messages")
+      .select("id, user_id, role, content, display_name, created_at")
+      .lt("created_at", data.before)
+      .order("created_at", { ascending: false })
+      .limit(data.limit);
+    if (error) throw new Error(error.message);
+    return {
+      messages: ((rows ?? []) as CommunityMessage[]).reverse(),
+      hasMore: (rows?.length ?? 0) === data.limit,
+    };
+  });
+
 /** Dev/admin only: wipe the live community chat. */
 export const clearCommunityMessages = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
