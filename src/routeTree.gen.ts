@@ -38,6 +38,7 @@ import { Route as AuthenticatedAdminReferralsAuditRouteImport } from './routes/_
 import { Route as AuthenticatedAdminOnboardingRouteImport } from './routes/_authenticated/admin.onboarding'
 import { Route as AuthenticatedAdminOgPersonaRouteImport } from './routes/_authenticated/admin.og-persona'
 import { Route as AuthenticatedAdminDebugContextRouteImport } from './routes/_authenticated/admin.debug-context'
+import { Route as AuthenticatedAdminCoinAuditRouteImport } from './routes/_authenticated/admin.coin-audit'
 import { Route as AuthenticatedAdminApiKeysRouteImport } from './routes/_authenticated/admin.api-keys'
 import { Route as ApiPublicTelegramWebhookRouteImport } from './routes/api/public/telegram/webhook'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
@@ -200,6 +201,12 @@ const AuthenticatedAdminDebugContextRoute =
     path: '/admin/debug-context',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminCoinAuditRoute =
+  AuthenticatedAdminCoinAuditRouteImport.update({
+    id: '/admin/coin-audit',
+    path: '/admin/coin-audit',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminApiKeysRoute =
   AuthenticatedAdminApiKeysRouteImport.update({
     id: '/admin/api-keys',
@@ -241,6 +248,7 @@ export interface FileRoutesByFullPath {
   '/portal/$slug': typeof PortalSlugRoute
   '/r/$code': typeof RCodeRoute
   '/admin/api-keys': typeof AuthenticatedAdminApiKeysRoute
+  '/admin/coin-audit': typeof AuthenticatedAdminCoinAuditRoute
   '/admin/debug-context': typeof AuthenticatedAdminDebugContextRoute
   '/admin/og-persona': typeof AuthenticatedAdminOgPersonaRoute
   '/admin/onboarding': typeof AuthenticatedAdminOnboardingRoute
@@ -275,6 +283,7 @@ export interface FileRoutesByTo {
   '/r/$code': typeof RCodeRoute
   '/': typeof AuthenticatedIndexRoute
   '/admin/api-keys': typeof AuthenticatedAdminApiKeysRoute
+  '/admin/coin-audit': typeof AuthenticatedAdminCoinAuditRoute
   '/admin/debug-context': typeof AuthenticatedAdminDebugContextRoute
   '/admin/og-persona': typeof AuthenticatedAdminOgPersonaRoute
   '/admin/onboarding': typeof AuthenticatedAdminOnboardingRoute
@@ -311,6 +320,7 @@ export interface FileRoutesById {
   '/r/$code': typeof RCodeRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/admin/api-keys': typeof AuthenticatedAdminApiKeysRoute
+  '/_authenticated/admin/coin-audit': typeof AuthenticatedAdminCoinAuditRoute
   '/_authenticated/admin/debug-context': typeof AuthenticatedAdminDebugContextRoute
   '/_authenticated/admin/og-persona': typeof AuthenticatedAdminOgPersonaRoute
   '/_authenticated/admin/onboarding': typeof AuthenticatedAdminOnboardingRoute
@@ -347,6 +357,7 @@ export interface FileRouteTypes {
     | '/portal/$slug'
     | '/r/$code'
     | '/admin/api-keys'
+    | '/admin/coin-audit'
     | '/admin/debug-context'
     | '/admin/og-persona'
     | '/admin/onboarding'
@@ -381,6 +392,7 @@ export interface FileRouteTypes {
     | '/r/$code'
     | '/'
     | '/admin/api-keys'
+    | '/admin/coin-audit'
     | '/admin/debug-context'
     | '/admin/og-persona'
     | '/admin/onboarding'
@@ -416,6 +428,7 @@ export interface FileRouteTypes {
     | '/r/$code'
     | '/_authenticated/'
     | '/_authenticated/admin/api-keys'
+    | '/_authenticated/admin/coin-audit'
     | '/_authenticated/admin/debug-context'
     | '/_authenticated/admin/og-persona'
     | '/_authenticated/admin/onboarding'
@@ -652,6 +665,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDebugContextRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/coin-audit': {
+      id: '/_authenticated/admin/coin-audit'
+      path: '/admin/coin-audit'
+      fullPath: '/admin/coin-audit'
+      preLoaderRoute: typeof AuthenticatedAdminCoinAuditRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/api-keys': {
       id: '/_authenticated/admin/api-keys'
       path: '/admin/api-keys'
@@ -707,6 +727,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedAdminApiKeysRoute: typeof AuthenticatedAdminApiKeysRoute
+  AuthenticatedAdminCoinAuditRoute: typeof AuthenticatedAdminCoinAuditRoute
   AuthenticatedAdminDebugContextRoute: typeof AuthenticatedAdminDebugContextRoute
   AuthenticatedAdminOgPersonaRoute: typeof AuthenticatedAdminOgPersonaRoute
   AuthenticatedAdminOnboardingRoute: typeof AuthenticatedAdminOnboardingRoute
@@ -733,6 +754,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedAdminApiKeysRoute: AuthenticatedAdminApiKeysRoute,
+  AuthenticatedAdminCoinAuditRoute: AuthenticatedAdminCoinAuditRoute,
   AuthenticatedAdminDebugContextRoute: AuthenticatedAdminDebugContextRoute,
   AuthenticatedAdminOgPersonaRoute: AuthenticatedAdminOgPersonaRoute,
   AuthenticatedAdminOnboardingRoute: AuthenticatedAdminOnboardingRoute,
