@@ -103,7 +103,7 @@ function CheckoutReturn() {
     if (!next) {
       // Always refresh on close so balance shown elsewhere is fresh.
       qc.invalidateQueries({ queryKey: ["profile"] });
-      navigate({ to: "/buy-coins" });
+      navigate({ to: "/buy-coins", search: {} });
     }
   }
 
