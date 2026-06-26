@@ -33,11 +33,12 @@ function CheckoutReturn() {
   const { session_id } = Route.useSearch();
   const qc = useQueryClient();
   const navigate = useNavigate();
-  const { data: profile } = useProfile();
+  const { data: profile, refetch: refetchProfile } = useProfile();
   const reconcile = useServerFn(reconcileCoinSession);
   const [state, setState] = useState<SyncState>("idle");
   const [errMsg, setErrMsg] = useState<string | null>(null);
   const [coinsAdded, setCoinsAdded] = useState<number | null>(null);
+  const [confirmedBalance, setConfirmedBalance] = useState<number | null>(null);
   const [open, setOpen] = useState(true);
 
   useEffect(() => {
@@ -66,15 +67,22 @@ function CheckoutReturn() {
           }
           if (res.status === "credited") {
             setCoinsAdded(res.coins);
+            setConfirmedBalance(res.balance);
             qc.invalidateQueries({ queryKey: ["profile"] });
             qc.invalidateQueries({ queryKey: ["coin-transactions"] });
+            await refetchProfile();
             toast.success(`+${res.coins} OG coins added`, { description: `Order ${session_id}` });
             setState("done");
             return;
           }
           if (res.status === "already_credited" || res.status === "vip_granted") {
+            if (res.status === "already_credited") {
+              setCoinsAdded(res.coins);
+              setConfirmedBalance(res.balance);
+            }
             qc.invalidateQueries({ queryKey: ["profile"] });
             qc.invalidateQueries({ queryKey: ["coin-transactions"] });
+            await refetchProfile();
             setState("done");
             return;
           }
@@ -87,7 +95,7 @@ function CheckoutReturn() {
     }
     run();
     return () => { cancelled = true; };
-  }, [session_id, qc, reconcile]);
+  }, [session_id, qc, reconcile, refetchProfile]);
 
   // Auto-close on success after a short celebratory beat
   useEffect(() => {
@@ -118,11 +126,17 @@ function CheckoutReturn() {
       qc.invalidateQueries({ queryKey: ["coin-transactions"] });
       if (res.status === "credited") {
         setCoinsAdded(res.coins);
+        setConfirmedBalance(res.balance);
         toast.success(`+${res.coins} OG coins added`);
         setState("done");
       } else {
+        if (res.status === "already_credited") {
+          setCoinsAdded(res.coins);
+          setConfirmedBalance(res.balance);
+        }
         setState(res.status === "pending" ? "pending" : "done");
       }
+      await refetchProfile();
     } catch (e) {
       setErrMsg(e instanceof Error ? e.message : "Retry failed");
       setState("error");
@@ -174,7 +188,7 @@ function CheckoutReturn() {
 
           <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2">
             <Coins className="h-4 w-4 text-coin" />
-            <span className="font-bold tabular-nums">{profile?.coin_balance ?? 0}</span>
+            <span className="font-bold tabular-nums">{confirmedBalance ?? profile?.coin_balance ?? 0}</span>
             <span className="text-sm text-muted-foreground">current balance</span>
             {state === "syncing" && (
               <Loader2 className="ml-1 h-3 w-3 animate-spin text-muted-foreground" />

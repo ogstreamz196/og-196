@@ -298,7 +298,7 @@ export const createCustomCoinCheckoutSession = createServerFn({ method: "POST" }
 
 type ReconcileResult =
   | { status: "credited"; coins: number; balance: number }
-  | { status: "already_credited"; balance: number }
+  | { status: "already_credited"; coins: number; balance: number }
   | { status: "vip_granted" }
   | { status: "pending"; reason: string }
   | { error: string };
@@ -342,38 +342,20 @@ export const reconcileCoinSession = createServerFn({ method: "POST" })
       if (!coins || coins <= 0) return { error: "Could not determine coin amount" };
 
       const reference = `stripe:${data.environment}:${session.id}`;
-      const { data: existing } = await supabaseAdmin
-        .from("coin_transactions")
-        .select("id")
-        .eq("reference", reference)
-        .maybeSingle();
+      const { data: result, error: creditErr } = await (supabaseAdmin as any)
+        .rpc("credit_coin_transaction", {
+          _user_id: userId,
+          _amount: coins,
+          _type: "stripe_purchase",
+          _reference: reference,
+        });
+      if (creditErr) return { error: creditErr.message };
 
-      const { data: profile } = await supabaseAdmin
-        .from("profiles").select("coin_balance").eq("id", userId).maybeSingle();
-      if (!profile) return { error: "Profile not found" };
-
-      if (existing) {
-        return { status: "already_credited", balance: profile.coin_balance ?? 0 };
-      }
-
-      const newBalance = (profile.coin_balance ?? 0) + coins;
-      const { error: updErr } = await supabaseAdmin
-        .from("profiles").update({ coin_balance: newBalance }).eq("id", userId);
-      if (updErr) return { error: updErr.message };
-
-      const { error: txErr } = await supabaseAdmin.from("coin_transactions").insert({
-        user_id: userId,
-        amount: coins,
-        type: "stripe_purchase",
-        reference,
-      });
-      if (txErr) {
-        // Race with webhook: another writer inserted the same reference.
-        // Treat as success — the balance update already landed.
-        if (txErr.code !== "23505") console.error("reconcile tx insert failed", txErr);
-      }
-
-      return { status: "credited", coins, balance: newBalance };
+      const balance = Number((result as { balance?: number } | null)?.balance ?? 0);
+      const credited = Boolean((result as { credited?: boolean } | null)?.credited);
+      return credited
+        ? { status: "credited", coins, balance }
+        : { status: "already_credited", coins, balance };
     } catch (error) {
       console.error("reconcileCoinSession failed", error);
       return { error: getStripeErrorMessage(error) };
