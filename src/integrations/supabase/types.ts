@@ -1080,6 +1080,15 @@ export type Database = {
         }
         Returns: string
       }
+      credit_coin_transaction: {
+        Args: {
+          _amount: number
+          _reference: string
+          _type: string
+          _user_id: string
+        }
+        Returns: Json
+      }
       daily_coin_floor: { Args: never; Returns: number }
       deduct_coins: {
         Args: { p_amount: number; p_reference: string; p_user: string }
