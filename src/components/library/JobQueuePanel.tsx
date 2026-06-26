@@ -177,25 +177,40 @@ export function JobQueuePanel({ songs }: { songs: Song[] }) {
       </div>
 
       <ul className="grid gap-2">
-        {jobs.map(({ song, kind }) => {
+        {jobs.map(({ song, kind, elapsed, inFlight, slow, stuck }) => {
           const m = META[kind];
           const Icon = m.icon;
+          const showRetry = kind === "failed" || stuck;
+          const subline = kind === "failed"
+            ? friendlyError(song.error_message)
+            : inFlight
+              ? `${m.label} · ${formatElapsed(elapsed)}${stuck ? " · looks stuck" : slow ? " · taking longer than usual" : ""}`
+              : m.label;
           return (
             <li
               key={song.id}
-              className="flex items-center gap-3 rounded-2xl border border-white/10 bg-background/40 p-3"
+              className={cn(
+                "flex items-center gap-3 rounded-2xl border border-white/10 bg-background/40 p-3",
+                stuck && "border-rose-500/40 bg-rose-500/5",
+                slow && !stuck && "border-amber-400/40 bg-amber-400/5",
+              )}
             >
               <span className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-xl border", m.cls)}>
                 <Icon className={cn("h-4 w-4", kind === "generating" && "animate-spin")} />
               </span>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-bold">{song.title || "Untitled"}</p>
-                <p className="truncate text-[11px] uppercase tracking-wider text-muted-foreground">
-                  {m.label}
-                  {kind === "failed" && song.error_message ? ` · ${song.error_message}` : ""}
+                <p
+                  className={cn(
+                    "truncate text-[11px] uppercase tracking-wider",
+                    kind === "failed" || stuck ? "text-rose-200" : slow ? "text-amber-200" : "text-muted-foreground",
+                  )}
+                  title={kind === "failed" ? song.error_message ?? undefined : undefined}
+                >
+                  {subline}
                 </p>
               </div>
-              {kind === "failed" && (
+              {showRetry && (
                 <Button
                   size="sm"
                   variant="secondary"
