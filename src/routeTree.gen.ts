@@ -29,6 +29,7 @@ import { Route as AuthenticatedBuyCoinsIndexRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedLibrarySongIdRouteImport } from './routes/_authenticated/library.$songId'
 import { Route as AuthenticatedBuyCoinsReturnRouteImport } from './routes/_authenticated/buy-coins.return'
+import { Route as AuthenticatedAdminWebhooksRouteImport } from './routes/_authenticated/admin.webhooks'
 import { Route as AuthenticatedAdminUsersProRouteImport } from './routes/_authenticated/admin.users-pro'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedAdminUserSettingsRouteImport } from './routes/_authenticated/admin.user-settings'
@@ -146,6 +147,12 @@ const AuthenticatedBuyCoinsReturnRoute =
     path: '/buy-coins/return',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminWebhooksRoute =
+  AuthenticatedAdminWebhooksRouteImport.update({
+    id: '/admin/webhooks',
+    path: '/admin/webhooks',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminUsersProRoute =
   AuthenticatedAdminUsersProRouteImport.update({
     id: '/admin/users-pro',
@@ -242,6 +249,7 @@ export interface FileRoutesByFullPath {
   '/admin/user-settings': typeof AuthenticatedAdminUserSettingsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/admin/users-pro': typeof AuthenticatedAdminUsersProRoute
+  '/admin/webhooks': typeof AuthenticatedAdminWebhooksRoute
   '/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
   '/library/$songId': typeof AuthenticatedLibrarySongIdRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -275,6 +283,7 @@ export interface FileRoutesByTo {
   '/admin/user-settings': typeof AuthenticatedAdminUserSettingsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/admin/users-pro': typeof AuthenticatedAdminUsersProRoute
+  '/admin/webhooks': typeof AuthenticatedAdminWebhooksRoute
   '/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
   '/library/$songId': typeof AuthenticatedLibrarySongIdRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -310,6 +319,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/user-settings': typeof AuthenticatedAdminUserSettingsRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/_authenticated/admin/users-pro': typeof AuthenticatedAdminUsersProRoute
+  '/_authenticated/admin/webhooks': typeof AuthenticatedAdminWebhooksRoute
   '/_authenticated/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
   '/_authenticated/library/$songId': typeof AuthenticatedLibrarySongIdRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -345,6 +355,7 @@ export interface FileRouteTypes {
     | '/admin/user-settings'
     | '/admin/users'
     | '/admin/users-pro'
+    | '/admin/webhooks'
     | '/buy-coins/return'
     | '/library/$songId'
     | '/admin/'
@@ -378,6 +389,7 @@ export interface FileRouteTypes {
     | '/admin/user-settings'
     | '/admin/users'
     | '/admin/users-pro'
+    | '/admin/webhooks'
     | '/buy-coins/return'
     | '/library/$songId'
     | '/admin'
@@ -412,6 +424,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/user-settings'
     | '/_authenticated/admin/users'
     | '/_authenticated/admin/users-pro'
+    | '/_authenticated/admin/webhooks'
     | '/_authenticated/buy-coins/return'
     | '/_authenticated/library/$songId'
     | '/_authenticated/admin/'
@@ -576,6 +589,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBuyCoinsReturnRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/webhooks': {
+      id: '/_authenticated/admin/webhooks'
+      path: '/admin/webhooks'
+      fullPath: '/admin/webhooks'
+      preLoaderRoute: typeof AuthenticatedAdminWebhooksRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/users-pro': {
       id: '/_authenticated/admin/users-pro'
       path: '/admin/users-pro'
@@ -695,6 +715,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminUserSettingsRoute: typeof AuthenticatedAdminUserSettingsRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRouteWithChildren
   AuthenticatedAdminUsersProRoute: typeof AuthenticatedAdminUsersProRoute
+  AuthenticatedAdminWebhooksRoute: typeof AuthenticatedAdminWebhooksRoute
   AuthenticatedBuyCoinsReturnRoute: typeof AuthenticatedBuyCoinsReturnRoute
   AuthenticatedLibrarySongIdRoute: typeof AuthenticatedLibrarySongIdRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
@@ -720,6 +741,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminUserSettingsRoute: AuthenticatedAdminUserSettingsRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRouteWithChildren,
   AuthenticatedAdminUsersProRoute: AuthenticatedAdminUsersProRoute,
+  AuthenticatedAdminWebhooksRoute: AuthenticatedAdminWebhooksRoute,
   AuthenticatedBuyCoinsReturnRoute: AuthenticatedBuyCoinsReturnRoute,
   AuthenticatedLibrarySongIdRoute: AuthenticatedLibrarySongIdRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
@@ -744,13 +766,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
