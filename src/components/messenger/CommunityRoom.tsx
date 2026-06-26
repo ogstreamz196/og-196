@@ -1,11 +1,12 @@
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { Send, Users, Loader2 } from "lucide-react";
+import { Send, Users, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   listCommunityMessages,
   postCommunityMessage,
+  clearCommunityMessages,
   type CommunityMessage,
 } from "@/lib/community.functions";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/use-auth";
 import { useFoulMouth } from "@/hooks/use-foul-mouth";
+import { useRole } from "@/hooks/use-role";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
 
 function initials(name: string | null) {
@@ -38,7 +40,10 @@ export function CommunityRoom() {
   const qc = useQueryClient();
   const listFn = useServerFn(listCommunityMessages);
   const postFn = useServerFn(postCommunityMessage);
+  const clearFn = useServerFn(clearCommunityMessages);
   const { foulMouth } = useFoulMouth();
+  const { isDev, isAdmin } = useRole();
+  const canClear = isDev || isAdmin;
 
   const { data, isLoading } = useQuery({
     queryKey: ["community-messages"],
@@ -85,6 +90,15 @@ export function CommunityRoom() {
     onError: (err: Error) => toast.error(err.message),
   });
 
+  const clear = useMutation({
+    mutationFn: () => clearFn(),
+    onSuccess: () => {
+      qc.setQueryData(["community-messages"], { messages: [] });
+      toast.success("Live chat cleared");
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+
   function submit(e: React.FormEvent) {
     e.preventDefault();
     const t = text.trim();
@@ -94,6 +108,32 @@ export function CommunityRoom() {
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col gap-2 p-3">
+      {canClear && (
+        <div className="flex items-center justify-between rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-1.5">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-destructive/80">
+            Dev controls
+          </span>
+          <Button
+            type="button"
+            variant="destructive"
+            size="sm"
+            className="h-7 gap-1.5 text-xs"
+            disabled={clear.isPending}
+            onClick={() => {
+              if (window.confirm("Wipe ALL live community messages? This cannot be undone.")) {
+                clear.mutate();
+              }
+            }}
+          >
+            {clear.isPending ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Trash2 className="h-3.5 w-3.5" />
+            )}
+            Clear live chat
+          </Button>
+        </div>
+      )}
       <div
         ref={scrollRef}
         className="flex-1 space-y-3 overflow-y-auto rounded-2xl border border-border/40 bg-background/40 p-3 backdrop-blur-md"
