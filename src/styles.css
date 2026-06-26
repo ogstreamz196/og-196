@@ -680,6 +680,62 @@ button.graffiti-accent:hover {
   }
 }
 
+/* Silver fire aura — molten chrome halo that licks around card edges.
+   Two stacked pseudo-elements cross-fade with a slow flicker so it reads
+   as living fire, not a static glow. GPU-friendly: only opacity animates. */
+@keyframes silver-fire-flicker {
+  0%, 100% { opacity: 0.9; }
+  35%      { opacity: 0.55; }
+  60%      { opacity: 1;    }
+  80%      { opacity: 0.7;  }
+}
+@keyframes silver-fire-drift {
+  0%, 100% { opacity: 0.75; transform: translateZ(0) scale(1); }
+  50%      { opacity: 0.35; transform: translateZ(0) scale(1.012); }
+}
+.silver-fire-aura {
+  position: relative;
+  isolation: isolate;
+}
+.silver-fire-aura::before,
+.silver-fire-aura::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: inherit;
+  z-index: -1;
+  pointer-events: none;
+  will-change: opacity, transform;
+  transform: translateZ(0);
+}
+.silver-fire-aura::before {
+  box-shadow:
+    0 0 0 1px rgba(226, 232, 240, 0.55),
+    0 0 14px 2px rgba(203, 213, 225, 0.55),
+    0 0 32px 8px rgba(148, 163, 184, 0.45),
+    0 0 60px 18px rgba(241, 245, 249, 0.28);
+  animation: silver-fire-flicker 2.2s ease-in-out infinite;
+}
+.silver-fire-aura::after {
+  background: radial-gradient(
+    120% 80% at 50% 50%,
+    rgba(248, 250, 252, 0.18) 0%,
+    rgba(203, 213, 225, 0.12) 40%,
+    transparent 70%
+  );
+  box-shadow:
+    0 0 24px 6px rgba(226, 232, 240, 0.45),
+    0 0 56px 16px rgba(148, 163, 184, 0.35);
+  animation: silver-fire-drift 3.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .silver-fire-aura::before,
+  .silver-fire-aura::after {
+    animation: none;
+    opacity: 0.55;
+  }
+}
+
 /* Premium luxury slow glow — soft gold + brand halo that breathes.
    GPU-friendly: only opacity/transform animate on stacked pseudo-elements. */
 @keyframes luxe-glow-breathe {
