@@ -185,3 +185,25 @@ export const listCommunityMessages = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return { messages: ((data ?? []) as CommunityMessage[]).reverse() };
   });
+
+/** Dev/admin only: wipe the live community chat. */
+export const clearCommunityMessages = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: isAdmin } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
+    const { data: isDev } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "dev",
+    });
+    if (!isAdmin && !isDev) throw new Error("Forbidden");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("community_messages")
+      .delete()
+      .not("id", "is", null);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
