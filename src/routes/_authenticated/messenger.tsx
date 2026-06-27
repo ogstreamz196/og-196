@@ -153,7 +153,7 @@ function MessengerPage() {
             ) : (
               <MessageCircle className="h-4 w-4 text-primary" />
             )}
-            <span className="whitespace-nowrap">{isCommunity ? "Turn on Loner" : "Turn off Loner"}</span>
+            <span className="whitespace-nowrap">{setMode.isPending ? "Saving…" : isCommunity ? "Turn on Loner" : "Turn off Loner"}</span>
 
           </button>
         </header>

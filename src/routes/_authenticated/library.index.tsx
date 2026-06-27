@@ -48,6 +48,8 @@ import { FoulMouthReminder } from "@/components/FoulMouthReminder";
 import { PoweredByOgBot } from "@/components/PoweredByOgBot";
 import { JobQueuePanel } from "@/components/library/JobQueuePanel";
 import { CategoryCard } from "@/components/library/CategoryCard";
+import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
+
 import { ReviewDialog } from "@/components/library/ReviewDialog";
 import { useInfiniteScrollSentinel } from "@/hooks/use-infinite-scroll-sentinel";
 
@@ -114,7 +116,14 @@ function LibraryPage() {
   const [chips, setChips] = useState<Record<Category, string[]>>(() => initialChips());
   const [lyrics, setLyrics] = useState("");
   const [genLyrics, setGenLyrics] = useState(false);
-  const [foulMouth, setFoulMouth] = useState(false);
+  const { foulMouth } = useFoulMouth();
+  const setFoulMouthMutation = useSetFoulMouth();
+  const setFoulMouth = (updater: boolean | ((v: boolean) => boolean)) => {
+    const next = typeof updater === "function" ? updater(foulMouth) : updater;
+    setFoulMouthMutation.mutate(next);
+  };
+  const foulMouthSaving = setFoulMouthMutation.isPending;
+
   const [personalDetails, setPersonalDetails] = useState("");
   const [extraContext, setExtraContext] = useState("");
   const [genSong, setGenSong] = useState(false);
@@ -891,7 +900,7 @@ function LibraryPage() {
                   : "border-white/25 bg-white/10 text-foreground",
               )}
             >
-              {foulMouth ? "Turn off" : "Turn on"}
+              {foulMouthSaving ? "Saving…" : foulMouth ? "Turn off" : "Turn on"}
             </span>
           </button>
 
