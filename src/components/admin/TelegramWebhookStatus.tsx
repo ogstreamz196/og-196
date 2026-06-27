@@ -118,6 +118,21 @@ export function TelegramWebhookStatus() {
               />
               Refresh
             </button>
+            <button
+              type="button"
+              onClick={registerWebhook}
+              disabled={registering}
+              className="inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary hover:bg-primary/20 disabled:opacity-60"
+              aria-label="Re-register webhook on the active bot"
+              title="Point Telegram at this app's webhook using the active bot token"
+            >
+              {registering ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <Plug className="h-3 w-3" />
+              )}
+              Re-register
+            </button>
           </div>
 
           {data?.url ? (
