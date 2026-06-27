@@ -16,7 +16,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { useRole } from "@/hooks/use-role";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { useOgMode } from "@/hooks/use-og-mode";
-import { useShareLive } from "@/hooks/use-share-live";
+// useShareLive intentionally removed — Loner/Community is page-level now.
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import type { RealtimePostgresInsertPayload } from "@supabase/supabase-js";
