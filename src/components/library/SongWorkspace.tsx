@@ -143,6 +143,19 @@ export function SongWorkspace({ song, onSaved }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [song.id, song.status]);
 
+  // Elapsed-seconds counter for the Generate button while a job is in flight.
+  const [elapsed, setElapsed] = useState(0);
+  useEffect(() => {
+    if (!isPending) { setElapsed(0); return; }
+    const startedAt = song.generation_started_at
+      ? new Date(song.generation_started_at).getTime()
+      : Date.now();
+    const tick = () => setElapsed(Math.max(0, Math.round((Date.now() - startedAt) / 1000)));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [isPending, song.generation_started_at]);
+
   const stage: Stage = isReady ? 3 : hasLyrics ? 2 : 1;
 
   const dirty =
