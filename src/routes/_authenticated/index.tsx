@@ -56,6 +56,16 @@ import { DodgyText } from "@/components/welcome/DodgyText";
 
 export const Route = createFileRoute("/_authenticated/")({
   component: DashboardHome,
+  head: () => ({
+    meta: [
+      { title: "AI Music Studio — OG Streamz" },
+      { name: "description", content: "Your OG Streamz studio: generate AI songs, chat with OG Bot, and manage your coin-powered creator economy." },
+      { property: "og:title", content: "AI Music Studio — OG Streamz" },
+      { property: "og:description", content: "Generate AI songs, chat with OG Bot, and run your creator economy." },
+      { property: "og:url", content: "https://ogwidget.lovable.app/" },
+    ],
+    links: [{ rel: "canonical", href: "https://ogwidget.lovable.app/" }],
+  }),
 });
 
 type PromptIdea = { title: string; description: string; vibe: string };
