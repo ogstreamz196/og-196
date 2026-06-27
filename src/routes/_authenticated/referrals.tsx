@@ -259,35 +259,38 @@ function ReferralsPage() {
         </div>
 
         {/* HERO — oversized wallet counter */}
-        <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-card/60 p-6 backdrop-blur-2xl sm:p-10">
+        <section
+          data-testid="referrals-hero"
+          className="relative overflow-hidden rounded-3xl border border-white/10 bg-card/60 p-5 backdrop-blur-2xl sm:p-10"
+        >
           <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-primary/20 blur-3xl" />
           <div aria-hidden className="pointer-events-none absolute -left-10 -bottom-10 h-48 w-48 rounded-full bg-destructive/15 blur-3xl" />
 
           <div className="relative text-center">
-            <p className="mb-3 text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground">
+            <p className="mb-2 text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground sm:mb-3 sm:tracking-[0.4em]">
               OG Coin Cashback Wallet
             </p>
-            <div className="relative inline-block">
+            <div className="relative inline-block max-w-full">
               <div aria-hidden className="absolute -inset-2 rounded-3xl bg-gradient-to-r from-primary via-fuchsia-500 to-destructive opacity-25 blur-2xl" />
-              <div className="relative flex items-baseline justify-center gap-3">
-                <span className="font-bungee bg-gradient-to-b from-white to-zinc-400 bg-clip-text text-6xl font-black tabular-nums tracking-tight text-transparent drop-shadow-[0_4px_24px_rgba(239,68,68,0.35)] sm:text-8xl">
+              <div className="relative flex items-baseline justify-center gap-2 sm:gap-3">
+                <span className="font-bungee bg-gradient-to-b from-white to-zinc-400 bg-clip-text text-5xl font-black tabular-nums tracking-tight text-transparent drop-shadow-[0_4px_24px_rgba(239,68,68,0.35)] xs:text-6xl sm:text-8xl">
                   {summary.total_earned.toLocaleString()}
                 </span>
-                <span className="text-lg font-black uppercase tracking-widest text-primary sm:text-2xl">OG</span>
+                <span className="text-base font-black uppercase tracking-widest text-primary sm:text-2xl">OG</span>
               </div>
             </div>
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-xs">
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-2 text-xs sm:mt-4">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 font-semibold text-emerald-300">
                 <TrendingUp className="h-3 w-3" /> {summary.total_referred} {summary.total_referred === 1 ? "referral" : "referrals"} · auto-paid
               </span>
               <span className="text-muted-foreground">10% of every coin your crew burns</span>
             </div>
 
-            <div className="mt-6 flex flex-wrap justify-center gap-2">
-              <Button onClick={share} size="lg" className="gap-2 bg-gradient-to-r from-primary to-fuchsia-500 px-6 font-black uppercase tracking-wider shadow-glow hover:scale-[1.02]">
+            <div className="mt-5 flex flex-col gap-2 sm:mt-6 sm:flex-row sm:flex-wrap sm:justify-center">
+              <Button onClick={share} size="lg" className="h-12 w-full gap-2 bg-gradient-to-r from-primary to-fuchsia-500 px-6 font-black uppercase tracking-wider shadow-glow hover:scale-[1.02] sm:w-auto">
                 <Share2 className="h-4 w-4" /> Share & earn
               </Button>
-              <Button onClick={copy} variant="secondary" size="lg" className="gap-2 font-bold uppercase tracking-wider">
+              <Button onClick={copy} variant="secondary" size="lg" className="h-12 w-full gap-2 font-bold uppercase tracking-wider sm:w-auto">
                 {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 {copied ? "Copied" : "Copy link"}
               </Button>
