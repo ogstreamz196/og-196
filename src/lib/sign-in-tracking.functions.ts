@@ -539,6 +539,7 @@ export const sendTestBossNotification = createServerFn({ method: "POST" })
     const sent = await sendTelegramDirect(
       prof.telegram_chat_id as number,
       `🧪 <b>Test notification</b>\nBoss console is wired correctly, ${escapeHtml(prof.display_name ?? "boss")}.`,
+      context.userId,
     );
-    return { ok: sent };
+    return { ok: sent.ok, error: sent.error, stale: sent.stale };
   });
