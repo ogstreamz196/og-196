@@ -476,7 +476,11 @@ export function OgChat({
       )}
     >
       {showHeader && (
-        <div className="flex flex-col gap-2.5 border-b border-border/60 bg-muted/30 px-3 py-3 sm:flex-row sm:items-stretch">
+        <div
+          data-testid="ogchat-header"
+          className="flex flex-col gap-2.5 border-b border-border/60 bg-muted/30 px-3 py-3 sm:flex-row sm:items-center sm:gap-3"
+        >
+
 
           {/* Foul-mouth hero toggle — the main highlight */}
           <button
