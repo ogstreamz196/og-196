@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
-import { useOgMode } from "@/hooks/use-og-mode";
+// useOgMode removed — Foul Mouth is the single tone toggle.
 import { useRole } from "@/hooks/use-role";
 import { useAppPreferences, type AppPreferences } from "@/hooks/use-app-preferences";
 import { useDisplayPrefs, useSetDisplayPrefs, clampScale, type Density } from "@/hooks/use-display-prefs";
@@ -22,7 +22,7 @@ export function PreferencesPanel() {
   const { foulMouth, isLoading } = useFoulMouth();
   const setFoulMouth = useSetFoulMouth();
   const { isVip } = useRole();
-  const { mode, setMode } = useOgMode();
+  
   const { prefs, update: rawUpdate } = useAppPreferences();
   const update = <K extends keyof AppPreferences>(key: K, value: AppPreferences[K]) => {
     rawUpdate(key, value);
@@ -30,10 +30,6 @@ export function PreferencesPanel() {
   };
   const display = useDisplayPrefs();
   const setDisplay = useSetDisplayPrefs();
-  const changeMode = (v: "og" | "safe") => {
-    setMode(v);
-    toast.success("Settings saved", { id: "settings-saved" });
-  };
 
   const SCALE_STEP = 0.05;
   const scalePct = Math.round(display.textScale * 100);
@@ -129,24 +125,12 @@ export function PreferencesPanel() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
-          <div className="space-y-2">
-            <Label>Default mode</Label>
-            <RadioGroup
-              value={mode}
-              onValueChange={(v) => changeMode(v as "og" | "safe")}
-              className="grid grid-cols-2 gap-2"
-            >
-              <ModeOption value="og" title="OG" body="British banter, full personality." />
-              <ModeOption value="safe" title="Safe" body="Family-friendly, no swearing." />
-            </RadioGroup>
-          </div>
-
           <ToggleRow
             icon={<MessageSquareMore className="h-4 w-4" />}
             label={isVip ? "Foul-mouth" : "Foul-mouth (VIP only)"}
             description={
               isVip
-                ? "When OG mode is on, allow stronger language."
+                ? "Let OG use stronger language in replies."
                 : "Unlock with OG VIP (£5/month) to let OG go fully savage."
             }
             checked={isVip && foulMouth}

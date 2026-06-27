@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import ReactMarkdown from "react-markdown";
-import { Send, Trash2, Sparkles, Skull, ShieldCheck, Paperclip, Mic, MicOff, Crown, X, Loader2, ArrowDown } from "lucide-react";
+import { Send, Trash2, Skull, ShieldCheck, Paperclip, Mic, MicOff, Crown, X, Loader2, ArrowDown } from "lucide-react";
 import { chatOgBot, type OgChatMessage } from "@/lib/og-messenger.functions";
 import { transcribeOgAudio } from "@/lib/og-transcribe.functions";
 import { postCommunityMessage } from "@/lib/community.functions";
@@ -15,7 +15,7 @@ import { useDevMode } from "@/hooks/use-dev-mode";
 import { useProfile } from "@/hooks/use-profile";
 import { useRole } from "@/hooks/use-role";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
-import { useOgMode } from "@/hooks/use-og-mode";
+// useOgMode removed — Foul Mouth is the single tone toggle.
 // useShareLive intentionally removed — Loner/Community is page-level now.
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -116,7 +116,7 @@ export function OgChat({
   const { data: profile } = useProfile();
   const { foulMouth } = useFoulMouth();
   const setFoulMouth = useSetFoulMouth();
-  const { mode, toggle: toggleMode } = useOgMode();
+  
   const { isVip } = useRole();
   // shareLive removed: Loner Mode is enforced by the page mounting OgChat.
   const postCommunity = useServerFn(postCommunityMessage);
@@ -465,7 +465,8 @@ export function OgChat({
 
   const balance = profile?.coin_balance ?? 0;
   const isOut = balance <= 0;
-  const foulActive = mode === "og" && foulMouth;
+  const foulActive = foulMouth;
+  const mode = foulMouth ? "og" : "safe";
 
   return (
     <div
@@ -486,7 +487,7 @@ export function OgChat({
           <button
             type="button"
             onClick={toggleFoul}
-            disabled={setFoulMouth.isPending || mode === "safe"}
+            disabled={setFoulMouth.isPending}
             aria-pressed={foulActive}
             aria-label="Toggle foul mouth"
             data-testid="ogchat-foulmouth-hero"
@@ -515,11 +516,7 @@ export function OgChat({
                   "text-[15px] font-black uppercase tracking-wide",
                   foulActive ? "text-destructive" : "text-foreground",
                 )}>
-                  {mode === "safe"
-                    ? "Foul Mouth · OG mode required"
-                    : foulActive
-                      ? "Foul Mouth ON"
-                      : "Turn on Foul Mouth"}
+                  {foulActive ? "Foul Mouth ON" : "Turn on Foul Mouth"}
                 </span>
               </span>
 
@@ -553,22 +550,7 @@ export function OgChat({
               <OgAvatar size={18} />
               <span className="font-semibold">{balance} coin{balance === 1 ? "" : "s"}</span>
             </span>
-            <button
-              type="button"
-              onClick={toggleMode}
-              className={cn(
-                "inline-flex items-center gap-1.5 rounded-lg border-2 px-3 py-1.5 text-[12px] font-bold transition",
-                mode === "og"
-                  ? "border-primary/60 bg-primary/15 text-primary"
-                  : "border-border bg-muted text-muted-foreground",
-              )}
-              title={mode === "og" ? "OG mode — tap for Safe" : "Safe mode — tap for OG"}
-            >
-              {mode === "og" ? <Sparkles className="h-3.5 w-3.5" /> : <ShieldCheck className="h-3.5 w-3.5" />}
-              {mode === "og" ? "OG mode" : "Safe mode"}
-            </button>
-            {/* Share Live button removed — Loner ↔ Community is controlled
-                by the page-level toggle in /messenger. */}
+            {/* OG/Safe mode toggle removed — Foul Mouth is the single tone control. */}
             {isVip ? (
               <select
                 value={language}
