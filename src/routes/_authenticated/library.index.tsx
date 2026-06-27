@@ -44,7 +44,7 @@ import {
 } from "@/lib/library-utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Disc3, Flame } from "lucide-react";
-import { FoulMouthReminder } from "@/components/FoulMouthReminder";
+
 import { PoweredByOgBot } from "@/components/PoweredByOgBot";
 import { JobQueuePanel } from "@/components/library/JobQueuePanel";
 import { CategoryCard } from "@/components/library/CategoryCard";
@@ -443,20 +443,6 @@ function LibraryPage() {
         </div>
       </header>
 
-      {/* Persistent Foul Mouth reminder — one tap takes you to the toggle */}
-      <div className="sticky top-14 z-20 -mx-4 px-4 sm:top-16 sm:-mx-6 sm:px-6">
-        <FoulMouthReminder
-          enabled={foulMouth}
-          onAction={() => {
-            const el = document.getElementById("foul-mouth-toggle");
-            if (el) {
-              el.scrollIntoView({ behavior: "smooth", block: "center" });
-              el.focus({ preventScroll: true });
-            }
-            setFoulMouth((v) => !v);
-          }}
-        />
-      </div>
 
       {/* Library — luxury two-tab vault: Yours first, then Community */}
       <section>
@@ -879,13 +865,13 @@ function LibraryPage() {
               {foulMouth ? "🤬" : "🧼"}
             </div>
             <div className="min-w-0 shrink">
-              <div className="truncate text-sm font-bold leading-tight sm:text-lg">
+              <div className="truncate font-bungee text-base leading-tight sm:text-xl">
                 OG Foul Mouth ·{" "}
                 <span
                   id="foul-mouth-status"
                   aria-live="polite"
                   className={cn(
-                    "font-black uppercase tracking-wide",
+                    "font-bungee",
                     foulMouth ? "text-destructive" : "text-muted-foreground",
                   )}
                 >
