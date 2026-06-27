@@ -152,7 +152,10 @@ Deno.serve(async (req) => {
       `Theme / description: ${description || "(none)"}\n` +
       `Style tags: ${styleTags.join(", ") || "(none)"}\n` +
       `Language: ${language}\n` +
-      (personalDetails ? `Personal details to weave in naturally (names, places, references): ${personalDetails}\n` : "") +
+      (personalDetails
+        ? `Artist profile (weave these into the lyrics naturally — reference the artist's name and a couple of personal details across the song so it feels personal, but DO NOT force them into every line, and never let them overpower the theme. Aim for the name/details to appear roughly 2–4 times total, ideally in the hook/chorus or a memorable line, spread across different sections — not back-to-back): ${personalDetails}\n`
+        : "") +
+
       (extraContext ? `Extra context from the artist: ${extraContext}\n` : "") +
       `\nWrite the FULL two-minute song now — do not stop early.`;
 
