@@ -463,7 +463,7 @@ function LibraryPage() {
               MusicHUB · Previews
             </div>
             <h2 className="truncate font-display text-xl font-black tracking-tight sm:text-3xl">
-              Your tracks
+              Library
             </h2>
           </div>
           {versionedLibrary.length > 0 && (
