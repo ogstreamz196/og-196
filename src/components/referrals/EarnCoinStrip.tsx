@@ -66,26 +66,29 @@ export function EarnCoinStrip({
   }
 
   return (
-    <Link
-      to="/referrals"
+    <div
       className={cn(
-        "group flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coin/60",
+        "flex w-full min-w-0 items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold",
         tone === "muted"
-          ? "border-white/10 bg-white/[0.04] text-foreground/80 hover:border-coin/40 hover:text-foreground"
-          : "border-coin/40 bg-gradient-to-r from-coin/15 via-coin/10 to-transparent text-foreground hover:border-coin",
+          ? "border-white/10 bg-white/[0.04] text-foreground/80"
+          : "border-coin/40 bg-gradient-to-r from-coin/15 via-coin/10 to-transparent text-foreground",
         className,
       )}
+      role="region"
       aria-label="Earn 10% cashback by referring friends"
     >
       <Sparkles className="h-3.5 w-3.5 shrink-0 text-coin" />
-      <span className="truncate">
+      <Link
+        to="/referrals"
+        className="min-w-0 flex-1 truncate hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coin/60 rounded"
+      >
         Earn <b className="text-coin">10% cashback</b>
         {shortCode && (
           <>
             {" "}· code <code className="font-mono">{code}</code>
           </>
         )}
-      </span>
+      </Link>
       {shareUrl && (
         <button
           type="button"
@@ -96,6 +99,7 @@ export function EarnCoinStrip({
           <Share2 className="h-3 w-3" /> Share
         </button>
       )}
-    </Link>
+    </div>
   );
 }
+

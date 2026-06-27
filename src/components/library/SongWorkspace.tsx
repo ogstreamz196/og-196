@@ -26,7 +26,6 @@ import { VariationsCard } from "./song-workspace/VariationsCard";
 import type { WorkspaceSong } from "./song-workspace/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
-import { EarnCoinStrip } from "@/components/referrals/EarnCoinStrip";
 
 
 const LANGUAGES = [
@@ -667,7 +666,6 @@ export function SongWorkspace({ song, onSaved }: Props) {
               <Button asChild variant="outline" size="sm" className="w-full">
                 <Link to="/buy-coins">Top up</Link>
               </Button>
-              <EarnCoinStrip className="w-full justify-start" />
             </CardContent>
           </Card>
 

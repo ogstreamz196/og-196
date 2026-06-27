@@ -46,7 +46,6 @@ import ogStreamzLogo from "@/assets/ogstreamz-logo.jpg.asset.json";
 import { FoulMouthReminder } from "@/components/FoulMouthReminder";
 import { PoweredByOgBot } from "@/components/PoweredByOgBot";
 import { JobQueuePanel } from "@/components/library/JobQueuePanel";
-import { EarnCoinStrip } from "@/components/referrals/EarnCoinStrip";
 
 
 import { Button } from "@/components/ui/button";
@@ -461,7 +460,6 @@ function LibraryPage() {
         </div>
       </header>
 
-      <EarnCoinStrip className="self-start" />
 
 
       {/* Persistent Foul Mouth reminder — one tap takes you to the toggle */}
