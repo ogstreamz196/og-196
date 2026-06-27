@@ -1040,10 +1040,14 @@ button.graffiti-accent:hover {
   hyphens: auto;
 }
 @utility font-bungee {
-  font-family: "Bungee", "Bowlby One", "Lilita One", var(--font-display), system-ui, sans-serif;
+  font-family: "Bungee", "Bowlby One", "Lilita One", "Impact", var(--font-display), system-ui, sans-serif;
   font-weight: 400;
   letter-spacing: 0.02em;
   line-height: 1;
+  text-transform: uppercase;
+  font-synthesis: none;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 
