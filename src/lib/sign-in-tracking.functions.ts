@@ -343,14 +343,16 @@ async function notifyBossesAndSync(ev: {
       })
       .select("id")
       .single();
-    const ok = await sendTelegramDirect(chatId, text);
+    const sendResult = await sendTelegramDirect(chatId, text, bossId);
     if (q?.id) {
       await supabaseAdmin
         .from("telegram_dm_queue")
         .update({
-          status: ok ? "sent" : "failed",
-          sent_at: ok ? new Date().toISOString() : null,
-          last_error: ok ? null : "send_failed",
+          status: sendResult.ok ? "sent" : "failed",
+          sent_at: sendResult.ok ? new Date().toISOString() : null,
+          last_error: sendResult.ok
+            ? null
+            : (sendResult.stale ? `stale_chat:${sendResult.error}` : sendResult.error) ?? "send_failed",
         })
         .eq("id", q.id);
     }
