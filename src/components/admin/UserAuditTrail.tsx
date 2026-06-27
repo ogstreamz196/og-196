@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { History, Loader2, RefreshCw, Coins } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { CollapsiblePanel } from "@/components/ui/collapsible-panel";
 import { cn } from "@/lib/utils";
 
 interface Tx {
@@ -50,13 +51,8 @@ export function UserAuditTrail({ userId, email }: { userId: string; email?: stri
           <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
         </div>
       ) : q.data && q.data.length > 0 ? (
-        <details data-testid="admin-recent-changes" className="group rounded-xl border border-border bg-background/40">
-          <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground">
-            <History className="h-4 w-4" /> Recent changes ({q.data.length})
-            <span className="ml-auto text-xs opacity-70 group-open:hidden">Show</span>
-            <span className="ml-auto hidden text-xs opacity-70 group-open:inline">Hide</span>
-          </summary>
-          <ul className="divide-y divide-border border-t border-border text-sm max-h-96 overflow-y-auto">
+        <CollapsiblePanel title="Recent changes" count={q.data.length}>
+          <ul className="divide-y divide-border text-sm max-h-96 overflow-y-auto">
             {q.data.map((t) => (
               <li key={t.id} className="flex items-start gap-3 px-3 py-2">
                 <div className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-muted">
@@ -86,7 +82,7 @@ export function UserAuditTrail({ userId, email }: { userId: string; email?: stri
               </li>
             ))}
           </ul>
-        </details>
+        </CollapsiblePanel>
       ) : (
         <p className="text-sm text-muted-foreground">No activity on this account yet.</p>
       )}

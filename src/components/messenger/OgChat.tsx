@@ -10,6 +10,7 @@ import { postCommunityMessage } from "@/lib/community.functions";
 import { QUICK_STARTS } from "@/lib/og-persona-public";
 import { routeOgMessage } from "@/lib/og-chat-routing";
 import { toast } from "sonner";
+import { TypingDots } from "@/components/ui/typing-dots";
 import { useAuth } from "@/hooks/use-auth";
 import { useDevMode } from "@/hooks/use-dev-mode";
 import { useProfile } from "@/hooks/use-profile";
@@ -731,10 +732,8 @@ export function OgChat({
                   is typing<span className="inline-block animate-pulse">…</span>
                 </span>
               </span>
-              <div className="rounded-2xl rounded-bl-sm bg-card border-2 border-border px-4 py-3 inline-flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]" />
-                <span className="h-2 w-2 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]" />
-                <span className="h-2 w-2 rounded-full bg-primary animate-bounce" />
+              <div className="rounded-2xl rounded-bl-sm bg-card border-2 border-border px-4 py-3 inline-flex items-center">
+                <TypingDots aria-label="OG Bot is typing" />
               </div>
               {/* Shimmering bubble skeletons — Suno-style "still cooking" placeholders */}
               <div className="space-y-1.5">

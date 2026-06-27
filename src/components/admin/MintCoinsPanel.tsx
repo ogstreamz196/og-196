@@ -14,6 +14,7 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { UserAuditTrail } from "./UserAuditTrail";
+import { CollapsiblePanel } from "@/components/ui/collapsible-panel";
 
 interface ProfileLite {
   id: string;
@@ -290,13 +291,8 @@ export function MintCoinsPanel() {
         <UserAuditTrail userId={selected.id} email={selected.email} />
       )}
 
-      <details data-testid="admin-recent-changes" className="group mt-6 rounded-xl border border-border bg-background/40">
-        <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground">
-          <History className="h-4 w-4" /> Recent admin changes (global)
-          <span className="ml-auto text-xs opacity-70 group-open:hidden">Show</span>
-          <span className="ml-auto hidden text-xs opacity-70 group-open:inline">Hide</span>
-        </summary>
-        <div className="border-t border-border px-3 py-2">
+      <CollapsiblePanel title="Recent admin changes (global)" className="mt-6">
+        <div className="px-3 py-2">
           {recent.isLoading ? (
             <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
           ) : recent.data && recent.data.length > 0 ? (
@@ -319,7 +315,7 @@ export function MintCoinsPanel() {
             <p className="text-sm text-muted-foreground">No admin coin activity yet.</p>
           )}
         </div>
-      </details>
+      </CollapsiblePanel>
 
     </div>
   );

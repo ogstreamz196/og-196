@@ -21,6 +21,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { useVariations } from "@/hooks/use-variations";
 import { invokeError } from "@/lib/invoke-error";
 import { cn } from "@/lib/utils";
+import { CoinPill } from "@/components/ui/coin-pill";
 import { StageStepper, type Stage } from "./song-workspace/StageStepper";
 import { VariationsCard } from "./song-workspace/VariationsCard";
 import type { WorkspaceSong } from "./song-workspace/types";
@@ -822,11 +823,7 @@ function LyricsSkeleton({ songId }: { songId?: string }) {
 
 
 function CostBadge({ cost }: { cost: number }) {
-  return (
-    <span className="inline-flex items-center gap-1 rounded-full border border-coin/30 bg-coin/10 px-2.5 py-1 text-xs font-semibold text-coin">
-      <Coins className="h-3.5 w-3.5" /> {cost} per send
-    </span>
-  );
+  return <CoinPill>{cost} per send</CoinPill>;
 }
 
 type GenerationStep = {
