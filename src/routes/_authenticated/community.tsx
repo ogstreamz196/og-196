@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
-// Community has been merged into OG-GPT. Redirect to messenger with
+// Community has been merged into OG Bot. Redirect to messenger with
 // Live Chat Mode pre-enabled.
 export const Route = createFileRoute("/_authenticated/community")({
   beforeLoad: () => {

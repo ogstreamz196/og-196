@@ -661,14 +661,14 @@ export function OgChat({
                     )}
                     title={
                       shareLive.enabled
-                        ? "Live Chat is ON, but quick-starts always send privately to OG-GPT"
-                        : "Quick-starts send to your private OG-GPT chat"
+                        ? "Live Chat is ON, but quick-starts always send privately to OG Bot"
+                        : "Quick-starts send to your private OG Bot chat"
                     }
                   >
                     <ShieldCheck className="h-3 w-3" />
                     {shareLive.enabled
-                      ? "Quick-starts bypass Live Chat → Private OG-GPT"
-                      : "Sends to Private OG-GPT"}
+                      ? "Quick-starts bypass Live Chat → Private OG Bot"
+                      : "Sends to Private OG Bot"}
                   </div>
                   <div className="flex flex-wrap justify-center gap-2">
                     {QUICK_STARTS.map((q) => (

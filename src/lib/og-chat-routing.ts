@@ -1,7 +1,7 @@
 /**
  * Pure routing helper for OG chat messages.
  *
- * Decides whether a message should go to the private OG-GPT pipeline or to
+ * Decides whether a message should go to the private OG Bot pipeline or to
  * the shared Live Chat community feed. Centralised so the UI and tests share
  * the exact same logic — fixes the regression where Live Chat Mode hijacked
  * quick-start chips.

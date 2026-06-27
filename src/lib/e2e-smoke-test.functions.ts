@@ -21,7 +21,7 @@ export type SmokeResult = {
  *  1. Verifies the caller's Supabase session (sign-in works).
  *  2. Creates a throwaway song row and kicks off suno-generate.
  *  3. Polls for status transition (queued/generating/completed).
- *  4. Sends a test message through chatOgBot to verify OG-GPT.
+ *  4. Sends a test message through chatOgBot to verify OG Bot.
  *  5. Cleans up the throwaway song.
  *
  * Admin-only. Each step is timed and logged independently — a single
@@ -142,8 +142,8 @@ export const runE2ESmokeTest = createServerFn({ method: "POST" })
         });
       }
 
-      // 5) OG-GPT round-trip
-      await run("og_chat", "Send OG-GPT test message", async () => {
+      // 5) OG Bot round-trip
+      await run("og_chat", "Send OG Bot test message", async () => {
         const { chatOgBot } = await import("@/lib/og-messenger.functions");
         const res = await chatOgBot({
           data: {

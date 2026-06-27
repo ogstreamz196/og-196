@@ -13,7 +13,7 @@ const FEATURES = [
   {
     to: "/messenger",
     icon: <MessageCircle className="h-6 w-6" />,
-    title: "OG-GPT",
+    title: "OG Bot",
     description: "Chat with OG Bot for tips, recommendations, and production advice. 5 free OG Coins on sign-up.",
     cta: "Chat",
   },
