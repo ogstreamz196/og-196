@@ -1,7 +1,8 @@
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Send, Users, Loader2, Trash2 } from "lucide-react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { ArrowDown, Send, Users, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   listCommunityMessages,
