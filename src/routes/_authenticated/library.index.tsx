@@ -331,6 +331,33 @@ function LibraryPage() {
     });
   }, [library.data]);
 
+  // Active jobs (queued/processing/failed) for the queue panel; completed
+  // tracks are rendered as cards below — never both, so nothing shows twice.
+  const activeJobs = useMemo(
+    () => versionedLibrary.filter((s) => s.status !== "completed"),
+    [versionedLibrary],
+  );
+  const completedTracks = useMemo(
+    () => versionedLibrary.filter((s) => s.status === "completed"),
+    [versionedLibrary],
+  );
+
+  const community = useQuery({
+    queryKey: ["library-community", user?.id],
+    enabled: !!user,
+    queryFn: async (): Promise<Song[]> => {
+      const { data, error } = await supabase
+        .from("songs")
+        .select("*")
+        .eq("status", "completed")
+        .neq("user_id", user!.id)
+        .order("created_at", { ascending: false })
+        .limit(24);
+      if (error) throw error;
+      return (data ?? []) as Song[];
+    },
+  });
+
   useEffect(() => {
     if (!user) return;
     const ch = supabase
