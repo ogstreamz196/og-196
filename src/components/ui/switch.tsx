@@ -20,8 +20,9 @@ const Switch = React.forwardRef<
       aria-hidden="true"
       className="pointer-events-none absolute inset-0 flex items-center justify-center text-[10px] font-bold uppercase tracking-wider select-none transition-colors"
     >
-      <span className="group-data-[state=checked]:hidden pl-5 text-muted-foreground">Turn on</span>
-      <span className="group-data-[state=unchecked]:hidden pr-5 text-primary-foreground">Turn off</span>
+      <span className="group-data-[state=checked]:hidden pl-5 text-muted-foreground">Turned off</span>
+      <span className="group-data-[state=unchecked]:hidden pr-5 text-primary-foreground">Turned on</span>
+
     </span>
     {/* Screen-reader-only state announcement: complements role="switch" + aria-checked */}
     <span className="sr-only">
