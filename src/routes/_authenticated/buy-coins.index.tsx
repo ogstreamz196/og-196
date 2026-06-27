@@ -304,9 +304,12 @@ function BuyCoinsPage() {
           </div>
         </section>
 
+        {/* Referral cashback reminder */}
+        <ReferralReminder />
 
         {/* Coin bundles */}
         <SectionCard>
+
           <SectionHeader
             eyebrow="Coin Bundles"
             title="Pick your loot"
