@@ -1,7 +1,21 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { CheckCircle2, MessageCircle, AlertCircle, Loader2, XCircle } from "lucide-react";
-import { getMyTelegramStatus } from "@/lib/telegram-admin.functions";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import {
+  CheckCircle2,
+  MessageCircle,
+  AlertCircle,
+  Loader2,
+  XCircle,
+  Send,
+} from "lucide-react";
+import {
+  getMyTelegramStatus,
+  getMyTelegramLinkToken,
+} from "@/lib/telegram-admin.functions";
+
+const TELEGRAM_BOT_USERNAME = "OGStreamzBot";
 
 function formatLinkedAt(iso: string | null): string {
   if (!iso) return "";
@@ -56,12 +70,66 @@ const TONES: Record<"verified" | "failed" | "pending" | "unlinked", Tone> = {
 
 export function TelegramLinkStatus() {
   const statusFn = useServerFn(getMyTelegramStatus);
+  const tokenFn = useServerFn(getMyTelegramLinkToken);
+  const qc = useQueryClient();
+  const [reconnecting, setReconnecting] = useState(false);
+  const launchedAt = useRef<number | null>(null);
+
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ["my-telegram-status"],
     queryFn: () => statusFn(),
     staleTime: 30_000,
     refetchInterval: 60_000,
   });
+
+  const state = data?.state ?? "unlinked";
+  const canReconnect = state !== "verified";
+
+  // When the user returns from Telegram, re-check and nudge if still not verified.
+  useEffect(() => {
+    function onFocus() {
+      if (!launchedAt.current) return;
+      if (Date.now() - launchedAt.current < 1500) return;
+      qc.invalidateQueries({ queryKey: ["my-telegram-status"] }).then(() => {
+        const fresh = qc.getQueryData<{ state?: string }>(["my-telegram-status"]);
+        if (fresh?.state !== "verified") {
+          toast.error("Telegram didn't confirm yet", {
+            description:
+              "Open OG Bot and tap Start, then allow ALL permissions — message access is required so we can verify and message you. Tap Reconnect to try again.",
+            duration: 8000,
+          });
+        } else {
+          toast.success("Telegram connected");
+        }
+        launchedAt.current = null;
+      });
+    }
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [qc]);
+
+  async function handleReconnect(e: React.MouseEvent<HTMLAnchorElement>) {
+    e.preventDefault();
+    if (reconnecting) return;
+    setReconnecting(true);
+    try {
+      const { token } = await tokenFn();
+      if (!token) throw new Error("No token");
+      toast.message("Opening Telegram…", {
+        description:
+          "Tap Start and allow ALL permissions so OG Bot can message you.",
+      });
+      launchedAt.current = Date.now();
+      const url = `https://t.me/${TELEGRAM_BOT_USERNAME}?start=${token}`;
+      window.open(url, "_blank", "noopener,noreferrer");
+    } catch (err) {
+      toast.error("Couldn't generate start link", {
+        description: err instanceof Error ? err.message : "Please try again.",
+      });
+    } finally {
+      setReconnecting(false);
+    }
+  }
 
   if (isLoading || !data) {
     return (
@@ -77,7 +145,6 @@ export function TelegramLinkStatus() {
     );
   }
 
-  const state = data.state;
   const tone = TONES[state];
 
   const label =
@@ -104,10 +171,10 @@ export function TelegramLinkStatus() {
           data.linkedAt ? ` · since ${formatLinkedAt(data.linkedAt)}` : ""
         }`
       : state === "failed"
-        ? `OG Bot couldn't reach your chat${data.verifyError ? ` — ${data.verifyError}` : ""}. Re-open the bot and tap Start.`
+        ? `OG Bot couldn't reach your chat${data.verifyError ? ` — ${data.verifyError}` : ""}. Tap Reconnect and allow ALL permissions.`
         : state === "pending"
-          ? "Open the OG Bot start-link in Telegram and tap Start to finish verification."
-          : "Ask an admin for your personal start-link to receive OG Bot DMs.";
+          ? "Tap Reconnect, open OG Bot in Telegram, hit Start, and allow ALL permissions."
+          : "Tap Reconnect to open OG Bot in Telegram and allow ALL permissions.";
 
   const Icon =
     state === "verified"
@@ -137,12 +204,31 @@ export function TelegramLinkStatus() {
         </p>
         <p className="text-xs text-muted-foreground">{detail}</p>
       </div>
-      <span
-        className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${tone.pill}`}
-      >
-        {isFetching ? <Loader2 className="h-3 w-3 animate-spin" /> : null}
-        {label}
-      </span>
+      <div className="flex items-center gap-2">
+        {canReconnect ? (
+          <a
+            href="#reconnect-telegram"
+            role="button"
+            aria-label="Reconnect Telegram"
+            aria-busy={reconnecting}
+            onClick={handleReconnect}
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full bg-gradient-to-r from-sky-500 to-indigo-500 px-4 py-2 text-xs font-bold uppercase tracking-[0.14em] text-white shadow-lg shadow-sky-500/30 transition hover:from-sky-400 hover:to-indigo-400 focus:outline-none focus:ring-2 focus:ring-sky-300"
+          >
+            {reconnecting ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Send className="h-3.5 w-3.5" />
+            )}
+            Reconnect
+          </a>
+        ) : null}
+        <span
+          className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${tone.pill}`}
+        >
+          {isFetching ? <Loader2 className="h-3 w-3 animate-spin" /> : null}
+          {label}
+        </span>
+      </div>
     </section>
   );
 }
