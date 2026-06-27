@@ -50,39 +50,47 @@ export function UserAuditTrail({ userId, email }: { userId: string; email?: stri
           <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
         </div>
       ) : q.data && q.data.length > 0 ? (
-        <ul className="divide-y divide-border rounded-xl border border-border bg-background/40 text-sm max-h-96 overflow-y-auto">
-          {q.data.map((t) => (
-            <li key={t.id} className="flex items-start gap-3 px-3 py-2">
-              <div className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-muted">
-                <Coins className="h-3 w-3 text-coin" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-baseline gap-2">
-                  <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-                    {t.type}
-                  </span>
-                  <span className={cn(
-                    "font-semibold tabular-nums",
-                    t.amount > 0 && "text-primary",
-                    t.amount < 0 && "text-destructive",
-                    t.amount === 0 && "text-muted-foreground",
-                  )}>
-                    {t.amount > 0 ? "+" : ""}{t.amount}
-                  </span>
-                  <span className="ml-auto text-xs text-muted-foreground whitespace-nowrap">
-                    {new Date(t.created_at).toLocaleString()}
-                  </span>
+        <details className="group rounded-xl border border-border bg-background/40">
+          <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground">
+            <History className="h-4 w-4" /> Recent changes ({q.data.length})
+            <span className="ml-auto text-xs opacity-70 group-open:hidden">Show</span>
+            <span className="ml-auto hidden text-xs opacity-70 group-open:inline">Hide</span>
+          </summary>
+          <ul className="divide-y divide-border border-t border-border text-sm max-h-96 overflow-y-auto">
+            {q.data.map((t) => (
+              <li key={t.id} className="flex items-start gap-3 px-3 py-2">
+                <div className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-muted">
+                  <Coins className="h-3 w-3 text-coin" />
                 </div>
-                {t.reference && (
-                  <p className="mt-0.5 truncate text-xs text-muted-foreground">{t.reference}</p>
-                )}
-              </div>
-            </li>
-          ))}
-        </ul>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-baseline gap-2">
+                    <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                      {t.type}
+                    </span>
+                    <span className={cn(
+                      "font-semibold tabular-nums",
+                      t.amount > 0 && "text-primary",
+                      t.amount < 0 && "text-destructive",
+                      t.amount === 0 && "text-muted-foreground",
+                    )}>
+                      {t.amount > 0 ? "+" : ""}{t.amount}
+                    </span>
+                    <span className="ml-auto text-xs text-muted-foreground whitespace-nowrap">
+                      {new Date(t.created_at).toLocaleString()}
+                    </span>
+                  </div>
+                  {t.reference && (
+                    <p className="mt-0.5 truncate text-xs text-muted-foreground">{t.reference}</p>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </details>
       ) : (
         <p className="text-sm text-muted-foreground">No activity on this account yet.</p>
       )}
+
     </div>
   );
 }
