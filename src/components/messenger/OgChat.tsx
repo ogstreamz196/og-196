@@ -506,16 +506,14 @@ export function OgChat({
                   "text-[15px] font-black uppercase tracking-wide",
                   foulActive ? "text-destructive" : "text-foreground",
                 )}>
-                  Foul Mouth
-                </span>
-                <span className="truncate text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                   {mode === "safe"
-                    ? "Switch to OG mode first"
+                    ? "Foul Mouth · OG mode required"
                     : foulActive
-                      ? "ON · full savage, no filter"
-                      : "OFF · clean & friendly — tap to unleash"}
+                      ? "Foul Mouth ON"
+                      : "Turn on Foul Mouth"}
                 </span>
               </span>
+
             </span>
             {/* Big visual switch */}
             <span
