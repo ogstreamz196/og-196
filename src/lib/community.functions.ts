@@ -186,23 +186,31 @@ export const listCommunityMessages = createServerFn({ method: "GET" })
     return { messages: ((data ?? []) as CommunityMessage[]).reverse() };
   });
 
-/** Load a page of older messages strictly before the given ISO timestamp. */
+/** Load a page of older messages strictly before the given (created_at, id) cursor. */
 export const listOlderCommunityMessages = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { before: string; limit?: number }) => {
+  .inputValidator((data: { before: string; beforeId?: string; limit?: number }) => {
     const before = String(data?.before ?? "");
     if (!before) throw new Error("before required");
+    const beforeId = data?.beforeId ? String(data.beforeId) : null;
     const limit = Math.min(Math.max(Number(data?.limit ?? 50), 1), 100);
-    return { before, limit };
+    return { before, beforeId, limit };
   })
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: rows, error } = await supabaseAdmin
+    // Composite cursor on (created_at, id) avoids dropping/duplicating rows
+    // that share the exact same created_at timestamp.
+    const query = supabaseAdmin
       .from("community_messages")
       .select("id, user_id, role, content, display_name, created_at")
-      .lt("created_at", data.before)
       .order("created_at", { ascending: false })
+      .order("id", { ascending: false })
       .limit(data.limit);
+    const { data: rows, error } = data.beforeId
+      ? await query.or(
+          `created_at.lt.${data.before},and(created_at.eq.${data.before},id.lt.${data.beforeId})`,
+        )
+      : await query.lt("created_at", data.before);
     if (error) throw new Error(error.message);
     return {
       messages: ((rows ?? []) as CommunityMessage[]).reverse(),
