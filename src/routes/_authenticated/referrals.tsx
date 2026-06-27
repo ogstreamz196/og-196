@@ -229,7 +229,7 @@ function ReferralsPage() {
 
   return (
     <DashboardShell title="Earnings">
-      <div className="relative w-full space-y-6">
+      <div className="relative w-full space-y-4 sm:space-y-6" data-testid="referrals-page">
         {/* Ambient atmosphere */}
         <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
           <div className="absolute top-1/4 -left-20 h-96 w-96 rounded-full bg-primary/10 blur-[120px]" />
