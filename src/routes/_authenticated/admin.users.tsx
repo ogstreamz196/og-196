@@ -46,6 +46,8 @@ interface RoleRow {
   role: string;
 }
 
+type ProUserRow = Awaited<ReturnType<typeof listUsersPro>>[number];
+
 type RoleFilter = "all" | "admin" | "vip" | "og_bot" | "user";
 type SortKey = "joined" | "balance" | "name";
 
