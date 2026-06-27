@@ -129,7 +129,7 @@ function DashboardHome() {
         </div>
 
         {/* Top marquee status strip */}
-        <div className="relative -mx-6 -mt-6 mb-2 overflow-hidden border-b border-white/10 bg-white/[0.03] py-2 sm:-mx-12 sm:-mt-12 sm:mb-4">
+        <div className="relative -mx-4 -mt-4 mb-2 overflow-hidden border-b border-white/10 bg-white/[0.03] py-2 sm:-mx-12 sm:-mt-12 sm:mb-4">
           <div className="flex animate-[wc-shimmer_22s_linear_infinite] whitespace-nowrap text-xs font-bold uppercase tracking-[0.3em] text-foreground/70 [background:linear-gradient(90deg,transparent,oklch(1_0_0/0.15),transparent)] [background-size:200%_100%] sm:text-sm">
             {Array.from({ length: 2 }).map((_, k) => (
               <div key={k} className="flex shrink-0 items-center gap-6 px-6">
