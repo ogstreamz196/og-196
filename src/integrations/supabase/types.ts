@@ -340,6 +340,39 @@ export type Database = {
         }
         Relationships: []
       }
+      og_lexicon: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          enabled: boolean
+          id: string
+          notes: string | null
+          phrase: string
+          severity: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          enabled?: boolean
+          id?: string
+          notes?: string | null
+          phrase: string
+          severity?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          enabled?: boolean
+          id?: string
+          notes?: string | null
+          phrase?: string
+          severity?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       og_messages: {
         Row: {
           content: string
@@ -1096,6 +1129,29 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_delete_lexicon_phrase: {
+        Args: { p_phrase: string }
+        Returns: boolean
+      }
+      admin_list_lexicon: {
+        Args: never
+        Returns: {
+          created_at: string
+          created_by: string | null
+          enabled: boolean
+          id: string
+          notes: string | null
+          phrase: string
+          severity: number
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "og_lexicon"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       admin_referral_audit: {
         Args: { p_limit?: number; p_search?: string }
         Returns: Json
@@ -1109,6 +1165,15 @@ export type Database = {
           admin_notes: string
           new_display_name: string
           target_user_id: string
+        }
+        Returns: string
+      }
+      admin_upsert_lexicon_phrase: {
+        Args: {
+          p_enabled?: boolean
+          p_notes?: string
+          p_phrase: string
+          p_severity?: number
         }
         Returns: string
       }
