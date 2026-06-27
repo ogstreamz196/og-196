@@ -98,7 +98,15 @@ export const adminListLexicon = createServerFn({ method: "POST" })
     await assertBoss(ctx);
     const { data, error } = await ctx.supabase.rpc("admin_list_lexicon");
     if (error) safeError(error);
-    return { items: (data as Array<Record<string, unknown>>) ?? [] };
+    type Row = {
+      id: string;
+      phrase: string;
+      severity: number;
+      enabled: boolean;
+      notes: string | null;
+      updated_at: string;
+    };
+    return { items: (data as Row[] | null) ?? [] };
   });
 
 export const adminUpsertLexiconPhrase = createServerFn({ method: "POST" })
