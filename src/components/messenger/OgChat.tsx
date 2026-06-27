@@ -320,21 +320,21 @@ export function OgChat({
     if (m.isPending) return;
     if (!user) return toast.error("Sign in to chat with OG Bot.");
 
+    // OG Bot Loner Mode is ALWAYS private. The page-level Loner ↔ Community
+    // toggle (in /messenger) is the single source of truth — when OgChat is
+    // mounted, the user has chosen Loner Mode, so we ignore the legacy
+    // shareLive preference here. Community posting happens in CommunityRoom.
     const target = routeOgMessage({
       text: t,
       hasAttachment: !!att,
-      shareLive: shareLive.enabled,
-      forcePrivate: opts?.forcePrivate,
+      shareLive: false,
+      forcePrivate: true,
     });
 
-    if (target === "noop") {
-      if (shareLive.enabled && att && !t) {
-        return toast.error("Community messages must be text (no attachments yet).");
-      }
-      return;
-    }
+    if (target === "noop") return;
 
     if (target === "community") {
+      // Defensive: should be unreachable now that shareLive is forced off.
       setInput("");
       setAttachment(null);
       postCommunity({ data: { content: t } })
