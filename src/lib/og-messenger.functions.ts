@@ -132,6 +132,8 @@ export const chatOgBot = createServerFn({ method: "POST" })
 
     const effectiveLanguage = isVip ? (data.language || "English") : "English";
 
+    const { buildSystemPrompt, detectSongIntent } = await import("@/lib/og-persona.server");
+
     const latestUserMsg = [...data.messages].reverse().find((m) => m.role === "user");
     const songIntent =
       detectSongIntent(latestUserMsg?.content) ||
