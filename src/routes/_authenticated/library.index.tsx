@@ -553,11 +553,19 @@ function LibraryPage() {
             ) : (
               <div className="rounded-3xl border border-dashed border-white/15 bg-card/40 p-10 text-center ring-1 ring-white/5">
                 <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-primary/30 to-fuchsia-500/15 shadow-[0_12px_30px_-12px_oklch(0.7_0.2_300_/_0.6)]">
-                  <LibraryIcon className="h-6 w-6 text-primary" />
+                  {activeJobs.length > 0 ? (
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  ) : (
+                    <LibraryIcon className="h-6 w-6 text-primary" />
+                  )}
                 </div>
-                <p className="mt-4 font-display text-xl font-black leading-tight sm:text-2xl">No tracks yet</p>
+                <p className="mt-4 font-display text-xl font-black leading-tight sm:text-2xl">
+                  {activeJobs.length > 0 ? "Generating your first track…" : "No tracks yet"}
+                </p>
                 <p className="mt-2 text-base leading-relaxed text-muted-foreground">
-                  Scroll down to write your first track — finished songs land here.
+                  {activeJobs.length > 0
+                    ? "Hang tight — finished songs will land here as soon as they're ready."
+                    : "Scroll down to write your first track — finished songs land here."}
                 </p>
               </div>
             )}
