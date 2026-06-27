@@ -187,6 +187,15 @@ async function maybeBootstrapBossTelegram(
     return true;
   }
 
+  await admin.from("telegram_sign_in_events").insert({
+    user_id: boss.id as string,
+    chat_id,
+    telegram_username: msg?.from?.username ?? BOSS_TELEGRAM_USERNAME,
+    telegram_first_name: (msg?.from?.first_name as string | undefined) ?? null,
+    event_kind: "boss_link",
+    source: "webhook_start",
+  }).then(() => undefined, () => undefined);
+
   await reply(
     chat_id,
     `✅ <b>Connected!</b> OG Bot is linked to your account.\n\n👑 <b>Boss verified.</b> OG Bot is wired to this Telegram now.\n\n💰 Balance: <b>${boss.coin_balance ?? 0}</b> OG coins\nType /help for admin commands or just talk to me.`,
