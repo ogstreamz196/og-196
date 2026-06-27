@@ -2,11 +2,13 @@ import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { useRole } from "@/hooks/use-role";
 import { toast } from "sonner";
 
 /**
  * Single source of truth for the per-user OG Bot messenger mode.
  * Reads/writes `user_preferences.messenger_mode` ('loner' | 'community').
+ * VIPs default to community mode; everyone else defaults to loner.
  * Realtime-subscribed so the toggle stays in sync across tabs/devices.
  */
 export type MessengerMode = "loner" | "community";
@@ -17,22 +19,38 @@ export function messengerModeQueryKey(userId: string | null | undefined) {
 
 export function useMessengerMode() {
   const { user } = useAuth();
+  const { isVip } = useRole();
   const uid = user?.id ?? null;
   const qc = useQueryClient();
 
   const query = useQuery({
     queryKey: messengerModeQueryKey(uid),
     enabled: !!uid,
-    queryFn: async () => {
+    queryFn: async (): Promise<MessengerMode | null> => {
       const { data, error } = await supabase
         .from("user_preferences")
         .select("messenger_mode")
         .eq("user_id", uid!)
         .maybeSingle();
       if (error) throw new Error(error.message);
-      return ((data?.messenger_mode as MessengerMode | undefined) ?? "loner") as MessengerMode;
+      const stored = data?.messenger_mode as MessengerMode | null | undefined;
+      return stored === "community" || stored === "loner" ? stored : null;
     },
   });
+
+  // Seed VIPs into community mode once if they've never picked a preference.
+  useEffect(() => {
+    if (!uid || !query.isFetched || !isVip) return;
+    if (query.data !== null) return;
+    void supabase
+      .from("user_preferences")
+      .upsert({ user_id: uid, messenger_mode: "community" }, { onConflict: "user_id" })
+      .then(({ error }) => {
+        if (!error) {
+          qc.setQueryData(messengerModeQueryKey(uid), "community");
+        }
+      });
+  }, [uid, isVip, query.isFetched, query.data, qc]);
 
   useEffect(() => {
     if (!uid) return;
@@ -56,12 +74,16 @@ export function useMessengerMode() {
     };
   }, [uid, qc]);
 
+  const effectiveMode: MessengerMode =
+    query.data ?? (isVip ? "community" : "loner");
+
   return {
-    mode: (query.data ?? "loner") as MessengerMode,
+    mode: effectiveMode,
     isLoading: query.isLoading,
     isReady: !!uid && query.isFetched,
   };
 }
+
 
 export function useSetMessengerMode() {
   const { user } = useAuth();
