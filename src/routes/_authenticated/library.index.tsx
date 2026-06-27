@@ -541,7 +541,7 @@ function LibraryPage() {
                     )
                   : completedTracks;
                 return (
-                  <div className="grid gap-3">
+                  <div data-testid="library-cards" className="grid gap-3">
                     {genSong && <SongCardSkeleton label="Generating" />}
                     {filtered.length === 0 && !genSong ? (
                       <p className="py-6 text-center text-sm text-muted-foreground">
