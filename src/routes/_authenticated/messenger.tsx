@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Users, MessageCircle } from "lucide-react";
+import { Users, MessageCircle, Loader2 } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { OgChat } from "@/components/messenger/OgChat";
 import { CommunityRoom } from "@/components/messenger/CommunityRoom";
 import { PoweredByOgBot } from "@/components/PoweredByOgBot";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   AlertDialog,
   AlertDialogAction,
