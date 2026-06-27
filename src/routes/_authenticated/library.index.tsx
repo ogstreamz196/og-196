@@ -473,60 +473,102 @@ function LibraryPage() {
           )}
         </div>
 
-        {versionedLibrary.length > 0 && (
+        {activeJobs.length > 0 && (
           <div className="mb-4">
-            <JobQueuePanel songs={versionedLibrary} />
+            <JobQueuePanel songs={activeJobs} />
           </div>
         )}
 
-        {library.isLoading ? (
-          <div className="grid gap-3">
-            {[0, 1, 2].map((i) => (
-              <SongCardSkeleton key={i} />
-            ))}
-          </div>
-        ) : versionedLibrary.length > 0 || genSong ? (
-          <div className="grid gap-3">
-            {genSong && <SongCardSkeleton label="Generating" />}
-            {versionedLibrary.map((s) => (
-              <div key={s.id} className="relative">
-                <Link
-                  to="/library/$songId"
-                  params={{ songId: s.id }}
-                  className="block rounded-2xl transition-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <SongCard song={s} />
-                </Link>
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  className="absolute right-3 top-3 h-8 w-8 opacity-90 shadow-md"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setPendingDelete(s);
-                  }}
-                  aria-label="Delete track"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+        <Tabs defaultValue="yours" className="w-full">
+          <TabsList className="mb-4 grid w-full grid-cols-2 rounded-2xl bg-white/[0.04] p-1 sm:w-auto sm:inline-flex">
+            <TabsTrigger value="yours" className="rounded-xl px-4 py-2 text-sm font-bold">
+              Yours{completedTracks.length ? ` · ${completedTracks.length}` : ""}
+            </TabsTrigger>
+            <TabsTrigger value="community" className="rounded-xl px-4 py-2 text-sm font-bold">
+              Community{community.data?.length ? ` · ${community.data.length}` : ""}
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="yours" className="mt-0">
+            {library.isLoading ? (
+              <div className="grid gap-3">
+                {[0, 1, 2].map((i) => (
+                  <SongCardSkeleton key={i} />
+                ))}
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="rounded-3xl border border-dashed border-white/15 bg-card/40 p-10 text-center ring-1 ring-white/5">
-            <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-primary/30 to-fuchsia-500/15 shadow-[0_12px_30px_-12px_oklch(0.7_0.2_300_/_0.6)]">
-              <LibraryIcon className="h-6 w-6 text-primary" />
-            </div>
-            <p className="mt-4 font-display text-xl font-black leading-tight sm:text-2xl">No previews yet</p>
-            <p className="mt-2 text-base leading-relaxed text-muted-foreground">
-              Scroll down to write your first track — versions will appear here.
-            </p>
+            ) : completedTracks.length > 0 || genSong ? (
+              <div className="grid gap-3">
+                {genSong && <SongCardSkeleton label="Generating" />}
+                {completedTracks.map((s) => (
+                  <div key={s.id} className="relative">
+                    <Link
+                      to="/library/$songId"
+                      params={{ songId: s.id }}
+                      className="block rounded-2xl transition-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <SongCard song={s} />
+                    </Link>
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      className="absolute right-3 top-3 h-8 w-8 opacity-90 shadow-md"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setPendingDelete(s);
+                      }}
+                      aria-label="Delete track"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-3xl border border-dashed border-white/15 bg-card/40 p-10 text-center ring-1 ring-white/5">
+                <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-primary/30 to-fuchsia-500/15 shadow-[0_12px_30px_-12px_oklch(0.7_0.2_300_/_0.6)]">
+                  <LibraryIcon className="h-6 w-6 text-primary" />
+                </div>
+                <p className="mt-4 font-display text-xl font-black leading-tight sm:text-2xl">No tracks yet</p>
+                <p className="mt-2 text-base leading-relaxed text-muted-foreground">
+                  Scroll down to write your first track — finished songs land here.
+                </p>
+              </div>
+            )}
+          </TabsContent>
 
-          </div>
-
-        )}
+          <TabsContent value="community" className="mt-0">
+            {community.isLoading ? (
+              <div className="grid gap-3">
+                {[0, 1, 2].map((i) => (
+                  <SongCardSkeleton key={i} />
+                ))}
+              </div>
+            ) : (community.data?.length ?? 0) > 0 ? (
+              <div className="grid gap-3">
+                {community.data!.map((s) => (
+                  <Link
+                    key={s.id}
+                    to="/library/$songId"
+                    params={{ songId: s.id }}
+                    className="block rounded-2xl transition-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <SongCard song={s} />
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-3xl border border-dashed border-white/15 bg-card/40 p-10 text-center ring-1 ring-white/5">
+                <p className="font-display text-xl font-black leading-tight sm:text-2xl">Nothing here yet</p>
+                <p className="mt-2 text-base leading-relaxed text-muted-foreground">
+                  Be the first — finished tracks from the community will appear here.
+                </p>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </section>
+
 
       {/* Lyrics generating skeleton */}
       {genLyrics && !lyrics && (
