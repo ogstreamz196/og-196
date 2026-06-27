@@ -561,11 +561,12 @@ export function SongWorkspace({ song, onSaved }: Props) {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Music2 className="h-4 w-4 text-primary" />
-                Stage 3 · Create the full song
+                3 · Full HQ
               </CardTitle>
               <CardDescription>
-                Preview is a fast compressed sample. Pay {fullUnlockCost} coins once to unlock and download the full HQ version, or regenerate the sample for {previewCost}.
+                {fullUnlockCost} coins · unlock & download.
               </CardDescription>
+
             </CardHeader>
             <CardContent className="space-y-3">
               {!isReady ? (
