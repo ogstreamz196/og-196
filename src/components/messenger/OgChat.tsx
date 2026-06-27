@@ -465,7 +465,8 @@ export function OgChat({
 
   const balance = profile?.coin_balance ?? 0;
   const isOut = balance <= 0;
-  const foulActive = mode === "og" && foulMouth;
+  const foulActive = foulMouth;
+  const mode = foulMouth ? "og" : "safe";
 
   return (
     <div
