@@ -18,6 +18,7 @@ import { AppToggles } from "@/components/admin/AppToggles";
 import { OgBotPing } from "@/components/admin/OgBotPing";
 import { TelegramWebhookStatus } from "@/components/admin/TelegramWebhookStatus";
 import { BossNotificationsPanel } from "@/components/admin/BossNotificationsPanel";
+import { FlameHeading } from "@/components/ui/flame-heading";
 import { TelegramSmokeTest } from "@/components/admin/TelegramSmokeTest";
 import { E2ESmokeTest } from "@/components/admin/E2ESmokeTest";
 import { FoulMouthSmokeTest } from "@/components/admin/FoulMouthSmokeTest";
