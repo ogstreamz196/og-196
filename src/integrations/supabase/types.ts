@@ -565,6 +565,54 @@ export type Database = {
         }
         Relationships: []
       }
+      security_audit_log: {
+        Row: {
+          actor_id: string | null
+          coin_delta: number | null
+          created_at: string
+          event_type: string
+          id: string
+          jwt_role: string | null
+          metadata: Json | null
+          new_balance: number | null
+          old_balance: number | null
+          reason: string | null
+          request_ip: string | null
+          song_id: string | null
+          target_user_id: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          coin_delta?: number | null
+          created_at?: string
+          event_type: string
+          id?: string
+          jwt_role?: string | null
+          metadata?: Json | null
+          new_balance?: number | null
+          old_balance?: number | null
+          reason?: string | null
+          request_ip?: string | null
+          song_id?: string | null
+          target_user_id?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          coin_delta?: number | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          jwt_role?: string | null
+          metadata?: Json | null
+          new_balance?: number | null
+          old_balance?: number | null
+          reason?: string | null
+          request_ip?: string | null
+          song_id?: string | null
+          target_user_id?: string | null
+        }
+        Relationships: []
+      }
       sign_in_events: {
         Row: {
           browser: string | null
