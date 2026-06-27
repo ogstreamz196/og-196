@@ -22,7 +22,7 @@ export function PreferencesPanel() {
   const { foulMouth, isLoading } = useFoulMouth();
   const setFoulMouth = useSetFoulMouth();
   const { isVip } = useRole();
-  const { mode, setMode } = useOgMode();
+  
   const { prefs, update: rawUpdate } = useAppPreferences();
   const update = <K extends keyof AppPreferences>(key: K, value: AppPreferences[K]) => {
     rawUpdate(key, value);
