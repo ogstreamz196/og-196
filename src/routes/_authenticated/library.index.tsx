@@ -428,9 +428,9 @@ function LibraryPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 pb-20">
+    <div data-testid="library-root" className="mx-auto flex w-full max-w-5xl flex-col gap-4 pb-20">
       {/* Hero — premium kicker, oversized headline, generous breathing room */}
-      <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b border-white/10 pb-4">
+      <header data-testid="library-hero" className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b border-white/10 pb-4">
         <div className="min-w-0">
           <h1 className="font-display text-2xl font-black leading-[1.1] tracking-[-0.02em] break-words sm:text-5xl lg:text-6xl">
             Hey <span className="text-gradient-brand">{firstName}</span> — let's write a song.
