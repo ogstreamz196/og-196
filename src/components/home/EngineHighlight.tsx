@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Bot, Play } from "lucide-react";
+import { FlameHeading } from "@/components/ui/flame-heading";
 
 export function EngineHighlight() {
   return (
