@@ -32,11 +32,11 @@ export function HubCard({ to, icon, title, description, cta, primary }: HubCardP
         <span className={primary ? "text-primary-foreground" : "text-primary"}>{icon}</span>
       </div>
       <div className="min-w-0">
-        <h3 className="font-bitcount text-3xl font-black sm:text-4xl md:text-5xl break-words">{title}</h3>
-        <p className="font-bitcount mt-2 text-base sm:text-lg md:text-xl leading-snug text-muted-foreground text-pretty">{description}</p>
+        <h3 className="font-bungee text-3xl sm:text-4xl md:text-5xl break-words">{title}</h3>
+        <p className="font-bungee mt-3 text-sm sm:text-base md:text-lg leading-snug text-muted-foreground text-pretty">{description}</p>
       </div>
       <div className="mt-auto pt-2">
-        <span className="font-bitcount inline-flex items-center gap-1.5 text-base sm:text-lg text-primary">
+        <span className="font-bungee inline-flex items-center gap-1.5 text-sm sm:text-base text-primary">
           {cta}
           <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
         </span>
