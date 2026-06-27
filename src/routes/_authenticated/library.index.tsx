@@ -78,6 +78,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+
+
 
 export const Route = createFileRoute("/_authenticated/library/")({
   component: LibraryPage,
