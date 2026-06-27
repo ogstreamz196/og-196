@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
-  Loader2, FileText, MessageSquareMore, Wand2, ExternalLink,
+  Loader2, FileText, Wand2,
   Coins, Check, Sparkles, Music2, AlertCircle, Play, RefreshCw,
 } from "lucide-react";
+
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
