@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Loader2,
   Library as LibraryIcon,
@@ -342,21 +342,47 @@ function LibraryPage() {
     [versionedLibrary],
   );
 
-  const community = useQuery({
+  const COMMUNITY_PAGE_SIZE = 12;
+  const community = useInfiniteQuery({
     queryKey: ["library-community", user?.id],
     enabled: !!user,
-    queryFn: async (): Promise<Song[]> => {
+    initialPageParam: 0,
+    queryFn: async ({ pageParam }): Promise<Song[]> => {
+      const from = (pageParam as number) * COMMUNITY_PAGE_SIZE;
+      const to = from + COMMUNITY_PAGE_SIZE - 1;
       const { data, error } = await supabase
         .from("songs")
         .select("*")
         .eq("status", "completed")
         .neq("user_id", user!.id)
         .order("created_at", { ascending: false })
-        .limit(24);
+        .range(from, to);
       if (error) throw error;
       return (data ?? []) as Song[];
     },
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage.length < COMMUNITY_PAGE_SIZE ? undefined : allPages.length,
   });
+  const communityTracks = useMemo(
+    () => community.data?.pages.flat() ?? [],
+    [community.data],
+  );
+  const communitySentinelRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const el = communitySentinelRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver((entries) => {
+      if (
+        entries[0]?.isIntersecting &&
+        community.hasNextPage &&
+        !community.isFetchingNextPage
+      ) {
+        community.fetchNextPage();
+      }
+    }, { rootMargin: "400px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [community.hasNextPage, community.isFetchingNextPage, communityTracks.length]);
 
   useEffect(() => {
     if (!user) return;
@@ -485,7 +511,7 @@ function LibraryPage() {
               Yours{completedTracks.length ? ` · ${completedTracks.length}` : ""}
             </TabsTrigger>
             <TabsTrigger value="community" className="rounded-xl px-4 py-2 text-sm font-bold">
-              Community{community.data?.length ? ` · ${community.data.length}` : ""}
+              Community{communityTracks.length ? ` · ${communityTracks.length}` : ""}
             </TabsTrigger>
           </TabsList>
 
@@ -527,11 +553,19 @@ function LibraryPage() {
             ) : (
               <div className="rounded-3xl border border-dashed border-white/15 bg-card/40 p-10 text-center ring-1 ring-white/5">
                 <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-primary/30 to-fuchsia-500/15 shadow-[0_12px_30px_-12px_oklch(0.7_0.2_300_/_0.6)]">
-                  <LibraryIcon className="h-6 w-6 text-primary" />
+                  {activeJobs.length > 0 ? (
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  ) : (
+                    <LibraryIcon className="h-6 w-6 text-primary" />
+                  )}
                 </div>
-                <p className="mt-4 font-display text-xl font-black leading-tight sm:text-2xl">No tracks yet</p>
+                <p className="mt-4 font-display text-xl font-black leading-tight sm:text-2xl">
+                  {activeJobs.length > 0 ? "Generating your first track…" : "No tracks yet"}
+                </p>
                 <p className="mt-2 text-base leading-relaxed text-muted-foreground">
-                  Scroll down to write your first track — finished songs land here.
+                  {activeJobs.length > 0
+                    ? "Hang tight — finished songs will land here as soon as they're ready."
+                    : "Scroll down to write your first track — finished songs land here."}
                 </p>
               </div>
             )}
@@ -544,9 +578,9 @@ function LibraryPage() {
                   <SongCardSkeleton key={i} />
                 ))}
               </div>
-            ) : (community.data?.length ?? 0) > 0 ? (
+            ) : communityTracks.length > 0 ? (
               <div className="grid gap-3">
-                {community.data!.map((s) => (
+                {communityTracks.map((s) => (
                   <Link
                     key={s.id}
                     to="/library/$songId"
@@ -556,6 +590,19 @@ function LibraryPage() {
                     <SongCard song={s} />
                   </Link>
                 ))}
+                <div ref={communitySentinelRef} className="h-1" aria-hidden />
+                {community.isFetchingNextPage && (
+                  <div className="grid gap-3">
+                    {[0, 1].map((i) => (
+                      <SongCardSkeleton key={`more-${i}`} label="Loading" />
+                    ))}
+                  </div>
+                )}
+                {!community.hasNextPage && (
+                  <p className="py-4 text-center text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                    You've reached the end
+                  </p>
+                )}
               </div>
             ) : (
               <div className="rounded-3xl border border-dashed border-white/15 bg-card/40 p-10 text-center ring-1 ring-white/5">
