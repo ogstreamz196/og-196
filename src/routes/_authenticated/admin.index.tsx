@@ -162,7 +162,7 @@ function AdminPanel() {
 
         {/* Group: Coins & Pricing */}
         <section className="space-y-3">
-          <h3 className="font-bungee text-2xl sm:text-3xl">Coins & Pricing</h3>
+          <FlameHeading as="h3" size="lg">Coins & Pricing</FlameHeading>
           <AdminCollapsible storageKey="og-coins" title="OG Coins" subtitle="Boss coin operations" defaultOpen>
             <OgCoinsPanel />
           </AdminCollapsible>
@@ -176,7 +176,7 @@ function AdminPanel() {
 
         {/* Group: App Configuration */}
         <section className="space-y-3">
-          <h3 className="font-bungee text-2xl sm:text-3xl">App Configuration</h3>
+          <FlameHeading as="h3" size="lg">App Configuration</FlameHeading>
           <AdminCollapsible storageKey="app-toggles" title="App toggles" subtitle="Global feature flags">
             <AppToggles />
           </AdminCollapsible>
@@ -193,7 +193,7 @@ function AdminPanel() {
 
         {/* Group: Telegram & Diagnostics */}
         <section className="space-y-3">
-          <h3 className="font-bungee text-2xl sm:text-3xl">Telegram & Diagnostics</h3>
+          <FlameHeading as="h3" size="lg">Telegram & Diagnostics</FlameHeading>
           <AdminCollapsible storageKey="og-bot-ping" title="OG Bot ping" subtitle="Verify OG Bot connectivity">
             <OgBotPing />
           </AdminCollapsible>
@@ -213,7 +213,7 @@ function AdminPanel() {
 
         {/* Group: Activity */}
         <section className="space-y-3">
-          <h3 className="font-bungee text-2xl sm:text-3xl">Activity</h3>
+          <FlameHeading as="h3" size="lg">Activity</FlameHeading>
           <AdminCollapsible storageKey="boss-audit" title="Boss audit log" subtitle="Recent admin actions">
             <BossAuditLog />
           </AdminCollapsible>
