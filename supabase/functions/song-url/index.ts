@@ -26,7 +26,15 @@ Deno.serve(async (req) => {
   if (!song || song.user_id !== user.id) return jsonResponse({ error: "Not found" }, 404);
 
   if (mode === "full") {
-    if (!song.unlocked) return jsonResponse({ error: "Not unlocked", code: "locked" }, 403);
+    // Require an unlocked_songs record before ever returning the full URL.
+    // songs.unlocked is a denormalised mirror; the unlock ledger is the source of truth.
+    const { data: unlockRow } = await admin
+      .from("unlocked_songs")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("song_id", song_id)
+      .maybeSingle();
+    if (!unlockRow) return jsonResponse({ error: "Not unlocked", code: "locked" }, 403);
     if (!song.audio_path) return jsonResponse({ error: "Full track still downloading", code: "full_pending" }, 409);
   }
 
