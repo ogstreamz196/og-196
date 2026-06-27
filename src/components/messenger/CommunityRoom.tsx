@@ -51,18 +51,20 @@ export function CommunityRoom() {
     queryFn: () => listFn(),
     staleTime: 10_000,
   });
-  const messages: CommunityMessage[] = data?.messages ?? [];
+  const messages: CommunityMessage[] = useMemo(() => data?.messages ?? [], [data?.messages]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const [text, setText] = useState("");
   const [hasMore, setHasMore] = useState(true);
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [typingUsers, setTypingUsers] = useState<Record<string, { name: string; at: number }>>({});
+  const [showJump, setShowJump] = useState(false);
   const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const lastTypingSentRef = useRef(0);
   const stickToBottomRef = useRef(true);
+  const didInitialScrollRef = useRef(false);
 
-  // Realtime: new messages
+  // Realtime: new messages (dedup by id)
   useEffect(() => {
     const channel = supabase
       .channel("community-messages")
