@@ -146,3 +146,13 @@ function SongCardImpl({ song }: { song: Song }) {
     </div>
   );
 }
+
+export const SongCard = memo(SongCardImpl, (a, b) =>
+  a.song.id === b.song.id &&
+  a.song.status === b.song.status &&
+  a.song.audio_path === b.song.audio_path &&
+  a.song.sample_path === b.song.sample_path &&
+  a.song.cover_url === b.song.cover_url &&
+  a.song.title === b.song.title &&
+  a.song.error_message === b.song.error_message,
+);
