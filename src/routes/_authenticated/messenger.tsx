@@ -139,8 +139,8 @@ function MessengerPage() {
             aria-checked={isCommunity}
             aria-label={
               isCommunity
-                ? "Turn off OG Community Mode (back to Loner Mode)"
-                : "Turn on OG Community Mode"
+                ? "Turn on OG Bot Loner Mode (leave Community)"
+                : "Turn off Loner Mode (switch to OG Community Mode)"
             }
             className={`group flex shrink-0 items-center gap-2 rounded-full border px-3 py-2 text-[10px] font-black uppercase tracking-[0.18em] transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 sm:text-xs ${
               isCommunity
@@ -153,7 +153,8 @@ function MessengerPage() {
             ) : (
               <MessageCircle className="h-4 w-4 text-primary" />
             )}
-            <span className="whitespace-nowrap">{isCommunity ? "Turn off" : "Turn on"}</span>
+            <span className="whitespace-nowrap">{isCommunity ? "Turn on Loner" : "Turn off Loner"}</span>
+
           </button>
         </header>
 
