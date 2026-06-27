@@ -80,40 +80,30 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
       { name: "theme-color", content: "#0a0a0a" },
       { name: "format-detection", content: "telephone=no" },
-      { title: "PORTAL" },
+      { title: "OG Streamz — AI Song Generator & OG Bot Hub" },
       {
         name: "description",
-        content: "Generate full songs from a prompt using AI. Powered by 0G-Streamz.",
+        content:
+          "OG Streamz turns a prompt into a full song with AI, with a built-in OG Bot assistant and a coin-powered creator economy.",
       },
-      { name: "author", content: "Sonix" },
-      { property: "og:title", content: "PORTAL" },
+      { name: "author", content: "OG Streamz" },
+      { property: "og:site_name", content: "OG Streamz" },
+      { property: "og:title", content: "OG Streamz — AI Song Generator & OG Bot Hub" },
       {
         property: "og:description",
-        content: "Generate full songs from a prompt using AI. Powered by 0G-Streamz.",
+        content:
+          "Generate full songs from a prompt, chat with OG Bot, and run your creator economy in one place.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://ogwidget.lovable.app" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "PORTAL" },
+      { name: "twitter:title", content: "OG Streamz — AI Song Generator & OG Bot Hub" },
       {
         name: "twitter:description",
-        content: "Generate full songs from a prompt using AI. Powered by 0G-Streamz.",
-      },
-      {
-        property: "og:image",
         content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0962d120-9a6a-4403-b946-c07e83d9dfbd/id-preview-1984ac9d--07659a42-5b68-4c8b-83b5-ee9a625dbb92.lovable.app-1781064468022.png",
-      },
-      {
-        name: "twitter:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0962d120-9a6a-4403-b946-c07e83d9dfbd/id-preview-1984ac9d--07659a42-5b68-4c8b-83b5-ee9a625dbb92.lovable.app-1781064468022.png",
+          "Generate full songs from a prompt, chat with OG Bot, and run your creator economy in one place.",
       },
       { name: "google-site-verification", content: "R34IxND5szTYrevWfX0gTnIvDi64kPx6wI0XCNM08YE" },
-      { name: "description", content: "PORTAL is an AI music generator and a hub for managing OG Bot API keys and tokens." },
-      { property: "og:description", content: "PORTAL is an AI music generator and a hub for managing OG Bot API keys and tokens." },
-      { name: "twitter:description", content: "PORTAL is an AI music generator and a hub for managing OG Bot API keys and tokens." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/258c6af9-f6ad-4792-8337-ebed91e6dd10/id-preview-993ea057--07659a42-5b68-4c8b-83b5-ee9a625dbb92.lovable.app-1782170919209.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/258c6af9-f6ad-4792-8337-ebed91e6dd10/id-preview-993ea057--07659a42-5b68-4c8b-83b5-ee9a625dbb92.lovable.app-1782170919209.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
