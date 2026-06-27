@@ -125,24 +125,12 @@ export function PreferencesPanel() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
-          <div className="space-y-2">
-            <Label>Default mode</Label>
-            <RadioGroup
-              value={mode}
-              onValueChange={(v) => changeMode(v as "og" | "safe")}
-              className="grid grid-cols-2 gap-2"
-            >
-              <ModeOption value="og" title="OG" body="British banter, full personality." />
-              <ModeOption value="safe" title="Safe" body="Family-friendly, no swearing." />
-            </RadioGroup>
-          </div>
-
           <ToggleRow
             icon={<MessageSquareMore className="h-4 w-4" />}
             label={isVip ? "Foul-mouth" : "Foul-mouth (VIP only)"}
             description={
               isVip
-                ? "When OG mode is on, allow stronger language."
+                ? "Let OG use stronger language in replies."
                 : "Unlock with OG VIP (£5/month) to let OG go fully savage."
             }
             checked={isVip && foulMouth}
