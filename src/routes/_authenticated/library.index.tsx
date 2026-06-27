@@ -896,14 +896,16 @@ function LibraryPage() {
             <span
               aria-hidden="true"
               className={cn(
-                "pointer-events-none inline-flex shrink-0 items-center justify-center rounded-full border-2 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] transition sm:px-4 sm:py-2 sm:text-xs",
+                "pointer-events-none ml-1 inline-flex shrink-0 items-center gap-1.5 rounded-full border-2 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] transition sm:px-4 sm:py-2 sm:text-xs",
                 foulMouth
                   ? "border-destructive bg-destructive text-destructive-foreground shadow-[0_0_18px_-4px_oklch(0.62_0.22_25_/_0.8)]"
                   : "border-white/25 bg-white/10 text-foreground",
               )}
             >
-              {foulMouthSaving ? "Saving…" : foulMouth ? "Turn off" : "Turn on"}
+              <span className="opacity-80">Foul Mouth:</span>
+              <span>{foulMouthSaving ? "Saving…" : foulMouth ? "Turn off" : "Turn on"}</span>
             </span>
+            <span className="ml-auto" aria-hidden="true" />
           </button>
 
           <div id="lyrics-section" className="relative scroll-mt-24">
