@@ -354,17 +354,19 @@ function LibraryPage() {
     enabled: !!user,
     initialPageParam: 0,
     queryFn: async ({ pageParam }): Promise<Song[]> => {
-      const from = (pageParam as number) * COMMUNITY_PAGE_SIZE;
-      const to = from + COMMUNITY_PAGE_SIZE - 1;
-      const { data, error } = await supabase
-        .from("songs")
-        .select("*")
-        .eq("status", "completed")
-        .neq("user_id", user!.id)
-        .order("created_at", { ascending: false })
-        .range(from, to);
+      const offset = (pageParam as number) * COMMUNITY_PAGE_SIZE;
+      // Uses a SECURITY DEFINER RPC that returns only safe public fields
+      // (no prompts, lyrics, or generation metadata).
+      const { data, error } = await supabase.rpc("list_community_songs", {
+        p_offset: offset,
+        p_limit: COMMUNITY_PAGE_SIZE,
+      });
       if (error) throw error;
-      return (data ?? []) as Song[];
+      // Fill missing required Song fields with safe defaults so the card renders.
+      return (data ?? []).map((s: Record<string, unknown>) => ({
+        prompt: "",
+        ...s,
+      })) as unknown as Song[];
     },
     getNextPageParam: (lastPage, allPages) =>
       lastPage.length < COMMUNITY_PAGE_SIZE ? undefined : allPages.length,
