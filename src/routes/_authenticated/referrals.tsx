@@ -229,138 +229,112 @@ function ReferralsPage() {
 
   return (
     <DashboardShell title="Earnings">
-      <div className="w-full space-y-8 sm:space-y-10">
-        {/* Binding status banner */}
-        {myRefQ.data?.has_referrer ? (
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 px-4 py-3 text-sm">
-            <div className="flex items-center gap-2">
-              <Lock className="h-4 w-4 text-emerald-400" />
-              <span className="font-semibold text-emerald-300">Bound</span>
-              <span className="text-muted-foreground">
-                to <span className="font-semibold text-foreground">{myRefQ.data.referrer_name}</span>
-                {myRefQ.data.referrer_code ? <> · <span className="font-mono">{myRefQ.data.referrer_code}</span></> : null}
-              </span>
-            </div>
-            {myRefQ.data.bound_at && (
-              <span className="text-xs text-muted-foreground">
-                Locked {new Date(myRefQ.data.bound_at).toLocaleString()}
-              </span>
-            )}
-          </div>
-        ) : (
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm">
-            <div className="flex items-center gap-2">
-              <ShieldAlert className="h-4 w-4 text-amber-400" />
-              <span className="font-semibold text-amber-300">Not bound</span>
-              <span className="text-muted-foreground">No OG Leader locked yet — you can bind one (once, forever) below.</span>
-            </div>
-            <Button
-              size="sm"
-              variant="outline"
+      <div className="relative w-full space-y-6">
+        {/* Ambient atmosphere */}
+        <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
+          <div className="absolute top-1/4 -left-20 h-96 w-96 rounded-full bg-primary/10 blur-[120px]" />
+          <div className="absolute bottom-1/4 -right-20 h-96 w-96 rounded-full bg-destructive/10 blur-[120px]" />
+        </div>
+
+        {/* Status strip — live + binding state, one row */}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-card/70 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-destructive backdrop-blur">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-destructive" /> Live
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-black shadow-lg shadow-orange-900/30">
+            <Sparkles className="h-3 w-3" /> 10% Lifetime
+          </span>
+          {myRefQ.data?.has_referrer ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-300">
+              <Lock className="h-3 w-3" /> Bound · {myRefQ.data.referrer_name}
+            </span>
+          ) : (
+            <button
               onClick={() => document.getElementById("bind-referrer")?.scrollIntoView({ behavior: "smooth" })}
+              className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-amber-300 transition hover:bg-amber-500/20"
             >
-              Bind now
-            </Button>
-          </div>
-        )}
+              <ShieldAlert className="h-3 w-3" /> Bind your OG Leader
+            </button>
+          )}
+        </div>
 
-        {/* HERO — earnings-first */}
-        <section className="relative overflow-hidden rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/20 via-card/80 to-background p-6 shadow-glow sm:p-10">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-primary/30 blur-3xl"
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -left-20 bottom-0 h-56 w-56 rounded-full bg-fuchsia-500/20 blur-3xl"
-          />
+        {/* HERO — oversized wallet counter */}
+        <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-card/60 p-6 backdrop-blur-2xl sm:p-10">
+          <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-primary/20 blur-3xl" />
+          <div aria-hidden className="pointer-events-none absolute -left-10 -bottom-10 h-48 w-48 rounded-full bg-destructive/15 blur-3xl" />
 
-          <div className="relative grid gap-8 lg:grid-cols-[1.2fr_1fr] lg:items-center">
-            <div className="space-y-5">
-              <div className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/15 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
-                <PiggyBank className="h-3 w-3" /> Earnings · 10% lifetime
-              </div>
-              <h1 className="font-display text-4xl font-black leading-[1.05] tracking-tight sm:text-5xl">
-                Earn{" "}
-                <span className="bg-gradient-to-r from-primary via-fuchsia-400 to-amber-300 bg-clip-text text-transparent">
-                  OG Coins
-                </span>{" "}
-                every time your crew creates.
-              </h1>
-              <p className="max-w-xl text-base text-muted-foreground sm:text-lg">
-                Share your OG Link. When someone you invited burns coins making songs, you bank{" "}
-                <span className="font-semibold text-foreground">10% in OG Coins</span> — automatically,
-                forever. No cap, no expiry, no payout fees.
-              </p>
-
-              <div className="flex flex-wrap gap-2 pt-1">
-                <Pill icon={<InfinityIcon className="h-3 w-3" />} label="Lifetime commission" />
-                <Pill icon={<Flame className="h-3 w-3" />} label="Auto-paid on every burn" />
-                <Pill icon={<Coins className="h-3 w-3" />} label="Spend instantly in-app" />
+          <div className="relative text-center">
+            <p className="mb-3 text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground">
+              OG Coin Cashback Wallet
+            </p>
+            <div className="relative inline-block">
+              <div aria-hidden className="absolute -inset-2 rounded-3xl bg-gradient-to-r from-primary via-fuchsia-500 to-destructive opacity-25 blur-2xl" />
+              <div className="relative flex items-baseline justify-center gap-3">
+                <span className="font-bungee bg-gradient-to-b from-white to-zinc-400 bg-clip-text text-6xl font-black tabular-nums tracking-tight text-transparent drop-shadow-[0_4px_24px_rgba(239,68,68,0.35)] sm:text-8xl">
+                  {summary.total_earned.toLocaleString()}
+                </span>
+                <span className="text-lg font-black uppercase tracking-widest text-primary sm:text-2xl">OG</span>
               </div>
             </div>
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-xs">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 font-semibold text-emerald-300">
+                <TrendingUp className="h-3 w-3" /> {summary.total_referred} {summary.total_referred === 1 ? "referral" : "referrals"} · auto-paid
+              </span>
+              <span className="text-muted-foreground">10% of every coin your crew burns</span>
+            </div>
 
-            {/* Big balance card + bind referrer (merged) */}
-            <div id="bind-referrer" className="scroll-mt-24 relative rounded-2xl border border-white/15 bg-background/70 p-6 backdrop-blur-xl">
-              <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-                <span className="inline-flex items-center gap-1.5">
-                  <Coins className="h-3.5 w-3.5 text-primary" /> Your cashback wallet
-                </span>
-                <span className="inline-flex items-center gap-1 text-emerald-400">
-                  <TrendingUp className="h-3 w-3" /> Live
-                </span>
-              </div>
-              <div className="mt-3 flex items-end gap-2">
-                <div className="font-display text-5xl font-black tabular-nums sm:text-6xl">
-                  {summary.total_earned.toLocaleString()}
-                </div>
-                <div className="pb-2 text-sm font-semibold text-primary">OG Coins</div>
-              </div>
-              <div className="mt-1 text-xs text-muted-foreground">
-                Earned from <span className="font-semibold text-foreground">{summary.total_referred}</span>{" "}
-                {summary.total_referred === 1 ? "referral" : "referrals"} so far
-              </div>
-
-              <div className="mt-5 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
-
-              <div className="mt-4 flex flex-wrap gap-2">
-                <Button onClick={share} className="flex-1 gap-2">
-                  <Share2 className="h-4 w-4" /> Share & earn
-                </Button>
-                <Button variant="secondary" onClick={copy} className="gap-2">
-                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                  {copied ? "Copied" : "Copy link"}
-                </Button>
-              </div>
-
-              {/* Merged: Connect OG Leader binding card */}
-              <div className="mt-5 border-t border-white/10 pt-5">
-                <div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-rose-300">
-                  <KeyRound className="h-3.5 w-3.5" /> Connect your OG Leader
-                </div>
-                <BindReferrerCard />
-              </div>
+            <div className="mt-6 flex flex-wrap justify-center gap-2">
+              <Button onClick={share} size="lg" className="gap-2 bg-gradient-to-r from-primary to-fuchsia-500 px-6 font-black uppercase tracking-wider shadow-glow hover:scale-[1.02]">
+                <Share2 className="h-4 w-4" /> Share & earn
+              </Button>
+              <Button onClick={copy} variant="secondary" size="lg" className="gap-2 font-bold uppercase tracking-wider">
+                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                {copied ? "Copied" : "Copy link"}
+              </Button>
             </div>
           </div>
         </section>
 
-        {/* SHARE CARD — primary action */}
-        <section className="rounded-3xl border border-white/10 bg-card/70 p-5 backdrop-blur-xl sm:p-6">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
-                Your OG Link
-              </div>
-              <div className="mt-1 text-sm text-muted-foreground">
-                Drop it in group chats, your bio, or DMs. Anyone who signs up = lifetime 10%.
-              </div>
+        {/* PAID / PENDING / NETWORK — tight stat tiles */}
+        <section className="grid gap-3 sm:grid-cols-3">
+          <StatTile
+            tone="emerald"
+            icon={<CheckCircle2 className="h-4 w-4" />}
+            label="Paid"
+            value={paidCoins.toLocaleString()}
+            sub={`${paidEvents} cashback ${paidEvents === 1 ? "event" : "events"}`}
+            unit="OG"
+          />
+          <StatTile
+            tone="amber"
+            icon={<Hourglass className="h-4 w-4" />}
+            label="Pending"
+            value={pendingReferees.toLocaleString()}
+            sub="Awaiting first burn"
+            unit="refs"
+          />
+          <StatTile
+            tone="sky"
+            icon={<Users className="h-4 w-4" />}
+            label="Network"
+            value={summary.total_referred.toLocaleString()}
+            sub="Lifetime sign-ups"
+            unit="nodes"
+          />
+        </section>
+
+        {/* SHARE LINK + QR — fused command bar */}
+        <section className="rounded-3xl border border-white/10 bg-card/60 p-5 backdrop-blur-xl sm:p-6">
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-[10px] font-black uppercase tracking-[0.22em] text-primary">
+              Your OG Link
             </div>
-            <span className="hidden rounded-full border border-emerald-400/30 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-300 sm:inline-flex">
+            <span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.18em] text-emerald-300">
               Active
             </span>
           </div>
 
-          <div className="mt-4 grid gap-4 md:grid-cols-[1fr_auto] md:items-start">
+          <div className="mt-3 grid gap-4 md:grid-cols-[1fr_auto] md:items-start">
             <div className="space-y-3">
               <div className="flex flex-col gap-2 sm:flex-row">
                 <div className="relative flex-1">
@@ -378,23 +352,20 @@ function ReferralsPage() {
                     {copied ? "Copied" : "Copy"}
                   </Button>
                   <Button variant="secondary" onClick={inviteAgain} className="h-11 gap-2">
-                    <Gift className="h-4 w-4" /> Invite again
+                    <Gift className="h-4 w-4" /> Invite
                   </Button>
                   <Button variant="outline" onClick={share} className="h-11 gap-2">
                     <Share2 className="h-4 w-4" /> Share
                   </Button>
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Tip: the link must be opened by a brand-new account within 24h of sign-up to count.
-              </p>
 
-              {/* OG Leader Code — short, shareable, one-of-a-kind */}
+              {/* OG Leader Code */}
               {user && (
                 <div className="rounded-2xl border border-primary/30 bg-primary/5 p-3">
                   <div className="flex items-center justify-between gap-2">
-                    <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
-                      Your unique OG Leader code
+                    <div className="text-[10px] font-black uppercase tracking-[0.22em] text-primary">
+                      Your OG Leader code
                     </div>
                     <Button
                       type="button"
@@ -411,29 +382,22 @@ function ReferralsPage() {
                       <Copy className="h-3 w-3" /> Copy code
                     </Button>
                   </div>
-                  <div className="mt-1 font-mono text-lg font-bold tracking-widest text-foreground">
+                  <div className="mt-1 font-mono text-2xl font-black tracking-widest text-foreground">
                     {codeQ.isLoading ? "Loading…" : (myCode ?? "—")}
                   </div>
                   <div className="mt-1 text-[11px] text-muted-foreground">
-                    Share this code with anyone you invite. They paste it into "Connect OG Leader" to lock you in as their OG Leader for life — you then earn 10% of every coin they burn.
+                    Friends paste this in "Connect OG Leader" — locks you in for life. 10% of every coin they burn → yours.
                   </div>
                 </div>
               )}
             </div>
 
-            {/* QR card */}
             {link && (
               <div className="flex flex-col items-center gap-2 rounded-2xl border border-white/10 bg-background/60 p-3 md:w-44">
                 <div className="rounded-xl bg-white p-2.5">
-                  <QRCodeSVG
-                    id="og-referral-qr"
-                    value={link}
-                    size={144}
-                    level="M"
-                    includeMargin={false}
-                  />
+                  <QRCodeSVG id="og-referral-qr" value={link} size={144} level="M" includeMargin={false} />
                 </div>
-                <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">
                   <QrCode className="h-3 w-3" /> Scan to join
                 </div>
                 <Button
@@ -450,67 +414,44 @@ function ReferralsPage() {
           </div>
         </section>
 
-        {/* STATS — Paid vs Pending breakdown */}
+        {/* EARNING MISSIONS — How it works as gamified tiles */}
         <section className="grid gap-3 sm:grid-cols-3">
-          <StatCard
-            icon={<CheckCircle2 className="h-5 w-5 text-emerald-400" />}
-            label="Paid earnings"
-            value={paidCoins}
-            hint={`${paidEvents} settled cashback ${paidEvents === 1 ? "event" : "events"}`}
-            accent="from-emerald-500/30"
+          <Mission
+            tone="primary"
+            n={1}
+            icon={<Link2 className="h-5 w-5" />}
+            title="Drop your link"
+            body="Group chats, bio, DMs — one link works everywhere."
           />
-          <StatCard
-            icon={<Hourglass className="h-5 w-5 text-amber-400" />}
-            label="Pending referees"
-            value={pendingReferees}
-            hint="Signed up — awaiting their first qualifying burn"
-            accent="from-amber-500/30"
+          <Mission
+            tone="fuchsia"
+            n={2}
+            icon={<UserPlus className="h-5 w-5" />}
+            title="Crew signs up"
+            body="They open it, register, and start cooking on MusicHub."
           />
-          <StatCard
-            icon={<Users className="h-5 w-5 text-sky-400" />}
-            label="Total referred"
-            value={summary.total_referred}
-            hint="Lifetime confirmed sign-ups"
-            accent="from-sky-500/30"
+          <Mission
+            tone="destructive"
+            n={3}
+            icon={<Flame className="h-5 w-5" />}
+            title="You bank 10% forever"
+            body="Every burn → 10% lands in your wallet, automatically."
           />
         </section>
 
-
-        {/* HOW IT WORKS */}
-        <section className="rounded-3xl border border-white/10 bg-card/60 p-5 sm:p-6">
-          <div className="flex flex-wrap items-end justify-between gap-2">
-            <h2 className="font-display text-xl font-black tracking-tight">How you earn</h2>
-            <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-              3 steps · zero effort after
-            </span>
+        {/* BIND LEADER — kept anchor */}
+        <section id="bind-referrer" className="scroll-mt-24 rounded-3xl border border-white/10 bg-card/60 p-5 backdrop-blur-xl sm:p-6">
+          <div className="mb-3 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] text-rose-300">
+            <KeyRound className="h-3.5 w-3.5" /> Connect your OG Leader
           </div>
-          <div className="mt-5 grid gap-3 sm:grid-cols-3">
-            <Step
-              icon={<Link2 className="h-4 w-4" />}
-              n={1}
-              title="Share your OG Link"
-              body="Drop it in group chats, socials or DMs. One link works everywhere."
-            />
-            <Step
-              icon={<UserPlus className="h-4 w-4" />}
-              n={2}
-              title="They sign up & create"
-              body="A friend opens your link, makes an account and starts cooking tracks."
-            />
-            <Step
-              icon={<Sparkles className="h-4 w-4" />}
-              n={3}
-              title="You bank 10% forever"
-              body="Every OG Coin they burn, 10% drops straight into your balance — auto."
-            />
-          </div>
+          <BindReferrerCard />
         </section>
 
-        {/* HISTORY */}
-        <section className="rounded-3xl border border-white/10 bg-card/60 p-5 sm:p-6">
+        {/* CASHBACK FEED — dense activity */}
+        <section className="rounded-3xl border border-white/10 bg-card/60 p-5 backdrop-blur-xl sm:p-6">
           <div className="flex items-center justify-between">
-            <h2 className="font-display text-xl font-black tracking-tight">Cashback history</h2>
-            <span className="text-xs text-muted-foreground">Last 20 events</span>
+            <h2 className="font-bungee text-xl tracking-tight">Cashback feed</h2>
+            <span className="text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground">Last 20</span>
           </div>
           <div className="mt-3 divide-y divide-white/5">
             {summaryQ.isLoading && (
@@ -521,9 +462,9 @@ function ReferralsPage() {
                 <div className="grid h-12 w-12 place-items-center rounded-full bg-primary/15 text-primary">
                   <Coins className="h-6 w-6" />
                 </div>
-                <div className="text-sm font-semibold">No cashback yet</div>
+                <div className="text-sm font-bold">No cashback yet</div>
                 <div className="max-w-xs text-xs text-muted-foreground">
-                  Share your OG Link to start earning. The first burn from a referee lands here.
+                  Share your OG Link — the first burn from a referee lands here.
                 </div>
                 <Button size="sm" onClick={share} className="mt-2 gap-2">
                   <Share2 className="h-3.5 w-3.5" /> Share your link
@@ -532,33 +473,27 @@ function ReferralsPage() {
             )}
             {summary.recent.map((tx) => {
               const burned = Number(tx.reference?.match(/burn:(\d+)/)?.[1] ?? 0);
-              const refTail = tx.reference?.match(/ref:([^|]+)$/)?.[1] ?? null;
               const when = new Date(tx.created_at);
               return (
-                <div key={tx.id} className="flex items-start justify-between gap-3 py-3">
-                  <div className="flex min-w-0 items-start gap-3">
-                    <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary/15 text-xs font-bold uppercase text-primary">
+                <div key={tx.id} className="flex items-center justify-between gap-3 py-2.5">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary/15 text-xs font-black uppercase text-primary">
                       {(tx.referee_name ?? "?").slice(0, 1)}
                     </div>
                     <div className="min-w-0">
-                      <div className="flex items-center gap-2 truncate text-sm font-semibold">
+                      <div className="flex items-center gap-2 truncate text-sm font-bold">
                         {tx.referee_name ?? "Referred user"}
-                        <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.16em] text-emerald-300">
+                        <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-[0.16em] text-emerald-300">
                           <CheckCircle2 className="h-2.5 w-2.5" /> Paid
                         </span>
                       </div>
                       <div className="mt-0.5 font-mono text-[11px] text-muted-foreground">
                         {burned > 0 ? <>{burned} burned × 10% = </> : <>Cashback = </>}
-                        <span className="font-semibold text-primary">+{tx.amount} OG</span>
+                        <span className="font-bold text-primary">+{tx.amount} OG</span>
                       </div>
-                      {refTail && (
-                        <div className="truncate font-mono text-[10px] text-muted-foreground/70">
-                          gen: {refTail}
-                        </div>
-                      )}
                     </div>
                   </div>
-                  <div className="text-right text-xs text-muted-foreground">
+                  <div className="shrink-0 text-right text-[10px] text-muted-foreground">
                     <div>{when.toLocaleDateString()}</div>
                     <div>{when.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
                   </div>
@@ -572,71 +507,68 @@ function ReferralsPage() {
   );
 }
 
-function Pill({ icon, label }: { icon: React.ReactNode; label: string }) {
-  return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-semibold text-foreground/85">
-      <span className="text-primary">{icon}</span>
-      {label}
-    </span>
-  );
-}
-
-function StatCard({
+function StatTile({
+  tone,
   icon,
   label,
   value,
-  hint,
-  accent,
+  sub,
+  unit,
 }: {
+  tone: "emerald" | "amber" | "sky";
   icon: React.ReactNode;
   label: string;
-  value: number;
-  hint: string;
-  accent: string;
+  value: string;
+  sub: string;
+  unit: string;
 }) {
+  const tones = {
+    emerald: { ring: "hover:border-emerald-400/40", text: "text-emerald-400", glow: "from-emerald-500/20" },
+    amber: { ring: "hover:border-amber-400/40", text: "text-amber-400", glow: "from-amber-500/20" },
+    sky: { ring: "hover:border-sky-400/40", text: "text-sky-400", glow: "from-sky-500/20" },
+  }[tone];
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-card/70 p-5 backdrop-blur-xl transition-all hover:border-white/20">
-      <div
-        aria-hidden
-        className={`pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-gradient-to-br ${accent} to-transparent blur-2xl`}
-      />
-      <div className="relative">
-        <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+    <div className={`group relative overflow-hidden rounded-2xl border border-white/10 bg-card/70 p-5 backdrop-blur-xl transition ${tones.ring}`}>
+      <div aria-hidden className={`pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-gradient-to-br ${tones.glow} to-transparent blur-2xl`} />
+      <div className="relative flex items-start justify-between">
+        <span className={`inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.22em] ${tones.text}`}>
           {icon} {label}
-        </div>
-        <div className="mt-2 font-display text-4xl font-black tabular-nums">{value.toLocaleString()}</div>
-        <div className="mt-1 text-xs text-muted-foreground">{hint}</div>
+        </span>
+        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">{unit}</span>
       </div>
+      <div className="relative mt-3 font-bungee text-4xl tabular-nums">{value}</div>
+      <div className="relative mt-1 text-xs text-muted-foreground">{sub}</div>
     </div>
   );
 }
 
-function Step({
-  icon,
+function Mission({
+  tone,
   n,
+  icon,
   title,
   body,
 }: {
-  icon: React.ReactNode;
+  tone: "primary" | "fuchsia" | "destructive";
   n: number;
+  icon: React.ReactNode;
   title: string;
   body: string;
 }) {
+  const tones = {
+    primary: { ring: "hover:border-primary/40", bg: "bg-primary/10", text: "text-primary" },
+    fuchsia: { ring: "hover:border-fuchsia-400/40", bg: "bg-fuchsia-500/10", text: "text-fuchsia-400" },
+    destructive: { ring: "hover:border-destructive/40", bg: "bg-destructive/10", text: "text-destructive" },
+  }[tone];
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-background/40 p-4">
-      <div className="absolute right-3 top-2 font-display text-5xl font-black text-white/[0.04]">
-        {n}
-      </div>
+    <div className={`group relative overflow-hidden rounded-3xl border border-white/10 bg-card/60 p-5 backdrop-blur-xl transition ${tones.ring}`}>
+      <div className="absolute right-3 top-2 font-bungee text-6xl text-white/[0.04]">{n}</div>
       <div className="relative">
-        <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
-          <span className="grid h-6 w-6 place-items-center rounded-full bg-primary/15 text-primary">
-            {icon}
-          </span>
-          Step {n}
-        </div>
-        <div className="mt-2 text-sm font-bold text-foreground">{title}</div>
+        <div className={`grid h-11 w-11 place-items-center rounded-xl ${tones.bg} ${tones.text}`}>{icon}</div>
+        <div className="mt-3 text-base font-black">{title}</div>
         <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{body}</p>
       </div>
     </div>
   );
 }
+
