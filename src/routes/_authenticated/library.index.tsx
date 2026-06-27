@@ -850,9 +850,10 @@ function LibraryPage() {
             type="button"
             role="switch"
             aria-checked={foulMouth}
-            aria-label="OG Foul Mouth — explicit lyrics mode"
+            aria-pressed={foulMouth}
+            aria-label={`OG Foul Mouth — explicit lyrics mode, currently turned ${foulMouth ? "on" : "off"}. Activate to turn ${foulMouth ? "off" : "on"}.`}
             aria-describedby="foul-mouth-status"
-            aria-busy={genLyrics}
+            aria-busy={genLyrics || foulMouthSaving}
             onClick={() => !genLyrics && setFoulMouth((v) => !v)}
             onKeyDown={(e) => {
               if (genLyrics) return;
