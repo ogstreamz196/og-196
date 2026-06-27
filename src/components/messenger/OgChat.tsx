@@ -834,7 +834,7 @@ export function OgChat({
             disabled={!user || m.isPending}
             aria-label="Attach image"
             title="Attach image"
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-white/5 hover:text-foreground disabled:opacity-40 sm:h-11 sm:w-11"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-white/5 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 disabled:opacity-40"
           >
             <Paperclip className="h-5 w-5" />
           </button>
@@ -843,9 +843,10 @@ export function OgChat({
             onClick={recording ? stopRecording : startRecording}
             disabled={!user || m.isPending || transcribing}
             aria-label={recording ? "Stop recording" : "Voice input"}
+            aria-pressed={recording}
             title={recording ? "Stop recording" : "Voice input"}
             className={cn(
-              "grid h-9 w-9 shrink-0 place-items-center rounded-full transition disabled:opacity-40 sm:h-11 sm:w-11",
+              "grid h-11 w-11 shrink-0 place-items-center rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 disabled:opacity-40",
               recording
                 ? "bg-destructive text-destructive-foreground hover:bg-destructive/90 animate-pulse"
                 : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
@@ -888,15 +889,19 @@ export function OgChat({
             }
             disabled={m.isPending || isOut || !user || transcribing}
             maxLength={2000}
-            autoFocus
-            className="min-h-[36px] max-h-[180px] flex-1 resize-none bg-transparent px-2 py-1.5 text-[15px] leading-relaxed placeholder:text-muted-foreground/70 focus:outline-none disabled:cursor-not-allowed sm:min-h-[40px] sm:px-3 sm:py-2 sm:text-lg"
+            inputMode="text"
+            enterKeyHint="send"
+            aria-label="Message OG Bot in Loner Mode"
+            data-testid="og-loner-composer"
+            className="min-h-[40px] max-h-[180px] flex-1 resize-none bg-transparent px-2 py-2 text-base leading-relaxed placeholder:text-muted-foreground/70 focus:outline-none disabled:cursor-not-allowed sm:px-3 sm:text-lg"
           />
           <button
             type="submit"
             disabled={m.isPending || (!input.trim() && !attachment) || isOut || !user}
-            aria-label="Send"
+            aria-label="Send message"
             title="Send"
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-brand text-primary-foreground shadow-[0_8px_22px_-6px_hsl(var(--primary)/0.6)] ring-1 ring-primary/40 transition hover:scale-105 active:scale-95 disabled:bg-muted disabled:text-muted-foreground disabled:shadow-none disabled:ring-0 sm:h-11 sm:w-11"
+            data-testid="og-loner-send"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-gradient-brand text-primary-foreground shadow-[0_8px_22px_-6px_hsl(var(--primary)/0.6)] ring-1 ring-primary/40 transition hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 disabled:bg-muted disabled:text-muted-foreground disabled:shadow-none disabled:ring-0"
           >
             {m.isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
           </button>
