@@ -461,6 +461,9 @@ function LibraryPage() {
         </div>
       </header>
 
+      <EarnCoinStrip className="self-start" />
+
+
       {/* Persistent Foul Mouth reminder — one tap takes you to the toggle */}
       <div className="sticky top-14 z-20 -mx-4 px-4 sm:top-16 sm:-mx-6 sm:px-6">
         <FoulMouthReminder
