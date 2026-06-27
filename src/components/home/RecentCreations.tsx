@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Headphones, Music2, Zap, ArrowRight } from "lucide-react";
 import type { RecentSong } from "@/hooks/use-recent-songs";
+import { FlameHeading } from "@/components/ui/flame-heading";
 
 interface RecentCreationsProps {
   songs: RecentSong[];
