@@ -71,7 +71,7 @@ export function CategoryCard({
 
         <div className="space-y-2.5">
           <div className="flex items-center justify-between gap-2">
-            <div className="text-xs font-bold uppercase tracking-[0.22em] text-muted-foreground">
+            <div className="font-bungee text-base sm:text-lg uppercase text-muted-foreground">
               Quick picks
             </div>
             <Button
