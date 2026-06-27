@@ -824,7 +824,7 @@ export function OgChat({
         {/* Unified composer pill — attachment | mic | textarea | send (Telegram/WhatsApp pattern) */}
         <div
           className={cn(
-            "flex items-end gap-1.5 rounded-full border border-white/10 bg-background/80 px-3 py-2 shadow-[0_14px_36px_-18px_rgba(0,0,0,0.55)] ring-1 ring-white/5 backdrop-blur-xl transition focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/30 sm:px-4 sm:py-2.5",
+            "flex items-end gap-1 rounded-full border border-white/10 bg-background/80 px-2 py-1.5 shadow-[0_14px_36px_-18px_rgba(0,0,0,0.55)] ring-1 ring-white/5 backdrop-blur-xl transition focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/30 sm:gap-1.5 sm:px-4 sm:py-2.5",
             (isOut || !user) && "opacity-70",
           )}
         >
@@ -834,7 +834,7 @@ export function OgChat({
             disabled={!user || m.isPending}
             aria-label="Attach image"
             title="Attach image"
-            className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-white/5 hover:text-foreground disabled:opacity-40"
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-white/5 hover:text-foreground disabled:opacity-40 sm:h-11 sm:w-11"
           >
             <Paperclip className="h-5 w-5" />
           </button>
@@ -845,7 +845,7 @@ export function OgChat({
             aria-label={recording ? "Stop recording" : "Voice input"}
             title={recording ? "Stop recording" : "Voice input"}
             className={cn(
-              "grid h-11 w-11 shrink-0 place-items-center rounded-full transition disabled:opacity-40",
+              "grid h-9 w-9 shrink-0 place-items-center rounded-full transition disabled:opacity-40 sm:h-11 sm:w-11",
               recording
                 ? "bg-destructive text-destructive-foreground hover:bg-destructive/90 animate-pulse"
                 : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
@@ -889,7 +889,7 @@ export function OgChat({
             disabled={m.isPending || isOut || !user || transcribing}
             maxLength={2000}
             autoFocus
-            className="min-h-[40px] max-h-[180px] flex-1 resize-none bg-transparent px-3 py-2 text-base leading-relaxed placeholder:text-muted-foreground/70 focus:outline-none disabled:cursor-not-allowed sm:text-lg"
+            className="min-h-[36px] max-h-[180px] flex-1 resize-none bg-transparent px-2 py-1.5 text-[15px] leading-relaxed placeholder:text-muted-foreground/70 focus:outline-none disabled:cursor-not-allowed sm:min-h-[40px] sm:px-3 sm:py-2 sm:text-lg"
           />
           <button
             type="submit"
