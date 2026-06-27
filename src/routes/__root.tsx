@@ -165,6 +165,28 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
 
     ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "OG Streamz",
+          url: "https://ogwidget.lovable.app",
+          description:
+            "AI song generation, OG Bot assistant, and a coin-powered creator economy.",
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "OG Streamz",
+          url: "https://ogwidget.lovable.app",
+        }),
+      },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
