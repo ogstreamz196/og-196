@@ -46,10 +46,9 @@ export function TelegramSignInLog({ userId }: { userId: string }) {
 
   return (
     <CollapsiblePanel
-      data-testid="admin-recent-changes"
+      icon={<Send className="h-4 w-4 text-sky-400" />}
       title={
         <span className="inline-flex items-center gap-2">
-          <Send className="h-4 w-4 text-sky-400" />
           Telegram sign-in history
           <span className="ml-1 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
             {rows.length}
