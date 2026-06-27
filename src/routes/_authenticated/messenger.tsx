@@ -76,12 +76,13 @@ function MessengerPage() {
               }`}
             >
               <span className="truncate">
-                {liveChat ? "Live · OG Community" : "OG Bot · Private chat"}
+                {liveChat ? "OG Community Mode" : "OG Bot Loner Mode"}
               </span>
             </div>
             <h1 className="truncate font-display text-lg font-black leading-tight tracking-tight sm:text-3xl">
-              {liveChat ? "OG Community" : "OG Bot"}
+              {liveChat ? "OG Community Mode" : "OG Bot Loner Mode"}
             </h1>
+
             <p className="flex items-center gap-1.5 truncate text-xs font-semibold text-emerald-400 sm:text-sm">
               <span className="relative inline-flex h-2 w-2 shrink-0">
                 <span className="absolute inset-0 animate-ping rounded-full bg-emerald-400/70" />
