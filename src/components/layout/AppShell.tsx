@@ -19,7 +19,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppSidebar } from "./AppSidebar";
 import { HighContrastToggle } from "./HighContrastToggle";
 import { WelcomeBackdrop } from "./WelcomeBackdrop";
-// OgFloatingWidget intentionally not imported — see comment below near <main>.
 import ogStreamzLogo from "@/assets/ogstreamz-logo.jpg.asset.json";
 import ogBotLogo from "@/assets/ogbot.png.asset.json";
 
