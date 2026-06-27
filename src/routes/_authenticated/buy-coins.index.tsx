@@ -12,28 +12,21 @@ import { useSiteContent, useSetSiteContent } from "@/hooks/use-site-content";
 import { cn } from "@/lib/utils";
 import {
   COIN_PACKS, CURRENCY_SYMBOL, VIP_PLAN, CUSTOM_COIN_UNIT,
-  findCoinPackByBundleId,
   applyPackOverride, parsePackOverride, packOverrideKey, packShowsBonus,
   type CoinPack, type PackOverride,
 } from "@/lib/coin-packs";
+import {
+  loadStoredSelection,
+  persistSelection,
+  clearStoredSelection,
+  type Selection,
+} from "@/lib/buy-coins-selection";
 import { StripeEmbeddedCheckoutInline } from "@/components/StripeEmbeddedCheckout";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
 import { toast } from "sonner";
 import { PurchaseHistory } from "@/components/PurchaseHistory";
 import { ReferralReminder } from "@/components/referrals/ReferralReminder";
-
-const SELECTION_STORAGE_KEY = "buyCoins.lastSelection";
-
-type StoredSelection =
-  | { type: "coins"; bundleId: string }
-  | { type: "custom"; units: number }
-  | { type: "vip" };
-
-type Selection =
-  | { type: "coins"; pack: CoinPack }
-  | { type: "custom"; units: number }
-  | { type: "vip" };
 
 export const Route = createFileRoute("/_authenticated/buy-coins/")({
   validateSearch: (s: Record<string, unknown>) => ({
