@@ -900,7 +900,7 @@ function LibraryPage() {
                   : "border-white/25 bg-white/10 text-foreground",
               )}
             >
-              {foulMouth ? "Turn off" : "Turn on"}
+              {foulMouthSaving ? "Saving…" : foulMouth ? "Turn off" : "Turn on"}
             </span>
           </button>
 
