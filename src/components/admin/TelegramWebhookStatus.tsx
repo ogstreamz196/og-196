@@ -29,12 +29,32 @@ function fmtTs(epochSeconds: number | null): string {
 
 export function TelegramWebhookStatus() {
   const probeFn = useServerFn(getTelegramWebhookStatus);
+  const setFn = useServerFn(setTelegramWebhook);
+  const [registering, setRegistering] = useState(false);
   const q = useQuery({
     queryKey: ["telegram-webhook-status"],
     queryFn: () => probeFn(),
     refetchInterval: 30_000,
     staleTime: 15_000,
   });
+
+  async function registerWebhook() {
+    setRegistering(true);
+    try {
+      const r = await setFn({ data: {} } as never);
+      toast.success(
+        r.botUsername
+          ? `Webhook registered on @${r.botUsername}`
+          : "Webhook registered",
+        { description: r.url },
+      );
+      q.refetch();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not register webhook");
+    } finally {
+      setRegistering(false);
+    }
+  }
 
   const data = q.data;
   const loading = q.isLoading;
