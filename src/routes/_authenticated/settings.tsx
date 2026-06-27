@@ -34,6 +34,8 @@ function SettingsPage() {
 
   const [name, setName] = useState("");
   const [nameDirty, setNameDirty] = useState(false);
+  const [bio, setBio] = useState("");
+  const [bioDirty, setBioDirty] = useState(false);
   const [balance, setBalance] = useState("");
   const [balanceDirty, setBalanceDirty] = useState(false);
   const [adjust, setAdjust] = useState("");
@@ -42,8 +44,12 @@ function SettingsPage() {
     if (profile && !nameDirty) setName(profile.display_name ?? (dev.isDev ? "Developer" : ""));
   }, [profile?.display_name, nameDirty, dev.isDev]);
   useEffect(() => {
+    if (profile && !bioDirty) setBio((profile as { artist_bio?: string | null }).artist_bio ?? "");
+  }, [(profile as { artist_bio?: string | null } | undefined)?.artist_bio, bioDirty]);
+  useEffect(() => {
     if (profile && !balanceDirty) setBalance(String(profile.coin_balance ?? 0));
   }, [profile?.coin_balance, balanceDirty]);
+
 
   const isOgBot = (roles as string[]).includes("og_bot");
 
