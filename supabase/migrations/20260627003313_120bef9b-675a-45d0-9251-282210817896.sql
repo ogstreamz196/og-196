@@ -1,0 +1,1 @@
+CREATE POLICY "Authenticated view completed songs" ON public.songs FOR SELECT TO authenticated USING (status = 'completed');
