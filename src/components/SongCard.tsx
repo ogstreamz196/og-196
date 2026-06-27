@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Play, Pause, Loader2, Music2, Download, AlertCircle, Lock } from "lucide-react";
 import { useSettings } from "@/hooks/use-settings";
 import { useSongAudio } from "@/hooks/use-song-audio";
