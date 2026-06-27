@@ -7,7 +7,7 @@ import { createServerFn } from "@tanstack/react-start";
 export const pingOgBot = createServerFn({ method: "GET" }).handler(async () => {
   const host = process.env.OG_BOT_HOST;
   if (!host) return { ok: false, status: 0, host: null as string | null, error: "OG_BOT_HOST not set" };
-  const url = `${host.replace(/\/$/, "")}/api/public/og-bot-widget-embed.js`;
+  const url = `${host.replace(/\/$/, "")}/`;
   const startedAt = Date.now();
   try {
     const res = await fetch(url, { method: "GET" });
