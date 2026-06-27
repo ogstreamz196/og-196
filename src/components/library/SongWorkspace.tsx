@@ -459,11 +459,12 @@ export function SongWorkspace({ song, onSaved }: Props) {
                 <div>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <Play className="h-4 w-4 text-primary" />
-                    Stage 2 · Preview sample
+                    2 · Preview
                   </CardTitle>
                   <CardDescription>
-                    Generate a free preview using your lyrics. {settings?.sample_seconds ?? 30}s sample appears in the player above.
+                    Free {settings?.sample_seconds ?? 30}s sample.
                   </CardDescription>
+
                 </div>
                 <CostBadge cost={previewCost} />
               </div>
