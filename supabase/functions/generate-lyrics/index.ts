@@ -88,6 +88,23 @@ Deno.serve(async (req) => {
       foulMouth = (pref as { foul_mouth?: boolean } | null)?.foul_mouth ?? false;
     }
 
+    // Default personal context: weave the user's display_name + artist_bio from
+    // their profile so lyrics feel personal without the user having to retype
+    // it every time. Per-request `personalDetails` always wins.
+    if (!personalDetails) {
+      const { data: prof } = await admin
+        .from("profiles")
+        .select("display_name, artist_bio")
+        .eq("id", user.id)
+        .maybeSingle();
+      const p = (prof ?? null) as { display_name?: string | null; artist_bio?: string | null } | null;
+      const parts: string[] = [];
+      if (p?.display_name?.trim()) parts.push(`Artist name: ${p.display_name.trim()}`);
+      if (p?.artist_bio?.trim()) parts.push(`Bio: ${p.artist_bio.trim().slice(0, 400)}`);
+      personalDetails = parts.join(" · ");
+    }
+
+
     const isEnglish = language.trim().toLowerCase() === "english";
     const bilingualRule = isEnglish
       ? ""
