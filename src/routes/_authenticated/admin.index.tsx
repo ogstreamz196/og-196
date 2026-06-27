@@ -133,208 +133,185 @@ function AdminPanel() {
   return (
     <DashboardShell title="Admin Controls">
       <BossNav />
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-6xl space-y-8">
+        {/* Quick links to standalone admin tools */}
         <AdminSection
           padding="p-4"
           icon={<ShieldCheck className="h-5 w-5 text-primary-foreground" />}
-          title="More admin tools"
-          subtitle="Configuration & debugging shortcuts not in the top nav."
+          title="Admin tools"
+          subtitle="Standalone pages outside the main nav."
         >
           <div className="flex flex-wrap gap-2">
-            <Link to="/admin/og-persona">
-              <Button size="sm" variant="outline">OG Bot Persona</Button>
-            </Link>
-            <Link to="/admin/user-settings">
-              <Button size="sm" variant="outline">User Settings</Button>
-            </Link>
-            <Link to="/admin/api-keys">
-              <Button size="sm" variant="outline">API Keys</Button>
-            </Link>
-            <Link to="/admin/debug-context">
-              <Button size="sm" variant="outline">Lyric Context Debug</Button>
-            </Link>
-            <Link to="/admin/referrals-audit">
-              <Button size="sm" variant="outline">Referral audit</Button>
-            </Link>
+            <Link to="/admin/og-persona"><Button size="sm" variant="outline">OG Bot Persona</Button></Link>
+            <Link to="/admin/user-settings"><Button size="sm" variant="outline">User Settings</Button></Link>
+            <Link to="/admin/api-keys"><Button size="sm" variant="outline">API Keys</Button></Link>
+            <Link to="/admin/debug-context"><Button size="sm" variant="outline">Lyric Context Debug</Button></Link>
+            <Link to="/admin/referrals-audit"><Button size="sm" variant="outline">Referral audit</Button></Link>
           </div>
         </AdminSection>
 
-
-        <div className="mb-3 flex flex-wrap items-center justify-end gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() =>
-              window.dispatchEvent(
-                new CustomEvent("admin-collapsible:set-all", { detail: { open: true } }),
-              )
-            }
-          >
-            Expand all
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() =>
-              window.dispatchEvent(
-                new CustomEvent("admin-collapsible:set-all", { detail: { open: false } }),
-              )
-            }
-          >
-            Collapse all
-          </Button>
+        {/* Expand/collapse master controls */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Sections</h2>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={() => window.dispatchEvent(new CustomEvent("admin-collapsible:set-all", { detail: { open: true } }))}>Expand all</Button>
+            <Button size="sm" variant="outline" onClick={() => window.dispatchEvent(new CustomEvent("admin-collapsible:set-all", { detail: { open: false } }))}>Collapse all</Button>
+          </div>
         </div>
 
+        {/* Group: Coins & Pricing */}
+        <section className="space-y-3">
+          <h3 className="text-xs font-bold uppercase tracking-widest text-primary">Coins & Pricing</h3>
+          <AdminCollapsible storageKey="og-coins" title="OG Coins" subtitle="Boss coin operations" defaultOpen>
+            <OgCoinsPanel />
+          </AdminCollapsible>
+          <AdminCollapsible storageKey="pricing" title="Pricing & limits" subtitle="Generation, unlock and signup costs">
+            <PricingControls />
+          </AdminCollapsible>
+          <AdminCollapsible storageKey="mint-coins" title="Mint coins" subtitle="Grant or deduct user balance">
+            <MintCoinsPanel />
+          </AdminCollapsible>
+        </section>
 
-        <AdminCollapsible storageKey="og-coins" title="OG Coins" subtitle="Boss coin operations" defaultOpen>
-          <OgCoinsPanel />
-        </AdminCollapsible>
+        {/* Group: App Configuration */}
+        <section className="space-y-3">
+          <h3 className="text-xs font-bold uppercase tracking-widest text-primary">App Configuration</h3>
+          <AdminCollapsible storageKey="app-toggles" title="App toggles" subtitle="Global feature flags">
+            <AppToggles />
+          </AdminCollapsible>
+          <AdminCollapsible storageKey="portals" title="Portals" subtitle="Manage portal definitions">
+            <PortalManager />
+          </AdminCollapsible>
+          <AdminCollapsible storageKey="capabilities" title="Hardwired capabilities" subtitle="Connector & runtime status">
+            <HardwiredCapabilities />
+          </AdminCollapsible>
+          <AdminCollapsible storageKey="boss-notifs" title="Boss notifications" subtitle="DM preferences">
+            <BossNotificationsPanel />
+          </AdminCollapsible>
+        </section>
 
-        <AdminCollapsible storageKey="pricing" title="Pricing & limits" subtitle="Generation, unlock and signup costs">
-          <PricingControls />
-        </AdminCollapsible>
+        {/* Group: Telegram & Diagnostics */}
+        <section className="space-y-3">
+          <h3 className="text-xs font-bold uppercase tracking-widest text-primary">Telegram & Diagnostics</h3>
+          <AdminCollapsible storageKey="og-bot-ping" title="OG Bot ping" subtitle="Verify OG Bot connectivity">
+            <OgBotPing />
+          </AdminCollapsible>
+          <AdminCollapsible storageKey="telegram-webhook" title="Telegram webhook" subtitle="Live delivery status">
+            <TelegramWebhookStatus />
+          </AdminCollapsible>
+          <AdminCollapsible storageKey="telegram-smoke" title="Telegram smoke test" subtitle="getMe + webhook check">
+            <TelegramSmokeTest />
+          </AdminCollapsible>
+          <AdminCollapsible storageKey="e2e-smoke" title="End-to-end smoke test" subtitle="Full stack flow">
+            <E2ESmokeTest />
+          </AdminCollapsible>
+          <AdminCollapsible storageKey="foul-smoke" title="Foul-mouth smoke test" subtitle="Live Chat VIP gating + reply quality">
+            <FoulMouthSmokeTest />
+          </AdminCollapsible>
+        </section>
 
-        <AdminCollapsible storageKey="app-toggles" title="App toggles" subtitle="Global feature flags">
-          <AppToggles />
-        </AdminCollapsible>
-
-        <AdminCollapsible storageKey="mint-coins" title="Mint coins" subtitle="Grant or deduct user balance">
-          <MintCoinsPanel />
-        </AdminCollapsible>
-
-        <AdminCollapsible storageKey="portals" title="Portals" subtitle="Manage portal definitions">
-          <PortalManager />
-        </AdminCollapsible>
-
-        <AdminCollapsible storageKey="boss-audit" title="Boss audit log" subtitle="Recent admin actions">
-          <BossAuditLog />
-        </AdminCollapsible>
-
-        <AdminCollapsible storageKey="og-bot-ping" title="OG Bot ping" subtitle="Verify OG Bot connectivity">
-          <OgBotPing />
-        </AdminCollapsible>
-
-        <AdminCollapsible storageKey="telegram-webhook" title="Telegram webhook" subtitle="Live delivery status">
-          <TelegramWebhookStatus />
-        </AdminCollapsible>
-
-        <AdminCollapsible storageKey="telegram-smoke" title="Telegram smoke test" subtitle="getMe + webhook check">
-          <TelegramSmokeTest />
-        </AdminCollapsible>
-
-        <AdminCollapsible storageKey="e2e-smoke" title="End-to-end smoke test" subtitle="Full stack flow">
-          <E2ESmokeTest />
-        </AdminCollapsible>
-
-        <AdminCollapsible storageKey="foul-smoke" title="Foul-mouth smoke test" subtitle="Live Chat VIP gating + reply quality">
-          <FoulMouthSmokeTest />
-        </AdminCollapsible>
-
-
-        <AdminCollapsible storageKey="boss-notifs" title="Boss notifications" subtitle="DM preferences">
-          <BossNotificationsPanel />
-        </AdminCollapsible>
-
-        <AdminCollapsible storageKey="capabilities" title="Hardwired capabilities" subtitle="Connector & runtime status">
-          <HardwiredCapabilities />
-        </AdminCollapsible>
-
-        <AdminCollapsible storageKey="recent-songs" title="Recent generations" subtitle="Unlock, lock, retry" defaultOpen>
-        <div className="rounded-2xl border border-border bg-card shadow-card">
-
-          {songsQuery.isLoading ? (
-            <div className="grid place-items-center py-16"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
-          ) : songsQuery.data && songsQuery.data.length > 0 ? (
-            <div className="overflow-x-auto">
-              <div className="min-w-[720px]">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Song</TableHead>
-                  <TableHead>User</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Unlocked</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {songsQuery.data.map((s) => (
-                  <TableRow key={s.id}>
-                    <TableCell className="max-w-[260px]">
-                      <div className="truncate font-medium">{s.title || "Untitled"}</div>
-                      <div className="truncate text-xs text-muted-foreground">{s.prompt}</div>
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      <div className="text-muted-foreground">{s.email ?? s.user_id.slice(0, 8)}</div>
-                      <div className="mt-0.5 flex items-center gap-2 text-xs">
-                        <AdminEditableLabel userId={s.user_id} value={s.display_name} fallback="No label" />
-                        <AdminEditableBalance userId={s.user_id} value={s.coin_balance} />
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <span className={cn(
-                        "rounded-full px-2 py-0.5 text-xs font-medium",
-                        s.status === "completed" && "bg-primary/15 text-primary",
-                        (s.status === "pending" || s.status === "processing") && "bg-muted text-muted-foreground",
-                        s.status === "failed" && "bg-destructive/15 text-destructive",
-                      )}>
-                        {s.status}
-                      </span>
-                      {s.status === "failed" && s.error_message && (
-                        <div className="mt-1 max-w-[200px] truncate text-xs text-destructive/80">{s.error_message}</div>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <span className={cn(
-                        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs",
-                        s.unlocked ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground",
-                      )}>
-                        {s.unlocked ? <Unlock className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
-                        {s.unlocked ? "Unlocked" : "Locked"}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
-                      {new Date(s.created_at).toLocaleString()}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          size="sm"
-                          variant={s.unlocked ? "outline" : "default"}
-                          disabled={toggleUnlock.isPending}
-                          onClick={() => toggleUnlock.mutate({ id: s.id, unlocked: !s.unlocked })}
-                        >
-                          {s.unlocked ? <Lock className="h-3.5 w-3.5" /> : <Unlock className="h-3.5 w-3.5" />}
-                          <span className="ml-1.5">{s.unlocked ? "Lock" : "Unlock"}</span>
-                        </Button>
-                        {s.status === "failed" && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            disabled={reprocess.isPending}
-                            onClick={() => reprocess.mutate(s.id)}
-                          >
-                            <RefreshCw className={cn("h-3.5 w-3.5", reprocess.isPending && "animate-spin")} />
-                            <span className="ml-1.5">Retry</span>
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-              </div>
+        {/* Group: Activity */}
+        <section className="space-y-3">
+          <h3 className="text-xs font-bold uppercase tracking-widest text-primary">Activity</h3>
+          <AdminCollapsible storageKey="boss-audit" title="Boss audit log" subtitle="Recent admin actions">
+            <BossAuditLog />
+          </AdminCollapsible>
+          <AdminCollapsible storageKey="recent-songs" title="Recent generations" subtitle="Unlock, lock, retry" defaultOpen>
+            <div className="rounded-2xl border border-border bg-card shadow-card">
+              {songsQuery.isLoading ? (
+                <div className="grid place-items-center py-16"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
+              ) : songsQuery.data && songsQuery.data.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <div className="min-w-[720px]">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Song</TableHead>
+                          <TableHead>User</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Unlocked</TableHead>
+                          <TableHead>Created</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {songsQuery.data.map((s) => (
+                          <TableRow key={s.id}>
+                            <TableCell className="max-w-[260px]">
+                              <div className="truncate font-medium">{s.title || "Untitled"}</div>
+                              <div className="truncate text-xs text-muted-foreground">{s.prompt}</div>
+                            </TableCell>
+                            <TableCell className="text-sm">
+                              <div className="text-muted-foreground">{s.email ?? s.user_id.slice(0, 8)}</div>
+                              <div className="mt-0.5 flex items-center gap-2 text-xs">
+                                <AdminEditableLabel userId={s.user_id} value={s.display_name} fallback="No label" />
+                                <AdminEditableBalance userId={s.user_id} value={s.coin_balance} />
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <span className={cn(
+                                "rounded-full px-2 py-0.5 text-xs font-medium",
+                                s.status === "completed" && "bg-primary/15 text-primary",
+                                (s.status === "pending" || s.status === "processing") && "bg-muted text-muted-foreground",
+                                s.status === "failed" && "bg-destructive/15 text-destructive",
+                              )}>
+                                {s.status}
+                              </span>
+                              {s.status === "failed" && s.error_message && (
+                                <div className="mt-1 max-w-[200px] truncate text-xs text-destructive/80">{s.error_message}</div>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <span className={cn(
+                                "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs",
+                                s.unlocked ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground",
+                              )}>
+                                {s.unlocked ? <Unlock className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
+                                {s.unlocked ? "Unlocked" : "Locked"}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                              {new Date(s.created_at).toLocaleString()}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-2">
+                                <Button
+                                  size="sm"
+                                  variant={s.unlocked ? "outline" : "default"}
+                                  disabled={toggleUnlock.isPending}
+                                  onClick={() => toggleUnlock.mutate({ id: s.id, unlocked: !s.unlocked })}
+                                >
+                                  {s.unlocked ? <Lock className="h-3.5 w-3.5" /> : <Unlock className="h-3.5 w-3.5" />}
+                                  <span className="ml-1.5">{s.unlocked ? "Lock" : "Unlock"}</span>
+                                </Button>
+                                {s.status === "failed" && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    disabled={reprocess.isPending}
+                                    onClick={() => reprocess.mutate(s.id)}
+                                  >
+                                    <RefreshCw className={cn("h-3.5 w-3.5", reprocess.isPending && "animate-spin")} />
+                                    <span className="ml-1.5">Retry</span>
+                                  </Button>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid place-items-center gap-2 py-16 text-muted-foreground">
+                  <Music2 className="h-8 w-8" />
+                  <p>No songs yet.</p>
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="grid place-items-center gap-2 py-16 text-muted-foreground">
-              <Music2 className="h-8 w-8" />
-              <p>No songs yet.</p>
-            </div>
-          )}
-        </div>
-        </AdminCollapsible>
+          </AdminCollapsible>
+        </section>
       </div>
     </DashboardShell>
 
