@@ -185,6 +185,33 @@ function SettingsPage() {
             </div>
           </div>
 
+          <div className="space-y-2">
+            <div className="flex items-end justify-between gap-2">
+              <Label htmlFor="artist-bio" className="flex flex-col gap-1">
+                <span>Artist bio · woven into your lyrics</span>
+                <span className="text-xs font-normal text-muted-foreground">
+                  MusicHub uses your display name and this bio by default — they'll appear naturally a couple of times per song, not in every line. Leave blank to opt out.
+                </span>
+              </Label>
+              <span className="text-[10px] text-muted-foreground">{bio.length}/400</span>
+            </div>
+            <Textarea
+              id="artist-bio"
+              value={bio}
+              onChange={(e) => { setBio(e.target.value.slice(0, 400)); setBioDirty(true); }}
+              maxLength={400}
+              rows={3}
+              placeholder="e.g. South London rapper, ex-footballer, raised by my nan, never quits."
+            />
+            <div className="flex justify-end">
+              <Button size="sm" onClick={() => saveBio.mutate()} disabled={!bioDirty || saveBio.isPending}>
+                {saveBio.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save bio
+              </Button>
+            </div>
+          </div>
+
+
           <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1.5">
               <Fingerprint className="h-3.5 w-3.5" />
