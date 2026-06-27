@@ -50,7 +50,7 @@ export function UserAuditTrail({ userId, email }: { userId: string; email?: stri
           <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
         </div>
       ) : q.data && q.data.length > 0 ? (
-        <details className="group rounded-xl border border-border bg-background/40">
+        <details data-testid="admin-recent-changes" className="group rounded-xl border border-border bg-background/40">
           <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground">
             <History className="h-4 w-4" /> Recent changes ({q.data.length})
             <span className="ml-auto text-xs opacity-70 group-open:hidden">Show</span>
