@@ -460,14 +460,14 @@ function LibraryPage() {
 
       {/* Library — luxury two-tab vault: Yours first, then Community */}
       <section>
-        <div className="mb-3 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
+        <div data-testid="library-your-header" className="mb-3 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
 
           <div className="min-w-0 space-y-1">
             <div className="truncate text-xs font-bold uppercase tracking-[0.24em] text-primary">
               <Disc3 className="mr-1.5 inline h-3.5 w-3.5 -translate-y-0.5" />
               MusicHUB · Vault
             </div>
-            <h2 className="truncate font-display text-2xl font-black tracking-tight sm:text-4xl">
+            <h2 data-testid="library-your-heading" className="truncate font-display text-2xl font-black tracking-tight sm:text-4xl">
               Your Library
             </h2>
             <p className="text-sm text-muted-foreground">
