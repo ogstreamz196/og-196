@@ -116,7 +116,14 @@ function LibraryPage() {
   const [chips, setChips] = useState<Record<Category, string[]>>(() => initialChips());
   const [lyrics, setLyrics] = useState("");
   const [genLyrics, setGenLyrics] = useState(false);
-  const [foulMouth, setFoulMouth] = useState(false);
+  const { foulMouth } = useFoulMouth();
+  const setFoulMouthMutation = useSetFoulMouth();
+  const setFoulMouth = (updater: boolean | ((v: boolean) => boolean)) => {
+    const next = typeof updater === "function" ? updater(foulMouth) : updater;
+    setFoulMouthMutation.mutate(next);
+  };
+  const foulMouthSaving = setFoulMouthMutation.isPending;
+
   const [personalDetails, setPersonalDetails] = useState("");
   const [extraContext, setExtraContext] = useState("");
   const [genSong, setGenSong] = useState(false);
