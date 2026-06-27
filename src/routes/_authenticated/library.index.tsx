@@ -865,7 +865,7 @@ function LibraryPage() {
             }}
             disabled={genLyrics}
             className={cn(
-              "relative group grid w-full min-h-14 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border-2 px-4 py-3 text-left transition-all sm:px-5 sm:py-4",
+              "relative group flex w-full min-h-14 items-center gap-3 rounded-2xl border-2 px-4 py-3 text-left transition-all sm:px-5 sm:py-4",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
               "disabled:opacity-60 disabled:cursor-not-allowed",
               foulMouth
@@ -879,7 +879,7 @@ function LibraryPage() {
             )}>
               {foulMouth ? "🤬" : "🧼"}
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1 sm:flex-none sm:max-w-[18rem]">
               <div className="truncate text-sm font-bold leading-tight sm:text-lg">OG Foul Mouth</div>
               <div
                 id="foul-mouth-status"
