@@ -94,12 +94,13 @@ function MessengerPage() {
             </p>
           </div>
 
-          {/* Mode toggle — Loner ↔ Community (single button, label reflects current mode) */}
+          {/* Mode toggle — Loner ↔ Community. Switch label states what tapping will DO. */}
           <button
             type="button"
             onClick={() => setLiveChat((v) => !v)}
-            aria-pressed={liveChat}
-            aria-label={liveChat ? "Community Mode is on — tap to switch to Loner Mode" : "Loner Mode is on — tap to switch to Community Mode"}
+            role="switch"
+            aria-checked={liveChat}
+            aria-label={liveChat ? "Turn off OG Community Mode (back to Loner Mode)" : "Turn on OG Community Mode"}
             className={`group flex shrink-0 items-center gap-2 rounded-full border px-3 py-2 text-[10px] font-black uppercase tracking-[0.18em] transition-all active:scale-95 sm:text-xs ${
               liveChat
                 ? "border-cyan-400/50 bg-cyan-500/15 text-cyan-100 shadow-[0_0_24px_-6px_rgba(34,211,238,0.6)] hover:bg-cyan-500/25"
@@ -112,9 +113,10 @@ function MessengerPage() {
               <MessageCircle className="h-4 w-4 text-primary" />
             )}
             <span className="whitespace-nowrap">
-              {liveChat ? "Community Mode" : "Loner Mode"}
+              {liveChat ? "Turn off" : "Turn on"}
             </span>
           </button>
+
 
         </header>
 
