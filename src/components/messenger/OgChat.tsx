@@ -489,6 +489,8 @@ export function OgChat({
             disabled={setFoulMouth.isPending || mode === "safe"}
             aria-pressed={foulActive}
             aria-label="Toggle foul mouth"
+            data-testid="ogchat-foulmouth-hero"
+
             className={cn(
               "group relative flex w-full sm:flex-1 sm:min-w-0 items-center justify-between gap-3 overflow-hidden rounded-2xl border-2 px-4 py-3 text-left shadow-sm transition-all active:scale-[0.99] disabled:opacity-50",
               foulActive
