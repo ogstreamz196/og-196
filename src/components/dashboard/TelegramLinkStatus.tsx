@@ -187,22 +187,31 @@ export function TelegramLinkStatus() {
 
   return (
     <section
+      data-testid="telegram-status-card"
       aria-label="Telegram connection status"
-      className={`flex flex-wrap items-center gap-3 rounded-2xl border-2 px-4 py-3 backdrop-blur-md ${tone.border} ${tone.bg}`}
+      className={`grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 rounded-2xl border-2 px-4 py-3 backdrop-blur-md sm:flex sm:flex-wrap ${tone.border} ${tone.bg}`}
     >
       <span
-        className={`grid h-10 w-10 place-items-center rounded-xl ${tone.iconBg} ${tone.iconText}`}
+        className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${tone.iconBg} ${tone.iconText}`}
       >
         <Icon
           className={`h-5 w-5 ${state === "pending" ? "animate-spin" : ""}`}
         />
       </span>
       <div className="min-w-0 flex-1">
-        <p className="flex items-center gap-2 text-lg sm:text-xl font-bold uppercase tracking-[0.14em] leading-tight">
+        <p
+          data-testid="telegram-status-headline"
+          className="flex items-center gap-2 font-bold uppercase tracking-[0.12em] leading-tight [font-size:clamp(0.95rem,3.4vw,1.5rem)]"
+        >
           <MessageCircle className="h-5 w-5 shrink-0" />
-          <span className="truncate">{headline}</span>
+          <span className="min-w-0 break-words hyphens-auto">{headline}</span>
         </p>
-        <p className="text-sm sm:text-base text-muted-foreground leading-snug">{detail}</p>
+        <p
+          data-testid="telegram-status-detail"
+          className="text-muted-foreground leading-snug break-words hyphens-auto [font-size:clamp(0.8rem,2.6vw,1rem)]"
+        >
+          {detail}
+        </p>
       </div>
       <div className="flex items-center gap-2">
         {canReconnect ? (
