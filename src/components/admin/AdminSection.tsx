@@ -50,13 +50,13 @@ export function AdminSection({
               {icon}
             </div>
           )}
-          <div className="min-w-0 flex-1">
+          <div className="min-w-[10rem] flex-1 basis-[12rem]">
             {title && <h3 className="font-semibold leading-tight">{title}</h3>}
             {subtitle && (
               <p className="text-sm text-muted-foreground">{subtitle}</p>
             )}
           </div>
-          {action && <div className="shrink-0">{action}</div>}
+          {action && <div className="w-full shrink-0 sm:w-auto">{action}</div>}
         </header>
       )}
       {children}
