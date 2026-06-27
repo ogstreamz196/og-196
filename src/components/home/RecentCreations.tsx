@@ -17,7 +17,7 @@ export function RecentCreations({ songs }: RecentCreationsProps) {
             <Headphones className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold">Recent creations</h2>
+            <h2 className="font-bungee text-3xl sm:text-4xl md:text-5xl">Recent creations</h2>
             <p className="text-sm text-muted-foreground">Your latest tracks from across the hub.</p>
           </div>
         </div>

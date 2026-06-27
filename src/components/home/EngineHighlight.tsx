@@ -9,7 +9,7 @@ export function EngineHighlight() {
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-primary">
             <Bot className="h-3.5 w-3.5" /> OG Bot Engine
           </div>
-          <h2 className="mt-4 text-3xl font-bold md:text-4xl">The brain behind every beat</h2>
+          <h2 className="font-bungee mt-4 text-4xl sm:text-5xl md:text-6xl">The brain behind every beat</h2>
           <p className="mt-3 text-base leading-relaxed text-muted-foreground">
             OG Bot doesn't just generate audio — it understands style, mood, and structure.
             Every track in your MusicHUB is shaped by AI that thinks like a producer.

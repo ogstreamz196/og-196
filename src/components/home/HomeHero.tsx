@@ -21,7 +21,7 @@ export function HomeHero({ balance, isAdmin, isVip }: HomeHeroProps) {
         OG Streamz — powered by OG Bot
       </div>
 
-      <h1 className="mt-7 text-balance text-[clamp(2.25rem,6vw,5rem)] font-bold leading-[1.02] tracking-tight">
+      <h1 className="font-bungee mt-7 text-balance text-[clamp(2.5rem,7vw,5.5rem)] leading-[1.02]">
         <span className="text-gradient-brand">OG Bot</span>
         <br className="hidden md:block" />
         <span className="text-gradient-metal"> Music Hub</span>
