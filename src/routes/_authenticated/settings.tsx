@@ -10,6 +10,8 @@ import { useProfile } from "@/hooks/use-profile";
 import { useRole } from "@/hooks/use-role";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -32,6 +34,8 @@ function SettingsPage() {
 
   const [name, setName] = useState("");
   const [nameDirty, setNameDirty] = useState(false);
+  const [bio, setBio] = useState("");
+  const [bioDirty, setBioDirty] = useState(false);
   const [balance, setBalance] = useState("");
   const [balanceDirty, setBalanceDirty] = useState(false);
   const [adjust, setAdjust] = useState("");
@@ -40,8 +44,12 @@ function SettingsPage() {
     if (profile && !nameDirty) setName(profile.display_name ?? (dev.isDev ? "Developer" : ""));
   }, [profile?.display_name, nameDirty, dev.isDev]);
   useEffect(() => {
+    if (profile && !bioDirty) setBio((profile as { artist_bio?: string | null }).artist_bio ?? "");
+  }, [(profile as { artist_bio?: string | null } | undefined)?.artist_bio, bioDirty]);
+  useEffect(() => {
     if (profile && !balanceDirty) setBalance(String(profile.coin_balance ?? 0));
   }, [profile?.coin_balance, balanceDirty]);
+
 
   const isOgBot = (roles as string[]).includes("og_bot");
 
@@ -63,6 +71,25 @@ function SettingsPage() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  const saveBio = useMutation({
+    mutationFn: async () => {
+      const trimmed = bio.trim().slice(0, 400);
+      const { error } = await supabase
+        .from("profiles")
+        .update({ artist_bio: trimmed || null } as never)
+        .eq("id", user!.id);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      toast.success("Artist bio saved — MusicHub will weave it into new lyrics");
+      setBioDirty(false);
+      refetch();
+      qc.invalidateQueries({ queryKey: ["profile", user?.id] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
 
   const saveBalance = useMutation({
     mutationFn: async () => {
@@ -157,6 +184,33 @@ function SettingsPage() {
               </Button>
             </div>
           </div>
+
+          <div className="space-y-2">
+            <div className="flex items-end justify-between gap-2">
+              <Label htmlFor="artist-bio" className="flex flex-col gap-1">
+                <span>Artist bio · woven into your lyrics</span>
+                <span className="text-xs font-normal text-muted-foreground">
+                  MusicHub uses your display name and this bio by default — they'll appear naturally a couple of times per song, not in every line. Leave blank to opt out.
+                </span>
+              </Label>
+              <span className="text-[10px] text-muted-foreground">{bio.length}/400</span>
+            </div>
+            <Textarea
+              id="artist-bio"
+              value={bio}
+              onChange={(e) => { setBio(e.target.value.slice(0, 400)); setBioDirty(true); }}
+              maxLength={400}
+              rows={3}
+              placeholder="e.g. South London rapper, ex-footballer, raised by my nan, never quits."
+            />
+            <div className="flex justify-end">
+              <Button size="sm" onClick={() => saveBio.mutate()} disabled={!bioDirty || saveBio.isPending}>
+                {saveBio.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save bio
+              </Button>
+            </div>
+          </div>
+
 
           <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1.5">

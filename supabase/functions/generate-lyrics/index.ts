@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
     const description = (body.description ?? "").toString().trim().slice(0, 1000);
     const styleTags = Array.isArray(body.styleTags) ? body.styleTags.slice(0, 10).map(String) : [];
     const language = (body.language ?? "English").toString().trim().slice(0, 50);
-    const personalDetails = (body.personalDetails ?? "").toString().trim().slice(0, 500);
+    let personalDetails = (body.personalDetails ?? "").toString().trim().slice(0, 500);
     const extraContext = (body.extraContext ?? "").toString().trim().slice(0, 1000);
 
     if (!songName && !description) {
@@ -88,6 +88,23 @@ Deno.serve(async (req) => {
       foulMouth = (pref as { foul_mouth?: boolean } | null)?.foul_mouth ?? false;
     }
 
+    // Default personal context: weave the user's display_name + artist_bio from
+    // their profile so lyrics feel personal without the user having to retype
+    // it every time. Per-request `personalDetails` always wins.
+    if (!personalDetails) {
+      const { data: prof } = await admin
+        .from("profiles")
+        .select("display_name, artist_bio")
+        .eq("id", user.id)
+        .maybeSingle();
+      const p = (prof ?? null) as { display_name?: string | null; artist_bio?: string | null } | null;
+      const parts: string[] = [];
+      if (p?.display_name?.trim()) parts.push(`Artist name: ${p.display_name.trim()}`);
+      if (p?.artist_bio?.trim()) parts.push(`Bio: ${p.artist_bio.trim().slice(0, 400)}`);
+      personalDetails = parts.join(" · ");
+    }
+
+
     const isEnglish = language.trim().toLowerCase() === "english";
     const bilingualRule = isEnglish
       ? ""
@@ -135,7 +152,10 @@ Deno.serve(async (req) => {
       `Theme / description: ${description || "(none)"}\n` +
       `Style tags: ${styleTags.join(", ") || "(none)"}\n` +
       `Language: ${language}\n` +
-      (personalDetails ? `Personal details to weave in naturally (names, places, references): ${personalDetails}\n` : "") +
+      (personalDetails
+        ? `Artist profile (weave these into the lyrics naturally — reference the artist's name and a couple of personal details across the song so it feels personal, but DO NOT force them into every line, and never let them overpower the theme. Aim for the name/details to appear roughly 2–4 times total, ideally in the hook/chorus or a memorable line, spread across different sections — not back-to-back): ${personalDetails}\n`
+        : "") +
+
       (extraContext ? `Extra context from the artist: ${extraContext}\n` : "") +
       `\nWrite the FULL two-minute song now — do not stop early.`;
 

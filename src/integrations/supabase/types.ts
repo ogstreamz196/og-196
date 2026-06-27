@@ -465,6 +465,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          artist_bio: string | null
           coin_balance: number
           created_at: string
           custom_bot_name: string
@@ -491,6 +492,7 @@ export type Database = {
           widget_deployed_domains: string[]
         }
         Insert: {
+          artist_bio?: string | null
           coin_balance?: number
           created_at?: string
           custom_bot_name?: string
@@ -517,6 +519,7 @@ export type Database = {
           widget_deployed_domains?: string[]
         }
         Update: {
+          artist_bio?: string | null
           coin_balance?: number
           created_at?: string
           custom_bot_name?: string
