@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import ReactMarkdown from "react-markdown";
-import { Send, Trash2, Sparkles, Skull, ShieldCheck, Paperclip, Mic, MicOff, Crown, X, Loader2, ArrowDown, Radio } from "lucide-react";
+import { Send, Trash2, Sparkles, Skull, ShieldCheck, Paperclip, Mic, MicOff, Crown, X, Loader2, ArrowDown } from "lucide-react";
 import { chatOgBot, type OgChatMessage } from "@/lib/og-messenger.functions";
 import { transcribeOgAudio } from "@/lib/og-transcribe.functions";
 import { postCommunityMessage } from "@/lib/community.functions";
@@ -16,7 +16,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { useRole } from "@/hooks/use-role";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { useOgMode } from "@/hooks/use-og-mode";
-import { useShareLive } from "@/hooks/use-share-live";
+// useShareLive intentionally removed — Loner/Community is page-level now.
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import type { RealtimePostgresInsertPayload } from "@supabase/supabase-js";
@@ -118,7 +118,7 @@ export function OgChat({
   const setFoulMouth = useSetFoulMouth();
   const { mode, toggle: toggleMode } = useOgMode();
   const { isVip } = useRole();
-  const shareLive = useShareLive();
+  // shareLive removed: Loner Mode is enforced by the page mounting OgChat.
   const postCommunity = useServerFn(postCommunityMessage);
   const transcribe = useServerFn(transcribeOgAudio);
   const [language, setLanguage] = useState<string>(() => {
@@ -320,21 +320,21 @@ export function OgChat({
     if (m.isPending) return;
     if (!user) return toast.error("Sign in to chat with OG Bot.");
 
+    // OG Bot Loner Mode is ALWAYS private. The page-level Loner ↔ Community
+    // toggle (in /messenger) is the single source of truth — when OgChat is
+    // mounted, the user has chosen Loner Mode, so we ignore the legacy
+    // shareLive preference here. Community posting happens in CommunityRoom.
     const target = routeOgMessage({
       text: t,
       hasAttachment: !!att,
-      shareLive: shareLive.enabled,
-      forcePrivate: opts?.forcePrivate,
+      shareLive: false,
+      forcePrivate: true,
     });
 
-    if (target === "noop") {
-      if (shareLive.enabled && att && !t) {
-        return toast.error("Community messages must be text (no attachments yet).");
-      }
-      return;
-    }
+    if (target === "noop") return;
 
     if (target === "community") {
+      // Defensive: should be unreachable now that shareLive is forced off.
       setInput("");
       setAttachment(null);
       postCommunity({ data: { content: t } })
@@ -556,30 +556,8 @@ export function OgChat({
               {mode === "og" ? <Sparkles className="h-3.5 w-3.5" /> : <ShieldCheck className="h-3.5 w-3.5" />}
               {mode === "og" ? "OG mode" : "Safe mode"}
             </button>
-            <button
-              type="button"
-              onClick={() => shareLive.setEnabled(!shareLive.enabled)}
-              aria-pressed={shareLive.enabled}
-              className={cn(
-                "inline-flex items-center gap-1.5 rounded-lg border-2 px-3 py-1.5 text-[12px] font-bold transition",
-                shareLive.enabled
-                  ? "border-emerald-400/60 bg-emerald-400/15 text-emerald-500 dark:text-emerald-300 shadow-[0_0_14px_-4px_oklch(0.78_0.18_155)]"
-                  : "border-border bg-muted text-muted-foreground hover:border-emerald-400/40",
-              )}
-              title={
-                shareLive.enabled
-                  ? "Share Live: ON — sending to OG Community"
-                  : shareLive.telegramLinked
-                    ? "Share Live: OFF — tap to broadcast to OG Community"
-                    : "Connect Telegram to auto-enable Share Live"
-              }
-            >
-              <Radio className={cn("h-3.5 w-3.5", shareLive.enabled && "animate-pulse")} />
-              {shareLive.enabled ? "Share Live · ON" : "Share Live"}
-              {shareLive.enabled && shareLive.isAuto && (
-                <span className="ml-0.5 rounded-full bg-emerald-500/20 px-1.5 text-[9px] font-black uppercase tracking-wider">auto</span>
-              )}
-            </button>
+            {/* Share Live button removed — Loner ↔ Community is controlled
+                by the page-level toggle in /messenger. */}
             {isVip ? (
               <select
                 value={language}
@@ -653,22 +631,11 @@ export function OgChat({
               {showQuickStarts && (
                 <div className="flex flex-col items-center gap-2 pt-2">
                   <div
-                    className={cn(
-                      "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-wider",
-                      shareLive.enabled
-                        ? "border-amber-400/60 bg-amber-400/10 text-amber-300"
-                        : "border-primary/40 bg-primary/10 text-primary",
-                    )}
-                    title={
-                      shareLive.enabled
-                        ? "Live Chat is ON, but quick-starts always send privately to OG Bot"
-                        : "Quick-starts send to your private OG Bot chat"
-                    }
+                    className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary"
+                    title="Private chat — only you and OG Bot can see this"
                   >
                     <ShieldCheck className="h-3 w-3" />
-                    {shareLive.enabled
-                      ? "Quick-starts bypass Live Chat → Private OG Bot"
-                      : "Sends to Private OG Bot"}
+                    Private · OG Bot Loner Mode
                   </div>
                   <div className="flex flex-wrap justify-center gap-2">
                     {QUICK_STARTS.map((q) => (
@@ -857,7 +824,7 @@ export function OgChat({
         {/* Unified composer pill — attachment | mic | textarea | send (Telegram/WhatsApp pattern) */}
         <div
           className={cn(
-            "flex items-end gap-1.5 rounded-full border border-white/10 bg-background/80 px-3 py-2 shadow-[0_14px_36px_-18px_rgba(0,0,0,0.55)] ring-1 ring-white/5 backdrop-blur-xl transition focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/30 sm:px-4 sm:py-2.5",
+            "flex items-end gap-1 rounded-full border border-white/10 bg-background/80 px-2 py-1.5 shadow-[0_14px_36px_-18px_rgba(0,0,0,0.55)] ring-1 ring-white/5 backdrop-blur-xl transition focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/30 sm:gap-1.5 sm:px-4 sm:py-2.5",
             (isOut || !user) && "opacity-70",
           )}
         >
@@ -867,7 +834,7 @@ export function OgChat({
             disabled={!user || m.isPending}
             aria-label="Attach image"
             title="Attach image"
-            className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-white/5 hover:text-foreground disabled:opacity-40"
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-white/5 hover:text-foreground disabled:opacity-40 sm:h-11 sm:w-11"
           >
             <Paperclip className="h-5 w-5" />
           </button>
@@ -878,7 +845,7 @@ export function OgChat({
             aria-label={recording ? "Stop recording" : "Voice input"}
             title={recording ? "Stop recording" : "Voice input"}
             className={cn(
-              "grid h-11 w-11 shrink-0 place-items-center rounded-full transition disabled:opacity-40",
+              "grid h-9 w-9 shrink-0 place-items-center rounded-full transition disabled:opacity-40 sm:h-11 sm:w-11",
               recording
                 ? "bg-destructive text-destructive-foreground hover:bg-destructive/90 animate-pulse"
                 : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
@@ -922,14 +889,14 @@ export function OgChat({
             disabled={m.isPending || isOut || !user || transcribing}
             maxLength={2000}
             autoFocus
-            className="min-h-[40px] max-h-[180px] flex-1 resize-none bg-transparent px-3 py-2 text-base leading-relaxed placeholder:text-muted-foreground/70 focus:outline-none disabled:cursor-not-allowed sm:text-lg"
+            className="min-h-[36px] max-h-[180px] flex-1 resize-none bg-transparent px-2 py-1.5 text-[15px] leading-relaxed placeholder:text-muted-foreground/70 focus:outline-none disabled:cursor-not-allowed sm:min-h-[40px] sm:px-3 sm:py-2 sm:text-lg"
           />
           <button
             type="submit"
             disabled={m.isPending || (!input.trim() && !attachment) || isOut || !user}
             aria-label="Send"
             title="Send"
-            className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-gradient-brand text-primary-foreground shadow-[0_8px_22px_-6px_hsl(var(--primary)/0.6)] ring-1 ring-primary/40 transition hover:scale-105 active:scale-95 disabled:bg-muted disabled:text-muted-foreground disabled:shadow-none disabled:ring-0"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-brand text-primary-foreground shadow-[0_8px_22px_-6px_hsl(var(--primary)/0.6)] ring-1 ring-primary/40 transition hover:scale-105 active:scale-95 disabled:bg-muted disabled:text-muted-foreground disabled:shadow-none disabled:ring-0 sm:h-11 sm:w-11"
           >
             {m.isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
           </button>
