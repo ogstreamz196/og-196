@@ -420,7 +420,7 @@ function JobDetailsDrawer({
           {/* Cover */}
           <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-gradient-to-br from-primary/30 to-fuchsia-500/15">
             {song?.cover_url ? (
-              <img src={song.cover_url} alt="" className="h-full w-full object-cover" />
+              <img src={song.cover_url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
             ) : null}
           </div>
 
