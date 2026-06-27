@@ -516,11 +516,7 @@ export function OgChat({
                   "text-[15px] font-black uppercase tracking-wide",
                   foulActive ? "text-destructive" : "text-foreground",
                 )}>
-                  {mode === "safe"
-                    ? "Foul Mouth · OG mode required"
-                    : foulActive
-                      ? "Foul Mouth ON"
-                      : "Turn on Foul Mouth"}
+                  {foulActive ? "Foul Mouth ON" : "Turn on Foul Mouth"}
                 </span>
               </span>
 
