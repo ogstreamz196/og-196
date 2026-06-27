@@ -419,17 +419,17 @@ function LibraryPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-3 pb-20 sm:gap-5">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 pb-20">
       {/* Hero — premium kicker, oversized headline, generous breathing room */}
-      <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b border-white/10 pb-3 sm:pb-4">
+      <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b border-white/10 pb-4">
         <div className="min-w-0 space-y-2">
           <h1 className="font-display text-2xl font-black leading-[1.1] tracking-[-0.02em] break-words sm:text-5xl lg:text-6xl">
             Hey <span className="text-gradient-brand">{firstName}</span> — let's write a song.
           </h1>
 
         </div>
-        <div className="inline-flex shrink-0 items-center gap-2 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 to-card/60 px-3 py-2 shadow-[0_8px_28px_-12px_oklch(0.7_0.2_300_/_0.45)] sm:gap-2.5 sm:px-4 sm:py-2.5">
-          <Coins className="h-5 w-5 text-primary" />
+        <div className="inline-flex shrink-0 items-center gap-2 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 to-card/60 px-4 py-2 shadow-[0_8px_28px_-12px_oklch(0.7_0.2_300_/_0.45)]">
+          <Coins className="h-5 w-5 text-primary" aria-hidden="true" />
           <span className="text-lg font-black tabular-nums sm:text-xl">{balance}</span>
           <span className="hidden text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground sm:inline">coins</span>
         </div>
@@ -849,12 +849,9 @@ function LibraryPage() {
             type="button"
             role="switch"
             aria-checked={foulMouth}
-            aria-label={
-              foulMouth
-                ? "OG Foul Mouth is on. Activate to turn explicit mode off."
-                : "OG Foul Mouth is off. Activate to turn explicit mode on."
-            }
+            aria-label="OG Foul Mouth — explicit lyrics mode"
             aria-describedby="foul-mouth-status"
+            aria-busy={genLyrics}
             onClick={() => !genLyrics && setFoulMouth((v) => !v)}
             onKeyDown={(e) => {
               if (genLyrics) return;
@@ -873,7 +870,7 @@ function LibraryPage() {
                 : "border-white/15 bg-white/[0.04] hover:border-white/25",
             )}
           >
-            <div aria-hidden className={cn(
+            <div aria-hidden="true" className={cn(
               "grid h-11 w-11 shrink-0 place-items-center rounded-xl text-xl transition sm:h-12 sm:w-12 sm:text-2xl",
               foulMouth ? "bg-destructive/30" : "bg-white/5",
             )}>
@@ -893,7 +890,7 @@ function LibraryPage() {
               </div>
             </div>
             <span
-              aria-hidden
+              aria-hidden="true"
               className={cn(
                 "pointer-events-none inline-flex shrink-0 items-center justify-center rounded-full border-2 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] transition sm:px-4 sm:py-2 sm:text-xs",
                 foulMouth
