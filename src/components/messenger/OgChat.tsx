@@ -7,7 +7,7 @@ import { Send, Trash2, Sparkles, Skull, ShieldCheck, Paperclip, Mic, MicOff, Cro
 import { chatOgBot, type OgChatMessage } from "@/lib/og-messenger.functions";
 import { transcribeOgAudio } from "@/lib/og-transcribe.functions";
 import { postCommunityMessage } from "@/lib/community.functions";
-import { QUICK_STARTS } from "@/lib/og-persona";
+import { QUICK_STARTS } from "@/lib/og-persona-public";
 import { routeOgMessage } from "@/lib/og-chat-routing";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
