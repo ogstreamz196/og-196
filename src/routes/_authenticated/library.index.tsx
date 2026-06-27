@@ -422,11 +422,10 @@ function LibraryPage() {
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 pb-20">
       {/* Hero — premium kicker, oversized headline, generous breathing room */}
       <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b border-white/10 pb-4">
-        <div className="min-w-0 space-y-2">
+        <div className="min-w-0">
           <h1 className="font-display text-2xl font-black leading-[1.1] tracking-[-0.02em] break-words sm:text-5xl lg:text-6xl">
             Hey <span className="text-gradient-brand">{firstName}</span> — let's write a song.
           </h1>
-
         </div>
         <div className="inline-flex shrink-0 items-center gap-2 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 to-card/60 px-4 py-2 shadow-[0_8px_28px_-12px_oklch(0.7_0.2_300_/_0.45)]">
           <Coins className="h-5 w-5 text-primary" aria-hidden="true" />
@@ -434,8 +433,6 @@ function LibraryPage() {
           <span className="hidden text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground sm:inline">coins</span>
         </div>
       </header>
-
-
 
       {/* Persistent Foul Mouth reminder — one tap takes you to the toggle */}
       <div className="sticky top-14 z-20 -mx-4 px-4 sm:top-16 sm:-mx-6 sm:px-6">
@@ -452,15 +449,10 @@ function LibraryPage() {
         />
       </div>
 
-
-
-
-
-
-
       {/* Library — luxury two-tab vault: Yours first, then Community */}
       <section>
-        <div className="mb-5 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
+        <div className="mb-3 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
+
           <div className="min-w-0 space-y-1">
             <div className="truncate text-xs font-bold uppercase tracking-[0.24em] text-primary">
               <Disc3 className="mr-1.5 inline h-3.5 w-3.5 -translate-y-0.5" />
