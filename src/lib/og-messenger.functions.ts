@@ -1,7 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { buildSystemPrompt, detectSongIntent, type UserContextSummary } from "@/lib/og-persona";
-import { extractInsults } from "@/lib/insult-learner";
+import type { UserContextSummary } from "@/lib/og-persona-public";
+// `og-persona.server` and `insult-learner.server` are loaded lazily inside the
+// handler so the swear lexicon / persona / learner code is never bundled into
+// the client. Filename `.server.ts` also triggers Vite import protection.
 
 export type OgChatMessage = { role: "user" | "assistant"; content: string };
 
@@ -130,6 +132,8 @@ export const chatOgBot = createServerFn({ method: "POST" })
 
     const effectiveLanguage = isVip ? (data.language || "English") : "English";
 
+    const { buildSystemPrompt, detectSongIntent } = await import("@/lib/og-persona.server");
+
     const latestUserMsg = [...data.messages].reverse().find((m) => m.role === "user");
     const songIntent =
       detectSongIntent(latestUserMsg?.content) ||
@@ -152,12 +156,13 @@ export const chatOgBot = createServerFn({ method: "POST" })
     if (data.mode === "og" && foulMouth) {
       const latestUser = [...data.messages].reverse().find((m) => m.role === "user");
       if (latestUser) {
+        const { extractInsults } = await import("@/lib/insult-learner.server");
         const candidates = extractInsults(latestUser.content);
         if (candidates.length) {
           newlyLearned = candidates;
           // Upsert each phrase, bumping uses + last_seen_at.
           await Promise.all(
-            candidates.map((phrase) =>
+            candidates.map((phrase: string) =>
               (supabaseAdmin.rpc as unknown as (fn: string, args: Record<string, unknown>) => Promise<{ error: { message: string } | null }>)("og_learn_insult", {
                 p_user_id: context.userId,
                 p_phrase: phrase,

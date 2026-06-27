@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createHash, timingSafeEqual } from "crypto";
-import { buildSystemPrompt, detectSongIntent, type UserContextSummary } from "@/lib/og-persona";
+import { buildSystemPrompt, detectSongIntent } from "@/lib/og-persona.server";
+import type { UserContextSummary } from "@/lib/og-persona-public";
 
 // Accepted tokens:
 //   - Rotated, single-use: "t_" + 32 lowercase hex chars (matched against
