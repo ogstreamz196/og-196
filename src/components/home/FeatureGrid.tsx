@@ -1,5 +1,6 @@
 import { Music2, Library, MessageCircle } from "lucide-react";
 import { HubCard } from "./HubCard";
+import { FlameHeading } from "@/components/ui/flame-heading";
 
 const FEATURES = [
   {
@@ -27,7 +28,7 @@ export function FeatureGrid() {
           <Music2 className="h-5 w-5 text-primary" />
         </div>
         <div>
-          <h2 className="font-bungee text-3xl sm:text-4xl md:text-5xl">What you can do</h2>
+          <FlameHeading as="h2" size="xl">What you can do</FlameHeading>
           <p className="text-sm text-muted-foreground">Everything you need to create and collect music.</p>
         </div>
       </div>
