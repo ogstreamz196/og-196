@@ -273,7 +273,7 @@ function ReferralsPage() {
             <div className="relative inline-block max-w-full">
               <div aria-hidden className="absolute -inset-2 rounded-3xl bg-gradient-to-r from-primary via-fuchsia-500 to-destructive opacity-25 blur-2xl" />
               <div className="relative flex items-baseline justify-center gap-2 sm:gap-3">
-                <span className="font-bungee bg-gradient-to-b from-white to-zinc-400 bg-clip-text text-5xl font-black tabular-nums tracking-tight text-transparent drop-shadow-[0_4px_24px_rgba(239,68,68,0.35)] xs:text-6xl sm:text-8xl">
+                <span className="font-bungee bg-gradient-to-b from-white to-zinc-400 bg-clip-text text-6xl font-black tabular-nums tracking-tight text-transparent drop-shadow-[0_4px_24px_rgba(239,68,68,0.35)] sm:text-8xl">
                   {summary.total_earned.toLocaleString()}
                 </span>
                 <span className="text-base font-black uppercase tracking-widest text-primary sm:text-2xl">OG</span>
