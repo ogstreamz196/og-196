@@ -20,7 +20,8 @@ import { toast } from "sonner";
 import { PreferencesPanel } from "@/components/settings/PreferencesPanel";
 import { VipStatusCard } from "@/components/settings/VipStatusCard";
 
-import { getMyTelegramLinkToken, rotateMyTelegramLinkToken } from "@/lib/telegram-admin.functions";
+import { getMyTelegramLinkToken, rotateMyTelegramLinkToken, getMyTelegramStatus } from "@/lib/telegram-admin.functions";
+import { TelegramLinkStatus } from "@/components/dashboard/TelegramLinkStatus";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   component: SettingsPage,
@@ -385,10 +386,20 @@ function TelegramConnectSection({ userId }: { userId: string }) {
   const qc = useQueryClient();
   const getTokenFn = useServerFn(getMyTelegramLinkToken);
   const rotateTokenFn = useServerFn(rotateMyTelegramLinkToken);
+  const statusFn = useServerFn(getMyTelegramStatus);
+
+  const statusQuery = useQuery({
+    queryKey: ["my-telegram-status"],
+    queryFn: () => statusFn(),
+    enabled: !!userId,
+    staleTime: 30_000,
+  });
+  const isLinked = statusQuery.data?.state === "verified";
+
   const tokenQuery = useQuery({
     queryKey: ["my-telegram-link-token"],
     queryFn: () => getTokenFn(),
-    enabled: !!userId,
+    enabled: !!userId && !isLinked,
     staleTime: 60_000,
   });
   const token = tokenQuery.data?.token ?? "";
@@ -416,71 +427,76 @@ function TelegramConnectSection({ userId }: { userId: string }) {
   };
 
   return (
-    <section className="rounded-2xl border border-border bg-card p-6 shadow-card">
+    <section className="rounded-2xl border border-border bg-card p-6 shadow-card space-y-4">
       <div className="flex items-start gap-3">
         <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/15 text-primary">
           <Send className="h-5 w-5" />
         </div>
         <div className="min-w-0 flex-1">
-          <h2 className="font-semibold">Connect Telegram</h2>
+          <h2 className="font-semibold">Telegram · OG Bot</h2>
           <p className="text-xs text-muted-foreground">
-            Chat with OG Bot from Telegram about literally anything — random shit, lyrics, life advice, 3am thoughts. Tap the button, hit Start, you're in.
+            {isLinked
+              ? "Your Telegram is linked. Use Reconnect only if OG Bot stops responding."
+              : "Connect once to chat with OG Bot about anything — lyrics, life, 3am thoughts."}
           </p>
         </div>
       </div>
 
-      <div className="mt-4 rounded-xl border border-dashed border-border bg-background/40 p-3">
-        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-          Your personal connect link
-        </Label>
-        <div className="mt-1 flex items-center gap-2">
-          <Input readOnly value={link} className="font-mono text-xs" />
-          <Button type="button" variant="outline" size="icon" onClick={copy} title="Copy link" aria-label="Copy connect link">
-            <Copy className="h-4 w-4" />
-          </Button>
-        </div>
-        <p className="mt-2 text-[11px] text-muted-foreground">
-          Always use this button/link — typing plain /start in Telegram cannot connect your profile.
-        </p>
-      </div>
+      <TelegramLinkStatus />
 
-      <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-        <Button
-          type="button"
-          disabled={!link || tokenQuery.isLoading}
-          onClick={() => {
-            if (!link) return;
-            const w = window.open(link, "_blank", "noopener,noreferrer");
-            if (!w) {
-              // Popup blocked (common inside preview iframe) — fall back to same-tab nav.
-              window.location.href = link;
-            }
-          }}
-          className="bg-[#229ED9] font-semibold text-white hover:bg-[#229ED9]/90"
-        >
-          {tokenQuery.isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />} Open in Telegram
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => rotate.mutate()}
-          disabled={rotate.isPending}
-        >
-          {rotate.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <KeyRound className="mr-2 h-4 w-4" />}
-          Fresh link
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => {
-            const url = `https://t.me/${TELEGRAM_BOT_USERNAME}`;
-            const w = window.open(url, "_blank", "noopener,noreferrer");
-            if (!w) window.location.href = url;
-          }}
-        >
-          <ExternalLink className="mr-2 h-4 w-4" /> Find @{TELEGRAM_BOT_USERNAME}
-        </Button>
-      </div>
+      {!isLinked ? (
+        <>
+          <div className="rounded-xl border border-dashed border-border bg-background/40 p-3">
+            <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Your personal connect link
+            </Label>
+            <div className="mt-1 flex items-center gap-2">
+              <Input readOnly value={link} className="font-mono text-xs" />
+              <Button type="button" variant="outline" size="icon" onClick={copy} title="Copy link" aria-label="Copy connect link">
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+            <p className="mt-2 text-[11px] text-muted-foreground">
+              Always use this button/link — typing plain /start in Telegram cannot connect your profile.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Button
+              type="button"
+              disabled={!link || tokenQuery.isLoading}
+              onClick={() => {
+                if (!link) return;
+                const w = window.open(link, "_blank", "noopener,noreferrer");
+                if (!w) window.location.href = link;
+              }}
+              className="bg-[#229ED9] font-semibold text-white hover:bg-[#229ED9]/90"
+            >
+              {tokenQuery.isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />} Connect Telegram
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => rotate.mutate()}
+              disabled={rotate.isPending}
+            >
+              {rotate.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <KeyRound className="mr-2 h-4 w-4" />}
+              Fresh link
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                const url = `https://t.me/${TELEGRAM_BOT_USERNAME}`;
+                const w = window.open(url, "_blank", "noopener,noreferrer");
+                if (!w) window.location.href = url;
+              }}
+            >
+              <ExternalLink className="mr-2 h-4 w-4" /> Find @{TELEGRAM_BOT_USERNAME}
+            </Button>
+          </div>
+        </>
+      ) : null}
     </section>
   );
 }
