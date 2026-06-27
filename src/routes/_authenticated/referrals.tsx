@@ -453,7 +453,7 @@ function ReferralsPage() {
         </section>
 
         {/* CASHBACK FEED — dense activity */}
-        <section className="rounded-3xl border border-white/10 bg-card/60 p-5 backdrop-blur-xl sm:p-6">
+        <section data-testid="referrals-cashback-feed" className="rounded-3xl border border-white/10 bg-card/60 p-5 backdrop-blur-xl sm:p-6">
           <div className="flex items-center justify-between">
             <h2 className="font-bungee text-xl tracking-tight">Cashback feed</h2>
             <span className="text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground">Last 20</span>
