@@ -21,6 +21,7 @@ import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
 import { toast } from "sonner";
 import { PurchaseHistory } from "@/components/PurchaseHistory";
+import { ReferralReminder } from "@/components/referrals/ReferralReminder";
 
 const SELECTION_STORAGE_KEY = "buyCoins.lastSelection";
 
@@ -304,9 +305,12 @@ function BuyCoinsPage() {
           </div>
         </section>
 
+        {/* Referral cashback reminder */}
+        <ReferralReminder />
 
         {/* Coin bundles */}
         <SectionCard>
+
           <SectionHeader
             eyebrow="Coin Bundles"
             title="Pick your loot"
