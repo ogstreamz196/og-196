@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { ArrowDown, Send, Users, Loader2, Trash2 } from "lucide-react";
+import { TypingDots } from "@/components/ui/typing-dots";
 import { toast } from "sonner";
 import {
   listCommunityMessages,
@@ -381,11 +382,7 @@ export function CommunityRoom() {
 
       {activeTypers.length > 0 && (
         <div className="flex items-center gap-2 px-2 text-xs text-muted-foreground">
-          <span className="flex gap-1">
-            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary [animation-delay:-0.3s]" />
-            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary [animation-delay:-0.15s]" />
-            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary" />
-          </span>
+          <TypingDots size="sm" aria-label="People typing" />
           <span className="truncate">
             {activeTypers.length === 1
               ? `${activeTypers[0].name} is typing…`
