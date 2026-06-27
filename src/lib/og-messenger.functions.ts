@@ -1,7 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { buildSystemPrompt, detectSongIntent, type UserContextSummary } from "@/lib/og-persona";
-import { extractInsults } from "@/lib/insult-learner";
+import type { UserContextSummary } from "@/lib/og-persona-public";
+// `og-persona.server` and `insult-learner.server` are loaded lazily inside the
+// handler so the swear lexicon / persona / learner code is never bundled into
+// the client. Filename `.server.ts` also triggers Vite import protection.
 
 export type OgChatMessage = { role: "user" | "assistant"; content: string };
 
