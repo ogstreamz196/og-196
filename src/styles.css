@@ -1049,36 +1049,31 @@ button.graffiti-accent:hover {
   word-break: break-word;
   overflow-wrap: anywhere;
   color: #ffffff !important;
-  /* aura scales with font-size via em units so it stays proportional */
+  /* aura sized in em so it scales with the heading */
   text-shadow:
     0 0 0.08em rgba(255, 255, 255, 0.9),
     0 0 0.22em rgba(255, 110, 50, 0.95),
     0 0 0.45em rgba(230, 50, 20, 0.85),
     0 0 0.8em rgba(190, 25, 5, 0.7),
     0 0.04em 0 rgba(120, 10, 0, 0.55);
-  animation: flame-aura 2.6s ease-in-out infinite;
-  /* keep the glow from overlapping neighbouring card chrome */
+  /* keep the glow on its own compositor layer so siblings don't repaint */
+  position: relative;
+  z-index: 1;
+  transform: translateZ(0);
+  will-change: opacity;
   isolation: isolate;
+  /* breathing room so the aura doesn't clip on card edges */
+  padding: 0.15em 0.1em 0.2em;
+  margin: -0.15em -0.1em -0.2em;
 }
-@keyframes flame-aura {
-  0%, 100% {
-    text-shadow:
-      0 0 0.08em rgba(255, 255, 255, 0.9),
-      0 0 0.22em rgba(255, 110, 50, 0.95),
-      0 0 0.45em rgba(230, 50, 20, 0.85),
-      0 0 0.8em rgba(190, 25, 5, 0.7),
-      0 0.04em 0 rgba(120, 10, 0, 0.55);
-  }
-  50% {
-    text-shadow:
-      0 0 0.1em rgba(255, 255, 255, 1),
-      0 0 0.3em rgba(255, 140, 70, 1),
-      0 0 0.55em rgba(240, 60, 25, 0.95),
-      0 0 0.95em rgba(200, 30, 8, 0.8),
-      0 0.04em 0 rgba(120, 10, 0, 0.6);
-  }
+/* GPU-friendly pulse: opacity only, no text-shadow re-rasterisation */
+.font-bungee {
+  animation: flame-aura-pulse 2.6s ease-in-out infinite;
 }
-/* trim aura on phones so it doesn't bleed into adjacent card padding */
+@keyframes flame-aura-pulse {
+  0%, 100% { opacity: 0.95; }
+  50%      { opacity: 1; }
+}
 @media (max-width: 640px) {
   .font-bungee {
     text-shadow:
