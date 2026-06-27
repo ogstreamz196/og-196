@@ -37,6 +37,18 @@ Deno.serve(async (req) => {
     const { error: uErr } = await admin.from("songs").update({ unlocked: true }).eq("id", song_id);
     if (uErr) return jsonResponse({ error: uErr.message }, 500);
 
+    // Source-of-truth ledger entry — `song-url` checks this before issuing the full URL.
+    const { error: lErr } = await admin.from("unlocked_songs").insert({
+      user_id: user.id,
+      song_id,
+      source: "coins",
+      cost_coins: cost,
+      reference: `unlock:${song_id}`,
+    });
+    if (lErr && !String(lErr.message).includes("duplicate")) {
+      return jsonResponse({ error: lErr.message }, 500);
+    }
+
     return jsonResponse({ ok: true, coin_balance: balance, cost });
   } catch (e) {
     return jsonResponse({ error: (e as Error).message }, 500);
