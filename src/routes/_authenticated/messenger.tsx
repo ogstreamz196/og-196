@@ -99,7 +99,7 @@ function MessengerPage() {
               }`}
             >
               <span className="truncate">
-                {liveChat ? "Live · OG Community" : "OG-GPT · OG Bot"}
+                {liveChat ? "Live · OG Community" : "OG Bot · Private chat"}
               </span>
             </div>
             <h1 className="truncate font-display text-lg font-black leading-tight tracking-tight sm:text-3xl">
