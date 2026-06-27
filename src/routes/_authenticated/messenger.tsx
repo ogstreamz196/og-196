@@ -7,8 +7,8 @@ import { OgChat } from "@/components/messenger/OgChat";
 import { CommunityRoom } from "@/components/messenger/CommunityRoom";
 import { FoulMouthReminder } from "@/components/FoulMouthReminder";
 import { PoweredByOgBot } from "@/components/PoweredByOgBot";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
+
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { useRole } from "@/hooks/use-role";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
