@@ -631,22 +631,11 @@ export function OgChat({
               {showQuickStarts && (
                 <div className="flex flex-col items-center gap-2 pt-2">
                   <div
-                    className={cn(
-                      "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-wider",
-                      shareLive.enabled
-                        ? "border-amber-400/60 bg-amber-400/10 text-amber-300"
-                        : "border-primary/40 bg-primary/10 text-primary",
-                    )}
-                    title={
-                      shareLive.enabled
-                        ? "Live Chat is ON, but quick-starts always send privately to OG Bot"
-                        : "Quick-starts send to your private OG Bot chat"
-                    }
+                    className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary"
+                    title="Private chat — only you and OG Bot can see this"
                   >
                     <ShieldCheck className="h-3 w-3" />
-                    {shareLive.enabled
-                      ? "Quick-starts bypass Live Chat → Private OG Bot"
-                      : "Sends to Private OG Bot"}
+                    Private · OG Bot Loner Mode
                   </div>
                   <div className="flex flex-wrap justify-center gap-2">
                     {QUICK_STARTS.map((q) => (
