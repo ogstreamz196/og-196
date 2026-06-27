@@ -198,11 +198,11 @@ export function TelegramLinkStatus() {
         />
       </span>
       <div className="min-w-0 flex-1">
-        <p className="flex items-center gap-2 text-sm font-bold uppercase tracking-[0.18em]">
-          <MessageCircle className="h-4 w-4" />
-          {headline}
+        <p className="flex items-center gap-2 text-lg sm:text-xl font-bold uppercase tracking-[0.14em] leading-tight">
+          <MessageCircle className="h-5 w-5 shrink-0" />
+          <span className="truncate">{headline}</span>
         </p>
-        <p className="text-xs text-muted-foreground">{detail}</p>
+        <p className="text-sm sm:text-base text-muted-foreground leading-snug">{detail}</p>
       </div>
       <div className="flex items-center gap-2">
         {canReconnect ? (
