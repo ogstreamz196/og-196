@@ -997,6 +997,7 @@ export type Database = {
           created_at: string
           density: string
           foul_mouth: boolean
+          messenger_mode: string
           text_scale: number
           updated_at: string
           user_id: string
@@ -1005,6 +1006,7 @@ export type Database = {
           created_at?: string
           density?: string
           foul_mouth?: boolean
+          messenger_mode?: string
           text_scale?: number
           updated_at?: string
           user_id: string
@@ -1013,6 +1015,7 @@ export type Database = {
           created_at?: string
           density?: string
           foul_mouth?: boolean
+          messenger_mode?: string
           text_scale?: number
           updated_at?: string
           user_id?: string
