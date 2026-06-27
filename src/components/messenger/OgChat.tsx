@@ -476,7 +476,8 @@ export function OgChat({
       )}
     >
       {showHeader && (
-        <div className="space-y-2.5 border-b border-border/60 bg-muted/30 px-3 py-3">
+        <div className="flex flex-col gap-2.5 border-b border-border/60 bg-muted/30 px-3 py-3 sm:flex-row sm:items-stretch">
+
           {/* Foul-mouth hero toggle — the main highlight */}
           <button
             type="button"
@@ -485,7 +486,7 @@ export function OgChat({
             aria-pressed={foulActive}
             aria-label="Toggle foul mouth"
             className={cn(
-              "group relative flex w-full items-center justify-between gap-3 overflow-hidden rounded-2xl border-2 px-4 py-3 text-left shadow-sm transition-all active:scale-[0.99] disabled:opacity-50",
+              "group relative flex w-full sm:flex-1 sm:min-w-0 items-center justify-between gap-3 overflow-hidden rounded-2xl border-2 px-4 py-3 text-left shadow-sm transition-all active:scale-[0.99] disabled:opacity-50",
               foulActive
                 ? "border-destructive bg-gradient-to-br from-destructive/25 via-destructive/15 to-destructive/10 shadow-[0_6px_24px_-8px_hsl(var(--destructive)/0.6)] hover:shadow-[0_8px_28px_-6px_hsl(var(--destructive)/0.7)]"
                 : "border-border bg-card hover:border-destructive/60 hover:bg-destructive/5",
@@ -537,7 +538,7 @@ export function OgChat({
           </button>
 
           {/* Secondary controls row */}
-          <div className="flex flex-wrap items-center gap-2 text-xs">
+          <div className="flex flex-wrap items-center gap-2 text-xs sm:flex-col sm:items-stretch sm:flex-nowrap sm:w-auto sm:shrink-0 sm:justify-center">
             <span className="mr-auto inline-flex items-center gap-1.5 text-muted-foreground">
               <OgAvatar size={18} />
               <span className="font-semibold">{balance} coin{balance === 1 ? "" : "s"}</span>
