@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Play, Pause, Loader2, Music2, Download, AlertCircle, Lock } from "lucide-react";
 import { useSettings } from "@/hooks/use-settings";
 import { useSongAudio } from "@/hooks/use-song-audio";
@@ -22,7 +23,7 @@ export interface Song {
   stream_audio_url?: string | null;
 }
 
-export function SongCard({ song }: { song: Song }) {
+function SongCardImpl({ song }: { song: Song }) {
   const { data: settings } = useSettings();
   const sampleSeconds = settings?.sample_seconds ?? 30;
 
@@ -145,3 +146,13 @@ export function SongCard({ song }: { song: Song }) {
     </div>
   );
 }
+
+export const SongCard = memo(SongCardImpl, (a, b) =>
+  a.song.id === b.song.id &&
+  a.song.status === b.song.status &&
+  a.song.audio_path === b.song.audio_path &&
+  a.song.sample_path === b.song.sample_path &&
+  a.song.cover_url === b.song.cover_url &&
+  a.song.title === b.song.title &&
+  a.song.error_message === b.song.error_message,
+);

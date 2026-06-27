@@ -427,6 +427,7 @@ export function CommunityRoom() {
           size="icon"
           disabled={!text.trim() || send.isPending}
           className="h-11 w-11 shrink-0 rounded-xl"
+          aria-label="Send message"
         >
           {send.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
         </Button>

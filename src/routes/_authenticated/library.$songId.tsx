@@ -214,7 +214,7 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
       <div className="flex flex-col gap-6 sm:flex-row">
         <div className="relative h-48 w-48 shrink-0 self-center overflow-hidden rounded-xl bg-gradient-brand-soft">
           {song.cover_url ? (
-            <img src={song.cover_url} alt="" className="h-full w-full object-cover" />
+            <img src={song.cover_url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
           ) : (
             <div className="grid h-full w-full place-items-center">
               <Music2 className="h-12 w-12 text-muted-foreground" />

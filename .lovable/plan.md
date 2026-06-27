@@ -1,51 +1,26 @@
-# Refactor Plan
+## Optimization plan (3 phases, behavior-preserving)
 
-"Refactor the whole project" at this size (1,200+ line route files, dozens of admin pages, many Edge Functions) would balloon into hundreds of edits with real regression risk. Instead, I'll do a focused, behavior-preserving cleanup of the worst hotspots — the files most likely to keep biting us in future changes — and stop there.
+### Phase 1 — Accessibility (this turn)
+- Replace `h-screen` with `h-dvh` in app-owned files (skip generated `ui/calendar.tsx`, `ui/sidebar.tsx`).
+- Add `aria-label` to icon-only Buttons (`size="icon"`) missing accessible names.
+- Audit headings: ensure each page has one `<h1>`; fix obvious skipped levels.
+- Replace hardcoded color utilities (`text-gray-*`, `bg-white`) with design tokens where they appear in app components.
 
-## Scope (in)
+### Phase 2 — Performance
+- Add `defaultPreloadStaleTime` / `gcTime` tuning on the shared QueryClient if not already set.
+- Memoize hot list rows in `library.index.tsx` and `messenger.tsx` (`React.memo` + stable handlers).
+- Add explicit `width`/`height` on `<img>` tags in `SongCard`, `CategoryCard`, hero, avatars to prevent CLS.
+- Add `loading="lazy"` + `decoding="async"` to non-LCP images.
+- Preload the LCP image on `/` via the route `head().links`.
 
-1. **`src/routes/_authenticated/library.index.tsx`** (~1,300 lines)
-   - Extract sub-components into `src/components/library/`:
-     - `LibraryHero` (welcome + earn strip + dodgy logo)
-     - `YoursTab` (search, list, empty state, delete)
-     - `CommunityTab` (search, infinite scroll, empty state)
-     - `MusicHubBuilder` (prompt chips + style pickers + generate button)
-   - Move the community RPC query + realtime subscription into `src/hooks/use-community-songs.ts` and `use-library-realtime.ts`.
-   - Route file becomes the composition shell only (~200 lines).
+### Phase 3 — Maintainability
+- Continue prior refactor: extract `LibraryTabs`, `CommunityList`, `YoursList` from `library.index.tsx` (now ~1042 lines).
+- Extract `MessengerComposer` and `MessageBubble` from `messenger.tsx`.
+- Extract `BossPricingPanel` from `admin.index.tsx` if still inline.
+- Consolidate duplicated signed-URL fetching into `useSignedUrl` hook (already partly done by `use-song-audio`).
 
-2. **`src/routes/_authenticated/messenger.tsx`**
-   - Pull confirmation dialog + mode header into `src/components/messenger/MessengerModeSwitch.tsx`.
-   - Keep `OgChat` / `CommunityRoom` mounting logic as-is.
+### Out of scope
+- No behavior changes, no API changes, no design-system color overhaul, no route reshuffles.
+- Auto-generated files (`routeTree.gen.ts`, `src/integrations/supabase/*`) are not touched.
 
-3. **`src/components/SongCard.tsx`**
-   - Split the signed-URL fetch + download handler into `src/hooks/use-song-audio.ts`.
-   - Card becomes presentational.
-
-4. **Shared utilities**
-   - Consolidate the repeated "format duration / format coin amount / relative time" helpers scattered across `src/components/**` into `src/lib/format.ts`.
-   - Replace duplicated `useState`+`useEffect` IntersectionObserver blocks (library community + any other infinite list) with a small `useInfiniteScrollSentinel(ref, { onHit, enabled })` hook.
-
-5. **Dead code sweep**
-   - Remove unused imports flagged by `tsgo` after the extractions.
-   - Delete the orphaned `src/routes/_authenticated/admin.users-pro.tsx` redirect file (already merged into `/admin/users`) and update `admin.route-map.tsx` accordingly — keep the path working via the route auditor's allowlist, not a dead file.
-
-## Scope (out — intentionally)
-
-- No design, copy, color, or layout changes.
-- No DB schema, RPC, RLS, or Edge Function changes.
-- No changes to auth, payments, Telegram, Suno, or Stripe flows.
-- No bulk rename or "tidy every file" pass — only the hotspots above.
-- No test additions beyond keeping the existing Playwright regression green.
-
-## Verification
-
-After each extraction:
-- `bunx tsgo --noEmit` clean.
-- `bun run build` clean (route auditor + Vite build).
-- Manual smoke in preview: open `/library` (both tabs), `/messenger` (both modes), play a track from a song card.
-
-## Risks / Notes
-
-- `library.index.tsx` holds a lot of co-located state; I'll lift state up only where a child genuinely needs it, and keep the rest local to avoid prop drilling.
-- If any extraction would require changing a public hook signature used elsewhere, I'll stop and leave that file alone rather than cascade edits.
-- Estimated diff: ~10–14 files touched, ~600 lines moved, ~0 lines of behavior change.
+After each phase: typecheck + relevant smoke checks. Reply between phases so you can redirect if priorities shift.
