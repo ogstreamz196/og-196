@@ -276,8 +276,9 @@ function AdminUsersPage() {
                 <TableBody>
                   {filtered.map((u) => {
                     const roles = rolesByUser.get(u.id) ?? [];
+                    const pro = proByUser.get(u.id);
                     return (
-                      <UserRow key={u.id} user={u} roles={roles} />
+                      <UserRow key={u.id} user={u} roles={roles} pro={pro} />
                     );
                   })}
                 </TableBody>
