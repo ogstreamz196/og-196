@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState } from "react";
 import { Play, Pause, Loader2, Music2, Download, AlertCircle, Lock } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useSettings } from "@/hooks/use-settings";
+import { useSongAudio } from "@/hooks/use-song-audio";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -27,85 +26,25 @@ export function SongCard({ song }: { song: Song }) {
   const { data: settings } = useSettings();
   const sampleSeconds = settings?.sample_seconds ?? 30;
 
-  const [signedUrl, setSignedUrl] = useState<string | null>(null);
-  const [playing, setPlaying] = useState(false);
-  const [loadingUrl, setLoadingUrl] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  const isReadyForPreview = song.status === "completed" && !!(song.audio_path || song.sample_path);
-
-  async function ensureUrl() {
-    if (signedUrl || (!song.audio_path && !song.sample_path)) return signedUrl;
-    setLoadingUrl(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("song-url", {
-        body: { song_id: song.id, mode: "preview" },
-      });
-      if (error) throw error;
-      setSignedUrl(data.url);
-      // Warm the audio element so playback starts instantly on click.
-      const el = audioRef.current;
-      if (el && el.src !== data.url) {
-        el.src = data.url as string;
-        el.load();
-      }
-      return data.url as string;
-    } finally {
-      setLoadingUrl(false);
-    }
-  }
-
-  // Pre-fetch the signed URL as soon as the song is ready so the first
-  // play click is instant instead of waiting on a round-trip + buffering.
-  useEffect(() => {
-    if (!isReadyForPreview || signedUrl || loadingUrl) return;
-    ensureUrl().catch(() => {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isReadyForPreview, song.id]);
-
-  async function togglePlay() {
-    const url = await ensureUrl();
-    if (!url) return;
-    const el = audioRef.current!;
-    if (playing) {
-      el.pause();
-      setPlaying(false);
-    } else {
-      if (el.src !== url) el.src = url;
-      await el.play();
-      setPlaying(true);
-    }
-  }
-
-  async function download() {
-    const url = await ensureUrl();
-    if (!url) return;
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${song.title || "song"}.mp3`;
-    a.click();
-  }
-
-  // Cap preview playback at sample_seconds
-  useEffect(() => {
-    const el = audioRef.current;
-    if (!el) return;
-    const onTime = () => {
-      setProgress(el.currentTime);
-      if (el.currentTime >= sampleSeconds) {
-        el.pause();
-        el.currentTime = 0;
-        setPlaying(false);
-      }
-    };
-    el.addEventListener("timeupdate", onTime);
-    return () => el.removeEventListener("timeupdate", onTime);
-  }, [sampleSeconds]);
-
-  const isReady = song.status === "completed" && !!(song.audio_path || song.sample_path);
+  const hasAudio = !!(song.audio_path || song.sample_path);
+  const isReady = song.status === "completed" && hasAudio;
   const isFailed = song.status === "failed";
   const isPending = song.status === "pending" || song.status === "processing";
+
+  const {
+    audioRef,
+    playing,
+    loadingUrl,
+    progress,
+    togglePlay,
+    download,
+    handleEnded,
+  } = useSongAudio({
+    songId: song.id,
+    hasAudio,
+    ready: isReady,
+    sampleSeconds,
+  });
 
   return (
     <div className="group flex gap-4 rounded-2xl border border-border bg-card p-4 shadow-card transition-all hover:shadow-glow">
@@ -191,14 +130,18 @@ export function SongCard({ song }: { song: Song }) {
             )}
           </span>
           {isReady && (
-            <Button size="sm" variant="ghost" onClick={download}>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => download(`${song.title || "song"}.mp3`)}
+            >
               <Download className="mr-2 h-3.5 w-3.5" /> Download (free)
             </Button>
           )}
         </div>
       </div>
 
-      <audio ref={audioRef} preload="auto" onEnded={() => setPlaying(false)} className="hidden" />
+      <audio ref={audioRef} preload="auto" onEnded={handleEnded} className="hidden" />
     </div>
   );
 }
