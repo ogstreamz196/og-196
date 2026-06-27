@@ -46,6 +46,8 @@ import ogStreamzLogo from "@/assets/ogstreamz-logo.jpg.asset.json";
 import { FoulMouthReminder } from "@/components/FoulMouthReminder";
 import { PoweredByOgBot } from "@/components/PoweredByOgBot";
 import { JobQueuePanel } from "@/components/library/JobQueuePanel";
+import { EarnCoinStrip } from "@/components/referrals/EarnCoinStrip";
+
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
