@@ -72,6 +72,25 @@ function SettingsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const saveBio = useMutation({
+    mutationFn: async () => {
+      const trimmed = bio.trim().slice(0, 400);
+      const { error } = await supabase
+        .from("profiles")
+        .update({ artist_bio: trimmed || null } as never)
+        .eq("id", user!.id);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      toast.success("Artist bio saved — MusicHub will weave it into new lyrics");
+      setBioDirty(false);
+      refetch();
+      qc.invalidateQueries({ queryKey: ["profile", user?.id] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+
   const saveBalance = useMutation({
     mutationFn: async () => {
       const n = Number.parseInt(balance, 10);
