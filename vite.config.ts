@@ -12,4 +12,10 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  vite: {
+    // Hide internal logic in shipped bundles so the foul-mouth lexicon, persona
+    // prompts, and other server-side strings cannot be traced back to source.
+    build: { sourcemap: false, minify: "esbuild" },
+    css: { devSourcemap: false },
+  },
 });
