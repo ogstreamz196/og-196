@@ -660,14 +660,9 @@ function LibraryPage() {
                 return (
                   <div className="grid gap-3">
                     {filtered.map((s) => (
-                      <Link
-                        key={s.id}
-                        to="/library/$songId"
-                        params={{ songId: s.id }}
-                        className="block rounded-2xl transition-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                      >
+                      <div key={s.id} className="block rounded-2xl">
                         <SongCard song={s} />
-                      </Link>
+                      </div>
                     ))}
                     <div ref={communitySentinelRef} className="h-1" aria-hidden />
                     {community.isFetchingNextPage && (
