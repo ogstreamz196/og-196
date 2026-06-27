@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/messenger")({
   }),
   head: () => ({
     meta: [
-      { title: "OG-GPT · Private chat & Live Community" },
+      { title: "OG Bot · Private chat & Live Community" },
       {
         name: "description",
         content:
@@ -52,12 +52,13 @@ function MessengerPage() {
   }
 
   return (
-    <DashboardShell title="OG-GPT">
+    <DashboardShell title="OG Bot">
       <div className="mx-auto mb-3 w-full max-w-5xl">
         <FoulMouthReminder enabled={foulMouth} onAction={handleFoulToggle} />
       </div>
 
-      <div className="mx-auto flex h-[calc(100dvh-12rem)] min-h-[460px] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-card/70 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.7)] ring-1 ring-white/5 backdrop-blur-xl sm:h-[calc(100dvh-16rem)] sm:rounded-3xl">
+      <div className="mx-auto flex h-[calc(100dvh-8rem)] min-h-[520px] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-card/70 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.7)] ring-1 ring-white/5 backdrop-blur-xl sm:h-[calc(100dvh-10rem)] sm:rounded-3xl">
+
         {/* Header — adapts to current mode */}
         <header
           className={`relative grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 border-b border-white/10 px-3 py-3 backdrop-blur-xl transition-colors sm:gap-4 sm:px-7 sm:py-5 ${
@@ -98,7 +99,7 @@ function MessengerPage() {
               }`}
             >
               <span className="truncate">
-                {liveChat ? "Live · OG Community" : "OG-GPT · OG Bot"}
+                {liveChat ? "Live · OG Community" : "OG Bot · Private chat"}
               </span>
             </div>
             <h1 className="truncate font-display text-lg font-black leading-tight tracking-tight sm:text-3xl">

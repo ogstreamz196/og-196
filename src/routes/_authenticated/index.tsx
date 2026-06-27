@@ -237,7 +237,7 @@ function DashboardHome() {
 
       </section>
 
-      {/* Primary CTAs — MusicHub + OG-GPT at the top */}
+      {/* Primary CTAs — MusicHub + OG Bot at the top */}
       <section className="space-y-3">
         <div className="flex items-center justify-between gap-3">
           <h2 className="text-sm uppercase tracking-[0.28em] text-muted-foreground sm:text-base">
@@ -261,7 +261,7 @@ function DashboardHome() {
             to="/messenger"
             image={ogBotAsset.url}
             imageAlt="OG Bot avatar"
-            eyebrow="OG-GPT"
+            eyebrow="OG Bot"
             title="Chat to OG Bot"
             body="Your AI co-producer"
             cta="Open Messenger"
@@ -392,7 +392,7 @@ function DashboardHome() {
               to="/settings"
             />
             <ChecklistItem done={hasSongs} label="Create your first song" to="/library" />
-            <ChecklistItem done={false} label="Say hi in OG-GPT" to="/messenger" />
+            <ChecklistItem done={false} label="Say hi in OG Bot" to="/messenger" />
             <ChecklistItem done={isVip} label="Unlock VIP perks" to="/buy-coins" />
           </CardContent>
         </Card>

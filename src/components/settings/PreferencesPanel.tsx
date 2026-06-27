@@ -125,7 +125,7 @@ export function PreferencesPanel() {
             <Sparkles className="h-4 w-4 text-primary" /> Assistant preferences
           </CardTitle>
           <CardDescription>
-            Defaults for OG-GPT and the floating assistant.
+            Defaults for OG Bot and the floating assistant.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">

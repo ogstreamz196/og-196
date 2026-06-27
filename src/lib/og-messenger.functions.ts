@@ -13,7 +13,7 @@ interface ChatReply {
 }
 
 /**
- * Unified chat backend for the OG-GPT page and the floating widget.
+ * Unified chat backend for the OG Bot page and the floating widget.
  *
  * - Authenticates via Supabase (no extra token required).
  * - Charges 1 OG coin per message (atomic via `deduct_coins` RPC).

@@ -5,7 +5,7 @@ import { getMyTelegramStatus } from "@/lib/telegram-admin.functions";
 import { useAuth } from "./use-auth";
 
 /**
- * Share-live preference: when ON, messages typed in OG-GPT are posted
+ * Share-live preference: when ON, messages typed in OG Bot are posted
  * to the EXCLUSIVE OG Community shared chat instead of the private OG Bot
  * thread. Default is ON automatically once the user has linked their
  * Telegram account.

@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { routeOgMessage } from "./og-chat-routing";
 import { QUICK_STARTS } from "./og-persona";
 
-describe("routeOgMessage — Live Chat vs Private OG-GPT regression", () => {
+describe("routeOgMessage — Live Chat vs Private OG Bot regression", () => {
   it("routes plain text to private when Live Chat is OFF", () => {
     expect(routeOgMessage({ shareLive: false, text: "hi" })).toBe("private");
   });
