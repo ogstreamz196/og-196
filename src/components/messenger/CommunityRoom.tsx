@@ -275,75 +275,107 @@ export function CommunityRoom() {
           </Button>
         </div>
       )}
-      <div
-        ref={scrollRef}
-        onScroll={onScroll}
-        className="flex-1 space-y-3 overflow-y-auto overscroll-contain rounded-2xl border border-border/40 bg-background/40 p-2 backdrop-blur-md sm:p-3"
-      >
-        {loadingOlder && (
-          <div className="flex items-center justify-center py-2 text-xs text-muted-foreground">
-            <Loader2 className="mr-2 h-3 w-3 animate-spin" /> Loading older messages…
-          </div>
-        )}
-        {!hasMore && messages.length > 0 && (
-          <div className="py-1 text-center text-[10px] uppercase tracking-wider text-muted-foreground/60">
-            Beginning of chat
-          </div>
-        )}
-        {isLoading ? (
-          <div className="flex h-full items-center justify-center text-muted-foreground">
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Loading community…
-          </div>
-        ) : messages.length === 0 ? (
-          <div className="flex h-full flex-col items-center justify-center gap-2 text-center text-muted-foreground">
-            <Users className="h-8 w-8 opacity-50" />
-            <p className="text-sm">Be the first to say something.</p>
-          </div>
-        ) : (
-          messages.map((m) => {
-            const mine = m.role === "user" && m.user_id === myId;
-            const isBot = m.role === "bot";
-            return (
-              <div
-                key={m.id}
-                className={`flex items-end gap-2 ${mine ? "flex-row-reverse" : "flex-row"}`}
-              >
-                <span
-                  className={`grid h-8 w-8 shrink-0 place-items-center overflow-hidden rounded-full text-[10px] font-bold uppercase ${
-                    isBot
-                      ? "bg-primary/20 ring-1 ring-primary/40"
-                      : mine
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-foreground"
-                  }`}
-                >
-                  {isBot ? (
-                    <img src={ogBotAsset.url} alt="OG Bot" className="h-full w-full object-cover" />
-                  ) : (
-                    initials(m.display_name)
-                  )}
-                </span>
-                <div
-                  className={`min-w-0 max-w-[85%] rounded-2xl px-3 py-2 text-sm shadow-sm sm:max-w-[78%] ${
-                    isBot
-                      ? "border border-primary/30 bg-primary/10 text-foreground"
-                      : mine
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-foreground"
-                  }`}
-                >
-                  <p
-                    className={`mb-0.5 text-[10px] font-bold uppercase tracking-wider ${
-                      mine ? "text-primary-foreground/80" : "text-muted-foreground"
-                    }`}
-                  >
-                    {isBot ? "OG Bot" : m.display_name || "OG member"} · {formatTime(m.created_at)}
-                  </p>
-                  <p className="whitespace-pre-wrap break-words leading-snug">{m.content}</p>
+      <div className="relative flex-1 min-h-0">
+        <div
+          ref={scrollRef}
+          onScroll={onScroll}
+          className="absolute inset-0 overflow-y-auto overscroll-contain rounded-2xl border border-border/40 bg-background/40 p-2 backdrop-blur-md sm:p-3"
+        >
+          {isLoading ? (
+            <div className="flex h-full items-center justify-center text-muted-foreground">
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Loading community…
+            </div>
+          ) : messages.length === 0 ? (
+            <div className="flex h-full flex-col items-center justify-center gap-2 text-center text-muted-foreground">
+              <Users className="h-8 w-8 opacity-50" />
+              <p className="text-sm">Be the first to say something.</p>
+            </div>
+          ) : (
+            <>
+              {loadingOlder && (
+                <div className="flex items-center justify-center py-2 text-xs text-muted-foreground">
+                  <Loader2 className="mr-2 h-3 w-3 animate-spin" /> Loading older messages…
                 </div>
+              )}
+              {!hasMore && (
+                <div className="py-1 text-center text-[10px] uppercase tracking-wider text-muted-foreground/60">
+                  Beginning of chat
+                </div>
+              )}
+              <div
+                style={{ height: rowVirtualizer.getTotalSize(), position: "relative", width: "100%" }}
+              >
+                {rowVirtualizer.getVirtualItems().map((vi) => {
+                  const m = messages[vi.index];
+                  if (!m) return null;
+                  const mine = m.role === "user" && m.user_id === myId;
+                  const isBot = m.role === "bot";
+                  return (
+                    <div
+                      key={vi.key}
+                      ref={rowVirtualizer.measureElement}
+                      data-index={vi.index}
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        transform: `translateY(${vi.start}px)`,
+                      }}
+                    >
+                      <div
+                        className={`flex items-end gap-2 py-1.5 ${mine ? "flex-row-reverse" : "flex-row"}`}
+                      >
+                        <span
+                          className={`grid h-8 w-8 shrink-0 place-items-center overflow-hidden rounded-full text-[10px] font-bold uppercase ${
+                            isBot
+                              ? "bg-primary/20 ring-1 ring-primary/40"
+                              : mine
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-muted text-foreground"
+                          }`}
+                        >
+                          {isBot ? (
+                            <img src={ogBotAsset.url} alt="OG Bot" className="h-full w-full object-cover" />
+                          ) : (
+                            initials(m.display_name)
+                          )}
+                        </span>
+                        <div
+                          className={`min-w-0 max-w-[85%] rounded-2xl px-3 py-2 text-sm shadow-sm sm:max-w-[78%] ${
+                            isBot
+                              ? "border border-primary/30 bg-primary/10 text-foreground"
+                              : mine
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-muted text-foreground"
+                          }`}
+                        >
+                          <p
+                            className={`mb-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                              mine ? "text-primary-foreground/80" : "text-muted-foreground"
+                            }`}
+                          >
+                            {isBot ? "OG Bot" : m.display_name || "OG member"} · {formatTime(m.created_at)}
+                          </p>
+                          <p className="whitespace-pre-wrap break-words leading-snug">{m.content}</p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            );
-          })
+            </>
+          )}
+        </div>
+        {showJump && (
+          <Button
+            type="button"
+            size="sm"
+            onClick={jumpToBottom}
+            className="absolute bottom-3 left-1/2 z-10 -translate-x-1/2 gap-1.5 rounded-full shadow-lg"
+          >
+            <ArrowDown className="h-3.5 w-3.5" /> Jump to newest
+          </Button>
         )}
       </div>
 
