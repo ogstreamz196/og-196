@@ -141,26 +141,51 @@ export function CommunityRoom() {
     });
   }, [myId, user]);
 
-  // Auto-scroll to bottom on new messages (only if user is already near bottom)
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el || !stickToBottomRef.current) return;
-    el.scrollTop = el.scrollHeight;
-  }, [messages.length]);
+  // Virtualizer — windows the message list so very long histories stay smooth.
+  const rowVirtualizer = useVirtualizer({
+    count: messages.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: () => 72,
+    overscan: 8,
+    getItemKey: (i) => messages[i]?.id ?? i,
+  });
 
-  // Infinite scroll: load older when scrolled to top
+  // Initial scroll to bottom once the first page has rendered.
+  useLayoutEffect(() => {
+    if (didInitialScrollRef.current || messages.length === 0) return;
+    const el = scrollRef.current;
+    if (!el) return;
+    rowVirtualizer.scrollToIndex(messages.length - 1, { align: "end" });
+    el.scrollTop = el.scrollHeight;
+    didInitialScrollRef.current = true;
+  }, [messages.length, rowVirtualizer]);
+
+  // Auto-scroll to newest only if user is already near the bottom.
+  useEffect(() => {
+    if (!didInitialScrollRef.current) return;
+    if (!stickToBottomRef.current || messages.length === 0) return;
+    rowVirtualizer.scrollToIndex(messages.length - 1, { align: "end" });
+  }, [messages.length, rowVirtualizer]);
+
+  // Scroll handler: track near-bottom + trigger cursor pagination on top.
   const onScroll = useCallback(async () => {
     const el = scrollRef.current;
     if (!el) return;
-    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    const nearBottom = distanceFromBottom < 120;
     stickToBottomRef.current = nearBottom;
+    setShowJump(!nearBottom && messages.length > 0);
+
     if (el.scrollTop > 40 || loadingOlder || !hasMore || messages.length === 0) return;
     const oldest = messages[0];
     if (!oldest) return;
     setLoadingOlder(true);
     const prevHeight = el.scrollHeight;
+    const prevTop = el.scrollTop;
     try {
-      const res = await olderFn({ data: { before: oldest.created_at, limit: 50 } });
+      const res = await olderFn({
+        data: { before: oldest.created_at, beforeId: oldest.id, limit: 50 },
+      });
       if (res.messages.length === 0) {
         setHasMore(false);
       } else {
@@ -174,11 +199,10 @@ export function CommunityRoom() {
             return { messages: merged };
           },
         );
-        // Preserve scroll position after prepending
+        // Preserve scroll position after prepending older messages.
         requestAnimationFrame(() => {
-          if (scrollRef.current) {
-            scrollRef.current.scrollTop = scrollRef.current.scrollHeight - prevHeight;
-          }
+          const node = scrollRef.current;
+          if (node) node.scrollTop = node.scrollHeight - prevHeight + prevTop;
         });
       }
     } catch (err) {
@@ -187,6 +211,14 @@ export function CommunityRoom() {
       setLoadingOlder(false);
     }
   }, [hasMore, loadingOlder, messages, olderFn, qc]);
+
+  const jumpToBottom = useCallback(() => {
+    stickToBottomRef.current = true;
+    setShowJump(false);
+    if (messages.length > 0) {
+      rowVirtualizer.scrollToIndex(messages.length - 1, { align: "end" });
+    }
+  }, [messages.length, rowVirtualizer]);
 
   const send = useMutation({
     mutationFn: (content: string) => postFn({ data: { content, foulMouth } }),
