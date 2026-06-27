@@ -19,6 +19,8 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { PreferencesPanel } from "@/components/settings/PreferencesPanel";
 import { VipStatusCard } from "@/components/settings/VipStatusCard";
+import { EarnCoinStrip } from "@/components/referrals/EarnCoinStrip";
+
 import { getMyTelegramLinkToken, rotateMyTelegramLinkToken } from "@/lib/telegram-admin.functions";
 
 export const Route = createFileRoute("/_authenticated/settings")({
