@@ -3,40 +3,59 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 /**
- * Guards the Library page foul-mouth toggle:
- *   1. Rendered exactly once (no duplicate reminders/pills).
- *   2. Wired to the profile-backed `useFoulMouth` / `useSetFoulMouth` hooks
- *      (NOT local component state or any ad-hoc setting).
+ * Guards the reusable FoulMouthToggle component and its single use in Library:
+ *   1. Toggle markup lives in one place (the shared component).
+ *   2. Library imports the component and renders it exactly once.
+ *   3. The component is wired to the profile-backed hooks (not local state).
+ *   4. Exposes correct ARIA state to screen readers.
  */
 
-const LIBRARY = join(process.cwd(), "src/routes/_authenticated/library.index.tsx");
+const COMPONENT = join(process.cwd(), "src/components/FoulMouthToggle.tsx");
+const LIBRARY = join(process.cwd(), "src/routes/_authenticated/library.index.lazy.tsx");
 
-describe("Library foul-mouth toggle", () => {
-  const src = readFileSync(LIBRARY, "utf8");
+const componentSrc = readFileSync(COMPONENT, "utf8");
+const librarySrc = readFileSync(LIBRARY, "utf8");
 
-  it("renders the toggle exactly once", () => {
-    const matches = src.match(/id=["']foul-mouth-toggle["']/g) ?? [];
-    expect(matches.length, "exactly one foul-mouth-toggle should exist").toBe(1);
+describe("FoulMouthToggle component", () => {
+  it("owns the single foul-mouth-toggle id", () => {
+    const matches = componentSrc.match(/id=["']foul-mouth-toggle["']/g) ?? [];
+    expect(matches.length).toBe(1);
+  });
+
+  it("is wired to the profile-backed hooks", () => {
+    expect(componentSrc).toMatch(/from\s+["']@\/hooks\/use-foul-mouth["']/);
+    expect(componentSrc).toMatch(/useFoulMouth\s*\(/);
+    expect(componentSrc).toMatch(/useSetFoulMouth\s*\(/);
+  });
+
+  it("persists via the mutation, not local useState", () => {
+    expect(componentSrc).toMatch(/mutation\.mutate\(/);
+    expect(componentSrc).not.toMatch(/useState<\s*boolean\s*>/);
+  });
+
+  it("exposes accessible on/off state", () => {
+    expect(componentSrc).toMatch(/aria-pressed=\{foulMouth\}/);
+    expect(componentSrc).toMatch(/aria-checked=\{foulMouth\}/);
+    expect(componentSrc).toMatch(/aria-live=["']polite["']/);
+  });
+});
+
+describe("Library page uses the shared component", () => {
+  it("imports FoulMouthToggle", () => {
+    expect(librarySrc).toMatch(/from\s+["']@\/components\/FoulMouthToggle["']/);
+  });
+
+  it("renders FoulMouthToggle exactly once", () => {
+    const matches = librarySrc.match(/<FoulMouthToggle\b/g) ?? [];
+    expect(matches.length).toBe(1);
+  });
+
+  it("does not inline a second foul-mouth-toggle button", () => {
+    const matches = librarySrc.match(/id=["']foul-mouth-toggle["']/g) ?? [];
+    expect(matches.length).toBe(0);
   });
 
   it("does not re-import the removed FoulMouthReminder duplicate", () => {
-    expect(src).not.toMatch(/FoulMouthReminder/);
-  });
-
-  it("is wired to the profile-backed useFoulMouth hook", () => {
-    expect(src).toMatch(/from\s+["']@\/hooks\/use-foul-mouth["']/);
-    expect(src).toMatch(/useFoulMouth\s*\(/);
-    expect(src).toMatch(/useSetFoulMouth\s*\(/);
-  });
-
-  it("uses the mutation (not local useState) to persist the toggle", () => {
-    // The handler must call the mutation, not a local setState boolean.
-    expect(src).toMatch(/setFoulMouthMutation\.mutate\(/);
-  });
-
-  it("exposes accessible on/off state to screen readers", () => {
-    expect(src).toMatch(/aria-pressed=\{foulMouth\}/);
-    expect(src).toMatch(/aria-checked=\{foulMouth\}/);
-    expect(src).toMatch(/aria-live=["']polite["']/);
+    expect(librarySrc).not.toMatch(/FoulMouthReminder/);
   });
 });
