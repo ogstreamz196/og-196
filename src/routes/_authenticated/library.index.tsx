@@ -570,9 +570,9 @@ function LibraryPage() {
                   <SongCardSkeleton key={i} />
                 ))}
               </div>
-            ) : (community.data?.length ?? 0) > 0 ? (
+            ) : communityTracks.length > 0 ? (
               <div className="grid gap-3">
-                {community.data!.map((s) => (
+                {communityTracks.map((s) => (
                   <Link
                     key={s.id}
                     to="/library/$songId"
@@ -582,6 +582,19 @@ function LibraryPage() {
                     <SongCard song={s} />
                   </Link>
                 ))}
+                <div ref={communitySentinelRef} className="h-1" aria-hidden />
+                {community.isFetchingNextPage && (
+                  <div className="grid gap-3">
+                    {[0, 1].map((i) => (
+                      <SongCardSkeleton key={`more-${i}`} label="Loading" />
+                    ))}
+                  </div>
+                )}
+                {!community.hasNextPage && (
+                  <p className="py-4 text-center text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                    You've reached the end
+                  </p>
+                )}
               </div>
             ) : (
               <div className="rounded-3xl border border-dashed border-white/15 bg-card/40 p-10 text-center ring-1 ring-white/5">
