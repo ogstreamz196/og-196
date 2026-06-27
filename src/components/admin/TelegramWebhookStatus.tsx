@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
   Activity,
   AlertTriangle,
   CheckCircle2,
+  Inbox,
   Loader2,
   Plug,
   RefreshCw,
@@ -14,6 +15,15 @@ import { toast } from "sonner";
 import { getTelegramWebhookStatus } from "@/lib/telegram-webhook-status.functions";
 import { setTelegramWebhook } from "@/lib/telegram-set-webhook.functions";
 import { cn } from "@/lib/utils";
+
+const LAST_SET_KEY = "telegram:lastSetWebhookAt";
+const AUTO_ATTEMPT_KEY = "telegram:autoRegisterAttemptedAt";
+const EXPECTED_WEBHOOK_PATH = "/api/public/telegram/webhook";
+
+type Props = {
+  /** Automatically attempt re-registration once per session if the webhook is missing/broken. */
+  autoRegister?: boolean;
+};
 
 function fmtTs(epochSeconds: number | null): string {
   if (!epochSeconds) return "";
