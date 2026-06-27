@@ -134,7 +134,10 @@ export function TelegramLinkStatus() {
   if (isLoading || !data) {
     return (
       <section
+        data-testid="telegram-status-card"
         aria-label="Telegram connection status"
+        aria-busy="true"
+        style={{ minHeight: "clamp(5rem, 14vw, 6.5rem)" }}
         className="flex items-center gap-3 rounded-2xl border-2 border-border/40 bg-muted/20 px-4 py-3 backdrop-blur-md"
       >
         <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
