@@ -46,6 +46,8 @@ import ogStreamzLogo from "@/assets/ogstreamz-logo.jpg.asset.json";
 import { FoulMouthReminder } from "@/components/FoulMouthReminder";
 import { PoweredByOgBot } from "@/components/PoweredByOgBot";
 import { JobQueuePanel } from "@/components/library/JobQueuePanel";
+import { EarnCoinStrip } from "@/components/referrals/EarnCoinStrip";
+
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -458,6 +460,9 @@ function LibraryPage() {
           <span className="hidden text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground sm:inline">coins</span>
         </div>
       </header>
+
+      <EarnCoinStrip className="self-start" />
+
 
       {/* Persistent Foul Mouth reminder — one tap takes you to the toggle */}
       <div className="sticky top-14 z-20 -mx-4 px-4 sm:top-16 sm:-mx-6 sm:px-6">

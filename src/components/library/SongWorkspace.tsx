@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
-  Loader2, FileText, MessageSquareMore, Wand2, ExternalLink,
+  Loader2, FileText, Wand2,
   Coins, Check, Sparkles, Music2, AlertCircle, Play, RefreshCw,
 } from "lucide-react";
+
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,8 @@ import { VariationsCard } from "./song-workspace/VariationsCard";
 import type { WorkspaceSong } from "./song-workspace/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
+import { EarnCoinStrip } from "@/components/referrals/EarnCoinStrip";
+
 
 const LANGUAGES = [
   "English", "Spanish", "French", "Portuguese", "Hindi", "Gujarati",
@@ -326,11 +329,12 @@ export function SongWorkspace({ song, onSaved }: Props) {
                 <div>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <FileText className="h-4 w-4 text-primary" />
-                    Stage 1 · Lyrics
+                    1 · Lyrics
                   </CardTitle>
                   <CardDescription>
-                    Describe the song. Edit anytime and resend — each lyrics generation costs {lyricsCost} coin{lyricsCost === 1 ? "" : "s"}.
+                    Write the brief, hit generate.
                   </CardDescription>
+
                 </div>
                 <CostBadge cost={lyricsCost} />
               </div>
@@ -458,11 +462,12 @@ export function SongWorkspace({ song, onSaved }: Props) {
                 <div>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <Play className="h-4 w-4 text-primary" />
-                    Stage 2 · Preview sample
+                    2 · Preview
                   </CardTitle>
                   <CardDescription>
-                    Generate a free preview using your lyrics. {settings?.sample_seconds ?? 30}s sample appears in the player above.
+                    Free {settings?.sample_seconds ?? 30}s sample.
                   </CardDescription>
+
                 </div>
                 <CostBadge cost={previewCost} />
               </div>
@@ -559,11 +564,12 @@ export function SongWorkspace({ song, onSaved }: Props) {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Music2 className="h-4 w-4 text-primary" />
-                Stage 3 · Create the full song
+                3 · Full HQ
               </CardTitle>
               <CardDescription>
-                Preview is a fast compressed sample. Pay {fullUnlockCost} coins once to unlock and download the full HQ version, or regenerate the sample for {previewCost}.
+                {fullUnlockCost} coins · unlock & download.
               </CardDescription>
+
             </CardHeader>
             <CardContent className="space-y-3">
               {!isReady ? (
@@ -654,50 +660,30 @@ export function SongWorkspace({ song, onSaved }: Props) {
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Coins className="h-4 w-4 text-coin" /> Your coins
               </CardTitle>
-              <CardDescription>Every generation uses coins — same as any AI message.</CardDescription>
+              <CardDescription>Lyrics {lyricsCost} · Preview {previewCost} · Full {fullUnlockCost}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="text-3xl font-bold tabular-nums">{balance.toLocaleString()}</div>
-              <div className="space-y-1 text-xs text-muted-foreground">
-                <p>· Lyrics generation: <b className="text-foreground">{lyricsCost}</b></p>
-                <p>· Preview sample: <b className="text-foreground">{previewCost}</b></p>
-                <p>· Full HQ unlock: <b className="text-foreground">{fullUnlockCost}</b></p>
-              </div>
               <Button asChild variant="outline" size="sm" className="w-full">
                 <Link to="/buy-coins">Top up</Link>
               </Button>
+              <EarnCoinStrip className="w-full justify-start" />
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Wand2 className="h-4 w-4" /> Style
-              </CardTitle>
-              <CardDescription>Locked in from stage 1.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                {song.style || "No style tags yet. Update the brief and resend stage 1 to refine."}
-              </p>
-            </CardContent>
-          </Card>
+          {song.style && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-sm">
+                  <Wand2 className="h-3.5 w-3.5" /> Style
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-muted-foreground">{song.style}</p>
+              </CardContent>
+            </Card>
+          )}
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <MessageSquareMore className="h-4 w-4" /> Need a hand?
-              </CardTitle>
-              <CardDescription>Brainstorm with OG Bot.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button asChild variant="outline" className="w-full gap-2">
-                <Link to="/messenger">
-                  Open OG Bot <ExternalLink className="h-3.5 w-3.5" />
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
         </div>
       </div>
     </div>

@@ -19,6 +19,8 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { PreferencesPanel } from "@/components/settings/PreferencesPanel";
 import { VipStatusCard } from "@/components/settings/VipStatusCard";
+import { EarnCoinStrip } from "@/components/referrals/EarnCoinStrip";
+
 import { getMyTelegramLinkToken, rotateMyTelegramLinkToken } from "@/lib/telegram-admin.functions";
 
 export const Route = createFileRoute("/_authenticated/settings")({
@@ -154,6 +156,8 @@ function SettingsPage() {
   return (
     <DashboardShell title="Settings">
       <div className="mx-auto max-w-2xl space-y-6">
+        <EarnCoinStrip />
+
         {/* Identity */}
         <section className="rounded-2xl border border-border bg-card p-6 shadow-card space-y-4">
           <header className="flex items-center gap-3">

@@ -3,6 +3,8 @@ import { Receipt } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { PurchaseHistory } from "@/components/PurchaseHistory";
 import { VipStatusCard } from "@/components/settings/VipStatusCard";
+import { EarnCoinStrip } from "@/components/referrals/EarnCoinStrip";
+
 
 export const Route = createFileRoute("/_authenticated/purchase-history")({
   component: PurchaseHistoryPage,
@@ -21,6 +23,9 @@ function PurchaseHistoryPage() {
             </p>
           </div>
         </header>
+
+        <EarnCoinStrip />
+
 
         <VipStatusCard />
         <PurchaseHistory />
