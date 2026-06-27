@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
+import { FlameHeading } from "@/components/ui/flame-heading";
 
 export interface HubCardProps {
   to: string;
@@ -32,14 +33,14 @@ export function HubCard({ to, icon, title, description, cta, primary }: HubCardP
         <span className={primary ? "text-primary-foreground" : "text-primary"}>{icon}</span>
       </div>
       <div className="min-w-0">
-        <h3 className="font-bungee text-3xl sm:text-4xl md:text-5xl break-words">{title}</h3>
+        <FlameHeading as="h3" size="xl" className="break-words">{title}</FlameHeading>
         <p className="font-bungee mt-3 text-sm sm:text-base md:text-lg leading-snug text-muted-foreground text-pretty">{description}</p>
       </div>
       <div className="mt-auto pt-2">
-        <span className="font-bungee inline-flex items-center gap-1.5 text-sm sm:text-base text-primary">
+        <FlameHeading as="span" size="sm" className="inline-flex items-center gap-1.5 text-primary">
           {cta}
           <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
-        </span>
+        </FlameHeading>
       </div>
 
     </Link>
