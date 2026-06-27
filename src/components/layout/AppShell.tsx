@@ -168,6 +168,13 @@ export function AppShell({ children }: { children: ReactNode }) {
             )}
             <AdminEditHint />
 
+            <div className="border-b border-white/5 bg-background/40 px-3 py-1.5 sm:px-5 lg:px-7">
+              <div className="mx-auto w-full max-w-6xl">
+                <EarnCoinStrip />
+              </div>
+            </div>
+
+
             <main className="min-w-0 flex-1 overflow-x-hidden">
               <div className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
                 {children}
