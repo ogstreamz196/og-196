@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
@@ -5,10 +6,13 @@ import {
   AlertTriangle,
   CheckCircle2,
   Loader2,
+  Plug,
   RefreshCw,
   Webhook,
 } from "lucide-react";
+import { toast } from "sonner";
 import { getTelegramWebhookStatus } from "@/lib/telegram-webhook-status.functions";
+import { setTelegramWebhook } from "@/lib/telegram-set-webhook.functions";
 import { cn } from "@/lib/utils";
 
 function fmtTs(epochSeconds: number | null): string {
@@ -25,12 +29,32 @@ function fmtTs(epochSeconds: number | null): string {
 
 export function TelegramWebhookStatus() {
   const probeFn = useServerFn(getTelegramWebhookStatus);
+  const setFn = useServerFn(setTelegramWebhook);
+  const [registering, setRegistering] = useState(false);
   const q = useQuery({
     queryKey: ["telegram-webhook-status"],
     queryFn: () => probeFn(),
     refetchInterval: 30_000,
     staleTime: 15_000,
   });
+
+  async function registerWebhook() {
+    setRegistering(true);
+    try {
+      const r = await setFn({ data: {} } as never);
+      toast.success(
+        r.botUsername
+          ? `Webhook registered on @${r.botUsername}`
+          : "Webhook registered",
+        { description: r.url },
+      );
+      q.refetch();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not register webhook");
+    } finally {
+      setRegistering(false);
+    }
+  }
 
   const data = q.data;
   const loading = q.isLoading;
@@ -93,6 +117,21 @@ export function TelegramWebhookStatus() {
                 className={cn("h-3 w-3", q.isFetching && "animate-spin")}
               />
               Refresh
+            </button>
+            <button
+              type="button"
+              onClick={registerWebhook}
+              disabled={registering}
+              className="inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary hover:bg-primary/20 disabled:opacity-60"
+              aria-label="Re-register webhook on the active bot"
+              title="Point Telegram at this app's webhook using the active bot token"
+            >
+              {registering ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <Plug className="h-3 w-3" />
+              )}
+              Re-register
             </button>
           </div>
 
