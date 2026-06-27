@@ -19,6 +19,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppSidebar } from "./AppSidebar";
 import { HighContrastToggle } from "./HighContrastToggle";
 import { WelcomeBackdrop } from "./WelcomeBackdrop";
+import { EarnCoinStrip } from "@/components/referrals/EarnCoinStrip";
+
 import ogStreamzLogo from "@/assets/ogstreamz-logo.jpg.asset.json";
 import ogBotLogo from "@/assets/ogbot.png.asset.json";
 
