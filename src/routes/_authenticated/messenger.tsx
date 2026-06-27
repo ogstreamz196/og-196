@@ -9,7 +9,6 @@ import { FoulMouthReminder } from "@/components/FoulMouthReminder";
 import { PoweredByOgBot } from "@/components/PoweredByOgBot";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 
-import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { useRole } from "@/hooks/use-role";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
 
