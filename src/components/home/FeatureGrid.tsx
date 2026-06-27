@@ -27,7 +27,7 @@ export function FeatureGrid() {
           <Music2 className="h-5 w-5 text-primary" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold">What you can do</h2>
+          <h2 className="font-bungee text-3xl sm:text-4xl md:text-5xl">What you can do</h2>
           <p className="text-sm text-muted-foreground">Everything you need to create and collect music.</p>
         </div>
       </div>

@@ -8,7 +8,7 @@ export function PortalVipCta() {
         <div className="grid h-10 w-10 place-items-center rounded-xl bg-amber-500/20">
           <Crown className="h-5 w-5 text-amber-500" />
         </div>
-        <h3 className="text-xl font-bold">OG VIP</h3>
+        <h3 className="font-bungee text-3xl sm:text-4xl">OG VIP</h3>
       </div>
       <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
         Priority generation, exclusive badges, and VIP-only portal access.

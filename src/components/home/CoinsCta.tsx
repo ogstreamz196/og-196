@@ -4,7 +4,7 @@ import { Coins } from "lucide-react";
 export function CoinsCta() {
   return (
     <section className="w-full rounded-2xl border border-border bg-card/60 p-8 text-center shadow-card">
-      <h3 className="text-xl font-semibold">Running low on coins?</h3>
+      <h3 className="font-bungee text-3xl sm:text-4xl">Running low on coins?</h3>
       <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
         Top up your OG coins to keep creating. Choose from coin packs or grab a VIP membership for unlimited perks.
       </p>
