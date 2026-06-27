@@ -260,9 +260,38 @@ export function TelegramWebhookStatus({ autoRegister = true }: Props = {}) {
           ) : null}
 
           {data ? (
-            <p className="mt-2 text-[10px] uppercase tracking-wider text-muted-foreground">
-              Checked {new Date(data.checkedAt).toLocaleTimeString()}
-            </p>
+            <div className="mt-3 grid gap-2 rounded-xl border border-border/40 bg-muted/20 p-2 text-[11px] sm:grid-cols-3">
+              <div>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Last setWebhook
+                </p>
+                <p className="font-mono">
+                  {lastSetAt ? new Date(lastSetAt).toLocaleString() : "—"}
+                </p>
+              </div>
+              <div>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Receiving updates
+                </p>
+                <p
+                  className={cn(
+                    "inline-flex items-center gap-1 font-semibold",
+                    receiving ? "text-emerald-400" : "text-amber-400",
+                  )}
+                >
+                  <Inbox className="h-3 w-3" />
+                  {receiving ? "Yes" : "No / stalled"}
+                </p>
+              </div>
+              <div>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Checked
+                </p>
+                <p className="font-mono">
+                  {new Date(data.checkedAt).toLocaleTimeString()}
+                </p>
+              </div>
+            </div>
           ) : null}
         </div>
       </div>
