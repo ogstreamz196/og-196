@@ -879,7 +879,7 @@ function LibraryPage() {
             )}>
               {foulMouth ? "🤬" : "🧼"}
             </div>
-            <div className="min-w-0 flex-1 sm:flex-none sm:max-w-[18rem]">
+            <div className="min-w-0 shrink max-w-[10rem] sm:max-w-[18rem]">
               <div className="truncate text-sm font-bold leading-tight sm:text-lg">OG Foul Mouth</div>
               <div
                 id="foul-mouth-status"
