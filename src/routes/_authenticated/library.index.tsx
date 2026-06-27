@@ -849,12 +849,9 @@ function LibraryPage() {
             type="button"
             role="switch"
             aria-checked={foulMouth}
-            aria-label={
-              foulMouth
-                ? "OG Foul Mouth is on. Activate to turn explicit mode off."
-                : "OG Foul Mouth is off. Activate to turn explicit mode on."
-            }
+            aria-label="OG Foul Mouth — explicit lyrics mode"
             aria-describedby="foul-mouth-status"
+            aria-busy={genLyrics}
             onClick={() => !genLyrics && setFoulMouth((v) => !v)}
             onKeyDown={(e) => {
               if (genLyrics) return;
@@ -873,7 +870,7 @@ function LibraryPage() {
                 : "border-white/15 bg-white/[0.04] hover:border-white/25",
             )}
           >
-            <div aria-hidden className={cn(
+            <div aria-hidden="true" className={cn(
               "grid h-11 w-11 shrink-0 place-items-center rounded-xl text-xl transition sm:h-12 sm:w-12 sm:text-2xl",
               foulMouth ? "bg-destructive/30" : "bg-white/5",
             )}>
@@ -893,7 +890,7 @@ function LibraryPage() {
               </div>
             </div>
             <span
-              aria-hidden
+              aria-hidden="true"
               className={cn(
                 "pointer-events-none inline-flex shrink-0 items-center justify-center rounded-full border-2 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] transition sm:px-4 sm:py-2 sm:text-xs",
                 foulMouth
