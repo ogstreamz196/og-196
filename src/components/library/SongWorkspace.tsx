@@ -133,7 +133,8 @@ export function SongWorkspace({ song, onSaved }: Props) {
       )
       .subscribe();
 
-    const poll = setInterval(() => onSaved?.(), 4000);
+    // Tight 2s polling fallback in case Realtime drops a message.
+    const poll = setInterval(() => onSaved?.(), 2000);
 
     return () => {
       supabase.removeChannel(channel);
@@ -141,6 +142,19 @@ export function SongWorkspace({ song, onSaved }: Props) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [song.id, song.status]);
+
+  // Elapsed-seconds counter for the Generate button while a job is in flight.
+  const [elapsed, setElapsed] = useState(0);
+  useEffect(() => {
+    if (!isPending) { setElapsed(0); return; }
+    const startedAt = song.generation_started_at
+      ? new Date(song.generation_started_at).getTime()
+      : Date.now();
+    const tick = () => setElapsed(Math.max(0, Math.round((Date.now() - startedAt) / 1000)));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [isPending, song.generation_started_at]);
 
   const stage: Stage = isReady ? 3 : hasLyrics ? 2 : 1;
 
@@ -549,7 +563,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
                 >
                   {genPreview || isPending ? <Loader2 className="h-4 w-4 animate-spin" /> :
                     isReady ? <RefreshCw className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                  {genPreview ? "Starting…" : isPending ? "Generating — please wait" : isReady ? "Regenerate sample" : "Generate preview"}
+                  {genPreview ? "Starting…" : isPending ? `Generating… ${elapsed}s` : isReady ? "Regenerate sample" : "Generate preview"}
                   <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-background/30 px-1.5 py-0.5 text-[10px] font-semibold">
                     <Coins className="h-3 w-3" /> {previewCost}
                   </span>
