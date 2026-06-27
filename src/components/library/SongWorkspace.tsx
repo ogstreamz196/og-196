@@ -26,6 +26,8 @@ import { VariationsCard } from "./song-workspace/VariationsCard";
 import type { WorkspaceSong } from "./song-workspace/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
+import { EarnCoinStrip } from "@/components/referrals/EarnCoinStrip";
+
 
 const LANGUAGES = [
   "English", "Spanish", "French", "Portuguese", "Hindi", "Gujarati",
