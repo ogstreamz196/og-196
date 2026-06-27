@@ -342,21 +342,47 @@ function LibraryPage() {
     [versionedLibrary],
   );
 
-  const community = useQuery({
+  const COMMUNITY_PAGE_SIZE = 12;
+  const community = useInfiniteQuery({
     queryKey: ["library-community", user?.id],
     enabled: !!user,
-    queryFn: async (): Promise<Song[]> => {
+    initialPageParam: 0,
+    queryFn: async ({ pageParam }): Promise<Song[]> => {
+      const from = (pageParam as number) * COMMUNITY_PAGE_SIZE;
+      const to = from + COMMUNITY_PAGE_SIZE - 1;
       const { data, error } = await supabase
         .from("songs")
         .select("*")
         .eq("status", "completed")
         .neq("user_id", user!.id)
         .order("created_at", { ascending: false })
-        .limit(24);
+        .range(from, to);
       if (error) throw error;
       return (data ?? []) as Song[];
     },
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage.length < COMMUNITY_PAGE_SIZE ? undefined : allPages.length,
   });
+  const communityTracks = useMemo(
+    () => community.data?.pages.flat() ?? [],
+    [community.data],
+  );
+  const communitySentinelRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const el = communitySentinelRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver((entries) => {
+      if (
+        entries[0]?.isIntersecting &&
+        community.hasNextPage &&
+        !community.isFetchingNextPage
+      ) {
+        community.fetchNextPage();
+      }
+    }, { rootMargin: "400px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [community.hasNextPage, community.isFetchingNextPage, communityTracks.length]);
 
   useEffect(() => {
     if (!user) return;
