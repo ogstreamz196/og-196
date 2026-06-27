@@ -878,17 +878,18 @@ function LibraryPage() {
               {foulMouth ? "🤬" : "🧼"}
             </div>
             <div className="min-w-0 shrink">
-
-              <div className="truncate text-sm font-bold leading-tight sm:text-lg">OG Foul Mouth</div>
-              <div
-                id="foul-mouth-status"
-                aria-live="polite"
-                className={cn(
-                  "truncate text-xs leading-tight sm:text-sm",
-                  foulMouth ? "font-semibold text-destructive-foreground/90" : "text-muted-foreground",
-                )}
-              >
-                {foulMouth ? "Explicit · ON" : "Clean · tap to go explicit"}
+              <div className="truncate text-sm font-bold leading-tight sm:text-lg">
+                OG Foul Mouth ·{" "}
+                <span
+                  id="foul-mouth-status"
+                  aria-live="polite"
+                  className={cn(
+                    "font-black uppercase tracking-wide",
+                    foulMouth ? "text-destructive" : "text-muted-foreground",
+                  )}
+                >
+                  {foulMouthSaving ? "Saving…" : foulMouth ? "Turned on" : "Turned off"}
+                </span>
               </div>
             </div>
             <span
