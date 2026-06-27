@@ -1,15 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { toast } from "sonner";
 import { Users, MessageCircle } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { OgChat } from "@/components/messenger/OgChat";
 import { CommunityRoom } from "@/components/messenger/CommunityRoom";
-import { FoulMouthReminder } from "@/components/FoulMouthReminder";
 import { PoweredByOgBot } from "@/components/PoweredByOgBot";
-import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 
-import { useRole } from "@/hooks/use-role";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
 
 export const Route = createFileRoute("/_authenticated/messenger")({
@@ -32,29 +28,10 @@ export const Route = createFileRoute("/_authenticated/messenger")({
 function MessengerPage() {
   const { live: initialLive } = Route.useSearch();
   const [liveChat, setLiveChat] = useState<boolean>(Boolean(initialLive));
-  const { foulMouth } = useFoulMouth();
-  const setFoulMouth = useSetFoulMouth();
-  const { isVip } = useRole();
-
-  async function handleFoulToggle() {
-    if (!isVip) {
-      toast.message("Foul-mouth is a VIP perk — grab OG VIP for £5/month.", {
-        action: { label: "Get VIP", onClick: () => { window.location.href = "/buy-coins?flow=vip"; } },
-      });
-      return;
-    }
-    try {
-      await setFoulMouth.mutateAsync(!foulMouth);
-    } catch (e) {
-      toast.error((e as Error).message);
-    }
-  }
 
   return (
     <DashboardShell title="OG Bot">
-      <div className="mx-auto mb-3 w-full max-w-5xl">
-        <FoulMouthReminder enabled={foulMouth} onAction={handleFoulToggle} />
-      </div>
+
 
       <div className="mx-auto flex h-[calc(100dvh-8rem)] min-h-[520px] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-card/70 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.7)] ring-1 ring-white/5 backdrop-blur-xl sm:h-[calc(100dvh-10rem)] sm:rounded-3xl">
 
