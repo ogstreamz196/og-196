@@ -90,7 +90,7 @@ function DashboardHome() {
       {/* Welcome */}
       <section
         ref={welcomeRef}
-        className="group/welcome relative flex flex-col gap-3 overflow-hidden rounded-[2.5rem] border-2 border-white/15 bg-card/55 p-6 shadow-[0_24px_60px_-20px_rgba(80,60,255,0.45)] backdrop-blur-2xl sm:p-12"
+        className="group/welcome relative flex flex-col gap-3 overflow-hidden rounded-[2rem] border-2 border-white/15 bg-card/55 p-4 shadow-[0_24px_60px_-20px_rgba(80,60,255,0.45)] backdrop-blur-2xl sm:rounded-[2.5rem] sm:p-12"
       >
         {/* Adaptive dark scrim */}
         <div
