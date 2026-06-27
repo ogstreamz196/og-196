@@ -642,9 +642,9 @@ function PackCard({
       />
 
       {/* Coins + bonus */}
-      <div className="mt-3 flex items-center gap-2.5">
-        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-coin/15">
-          <Coins className="h-6 w-6 text-coin" />
+      <div className="mt-3 flex items-center gap-2">
+        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-coin/15">
+          <Coins className="h-5 w-5 text-coin" />
         </div>
         <div className="min-w-0 flex-1">
           <EditableField
@@ -659,19 +659,20 @@ function PackCard({
             setDraft={setDraft}
             inputProps={{ type: "number", min: 1, step: 1 }}
             view={
-              <div className="flex items-baseline gap-2 leading-none">
+              <div className="flex items-baseline gap-1.5 whitespace-nowrap leading-none">
                 {showBonus && (
-                  <span className="text-lg font-bold tabular-nums text-muted-foreground/70 line-through decoration-2">
+                  <span className="text-base font-bold tabular-nums text-muted-foreground/70 line-through decoration-2">
                     {Math.round(effective.coins / 2)}
                   </span>
                 )}
-                <span className={cn("text-3xl font-black tabular-nums", showBonus && "flash-gold")}>
+                <span className={cn("text-2xl font-black tabular-nums sm:text-3xl", showBonus && "flash-gold")}>
                   {effective.coins}
                 </span>
-                <span className="text-xs font-bold text-coin">Coins</span>
+                <span className="text-[11px] font-bold text-coin">Coins</span>
               </div>
             }
           />
+
           <div className="mt-1 flex items-center gap-2">
             {canEdit ? (
               <button
