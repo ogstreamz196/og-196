@@ -760,7 +760,10 @@ function Footer() {
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-8 text-sm text-muted-foreground sm:flex-row sm:px-8">
         <span className="inline-flex items-center gap-2">© {new Date().getFullYear()} OG Studio · Prompt songs powered by <OgBotLogo className="h-5 w-5" /></span>
         <div className="flex items-center gap-6">
-          <Link to="/auth" className="transition hover:text-foreground">
+          <Link
+            to="/auth"
+            className="inline-flex min-h-11 items-center rounded-md px-3 transition hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          >
             Sign in
           </Link>
         </div>
