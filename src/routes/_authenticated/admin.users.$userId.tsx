@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { UserAuditTrail } from "@/components/admin/UserAuditTrail";
+import { TelegramSignInLog } from "@/components/admin/TelegramSignInLog";
 import { DevBossPanel } from "@/components/admin/DevBossPanel";
 import {
   sendTelegramDm,
@@ -45,7 +46,7 @@ interface ProfileRow {
 
 function UserSettingsPage() {
   const { userId } = Route.useParams();
-  const { isAdmin, isLoading } = useRole();
+  const { isAdmin, isBoss, isLoading } = useRole();
   const qc = useQueryClient();
 
   const profileQ = useQuery({
@@ -386,6 +387,8 @@ function UserSettingsPage() {
         <DevBossPanel targetUserId={profile.id} currentBalance={profile.coin_balance ?? 0} />
 
         <UserAuditTrail userId={profile.id} email={profile.email} />
+
+        {isBoss && <TelegramSignInLog userId={profile.id} />}
       </div>
     </DashboardShell>
   );

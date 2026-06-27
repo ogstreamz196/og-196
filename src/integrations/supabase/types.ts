@@ -1001,6 +1001,39 @@ export type Database = {
         }
         Relationships: []
       }
+      telegram_sign_in_events: {
+        Row: {
+          chat_id: number | null
+          created_at: string
+          event_kind: string
+          id: string
+          source: string | null
+          telegram_first_name: string | null
+          telegram_username: string | null
+          user_id: string
+        }
+        Insert: {
+          chat_id?: number | null
+          created_at?: string
+          event_kind?: string
+          id?: string
+          source?: string | null
+          telegram_first_name?: string | null
+          telegram_username?: string | null
+          user_id: string
+        }
+        Update: {
+          chat_id?: number | null
+          created_at?: string
+          event_kind?: string
+          id?: string
+          source?: string | null
+          telegram_first_name?: string | null
+          telegram_username?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       unlocked_songs: {
         Row: {
           cost_coins: number | null
