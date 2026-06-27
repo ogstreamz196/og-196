@@ -44,7 +44,7 @@ import {
 } from "@/lib/library-utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Disc3, Flame } from "lucide-react";
-import { FoulMouthReminder } from "@/components/FoulMouthReminder";
+
 import { PoweredByOgBot } from "@/components/PoweredByOgBot";
 import { JobQueuePanel } from "@/components/library/JobQueuePanel";
 import { CategoryCard } from "@/components/library/CategoryCard";
