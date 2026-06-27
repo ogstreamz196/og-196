@@ -379,10 +379,12 @@ export function OgChat({
     try {
       const next = !foulMouth;
       await setFoulMouth.mutateAsync(next);
-      toast.message(next ? "🖕 Foul mouth: ON" : "🧼 Foul mouth: OFF");
+      // Toast confirmation is fired centrally by useSetFoulMouth's onSuccess
+      // so every surface (messenger, settings, library) shows the same message.
     } catch (e) {
       toast.error((e as Error).message);
     }
+
   }
 
   async function handleFile(file: File) {
