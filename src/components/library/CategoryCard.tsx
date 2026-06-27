@@ -40,7 +40,7 @@ export function CategoryCard({
             <Icon className="h-5 w-5" />
           </div>
           <div className="min-w-0 leading-tight">
-            <div className={`font-bungee text-xl sm:text-2xl uppercase ${meta.accent}`}>
+            <div className={"font-bungee text-xl sm:text-2xl uppercase"}>
               {meta.emoji} {meta.label}
             </div>
 
