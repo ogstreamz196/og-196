@@ -133,7 +133,8 @@ export function SongWorkspace({ song, onSaved }: Props) {
       )
       .subscribe();
 
-    const poll = setInterval(() => onSaved?.(), 4000);
+    // Tight 2s polling fallback in case Realtime drops a message.
+    const poll = setInterval(() => onSaved?.(), 2000);
 
     return () => {
       supabase.removeChannel(channel);
