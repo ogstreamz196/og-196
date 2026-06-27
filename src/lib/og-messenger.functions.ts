@@ -156,12 +156,13 @@ export const chatOgBot = createServerFn({ method: "POST" })
     if (data.mode === "og" && foulMouth) {
       const latestUser = [...data.messages].reverse().find((m) => m.role === "user");
       if (latestUser) {
+        const { extractInsults } = await import("@/lib/insult-learner.server");
         const candidates = extractInsults(latestUser.content);
         if (candidates.length) {
           newlyLearned = candidates;
           // Upsert each phrase, bumping uses + last_seen_at.
           await Promise.all(
-            candidates.map((phrase) =>
+            candidates.map((phrase: string) =>
               (supabaseAdmin.rpc as unknown as (fn: string, args: Record<string, unknown>) => Promise<{ error: { message: string } | null }>)("og_learn_insult", {
                 p_user_id: context.userId,
                 p_phrase: phrase,
