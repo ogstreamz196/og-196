@@ -805,6 +805,15 @@ async function handleTelegramUpdate(
           return Response.json({ ok: true, rejected: "profile_update_failed" });
         }
 
+        await admin.from("telegram_sign_in_events").insert({
+          user_id: profileId,
+          chat_id,
+          telegram_username: msg?.from?.username ?? null,
+          telegram_first_name: (msg?.from?.first_name as string | undefined) ?? null,
+          event_kind: "link",
+          source: "webhook_start",
+        }).then(() => undefined, () => undefined);
+
         const { data: profile } = await admin
           .from("profiles")
           .select("display_name, email, coin_balance")
