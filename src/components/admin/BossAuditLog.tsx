@@ -80,38 +80,38 @@ export function BossAuditLog() {
       ) : (
         <ul className="max-h-[480px] space-y-2 overflow-y-auto pr-1">
           {data.map((row) => (
-            <li
-              key={row.id}
-              className="rounded-xl border border-border/60 bg-background/40 p-3 text-sm"
-            >
-              <div className="mb-1.5 flex flex-wrap items-center gap-2">
-                <span
-                  className={cn(
-                    "rounded-full px-2 py-0.5 text-xs font-medium capitalize",
-                    CAT_STYLES[row.category] ?? "bg-muted text-muted-foreground",
-                  )}
-                >
-                  {row.category}
-                </span>
-                <span className="text-xs uppercase tracking-wide text-muted-foreground">
-                  {row.action}
-                </span>
-                <code className="rounded bg-muted/60 px-1.5 py-0.5 text-xs">{row.target_key}</code>
-                <span className="ml-auto text-xs text-muted-foreground">
-                  {new Date(row.created_at).toLocaleString()}
-                </span>
-              </div>
-              <div className="grid gap-2 text-xs sm:grid-cols-[1fr_auto_1fr] sm:items-start">
-                <div className="rounded-lg bg-destructive/10 p-2 text-destructive-foreground/80">
-                  <div className="mb-1 text-[10px] uppercase tracking-wide opacity-70">Before</div>
-                  {preview(row.old_value)}
+            <li key={row.id}>
+              <details className="group rounded-xl border border-border/60 bg-background/40 text-sm open:bg-background/60">
+                <summary className="flex cursor-pointer list-none flex-wrap items-center gap-2 p-3 [&::-webkit-details-marker]:hidden">
+                  <span
+                    className={cn(
+                      "rounded-full px-2 py-0.5 text-xs font-medium capitalize",
+                      CAT_STYLES[row.category] ?? "bg-muted text-muted-foreground",
+                    )}
+                  >
+                    {row.category}
+                  </span>
+                  <span className="text-xs uppercase tracking-wide text-muted-foreground">
+                    {row.action}
+                  </span>
+                  <code className="rounded bg-muted/60 px-1.5 py-0.5 text-xs">{row.target_key}</code>
+                  <span className="ml-auto text-xs text-muted-foreground">
+                    {new Date(row.created_at).toLocaleString()}
+                  </span>
+                  <ArrowRight className="h-3.5 w-3.5 text-muted-foreground transition-transform group-open:rotate-90" />
+                </summary>
+                <div className="grid gap-2 border-t border-border/40 p-3 text-xs sm:grid-cols-[1fr_auto_1fr] sm:items-start">
+                  <div className="rounded-lg bg-destructive/10 p-2 text-destructive-foreground/80">
+                    <div className="mb-1 text-[10px] uppercase tracking-wide opacity-70">Before</div>
+                    {preview(row.old_value)}
+                  </div>
+                  <ArrowRight className="hidden h-4 w-4 self-center text-muted-foreground sm:block" />
+                  <div className="rounded-lg bg-primary/10 p-2">
+                    <div className="mb-1 text-[10px] uppercase tracking-wide opacity-70">After</div>
+                    {preview(row.new_value)}
+                  </div>
                 </div>
-                <ArrowRight className="hidden h-4 w-4 self-center text-muted-foreground sm:block" />
-                <div className="rounded-lg bg-primary/10 p-2">
-                  <div className="mb-1 text-[10px] uppercase tracking-wide opacity-70">After</div>
-                  {preview(row.new_value)}
-                </div>
-              </div>
+              </details>
             </li>
           ))}
         </ul>
