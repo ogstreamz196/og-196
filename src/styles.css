@@ -1030,11 +1030,16 @@ button.graffiti-accent:hover {
   letter-spacing: -0.01em;
 }
 @utility font-bitcount {
-  font-family: "Bitcount Grid Double", var(--font-display);
+  font-family: "Bitcount Grid Double", "Bowlby One", "Lilita One", var(--font-display), system-ui, sans-serif;
   font-weight: 700;
-  letter-spacing: -0.01em;
-  line-height: 1;
+  letter-spacing: -0.03em;
+  line-height: 0.9;
+  font-feature-settings: "ss01";
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  hyphens: auto;
 }
+
 @utility sticker-shadow {
   box-shadow: 4px 4px 0 0 hsl(0 0% 0%);
 }
