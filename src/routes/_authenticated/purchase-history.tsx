@@ -24,6 +24,9 @@ function PurchaseHistoryPage() {
           </div>
         </header>
 
+        <EarnCoinStrip />
+
+
         <VipStatusCard />
         <PurchaseHistory />
       </div>
