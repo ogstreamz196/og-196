@@ -156,6 +156,8 @@ function SettingsPage() {
   return (
     <DashboardShell title="Settings">
       <div className="mx-auto max-w-2xl space-y-6">
+        <EarnCoinStrip />
+
         {/* Identity */}
         <section className="rounded-2xl border border-border bg-card p-6 shadow-card space-y-4">
           <header className="flex items-center gap-3">
