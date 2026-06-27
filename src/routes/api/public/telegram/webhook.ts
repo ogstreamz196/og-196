@@ -813,6 +813,7 @@ async function handleTelegramUpdate(
         const balance = profile?.coin_balance ?? 0;
 
         const greeting =
+          `✅ <b>Connected!</b> OG Bot is now linked to your account.\n\n` +
           `🔥 Yo <b>${name}</b> — link verified. OG Bot in your pocket now.\n\n` +
           `💰 Balance: <b>${balance}</b> OG coins\n` +
           `🎧 Just chat — same brain as the in-app messenger.\n` +
