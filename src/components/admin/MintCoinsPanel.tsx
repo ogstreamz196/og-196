@@ -290,32 +290,37 @@ export function MintCoinsPanel() {
         <UserAuditTrail userId={selected.id} email={selected.email} />
       )}
 
-      <div className="mt-6">
-        <div className="mb-2 flex items-center gap-2 text-sm font-medium text-muted-foreground">
+      <details className="group mt-6 rounded-xl border border-border bg-background/40">
+        <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground">
           <History className="h-4 w-4" /> Recent admin changes (global)
-        </div>
-        {recent.isLoading ? (
-          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-        ) : recent.data && recent.data.length > 0 ? (
-          <ul className="divide-y divide-border rounded-xl border border-border bg-background/40 text-sm">
-            {recent.data.map((t) => (
-              <li key={t.id} className="flex items-center justify-between px-3 py-2">
-                <div className="min-w-0">
-                  <div className="truncate font-medium">{t.email ?? t.user_id.slice(0, 8)}</div>
-                  <div className="truncate text-xs text-muted-foreground">
-                    {t.reference || t.type} · {new Date(t.created_at).toLocaleString()}
+          <span className="ml-auto text-xs opacity-70 group-open:hidden">Show</span>
+          <span className="ml-auto hidden text-xs opacity-70 group-open:inline">Hide</span>
+        </summary>
+        <div className="border-t border-border px-3 py-2">
+          {recent.isLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+          ) : recent.data && recent.data.length > 0 ? (
+            <ul className="divide-y divide-border text-sm">
+              {recent.data.map((t) => (
+                <li key={t.id} className="flex items-center justify-between py-2">
+                  <div className="min-w-0">
+                    <div className="truncate font-medium">{t.email ?? t.user_id.slice(0, 8)}</div>
+                    <div className="truncate text-xs text-muted-foreground">
+                      {t.reference || t.type} · {new Date(t.created_at).toLocaleString()}
+                    </div>
                   </div>
-                </div>
-                <div className={t.amount >= 0 ? "font-semibold text-primary" : "font-semibold text-destructive"}>
-                  {t.amount >= 0 ? "+" : ""}{t.amount}
-                </div>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-sm text-muted-foreground">No admin coin activity yet.</p>
-        )}
-      </div>
+                  <div className={t.amount >= 0 ? "font-semibold text-primary" : "font-semibold text-destructive"}>
+                    {t.amount >= 0 ? "+" : ""}{t.amount}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-muted-foreground">No admin coin activity yet.</p>
+          )}
+        </div>
+      </details>
+
     </div>
   );
 }
