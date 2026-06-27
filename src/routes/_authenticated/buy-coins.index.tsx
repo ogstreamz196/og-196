@@ -62,49 +62,25 @@ function BuyCoinsPage() {
   // Restore previous selection (e.g. after a canceled Stripe checkout).
   useEffect(() => {
     if (selected) return;
-    try {
-      const raw = sessionStorage.getItem(SELECTION_STORAGE_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw) as StoredSelection;
-      if (parsed.type === "vip") {
-        setSelected({ type: "vip" });
-        setStage("confirm");
-        toast.info("We brought you back to your last selection.");
-      } else if (parsed.type === "coins") {
-        const pack = findCoinPackByBundleId(parsed.bundleId);
-        if (pack) {
-          setSelected({ type: "coins", pack });
-          setStage("confirm");
-          toast.info("We brought you back to your last selection.");
-        }
-      } else if (parsed.type === "custom") {
-        const u = Math.min(Math.max(parsed.units, CUSTOM_COIN_UNIT.minUnits), CUSTOM_COIN_UNIT.maxUnits);
-        setSelected({ type: "custom", units: u });
-        setStage("confirm");
-        toast.info("We brought you back to your last selection.");
-      }
-    } catch {
-      /* ignore */
-    }
+    const restored = loadStoredSelection();
+    if (!restored) return;
+    setSelected(restored);
+    setStage("confirm");
+    toast.info("We brought you back to your last selection.");
   }, [selected]);
 
   const pickSelection = (s: Selection) => {
-    const stored: StoredSelection =
-      s.type === "vip"
-        ? { type: "vip" }
-        : s.type === "custom"
-        ? { type: "custom", units: s.units }
-        : { type: "coins", bundleId: s.pack.bundleId };
-    try { sessionStorage.setItem(SELECTION_STORAGE_KEY, JSON.stringify(stored)); } catch { /* ignore */ }
+    persistSelection(s);
     setSelected(s);
     setStage("confirm");
   };
 
   const clearSelection = () => {
-    try { sessionStorage.removeItem(SELECTION_STORAGE_KEY); } catch { /* ignore */ }
+    clearStoredSelection();
     setSelected(null);
     setStage("confirm");
   };
+
 
   // Anchor savings calc against the worst per-coin price (the smallest pack).
   const basePerCoin = COIN_PACKS.reduce(
