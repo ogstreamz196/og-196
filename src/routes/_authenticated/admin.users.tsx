@@ -81,6 +81,18 @@ function AdminUsersPage() {
     },
   });
 
+  const proQ = useQuery({
+    queryKey: ["admin-users-pro"],
+    enabled: isAdmin,
+    queryFn: () => listUsersPro({ data: { search: "" } }),
+    staleTime: 30_000,
+  });
+  const proByUser = useMemo(() => {
+    const m = new Map<string, ProUserRow>();
+    (proQ.data ?? []).forEach((r) => m.set(r.id, r as ProUserRow));
+    return m;
+  }, [proQ.data]);
+
   const rolesByUser = useMemo(() => {
     const map = new Map<string, string[]>();
     (rolesQ.data ?? []).forEach((r) => {
