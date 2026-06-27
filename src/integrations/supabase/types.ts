@@ -1133,6 +1133,26 @@ export type Database = {
         Args: { _delta: number; _user_id: string }
         Returns: number
       }
+      list_community_songs: {
+        Args: { p_limit?: number; p_offset?: number }
+        Returns: {
+          audio_path: string
+          completed_at: string
+          cover_url: string
+          created_at: string
+          duration_seconds: number
+          id: string
+          is_variation: boolean
+          revealed: boolean
+          sample_path: string
+          status: string
+          stream_audio_url: string
+          style: string
+          title: string
+          unlocked: boolean
+          user_id: string
+        }[]
+      }
       list_og_bot_remote_tokens_safe: {
         Args: never
         Returns: {
