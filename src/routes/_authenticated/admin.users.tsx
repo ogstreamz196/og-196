@@ -5,8 +5,10 @@ import {
   Loader2, ShieldCheck, Search, ArrowLeft, Users as UsersIcon,
   UserCog, Crown, Coins, Settings as SettingsIcon, Bot,
   Plus, Minus, Pencil, MoreHorizontal, ChevronDown, ChevronUp,
-  ExternalLink, X,
+  ExternalLink, X, MapPin, Smartphone, Send,
 } from "lucide-react";
+import { listUsersPro } from "@/lib/sign-in-tracking.functions";
+import { formatDistanceToNow } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { maskDevIdentity } from "@/lib/dev-identity";
 import { useRole } from "@/hooks/use-role";
@@ -44,6 +46,8 @@ interface RoleRow {
   role: string;
 }
 
+type ProUserRow = Awaited<ReturnType<typeof listUsersPro>>[number];
+
 type RoleFilter = "all" | "admin" | "vip" | "og_bot" | "user";
 type SortKey = "joined" | "balance" | "name";
 
@@ -78,6 +82,18 @@ function AdminUsersPage() {
       return (data ?? []) as RoleRow[];
     },
   });
+
+  const proQ = useQuery({
+    queryKey: ["admin-users-pro"],
+    enabled: isAdmin,
+    queryFn: () => listUsersPro({ data: { search: "" } }),
+    staleTime: 30_000,
+  });
+  const proByUser = useMemo(() => {
+    const m = new Map<string, ProUserRow>();
+    (proQ.data ?? []).forEach((r) => m.set(r.id, r as ProUserRow));
+    return m;
+  }, [proQ.data]);
 
   const rolesByUser = useMemo(() => {
     const map = new Map<string, string[]>();
@@ -260,8 +276,9 @@ function AdminUsersPage() {
                 <TableBody>
                   {filtered.map((u) => {
                     const roles = rolesByUser.get(u.id) ?? [];
+                    const pro = proByUser.get(u.id);
                     return (
-                      <UserRow key={u.id} user={u} roles={roles} />
+                      <UserRow key={u.id} user={u} roles={roles} pro={pro} />
                     );
                   })}
                 </TableBody>
@@ -359,63 +376,99 @@ function InlineNameEdit({ user }: { user: ProfileRow }) {
 }
 
 
-function UserRow({ user, roles }: { user: ProfileRow; roles: string[] }) {
+function UserRow({ user, roles, pro }: { user: ProfileRow; roles: string[]; pro?: ProUserRow }) {
   const isVip = roles.includes("vip");
   const isOgBot = roles.includes("og_bot");
   const isAdminUser = roles.includes("admin");
+  const hasPro = !!(pro && (pro.last_country || pro.last_device || pro.telegram_chat_id || pro.last_sign_in_at));
 
   return (
-    <TableRow className="group">
-      <TableCell className="max-w-[280px] py-3">
-        <div className="flex min-w-0 items-center gap-3">
-          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-brand text-xs font-semibold text-primary-foreground">
-            {(user.display_name ?? user.email ?? "?").slice(0, 1).toUpperCase()}
+    <>
+      <TableRow className="group">
+        <TableCell className="max-w-[280px] py-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-brand text-xs font-semibold text-primary-foreground">
+              {(user.display_name ?? user.email ?? "?").slice(0, 1).toUpperCase()}
+            </div>
+            <div className="min-w-0 flex-1">
+              <InlineNameEdit user={user} />
+              <div className="truncate text-xs text-muted-foreground">{user.email ?? "—"}</div>
+            </div>
           </div>
-          <div className="min-w-0 flex-1">
-            <InlineNameEdit user={user} />
-            <div className="truncate text-xs text-muted-foreground">{user.email ?? "—"}</div>
+        </TableCell>
+
+        <TableCell>
+          <div className="flex flex-wrap items-center gap-1">
+            {isAdminUser && <RoleChip label="Admin" tone="primary" />}
+            {isVip && <RoleChip label="VIP" tone="amber" />}
+            {isOgBot && <RoleChip label="Bot" tone="primary-soft" />}
+            {!isAdminUser && !isVip && !isOgBot && <RoleChip label="User" tone="muted" />}
           </div>
-        </div>
-      </TableCell>
+        </TableCell>
 
-      <TableCell>
-        <div className="flex flex-wrap items-center gap-1">
-          {isAdminUser && <RoleChip label="Admin" tone="primary" />}
-          {isVip && <RoleChip label="VIP" tone="amber" />}
-          {isOgBot && <RoleChip label="Bot" tone="primary-soft" />}
-          {!isAdminUser && !isVip && !isOgBot && <RoleChip label="User" tone="muted" />}
-        </div>
-      </TableCell>
+        <TableCell className="text-right">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/60 px-2.5 py-1 font-mono text-sm tabular-nums">
+            <Coins className="h-3.5 w-3.5 text-coin" />
+            {(user.coin_balance ?? 0).toLocaleString()}
+          </div>
+        </TableCell>
 
-      <TableCell className="text-right">
-        <div className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/60 px-2.5 py-1 font-mono text-sm tabular-nums">
-          <Coins className="h-3.5 w-3.5 text-coin" />
-          {(user.coin_balance ?? 0).toLocaleString()}
-        </div>
-      </TableCell>
+        <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
+          {new Date(user.created_at).toLocaleDateString()}
+        </TableCell>
 
-      <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
-        {new Date(user.created_at).toLocaleDateString()}
-      </TableCell>
-
-      <TableCell className="text-right">
-        <div className="flex items-center justify-end gap-1">
-          <VipQuickToggle userId={user.id} checked={isVip} />
-          <CoinsPopover userId={user.id} balance={user.coin_balance ?? 0} />
-          <EditUserPopover user={user} roles={roles} />
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link to="/admin/users/$userId" params={{ userId: user.id }}>
-                <Button size="icon" variant="ghost" className="h-8 w-8" aria-label="Open full user settings">
-                  <ExternalLink className="h-3.5 w-3.5" />
-                </Button>
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent>Open full settings</TooltipContent>
-          </Tooltip>
-        </div>
-      </TableCell>
-    </TableRow>
+        <TableCell className="text-right">
+          <div className="flex items-center justify-end gap-1">
+            <VipQuickToggle userId={user.id} checked={isVip} />
+            <CoinsPopover userId={user.id} balance={user.coin_balance ?? 0} />
+            <EditUserPopover user={user} roles={roles} />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link to="/admin/users/$userId" params={{ userId: user.id }}>
+                  <Button size="icon" variant="ghost" className="h-8 w-8" aria-label="Open full user settings">
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </Button>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent>Open full settings</TooltipContent>
+            </Tooltip>
+          </div>
+        </TableCell>
+      </TableRow>
+      {hasPro && (
+        <TableRow className="border-t-0 hover:bg-transparent">
+          <TableCell colSpan={5} className="pt-0 pb-3">
+            <div className="ml-12 flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
+              {pro!.last_country && (
+                <span className="inline-flex items-center gap-1 rounded-full border border-border/40 bg-background/40 px-2 py-0.5">
+                  <MapPin className="h-3 w-3 text-sky-400" />
+                  {pro!.last_city ? `${pro!.last_city}, ` : ""}{pro!.last_country}
+                </span>
+              )}
+              {pro!.last_device && (
+                <span className="inline-flex items-center gap-1 rounded-full border border-border/40 bg-background/40 px-2 py-0.5">
+                  <Smartphone className="h-3 w-3 text-primary" />
+                  {pro!.last_device}
+                </span>
+              )}
+              {pro!.last_sign_in_at && (
+                <span className="rounded-full border border-border/40 bg-background/40 px-2 py-0.5">
+                  Last seen {formatDistanceToNow(new Date(pro!.last_sign_in_at), { addSuffix: true })}
+                  {pro!.sign_in_count ? ` · ${pro!.sign_in_count} total` : ""}
+                </span>
+              )}
+              {pro!.telegram_chat_id ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 font-semibold text-emerald-300">
+                  <Send className="h-3 w-3" /> Telegram linked
+                </span>
+              ) : (
+                <span className="rounded-full bg-muted px-2 py-0.5">No Telegram</span>
+              )}
+            </div>
+          </TableCell>
+        </TableRow>
+      )}
+    </>
   );
 }
 
