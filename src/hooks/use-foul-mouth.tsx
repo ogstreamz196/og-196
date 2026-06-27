@@ -90,8 +90,14 @@ export function useSetFoulMouth() {
       if (ctx) qc.setQueryData(foulMouthQueryKey(uid), ctx.prev);
     },
     onSuccess: (next) => {
-      toast.success(next ? "OG Foul Mouth on" : "Clean mode on", { id: "settings-saved" });
+      toast.success(next ? "🤬 Foul Mouth: ON" : "🧼 Foul Mouth: OFF", {
+        id: "foul-mouth-toggle",
+        description: next
+          ? "OG Bot is off the leash. Saved to your profile."
+          : "Clean mode locked in. Saved to your profile.",
+      });
     },
+
     onSettled: () => {
       qc.invalidateQueries({ queryKey: foulMouthQueryKey(uid) });
     },
