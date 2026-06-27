@@ -46,7 +46,7 @@ describe("OgChat merged header layout tokens", () => {
 
   it("controls take a fixed, balanced column on sm+ and never shrink", () => {
     expect(controls).toMatch(/\bsm:flex-col\b/);
-    expect(controls).toMatch(/\bsm:w-\[180px\]\b/);
+    expect(controls).toMatch(/sm:w-\[180px\]/);
     expect(controls).toMatch(/\bsm:shrink-0\b/);
     // mobile: must wrap to avoid horizontal overflow at 320/360
     expect(controls).toMatch(/\bflex-wrap\b/);
