@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Users, MessageCircle } from "lucide-react";
+import { Users, MessageCircle, Loader2 } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { OgChat } from "@/components/messenger/OgChat";
 import { CommunityRoom } from "@/components/messenger/CommunityRoom";
 import { PoweredByOgBot } from "@/components/PoweredByOgBot";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -158,8 +159,43 @@ function MessengerPage() {
           </button>
         </header>
 
-        <div className="flex min-h-0 flex-1 flex-col">
-          {isCommunity ? <CommunityRoom /> : <OgChat showHeader showQuickStarts />}
+        <div className="relative flex min-h-0 flex-1 flex-col">
+          {!isReady ? (
+            <div
+              role="status"
+              aria-live="polite"
+              aria-label="Loading your messenger preferences"
+              className="flex h-full flex-col gap-3 p-4 sm:p-6"
+            >
+              <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                Loading your messenger…
+              </div>
+              <Skeleton className="h-16 w-3/4 rounded-2xl" />
+              <Skeleton className="ml-auto h-12 w-2/3 rounded-2xl" />
+              <Skeleton className="h-20 w-5/6 rounded-2xl" />
+              <Skeleton className="ml-auto h-10 w-1/2 rounded-2xl" />
+              <div className="mt-auto">
+                <Skeleton className="h-12 w-full rounded-full" />
+              </div>
+            </div>
+          ) : isCommunity ? (
+            <CommunityRoom />
+          ) : (
+            <OgChat showHeader showQuickStarts />
+          )}
+          {setMode.isPending && (
+            <div
+              role="status"
+              aria-live="polite"
+              className="pointer-events-none absolute inset-x-0 top-0 flex justify-center"
+            >
+              <span className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-card/90 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground shadow-lg backdrop-blur">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Saving mode…
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
