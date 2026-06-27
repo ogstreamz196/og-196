@@ -299,7 +299,7 @@ function ReferralsPage() {
         </section>
 
         {/* PAID / PENDING / NETWORK — tight stat tiles */}
-        <section className="grid gap-3 sm:grid-cols-3">
+        <section data-testid="referrals-stat-tiles" className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           <StatTile
             tone="emerald"
             icon={<CheckCircle2 className="h-4 w-4" />}
@@ -316,14 +316,16 @@ function ReferralsPage() {
             sub="Awaiting first burn"
             unit="refs"
           />
-          <StatTile
-            tone="sky"
-            icon={<Users className="h-4 w-4" />}
-            label="Network"
-            value={summary.total_referred.toLocaleString()}
-            sub="Lifetime sign-ups"
-            unit="nodes"
-          />
+          <div className="col-span-2 sm:col-span-1">
+            <StatTile
+              tone="sky"
+              icon={<Users className="h-4 w-4" />}
+              label="Network"
+              value={summary.total_referred.toLocaleString()}
+              sub="Lifetime sign-ups"
+              unit="nodes"
+            />
+          </div>
         </section>
 
         {/* SHARE LINK + QR — fused command bar */}
