@@ -1001,6 +1001,47 @@ export type Database = {
         }
         Relationships: []
       }
+      unlocked_songs: {
+        Row: {
+          cost_coins: number | null
+          created_at: string
+          id: string
+          reference: string | null
+          song_id: string
+          source: string
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          cost_coins?: number | null
+          created_at?: string
+          id?: string
+          reference?: string | null
+          song_id: string
+          source?: string
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          cost_coins?: number | null
+          created_at?: string
+          id?: string
+          reference?: string | null
+          song_id?: string
+          source?: string
+          unlocked_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "unlocked_songs_song_id_fkey"
+            columns: ["song_id"]
+            isOneToOne: false
+            referencedRelation: "songs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_devices: {
         Row: {
           browser: string | null
