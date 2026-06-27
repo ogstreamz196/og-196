@@ -1,5 +1,6 @@
 import { Music2, Library, MessageCircle } from "lucide-react";
 import { HubCard } from "./HubCard";
+import { FlameHeading } from "@/components/ui/flame-heading";
 
 const FEATURES = [
   {
