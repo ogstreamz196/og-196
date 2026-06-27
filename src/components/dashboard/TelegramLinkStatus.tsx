@@ -189,7 +189,8 @@ export function TelegramLinkStatus() {
     <section
       data-testid="telegram-status-card"
       aria-label="Telegram connection status"
-      className={`grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 rounded-2xl border-2 px-4 py-3 backdrop-blur-md sm:flex sm:flex-wrap ${tone.border} ${tone.bg}`}
+      style={{ minHeight: "clamp(5rem, 14vw, 6.5rem)", contain: "layout paint" }}
+      className={`grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-2 rounded-2xl border-2 px-4 py-3 backdrop-blur-md sm:flex sm:flex-wrap ${tone.border} ${tone.bg}`}
     >
       <span
         className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${tone.iconBg} ${tone.iconText}`}
