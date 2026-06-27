@@ -90,10 +90,14 @@ async function lookupGeo(ip: string | null): Promise<GeoInfo> {
   }
 }
 
-async function sendTelegramDirect(chatId: number, text: string) {
+async function sendTelegramDirect(
+  chatId: number,
+  text: string,
+  targetUserId?: string,
+): Promise<{ ok: boolean; error?: string; stale?: boolean }> {
   const lovableKey = process.env.LOVABLE_API_KEY;
   const tgKey = process.env.TELEGRAM_API_KEY;
-  if (!lovableKey || !tgKey) return false;
+  if (!lovableKey || !tgKey) return { ok: false, error: "missing_keys" };
   try {
     const res = await fetch(`${GATEWAY_TG}/sendMessage`, {
       method: "POST",
@@ -104,9 +108,33 @@ async function sendTelegramDirect(chatId: number, text: string) {
       },
       body: JSON.stringify({ chat_id: chatId, text, parse_mode: "HTML" }),
     });
-    return res.ok;
-  } catch {
-    return false;
+    if (res.ok) return { ok: true };
+    const j = (await res.json().catch(() => null)) as { description?: string } | null;
+    const desc = j?.description ?? `http_${res.status}`;
+    // Telegram says the chat is gone / bot was kicked / token swapped —
+    // unlink so we stop spamming failures and the user can re-/start.
+    const stale =
+      /chat not found|bot was blocked|user is deactivated|chat was deleted|bot was kicked/i.test(
+        desc,
+      );
+    if (stale && targetUserId) {
+      try {
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        await supabaseAdmin
+          .from("profiles")
+          .update({
+            telegram_chat_id: null,
+            telegram_linked_at: null,
+            telegram_link_token: null,
+          })
+          .eq("id", targetUserId);
+      } catch {
+        /* ignore */
+      }
+    }
+    return { ok: false, error: desc, stale };
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
   }
 }
 
@@ -315,14 +343,16 @@ async function notifyBossesAndSync(ev: {
       })
       .select("id")
       .single();
-    const ok = await sendTelegramDirect(chatId, text);
+    const sendResult = await sendTelegramDirect(chatId, text, bossId);
     if (q?.id) {
       await supabaseAdmin
         .from("telegram_dm_queue")
         .update({
-          status: ok ? "sent" : "failed",
-          sent_at: ok ? new Date().toISOString() : null,
-          last_error: ok ? null : "send_failed",
+          status: sendResult.ok ? "sent" : "failed",
+          sent_at: sendResult.ok ? new Date().toISOString() : null,
+          last_error: sendResult.ok
+            ? null
+            : (sendResult.stale ? `stale_chat:${sendResult.error}` : sendResult.error) ?? "send_failed",
         })
         .eq("id", q.id);
     }
@@ -509,6 +539,7 @@ export const sendTestBossNotification = createServerFn({ method: "POST" })
     const sent = await sendTelegramDirect(
       prof.telegram_chat_id as number,
       `🧪 <b>Test notification</b>\nBoss console is wired correctly, ${escapeHtml(prof.display_name ?? "boss")}.`,
+      context.userId,
     );
-    return { ok: sent };
+    return { ok: sent.ok, error: sent.error, stale: sent.stale };
   });
