@@ -120,6 +120,8 @@ function LibraryPage() {
   const [pendingDelete, setPendingDelete] = useState<Song | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
+  const [yoursSearch, setYoursSearch] = useState("");
+  const [communitySearch, setCommunitySearch] = useState("");
 
   // Build a human-readable line from the current category selections.
   const selectionsLine = useMemo(() => {
