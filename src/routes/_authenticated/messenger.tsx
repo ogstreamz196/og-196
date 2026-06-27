@@ -116,23 +116,28 @@ function MessengerPage() {
             </p>
           </div>
 
-          {/* Live Chat Mode toggle */}
-          <div className="flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-background/40 px-2 py-1.5 sm:gap-2 sm:px-3 sm:py-2">
+          {/* Mode toggle — Loner ↔ Community (single button, label reflects current mode) */}
+          <button
+            type="button"
+            onClick={() => setLiveChat((v) => !v)}
+            aria-pressed={liveChat}
+            aria-label={liveChat ? "Community Mode is on — tap to switch to Loner Mode" : "Loner Mode is on — tap to switch to Community Mode"}
+            className={`group flex shrink-0 items-center gap-2 rounded-full border px-3 py-2 text-[10px] font-black uppercase tracking-[0.18em] transition-all active:scale-95 sm:text-xs ${
+              liveChat
+                ? "border-cyan-400/50 bg-cyan-500/15 text-cyan-100 shadow-[0_0_24px_-6px_rgba(34,211,238,0.6)] hover:bg-cyan-500/25"
+                : "border-primary/40 bg-primary/10 text-primary shadow-[0_0_24px_-6px_oklch(0.7_0.2_25/0.6)] hover:bg-primary/20"
+            }`}
+          >
             {liveChat ? (
               <Users className="h-4 w-4 text-cyan-300" />
             ) : (
               <MessageCircle className="h-4 w-4 text-primary" />
             )}
-            <Label htmlFor="live-chat-mode" className="hidden text-xs font-bold uppercase tracking-wider sm:inline">
-              Live Chat
-            </Label>
-            <Switch
-              id="live-chat-mode"
-              checked={liveChat}
-              onCheckedChange={setLiveChat}
-              aria-label="Toggle Live Chat Mode"
-            />
-          </div>
+            <span className="whitespace-nowrap">
+              {liveChat ? "Community Mode" : "Loner Mode"}
+            </span>
+          </button>
+
         </header>
 
         <div className="flex min-h-0 flex-1 flex-col">
