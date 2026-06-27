@@ -326,11 +326,12 @@ export function SongWorkspace({ song, onSaved }: Props) {
                 <div>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <FileText className="h-4 w-4 text-primary" />
-                    Stage 1 · Lyrics
+                    1 · Lyrics
                   </CardTitle>
                   <CardDescription>
-                    Describe the song. Edit anytime and resend — each lyrics generation costs {lyricsCost} coin{lyricsCost === 1 ? "" : "s"}.
+                    Write the brief, hit generate.
                   </CardDescription>
+
                 </div>
                 <CostBadge cost={lyricsCost} />
               </div>
