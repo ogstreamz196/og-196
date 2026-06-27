@@ -250,14 +250,6 @@ function DashboardHome() {
 
       {/* Primary CTAs — MusicHub + OG Bot at the top */}
       <section className="space-y-3">
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="text-sm uppercase tracking-[0.28em] text-muted-foreground sm:text-base">
-            🚀 Jump in
-          </h2>
-          <span className="hidden text-xs font-semibold uppercase tracking-[0.22em] text-primary sm:inline">
-            Powered by OG Bot
-          </span>
-        </div>
         <div className="grid grid-cols-2 items-stretch gap-3 sm:gap-5">
           <PrimaryCard
             to="/library"
