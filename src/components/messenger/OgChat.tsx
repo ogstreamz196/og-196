@@ -116,7 +116,7 @@ export function OgChat({
   const { data: profile } = useProfile();
   const { foulMouth } = useFoulMouth();
   const setFoulMouth = useSetFoulMouth();
-  const { mode, toggle: toggleMode } = useOgMode();
+  
   const { isVip } = useRole();
   // shareLive removed: Loner Mode is enforced by the page mounting OgChat.
   const postCommunity = useServerFn(postCommunityMessage);
