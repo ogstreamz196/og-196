@@ -12,6 +12,9 @@ import {
   Mic2,
   Music4,
   Shuffle,
+  Search,
+  Users,
+  Crown,
 } from "lucide-react";
 
 import { toast } from "sonner";
