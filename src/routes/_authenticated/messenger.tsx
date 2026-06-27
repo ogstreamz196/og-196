@@ -5,6 +5,8 @@ import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { OgChat } from "@/components/messenger/OgChat";
 import { CommunityRoom } from "@/components/messenger/CommunityRoom";
 import { PoweredByOgBot } from "@/components/PoweredByOgBot";
+import { EarnCoinStrip } from "@/components/referrals/EarnCoinStrip";
+
 
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
 
