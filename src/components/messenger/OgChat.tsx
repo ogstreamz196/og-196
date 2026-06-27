@@ -538,7 +538,7 @@ export function OgChat({
           </button>
 
           {/* Secondary controls row */}
-          <div className="flex flex-wrap items-center gap-2 text-xs">
+          <div className="flex flex-wrap items-center gap-2 text-xs sm:flex-col sm:items-stretch sm:flex-nowrap sm:w-auto sm:shrink-0 sm:justify-center">
             <span className="mr-auto inline-flex items-center gap-1.5 text-muted-foreground">
               <OgAvatar size={18} />
               <span className="font-semibold">{balance} coin{balance === 1 ? "" : "s"}</span>
