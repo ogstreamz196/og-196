@@ -131,7 +131,7 @@ async function runOne(key: string): Promise<CheckResult> {
       const host = process.env.OG_BOT_HOST;
       if (!host) return { ok: false, detail: "OG_BOT_HOST not set." };
       const { result, latencyMs } = await timed(() =>
-        fetch(`${host.replace(/\/$/, "")}/api/public/og-bot-widget-embed.js`),
+        fetch(`${host.replace(/\/$/, "")}/`),
       );
       return result.ok
         ? { ok: true, detail: `Reachable (${result.status})`, latencyMs }
