@@ -487,7 +487,7 @@ export function OgChat({
           <button
             type="button"
             onClick={toggleFoul}
-            disabled={setFoulMouth.isPending || mode === "safe"}
+            disabled={setFoulMouth.isPending}
             aria-pressed={foulActive}
             aria-label="Toggle foul mouth"
             data-testid="ogchat-foulmouth-hero"
