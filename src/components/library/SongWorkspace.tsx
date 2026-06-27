@@ -21,6 +21,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { useVariations } from "@/hooks/use-variations";
 import { invokeError } from "@/lib/invoke-error";
 import { cn } from "@/lib/utils";
+import { CoinPill } from "@/components/ui/coin-pill";
 import { StageStepper, type Stage } from "./song-workspace/StageStepper";
 import { VariationsCard } from "./song-workspace/VariationsCard";
 import type { WorkspaceSong } from "./song-workspace/types";
