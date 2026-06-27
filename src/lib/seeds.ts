@@ -13,14 +13,14 @@
  */
 
 // ─── OG Bot persona + chat quick-starts ──────────────────────────────────────
-// Canonical home: src/lib/og-persona.ts (server-only).
-export { QUICK_STARTS, buildSystemPrompt } from "@/lib/og-persona";
-export type { OgMode } from "@/lib/og-persona";
-
-// ─── Insult-learner seed dictionary ──────────────────────────────────────────
-// Canonical home: src/lib/insult-learner.ts (server-only seed set).
-// Not re-exported (server-only file) — listed here so you know it exists.
-//   → src/lib/insult-learner.ts  (SEED_WORDS, STOPWORDS)
+// The sensitive parts (system prompt, lexicon, foul-mouth rules, songwriting
+// playbook) live in `src/lib/og-persona.server.ts` and are NOT re-exported
+// here — they must never reach the client bundle.
+//   → src/lib/og-persona.server.ts        (buildSystemPrompt, detectSongIntent — server-only)
+//   → src/lib/insult-learner.server.ts    (extractInsults, SEED_WORDS — server-only)
+// Client-safe surface only:
+export { QUICK_STARTS } from "@/lib/og-persona-public";
+export type { OgMode } from "@/lib/og-persona-public";
 
 // ─── Song-creation taxonomies ────────────────────────────────────────────────
 // Canonical home (today): src/components/library/CreateSongDialog.tsx
