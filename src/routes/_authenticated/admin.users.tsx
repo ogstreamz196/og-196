@@ -5,8 +5,10 @@ import {
   Loader2, ShieldCheck, Search, ArrowLeft, Users as UsersIcon,
   UserCog, Crown, Coins, Settings as SettingsIcon, Bot,
   Plus, Minus, Pencil, MoreHorizontal, ChevronDown, ChevronUp,
-  ExternalLink, X,
+  ExternalLink, X, MapPin, Smartphone, Send,
 } from "lucide-react";
+import { listUsersPro } from "@/lib/sign-in-tracking.functions";
+import { formatDistanceToNow } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { maskDevIdentity } from "@/lib/dev-identity";
 import { useRole } from "@/hooks/use-role";
