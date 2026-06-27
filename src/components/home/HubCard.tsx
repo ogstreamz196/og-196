@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
+import { FlameHeading } from "@/components/ui/flame-heading";
 
 export interface HubCardProps {
   to: string;
