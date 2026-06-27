@@ -419,7 +419,7 @@ function LibraryPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 pb-20 sm:gap-12">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-3 pb-20 sm:gap-5">
       {/* Hero — premium kicker, oversized headline, generous breathing room */}
       <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b border-white/10 pb-6 sm:pb-8">
         <div className="min-w-0 space-y-2">
