@@ -319,6 +319,11 @@ function BuyCoinsPage() {
             }
           />
           <div className="px-5 pb-5 sm:px-6 sm:pb-6">
+            {/* Custom pack */}
+            <div className="mb-5">
+              <CustomPackCard onBuy={(units) => pickSelection({ type: "custom", units })} />
+            </div>
+
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {COIN_PACKS.map((t, i) => (
                 <PackCard
@@ -332,10 +337,6 @@ function BuyCoinsPage() {
               ))}
             </div>
 
-            {/* Custom pack */}
-            <div className="mt-5">
-              <CustomPackCard onBuy={(units) => pickSelection({ type: "custom", units })} />
-            </div>
 
             <p className="mt-4 flex items-center justify-center gap-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
               <Lock className="h-3 w-3" /> Secure checkout · Apple Pay · Google Pay · Card
