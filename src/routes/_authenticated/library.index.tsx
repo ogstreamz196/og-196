@@ -511,7 +511,7 @@ function LibraryPage() {
               Yours{completedTracks.length ? ` · ${completedTracks.length}` : ""}
             </TabsTrigger>
             <TabsTrigger value="community" className="rounded-xl px-4 py-2 text-sm font-bold">
-              Community{community.data?.length ? ` · ${community.data.length}` : ""}
+              Community{communityTracks.length ? ` · ${communityTracks.length}` : ""}
             </TabsTrigger>
           </TabsList>
 
