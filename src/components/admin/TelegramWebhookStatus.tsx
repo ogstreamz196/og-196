@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
   Activity,
   AlertTriangle,
   CheckCircle2,
+  Inbox,
   Loader2,
   Plug,
   RefreshCw,
@@ -14,6 +15,15 @@ import { toast } from "sonner";
 import { getTelegramWebhookStatus } from "@/lib/telegram-webhook-status.functions";
 import { setTelegramWebhook } from "@/lib/telegram-set-webhook.functions";
 import { cn } from "@/lib/utils";
+
+const LAST_SET_KEY = "telegram:lastSetWebhookAt";
+const AUTO_ATTEMPT_KEY = "telegram:autoRegisterAttemptedAt";
+const EXPECTED_WEBHOOK_PATH = "/api/public/telegram/webhook";
+
+type Props = {
+  /** Automatically attempt re-registration once per session if the webhook is missing/broken. */
+  autoRegister?: boolean;
+};
 
 function fmtTs(epochSeconds: number | null): string {
   if (!epochSeconds) return "";
@@ -27,10 +37,16 @@ function fmtTs(epochSeconds: number | null): string {
   }
 }
 
-export function TelegramWebhookStatus() {
+export function TelegramWebhookStatus({ autoRegister = true }: Props = {}) {
   const probeFn = useServerFn(getTelegramWebhookStatus);
   const setFn = useServerFn(setTelegramWebhook);
   const [registering, setRegistering] = useState(false);
+  const [lastSetAt, setLastSetAt] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return window.localStorage.getItem(LAST_SET_KEY);
+  });
+  const autoTriedRef = useRef(false);
+
   const q = useQuery({
     queryKey: ["telegram-webhook-status"],
     queryFn: () => probeFn(),
@@ -38,16 +54,31 @@ export function TelegramWebhookStatus() {
     staleTime: 15_000,
   });
 
-  async function registerWebhook() {
+  async function registerWebhook(opts?: { silent?: boolean }) {
     setRegistering(true);
     try {
       const r = await setFn({ data: {} } as never);
-      toast.success(
-        r.botUsername
-          ? `Webhook registered on @${r.botUsername}`
-          : "Webhook registered",
-        { description: r.url },
-      );
+      const stamp = new Date().toISOString();
+      try {
+        window.localStorage.setItem(LAST_SET_KEY, stamp);
+      } catch {
+        // ignore quota errors
+      }
+      setLastSetAt(stamp);
+      if (!opts?.silent) {
+        toast.success(
+          r.botUsername
+            ? `Webhook registered on @${r.botUsername}`
+            : "Webhook registered",
+          { description: r.url },
+        );
+      } else {
+        toast.success(
+          r.botUsername
+            ? `Auto-fixed webhook on @${r.botUsername}`
+            : "Auto-fixed Telegram webhook",
+        );
+      }
       q.refetch();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not register webhook");
@@ -56,11 +87,40 @@ export function TelegramWebhookStatus() {
     }
   }
 
+  // Auto-register once per browser session when the webhook is missing,
+  // points at an unexpected URL, or has a recent delivery error.
+  useEffect(() => {
+    if (!autoRegister || autoTriedRef.current || q.isLoading || !q.data) return;
+    const data = q.data;
+    const isMissing = !data.ok || !data.url;
+    const wrongUrl = data.url ? !data.url.endsWith(EXPECTED_WEBHOOK_PATH) : false;
+    const recentErr =
+      !!data.lastErrorDate && Date.now() / 1000 - data.lastErrorDate < 60 * 60;
+    if (!(isMissing || wrongUrl || recentErr)) return;
+    // Throttle: don't auto-retry more than once per 10 minutes across reloads.
+    try {
+      const last = Number(window.localStorage.getItem(AUTO_ATTEMPT_KEY) ?? 0);
+      if (Date.now() - last < 10 * 60 * 1000) return;
+      window.localStorage.setItem(AUTO_ATTEMPT_KEY, String(Date.now()));
+    } catch {
+      // ignore
+    }
+    autoTriedRef.current = true;
+    void registerWebhook({ silent: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoRegister, q.isLoading, q.data?.ok, q.data?.url, q.data?.lastErrorDate]);
+
   const data = q.data;
   const loading = q.isLoading;
   const healthy = !!data?.ok && !data?.lastErrorMessage;
   const degraded = !!data?.ok && !!data?.lastErrorMessage;
   const offline = !!data && !data.ok;
+
+  // Receiving updates if: webhook is up AND no recent error AND we either have
+  // historical pending traffic or no error in the last 24h.
+  const recentErr24h =
+    !!data?.lastErrorDate && Date.now() / 1000 - data.lastErrorDate < 86_400;
+  const receiving = !!data?.ok && !!data?.url && !recentErr24h;
 
   const tone = loading
     ? "bg-muted text-muted-foreground"
@@ -120,7 +180,7 @@ export function TelegramWebhookStatus() {
             </button>
             <button
               type="button"
-              onClick={registerWebhook}
+              onClick={() => registerWebhook()}
               disabled={registering}
               className="inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary hover:bg-primary/20 disabled:opacity-60"
               aria-label="Re-register webhook on the active bot"
@@ -200,9 +260,38 @@ export function TelegramWebhookStatus() {
           ) : null}
 
           {data ? (
-            <p className="mt-2 text-[10px] uppercase tracking-wider text-muted-foreground">
-              Checked {new Date(data.checkedAt).toLocaleTimeString()}
-            </p>
+            <div className="mt-3 grid gap-2 rounded-xl border border-border/40 bg-muted/20 p-2 text-[11px] sm:grid-cols-3">
+              <div>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Last setWebhook
+                </p>
+                <p className="font-mono">
+                  {lastSetAt ? new Date(lastSetAt).toLocaleString() : "—"}
+                </p>
+              </div>
+              <div>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Receiving updates
+                </p>
+                <p
+                  className={cn(
+                    "inline-flex items-center gap-1 font-semibold",
+                    receiving ? "text-emerald-400" : "text-amber-400",
+                  )}
+                >
+                  <Inbox className="h-3 w-3" />
+                  {receiving ? "Yes" : "No / stalled"}
+                </p>
+              </div>
+              <div>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Checked
+                </p>
+                <p className="font-mono">
+                  {new Date(data.checkedAt).toLocaleTimeString()}
+                </p>
+              </div>
+            </div>
           ) : null}
         </div>
       </div>
