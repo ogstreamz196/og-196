@@ -38,6 +38,27 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: "Provide a song name or description" }, 400);
     }
 
+    // The single Foul Mouth toggle is the only source of tone. If a `mode` is
+    // supplied it MUST be the derived value ("og" | "safe") — reject anything
+    // else so stale clients or tampered requests can't smuggle in a removed
+    // OG-mode value.
+    if (body.mode !== undefined && body.mode !== "og" && body.mode !== "safe") {
+      return jsonResponse(
+        { error: "Invalid mode — must be derived from Foul Mouth ('og' or 'safe')", code: "invalid_mode" },
+        400,
+      );
+    }
+    if (
+      typeof body.foulMouth === "boolean" &&
+      typeof body.mode === "string" &&
+      (body.foulMouth ? "og" : "safe") !== body.mode
+    ) {
+      return jsonResponse(
+        { error: "mode does not match foulMouth flag", code: "mode_mismatch" },
+        400,
+      );
+    }
+
     const songId = body.song_id ? String(body.song_id) : null;
 
     const admin = adminClient();
