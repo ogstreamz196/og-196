@@ -90,7 +90,7 @@ function DashboardHome() {
       {/* Welcome */}
       <section
         ref={welcomeRef}
-        className="group/welcome relative flex flex-col gap-3 overflow-hidden rounded-[2.5rem] border-2 border-white/15 bg-card/55 p-6 shadow-[0_24px_60px_-20px_rgba(80,60,255,0.45)] backdrop-blur-2xl sm:p-12"
+        className="group/welcome relative flex flex-col gap-3 overflow-hidden rounded-[2rem] border-2 border-white/15 bg-card/55 p-4 shadow-[0_24px_60px_-20px_rgba(80,60,255,0.45)] backdrop-blur-2xl sm:rounded-[2.5rem] sm:p-12"
       >
         {/* Adaptive dark scrim */}
         <div
@@ -129,7 +129,7 @@ function DashboardHome() {
         </div>
 
         {/* Top marquee status strip */}
-        <div className="relative -mx-6 -mt-6 mb-2 overflow-hidden border-b border-white/10 bg-white/[0.03] py-2 sm:-mx-12 sm:-mt-12 sm:mb-4">
+        <div className="relative -mx-4 -mt-4 mb-2 overflow-hidden border-b border-white/10 bg-white/[0.03] py-2 sm:-mx-12 sm:-mt-12 sm:mb-4">
           <div className="flex animate-[wc-shimmer_22s_linear_infinite] whitespace-nowrap text-xs font-bold uppercase tracking-[0.3em] text-foreground/70 [background:linear-gradient(90deg,transparent,oklch(1_0_0/0.15),transparent)] [background-size:200%_100%] sm:text-sm">
             {Array.from({ length: 2 }).map((_, k) => (
               <div key={k} className="flex shrink-0 items-center gap-6 px-6">
@@ -175,7 +175,7 @@ function DashboardHome() {
               ))}
             </span>
           </div>
-          <div className="order-1 w-full min-w-0 basis-full rounded-3xl bg-background/35 p-5 text-center backdrop-blur-md ring-2 ring-white/10 transition-transform duration-500 group-hover/welcome:-translate-y-1 sm:order-none sm:p-8">
+          <div className="order-1 w-full min-w-0 basis-full rounded-3xl bg-background/35 p-4 text-center backdrop-blur-md ring-2 ring-white/10 transition-transform duration-500 group-hover/welcome:-translate-y-1 sm:order-none sm:p-8">
             <p className="inline-flex items-center justify-center gap-2 text-xs uppercase tracking-[0.28em] text-muted-foreground sm:text-xl">
               <span className="inline-block animate-[wiggle_1.6s_ease-in-out_infinite] [transform-origin:70%_70%]">👋</span>
               <span className="relative">
@@ -183,16 +183,17 @@ function DashboardHome() {
                 <span aria-hidden className="absolute -bottom-1 left-0 h-[2px] w-full origin-left scale-x-0 bg-gradient-to-r from-primary via-accent to-primary animate-[shimmer_3s_ease-in-out_infinite] [animation:wc-pop_0.8s_0.3s_cubic-bezier(.34,1.56,.64,1)_forwards]" />
               </span>
             </p>
-            <div className="mt-5 flex flex-col items-center gap-5 sm:gap-7">
+            <div className="mt-4 flex flex-col items-center gap-4 sm:mt-5 sm:gap-7">
               <DodgyLogo
                 src={ogLogo.url}
                 alt="OG Streamz"
-                size={320}
-                maxDrift={110}
-                dodgeRadius={180}
-                imageClassName="rounded-3xl ring-1 ring-white/10 shadow-[0_24px_70px_-20px_rgba(0,0,0,0.8)]"
+                size={200}
+                maxDrift={80}
+                dodgeRadius={160}
+                imageClassName="rounded-3xl ring-1 ring-white/10 shadow-[0_24px_70px_-20px_rgba(0,0,0,0.8)] w-[min(60vw,200px)] sm:w-[320px] h-auto"
                 className="mx-auto"
               />
+
               <DodgyText dodgeRadius={160} maxDrift={28} className="w-full">
                 <h1 className="font-display flex min-w-0 flex-col items-center gap-1 text-[clamp(1.5rem,3.2vw+0.75rem,3.75rem)] font-black leading-[1.05] tracking-[-0.02em] text-foreground [text-shadow:0_4px_28px_rgba(0,0,0,0.75)] [overflow-wrap:anywhere] [text-wrap:balance] [font-variant-ligatures:none] sm:gap-2">
                   <span className="block wc-pop">Hello,</span>
