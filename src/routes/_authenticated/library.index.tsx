@@ -12,6 +12,9 @@ import {
   Mic2,
   Music4,
   Shuffle,
+  Search,
+  Users,
+  Crown,
 } from "lucide-react";
 
 import { toast } from "sonner";
@@ -117,6 +120,8 @@ function LibraryPage() {
   const [pendingDelete, setPendingDelete] = useState<Song | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
+  const [yoursSearch, setYoursSearch] = useState("");
+  const [communitySearch, setCommunitySearch] = useState("");
 
   // Build a human-readable line from the current category selections.
   const selectionsLine = useMemo(() => {
@@ -483,20 +488,23 @@ function LibraryPage() {
 
 
 
-      {/* Library — previews created (above creation options) */}
+      {/* Library — luxury two-tab vault: Yours first, then Community */}
       <section>
         <div className="mb-5 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
           <div className="min-w-0 space-y-1">
             <div className="truncate text-xs font-bold uppercase tracking-[0.24em] text-primary">
               <Disc3 className="mr-1.5 inline h-3.5 w-3.5 -translate-y-0.5" />
-              MusicHUB · Previews
+              MusicHUB · Vault
             </div>
-            <h2 className="truncate font-display text-xl font-black tracking-tight sm:text-3xl">
-              Library
+            <h2 className="truncate font-display text-2xl font-black tracking-tight sm:text-4xl">
+              Your Library
             </h2>
+            <p className="text-sm text-muted-foreground">
+              Your tracks first. Community drops live in the next tab.
+            </p>
           </div>
           {versionedLibrary.length > 0 && (
-            <span className="shrink-0 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
+            <span className="shrink-0 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-primary">
               {versionedLibrary.length} track{versionedLibrary.length === 1 ? "" : "s"}
             </span>
           )}
@@ -509,16 +517,41 @@ function LibraryPage() {
         )}
 
         <Tabs defaultValue="yours" className="w-full">
-          <TabsList className="mb-4 grid w-full grid-cols-2 rounded-2xl bg-white/[0.04] p-1 sm:w-auto sm:inline-flex">
-            <TabsTrigger value="yours" className="rounded-xl px-4 py-2 text-sm font-bold">
-              Yours{completedTracks.length ? ` · ${completedTracks.length}` : ""}
+          <TabsList className="mb-5 grid h-auto w-full grid-cols-2 gap-1.5 rounded-2xl border border-white/10 bg-gradient-to-br from-card/80 to-card/40 p-1.5 shadow-[0_10px_40px_-20px_oklch(0.7_0.2_300_/_0.5)] backdrop-blur">
+            <TabsTrigger
+              value="yours"
+              className="group flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-bold transition-all data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary/30 data-[state=active]:to-fuchsia-500/15 data-[state=active]:text-foreground data-[state=active]:shadow-[0_8px_24px_-12px_oklch(0.7_0.2_300_/_0.7)] data-[state=active]:ring-1 data-[state=active]:ring-primary/40"
+            >
+              <Crown className="h-4 w-4 text-primary" />
+              <span className="truncate">Yours</span>
+              <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-black tabular-nums text-foreground/90">
+                {completedTracks.length}
+              </span>
             </TabsTrigger>
-            <TabsTrigger value="community" className="rounded-xl px-4 py-2 text-sm font-bold">
-              Community{communityTracks.length ? ` · ${communityTracks.length}` : ""}
+            <TabsTrigger
+              value="community"
+              className="group flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-bold transition-all data-[state=active]:bg-gradient-to-br data-[state=active]:from-fuchsia-500/25 data-[state=active]:to-primary/15 data-[state=active]:text-foreground data-[state=active]:shadow-[0_8px_24px_-12px_oklch(0.7_0.2_300_/_0.7)] data-[state=active]:ring-1 data-[state=active]:ring-fuchsia-400/40"
+            >
+              <Users className="h-4 w-4 text-fuchsia-300" />
+              <span className="truncate">Community</span>
+              <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-black tabular-nums text-foreground/90">
+                {communityTracks.length}
+              </span>
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="yours" className="mt-0">
+          <TabsContent value="yours" className="mt-0 space-y-3">
+            {completedTracks.length > 3 && (
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={yoursSearch}
+                  onChange={(e) => setYoursSearch(e.target.value)}
+                  placeholder="Search your tracks…"
+                  className="h-11 rounded-xl border-white/10 bg-white/[0.04] pl-9 text-sm"
+                />
+              </div>
+            )}
             {library.isLoading ? (
               <div className="grid gap-3">
                 {[0, 1, 2].map((i) => (
@@ -526,44 +559,63 @@ function LibraryPage() {
                 ))}
               </div>
             ) : completedTracks.length > 0 || genSong ? (
-              <div className="grid gap-3">
-                {genSong && <SongCardSkeleton label="Generating" />}
-                {completedTracks.map((s) => (
-                  <div key={s.id} className="relative">
-                    <Link
-                      to="/library/$songId"
-                      params={{ songId: s.id }}
-                      className="block rounded-2xl transition-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                      <SongCard song={s} />
-                    </Link>
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      className="absolute right-3 top-3 h-8 w-8 opacity-90 shadow-md"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setPendingDelete(s);
-                      }}
-                      aria-label="Delete track"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+              (() => {
+                const q = yoursSearch.trim().toLowerCase();
+                const filtered = q
+                  ? completedTracks.filter(
+                      (s) =>
+                        (s.title || "").toLowerCase().includes(q) ||
+                        (s.prompt || "").toLowerCase().includes(q) ||
+                        (s.style || "").toLowerCase().includes(q),
+                    )
+                  : completedTracks;
+                return (
+                  <div className="grid gap-3">
+                    {genSong && <SongCardSkeleton label="Generating" />}
+                    {filtered.length === 0 && !genSong ? (
+                      <p className="py-6 text-center text-sm text-muted-foreground">
+                        No tracks match "{yoursSearch}".
+                      </p>
+                    ) : (
+                      filtered.map((s) => (
+                        <div key={s.id} className="relative">
+                          <Link
+                            to="/library/$songId"
+                            params={{ songId: s.id }}
+                            className="block rounded-2xl transition-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          >
+                            <SongCard song={s} />
+                          </Link>
+                          <Button
+                            variant="destructive"
+                            size="icon"
+                            className="absolute right-3 top-3 h-8 w-8 opacity-90 shadow-md"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setPendingDelete(s);
+                            }}
+                            aria-label="Delete track"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))
+                    )}
                   </div>
-                ))}
-              </div>
+                );
+              })()
             ) : (
-              <div className="rounded-3xl border border-dashed border-white/15 bg-card/40 p-10 text-center ring-1 ring-white/5">
+              <div className="rounded-3xl border border-dashed border-primary/30 bg-gradient-to-br from-primary/10 to-card/40 p-10 text-center ring-1 ring-white/5">
                 <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-primary/30 to-fuchsia-500/15 shadow-[0_12px_30px_-12px_oklch(0.7_0.2_300_/_0.6)]">
                   {activeJobs.length > 0 ? (
                     <Loader2 className="h-6 w-6 animate-spin text-primary" />
                   ) : (
-                    <LibraryIcon className="h-6 w-6 text-primary" />
+                    <Crown className="h-6 w-6 text-primary" />
                   )}
                 </div>
                 <p className="mt-4 font-display text-xl font-black leading-tight sm:text-2xl">
-                  {activeJobs.length > 0 ? "Generating your first track…" : "No tracks yet"}
+                  {activeJobs.length > 0 ? "Generating your first track…" : "Your vault is empty"}
                 </p>
                 <p className="mt-2 text-base leading-relaxed text-muted-foreground">
                   {activeJobs.length > 0
@@ -574,7 +626,18 @@ function LibraryPage() {
             )}
           </TabsContent>
 
-          <TabsContent value="community" className="mt-0">
+          <TabsContent value="community" className="mt-0 space-y-3">
+            {communityTracks.length > 3 && (
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={communitySearch}
+                  onChange={(e) => setCommunitySearch(e.target.value)}
+                  placeholder="Search community tracks…"
+                  className="h-11 rounded-xl border-white/10 bg-white/[0.04] pl-9 text-sm"
+                />
+              </div>
+            )}
             {community.isLoading ? (
               <div className="grid gap-3">
                 {[0, 1, 2].map((i) => (
@@ -582,34 +645,50 @@ function LibraryPage() {
                 ))}
               </div>
             ) : communityTracks.length > 0 ? (
-              <div className="grid gap-3">
-                {communityTracks.map((s) => (
-                  <Link
-                    key={s.id}
-                    to="/library/$songId"
-                    params={{ songId: s.id }}
-                    className="block rounded-2xl transition-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    <SongCard song={s} />
-                  </Link>
-                ))}
-                <div ref={communitySentinelRef} className="h-1" aria-hidden />
-                {community.isFetchingNextPage && (
+              (() => {
+                const q = communitySearch.trim().toLowerCase();
+                const filtered = q
+                  ? communityTracks.filter(
+                      (s) =>
+                        (s.title || "").toLowerCase().includes(q) ||
+                        (s.prompt || "").toLowerCase().includes(q) ||
+                        (s.style || "").toLowerCase().includes(q),
+                    )
+                  : communityTracks;
+                return (
                   <div className="grid gap-3">
-                    {[0, 1].map((i) => (
-                      <SongCardSkeleton key={`more-${i}`} label="Loading" />
+                    {filtered.map((s) => (
+                      <Link
+                        key={s.id}
+                        to="/library/$songId"
+                        params={{ songId: s.id }}
+                        className="block rounded-2xl transition-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <SongCard song={s} />
+                      </Link>
                     ))}
+                    <div ref={communitySentinelRef} className="h-1" aria-hidden />
+                    {community.isFetchingNextPage && (
+                      <div className="grid gap-3">
+                        {[0, 1].map((i) => (
+                          <SongCardSkeleton key={`more-${i}`} label="Loading" />
+                        ))}
+                      </div>
+                    )}
+                    {!community.hasNextPage && (
+                      <p className="py-4 text-center text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                        You've reached the end
+                      </p>
+                    )}
                   </div>
-                )}
-                {!community.hasNextPage && (
-                  <p className="py-4 text-center text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                    You've reached the end
-                  </p>
-                )}
-              </div>
+                );
+              })()
             ) : (
-              <div className="rounded-3xl border border-dashed border-white/15 bg-card/40 p-10 text-center ring-1 ring-white/5">
-                <p className="font-display text-xl font-black leading-tight sm:text-2xl">Nothing here yet</p>
+              <div className="rounded-3xl border border-dashed border-fuchsia-400/30 bg-gradient-to-br from-fuchsia-500/10 to-card/40 p-10 text-center ring-1 ring-white/5">
+                <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-fuchsia-500/30 to-primary/15">
+                  <Users className="h-6 w-6 text-fuchsia-300" />
+                </div>
+                <p className="mt-4 font-display text-xl font-black leading-tight sm:text-2xl">Nothing here yet</p>
                 <p className="mt-2 text-base leading-relaxed text-muted-foreground">
                   Be the first — finished tracks from the community will appear here.
                 </p>
@@ -618,6 +697,7 @@ function LibraryPage() {
           </TabsContent>
         </Tabs>
       </section>
+
 
 
       {/* Lyrics generating skeleton */}
