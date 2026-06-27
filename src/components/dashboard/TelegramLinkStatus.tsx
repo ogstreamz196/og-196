@@ -134,7 +134,10 @@ export function TelegramLinkStatus() {
   if (isLoading || !data) {
     return (
       <section
+        data-testid="telegram-status-card"
         aria-label="Telegram connection status"
+        aria-busy="true"
+        style={{ minHeight: "clamp(5rem, 14vw, 6.5rem)" }}
         className="flex items-center gap-3 rounded-2xl border-2 border-border/40 bg-muted/20 px-4 py-3 backdrop-blur-md"
       >
         <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
@@ -189,7 +192,8 @@ export function TelegramLinkStatus() {
     <section
       data-testid="telegram-status-card"
       aria-label="Telegram connection status"
-      className={`grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 rounded-2xl border-2 px-4 py-3 backdrop-blur-md sm:flex sm:flex-wrap ${tone.border} ${tone.bg}`}
+      style={{ minHeight: "clamp(5rem, 14vw, 6.5rem)", contain: "layout paint" }}
+      className={`grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-2 rounded-2xl border-2 px-4 py-3 backdrop-blur-md sm:flex sm:flex-wrap ${tone.border} ${tone.bg}`}
     >
       <span
         className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${tone.iconBg} ${tone.iconText}`}
