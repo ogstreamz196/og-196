@@ -723,7 +723,7 @@ function LibraryPage() {
 
         {/* Title */}
         <div className="space-y-3">
-          <Label htmlFor="song-title" className="font-bungee text-2xl sm:text-3xl uppercase text-primary">
+          <Label htmlFor="song-title" className="font-bungee text-2xl sm:text-3xl uppercase">
             Title
           </Label>
           <div className="flex flex-wrap items-stretch gap-2">
@@ -760,7 +760,7 @@ function LibraryPage() {
 
         {/* Personal details */}
         <div className="space-y-3">
-          <Label htmlFor="personal-details" className="font-bungee text-2xl sm:text-3xl uppercase text-primary">
+          <Label htmlFor="personal-details" className="font-bungee text-2xl sm:text-3xl uppercase">
             Describe
           </Label>
           <div
@@ -838,7 +838,7 @@ function LibraryPage() {
 
         {/* Sound categories */}
         <div className="space-y-3">
-          <div className="font-bungee text-2xl sm:text-3xl uppercase text-primary">
+          <div className="font-bungee text-2xl sm:text-3xl uppercase">
             Sound
           </div>
           <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 sm:gap-5">
