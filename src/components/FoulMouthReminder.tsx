@@ -56,18 +56,27 @@ export function FoulMouthReminder({ enabled, onAction, className }: FoulMouthRem
       </span>
       <span
         className={cn(
-          "relative h-6 w-11 shrink-0 rounded-full border-2 transition-colors",
+          "relative inline-flex h-8 w-[68px] shrink-0 items-center rounded-full border-2 transition-colors sm:h-9 sm:w-[76px]",
           enabled ? "border-destructive bg-destructive" : "border-amber-400/60 bg-muted",
         )}
         aria-hidden="true"
       >
         <span
           className={cn(
-            "absolute top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-background shadow-md transition-all",
-            enabled ? "left-[calc(100%-1.15rem)]" : "left-0.5",
+            "absolute top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-background shadow-md transition-all sm:h-7 sm:w-7",
+            enabled ? "left-[calc(100%-1.75rem)] sm:left-[calc(100%-2rem)]" : "left-0.5",
           )}
         />
+        <span
+          className={cn(
+            "w-full text-center font-black text-[10px] uppercase tracking-[0.18em] sm:text-xs",
+            enabled ? "pr-7 text-destructive-foreground" : "pl-7 text-amber-200",
+          )}
+        >
+          {enabled ? "On" : "Off"}
+        </span>
       </span>
+
     </button>
   );
 }
