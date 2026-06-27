@@ -865,13 +865,13 @@ function LibraryPage() {
               {foulMouth ? "🤬" : "🧼"}
             </div>
             <div className="min-w-0 shrink">
-              <div className="truncate text-sm font-bold leading-tight sm:text-lg">
+              <div className="truncate font-bungee text-base leading-tight sm:text-xl">
                 OG Foul Mouth ·{" "}
                 <span
                   id="foul-mouth-status"
                   aria-live="polite"
                   className={cn(
-                    "font-black uppercase tracking-wide",
+                    "font-bungee",
                     foulMouth ? "text-destructive" : "text-muted-foreground",
                   )}
                 >
