@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/messenger")({
   }),
   head: () => ({
     meta: [
-      { title: "OG-GPT · Private chat & Live Community" },
+      { title: "OG Bot · Private chat & Live Community" },
       {
         name: "description",
         content:
