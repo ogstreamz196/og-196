@@ -550,22 +550,7 @@ export function OgChat({
               <OgAvatar size={18} />
               <span className="font-semibold">{balance} coin{balance === 1 ? "" : "s"}</span>
             </span>
-            <button
-              type="button"
-              onClick={toggleMode}
-              className={cn(
-                "inline-flex items-center gap-1.5 rounded-lg border-2 px-3 py-1.5 text-[12px] font-bold transition",
-                mode === "og"
-                  ? "border-primary/60 bg-primary/15 text-primary"
-                  : "border-border bg-muted text-muted-foreground",
-              )}
-              title={mode === "og" ? "OG mode — tap for Safe" : "Safe mode — tap for OG"}
-            >
-              {mode === "og" ? <Sparkles className="h-3.5 w-3.5" /> : <ShieldCheck className="h-3.5 w-3.5" />}
-              {mode === "og" ? "OG mode" : "Safe mode"}
-            </button>
-            {/* Share Live button removed — Loner ↔ Community is controlled
-                by the page-level toggle in /messenger. */}
+            {/* OG/Safe mode toggle removed — Foul Mouth is the single tone control. */}
             {isVip ? (
               <select
                 value={language}
