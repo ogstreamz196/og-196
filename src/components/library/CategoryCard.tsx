@@ -40,9 +40,10 @@ export function CategoryCard({
             <Icon className="h-5 w-5" />
           </div>
           <div className="min-w-0 leading-tight">
-            <div className={`text-xs font-bold uppercase tracking-[0.22em] ${meta.accent}`}>
+            <div className={`font-bungee text-xl sm:text-2xl uppercase ${meta.accent}`}>
               {meta.emoji} {meta.label}
             </div>
+
             <div className="mt-1.5 text-base font-semibold text-foreground">
               {value ? (
                 <span className="inline-flex items-center gap-1.5">
@@ -71,7 +72,7 @@ export function CategoryCard({
 
         <div className="space-y-2.5">
           <div className="flex items-center justify-between gap-2">
-            <div className="text-xs font-bold uppercase tracking-[0.22em] text-muted-foreground">
+            <div className="font-bungee text-base sm:text-lg uppercase text-muted-foreground">
               Quick picks
             </div>
             <Button

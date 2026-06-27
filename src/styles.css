@@ -1039,6 +1039,13 @@ button.graffiti-accent:hover {
   overflow-wrap: anywhere;
   hyphens: auto;
 }
+@utility font-bungee {
+  font-family: "Bungee", "Bowlby One", "Lilita One", var(--font-display), system-ui, sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
 
 @utility sticker-shadow {
   box-shadow: 4px 4px 0 0 hsl(0 0% 0%);
