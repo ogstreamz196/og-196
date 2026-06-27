@@ -44,7 +44,7 @@ function RecentSongCard({ song }: { song: RecentSong }) {
     >
       <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl bg-gradient-brand-soft">
         {song.cover_url ? (
-          <img src={song.cover_url} alt="" className="h-full w-full object-cover" />
+          <img src={song.cover_url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
         ) : (
           <Music2 className="h-5 w-5 text-primary" />
         )}
