@@ -46,7 +46,7 @@ interface ProfileRow {
 
 function UserSettingsPage() {
   const { userId } = Route.useParams();
-  const { isAdmin, isLoading } = useRole();
+  const { isAdmin, isBoss, isLoading } = useRole();
   const qc = useQueryClient();
 
   const profileQ = useQuery({
