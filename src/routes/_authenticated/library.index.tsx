@@ -379,21 +379,11 @@ function LibraryPage() {
     [community.data],
   );
   const communitySentinelRef = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    const el = communitySentinelRef.current;
-    if (!el) return;
-    const io = new IntersectionObserver((entries) => {
-      if (
-        entries[0]?.isIntersecting &&
-        community.hasNextPage &&
-        !community.isFetchingNextPage
-      ) {
-        community.fetchNextPage();
-      }
-    }, { rootMargin: "400px" });
-    io.observe(el);
-    return () => io.disconnect();
-  }, [community.hasNextPage, community.isFetchingNextPage, communityTracks.length]);
+  useInfiniteScrollSentinel(communitySentinelRef, {
+    enabled: !!community.hasNextPage && !community.isFetchingNextPage,
+    onHit: () => community.fetchNextPage(),
+    deps: [community.hasNextPage, community.isFetchingNextPage, communityTracks.length],
+  });
 
   useEffect(() => {
     if (!user) return;
