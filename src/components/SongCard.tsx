@@ -23,7 +23,7 @@ export interface Song {
   stream_audio_url?: string | null;
 }
 
-export function SongCard({ song }: { song: Song }) {
+function SongCardImpl({ song }: { song: Song }) {
   const { data: settings } = useSettings();
   const sampleSeconds = settings?.sample_seconds ?? 30;
 
