@@ -387,6 +387,8 @@ function UserSettingsPage() {
         <DevBossPanel targetUserId={profile.id} currentBalance={profile.coin_balance ?? 0} />
 
         <UserAuditTrail userId={profile.id} email={profile.email} />
+
+        {isBoss && <TelegramSignInLog userId={profile.id} />}
       </div>
     </DashboardShell>
   );
