@@ -144,7 +144,7 @@ function AdminPanel() {
         >
           <div className="flex flex-wrap gap-2">
             <Link to="/admin/og-persona"><Button size="sm" variant="outline">OG Bot Persona</Button></Link>
-            <Link to="/admin/user-settings"><Button size="sm" variant="outline">User Settings</Button></Link>
+            
             <Link to="/admin/api-keys"><Button size="sm" variant="outline">API Keys</Button></Link>
             <Link to="/admin/debug-context"><Button size="sm" variant="outline">Lyric Context Debug</Button></Link>
             <Link to="/admin/referrals-audit"><Button size="sm" variant="outline">Referral audit</Button></Link>
