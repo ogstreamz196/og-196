@@ -12,28 +12,21 @@ import { useSiteContent, useSetSiteContent } from "@/hooks/use-site-content";
 import { cn } from "@/lib/utils";
 import {
   COIN_PACKS, CURRENCY_SYMBOL, VIP_PLAN, CUSTOM_COIN_UNIT,
-  findCoinPackByBundleId,
   applyPackOverride, parsePackOverride, packOverrideKey, packShowsBonus,
   type CoinPack, type PackOverride,
 } from "@/lib/coin-packs";
+import {
+  loadStoredSelection,
+  persistSelection,
+  clearStoredSelection,
+  type Selection,
+} from "@/lib/buy-coins-selection";
 import { StripeEmbeddedCheckoutInline } from "@/components/StripeEmbeddedCheckout";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
 import { toast } from "sonner";
 import { PurchaseHistory } from "@/components/PurchaseHistory";
 import { ReferralReminder } from "@/components/referrals/ReferralReminder";
-
-const SELECTION_STORAGE_KEY = "buyCoins.lastSelection";
-
-type StoredSelection =
-  | { type: "coins"; bundleId: string }
-  | { type: "custom"; units: number }
-  | { type: "vip" };
-
-type Selection =
-  | { type: "coins"; pack: CoinPack }
-  | { type: "custom"; units: number }
-  | { type: "vip" };
 
 export const Route = createFileRoute("/_authenticated/buy-coins/")({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -69,49 +62,25 @@ function BuyCoinsPage() {
   // Restore previous selection (e.g. after a canceled Stripe checkout).
   useEffect(() => {
     if (selected) return;
-    try {
-      const raw = sessionStorage.getItem(SELECTION_STORAGE_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw) as StoredSelection;
-      if (parsed.type === "vip") {
-        setSelected({ type: "vip" });
-        setStage("confirm");
-        toast.info("We brought you back to your last selection.");
-      } else if (parsed.type === "coins") {
-        const pack = findCoinPackByBundleId(parsed.bundleId);
-        if (pack) {
-          setSelected({ type: "coins", pack });
-          setStage("confirm");
-          toast.info("We brought you back to your last selection.");
-        }
-      } else if (parsed.type === "custom") {
-        const u = Math.min(Math.max(parsed.units, CUSTOM_COIN_UNIT.minUnits), CUSTOM_COIN_UNIT.maxUnits);
-        setSelected({ type: "custom", units: u });
-        setStage("confirm");
-        toast.info("We brought you back to your last selection.");
-      }
-    } catch {
-      /* ignore */
-    }
+    const restored = loadStoredSelection();
+    if (!restored) return;
+    setSelected(restored);
+    setStage("confirm");
+    toast.info("We brought you back to your last selection.");
   }, [selected]);
 
   const pickSelection = (s: Selection) => {
-    const stored: StoredSelection =
-      s.type === "vip"
-        ? { type: "vip" }
-        : s.type === "custom"
-        ? { type: "custom", units: s.units }
-        : { type: "coins", bundleId: s.pack.bundleId };
-    try { sessionStorage.setItem(SELECTION_STORAGE_KEY, JSON.stringify(stored)); } catch { /* ignore */ }
+    persistSelection(s);
     setSelected(s);
     setStage("confirm");
   };
 
   const clearSelection = () => {
-    try { sessionStorage.removeItem(SELECTION_STORAGE_KEY); } catch { /* ignore */ }
+    clearStoredSelection();
     setSelected(null);
     setStage("confirm");
   };
+
 
   // Anchor savings calc against the worst per-coin price (the smallest pack).
   const basePerCoin = COIN_PACKS.reduce(
