@@ -425,33 +425,10 @@ function LibraryPage() {
       {/* Hero — premium kicker, oversized headline, generous breathing room */}
       <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b border-white/10 pb-6 sm:pb-8">
         <div className="min-w-0 space-y-2">
-          <div
-            className="inline-flex flex-wrap items-center gap-2 rounded-full border border-primary/30 bg-gradient-to-r from-primary/15 via-background/40 to-card/60 px-2 py-1 pr-3 shadow-[0_0_28px_-10px_oklch(0.7_0.2_300_/_0.8)] backdrop-blur-md sm:gap-2.5 sm:py-1.5"
-            aria-label="OG Streamz MusicHUB — powered by OG Bot"
-          >
-            <img
-              src={ogStreamzLogo.url}
-              alt="OG Streamz"
-              draggable={false}
-              className="h-6 w-6 shrink-0 rounded-md object-cover ring-1 ring-white/15 sm:h-7 sm:w-7"
-            />
-            <span className="font-display text-[11px] font-black uppercase tracking-[0.22em] text-primary sm:text-xs sm:tracking-[0.28em]">
-              MusicHUB
-            </span>
-            <span aria-hidden className="text-primary/40">·</span>
-            <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground sm:text-[11px]">
-              Powered by
-              <img
-                src={ogBotLogo.url}
-                alt=""
-                className="h-4 w-4 rounded-full object-cover ring-1 ring-primary/50"
-              />
-              <span className="font-black tracking-tight text-foreground/85">OG Bot</span>
-            </span>
-          </div>
           <h1 className="font-display text-2xl font-black leading-[1.1] tracking-[-0.02em] break-words sm:text-5xl lg:text-6xl">
             Hey <span className="text-gradient-brand">{firstName}</span> — let's write a song.
           </h1>
+
         </div>
         <div className="inline-flex shrink-0 items-center gap-2 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 to-card/60 px-3 py-2 shadow-[0_8px_28px_-12px_oklch(0.7_0.2_300_/_0.45)] sm:gap-2.5 sm:px-4 sm:py-2.5">
           <Coins className="h-5 w-5 text-primary" />
