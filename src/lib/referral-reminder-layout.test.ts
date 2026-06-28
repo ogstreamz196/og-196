@@ -30,6 +30,27 @@ describe("ReferralReminder responsive contract", () => {
     expect(src).toMatch(/h-11[^"]*sm:h-9/);
   });
 
+  it("gives the inline Copy link button a 44x44 mobile tap target", () => {
+    expect(src).toMatch(/min-h-11 min-w-11[^"]*sm:min-h-9/);
+  });
+
+  it("uses high-contrast foreground tokens (not muted) for inline controls", () => {
+    // muted-foreground on bg-coin/5 fails AA at 11px; we use foreground/85+
+    expect(src).not.toMatch(/text-muted-foreground/);
+    expect(src).toMatch(/text-foreground\/85/);
+  });
+
+  it("labels icon-bearing controls for screen readers", () => {
+    expect(src).toMatch(/aria-label=\{copied \? "Referral link copied"/);
+    expect(src).toMatch(/aria-label="Share your referral link"/);
+    expect(src).toMatch(/aria-label="See referral earnings details"/);
+  });
+
+  it("renders a visible focus ring on every interactive control", () => {
+    const focusRings = src.match(/focus-visible:ring-2/g) ?? [];
+    expect(focusRings.length).toBeGreaterThanOrEqual(3);
+  });
+
   it("exposes a stable test id for layout regression scripts", () => {
     expect(src).toContain('data-testid="referral-reminder"');
   });
