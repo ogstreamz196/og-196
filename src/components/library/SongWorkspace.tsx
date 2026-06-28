@@ -402,12 +402,10 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
               >
                 <RefreshCw className="h-4 w-4" /> Refresh Library
               </Button>
-              <Button asChild variant="default" className="gap-2">
+              <Button asChild variant="outline" className="gap-2">
                 <Link to="/library">Back to My Library</Link>
               </Button>
-              <Button asChild variant="outline">
-                <Link to="/library">Back to library</Link>
-              </Button>
+
             </div>
 
           </CardContent>
