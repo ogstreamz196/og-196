@@ -186,19 +186,41 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
   }
 
   async function downloadFull() {
-    if (!unlocked) {
-      toast.error("This track isn't unlocked. Purchase or unlock to download the full version.");
-      return;
-    }
-    const precheck = await ensureFullUrlAllowed(song.id);
-    if (!precheck.ok) {
-      toast.error(precheck.reason);
-      return;
-    }
     setDownloading(true);
     try {
+      // Community viewers (non-owners) must pay 2 OG coins per download
+      // (1 burnt + 1 royalty to the creator). Owners just need their HQ unlock.
+      if (communityMode) {
+        const { data: unlockData, error: unlockErr } = await supabase.functions.invoke(
+          "unlock-full-song",
+          { body: { song_id: song.id } },
+        );
+        if (unlockErr) {
+          const msg =
+            (unlockErr as { context?: { error?: string } })?.context?.error ||
+            unlockErr.message ||
+            "Could not unlock track";
+          throw new Error(msg);
+        }
+        if (!unlockData?.already) {
+          toast.success(
+            `Charged ${unlockData?.cost ?? 2} OG coins — ${unlockData?.royalty ?? 1} sent to the creator as a royalty.`,
+          );
+        }
+      } else {
+        if (!unlocked) {
+          toast.error("This track isn't unlocked. Purchase or unlock to download the full version.");
+          return;
+        }
+        const precheck = await ensureFullUrlAllowed(song.id);
+        if (!precheck.ok) {
+          toast.error(precheck.reason);
+          return;
+        }
+      }
+
       const { data, error } = await supabase.functions.invoke("song-url", {
-        body: { song_id: song.id, mode: "full" },
+        body: { song_id: song.id, mode: "full", purpose: "download" },
       });
       if (error) {
         const msg =
@@ -219,6 +241,7 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
       setDownloading(false);
     }
   }
+
 
   const progressPct = useMemo(
     () => Math.min(100, (progress / sampleSeconds) * 100),
