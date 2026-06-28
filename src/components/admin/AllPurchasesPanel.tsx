@@ -79,8 +79,7 @@ export function AllPurchasesPanel() {
       r.display_name ?? "",
       r.email ?? "",
       r.amount,
-      // @ts-expect-error reference may exist on row
-      r.reference ?? "",
+      (r as { reference?: string | null }).reference ?? "",
     ]);
     const csv = [header, ...rows].map((row) => row.map(csvEscape).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
