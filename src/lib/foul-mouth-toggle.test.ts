@@ -38,6 +38,23 @@ describe("FoulMouthToggle component", () => {
     expect(componentSrc).toMatch(/aria-checked=\{foulMouth\}/);
     expect(componentSrc).toMatch(/aria-live=["']polite["']/);
   });
+
+  it("swaps the label between on (red) and off states", () => {
+    // Both the heading status line and the pill label must render the action
+    // copy "Turn foul off" when on and "Turn foul on" when off.
+    const labelExpr = /foulMouth\s*\?\s*"Turn foul off"\s*:\s*"Turn foul on"/g;
+    const matches = componentSrc.match(labelExpr) ?? [];
+    expect(matches.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("keeps the pill label readable in both states", () => {
+    expect(componentSrc).toMatch(/data-testid=["']foul-mouth-pill-label["']/);
+    // whitespace-nowrap prevents the label from clipping inside the pill.
+    expect(componentSrc).toMatch(/whitespace-nowrap/);
+    // High-contrast colours: white-on-red when on, foreground when off.
+    expect(componentSrc).toMatch(/text-white/);
+    expect(componentSrc).toMatch(/text-foreground/);
+  });
 });
 
 describe("Library page uses the shared component", () => {
