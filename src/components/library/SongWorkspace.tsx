@@ -246,6 +246,10 @@ export function SongWorkspace({ song, onSaved }: Props) {
   }
 
   async function generatePreview() {
+    if (!isOwner) {
+      toast.error("This is a community song — open the studio to create your own");
+      return;
+    }
     if (!hasLyrics) {
       toast.error("Generate lyrics first");
       return;
