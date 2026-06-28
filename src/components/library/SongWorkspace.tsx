@@ -88,6 +88,30 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const [genPreview, setGenPreview] = useState(false);
   const [unlocking, setUnlocking] = useState(false);
   const [missing, setMissing] = useState(false);
+  const [recheckActive, setRecheckActive] = useState(false);
+  const [recheckCount, setRecheckCount] = useState(0);
+
+  useEffect(() => {
+    if (!recheckActive) return;
+    if (recheckCount >= 10) {
+      setRecheckActive(false);
+      return;
+    }
+    const id = setTimeout(() => {
+      onRefresh?.();
+      onSaved?.();
+      setRecheckCount((c) => c + 1);
+    }, 3000);
+    return () => clearTimeout(id);
+  }, [recheckActive, recheckCount, onRefresh, onSaved]);
+
+  useEffect(() => {
+    if (!missing && recheckActive) {
+      setRecheckActive(false);
+      setRecheckCount(0);
+    }
+  }, [missing, recheckActive]);
+
   const lyricsRef = useRef<HTMLTextAreaElement | null>(null);
 
   const briefLanguage = useMemo(() => detectLanguage(brief), [brief]);
@@ -369,6 +393,8 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
               <Button
                 onClick={() => {
                   setMissing(false);
+                  setRecheckCount(0);
+                  setRecheckActive(true);
                   onRefresh?.();
                   onSaved?.();
                 }}
@@ -376,10 +402,12 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
               >
                 <RefreshCw className="h-4 w-4" /> Refresh Library
               </Button>
-              <Button asChild variant="outline">
-                <Link to="/library">Back to library</Link>
+              <Button asChild variant="outline" className="gap-2">
+                <Link to="/library">Back to My Library</Link>
               </Button>
+
             </div>
+
           </CardContent>
         </Card>
       </div>
