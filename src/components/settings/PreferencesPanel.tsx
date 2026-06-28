@@ -12,6 +12,7 @@ import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { useRole } from "@/hooks/use-role";
 import { useAppPreferences, type AppPreferences } from "@/hooks/use-app-preferences";
 import { useDisplayPrefs, useSetDisplayPrefs, clampScale, type Density } from "@/hooks/use-display-prefs";
+import { useAura, type AuraLevel } from "@/hooks/use-aura";
 
 /**
  * Drop-in preferences card group for /settings.
