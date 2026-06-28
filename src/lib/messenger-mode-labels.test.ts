@@ -32,8 +32,8 @@ describe("messenger mode labels", () => {
   });
 
   it("visible toggle label states the NEXT action (opposite of current mode)", () => {
-    expect(toggleActionLabel("community", false)).toBe("Turn on Loner");
-    expect(toggleActionLabel("loner", false)).toBe("Turn off Loner");
+    expect(toggleActionLabel("community", false)).toBe("Start Private Mode");
+    expect(toggleActionLabel("loner", false)).toBe("Leave Private Mode");
   });
 
   it("shows 'Saving…' while a mutation is in flight regardless of mode", () => {
