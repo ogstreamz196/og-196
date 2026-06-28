@@ -95,7 +95,7 @@ export function FoulMouthToggle({
                 foulMouth ? "text-destructive" : "text-muted-foreground",
               )}
             >
-              {saving ? "Saving…" : foulMouth ? "Turned on" : "Turned off"}
+              {saving ? "Saving…" : foulMouth ? "Turn off" : "Turn on"}
             </span>
           </div>
         </div>
