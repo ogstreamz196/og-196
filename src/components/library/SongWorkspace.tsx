@@ -88,6 +88,30 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const [genPreview, setGenPreview] = useState(false);
   const [unlocking, setUnlocking] = useState(false);
   const [missing, setMissing] = useState(false);
+  const [recheckActive, setRecheckActive] = useState(false);
+  const [recheckCount, setRecheckCount] = useState(0);
+
+  useEffect(() => {
+    if (!recheckActive) return;
+    if (recheckCount >= 10) {
+      setRecheckActive(false);
+      return;
+    }
+    const id = setTimeout(() => {
+      onRefresh?.();
+      onSaved?.();
+      setRecheckCount((c) => c + 1);
+    }, 3000);
+    return () => clearTimeout(id);
+  }, [recheckActive, recheckCount, onRefresh, onSaved]);
+
+  useEffect(() => {
+    if (!missing && recheckActive) {
+      setRecheckActive(false);
+      setRecheckCount(0);
+    }
+  }, [missing, recheckActive]);
+
   const lyricsRef = useRef<HTMLTextAreaElement | null>(null);
 
   const briefLanguage = useMemo(() => detectLanguage(brief), [brief]);
