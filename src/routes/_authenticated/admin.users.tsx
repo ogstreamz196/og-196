@@ -97,6 +97,15 @@ function AdminUsersPage() {
     return m;
   }, [proQ.data]);
 
+  const fetchPurchases = useServerFn(getAllCoinPurchases);
+  const purchasesQ = useQuery({
+    queryKey: ["admin-users-purchase-totals"],
+    enabled: isAdmin,
+    queryFn: () => fetchPurchases(),
+    staleTime: 60_000,
+  });
+  const spendByUser: AdminPurchaseTotals = purchasesQ.data?.totals ?? {};
+
   const rolesByUser = useMemo(() => {
     const map = new Map<string, string[]>();
     (rolesQ.data ?? []).forEach((r) => {
