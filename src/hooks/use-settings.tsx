@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export type AppSettings = {
@@ -23,9 +24,31 @@ const DEFAULTS: AppSettings = {
   signup_credits: 5,
 };
 
+const SETTINGS_QUERY_KEY = ["app-settings"] as const;
+
 export function useSettings() {
+  const qc = useQueryClient();
+
+  // Live-sync: when boss edits app_settings (e.g. sample_seconds), refetch so
+  // MusicHUB previews immediately respect the new cap without a page reload.
+  useEffect(() => {
+    const channel = supabase
+      .channel(`app-settings-sync:${Math.random().toString(36).slice(2, 10)}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "app_settings" },
+        () => {
+          qc.invalidateQueries({ queryKey: SETTINGS_QUERY_KEY });
+        },
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [qc]);
+
   return useQuery({
-    queryKey: ["app-settings"],
+    queryKey: SETTINGS_QUERY_KEY,
     staleTime: 30_000,
     queryFn: async (): Promise<AppSettings> => {
       const { data, error } = await supabase.from("app_settings").select("key, value");
@@ -34,9 +57,6 @@ export function useSettings() {
       for (const row of data ?? []) map[row.key] = row.value;
       const numOrDefault = (v: unknown, d: number) =>
         typeof v === "number" ? v : (typeof v === "string" && Number.isFinite(Number(v)) ? Number(v) : d);
-      // Materialize the shape from DEFAULTS so the table-driven approach replaces
-      // the previous per-field copy/paste — adding a new setting now means one
-      // line in DEFAULTS and nothing else.
       const out = { ...DEFAULTS };
       for (const key of Object.keys(DEFAULTS) as (keyof AppSettings)[]) {
         out[key] = numOrDefault(map[key], DEFAULTS[key]);
