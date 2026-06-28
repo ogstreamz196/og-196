@@ -28,9 +28,38 @@ export function PermissionsGate({ userId }: { userId: string }) {
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (localStorage.getItem(storageKey)) return;
-    const t = setTimeout(() => setOpen(true), 600);
-    return () => clearTimeout(t);
-  }, [storageKey]);
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    (async () => {
+      // Only show on the very first sign-in. If this user already has a
+      // registered sign-in event (IP captured) or a recorded consent
+      // decision, suppress the dialog on this device from now on.
+      const [{ count }, { data: profile }] = await Promise.all([
+        supabase
+          .from("sign_in_events")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", userId),
+        supabase
+          .from("profiles")
+          .select("gps_consent_at")
+          .eq("id", userId)
+          .maybeSingle(),
+      ]);
+      if (cancelled) return;
+      const alreadyRegistered = (count ?? 0) > 1 || !!profile?.gps_consent_at;
+      if (alreadyRegistered) {
+        localStorage.setItem(storageKey, "skipped-existing");
+        return;
+      }
+      timer = setTimeout(() => {
+        if (!cancelled) setOpen(true);
+      }, 600);
+    })();
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+    };
+  }, [storageKey, userId]);
 
   const dismiss = (granted: boolean) => {
     localStorage.setItem(storageKey, granted ? "granted" : "declined");
