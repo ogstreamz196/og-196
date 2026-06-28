@@ -227,6 +227,27 @@ function BuyCoinsPage() {
   return (
     <DashboardShell title="OG Coin Vault">
       <PaymentTestModeBanner />
+      {/* Sticky wallet bar — keeps balance in view while scrolling bundles */}
+      <div className="sticky top-0 z-30 -mx-4 mb-4 border-b border-coin/30 bg-background/85 px-4 py-2 backdrop-blur-md sm:-mx-6 sm:px-6">
+        <div
+          role="status"
+          aria-label={`Wallet balance ${profile?.coin_balance ?? 0} OG coins`}
+          className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3"
+        >
+          <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.25em] text-coin">
+            <Wallet className="h-3 w-3" /> Wallet
+          </span>
+          <span className="inline-flex items-baseline gap-1.5 whitespace-nowrap">
+            <Coins className="h-4 w-4 self-center text-coin" />
+            <span className="font-black tabular-nums leading-none text-foreground [font-size:clamp(1rem,4vw,1.25rem)]">
+              {profile?.coin_balance ?? 0}
+            </span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              OG&nbsp;coins
+            </span>
+          </span>
+        </div>
+      </div>
       <div className="mx-auto w-full max-w-6xl space-y-6">
         {/* Arcade-style hero */}
         <section className="relative overflow-hidden rounded-3xl border-2 border-coin/40 bg-gradient-to-br from-background via-card to-background shadow-glow">
