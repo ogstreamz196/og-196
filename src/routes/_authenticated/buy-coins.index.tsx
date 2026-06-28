@@ -258,18 +258,24 @@ function BuyCoinsPage() {
             </div>
 
             {/* HUD wallet */}
-            <div className="flex items-center gap-3 sm:flex-col sm:items-end">
-              <div className="rounded-2xl border-2 border-coin/50 bg-background/60 px-4 py-3 backdrop-blur-md shadow-glow">
+            <div className="flex w-full flex-col gap-3 sm:w-auto sm:items-end">
+              <div className="w-full rounded-2xl border-2 border-coin/50 bg-background/60 px-4 py-3 backdrop-blur-md shadow-glow sm:w-auto">
                 <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] text-coin">
                   <Wallet className="h-3 w-3" /> Wallet
                 </div>
-                <div className="mt-1 flex items-baseline gap-1.5">
-                  <Coins className="h-5 w-5 text-coin" />
-                  <span className="text-3xl font-black tabular-nums leading-none">{profile?.coin_balance ?? 0}</span>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">OG</span>
+                <div className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                  <Coins className="h-5 w-5 shrink-0 text-coin" />
+                  <span className="font-black tabular-nums leading-none [font-size:clamp(1.5rem,7vw,2rem)]">
+                    {profile?.coin_balance ?? 0}
+                  </span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                    OG&nbsp;coins
+                  </span>
                 </div>
               </div>
-              <AdminEditModeToggle />
+              <div className="self-end">
+                <AdminEditModeToggle />
+              </div>
             </div>
           </div>
         </section>
