@@ -132,7 +132,9 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
       setLoadingPreview(true);
       try {
         const { data, error } = await supabase.functions.invoke("song-url", {
-          body: { song_id: song.id, mode: "preview" },
+          body: communityMode
+            ? { song_id: song.id, mode: "full", purpose: "stream" }
+            : { song_id: song.id, mode: "preview" },
         });
         if (error) throw error;
         if (cancelled) return;
