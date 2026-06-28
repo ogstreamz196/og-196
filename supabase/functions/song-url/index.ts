@@ -20,10 +20,18 @@ Deno.serve(async (req) => {
 
   const admin = adminClient();
   const { data: song } = await admin.from("songs")
-    .select("user_id, audio_path, sample_path, status, unlocked")
+    .select("user_id, audio_path, sample_path, status, unlocked, revealed")
     .eq("id", song_id).single();
 
-  if (!song || song.user_id !== user.id) return jsonResponse({ error: "Not found" }, 404);
+  if (!song) return jsonResponse({ error: "Not found" }, 404);
+  const isOwner = song.user_id === user.id;
+  // Non-owners may only stream the compressed preview of completed+revealed community songs.
+  if (!isOwner) {
+    if (mode === "full") return jsonResponse({ error: "Not unlocked", code: "locked" }, 403);
+    if (song.status !== "completed" || song.revealed === false) {
+      return jsonResponse({ error: "Not found" }, 404);
+    }
+  }
 
   if (mode === "full") {
     // Require an unlocked_songs record before ever returning the full URL.
