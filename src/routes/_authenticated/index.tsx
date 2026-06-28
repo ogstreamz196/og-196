@@ -330,8 +330,8 @@ function DashboardHome() {
         </Link>
       </section>
 
-      {/* Ask OG Bot — prompt CTA */}
-      <AskOgCta />
+      {/* Ask OG Bot CTA removed per request */}
+
 
       {/* Continuity demo */}
       {/* <ContinuityDemo /> hidden per request */}
