@@ -482,7 +482,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
                   {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save draft"}
                 </Button>
 
-                <Button onClick={generateLyrics} disabled={genLyrics} className="gap-2">
+                <Button onClick={generateLyrics} disabled={genLyrics || missing} className="gap-2">
                   {genLyrics ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
                   {hasLyrics ? "Regenerate lyrics" : "Generate lyrics"}
                   <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-background/30 px-1.5 py-0.5 text-[10px] font-semibold">
