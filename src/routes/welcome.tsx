@@ -514,7 +514,15 @@ function AlbumCoverShowcase() {
         if (!cancelled) setHidden(false);
       }
     })();
-    return () => { cancelled = true; };
+    const onGenerate = () => {
+      try { localStorage.setItem(PERSONAL_BANNER_KEY, "1"); } catch {}
+      setHidden(true);
+    };
+    window.addEventListener("og:generate-start", onGenerate);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("og:generate-start", onGenerate);
+    };
   }, []);
 
   const dismiss = useCallback(() => {

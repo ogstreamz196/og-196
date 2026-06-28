@@ -304,6 +304,8 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       return;
     }
     setGenPreview(true);
+    try { localStorage.setItem("welcome.personal_banner.dismissed", "1"); } catch {}
+    try { window.dispatchEvent(new CustomEvent("og:generate-start")); } catch {}
     try {
       if (dirty) {
         await persist({
