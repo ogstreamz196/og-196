@@ -66,7 +66,7 @@ interface Props {
  *   3. Final song   — full track ready to play / download (uses preview unlock)
  * Edits at any stage can be re-sent and re-cost coins, same as every other AI message.
  */
-export function SongWorkspace({ song, onSaved }: Props) {
+export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const { data: settings } = useSettings();
   const { data: profile } = useProfile();
   const { foulMouth } = useFoulMouth();
