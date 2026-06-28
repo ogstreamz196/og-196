@@ -75,6 +75,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
   const previewCost = settings?.coins_per_generation ?? 3;
   const fullUnlockCost = settings?.coins_per_full_unlock ?? 5;
   const balance = profile?.coin_balance ?? 0;
+  const isOwner = !!profile?.id && song.user_id === profile.id;
 
   const [title, setTitle] = useState(song.title ?? "");
   const [brief, setBrief] = useState(song.prompt ?? "");
@@ -187,6 +188,10 @@ export function SongWorkspace({ song, onSaved }: Props) {
   }
 
   async function generateLyrics() {
+    if (!isOwner) {
+      toast.error("This is a community song — open the studio to create your own");
+      return;
+    }
     if (!brief.trim() && !title.trim()) {
       toast.error("Add a title or a brief first");
       return;
@@ -245,6 +250,10 @@ export function SongWorkspace({ song, onSaved }: Props) {
   }
 
   async function generatePreview() {
+    if (!isOwner) {
+      toast.error("This is a community song — open the studio to create your own");
+      return;
+    }
     if (!hasLyrics) {
       toast.error("Generate lyrics first");
       return;

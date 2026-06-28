@@ -1,6 +1,7 @@
 import type { Song } from "@/components/SongCard";
 
 export type WorkspaceSong = Song & {
+  user_id?: string | null;
   lyrics?: string | null;
   unlocked?: boolean | null;
   /** Stable timestamp for when the current generation began — used to resume the generating timer after a refresh. */
