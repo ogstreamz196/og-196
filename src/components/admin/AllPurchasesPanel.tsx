@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ChevronDown, Coins, Crown, Download, Loader2, Receipt } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getAllCoinPurchases } from "@/lib/payments.functions";
 import { useRole } from "@/hooks/use-role";
 import { Button } from "@/components/ui/button";
