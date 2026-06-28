@@ -313,31 +313,35 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
                   ) : (
                     <Play className="h-5 w-5" />
                   )}
-                  {playing ? "Pause preview" : "Play preview"}
+                  {playing
+                    ? communityMode ? "Pause" : "Pause preview"
+                    : communityMode ? "Play full track" : "Play preview"}
                 </Button>
                 <Button
                   onClick={downloadFull}
-                  disabled={downloading || !unlocked}
-                  variant={unlocked ? "default" : "outline"}
+                  disabled={downloading || (!communityMode && !unlocked)}
+                  variant={communityMode || unlocked ? "default" : "outline"}
                   size="lg"
                 >
                   {downloading ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
-                  ) : unlocked ? (
+                  ) : communityMode || unlocked ? (
                     <Download className="h-5 w-5" />
                   ) : (
                     <Lock className="h-5 w-5" />
                   )}
-                  {unlocked ? "Download HQ" : "Locked"}
+                  {communityMode
+                    ? "Download · 2 coins"
+                    : unlocked ? "Download HQ" : "Locked"}
                 </Button>
               </div>
 
               <div>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Lock className="h-3 w-3" />
-                  Preview limited to {sampleSeconds}s. {unlocked
-                    ? "Full track download available."
-                    : "Unlock to download the full track."}
+                  {communityMode
+                    ? "Full community track plays free. Downloading costs 2 OG coins — 1 burnt, 1 royalty to the creator."
+                    : `Preview limited to ${sampleSeconds}s. ${unlocked ? "Full track download available." : "Unlock to download the full track."}`}
                 </div>
                 <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-muted">
                   <div
