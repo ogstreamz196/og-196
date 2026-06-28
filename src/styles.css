@@ -1139,4 +1139,26 @@ button.graffiti-accent:hover {
   }
 }
 
+/* ============================================================
+   Sitewide audit: ban blue writing.
+   Any Tailwind blue/sky/indigo/cyan/violet text utility is
+   coerced to bright white with a subtle red flame aura so the
+   typography stays on-brand on mobile and desktop.
+   Icon-only usages (SVG `currentColor`) are unaffected because
+   only `color` and `text-shadow` are forced — fills/strokes
+   keep their original tone.
+   ============================================================ */
+:where(
+  [class*="text-blue-"],
+  [class*="text-sky-"],
+  [class*="text-indigo-"],
+  [class*="text-cyan-"],
+  [class*="text-violet-"]
+):not(svg):not(svg *) {
+  color: #ffffff !important;
+  text-shadow:
+    0 0 0.05em rgba(255, 255, 255, 0.85),
+    0 0 0.18em rgba(255, 110, 50, 0.7),
+    0 0 0.35em rgba(220, 40, 15, 0.55);
+}
 
