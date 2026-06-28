@@ -8,6 +8,8 @@ import {
   ExternalLink, X, MapPin, Smartphone, Send,
 } from "lucide-react";
 import { listUsersPro } from "@/lib/sign-in-tracking.functions";
+import { getAllCoinPurchases, type AdminPurchaseTotals } from "@/lib/payments.functions";
+import { useServerFn } from "@tanstack/react-start";
 import { formatDistanceToNow } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { maskDevIdentity } from "@/lib/dev-identity";
@@ -94,6 +96,15 @@ function AdminUsersPage() {
     (proQ.data ?? []).forEach((r) => m.set(r.id, r as ProUserRow));
     return m;
   }, [proQ.data]);
+
+  const fetchPurchases = useServerFn(getAllCoinPurchases);
+  const purchasesQ = useQuery({
+    queryKey: ["admin-users-purchase-totals"],
+    enabled: isAdmin,
+    queryFn: () => fetchPurchases(),
+    staleTime: 60_000,
+  });
+  const spendByUser: AdminPurchaseTotals = purchasesQ.data?.totals ?? {};
 
   const rolesByUser = useMemo(() => {
     const map = new Map<string, string[]>();
@@ -277,8 +288,9 @@ function AdminUsersPage() {
                   {filtered.map((u) => {
                     const roles = rolesByUser.get(u.id) ?? [];
                     const pro = proByUser.get(u.id);
+                    const spend = spendByUser[u.id];
                     return (
-                      <UserRow key={u.id} user={u} roles={roles} pro={pro} />
+                      <UserRow key={u.id} user={u} roles={roles} pro={pro} spend={spend} />
                     );
                   })}
                 </TableBody>
@@ -376,11 +388,22 @@ function InlineNameEdit({ user }: { user: ProfileRow }) {
 }
 
 
-function UserRow({ user, roles, pro }: { user: ProfileRow; roles: string[]; pro?: ProUserRow }) {
+function UserRow({
+  user,
+  roles,
+  pro,
+  spend,
+}: {
+  user: ProfileRow;
+  roles: string[];
+  pro?: ProUserRow;
+  spend?: { totalCoins: number; purchaseCount: number };
+}) {
   const isVip = roles.includes("vip");
   const isOgBot = roles.includes("og_bot");
   const isAdminUser = roles.includes("admin");
   const hasPro = !!(pro && (pro.last_country || pro.last_device || pro.telegram_chat_id || pro.last_sign_in_at));
+  const [spendOpen, setSpendOpen] = useState(false);
 
   return (
     <>
@@ -393,6 +416,23 @@ function UserRow({ user, roles, pro }: { user: ProfileRow; roles: string[]; pro?
             <div className="min-w-0 flex-1">
               <InlineNameEdit user={user} />
               <div className="truncate text-xs text-muted-foreground">{user.email ?? "—"}</div>
+              {spend && spend.totalCoins > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setSpendOpen((v) => !v)}
+                  aria-expanded={spendOpen}
+                  className="mt-1 inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-300 hover:bg-amber-500/20"
+                  title="Toggle total spend"
+                >
+                  <Coins className="h-3 w-3" />
+                  Spent {spend.totalCoins.toLocaleString()} · {spend.purchaseCount} buys
+                </button>
+              )}
+              {spendOpen && spend && (
+                <div className="mt-1 rounded-md border border-border/40 bg-background/40 px-2 py-1 text-[11px] text-muted-foreground">
+                  Lifetime: <span className="font-mono tabular-nums text-coin">{spend.totalCoins.toLocaleString()} coins</span> across {spend.purchaseCount} purchase{spend.purchaseCount === 1 ? "" : "s"}.
+                </div>
+              )}
             </div>
           </div>
         </TableCell>

@@ -25,6 +25,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import { AllPurchasesPanel } from "@/components/admin/AllPurchasesPanel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -507,6 +508,8 @@ function ReferralsPage() {
             })}
           </div>
         </section>
+
+        <AllPurchasesPanel />
       </div>
     </DashboardShell>
   );
