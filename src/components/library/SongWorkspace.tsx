@@ -56,6 +56,7 @@ function setBriefLanguage(brief: string, language: string): string {
 interface Props {
   song: WorkspaceSong;
   onSaved?: () => void;
+  onRefresh?: () => void;
 }
 
 /**
@@ -65,7 +66,7 @@ interface Props {
  *   3. Final song   — full track ready to play / download (uses preview unlock)
  * Edits at any stage can be re-sent and re-cost coins, same as every other AI message.
  */
-export function SongWorkspace({ song, onSaved }: Props) {
+export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const { data: settings } = useSettings();
   const { data: profile } = useProfile();
   const { foulMouth } = useFoulMouth();
@@ -340,6 +341,49 @@ export function SongWorkspace({ song, onSaved }: Props) {
     } finally {
       setUnlocking(false);
     }
+  }
+
+  if (missing) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between gap-3">
+          <span
+            role="status"
+            aria-live="polite"
+            className="inline-flex items-center gap-2 rounded-full border border-destructive/40 bg-destructive/10 px-3 py-1 text-xs font-semibold text-destructive"
+          >
+            <AlertCircle className="h-3.5 w-3.5" /> Song removed
+          </span>
+        </div>
+        <Card className="border-dashed border-destructive/40 bg-card/60">
+          <CardContent className="flex flex-col items-center gap-4 p-10 text-center">
+            <AlertCircle className="h-10 w-10 text-destructive" />
+            <div className="space-y-1">
+              <h3 className="text-lg font-semibold">This song is no longer available</h3>
+              <p className="text-sm text-muted-foreground">
+                It may have been deleted. Refresh your library to load the latest list,
+                or head back to the studio to start a new one.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <Button
+                onClick={() => {
+                  setMissing(false);
+                  onRefresh?.();
+                  onSaved?.();
+                }}
+                className="gap-2"
+              >
+                <RefreshCw className="h-4 w-4" /> Refresh Library
+              </Button>
+              <Button asChild variant="outline">
+                <Link to="/library">Back to library</Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
