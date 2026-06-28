@@ -486,10 +486,55 @@ function Hero() {
   );
 }
 
+const PERSONAL_BANNER_KEY = "welcome.personal_banner.dismissed";
+
 function AlbumCoverShowcase() {
+  const [hidden, setHidden] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        if (typeof window !== "undefined" && localStorage.getItem(PERSONAL_BANNER_KEY) === "1") {
+          return;
+        }
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { count } = await supabase
+            .from("songs")
+            .select("id", { count: "exact", head: true })
+            .eq("user_id", user.id);
+          if ((count ?? 0) > 0) {
+            try { localStorage.setItem(PERSONAL_BANNER_KEY, "1"); } catch {}
+            return;
+          }
+        }
+        if (!cancelled) setHidden(false);
+      } catch {
+        if (!cancelled) setHidden(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const dismiss = useCallback(() => {
+    try { localStorage.setItem(PERSONAL_BANNER_KEY, "1"); } catch {}
+    setHidden(true);
+  }, []);
+
+  if (hidden) return null;
+
   return (
     <div className="mx-auto mt-10 max-w-3xl px-1 sm:mt-16 sm:px-0">
       <div className="relative overflow-hidden rounded-[1.75rem] border-2 border-primary/40 bg-gradient-to-br from-card/80 via-card/60 to-card/80 p-5 text-center shadow-[0_18px_60px_-20px_rgba(255,60,60,0.45)] backdrop-blur-xl sm:rounded-[2rem] sm:p-8">
+        <button
+          type="button"
+          onClick={dismiss}
+          aria-label="Dismiss personalization reminder"
+          className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full border border-white/15 bg-background/60 text-muted-foreground transition hover:text-foreground"
+        >
+          ✕
+        </button>
         <span className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-primary sm:text-xs">
           ✨ Reminder
         </span>
@@ -503,6 +548,7 @@ function AlbumCoverShowcase() {
     </div>
   );
 }
+
 
 
 function Sticker({
