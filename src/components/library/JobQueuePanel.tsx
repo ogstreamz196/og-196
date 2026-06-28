@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { ensureFullUrlAllowed } from "@/lib/ensure-full-url-allowed";
 import { Link } from "@tanstack/react-router";
 import {
   Loader2,
