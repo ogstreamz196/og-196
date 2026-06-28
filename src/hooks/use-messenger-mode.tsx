@@ -18,7 +18,6 @@ export function messengerModeQueryKey(userId: string | null | undefined) {
 
 export function useMessengerMode() {
   const { user } = useAuth();
-  const { isVip } = useRole();
   const uid = user?.id ?? null;
   const qc = useQueryClient();
 
@@ -36,20 +35,6 @@ export function useMessengerMode() {
       return stored === "community" || stored === "loner" ? stored : null;
     },
   });
-
-  // Seed VIPs into community mode once if they've never picked a preference.
-  useEffect(() => {
-    if (!uid || !query.isFetched || !isVip) return;
-    if (query.data !== null) return;
-    void supabase
-      .from("user_preferences")
-      .upsert({ user_id: uid, messenger_mode: "community" }, { onConflict: "user_id" })
-      .then(({ error }) => {
-        if (!error) {
-          qc.setQueryData(messengerModeQueryKey(uid), "community");
-        }
-      });
-  }, [uid, isVip, query.isFetched, query.data, qc]);
 
   useEffect(() => {
     if (!uid) return;
@@ -73,8 +58,7 @@ export function useMessengerMode() {
     };
   }, [uid, qc]);
 
-  const effectiveMode: MessengerMode =
-    query.data ?? (isVip ? "community" : "loner");
+  const effectiveMode: MessengerMode = query.data ?? "loner";
 
   return {
     mode: effectiveMode,
