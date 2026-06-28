@@ -821,12 +821,14 @@ export function OgChat({
         </div>
       )}
       <form
+        ref={composerRef}
         onSubmit={(e) => {
           e.preventDefault();
           sendText(input);
         }}
-        className="border-t border-border bg-card/95 px-3 py-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))] backdrop-blur supports-[backdrop-filter]:bg-card/70 sm:px-4"
+        className="sticky bottom-0 z-20 border-t border-border bg-card/95 px-3 py-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))] backdrop-blur transition-transform duration-150 supports-[backdrop-filter]:bg-card/70 sm:px-4"
       >
+
         {attachment && (
           <div className="mb-2 flex items-center gap-2 rounded-xl border border-border bg-muted/40 p-2">
             <img src={attachment.dataUrl} alt="" className="h-10 w-10 rounded-md object-cover" />
