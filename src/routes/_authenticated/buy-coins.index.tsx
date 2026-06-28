@@ -235,37 +235,30 @@ function BuyCoinsPage() {
           <div className="pointer-events-none absolute -left-16 -top-20 h-64 w-64 rounded-full bg-coin/25 blur-3xl" />
           <div className="pointer-events-none absolute -right-20 -bottom-24 h-72 w-72 rounded-full bg-primary/25 blur-3xl" />
 
-          <div className="relative flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+          <div className="relative flex flex-col gap-5 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
             <div className="flex items-start gap-4 min-w-0">
-              <div className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-coin/40 to-coin/10 text-coin shadow-glow ring-2 ring-coin/40">
-                <Coins className="h-8 w-8 drop-shadow" />
+              <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-coin/40 to-coin/10 text-coin shadow-glow ring-2 ring-coin/40">
+                <Coins className="h-7 w-7 drop-shadow" />
               </div>
               <div className="min-w-0">
                 <p className="inline-flex items-center gap-1.5 rounded-full bg-coin/15 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.25em] text-coin ring-1 ring-coin/40">
                   <Flame className="h-3 w-3" /> The Coin Vault
                 </p>
-                <h1 className="mt-2 font-display text-4xl font-black tracking-tight sm:text-5xl">
+                <h1 className="mt-2 font-display text-3xl font-black tracking-tight sm:text-4xl">
                   <EditableContent contentKey="buyCoins.heading" defaultValue="Stock up. Power up." />
                 </h1>
-                <p className="mt-2 max-w-xl text-sm text-muted-foreground sm:text-[15px]">
-                  <EditableContent
-                    contentKey="buyCoins.subtitle"
-                    defaultValue="1 coin = 1 message or 1 track. Coins never expire — collect the bigger bundles to unlock fatter savings."
-                    multiline
-                  />
-                </p>
               </div>
             </div>
 
-            {/* HUD wallet */}
+            {/* HUD wallet — single line balance */}
             <div className="flex w-full flex-col gap-3 sm:w-auto sm:items-end">
               <div className="w-full rounded-2xl border-2 border-coin/50 bg-background/60 px-4 py-3 backdrop-blur-md shadow-glow sm:w-auto">
                 <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] text-coin">
-                  <Wallet className="h-3 w-3" /> Wallet
+                  <Wallet className="h-3 w-3" /> Wallet balance
                 </div>
-                <div className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                  <Coins className="h-5 w-5 shrink-0 text-coin" />
-                  <span className="font-black tabular-nums leading-none [font-size:clamp(1.5rem,7vw,2rem)]">
+                <div className="mt-1 flex items-baseline gap-2 whitespace-nowrap">
+                  <Coins className="h-5 w-5 shrink-0 self-center text-coin" />
+                  <span className="font-black tabular-nums leading-none [font-size:clamp(1.5rem,6vw,2rem)]">
                     {profile?.coin_balance ?? 0}
                   </span>
                   <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
@@ -280,7 +273,7 @@ function BuyCoinsPage() {
           </div>
         </section>
 
-        {/* Referral cashback reminder */}
+        {/* Your OG sharing code first — earn while others spend */}
         <ReferralReminder />
 
         {/* Coin bundles */}
