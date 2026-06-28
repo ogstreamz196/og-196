@@ -19,6 +19,7 @@ interface Props {
 export function StripeEmbeddedCheckoutInline({ priceId, returnUrl, type = "coins", customUnits }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
+  const [ready, setReady] = useState(false);
 
   const fetchClientSecret = useCallback(async (): Promise<string> => {
     try {
@@ -46,7 +47,10 @@ export function StripeEmbeddedCheckoutInline({ priceId, returnUrl, type = "coins
 
   if (error) {
     return (
-      <div className="rounded-2xl border border-destructive/40 bg-destructive/5 p-6 text-center">
+      <div
+        role="alert"
+        className="rounded-2xl border border-destructive/40 bg-destructive/5 p-6 text-center"
+      >
         <AlertTriangle className="mx-auto h-8 w-8 text-destructive" />
         <p className="mt-3 text-sm font-semibold text-foreground">Checkout couldn't start</p>
         <p className="mt-1 text-xs text-muted-foreground">{error}</p>
@@ -57,6 +61,7 @@ export function StripeEmbeddedCheckoutInline({ priceId, returnUrl, type = "coins
           className="mt-4"
           onClick={() => {
             setError(null);
+            setReady(false);
             setAttempt((a) => a + 1);
           }}
         >
@@ -67,9 +72,31 @@ export function StripeEmbeddedCheckoutInline({ priceId, returnUrl, type = "coins
   }
 
   return (
-    <div id="checkout" key={attempt}>
-      <EmbeddedCheckoutProvider stripe={getStripe()} options={{ fetchClientSecret }}>
-        <EmbeddedCheckout />
+    <div id="checkout" key={attempt} className="relative min-h-[420px]">
+      {!ready && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="absolute inset-0 z-10 grid place-items-center rounded-2xl border border-border bg-background/70 backdrop-blur-sm"
+        >
+          <div className="flex flex-col items-center gap-2 text-center">
+            <Loader2 className="h-7 w-7 animate-spin text-coin" />
+            <p className="text-sm font-semibold">Starting secure checkout…</p>
+            <p className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+              <Lock className="h-3 w-3" /> Encrypted by Stripe
+            </p>
+          </div>
+        </div>
+      )}
+      <EmbeddedCheckoutProvider
+        stripe={getStripe()}
+        options={{ fetchClientSecret, onComplete: () => setReady(true) }}
+      >
+        <div onLoad={() => setReady(true)}>
+          <EmbeddedCheckout
+            onReady={() => setReady(true)}
+          />
+        </div>
       </EmbeddedCheckoutProvider>
     </div>
   );
