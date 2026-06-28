@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
-import { AlertTriangle, RotateCw } from "lucide-react";
+import { AlertTriangle, Loader2, Lock, RotateCw } from "lucide-react";
 import { getStripe, getStripeEnvironment } from "@/lib/stripe";
 import {
   createCoinCheckoutSession,
