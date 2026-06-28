@@ -39,6 +39,8 @@ export function AllPurchasesPanel() {
   const [range, setRange] = useState<RangeKey>("all");
   const [customFrom, setCustomFrom] = useState<string>(toInputDate(startOfMonth()));
   const [customTo, setCustomTo] = useState<string>(toInputDate(new Date()));
+  const [pageSize, setPageSize] = useState<number>(50);
+  const [page, setPage] = useState(1);
 
   const q = useQuery({
     queryKey: ["admin-all-coin-purchases"],
