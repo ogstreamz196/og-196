@@ -17,6 +17,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { ensureCurrentUserBootstrap } from "@/lib/user-bootstrap.functions";
 import { useSiteContentRealtime } from "@/hooks/use-site-content";
 import { DisplayPrefsBridge } from "@/hooks/use-display-prefs";
+import { AuraBridge } from "@/hooks/use-aura";
 import { UserActivityArchiver } from "@/hooks/use-user-activity-archiver";
 
 function NotFoundComponent() {
@@ -341,6 +342,7 @@ function RootComponent() {
       <AuthProvider>
         <SiteContentRealtimeBridge />
         <DisplayPrefsBridge />
+        <AuraBridge />
         <UserActivityArchiver />
         <Outlet />
         <Toaster />

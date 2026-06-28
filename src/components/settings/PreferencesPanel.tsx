@@ -12,6 +12,7 @@ import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { useRole } from "@/hooks/use-role";
 import { useAppPreferences, type AppPreferences } from "@/hooks/use-app-preferences";
 import { useDisplayPrefs, useSetDisplayPrefs, clampScale, type Density } from "@/hooks/use-display-prefs";
+import { useAura, type AuraLevel } from "@/hooks/use-aura";
 
 /**
  * Drop-in preferences card group for /settings.
@@ -29,6 +30,7 @@ export function PreferencesPanel() {
   };
   const display = useDisplayPrefs();
   const setDisplay = useSetDisplayPrefs();
+  const aura = useAura();
 
   const SCALE_STEP = 0.05;
   const scalePct = Math.round(display.textScale * 100);
@@ -107,6 +109,20 @@ export function PreferencesPanel() {
               <ModeOption value="compact" title="Compact" body="Tighter rows." />
               <ModeOption value="comfortable" title="Comfortable" body="Default rhythm." />
               <ModeOption value="spacious" title="Spacious" body="More breathing room." />
+            </RadioGroup>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2"><Palette className="h-4 w-4" /> Red aura intensity</Label>
+            <RadioGroup
+              value={aura.level}
+              onValueChange={(v) => aura.setLevel(v as AuraLevel)}
+              className="grid grid-cols-4 gap-2"
+            >
+              <ModeOption value="off" title="Off" body="No glow." />
+              <ModeOption value="low" title="Low" body="Faint hint." />
+              <ModeOption value="medium" title="Medium" body="Default." />
+              <ModeOption value="high" title="High" body="Bold." />
             </RadioGroup>
           </div>
         </CardContent>
