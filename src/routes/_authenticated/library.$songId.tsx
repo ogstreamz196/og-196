@@ -103,6 +103,7 @@ function SkeletonState({ message }: { message: string }) {
 }
 
 function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void }) {
+  const qc = useQueryClient();
   const { data: settings } = useSettings();
   const sampleSeconds = settings?.sample_seconds ?? 30;
   const { user } = useAuth();
@@ -207,6 +208,12 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
             `Charged ${unlockData?.cost ?? 2} OG coins — ${unlockData?.royalty ?? 1} sent to the creator as a royalty.`,
           );
         }
+        // Refresh balance + song state so the UI flips to "unlocked".
+        await Promise.all([
+          qc.invalidateQueries({ queryKey: ["profile"] }),
+          qc.invalidateQueries({ queryKey: ["song", song.id] }),
+        ]);
+        onRefresh();
       } else {
         if (!unlocked) {
           toast.error("This track isn't unlocked. Purchase or unlock to download the full version.");
