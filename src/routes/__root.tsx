@@ -342,6 +342,7 @@ function RootComponent() {
       <AuthProvider>
         <SiteContentRealtimeBridge />
         <DisplayPrefsBridge />
+        <AuraBridge />
         <UserActivityArchiver />
         <Outlet />
         <Toaster />
