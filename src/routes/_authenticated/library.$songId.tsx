@@ -152,15 +152,16 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
     }
     load();
     return () => { cancelled = true; };
-  }, [isReady, song.id, previewUrl, loadingPreview]);
+  }, [isReady, song.id, previewUrl, loadingPreview, communityMode]);
 
-  // Enforce sample-seconds cap on the preview stream.
+  // Enforce sample-seconds cap ONLY for the owner preview. Community viewers
+  // hear the full track for free; the charge is on download.
   useEffect(() => {
     const el = audioRef.current;
     if (!el) return;
     const onTime = () => {
       setProgress(el.currentTime);
-      if (el.currentTime >= sampleSeconds) {
+      if (!communityMode && el.currentTime >= sampleSeconds) {
         el.pause();
         el.currentTime = 0;
         setPlaying(false);
@@ -168,7 +169,8 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
     };
     el.addEventListener("timeupdate", onTime);
     return () => el.removeEventListener("timeupdate", onTime);
-  }, [sampleSeconds]);
+  }, [sampleSeconds, communityMode]);
+
 
   async function togglePlay() {
     if (!previewUrl) return;
