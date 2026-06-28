@@ -95,11 +95,17 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
     if (!recheckActive) return;
     if (recheckCount >= 10) {
       setRecheckActive(false);
+      toast.error("Song is still missing after refreshing — it may be permanently deleted.");
       return;
     }
     const id = setTimeout(() => {
-      onRefresh?.();
-      onSaved?.();
+      try {
+        onRefresh?.();
+        onSaved?.();
+        toast.success(`Library reloaded — song still missing (attempt ${recheckCount + 1}/10)`);
+      } catch {
+        toast.error("Couldn't reload library. Retrying…");
+      }
       setRecheckCount((c) => c + 1);
     }, 3000);
     return () => clearTimeout(id);
@@ -109,8 +115,10 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
     if (!missing && recheckActive) {
       setRecheckActive(false);
       setRecheckCount(0);
+      toast.success("Song recovered — back in your library.");
     }
   }, [missing, recheckActive]);
+
 
   const lyricsRef = useRef<HTMLTextAreaElement | null>(null);
 
