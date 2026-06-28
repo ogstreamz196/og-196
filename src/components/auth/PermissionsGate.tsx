@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { shouldShowPermissionsGate } from "@/lib/permissions-gate-logic";
 import { toast } from "sonner";
 
 /**
