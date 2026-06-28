@@ -425,9 +425,23 @@
       repeating-linear-gradient(-45deg,
         oklch(0 0 0 / 0.05) 0px, oklch(0 0 0 / 0.05) 1px,
         transparent 1px, transparent 3px),
+      /* subtle red auras scattered around */
+      radial-gradient(circle 320px at 12% 18%, oklch(0.55 0.22 27 / 0.18), transparent 70%),
+      radial-gradient(circle 260px at 88% 32%, oklch(0.5 0.24 25 / 0.16), transparent 72%),
+      radial-gradient(circle 380px at 22% 82%, oklch(0.5 0.22 22 / 0.14), transparent 74%),
+      radial-gradient(circle 300px at 78% 90%, oklch(0.55 0.24 28 / 0.16), transparent 70%),
+      radial-gradient(circle 220px at 55% 50%, oklch(0.5 0.2 25 / 0.10), transparent 75%),
       radial-gradient(ellipse 90% 60% at 50% -10%, oklch(0.35 0.18 268 / 0.3), transparent 60%),
       radial-gradient(ellipse 70% 50% at 100% 100%, oklch(0.3 0.14 270 / 0.3), transparent 65%),
       linear-gradient(180deg, oklch(0.1 0.04 265 / 0.55), oklch(0.1 0.04 265 / 0.72));
+    animation: redAuraDrift 24s ease-in-out infinite alternate;
+  }
+  @keyframes redAuraDrift {
+    0%   { background-position: 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%; }
+    100% { background-position: 0% 0%, 0% 0%, 3% -2%, -2% 3%, 2% 2%, -3% -1%, 1% -3%, 0% 0%, 0% 0%, 0% 0%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    body::after { animation: none; }
   }
 
   /* High-contrast mode — pure white text, bolder borders, stronger surfaces, dimmer wallpaper */
