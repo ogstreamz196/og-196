@@ -51,7 +51,7 @@ interface RoleRow {
 type ProUserRow = Awaited<ReturnType<typeof listUsersPro>>[number];
 
 type RoleFilter = "all" | "admin" | "vip" | "og_bot" | "user";
-type SortKey = "joined" | "balance" | "name";
+type SortKey = "joined" | "balance" | "name" | "spend" | "buys";
 
 function AdminUsersPage() {
   const { isAdmin, isLoading: roleLoading } = useRole();
