@@ -487,59 +487,23 @@ function Hero() {
 }
 
 function AlbumCoverShowcase() {
-  const examples = [
-    { label: "Their name", example: "“For my sister Aaliyah…”", emoji: "🪪" },
-    { label: "The occasion", example: "“…her 30th birthday this Saturday.”", emoji: "🎂" },
-    { label: "What they love", example: "“Obsessed with afrobeats, mango margaritas and her dog Bruno.”", emoji: "💛" },
-    { label: "An inside joke or memory", example: "“Remind her about the karaoke night we don’t talk about.”", emoji: "🤫" },
-  ];
-
   return (
-    <div className="mx-auto mt-10 max-w-4xl px-1 sm:mt-16 sm:px-0">
-      <div className="text-center">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:text-sm sm:tracking-[0.25em]">
-          What to tell us
-        </p>
-        <h3 className="font-display mt-2.5 text-balance text-[clamp(1.6rem,7vw,2.25rem)] font-semibold leading-[1.05] tracking-[-0.025em] sm:mt-4 sm:text-5xl md:text-6xl">
-          The more personal, <em className="italic text-gradient-brand">the better the song</em>
+    <div className="mx-auto mt-10 max-w-3xl px-1 sm:mt-16 sm:px-0">
+      <div className="relative overflow-hidden rounded-[1.75rem] border-2 border-primary/40 bg-gradient-to-br from-card/80 via-card/60 to-card/80 p-5 text-center shadow-[0_18px_60px_-20px_rgba(255,60,60,0.45)] backdrop-blur-xl sm:rounded-[2rem] sm:p-8">
+        <span className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-primary sm:text-xs">
+          ✨ Reminder
+        </span>
+        <h3 className="font-display mt-3 text-balance text-[clamp(1.5rem,6vw,2.25rem)] font-semibold leading-[1.05] tracking-[-0.025em] sm:mt-4 sm:text-4xl">
+          Make it as personal as you like — <em className="italic text-gradient-brand">the more you share, the better the song</em>
         </h3>
+        <p className="mt-3 text-sm font-medium text-muted-foreground sm:mt-4 sm:text-base">
+          Names, inside jokes, occasions, favourite things — drop it all in. OG Bot turns your details into a track that feels like <em className="italic text-foreground">them</em>. 🎧
+        </p>
       </div>
-
-      <ul className="mt-6 grid gap-3 sm:mt-10 sm:gap-6 md:grid-cols-2">
-        {examples.map((e, i) => (
-          <li
-            key={e.label}
-            className="group relative flex items-start gap-3.5 rounded-[1.5rem] border border-white/15 bg-card/70 p-4 text-left shadow-[0_14px_40px_-22px_rgba(80,60,255,0.5)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-primary/40 sm:gap-4 sm:rounded-[2rem] sm:border-2 sm:p-8 sm:shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)]"
-          >
-            <CardEditBadge />
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-brand text-xl shadow-glow sm:h-14 sm:w-14 sm:rounded-2xl sm:text-3xl">
-              {e.emoji}
-            </span>
-            <div className="min-w-0">
-              <EditableContent
-                as="p"
-                contentKey={`welcome.example.${i}.label`}
-                defaultValue={e.label}
-                className="text-[10px] font-black uppercase tracking-[0.2em] text-primary sm:text-sm sm:tracking-[0.24em]"
-              />
-              <EditableContent
-                as="p"
-                multiline
-                contentKey={`welcome.example.${i}.example`}
-                defaultValue={e.example}
-                className="mt-1.5 block text-[15px] font-semibold leading-snug text-foreground sm:mt-2 sm:text-xl"
-              />
-            </div>
-          </li>
-        ))}
-      </ul>
-
-      <p className="mt-5 text-center text-xs font-medium text-muted-foreground sm:mt-8 sm:text-base sm:font-semibold">
-        Even one or two details turns into a track that feels like <em className="italic text-foreground">them</em>. 🎧
-      </p>
     </div>
   );
 }
+
 
 function Sticker({
   children,
