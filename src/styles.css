@@ -412,11 +412,23 @@
   /* Smoky tint for legibility over the wallpaper */
   /* Smoky tint + carbon-fibre micro-weave for legibility + premium texture */
   /* Red-aura intensity multiplier — controlled via <html data-aura="..."> */
-  :root { --aura-alpha: 1; }
+  /* --aura-theme adapts the base strength to the active theme so contrast
+     stays readable: full strength on dark, dialed down on light, and gently
+     softened in high-contrast mode. */
+  :root { --aura-theme: 1; --aura-alpha: calc(1 * var(--aura-theme)); }
   html[data-aura="off"]    { --aura-alpha: 0; }
-  html[data-aura="low"]    { --aura-alpha: 0.5; }
-  html[data-aura="medium"] { --aura-alpha: 1; }
-  html[data-aura="high"]   { --aura-alpha: 1.6; }
+  html[data-aura="low"]    { --aura-alpha: calc(0.5 * var(--aura-theme)); }
+  html[data-aura="medium"] { --aura-alpha: calc(1   * var(--aura-theme)); }
+  html[data-aura="high"]   { --aura-alpha: calc(1.6 * var(--aura-theme)); }
+
+  /* Light theme — system preference or explicit .light class */
+  @media (prefers-color-scheme: light) {
+    :root:not(.dark) { --aura-theme: 0.4; }
+  }
+  html.light { --aura-theme: 0.4; }
+  /* High-contrast — keep auras faint so text contrast wins */
+  html.hc { --aura-theme: 0.35; }
+
 
   body::after {
     content: "";
