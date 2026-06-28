@@ -457,6 +457,18 @@ function UserRow({
           </div>
         </TableCell>
 
+        <TableCell className="text-right">
+          <span className="font-mono text-sm tabular-nums text-amber-300">
+            {(spend?.totalCoins ?? 0).toLocaleString()}
+          </span>
+        </TableCell>
+
+        <TableCell className="text-right">
+          <span className="font-mono text-sm tabular-nums text-muted-foreground">
+            {spend?.purchaseCount ?? 0}
+          </span>
+        </TableCell>
+
         <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
           {new Date(user.created_at).toLocaleDateString()}
         </TableCell>
