@@ -59,13 +59,11 @@ Deno.serve(async (req) => {
   const isOwner = !(song.user_id !== user.id);
 
   if (!isOwner) {
-    if (mode === "full") {
-      log("locked_non_owner", { user_id: user.id, song_id });
-      return jsonResponse({
-        error: "Full track is locked",
-        code: "locked",
-        reason: "You do not own this song; the full HQ download is owner-only.",
-      }, 403);
+    // Community streaming: non-owners may play the FULL track for free as long
+    // as the song is revealed + completed. Downloading still requires payment
+    // (handled by the unlock check further down + unlock-full-song).
+    if (mode === "full" && purpose === "download") {
+      // fall through to unlock-row check below
     }
     if (song.status !== "completed") {
       log("not_completed", { user_id: user.id, song_id, status: song.status });
