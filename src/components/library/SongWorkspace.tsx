@@ -643,7 +643,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
                     <Button
                       variant="outline"
                       onClick={generatePreview}
-                      disabled={genPreview || isPending || unlocking}
+                      disabled={genPreview || isPending || unlocking || missing}
                     >
                       {genPreview ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
                       Regenerate sample
