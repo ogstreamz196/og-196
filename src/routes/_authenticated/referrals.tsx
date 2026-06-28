@@ -508,6 +508,8 @@ function ReferralsPage() {
             })}
           </div>
         </section>
+
+        <AllPurchasesPanel />
       </div>
     </DashboardShell>
   );
