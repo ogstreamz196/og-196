@@ -86,6 +86,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
   const [genLyrics, setGenLyrics] = useState(false);
   const [genPreview, setGenPreview] = useState(false);
   const [unlocking, setUnlocking] = useState(false);
+  const [missing, setMissing] = useState(false);
   const lyricsRef = useRef<HTMLTextAreaElement | null>(null);
 
   const briefLanguage = useMemo(() => detectLanguage(brief), [brief]);
