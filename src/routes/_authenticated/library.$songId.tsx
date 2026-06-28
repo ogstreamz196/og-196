@@ -103,6 +103,7 @@ function SkeletonState({ message }: { message: string }) {
 }
 
 function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void }) {
+  const qc = useQueryClient();
   const { data: settings } = useSettings();
   const sampleSeconds = settings?.sample_seconds ?? 30;
   const { user } = useAuth();
