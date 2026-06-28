@@ -56,6 +56,7 @@ function setBriefLanguage(brief: string, language: string): string {
 interface Props {
   song: WorkspaceSong;
   onSaved?: () => void;
+  onRefresh?: () => void;
 }
 
 /**
