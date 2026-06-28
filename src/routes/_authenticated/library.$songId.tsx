@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { useSettings } from "@/hooks/use-settings";
 import { Button } from "@/components/ui/button";
@@ -104,6 +105,11 @@ function SkeletonState({ message }: { message: string }) {
 function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void }) {
   const { data: settings } = useSettings();
   const sampleSeconds = settings?.sample_seconds ?? 30;
+  const { user } = useAuth();
+  const isOwner = !!user && song.user_id === user.id;
+  // Community viewers (non-owners) stream the FULL track for free; downloading
+  // costs 2 OG coins (1 burnt, 1 royalty to the creator).
+  const communityMode = !isOwner;
 
   const isReady = song.status === "completed" && !!(song.audio_path || (song as any).sample_path);
   const isFailed = song.status === "failed";
@@ -126,7 +132,9 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
       setLoadingPreview(true);
       try {
         const { data, error } = await supabase.functions.invoke("song-url", {
-          body: { song_id: song.id, mode: "preview" },
+          body: communityMode
+            ? { song_id: song.id, mode: "full", purpose: "stream" }
+            : { song_id: song.id, mode: "preview" },
         });
         if (error) throw error;
         if (cancelled) return;
@@ -144,15 +152,16 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
     }
     load();
     return () => { cancelled = true; };
-  }, [isReady, song.id, previewUrl, loadingPreview]);
+  }, [isReady, song.id, previewUrl, loadingPreview, communityMode]);
 
-  // Enforce sample-seconds cap on the preview stream.
+  // Enforce sample-seconds cap ONLY for the owner preview. Community viewers
+  // hear the full track for free; the charge is on download.
   useEffect(() => {
     const el = audioRef.current;
     if (!el) return;
     const onTime = () => {
       setProgress(el.currentTime);
-      if (el.currentTime >= sampleSeconds) {
+      if (!communityMode && el.currentTime >= sampleSeconds) {
         el.pause();
         el.currentTime = 0;
         setPlaying(false);
@@ -160,7 +169,8 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
     };
     el.addEventListener("timeupdate", onTime);
     return () => el.removeEventListener("timeupdate", onTime);
-  }, [sampleSeconds]);
+  }, [sampleSeconds, communityMode]);
+
 
   async function togglePlay() {
     if (!previewUrl) return;
@@ -176,19 +186,41 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
   }
 
   async function downloadFull() {
-    if (!unlocked) {
-      toast.error("This track isn't unlocked. Purchase or unlock to download the full version.");
-      return;
-    }
-    const precheck = await ensureFullUrlAllowed(song.id);
-    if (!precheck.ok) {
-      toast.error(precheck.reason);
-      return;
-    }
     setDownloading(true);
     try {
+      // Community viewers (non-owners) must pay 2 OG coins per download
+      // (1 burnt + 1 royalty to the creator). Owners just need their HQ unlock.
+      if (communityMode) {
+        const { data: unlockData, error: unlockErr } = await supabase.functions.invoke(
+          "unlock-full-song",
+          { body: { song_id: song.id } },
+        );
+        if (unlockErr) {
+          const msg =
+            (unlockErr as { context?: { error?: string } })?.context?.error ||
+            unlockErr.message ||
+            "Could not unlock track";
+          throw new Error(msg);
+        }
+        if (!unlockData?.already) {
+          toast.success(
+            `Charged ${unlockData?.cost ?? 2} OG coins — ${unlockData?.royalty ?? 1} sent to the creator as a royalty.`,
+          );
+        }
+      } else {
+        if (!unlocked) {
+          toast.error("This track isn't unlocked. Purchase or unlock to download the full version.");
+          return;
+        }
+        const precheck = await ensureFullUrlAllowed(song.id);
+        if (!precheck.ok) {
+          toast.error(precheck.reason);
+          return;
+        }
+      }
+
       const { data, error } = await supabase.functions.invoke("song-url", {
-        body: { song_id: song.id, mode: "full" },
+        body: { song_id: song.id, mode: "full", purpose: "download" },
       });
       if (error) {
         const msg =
@@ -210,9 +242,13 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
     }
   }
 
+
+  const progressDenom = communityMode
+    ? Math.max(1, song.duration_seconds ?? audioRef.current?.duration ?? sampleSeconds)
+    : sampleSeconds;
   const progressPct = useMemo(
-    () => Math.min(100, (progress / sampleSeconds) * 100),
-    [progress, sampleSeconds],
+    () => Math.min(100, (progress / progressDenom) * 100),
+    [progress, progressDenom],
   );
 
   return (
@@ -280,31 +316,35 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
                   ) : (
                     <Play className="h-5 w-5" />
                   )}
-                  {playing ? "Pause preview" : "Play preview"}
+                  {playing
+                    ? communityMode ? "Pause" : "Pause preview"
+                    : communityMode ? "Play full track" : "Play preview"}
                 </Button>
                 <Button
                   onClick={downloadFull}
-                  disabled={downloading || !unlocked}
-                  variant={unlocked ? "default" : "outline"}
+                  disabled={downloading || (!communityMode && !unlocked)}
+                  variant={communityMode || unlocked ? "default" : "outline"}
                   size="lg"
                 >
                   {downloading ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
-                  ) : unlocked ? (
+                  ) : communityMode || unlocked ? (
                     <Download className="h-5 w-5" />
                   ) : (
                     <Lock className="h-5 w-5" />
                   )}
-                  {unlocked ? "Download HQ" : "Locked"}
+                  {communityMode
+                    ? "Download · 2 coins"
+                    : unlocked ? "Download HQ" : "Locked"}
                 </Button>
               </div>
 
               <div>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Lock className="h-3 w-3" />
-                  Preview limited to {sampleSeconds}s. {unlocked
-                    ? "Full track download available."
-                    : "Unlock to download the full track."}
+                  {communityMode
+                    ? "Full community track plays free. Downloading costs 2 OG coins — 1 burnt, 1 royalty to the creator."
+                    : `Preview limited to ${sampleSeconds}s. ${unlocked ? "Full track download available." : "Unlock to download the full track."}`}
                 </div>
                 <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-muted">
                   <div

@@ -36,6 +36,7 @@ Deno.serve(async (req) => {
   const body = await req.json().catch(() => ({}));
   const song_id: string | undefined = body?.song_id;
   const mode: "preview" | "full" = body?.mode === "full" ? "full" : "preview";
+  const purpose: "stream" | "download" = body?.purpose === "stream" ? "stream" : "download";
   if (!song_id) {
     log("missing_song_id", { user_id: user.id, mode });
     return jsonResponse({ error: "Missing song_id", code: "missing_song_id" }, 400);
@@ -58,13 +59,11 @@ Deno.serve(async (req) => {
   const isOwner = !(song.user_id !== user.id);
 
   if (!isOwner) {
-    if (mode === "full") {
-      log("locked_non_owner", { user_id: user.id, song_id });
-      return jsonResponse({
-        error: "Full track is locked",
-        code: "locked",
-        reason: "You do not own this song; the full HQ download is owner-only.",
-      }, 403);
+    // Community streaming: non-owners may play the FULL track for free as long
+    // as the song is revealed + completed. Downloading still requires payment
+    // (handled by the unlock check further down + unlock-full-song).
+    if (mode === "full" && purpose === "download") {
+      // fall through to unlock-row check below
     }
     if (song.status !== "completed") {
       log("not_completed", { user_id: user.id, song_id, status: song.status });
@@ -87,19 +86,24 @@ Deno.serve(async (req) => {
   if (mode === "full") {
     // Require an unlocked_songs record before ever returning the full URL.
     // songs.unlocked is a denormalised mirror; the unlock ledger is the source of truth.
-    const { data: unlockRow } = await admin
-      .from("unlocked_songs")
-      .select("id")
-      .eq("user_id", user.id)
-      .eq("song_id", song_id)
-      .maybeSingle();
-    if (!unlockRow) {
-      log("locked_no_unlock_row", { user_id: user.id, song_id, mirror_unlocked: !!song.unlocked });
-      return jsonResponse({
-        error: "Full track is locked",
-        code: "locked",
-        reason: "No unlock ledger entry — unlock the HQ track first.",
-      }, 403);
+    // Non-owners streaming the community version don't need an unlock row;
+    // downloading does. Owners always need the ledger row from unlock-full-song.
+    const requireUnlock = isOwner || purpose === "download";
+    if (requireUnlock) {
+      const { data: unlockRow } = await admin
+        .from("unlocked_songs")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("song_id", song_id)
+        .maybeSingle();
+      if (!unlockRow) {
+        log("locked_no_unlock_row", { user_id: user.id, song_id, mirror_unlocked: !!song.unlocked });
+        return jsonResponse({
+          error: "Full track is locked",
+          code: "locked",
+          reason: "No unlock ledger entry — unlock the HQ track first.",
+        }, 403);
+      }
     }
     if (!song.audio_path) {
       log("full_pending", { user_id: user.id, song_id });
