@@ -141,11 +141,13 @@ function AdminUsersPage() {
       if (sort === "joined") cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
       else if (sort === "balance") cmp = (a.coin_balance ?? 0) - (b.coin_balance ?? 0);
       else if (sort === "name") cmp = (a.display_name ?? a.email ?? "").localeCompare(b.display_name ?? b.email ?? "");
+      else if (sort === "spend") cmp = (spendByUser[a.id]?.totalCoins ?? 0) - (spendByUser[b.id]?.totalCoins ?? 0);
+      else if (sort === "buys") cmp = (spendByUser[a.id]?.purchaseCount ?? 0) - (spendByUser[b.id]?.purchaseCount ?? 0);
       return sortDir === "asc" ? cmp : -cmp;
     });
 
     return sorted;
-  }, [usersQ.data, q, roleFilter, rolesByUser, sort, sortDir]);
+  }, [usersQ.data, q, roleFilter, rolesByUser, sort, sortDir, spendByUser]);
 
   if (roleLoading) {
     return (
