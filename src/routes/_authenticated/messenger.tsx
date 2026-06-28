@@ -140,8 +140,8 @@ function MessengerPage() {
             aria-checked={isCommunity}
             aria-label={
               isCommunity
-                ? "Turn on OG Bot Loner Mode (leave Community)"
-                : "Turn off Loner Mode (switch to OG Community Mode)"
+                ? "Start Private Mode (leave OG Community)"
+                : "Leave Private Mode (switch to OG Community Mode)"
             }
             className={`group flex shrink-0 items-center gap-2 rounded-full border px-3 py-2 text-[10px] font-black uppercase tracking-[0.18em] transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 sm:text-xs ${
               isCommunity
@@ -154,7 +154,7 @@ function MessengerPage() {
             ) : (
               <MessageCircle className="h-4 w-4 text-primary" />
             )}
-            <span className="whitespace-nowrap">{setMode.isPending ? "Saving…" : isCommunity ? "Turn on Loner" : "Turn off Loner"}</span>
+            <span className="whitespace-nowrap">{setMode.isPending ? "Saving…" : isCommunity ? "Start Private Mode" : "Leave Private Mode"}</span>
 
           </button>
         </header>
