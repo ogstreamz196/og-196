@@ -551,7 +551,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
                       size="sm"
                       variant="destructive"
                       onClick={generatePreview}
-                      disabled={!hasLyrics || genPreview || balance < previewCost}
+                      disabled={!hasLyrics || genPreview || balance < previewCost || missing}
                       className="gap-1.5"
                     >
                       {genPreview ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
