@@ -189,13 +189,13 @@ function BuyCoinsPage() {
                     : "One-time charge. Coins are credited to your balance within seconds and never expire."}
                 </p>
                 <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-                  <Button variant="outline" onClick={clearSelection}>Cancel</Button>
+                  <Button variant="outline" onClick={clearSelection} className="h-12 sm:h-10">Cancel</Button>
                   <Button
                     onClick={() => setStage("pay")}
-                    className="bg-gradient-brand font-bold text-primary-foreground shadow-glow hover:opacity-90"
+                    className="h-12 w-full bg-gradient-brand font-bold text-primary-foreground shadow-glow hover:opacity-90 sm:h-10 sm:w-auto"
                   >
                     <CreditCard className="mr-2 h-4 w-4" />
-                    Continue to payment · {CURRENCY_SYMBOL}{(totalCents / 100).toFixed(2)}
+                    Continue · {CURRENCY_SYMBOL}{(totalCents / 100).toFixed(2)}
                   </Button>
                 </div>
               </div>
