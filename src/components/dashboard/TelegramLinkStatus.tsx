@@ -192,7 +192,14 @@ export function TelegramLinkStatus() {
     <section
       data-testid="telegram-status-card"
       aria-label="Telegram connection status"
-      style={{ minHeight: "clamp(5rem, 14vw, 6.5rem)", contain: "layout paint" }}
+      style={{
+        minHeight: "clamp(5rem, 14vw, 6.5rem)",
+        // Self-protect: never let an over-eager parent crush us into a
+        // single-character vertical strip. Will clip via the app's
+        // global `overflow-x: hidden` rather than collapse.
+        minWidth: "min(100%, 16rem)",
+        contain: "layout paint",
+      }}
       className={`flex w-full min-w-0 flex-col gap-3 rounded-2xl border-2 px-4 py-3 backdrop-blur-md sm:flex-row sm:items-center sm:gap-4 ${tone.border} ${tone.bg}`}
     >
       <div className="flex min-w-0 flex-1 items-start gap-3">
@@ -206,19 +213,20 @@ export function TelegramLinkStatus() {
         <div className="min-w-0 flex-1">
           <p
             data-testid="telegram-status-headline"
-            className="flex min-w-0 items-center gap-2 font-bold uppercase tracking-[0.12em] leading-tight [font-size:clamp(0.95rem,3.4vw,1.5rem)]"
+            className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5 font-bold uppercase tracking-[0.08em] leading-tight [overflow-wrap:anywhere] [font-size:clamp(0.95rem,3.4vw,1.5rem)] sm:tracking-[0.12em]"
           >
             <MessageCircle className="h-5 w-5 shrink-0" />
-            <span className="min-w-0 break-words hyphens-auto">{headline}</span>
+            <span className="min-w-0 whitespace-normal">{headline}</span>
           </p>
           <p
             data-testid="telegram-status-detail"
-            className="min-w-0 text-muted-foreground leading-snug break-words hyphens-auto [font-size:clamp(0.8rem,2.6vw,1rem)]"
+            className="min-w-0 whitespace-normal text-muted-foreground leading-snug [overflow-wrap:anywhere] [font-size:clamp(0.8rem,2.6vw,1rem)]"
           >
             {detail}
           </p>
         </div>
       </div>
+
       <div className="flex flex-wrap items-center gap-2 sm:shrink-0 sm:justify-end">
         {canReconnect ? (
           <a
