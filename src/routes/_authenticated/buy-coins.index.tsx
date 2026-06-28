@@ -126,8 +126,8 @@ function BuyCoinsPage() {
             <ArrowLeft className="mr-2 h-4 w-4" /> Back to coin packs
           </Button>
           <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-card">
-            <div className="flex items-center justify-between gap-3 border-b border-border/60 bg-gradient-to-br from-coin/15 via-card to-card px-5 py-4">
-              <div className="flex min-w-0 items-center gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 bg-gradient-to-br from-coin/15 via-card to-card px-4 py-3 sm:px-5 sm:py-4">
+              <div className="flex min-w-0 flex-1 items-center gap-3">
                 <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-coin/20 text-coin shadow-glow">
                   {isVipFlow ? <Crown className="h-5 w-5" /> : <Coins className="h-5 w-5" />}
                 </div>
@@ -141,7 +141,7 @@ function BuyCoinsPage() {
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-2xl font-black tabular-nums leading-none">
+                <div className="text-2xl font-black tabular-nums leading-none sm:text-3xl">
                   {CURRENCY_SYMBOL}{(totalCents / 100).toFixed(2)}
                 </div>
                 <div className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -149,9 +149,9 @@ function BuyCoinsPage() {
                 </div>
               </div>
             </div>
-            <div className="flex items-center justify-center gap-4 border-b border-border/60 bg-background/40 px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 border-b border-border/60 bg-background/40 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground sm:px-5 sm:py-2.5">
               <span className="inline-flex items-center gap-1.5"><Lock className="h-3 w-3" /> Secure checkout</span>
-              <span aria-hidden>·</span>
+              <span aria-hidden className="hidden sm:inline">·</span>
               <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-3 w-3" /> Apple / Google Pay</span>
             </div>
             {stage === "confirm" ? (
