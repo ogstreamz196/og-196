@@ -71,26 +71,26 @@ export function ReferralReminder({ className }: { className?: string }) {
         className,
       )}
     >
-      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:flex-wrap sm:justify-between">
-        <div className="flex min-w-0 items-center gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-start gap-3">
           <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-coin/20 text-coin">
             <Sparkles className="h-5 w-5" />
           </div>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <div className="text-[11px] font-black uppercase tracking-[0.18em] text-coin">
               Earn 10% cashback
             </div>
-            <p className="truncate text-sm text-foreground">
+            <p className="text-sm leading-snug text-foreground [overflow-wrap:anywhere]">
               Share your code and bank 10% of every coin they burn — forever.
             </p>
-            <div className="mt-1 flex items-center gap-2">
+            <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
               <code className="rounded-md bg-background/60 px-2 py-0.5 font-mono text-xs font-bold tracking-wider text-foreground ring-1 ring-coin/30">
                 {code}
               </code>
               <button
                 type="button"
                 onClick={copy}
-                className="inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground hover:text-foreground"
+                className="inline-flex items-center gap-1 whitespace-nowrap text-[11px] font-semibold text-muted-foreground hover:text-foreground"
               >
                 {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
                 {copied ? "Copied" : "Copy link"}
@@ -98,17 +98,17 @@ export function ReferralReminder({ className }: { className?: string }) {
             </div>
           </div>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex shrink-0 items-center justify-end gap-2">
           <button
             type="button"
             onClick={share}
-            className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-coin px-3 text-xs font-bold text-background shadow hover:opacity-90"
+            className="inline-flex h-9 items-center gap-1.5 whitespace-nowrap rounded-lg bg-coin px-3 text-xs font-bold text-background shadow hover:opacity-90"
           >
             <Share2 className="h-3.5 w-3.5" /> Share
           </button>
           <Link
             to="/referrals"
-            className="text-[11px] font-semibold text-muted-foreground hover:text-foreground"
+            className="whitespace-nowrap text-[11px] font-semibold text-muted-foreground hover:text-foreground"
           >
             Details →
           </Link>
