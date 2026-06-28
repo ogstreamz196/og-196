@@ -282,6 +282,8 @@ function AdminUsersPage() {
                     <SortableHead label="User" active={sort === "name"} dir={sortDir} onClick={() => toggleSort("name")} />
                     <TableHead>Roles</TableHead>
                     <SortableHead label="Balance" align="right" active={sort === "balance"} dir={sortDir} onClick={() => toggleSort("balance")} />
+                    <SortableHead label="Spent" align="right" active={sort === "spend"} dir={sortDir} onClick={() => toggleSort("spend")} />
+                    <SortableHead label="Buys" align="right" active={sort === "buys"} dir={sortDir} onClick={() => toggleSort("buys")} />
                     <SortableHead label="Joined" active={sort === "joined"} dir={sortDir} onClick={() => toggleSort("joined")} />
                     <TableHead className="text-right">Quick actions</TableHead>
                   </TableRow>
