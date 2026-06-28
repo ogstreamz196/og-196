@@ -102,9 +102,8 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       try {
         onRefresh?.();
         onSaved?.();
-        toast.success(`Library reloaded — song still missing (attempt ${recheckCount + 1}/10)`);
       } catch {
-        toast.error("Couldn't reload library. Retrying…");
+        // Silent retry — single summary toast fires when polling ends.
       }
       setRecheckCount((c) => c + 1);
     }, 3000);
@@ -305,6 +304,8 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       return;
     }
     setGenPreview(true);
+    try { localStorage.setItem("welcome.personal_banner.dismissed", "1"); } catch {}
+    try { window.dispatchEvent(new CustomEvent("og:generate-start")); } catch {}
     try {
       if (dirty) {
         await persist({
