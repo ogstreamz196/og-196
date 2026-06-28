@@ -582,7 +582,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
               <div className="flex flex-wrap items-center justify-end gap-2">
                 <Button
                   onClick={generatePreview}
-                  disabled={!hasLyrics || genPreview || isPending || balance < previewCost}
+                  disabled={!hasLyrics || genPreview || isPending || balance < previewCost || missing}
                   aria-busy={genPreview || isPending}
                   className="gap-2"
                 >
