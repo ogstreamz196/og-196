@@ -86,6 +86,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
   const [genLyrics, setGenLyrics] = useState(false);
   const [genPreview, setGenPreview] = useState(false);
   const [unlocking, setUnlocking] = useState(false);
+  const [missing, setMissing] = useState(false);
   const lyricsRef = useRef<HTMLTextAreaElement | null>(null);
 
   const briefLanguage = useMemo(() => detectLanguage(brief), [brief]);
@@ -188,6 +189,10 @@ export function SongWorkspace({ song, onSaved }: Props) {
   }
 
   async function generateLyrics() {
+    if (missing) {
+      toast.error("This song is no longer available");
+      return;
+    }
     if (!isOwner) {
       toast.error("This is a community song — open the studio to create your own");
       return;
@@ -250,6 +255,10 @@ export function SongWorkspace({ song, onSaved }: Props) {
   }
 
   async function generatePreview() {
+    if (missing) {
+      toast.error("This song is no longer available");
+      return;
+    }
     if (!isOwner) {
       toast.error("This is a community song — open the studio to create your own");
       return;
@@ -281,7 +290,13 @@ export function SongWorkspace({ song, onSaved }: Props) {
         },
       });
       if (error) {
-        toast.error(invokeError(error, "Could not start generation"));
+        const msg = invokeError(error, "Could not start generation");
+        if (/song not found/i.test(msg)) {
+          setMissing(true);
+          toast.error("This song is no longer available — it may have been deleted. Start a new one from the studio.");
+          return;
+        }
+        toast.error(msg);
         return;
       }
       toast.success(`Generating · -${previewCost} coins`);
@@ -467,7 +482,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
                   {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save draft"}
                 </Button>
 
-                <Button onClick={generateLyrics} disabled={genLyrics} className="gap-2">
+                <Button onClick={generateLyrics} disabled={genLyrics || missing} className="gap-2">
                   {genLyrics ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
                   {hasLyrics ? "Regenerate lyrics" : "Generate lyrics"}
                   <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-background/30 px-1.5 py-0.5 text-[10px] font-semibold">
@@ -536,7 +551,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
                       size="sm"
                       variant="destructive"
                       onClick={generatePreview}
-                      disabled={!hasLyrics || genPreview || balance < previewCost}
+                      disabled={!hasLyrics || genPreview || balance < previewCost || missing}
                       className="gap-1.5"
                     >
                       {genPreview ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
@@ -567,7 +582,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
               <div className="flex flex-wrap items-center justify-end gap-2">
                 <Button
                   onClick={generatePreview}
-                  disabled={!hasLyrics || genPreview || isPending || balance < previewCost}
+                  disabled={!hasLyrics || genPreview || isPending || balance < previewCost || missing}
                   aria-busy={genPreview || isPending}
                   className="gap-2"
                 >
@@ -628,7 +643,7 @@ export function SongWorkspace({ song, onSaved }: Props) {
                     <Button
                       variant="outline"
                       onClick={generatePreview}
-                      disabled={genPreview || isPending || unlocking}
+                      disabled={genPreview || isPending || unlocking || missing}
                     >
                       {genPreview ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
                       Regenerate sample
