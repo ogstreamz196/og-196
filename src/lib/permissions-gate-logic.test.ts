@@ -48,4 +48,60 @@ describe("shouldShowPermissionsGate", () => {
       }),
     ).toBe(true);
   });
+
+  it("keeps showing if only sign_in_events is delayed but consent is null", () => {
+    // Profile loaded (no consent yet), sign_in_events still pending: still first-time.
+    expect(
+      shouldShowPermissionsGate({
+        localMarker: null,
+        signInEventCount: null,
+        gpsConsentAt: null,
+        elapsedMs: 500,
+      }),
+    ).toBe(true);
+  });
+
+  it("hides when sign_in_events is delayed but consent already exists", () => {
+    expect(
+      shouldShowPermissionsGate({
+        localMarker: null,
+        signInEventCount: null,
+        gpsConsentAt: "2026-06-01T00:00:00Z",
+        elapsedMs: 500,
+      }),
+    ).toBe(false);
+  });
+
+  it("hides when profile row is missing but IP is already registered", () => {
+    expect(
+      shouldShowPermissionsGate({
+        localMarker: null,
+        signInEventCount: 3,
+        gpsConsentAt: undefined,
+        elapsedMs: 100,
+      }),
+    ).toBe(false);
+  });
+
+  it("respects a custom fallback window", () => {
+    const inputs = {
+      localMarker: null,
+      signInEventCount: null,
+      gpsConsentAt: undefined,
+      elapsedMs: 1500,
+    };
+    expect(shouldShowPermissionsGate({ ...inputs, fallbackMs: 1000 })).toBe(false);
+    expect(shouldShowPermissionsGate({ ...inputs, fallbackMs: 5000 })).toBe(true);
+  });
+
+  it("never gets stuck: at very large elapsedMs with no data, hides", () => {
+    expect(
+      shouldShowPermissionsGate({
+        localMarker: null,
+        signInEventCount: null,
+        gpsConsentAt: undefined,
+        elapsedMs: 60_000,
+      }),
+    ).toBe(false);
+  });
 });
