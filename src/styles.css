@@ -1153,7 +1153,13 @@ button.graffiti-accent:hover {
   [class*="text-sky-"],
   [class*="text-indigo-"],
   [class*="text-cyan-"],
-  [class*="text-violet-"]
+  [class*="text-violet-"],
+  [class*="text-purple-"],
+  [class*="text-fuchsia-"],
+  .text-primary,
+  .text-sidebar-primary,
+  .text-info,
+  .text-link
 ):not(svg):not(svg *) {
   color: #ffffff !important;
   text-shadow:
@@ -1161,4 +1167,11 @@ button.graffiti-accent:hover {
     0 0 0.18em rgba(255, 110, 50, 0.7),
     0 0 0.35em rgba(220, 40, 15, 0.55);
 }
+
+/* Buttons styled with primary tone (e.g. ghost/outline using primary color)
+   still need their label coerced to white-on-red-aura. */
+:where(button, a)[class*="text-primary"]:not(svg):not(svg *) {
+  color: #ffffff !important;
+}
+
 
