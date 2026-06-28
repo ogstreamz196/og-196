@@ -946,9 +946,18 @@ export function OgChat({
             {m.isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
           </button>
         </div>
-        <p className="mt-2 px-2 text-xs font-medium text-muted-foreground/80">
-          Enter to send · Shift+Enter for newline · <span className="font-bold text-foreground/90">{balance}</span> coin{balance === 1 ? "" : "s"} left
+        <p className="mt-2 flex flex-wrap items-center gap-x-2 px-2 text-xs font-medium text-muted-foreground/80" aria-live="polite">
+          {m.isPending ? (
+            <span className="inline-flex items-center gap-1.5 font-semibold text-foreground/90">
+              <Loader2 className="h-3 w-3 animate-spin" /> Sending…
+            </span>
+          ) : (
+            <span>Enter to send · Shift+Enter for newline</span>
+          )}
+          <span aria-hidden>·</span>
+          <span><span className="font-bold text-foreground/90">{balance}</span> coin{balance === 1 ? "" : "s"} left</span>
         </p>
+
       </form>
 
 
