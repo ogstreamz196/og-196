@@ -251,6 +251,37 @@
     padding-left: max(var(--safe-pad, 0px), env(safe-area-inset-left));
     padding-right: max(var(--safe-pad, 0px), env(safe-area-inset-right));
   }
+
+  /* ---- Mobile app-style polish ---- */
+  @media (max-width: 767px) {
+    /* No accidental horizontal scroll on phones. */
+    html, body { overflow-x: hidden; }
+
+    /* Comfortable tap targets for primary controls (Apple HIG 44pt, Material 48dp). */
+    button:not([data-slot="sidebar-menu-button"]):not([data-no-tap-min]),
+    a[role="button"],
+    [role="button"]:not([data-no-tap-min]),
+    [role="tab"],
+    [role="switch"],
+    .tap-44 {
+      min-height: 44px;
+    }
+
+    /* Fluid heading scale — never overflow narrow screens. */
+    h1 { font-size: clamp(1.5rem, 6vw, 2.25rem); line-height: 1.15; }
+    h2 { font-size: clamp(1.25rem, 5vw, 1.75rem); line-height: 1.2; }
+    h3 { font-size: clamp(1.1rem, 4.2vw, 1.4rem); line-height: 1.25; }
+
+    /* Tighter card/section padding so content breathes without scrolling sideways. */
+    .card, [data-slot="card"] {
+      border-radius: 1rem;
+    }
+
+    /* Inputs at 16px to prevent iOS auto-zoom on focus. */
+    input, select, textarea {
+      font-size: max(16px, 1rem);
+    }
+  }
   /* Centered Radix dialogs/sheets must never escape the safe area on iPhone/Samsung. */
   [data-radix-dialog-content],
   [data-radix-alert-dialog-content] {
