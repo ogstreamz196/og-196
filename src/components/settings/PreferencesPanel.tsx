@@ -111,6 +111,20 @@ export function PreferencesPanel() {
               <ModeOption value="spacious" title="Spacious" body="More breathing room." />
             </RadioGroup>
           </div>
+
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2"><Palette className="h-4 w-4" /> Red aura intensity</Label>
+            <RadioGroup
+              value={aura.level}
+              onValueChange={(v) => aura.setLevel(v as AuraLevel)}
+              className="grid grid-cols-4 gap-2"
+            >
+              <ModeOption value="off" title="Off" body="No glow." />
+              <ModeOption value="low" title="Low" body="Faint hint." />
+              <ModeOption value="medium" title="Medium" body="Default." />
+              <ModeOption value="high" title="High" body="Bold." />
+            </RadioGroup>
+          </div>
         </CardContent>
       </Card>
 
