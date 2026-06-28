@@ -32,8 +32,8 @@ describe("messenger mode labels", () => {
   });
 
   it("visible toggle label states the NEXT action (opposite of current mode)", () => {
-    expect(toggleActionLabel("community", false)).toBe("Turn on Loner");
-    expect(toggleActionLabel("loner", false)).toBe("Turn off Loner");
+    expect(toggleActionLabel("community", false)).toBe("Start Private Mode");
+    expect(toggleActionLabel("loner", false)).toBe("Leave Private Mode");
   });
 
   it("shows 'Saving…' while a mutation is in flight regardless of mode", () => {
@@ -66,8 +66,8 @@ describe("messenger mode labels", () => {
     // Either imports the helpers, or keeps the exact strings the helpers own.
     const usesHelpers = /from\s+["']@\/lib\/messenger-mode-labels["']/.test(src);
     const keepsStrings =
-      src.includes("Turn on Loner") &&
-      src.includes("Turn off Loner") &&
+      src.includes("Start Private Mode") &&
+      src.includes("Leave Private Mode") &&
       src.includes("OG Community Mode") &&
       src.includes("OG Bot Loner Mode");
     expect(usesHelpers || keepsStrings).toBe(true);
