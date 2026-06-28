@@ -785,7 +785,7 @@ export function OgChat({
           e.preventDefault();
           sendText(input);
         }}
-        className="border-t border-border bg-card/95 px-3 py-2.5 backdrop-blur supports-[backdrop-filter]:bg-card/70 sm:px-4"
+        className="border-t border-border bg-card/95 px-3 py-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))] backdrop-blur supports-[backdrop-filter]:bg-card/70 sm:px-4"
       >
         {attachment && (
           <div className="mb-2 flex items-center gap-2 rounded-xl border border-border bg-muted/40 p-2">
@@ -884,6 +884,10 @@ export function OgChat({
             enterKeyHint="send"
             aria-label="Message OG Bot in Loner Mode"
             data-testid="og-loner-composer"
+            onFocus={(e) => {
+              // Ensure the composer scrolls into view above the mobile keyboard.
+              setTimeout(() => e.currentTarget?.scrollIntoView({ block: "end", behavior: "smooth" }), 250);
+            }}
             className="min-h-[40px] max-h-[180px] flex-1 resize-none bg-transparent px-2 py-2 text-base leading-relaxed placeholder:text-muted-foreground/70 focus:outline-none disabled:cursor-not-allowed sm:px-3 sm:text-lg"
           />
           <button

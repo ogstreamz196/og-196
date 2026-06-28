@@ -417,7 +417,7 @@ function TopNav() {
 
 function Hero() {
   return (
-    <section className="relative mx-auto flex min-h-[calc(100dvh-4rem)] max-w-7xl flex-col justify-center px-4 pt-8 pb-12 sm:min-h-[calc(100vh-5rem)] sm:px-8 sm:pt-10 sm:pb-16">
+    <section className="relative mx-auto flex min-h-[calc(100dvh-4rem)] max-w-7xl flex-col justify-center px-3 pt-6 pb-10 sm:min-h-[calc(100vh-5rem)] sm:px-8 sm:pt-10 sm:pb-16">
       {/* Floating stickers */}
       <Sticker className="left-[4%] top-10 wc-float" rotate="-12">
         <Heart className="h-6 w-6 text-pink-400" />
@@ -450,7 +450,7 @@ function Hero() {
 
 
 
-        <h1 className="font-display mt-6 text-[clamp(2.5rem,11vw,12rem)] font-black leading-[0.88] tracking-[-0.055em] drop-shadow-[0_8px_30px_rgba(80,60,255,0.35)] sm:mt-10 sm:leading-[0.85]">
+        <h1 className="font-display mt-5 text-[clamp(2rem,9.5vw,12rem)] font-black leading-[0.92] tracking-[-0.045em] [text-wrap:balance] hyphens-none drop-shadow-[0_8px_30px_rgba(80,60,255,0.35)] sm:mt-10 sm:leading-[0.85] sm:tracking-[-0.055em]">
           <span className="wc-pop block">PROMPT IT.</span>
           <span className="wc-pop block" style={{ animationDelay: "0.15s" }}>
             MAKE A{" "}
@@ -467,9 +467,9 @@ function Hero() {
         </h1>
 
 
-        <div id="sign-in" className="mx-auto mt-8 max-w-md scroll-mt-24 sm:mt-14 sm:max-w-3xl">
+        <div id="sign-in" className="mx-auto mt-6 max-w-md scroll-mt-24 sm:mt-14 sm:max-w-3xl">
           <AuthButtons size="xl" />
-          <p className="mt-4 text-center text-sm font-semibold tracking-wide text-muted-foreground sm:mt-6 sm:text-lg sm:font-bold sm:text-foreground">
+          <p className="mt-3 text-center text-sm font-semibold tracking-wide text-muted-foreground sm:mt-6 sm:text-lg sm:font-bold sm:text-foreground">
             Free to start — no card required
           </p>
         </div>
