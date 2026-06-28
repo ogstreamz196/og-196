@@ -188,6 +188,10 @@ export function SongWorkspace({ song, onSaved }: Props) {
   }
 
   async function generateLyrics() {
+    if (!isOwner) {
+      toast.error("This is a community song — open the studio to create your own");
+      return;
+    }
     if (!brief.trim() && !title.trim()) {
       toast.error("Add a title or a brief first");
       return;
