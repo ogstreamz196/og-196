@@ -7,6 +7,7 @@ import { useRole } from "@/hooks/use-role";
 import { Button } from "@/components/ui/button";
 
 type RangeKey = "all" | "today" | "week" | "month" | "custom";
+const PAGE_SIZES = [25, 50, 100, 250] as const;
 
 function fmtDate(iso: string) {
   try { return new Date(iso).toLocaleString(); } catch { return iso; }
