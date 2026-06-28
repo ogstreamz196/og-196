@@ -19,6 +19,7 @@ import { useSettings } from "@/hooks/use-settings";
 import { Button } from "@/components/ui/button";
 import type { Song } from "@/components/SongCard";
 import { SongWorkspace } from "@/components/library/SongWorkspace";
+import { ensureFullUrlAllowed } from "@/lib/ensure-full-url-allowed";
 
 export const Route = createFileRoute("/_authenticated/library/$songId")({
   component: SongDetailPage,
@@ -177,6 +178,11 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
   async function downloadFull() {
     if (!unlocked) {
       toast.error("This track isn't unlocked. Purchase or unlock to download the full version.");
+      return;
+    }
+    const precheck = await ensureFullUrlAllowed(song.id);
+    if (!precheck.ok) {
+      toast.error(precheck.reason);
       return;
     }
     setDownloading(true);

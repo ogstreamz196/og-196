@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { ensureFullUrlAllowed } from "@/lib/ensure-full-url-allowed";
 import { Link } from "@tanstack/react-router";
 import {
   Loader2,
@@ -379,6 +380,11 @@ function JobDetailsDrawer({
 
   async function handleDownload() {
     if (!song || !unlocked) return;
+    const precheck = await ensureFullUrlAllowed(song.id);
+    if (!precheck.ok) {
+      toast.error(precheck.reason);
+      return;
+    }
     setDownloading(true);
     try {
       let url = fullUrl;
