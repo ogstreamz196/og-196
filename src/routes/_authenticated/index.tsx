@@ -357,30 +357,8 @@ function DashboardHome() {
 
 
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Example prompts */}
-        <Card className="rounded-[2rem] border-2 border-white/15 shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)] lg:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="text-4xl font-black sm:text-5xl">🎤 Try a prompt</CardTitle>
-              <CardDescription className="text-lg">Tap one to start a song in seconds.</CardDescription>
-            </div>
-            <Link
-              to="/library"
-              preload="intent"
-              className={cn(buttonVariants({ variant: "ghost", size: "lg" }), "gap-1.5 rounded-full text-lg")}
-            >
-              Open studio <ArrowRight className="h-6 w-6" />
-            </Link>
-          </CardHeader>
-          <CardContent>
-            <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {EXAMPLE_PROMPTS.map((p) => (
-                <PromptCard key={p.title} prompt={p} />
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 gap-6">
+
 
         {/* Next steps */}
         <Card className="rounded-[2rem] border-2 border-white/15 shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)]">
