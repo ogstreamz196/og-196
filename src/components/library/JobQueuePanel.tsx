@@ -379,6 +379,11 @@ function JobDetailsDrawer({
 
   async function handleDownload() {
     if (!song || !unlocked) return;
+    const precheck = await ensureFullUrlAllowed(song.id);
+    if (!precheck.ok) {
+      toast.error(precheck.reason);
+      return;
+    }
     setDownloading(true);
     try {
       let url = fullUrl;
