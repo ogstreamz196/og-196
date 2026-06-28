@@ -154,7 +154,9 @@ if (ids.songId) console.log(`dynamic songId: ${ids.songId}`);
 if (ids.userId) console.log(`dynamic userId: ${ids.userId}`);
 
 // --- Scan loop -------------------------------------------------------------
-const browser = await chromium.launch();
+const browser = await chromium.launch({
+  executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH || undefined,
+});
 const violations = [];
 
 try {
