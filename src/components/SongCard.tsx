@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 
 export interface Song {
   id: string;
+  user_id?: string | null;
   title: string | null;
   prompt: string;
   style: string | null;
