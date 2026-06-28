@@ -19,6 +19,7 @@ import { useSettings } from "@/hooks/use-settings";
 import { Button } from "@/components/ui/button";
 import type { Song } from "@/components/SongCard";
 import { SongWorkspace } from "@/components/library/SongWorkspace";
+import { ensureFullUrlAllowed } from "@/lib/ensure-full-url-allowed";
 
 export const Route = createFileRoute("/_authenticated/library/$songId")({
   component: SongDetailPage,
