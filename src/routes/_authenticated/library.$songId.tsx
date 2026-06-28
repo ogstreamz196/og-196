@@ -105,6 +105,11 @@ function SkeletonState({ message }: { message: string }) {
 function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void }) {
   const { data: settings } = useSettings();
   const sampleSeconds = settings?.sample_seconds ?? 30;
+  const { user } = useAuth();
+  const isOwner = !!user && song.user_id === user.id;
+  // Community viewers (non-owners) stream the FULL track for free; downloading
+  // costs 2 OG coins (1 burnt, 1 royalty to the creator).
+  const communityMode = !isOwner;
 
   const isReady = song.status === "completed" && !!(song.audio_path || (song as any).sample_path);
   const isFailed = song.status === "failed";
