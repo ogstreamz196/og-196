@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { shouldShowPermissionsGate } from "@/lib/permissions-gate-logic";
 import { toast } from "sonner";
 
 /**
@@ -28,13 +29,39 @@ export function PermissionsGate({ userId }: { userId: string }) {
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (localStorage.getItem(storageKey)) return;
+
     let cancelled = false;
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    (async () => {
-      // Only show on the very first sign-in. If this user already has a
-      // registered sign-in event (IP captured) or a recorded consent
-      // decision, suppress the dialog on this device from now on.
-      const [{ count }, { data: profile }] = await Promise.all([
+    let openTimer: ReturnType<typeof setTimeout> | undefined;
+    const startedAt = Date.now();
+    let signInCount: number | null = null;
+    let gpsConsentAt: string | null | undefined = undefined;
+
+    const evaluate = () => {
+      if (cancelled) return;
+      const show = shouldShowPermissionsGate({
+        localMarker: localStorage.getItem(storageKey),
+        signInEventCount: signInCount,
+        gpsConsentAt,
+        elapsedMs: Date.now() - startedAt,
+      });
+      if (!show) {
+        if (openTimer) clearTimeout(openTimer);
+        setOpen(false);
+        // Persist suppression so we don't re-evaluate next mount.
+        if ((signInCount ?? 0) > 1 || gpsConsentAt) {
+          localStorage.setItem(storageKey, "skipped-existing");
+        }
+        return;
+      }
+      if (!openTimer) {
+        openTimer = setTimeout(() => {
+          if (!cancelled) setOpen(true);
+        }, 600);
+      }
+    };
+
+    const fetchOnce = async () => {
+      const [eventsRes, profileRes] = await Promise.all([
         supabase
           .from("sign_in_events")
           .select("id", { count: "exact", head: true })
@@ -45,19 +72,43 @@ export function PermissionsGate({ userId }: { userId: string }) {
           .eq("id", userId)
           .maybeSingle(),
       ]);
-      if (cancelled) return;
-      const alreadyRegistered = (count ?? 0) > 1 || !!profile?.gps_consent_at;
-      if (alreadyRegistered) {
-        localStorage.setItem(storageKey, "skipped-existing");
-        return;
-      }
-      timer = setTimeout(() => {
-        if (!cancelled) setOpen(true);
-      }, 600);
-    })();
+      signInCount = eventsRes.count ?? signInCount;
+      gpsConsentAt = profileRes.data ? profileRes.data.gps_consent_at ?? null : gpsConsentAt;
+      evaluate();
+    };
+
+    void fetchOnce();
+    // Polling fallback in case Realtime is unavailable / IP write is delayed.
+    const poll = setInterval(fetchOnce, 2500);
+    // Fallback timer: re-evaluate after the stuck-gate window so the
+    // fallback rule in shouldShowPermissionsGate can fire.
+    const fallback = setTimeout(evaluate, 4200);
+
+    // Realtime: hide immediately when the IP/consent row updates.
+    const channel = supabase
+      .channel(`perms-gate:${userId}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "sign_in_events", filter: `user_id=eq.${userId}` },
+        () => void fetchOnce(),
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${userId}` },
+        (payload) => {
+          const next = (payload.new as { gps_consent_at?: string | null } | null)?.gps_consent_at;
+          if (next !== undefined) gpsConsentAt = next ?? null;
+          evaluate();
+        },
+      )
+      .subscribe();
+
     return () => {
       cancelled = true;
-      if (timer) clearTimeout(timer);
+      if (openTimer) clearTimeout(openTimer);
+      clearTimeout(fallback);
+      clearInterval(poll);
+      supabase.removeChannel(channel);
     };
   }, [storageKey, userId]);
 
