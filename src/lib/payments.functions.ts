@@ -460,6 +460,80 @@ export const getCoinPurchaseHistory = createServerFn({ method: "GET" })
   });
 
 // -------------------------------------------------------------------------
+// Boss/admin: cross-user purchase visibility
+// -------------------------------------------------------------------------
+
+export type AdminPurchaseRow = {
+  id: string;
+  user_id: string;
+  email: string | null;
+  display_name: string | null;
+  amount: number;
+  reference: string | null;
+  created_at: string;
+};
+
+export type AdminPurchaseTotals = Record<string, { totalCoins: number; purchaseCount: number }>;
+
+export const getAllCoinPurchases = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<{ items: AdminPurchaseRow[]; totals: AdminPurchaseTotals }> => {
+    const { supabase, userId } = context;
+    const [bossRes, adminRes] = await Promise.all([
+      supabase.rpc("has_role", { _user_id: userId, _role: "boss" }),
+      supabase.rpc("has_role", { _user_id: userId, _role: "admin" }),
+    ]);
+    if (!bossRes.data && !adminRes.data) throw new Error("Forbidden");
+
+    const { data, error } = await supabase
+      .from("coin_transactions")
+      .select("id, user_id, amount, reference, created_at")
+      .eq("type", "stripe_purchase")
+      .gt("amount", 0)
+      .order("created_at", { ascending: false })
+      .limit(2000);
+    if (error) throw new Error(error.message);
+
+    const totals: AdminPurchaseTotals = {};
+    const userIds = new Set<string>();
+    for (const r of data ?? []) {
+      userIds.add(r.user_id);
+      const t = totals[r.user_id] ?? { totalCoins: 0, purchaseCount: 0 };
+      t.totalCoins += r.amount ?? 0;
+      t.purchaseCount += 1;
+      totals[r.user_id] = t;
+    }
+
+    let profileMap = new Map<string, { email: string | null; display_name: string | null }>();
+    if (userIds.size) {
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("id, email, display_name")
+        .in("id", Array.from(userIds));
+      profileMap = new Map(
+        (profs ?? []).map((p: any) => [p.id, { email: p.email ?? null, display_name: p.display_name ?? null }]),
+      );
+    }
+
+    const items: AdminPurchaseRow[] = (data ?? []).slice(0, 300).map((r) => {
+      const p = profileMap.get(r.user_id);
+      return {
+        id: r.id,
+        user_id: r.user_id,
+        amount: r.amount,
+        reference: r.reference,
+        created_at: r.created_at,
+        email: p?.email ?? null,
+        display_name: p?.display_name ?? null,
+      };
+    });
+
+    return { items, totals };
+  });
+
+
+
+// -------------------------------------------------------------------------
 // Receipt link
 // -------------------------------------------------------------------------
 
