@@ -282,7 +282,13 @@ export function SongWorkspace({ song, onSaved }: Props) {
         },
       });
       if (error) {
-        toast.error(invokeError(error, "Could not start generation"));
+        const msg = invokeError(error, "Could not start generation");
+        if (/song not found/i.test(msg)) {
+          setMissing(true);
+          toast.error("This song is no longer available — it may have been deleted. Start a new one from the studio.");
+          return;
+        }
+        toast.error(msg);
         return;
       }
       toast.success(`Generating · -${previewCost} coins`);
