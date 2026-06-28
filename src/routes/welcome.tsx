@@ -450,7 +450,7 @@ function Hero() {
 
 
 
-        <h1 className="font-display mt-6 text-[clamp(2.5rem,11vw,12rem)] font-black leading-[0.88] tracking-[-0.055em] drop-shadow-[0_8px_30px_rgba(80,60,255,0.35)] sm:mt-10 sm:leading-[0.85]">
+        <h1 className="font-display mt-5 text-[clamp(2rem,9.5vw,12rem)] font-black leading-[0.92] tracking-[-0.045em] [text-wrap:balance] hyphens-none drop-shadow-[0_8px_30px_rgba(80,60,255,0.35)] sm:mt-10 sm:leading-[0.85] sm:tracking-[-0.055em]">
           <span className="wc-pop block">PROMPT IT.</span>
           <span className="wc-pop block" style={{ animationDelay: "0.15s" }}>
             MAKE A{" "}
