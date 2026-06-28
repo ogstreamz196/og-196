@@ -90,12 +90,13 @@ export function StripeEmbeddedCheckoutInline({ priceId, returnUrl, type = "coins
       )}
       <EmbeddedCheckoutProvider
         stripe={getStripe()}
-        options={{ fetchClientSecret, onComplete: () => setReady(true) }}
+        options={{
+          fetchClientSecret,
+          onComplete: () => setReady(true),
+        }}
       >
         <div onLoad={() => setReady(true)}>
-          <EmbeddedCheckout
-            onReady={() => setReady(true)}
-          />
+          <EmbeddedCheckout />
         </div>
       </EmbeddedCheckoutProvider>
     </div>
