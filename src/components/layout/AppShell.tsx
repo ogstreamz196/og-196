@@ -19,6 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppSidebar } from "./AppSidebar";
 import { HighContrastToggle } from "./HighContrastToggle";
 import { WelcomeBackdrop } from "./WelcomeBackdrop";
+import { MobileBottomNav } from "./MobileBottomNav";
 import { EarnCoinStrip } from "@/components/referrals/EarnCoinStrip";
 
 import ogStreamzLogo from "@/assets/ogstreamz-logo.jpg.asset.json";
@@ -175,13 +176,13 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
 
 
-            <main className="min-w-0 flex-1 overflow-x-hidden">
+            <main className="min-w-0 flex-1 overflow-x-hidden pb-[calc(env(safe-area-inset-bottom)+72px)] md:pb-0">
               <div className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
                 {children}
               </div>
             </main>
 
-            {/* Floating OG Bot widget removed site-wide. Full chat lives on /messenger. */}
+            <MobileBottomNav />
           </div>
         </div>
       </SidebarProvider>
