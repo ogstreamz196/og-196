@@ -144,8 +144,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                   </Link>
                 )}
                 <AdminEditModeToggle className="hidden md:inline-flex" />
-                <HighContrastToggle />
-                <CoinBalance />
+                <HighContrastToggle className="hidden sm:inline-flex" />
+                <CoinBalance className="order-first sm:order-none" />
                 <Button
                   type="button"
                   variant="ghost"
