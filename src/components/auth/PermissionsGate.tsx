@@ -61,19 +61,31 @@ export function PermissionsGate({ userId }: { userId: string }) {
     };
 
     const fetchOnce = async () => {
-      const [eventsRes, profileRes] = await Promise.all([
-        supabase
-          .from("sign_in_events")
-          .select("id", { count: "exact", head: true })
-          .eq("user_id", userId),
-        supabase
-          .from("profiles")
-          .select("gps_consent_at")
-          .eq("id", userId)
-          .maybeSingle(),
-      ]);
-      signInCount = eventsRes.count ?? signInCount;
-      gpsConsentAt = profileRes.data ? profileRes.data.gps_consent_at ?? null : gpsConsentAt;
+      try {
+        const [eventsRes, profileRes] = await Promise.all([
+          supabase
+            .from("sign_in_events")
+            .select("id", { count: "exact", head: true })
+            .eq("user_id", userId),
+          supabase
+            .from("profiles")
+            .select("gps_consent_at")
+            .eq("id", userId)
+            .maybeSingle(),
+        ]);
+        if (eventsRes.error) {
+          console.warn("[PermissionsGate] sign_in_events lookup failed", eventsRes.error);
+        }
+        if (profileRes.error) {
+          console.warn("[PermissionsGate] profiles lookup failed", profileRes.error);
+        }
+        signInCount = eventsRes.count ?? signInCount;
+        gpsConsentAt = profileRes.data ? profileRes.data.gps_consent_at ?? null : gpsConsentAt;
+      } catch (e) {
+        // Network / RLS / offline: stay on fallback path so the gate still
+        // hides via the stuck-gate timer instead of blocking the user.
+        console.warn("[PermissionsGate] poll failed, relying on fallback window", e);
+      }
       evaluate();
     };
 
@@ -84,7 +96,8 @@ export function PermissionsGate({ userId }: { userId: string }) {
     // fallback rule in shouldShowPermissionsGate can fire.
     const fallback = setTimeout(evaluate, 4200);
 
-    // Realtime: hide immediately when the IP/consent row updates.
+    // Realtime: hide immediately when the IP/consent row updates. If the
+    // subscription itself errors out, log and keep polling — never block.
     const channel = supabase
       .channel(`perms-gate:${userId}`)
       .on(
@@ -101,7 +114,11 @@ export function PermissionsGate({ userId }: { userId: string }) {
           evaluate();
         },
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
+          console.warn("[PermissionsGate] realtime subscription degraded:", status);
+        }
+      });
 
     return () => {
       cancelled = true;
