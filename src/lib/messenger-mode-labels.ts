@@ -23,14 +23,14 @@ export function modeBadge(mode: MessengerMode): string {
 /** Visible pill copy — describes the action the NEXT click will perform. */
 export function toggleActionLabel(mode: MessengerMode, isSaving: boolean): string {
   if (isSaving) return "Saving…";
-  return isCommunityMode(mode) ? "Turn on Loner" : "Turn off Loner";
+  return isCommunityMode(mode) ? "Start Private Mode" : "Leave Private Mode";
 }
 
 /** Screen-reader label — full action sentence. */
 export function toggleAriaLabel(mode: MessengerMode): string {
   return isCommunityMode(mode)
-    ? "Turn on OG Bot Loner Mode (leave Community)"
-    : "Turn off Loner Mode (switch to OG Community Mode)";
+    ? "Start Private Mode (leave OG Community)"
+    : "Leave Private Mode (switch to OG Community Mode)";
 }
 
 /** The mode the toggle will move to when clicked. */
