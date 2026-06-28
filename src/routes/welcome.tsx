@@ -417,7 +417,7 @@ function TopNav() {
 
 function Hero() {
   return (
-    <section className="relative mx-auto flex min-h-[calc(100dvh-4rem)] max-w-7xl flex-col justify-center px-4 pt-8 pb-12 sm:min-h-[calc(100vh-5rem)] sm:px-8 sm:pt-10 sm:pb-16">
+    <section className="relative mx-auto flex min-h-[calc(100dvh-4rem)] max-w-7xl flex-col justify-center px-3 pt-6 pb-10 sm:min-h-[calc(100vh-5rem)] sm:px-8 sm:pt-10 sm:pb-16">
       {/* Floating stickers */}
       <Sticker className="left-[4%] top-10 wc-float" rotate="-12">
         <Heart className="h-6 w-6 text-pink-400" />
