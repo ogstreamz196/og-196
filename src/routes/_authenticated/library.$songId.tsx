@@ -326,19 +326,8 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
         </div>
       </div>
 
-      {isReady && (
-        <audio
-          ref={audioRef}
-          preload="auto"
-          controls
-          onEnded={() => setPlaying(false)}
-          className="mt-4 w-full rounded-lg bg-black/30"
-          aria-label="Song sample preview"
-        />
-      )}
-      {!isReady && (
-        <audio ref={audioRef} preload="auto" onEnded={() => setPlaying(false)} className="hidden" />
-      )}
+      <audio ref={audioRef} preload="auto" onEnded={() => setPlaying(false)} className="hidden" />
+
     </article>
   );
 }
