@@ -189,6 +189,10 @@ export function SongWorkspace({ song, onSaved }: Props) {
   }
 
   async function generateLyrics() {
+    if (missing) {
+      toast.error("This song is no longer available");
+      return;
+    }
     if (!isOwner) {
       toast.error("This is a community song — open the studio to create your own");
       return;
