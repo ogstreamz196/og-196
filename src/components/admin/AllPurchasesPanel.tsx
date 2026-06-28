@@ -74,6 +74,14 @@ export function AllPurchasesPanel() {
   const totalCoins = items.reduce((s, r) => s + r.amount, 0);
   const totalUsers = new Set(items.map((r) => r.user_id)).size;
 
+  const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+  const safePage = Math.min(page, totalPages);
+  const pageStart = (safePage - 1) * pageSize;
+  const pageItems = items.slice(pageStart, pageStart + pageSize);
+
+  // Reset to page 1 when filter inputs change
+  useMemo(() => { setPage(1); }, [range, fromTs, toTs, pageSize]);
+
   const downloadCsv = () => {
     const header = ["created_at", "user_id", "display_name", "email", "amount_coins", "reference"];
     const rows = items.map((r) => [
