@@ -93,16 +93,21 @@ export function ReferralReminder({ className }: { className?: string }) {
             >
               Share your code and bank 10% of every coin they burn — forever.
             </p>
-            <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
-              <code className="max-w-full truncate rounded-md bg-background/60 px-2 py-0.5 font-mono text-xs font-bold tracking-wider text-foreground ring-1 ring-coin/30">
+            <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-2">
+              <code
+                aria-label={`Your referral code ${code}`}
+                className="max-w-full truncate rounded-md bg-background/60 px-2 py-1 font-mono text-xs font-bold tracking-wider text-foreground ring-1 ring-coin/30"
+              >
                 {code}
               </code>
               <button
                 type="button"
                 onClick={copy}
-                className="inline-flex min-h-[32px] items-center gap-1 whitespace-nowrap text-[11px] font-semibold text-muted-foreground hover:text-foreground"
+                aria-label={copied ? "Referral link copied" : "Copy referral link"}
+                aria-live="polite"
+                className="inline-flex min-h-11 min-w-11 items-center gap-1.5 whitespace-nowrap rounded-md px-2 text-xs font-semibold text-foreground/85 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coin/60 sm:min-h-9 sm:min-w-0 sm:text-[11px]"
               >
-                {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                {copied ? <Check className="h-4 w-4 sm:h-3 sm:w-3" aria-hidden /> : <Copy className="h-4 w-4 sm:h-3 sm:w-3" aria-hidden />}
                 {copied ? "Copied" : "Copy link"}
               </button>
             </div>
@@ -114,13 +119,15 @@ export function ReferralReminder({ className }: { className?: string }) {
           <button
             type="button"
             onClick={share}
-            className="inline-flex h-11 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-coin px-4 text-sm font-bold text-background shadow hover:opacity-90 sm:h-9 sm:flex-none sm:px-3 sm:text-xs"
+            aria-label="Share your referral link"
+            className="inline-flex h-11 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-coin px-4 text-sm font-bold text-background shadow hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coin/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:h-9 sm:flex-none sm:px-3 sm:text-xs"
           >
-            <Share2 className="h-4 w-4 sm:h-3.5 sm:w-3.5" /> Share
+            <Share2 className="h-4 w-4 sm:h-3.5 sm:w-3.5" aria-hidden /> Share
           </button>
           <Link
             to="/referrals"
-            className="inline-flex h-11 shrink-0 items-center whitespace-nowrap px-2 text-xs font-semibold text-muted-foreground hover:text-foreground sm:h-9 sm:text-[11px]"
+            aria-label="See referral earnings details"
+            className="inline-flex h-11 min-w-11 shrink-0 items-center justify-center whitespace-nowrap rounded-md px-3 text-xs font-semibold text-foreground/85 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coin/60 sm:h-9 sm:min-w-0 sm:px-2 sm:text-[11px]"
           >
             Details →
           </Link>
