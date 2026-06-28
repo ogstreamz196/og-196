@@ -30,6 +30,7 @@ export function PreferencesPanel() {
   };
   const display = useDisplayPrefs();
   const setDisplay = useSetDisplayPrefs();
+  const aura = useAura();
 
   const SCALE_STEP = 0.05;
   const scalePct = Math.round(display.textScale * 100);
