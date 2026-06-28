@@ -80,7 +80,7 @@ export function AllPurchasesPanel() {
   const pageItems = items.slice(pageStart, pageStart + pageSize);
 
   // Reset to page 1 when filter inputs change
-  useMemo(() => { setPage(1); }, [range, fromTs, toTs, pageSize]);
+  useEffect(() => { setPage(1); }, [range, fromTs, toTs, pageSize]);
 
   const downloadCsv = () => {
     const header = ["created_at", "user_id", "display_name", "email", "amount_coins", "reference"];
