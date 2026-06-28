@@ -37,6 +37,9 @@ export function StripeEmbeddedCheckoutInline({ priceId, returnUrl, type = "coins
             });
       if ("error" in result) throw new Error(result.error);
       if (!result.clientSecret) throw new Error("Stripe did not return a client secret");
+      // Once Stripe has a client secret, the iframe paints in <~1s.
+      // Hide the loading overlay shortly after so users see the form.
+      setTimeout(() => setReady(true), 900);
       return result.clientSecret;
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Couldn't start checkout";
