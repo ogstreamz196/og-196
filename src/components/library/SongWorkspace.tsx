@@ -102,9 +102,8 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       try {
         onRefresh?.();
         onSaved?.();
-        toast.success(`Library reloaded — song still missing (attempt ${recheckCount + 1}/10)`);
       } catch {
-        toast.error("Couldn't reload library. Retrying…");
+        // Silent retry — single summary toast fires when polling ends.
       }
       setRecheckCount((c) => c + 1);
     }, 3000);
