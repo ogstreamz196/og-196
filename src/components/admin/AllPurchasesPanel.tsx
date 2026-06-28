@@ -208,26 +208,72 @@ export function AllPurchasesPanel() {
             <p className="text-xs text-muted-foreground">No purchases in this range.</p>
           )}
           {items.length > 0 && (
-            <ul className="max-h-96 overflow-y-auto divide-y divide-border/40 rounded-lg border border-border/40 bg-background/40">
-              {items.map((r) => (
-                <li key={r.id} className="flex items-center gap-2 px-3 py-2 text-xs">
-                  <Receipt className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate font-medium text-foreground">
-                      {r.display_name ?? r.email ?? r.user_id.slice(0, 8)}
+            <>
+              <ul className="max-h-96 overflow-y-auto divide-y divide-border/40 rounded-lg border border-border/40 bg-background/40">
+                {pageItems.map((r) => (
+                  <li key={r.id} className="flex items-center gap-2 px-3 py-2 text-xs">
+                    <Receipt className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate font-medium text-foreground">
+                        {r.display_name ?? r.email ?? r.user_id.slice(0, 8)}
+                      </div>
+                      <div className="truncate text-[11px] text-muted-foreground">
+                        {fmtDate(r.created_at)}
+                        {r.email && r.display_name ? ` · ${r.email}` : ""}
+                      </div>
                     </div>
-                    <div className="truncate text-[11px] text-muted-foreground">
-                      {fmtDate(r.created_at)}
-                      {r.email && r.display_name ? ` · ${r.email}` : ""}
+                    <div className="inline-flex shrink-0 items-center gap-1 rounded-full border border-coin/30 bg-coin/10 px-2 py-0.5 font-mono tabular-nums text-coin">
+                      <Coins className="h-3 w-3" />
+                      +{r.amount.toLocaleString()}
                     </div>
-                  </div>
-                  <div className="inline-flex shrink-0 items-center gap-1 rounded-full border border-coin/30 bg-coin/10 px-2 py-0.5 font-mono tabular-nums text-coin">
-                    <Coins className="h-3 w-3" />
-                    +{r.amount.toLocaleString()}
-                  </div>
-                </li>
-              ))}
-            </ul>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-muted-foreground">
+                <label className="flex items-center gap-1.5">
+                  Page size
+                  <select
+                    value={pageSize}
+                    onChange={(e) => setPageSize(Number(e.target.value))}
+                    className="rounded-md border border-border/50 bg-background/40 px-1.5 py-1 text-foreground"
+                    aria-label="Rows per page"
+                  >
+                    {PAGE_SIZES.map((n) => (
+                      <option key={n} value={n}>{n}</option>
+                    ))}
+                  </select>
+                </label>
+                <div className="tabular-nums">
+                  {pageStart + 1}-{Math.min(pageStart + pageSize, items.length)} of {items.length}
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={safePage <= 1}
+                    className="h-7 px-2 text-xs"
+                    aria-label="Previous page"
+                  >
+                    Prev
+                  </Button>
+                  <span className="px-1 tabular-nums">
+                    {safePage} / {totalPages}
+                  </span>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={safePage >= totalPages}
+                    className="h-7 px-2 text-xs"
+                    aria-label="Next page"
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            </>
           )}
         </div>
       )}
