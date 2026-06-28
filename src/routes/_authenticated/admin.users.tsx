@@ -51,7 +51,7 @@ interface RoleRow {
 type ProUserRow = Awaited<ReturnType<typeof listUsersPro>>[number];
 
 type RoleFilter = "all" | "admin" | "vip" | "og_bot" | "user";
-type SortKey = "joined" | "balance" | "name";
+type SortKey = "joined" | "balance" | "name" | "spend" | "buys";
 
 function AdminUsersPage() {
   const { isAdmin, isLoading: roleLoading } = useRole();
@@ -141,11 +141,13 @@ function AdminUsersPage() {
       if (sort === "joined") cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
       else if (sort === "balance") cmp = (a.coin_balance ?? 0) - (b.coin_balance ?? 0);
       else if (sort === "name") cmp = (a.display_name ?? a.email ?? "").localeCompare(b.display_name ?? b.email ?? "");
+      else if (sort === "spend") cmp = (spendByUser[a.id]?.totalCoins ?? 0) - (spendByUser[b.id]?.totalCoins ?? 0);
+      else if (sort === "buys") cmp = (spendByUser[a.id]?.purchaseCount ?? 0) - (spendByUser[b.id]?.purchaseCount ?? 0);
       return sortDir === "asc" ? cmp : -cmp;
     });
 
     return sorted;
-  }, [usersQ.data, q, roleFilter, rolesByUser, sort, sortDir]);
+  }, [usersQ.data, q, roleFilter, rolesByUser, sort, sortDir, spendByUser]);
 
   if (roleLoading) {
     return (
@@ -280,6 +282,8 @@ function AdminUsersPage() {
                     <SortableHead label="User" active={sort === "name"} dir={sortDir} onClick={() => toggleSort("name")} />
                     <TableHead>Roles</TableHead>
                     <SortableHead label="Balance" align="right" active={sort === "balance"} dir={sortDir} onClick={() => toggleSort("balance")} />
+                    <SortableHead label="Spent" align="right" active={sort === "spend"} dir={sortDir} onClick={() => toggleSort("spend")} />
+                    <SortableHead label="Buys" align="right" active={sort === "buys"} dir={sortDir} onClick={() => toggleSort("buys")} />
                     <SortableHead label="Joined" active={sort === "joined"} dir={sortDir} onClick={() => toggleSort("joined")} />
                     <TableHead className="text-right">Quick actions</TableHead>
                   </TableRow>
@@ -451,6 +455,18 @@ function UserRow({
             <Coins className="h-3.5 w-3.5 text-coin" />
             {(user.coin_balance ?? 0).toLocaleString()}
           </div>
+        </TableCell>
+
+        <TableCell className="text-right">
+          <span className="font-mono text-sm tabular-nums text-amber-300">
+            {(spend?.totalCoins ?? 0).toLocaleString()}
+          </span>
+        </TableCell>
+
+        <TableCell className="text-right">
+          <span className="font-mono text-sm tabular-nums text-muted-foreground">
+            {spend?.purchaseCount ?? 0}
+          </span>
         </TableCell>
 
         <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
