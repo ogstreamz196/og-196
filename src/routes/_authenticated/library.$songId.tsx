@@ -84,7 +84,7 @@ function SongDetailPage() {
         ) : (
           <>
             <PlayerCard song={data} onRefresh={refetch} />
-            <SongWorkspace song={data} onSaved={refetch} />
+            <SongWorkspace song={data} onSaved={refetch} onRefresh={refetch} />
           </>
         )}
       </div>
