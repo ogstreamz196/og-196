@@ -130,6 +130,46 @@ export function OgChat({
     window.localStorage.setItem(LANG_KEY, language);
   }, [language]);
 
+  // Mobile keyboard handling: pin composer above the on-screen keyboard via
+  // visualViewport, and restore the chat scroll position when it closes so
+  // the conversation doesn't jump.
+  const composerRef = useRef<HTMLFormElement>(null);
+  const savedScrollRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const apply = () => {
+      const offset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      const el = composerRef.current;
+      if (el) el.style.transform = offset > 0 ? `translateY(-${offset}px)` : "";
+      if (offset > 0 && scrollRef.current) {
+        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      }
+    };
+    vv.addEventListener("resize", apply);
+    vv.addEventListener("scroll", apply);
+    return () => {
+      vv.removeEventListener("resize", apply);
+      vv.removeEventListener("scroll", apply);
+      if (composerRef.current) composerRef.current.style.transform = "";
+    };
+  }, []);
+  const handleComposerFocus = () => {
+    if (scrollRef.current) savedScrollRef.current = scrollRef.current.scrollTop;
+  };
+  const handleComposerBlur = () => {
+    const saved = savedScrollRef.current;
+    if (saved != null && scrollRef.current) {
+      requestAnimationFrame(() => {
+        if (scrollRef.current) scrollRef.current.scrollTop = saved;
+      });
+    }
+    if (composerRef.current) composerRef.current.style.transform = "";
+  };
+
+
+
   // Attachment + mic state
   const [attachment, setAttachment] = useState<{ dataUrl: string; name: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -781,12 +821,14 @@ export function OgChat({
         </div>
       )}
       <form
+        ref={composerRef}
         onSubmit={(e) => {
           e.preventDefault();
           sendText(input);
         }}
-        className="border-t border-border bg-card/95 px-3 py-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))] backdrop-blur supports-[backdrop-filter]:bg-card/70 sm:px-4"
+        className="sticky bottom-0 z-20 border-t border-border bg-card/95 px-3 py-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))] backdrop-blur transition-transform duration-150 supports-[backdrop-filter]:bg-card/70 sm:px-4"
       >
+
         {attachment && (
           <div className="mb-2 flex items-center gap-2 rounded-xl border border-border bg-muted/40 p-2">
             <img src={attachment.dataUrl} alt="" className="h-10 w-10 rounded-md object-cover" />
@@ -885,10 +927,13 @@ export function OgChat({
             aria-label="Message OG Bot in Loner Mode"
             data-testid="og-loner-composer"
             onFocus={(e) => {
+              handleComposerFocus();
               // Ensure the composer scrolls into view above the mobile keyboard.
               setTimeout(() => e.currentTarget?.scrollIntoView({ block: "end", behavior: "smooth" }), 250);
             }}
+            onBlur={handleComposerBlur}
             className="min-h-[40px] max-h-[180px] flex-1 resize-none bg-transparent px-2 py-2 text-base leading-relaxed placeholder:text-muted-foreground/70 focus:outline-none disabled:cursor-not-allowed sm:px-3 sm:text-lg"
+
           />
           <button
             type="submit"
@@ -901,9 +946,18 @@ export function OgChat({
             {m.isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
           </button>
         </div>
-        <p className="mt-2 px-2 text-xs font-medium text-muted-foreground/80">
-          Enter to send · Shift+Enter for newline · <span className="font-bold text-foreground/90">{balance}</span> coin{balance === 1 ? "" : "s"} left
+        <p className="mt-2 flex flex-wrap items-center gap-x-2 px-2 text-xs font-medium text-muted-foreground/80" aria-live="polite">
+          {m.isPending ? (
+            <span className="inline-flex items-center gap-1.5 font-semibold text-foreground/90">
+              <Loader2 className="h-3 w-3 animate-spin" /> Sending…
+            </span>
+          ) : (
+            <span>Enter to send · Shift+Enter for newline</span>
+          )}
+          <span aria-hidden>·</span>
+          <span><span className="font-bold text-foreground/90">{balance}</span> coin{balance === 1 ? "" : "s"} left</span>
         </p>
+
       </form>
 
 
