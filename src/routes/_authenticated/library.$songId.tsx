@@ -179,6 +179,11 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
       toast.error("This track isn't unlocked. Purchase or unlock to download the full version.");
       return;
     }
+    const precheck = await ensureFullUrlAllowed(song.id);
+    if (!precheck.ok) {
+      toast.error(precheck.reason);
+      return;
+    }
     setDownloading(true);
     try {
       const { data, error } = await supabase.functions.invoke("song-url", {
