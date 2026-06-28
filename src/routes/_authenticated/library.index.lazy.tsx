@@ -461,11 +461,42 @@ function LibraryPage() {
               Your tracks first. Community drops live in the next tab.
             </p>
           </div>
-          {versionedLibrary.length > 0 && (
-            <span className="shrink-0 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-primary">
-              {versionedLibrary.length} track{versionedLibrary.length === 1 ? "" : "s"}
-            </span>
-          )}
+          <div className="flex shrink-0 items-center gap-2">
+            {versionedLibrary.length > 0 && (
+              <span className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-primary">
+                {versionedLibrary.length} track{versionedLibrary.length === 1 ? "" : "s"}
+              </span>
+            )}
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={library.isFetching}
+              onClick={async () => {
+                const before = completedTracks.length;
+                const beforeActive = activeJobs.length;
+                const res = await library.refetch();
+                const list = (res.data ?? []) as Song[];
+                const after = list.filter((s) => s.status === "completed").length;
+                const afterActive = list.filter((s) => s.status !== "completed").length;
+                const newReady = after - before;
+                if (newReady > 0) {
+                  toast.success(`Library refreshed · ${newReady} new track${newReady === 1 ? "" : "s"} ready`);
+                } else if (afterActive > 0) {
+                  toast(`Still generating · ${afterActive} in progress`);
+                } else if (beforeActive > 0 && afterActive === 0 && newReady === 0) {
+                  toast("Library refreshed · no changes yet");
+                } else {
+                  toast.success("Library up to date");
+                }
+              }}
+              className="h-9 gap-1.5 rounded-full"
+              aria-label="Refresh library"
+            >
+              <RefreshCw className={cn("h-3.5 w-3.5", library.isFetching && "animate-spin")} />
+              <span className="hidden sm:inline">Refresh</span>
+            </Button>
+          </div>
         </div>
 
         {activeJobs.length > 0 && (
