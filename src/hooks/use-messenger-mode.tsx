@@ -2,13 +2,12 @@ import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { useRole } from "@/hooks/use-role";
 import { toast } from "sonner";
 
 /**
  * Single source of truth for the per-user OG Bot messenger mode.
  * Reads/writes `user_preferences.messenger_mode` ('loner' | 'community').
- * VIPs default to community mode; everyone else defaults to loner.
+ * Everyone defaults to loner until they explicitly switch.
  * Realtime-subscribed so the toggle stays in sync across tabs/devices.
  */
 export type MessengerMode = "loner" | "community";
