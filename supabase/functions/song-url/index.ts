@@ -36,6 +36,7 @@ Deno.serve(async (req) => {
   const body = await req.json().catch(() => ({}));
   const song_id: string | undefined = body?.song_id;
   const mode: "preview" | "full" = body?.mode === "full" ? "full" : "preview";
+  const purpose: "stream" | "download" = body?.purpose === "stream" ? "stream" : "download";
   if (!song_id) {
     log("missing_song_id", { user_id: user.id, mode });
     return jsonResponse({ error: "Missing song_id", code: "missing_song_id" }, 400);
