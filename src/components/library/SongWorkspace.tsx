@@ -33,7 +33,7 @@ const LANGUAGES = [
   "English", "Spanish", "French", "Portuguese", "Hindi", "Gujarati",
   "Marathi", "Bengali", "Tamil", "Telugu", "Kannada", "Malayalam",
   "Urdu", "Punjabi", "Arabic", "Swahili", "Patois", "Yoruba", "German",
-  "Italian", "Filipino", "Tagalog", "Cebuano", "Mandarin", "Japanese",
+  "Italian", "Romanian", "Filipino", "Tagalog", "Cebuano", "Mandarin", "Japanese",
   "Korean", "Turkish", "Russian", "Polish", "Dutch", "Greek", "Thai",
   "Vietnamese", "Indonesian", "Malay", "Hebrew",
 ];
