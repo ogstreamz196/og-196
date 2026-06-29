@@ -56,7 +56,7 @@ const LANG_KEY = "og-bot:language";
 const OG_LANGUAGES = [
   "English", "Spanish", "French", "Portuguese", "Hindi", "Urdu",
   "Punjabi", "Arabic", "Swahili", "Patois", "Yoruba", "German",
-  "Italian", "Filipino", "Tagalog", "Cebuano", "Mandarin", "Japanese",
+  "Italian", "Romanian", "Filipino", "Tagalog", "Cebuano", "Mandarin", "Japanese",
   "Korean", "Turkish", "Russian", "Polish", "Dutch", "Greek", "Thai",
   "Vietnamese", "Indonesian", "Malay", "Bengali", "Tamil", "Hebrew",
 ];
