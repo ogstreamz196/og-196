@@ -71,7 +71,14 @@ function MessengerPage() {
 
   return (
     <DashboardShell title={isCommunity ? "OG Community Mode" : "OG Bot Loner Mode"}>
-      <div className="mx-auto flex h-[calc(100dvh-8rem)] min-h-[520px] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-card/70 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.7)] ring-1 ring-white/5 backdrop-blur-xl sm:h-[calc(100dvh-10rem)] sm:rounded-3xl">
+      <div className={`relative mx-auto w-full max-w-5xl ${foulMouth ? "hell-aura" : ""}`}>
+        {foulMouth && (
+          <>
+            <span aria-hidden className="pointer-events-none absolute -inset-6 -z-10 rounded-[2rem] bg-[radial-gradient(ellipse_at_top,rgba(239,68,68,0.55),transparent_60%),radial-gradient(ellipse_at_bottom,rgba(220,38,38,0.5),transparent_65%)] blur-2xl animate-pulse" />
+            <span aria-hidden className="pointer-events-none absolute -inset-3 -z-10 rounded-[2rem] bg-[conic-gradient(from_0deg,rgba(255,80,40,0.35),rgba(180,20,20,0.15),rgba(255,120,60,0.4),rgba(120,10,10,0.2),rgba(255,80,40,0.35))] blur-xl opacity-80" />
+          </>
+        )}
+      <div className={`flex h-[calc(100dvh-8rem)] min-h-[520px] w-full flex-col overflow-hidden rounded-2xl border shadow-[0_30px_80px_-30px_rgba(0,0,0,0.7)] ring-1 backdrop-blur-xl sm:h-[calc(100dvh-10rem)] sm:rounded-3xl ${foulMouth ? "border-red-500/50 bg-gradient-to-b from-[#1a0505]/90 via-[#220808]/85 to-[#0d0202]/90 ring-red-500/30 shadow-[0_0_60px_-10px_rgba(239,68,68,0.6)]" : "border-white/10 bg-card/70 ring-white/5"}`}>
 
         {/* Header — adapts to current mode */}
         <header
