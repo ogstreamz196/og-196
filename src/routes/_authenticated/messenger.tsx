@@ -46,6 +46,7 @@ function MessengerPage() {
   const { live: initialLive } = Route.useSearch();
   const { mode, isReady } = useMessengerMode();
   const setMode = useSetMessengerMode();
+  const { foulMouth } = useFoulMouth();
 
   // One-time bootstrap: ?live=1 deep-link wins over saved pref on first load.
   useEffect(() => {
