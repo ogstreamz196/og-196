@@ -359,9 +359,9 @@ function WelcomePage() {
         <WelcomeBackdrop />
         <TopNav />
         <Hero />
+        <FoulMouthHype />
         <Pillars />
         <HowItWorks />
-        <FoulMouthHype />
         <ClosingCta />
         <Footer />
         
