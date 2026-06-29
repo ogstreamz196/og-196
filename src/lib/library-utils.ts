@@ -8,7 +8,7 @@ export const POOLS: Record<Category, string[]> = {
     "Japanese", "Korean", "Mandarin", "Hindi", "Gujarati", "Marathi",
     "Bengali", "Tamil", "Telugu", "Kannada", "Malayalam", "Punjabi",
     "Urdu", "Arabic", "Swahili", "Yoruba", "Russian", "Turkish",
-    "Dutch", "Greek",
+    "Romanian", "Dutch", "Greek",
   ],
   genre: [
     "Drill", "Trap", "Afrobeats", "R&B", "Pop", "Dance", "Reggae",

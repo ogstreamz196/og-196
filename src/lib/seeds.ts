@@ -50,7 +50,7 @@ export const SONG_LANGUAGES = [
   "English", "Spanish", "French", "Portuguese", "Hindi", "Gujarati",
   "Marathi", "Bengali", "Tamil", "Telugu", "Kannada", "Malayalam",
   "Urdu", "Punjabi", "Arabic", "Swahili", "Patois", "Yoruba", "German",
-  "Italian", "Tagalog",
+  "Italian", "Romanian", "Tagalog",
 ] as const;
 
 export const SONG_THEMES = [
