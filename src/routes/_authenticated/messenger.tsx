@@ -207,6 +207,7 @@ function MessengerPage() {
           )}
         </div>
       </div>
+      </div>
 
       <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-3">
         <PoweredByOgBot />
