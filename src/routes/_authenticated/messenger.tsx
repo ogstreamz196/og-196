@@ -21,6 +21,7 @@ import {
   useSetMessengerMode,
   type MessengerMode,
 } from "@/hooks/use-messenger-mode";
+import { useFoulMouth } from "@/hooks/use-foul-mouth";
 
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
 
