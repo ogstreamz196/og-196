@@ -156,10 +156,52 @@ function BuyCoinsPage() {
             </div>
             {stage === "confirm" ? (
               <div className="p-5 sm:p-6">
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-                  Confirm your order
+                {/* Confirmation banner — extra prominent for custom builds */}
+                <div
+                  role="status"
+                  aria-live="polite"
+                  className={cn(
+                    "relative overflow-hidden rounded-2xl border-2 p-4",
+                    isCustomFlow
+                      ? "border-red-500/50 bg-gradient-to-br from-[#1a0505] via-[#0b0202] to-[#170303] shadow-[0_0_40px_-10px_rgba(239,68,68,0.6)]"
+                      : "border-emerald-500/40 bg-emerald-500/10",
+                  )}
+                >
+                  {isCustomFlow && (
+                    <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-red-500/25 blur-3xl animate-pulse" />
+                  )}
+                  <div className="relative flex items-start gap-3">
+                    <div className={cn(
+                      "grid h-10 w-10 shrink-0 place-items-center rounded-xl",
+                      isCustomFlow ? "border border-red-500/50 bg-red-500/15 text-red-300" : "bg-emerald-500/20 text-emerald-300",
+                    )}>
+                      {isCustomFlow ? <Flame className="h-5 w-5" /> : <Check className="h-5 w-5" />}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] font-black uppercase tracking-[0.25em] text-white/70">
+                        {isCustomFlow ? "Custom stack locked in" : isVipFlow ? "VIP plan selected" : "Pack selected"}
+                      </p>
+                      <p className="mt-0.5 truncate font-display text-lg font-black text-white sm:text-xl">
+                        {isVipFlow
+                          ? VIP_PLAN.label
+                          : isCustomFlow
+                          ? `${coinsForOrder} OG Coins`
+                          : `${(selected as { pack: CoinPack }).pack.coins} OG Coins · ${(selected as { pack: CoinPack }).pack.label}`}
+                      </p>
+                      {!isVipFlow && (
+                        <p className="mt-0.5 text-[11px] font-bold uppercase tracking-wider text-white/60 tabular-nums">
+                          {CURRENCY_SYMBOL}{(totalCents / 100).toFixed(2)} · {CURRENCY_SYMBOL}{perCoin.toFixed(3)} per coin
+                          {savingsPct > 0 ? ` · save ${savingsPct}%` : ""}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <p className="mt-5 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                  Order summary
                 </p>
-                <div className="mt-3 grid gap-2 rounded-2xl border border-border bg-background/40 p-4 text-sm">
+                <div className="mt-2 grid gap-2 rounded-2xl border border-border bg-background/40 p-4 text-sm">
                   <Row
                     label={isVipFlow ? "Plan" : "Pack"}
                     value={isVipFlow ? VIP_PLAN.label : isCustomFlow ? "Custom" : (selected as { pack: CoinPack }).pack.label}
@@ -183,11 +225,29 @@ function BuyCoinsPage() {
                     </span>
                   </div>
                 </div>
-                <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
-                  {isVipFlow
-                    ? "You'll be charged yearly. Cancel anytime from Settings."
-                    : "One-time charge. Coins are credited to your balance within seconds and never expire."}
+
+                {/* Next steps — clear what happens next */}
+                <p className="mt-5 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                  What happens next
                 </p>
+                <ol className="mt-2 space-y-2">
+                  <NextStep n={1} title="Continue to secure checkout" body="Pay with card, Apple Pay, or Google Pay. PCI-compliant via Stripe." />
+                  <NextStep
+                    n={2}
+                    title={isVipFlow ? "VIP unlocks instantly" : "Coins land in your wallet"}
+                    body={isVipFlow
+                      ? "All VIP perks activate the moment payment confirms."
+                      : `${coinsForOrder} OG Coins credited within seconds — no waiting.`}
+                  />
+                  <NextStep
+                    n={3}
+                    title={isVipFlow ? "Manage anytime in Settings" : "Start burning coins"}
+                    body={isVipFlow
+                      ? "Cancel or change plan whenever you like."
+                      : "Head to MusicHUB or Messenger and spend when ready. Coins never expire."}
+                  />
+                </ol>
+
                 <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
                   <Button variant="outline" onClick={clearSelection} className="h-12 sm:h-10">Cancel</Button>
                   <Button
