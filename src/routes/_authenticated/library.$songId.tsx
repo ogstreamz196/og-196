@@ -43,13 +43,16 @@ function SongDetailPage() {
       if (error) throw error;
       return (data ?? null) as FullSong | null;
     },
-    // While the song is pending/processing, refetch in the background as a
-    // safety net even if realtime drops messages.
+    // While the song is still queued/generating (draft/pending/processing),
+    // poll every 3s as a safety net in case realtime drops an UPDATE.
     refetchInterval: (q) => {
       const s = q.state.data as FullSong | null | undefined;
-      if (!s) return 4000;
-      return s.status === "pending" || s.status === "processing" ? 4000 : false;
+      if (!s) return 3000;
+      return s.status === "draft" || s.status === "pending" || s.status === "processing"
+        ? 3000
+        : false;
     },
+    refetchIntervalInBackground: true,
   });
 
   // Realtime subscription scoped to this single row.
@@ -114,7 +117,8 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
 
   const isReady = song.status === "completed" && !!(song.audio_path || (song as any).sample_path);
   const isFailed = song.status === "failed";
-  const isPending = song.status === "pending" || song.status === "processing";
+  const isPending = song.status === "draft" || song.status === "pending" || song.status === "processing";
+  const wasPendingRef = useRef(isPending);
   const unlocked = !!song.unlocked;
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -154,6 +158,25 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
     load();
     return () => { cancelled = true; };
   }, [isReady, song.id, previewUrl, loadingPreview, communityMode]);
+
+  // Once the preview URL is warmed after a pending→ready transition, auto-play
+  // it so the user gets an immediate "song is ready" moment.
+  useEffect(() => {
+    if (!isReady || !previewUrl || !wasPendingRef.current) return;
+    wasPendingRef.current = false;
+    const el = audioRef.current;
+    if (!el) return;
+    if (el.src !== previewUrl) el.src = previewUrl;
+    el.play()
+      .then(() => {
+        setPlaying(true);
+        toast.success("Song is ready — playing preview");
+      })
+      .catch(() => {
+        // Autoplay blocked (no gesture yet) — just surface the ready toast.
+        toast.success("Song is ready to play");
+      });
+  }, [isReady, previewUrl]);
 
   // Enforce sample-seconds cap ONLY for the owner preview. Community viewers
   // hear the full track for free; the charge is on download.
