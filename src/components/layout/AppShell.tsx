@@ -184,7 +184,11 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
 
 
-            <main className="min-w-0 flex-1 overflow-x-hidden pb-[calc(env(safe-area-inset-bottom)+72px)] md:pb-0">
+            <main
+              className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain pb-[calc(env(safe-area-inset-bottom)+72px)] [-webkit-overflow-scrolling:touch] md:pb-0"
+              style={{ touchAction: "pan-y" }}
+            >
+
               <div className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
                 {children}
               </div>
