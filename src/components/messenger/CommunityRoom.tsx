@@ -422,7 +422,9 @@ export function CommunityRoom() {
               : "Jump to newest"}
           </Button>
         )}
-
+        <div aria-live="polite" aria-atomic="true" className="sr-only">
+          {jumpAnnounce}
+        </div>
       </div>
 
       {activeTypers.length > 0 && (
