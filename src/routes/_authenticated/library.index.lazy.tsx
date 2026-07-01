@@ -811,7 +811,7 @@ function LibraryPage() {
 
         {/* Sound categories */}
         <div className="space-y-3">
-          <div className="font-bungee text-2xl sm:text-3xl uppercase">
+          <div className="font-bungee text-4xl sm:text-5xl uppercase">
             Sound
           </div>
           <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 sm:gap-5">
