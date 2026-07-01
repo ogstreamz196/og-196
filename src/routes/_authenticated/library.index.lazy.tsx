@@ -760,8 +760,11 @@ function LibraryPage() {
         </div>
 
         {/* Personal details */}
-        <div className="space-y-3">
-          <Label htmlFor="personal-details" className="font-bungee text-4xl sm:text-5xl uppercase">
+        <div className="space-y-4 sm:space-y-3">
+          <Label
+            htmlFor="personal-details"
+            className="block font-bungee text-3xl leading-[1.05] tracking-tight uppercase break-words sm:text-5xl"
+          >
             Describe
           </Label>
 
@@ -788,8 +791,8 @@ function LibraryPage() {
                     style={{ width: `${Math.min(100, pct)}%` }}
                   />
                 </div>
-                <div className="flex items-center justify-between gap-2 text-sm">
-                  <span id="personal-details-help" className={cn("min-w-0 truncate font-medium", tone)} aria-live="polite">{message}</span>
+                <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs sm:text-sm">
+                  <span id="personal-details-help" className={cn("min-w-0 flex-1 truncate font-medium", tone)} aria-live="polite">{message}</span>
                   <span
                     id="personal-details-count"
                     className={cn("shrink-0 tabular-nums font-semibold", tone)}
