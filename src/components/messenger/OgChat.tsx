@@ -879,7 +879,7 @@ export function OgChat({
             aria-pressed={recording}
             title={recording ? "Stop recording" : "Voice input"}
             className={cn(
-              "grid h-11 w-11 shrink-0 place-items-center rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 disabled:opacity-40",
+              "grid h-12 w-12 shrink-0 place-items-center rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 disabled:opacity-40 sm:h-11 sm:w-11",
               recording
                 ? "bg-destructive text-destructive-foreground hover:bg-destructive/90 animate-pulse"
                 : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
