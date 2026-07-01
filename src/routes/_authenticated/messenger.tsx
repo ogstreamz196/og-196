@@ -4,7 +4,7 @@ import { Users, MessageCircle, Loader2 } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { OgChat } from "@/components/messenger/OgChat";
 import { CommunityRoom } from "@/components/messenger/CommunityRoom";
-import { PoweredByOgBot } from "@/components/PoweredByOgBot";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   AlertDialog,
@@ -209,9 +209,6 @@ function MessengerPage() {
       </div>
       </div>
 
-      <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-3">
-        <PoweredByOgBot />
-      </div>
 
       <AlertDialog open={pendingMode !== null} onOpenChange={(o) => !o && setPendingMode(null)}>
         <AlertDialogContent>
