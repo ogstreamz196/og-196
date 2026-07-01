@@ -476,6 +476,46 @@ function LibraryPage() {
         </div>
       </header>
 
+      {/* Prominent Review banner — only visible when a freshly finished song is waiting to be reviewed */}
+      {readyToReview && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border-2 border-emerald-400/60 bg-gradient-to-r from-emerald-500/20 via-emerald-500/10 to-emerald-500/5 px-4 py-3 shadow-[0_20px_60px_-25px_rgba(16,185,129,0.7)] sm:gap-4 sm:px-6 sm:py-4"
+        >
+          <div className="min-w-0">
+            <div className="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-300">
+              🎧 Song is ready
+            </div>
+            <p className="mt-0.5 truncate font-display text-lg font-black text-foreground sm:text-2xl">
+              {readyToReview.title}
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                const id = readyToReview.id;
+                setReadyToReview(null);
+                navigate({ to: "/library/$songId", params: { songId: id } });
+              }}
+              className="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-5 py-2.5 text-sm font-black uppercase tracking-wider text-emerald-950 shadow-[0_10px_28px_-8px_rgba(16,185,129,0.9)] ring-2 ring-emerald-300/60 transition hover:scale-105 active:scale-95 sm:text-base"
+            >
+              Review now
+            </button>
+            <button
+              type="button"
+              onClick={() => setReadyToReview(null)}
+              aria-label="Dismiss ready notice"
+              className="rounded-full border border-white/10 px-2 py-1 text-xs text-muted-foreground hover:bg-white/5"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
+
 
       {/* Library — luxury two-tab vault: Yours first, then Community */}
       <section>
