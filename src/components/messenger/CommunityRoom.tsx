@@ -249,7 +249,7 @@ export function CommunityRoom() {
   const activeTypers = Object.values(typingUsers);
 
   return (
-    <div className="flex h-full min-h-0 flex-1 flex-col gap-2 p-2 sm:p-3">
+    <div className="flex h-full min-h-0 flex-1 flex-col gap-3 p-3 sm:gap-2 sm:p-3">
       {canClear && (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-destructive/30 bg-destructive/5 px-2.5 py-1.5 sm:px-3">
           <span className="text-[10px] font-bold uppercase tracking-wider text-destructive/80">
