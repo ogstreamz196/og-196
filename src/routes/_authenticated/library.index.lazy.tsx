@@ -416,6 +416,28 @@ function LibraryPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
+  // Detect songs that just finished (pending → completed) and surface an
+  // explicit "Song is ready" toast with a prominent Review action.
+  const previouslyActiveRef = useRef<Set<string>>(new Set());
+  const notifiedReadyRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    const activeIds = new Set(activeJobs.map((s) => s.id));
+    for (const song of completedTracks) {
+      if (notifiedReadyRef.current.has(song.id)) continue;
+      if (!previouslyActiveRef.current.has(song.id)) continue;
+      notifiedReadyRef.current.add(song.id);
+      toast.success(`🎧 Song is ready · ${song.title}`, {
+        duration: 12000,
+        action: {
+          label: "Review",
+          onClick: () =>
+            navigate({ to: "/library/$songId", params: { songId: song.id } }),
+        },
+      });
+    }
+    previouslyActiveRef.current = activeIds;
+  }, [activeJobs, completedTracks, navigate]);
+
 
 
 
