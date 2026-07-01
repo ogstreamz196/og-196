@@ -308,7 +308,7 @@ function BuyCoinsPage() {
           </span>
         </div>
       </div>
-      <div className="mx-auto w-full max-w-6xl space-y-10 sm:space-y-12">
+      <div className="mx-auto w-full max-w-6xl space-y-8 sm:space-y-12">
         {/* Arcade-style hero */}
         <section className="relative overflow-hidden rounded-3xl border-2 border-coin/40 bg-gradient-to-br from-background via-card to-background shadow-glow">
           {/* scanline + glow fx */}
@@ -361,7 +361,7 @@ function BuyCoinsPage() {
         <section aria-labelledby="section-custom">
           <SectionDivider id="section-custom" eyebrow="Step 1" title="Build your custom stack" icon={<SlidersHorizontal className="h-3.5 w-3.5" />} />
           <SectionCard>
-            <div className="p-5 sm:p-6">
+            <div className="p-2 sm:p-4">
               <CustomPackCard onBuy={(units) => pickSelection({ type: "custom", units })} />
             </div>
           </SectionCard>
@@ -371,17 +371,16 @@ function BuyCoinsPage() {
         <section aria-labelledby="section-vip">
           <SectionDivider id="section-vip" eyebrow="Or upgrade" title="Go VIP for the full pass" icon={<Crown className="h-3.5 w-3.5" />} tone="coin" />
           <SectionCard className="border-coin/40">
-            <SectionHeader
-              eyebrow="Membership Pass"
-              title={<EditableContent contentKey="buyCoins.vip.heading" defaultValue="Unlock the OG VIP Pass" />}
-              subtitle={<EditableContent contentKey="buyCoins.vip.subtitle" defaultValue="Unlock exclusive privileges across OG Streamz — billed monthly, cancel anytime." multiline />}
-              icon={<Crown className="h-5 w-5 text-coin" />}
-            />
-            <div className="px-5 pb-5 sm:px-6 sm:pb-6">
-              <div className="relative grid gap-4 rounded-2xl border border-coin/30 bg-gradient-to-br from-coin/10 via-card to-card p-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-6">
+            <div className="p-4 sm:p-6">
+              <p className="mb-3 text-xs leading-snug text-muted-foreground sm:text-sm">
+                <EditableContent contentKey="buyCoins.vip.subtitle" defaultValue="Unlock exclusive privileges across OG Streamz — billed monthly, cancel anytime." multiline />
+              </p>
+              <div className="relative grid gap-4 rounded-2xl border border-coin/30 bg-gradient-to-br from-coin/10 via-card to-card p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-6">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="text-lg font-bold">OG VIP</h3>
+                    <h3 className="text-lg font-bold">
+                      <EditableContent contentKey="buyCoins.vip.heading" defaultValue="OG VIP Pass" />
+                    </h3>
                     {isVip && (
                       <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400 ring-1 ring-emerald-500/30">
                         Active
@@ -395,8 +394,8 @@ function BuyCoinsPage() {
                     <li className="flex items-center gap-2"><Gift className="h-3.5 w-3.5 shrink-0 text-coin" /> Daily 10-coin safety net</li>
                   </ul>
                 </div>
-                <div className="flex items-center justify-between gap-3 sm:flex-col sm:items-end sm:justify-center">
-                  <div className="text-right">
+                <div className="flex items-center justify-between gap-3 border-t border-coin/20 pt-3 sm:flex-col sm:items-end sm:justify-center sm:border-t-0 sm:pt-0">
+                  <div>
                     <div className="text-3xl font-black tabular-nums leading-none">
                       {CURRENCY_SYMBOL}{(VIP_PLAN.priceCents / 100).toFixed(0)}
                     </div>
@@ -406,7 +405,7 @@ function BuyCoinsPage() {
                     size="lg"
                     disabled={isVip}
                     onClick={() => pickSelection({ type: "vip" })}
-                    className="bg-gradient-brand font-bold text-primary-foreground shadow-glow transition-transform hover:-translate-y-0.5 hover:opacity-90 active:translate-y-0"
+                    className="h-12 bg-gradient-brand font-bold text-primary-foreground shadow-glow transition-transform hover:-translate-y-0.5 hover:opacity-90 active:translate-y-0"
                   >
                     {isVip ? "You're VIP" : (<><Crown className="mr-2 h-4 w-4" /> Join VIP</>)}
                   </Button>
@@ -430,8 +429,8 @@ function BuyCoinsPage() {
             }
           />
           <SectionCard>
-            <div className="p-5 sm:p-6">
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="p-3 sm:p-6">
+              <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
                 {COIN_PACKS.map((t, i) => (
                   <PackCard
                     key={t.bundleId}
@@ -444,7 +443,7 @@ function BuyCoinsPage() {
                 ))}
               </div>
 
-              <p className="mt-4 flex items-center justify-center gap-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+              <p className="mt-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center text-[10px] font-medium uppercase tracking-wider text-muted-foreground sm:text-[11px]">
                 <Lock className="h-3 w-3" /> Secure checkout · Apple Pay · Google Pay · Card
               </p>
             </div>
@@ -967,11 +966,11 @@ function SectionDivider({
     ? "border-coin/40 bg-coin/10 text-coin"
     : "border-border bg-background/60 text-muted-foreground";
   return (
-    <div className="mb-5 sm:mb-6">
-      <div className="flex items-center gap-3">
+    <div className="mb-4 sm:mb-6">
+      <div className="flex items-center gap-2 sm:gap-3">
         <span className={cn("h-px flex-1 bg-gradient-to-r from-transparent to-transparent", accent)} aria-hidden />
         <span className={cn(
-          "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em]",
+          "inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.15em] sm:gap-1.5 sm:px-3 sm:text-[10px] sm:tracking-[0.22em]",
           chipTone,
         )}>
           {icon}
@@ -979,8 +978,8 @@ function SectionDivider({
         </span>
         <span className={cn("h-px flex-1 bg-gradient-to-r from-transparent to-transparent", accent)} aria-hidden />
       </div>
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-        <h2 id={id} className="font-display text-xl font-black tracking-tight text-foreground sm:text-2xl">
+      <div className="mt-2.5 flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 sm:mt-3">
+        <h2 id={id} className="font-display font-black tracking-tight text-foreground [font-size:clamp(1.125rem,5vw,1.5rem)] leading-tight">
           {title}
         </h2>
         {action}
