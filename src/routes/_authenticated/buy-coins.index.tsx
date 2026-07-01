@@ -308,7 +308,7 @@ function BuyCoinsPage() {
           </span>
         </div>
       </div>
-      <div className="mx-auto w-full max-w-6xl space-y-8 sm:space-y-12">
+      <div className="mx-auto w-full max-w-6xl space-y-10 sm:space-y-12">
         {/* Arcade-style hero */}
         <section className="relative overflow-hidden rounded-3xl border-2 border-coin/40 bg-gradient-to-br from-background via-card to-background shadow-glow">
           {/* scanline + glow fx */}
@@ -358,24 +358,24 @@ function BuyCoinsPage() {
         <ReferralReminder />
 
         {/* Custom pack — build your own stack first */}
-        <section aria-labelledby="section-custom">
+        <section aria-labelledby="section-custom" className="scroll-mt-24">
           <SectionDivider id="section-custom" eyebrow="Step 1" title="Build your custom stack" icon={<SlidersHorizontal className="h-3.5 w-3.5" />} />
           <SectionCard>
-            <div className="p-2 sm:p-4">
+            <div className="p-3 sm:p-4">
               <CustomPackCard onBuy={(units) => pickSelection({ type: "custom", units })} />
             </div>
           </SectionCard>
         </section>
 
         {/* VIP monthly subscription — placed right below custom for max visibility */}
-        <section aria-labelledby="section-vip">
+        <section aria-labelledby="section-vip" className="scroll-mt-24">
           <SectionDivider id="section-vip" eyebrow="Or upgrade" title="Go VIP for the full pass" icon={<Crown className="h-3.5 w-3.5" />} tone="coin" />
           <SectionCard className="border-coin/40">
-            <div className="p-4 sm:p-6">
+            <div className="p-3 sm:p-6">
               <p className="mb-3 text-xs leading-snug text-muted-foreground sm:text-sm">
                 <EditableContent contentKey="buyCoins.vip.subtitle" defaultValue="Unlock exclusive privileges across OG Streamz — billed monthly, cancel anytime." multiline />
               </p>
-              <div className="relative grid gap-4 rounded-2xl border border-coin/30 bg-gradient-to-br from-coin/10 via-card to-card p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-6">
+              <div className="relative grid gap-4 rounded-2xl border border-coin/30 bg-gradient-to-br from-coin/10 via-card to-card p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-6 sm:p-6">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="text-lg font-bold">
@@ -388,14 +388,14 @@ function BuyCoinsPage() {
                     )}
                   </div>
                   <ul className="mt-3 grid gap-1.5 text-sm text-muted-foreground sm:grid-cols-2">
-                    <li className="flex items-center gap-2"><Star className="h-3.5 w-3.5 shrink-0 text-coin" /> Foul-mouth OG Bot unlocked</li>
-                    <li className="flex items-center gap-2"><Star className="h-3.5 w-3.5 shrink-0 text-coin" /> Priority OG Bot replies</li>
-                    <li className="flex items-center gap-2"><Star className="h-3.5 w-3.5 shrink-0 text-coin" /> VIP badge across the hub</li>
-                    <li className="flex items-center gap-2"><Gift className="h-3.5 w-3.5 shrink-0 text-coin" /> Daily 10-coin safety net</li>
+                    <li className="flex items-start gap-2"><Star className="mt-0.5 h-3.5 w-3.5 shrink-0 text-coin" /> <span className="min-w-0">Foul-mouth OG Bot unlocked</span></li>
+                    <li className="flex items-start gap-2"><Star className="mt-0.5 h-3.5 w-3.5 shrink-0 text-coin" /> <span className="min-w-0">Priority OG Bot replies</span></li>
+                    <li className="flex items-start gap-2"><Star className="mt-0.5 h-3.5 w-3.5 shrink-0 text-coin" /> <span className="min-w-0">VIP badge across the hub</span></li>
+                    <li className="flex items-start gap-2"><Gift className="mt-0.5 h-3.5 w-3.5 shrink-0 text-coin" /> <span className="min-w-0">Daily 10-coin safety net</span></li>
                   </ul>
                 </div>
-                <div className="flex items-center justify-between gap-3 border-t border-coin/20 pt-3 sm:flex-col sm:items-end sm:justify-center sm:border-t-0 sm:pt-0">
-                  <div>
+                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-coin/20 pt-3 sm:flex-col sm:items-end sm:justify-center sm:border-t-0 sm:pt-0">
+                  <div className="min-w-0">
                     <div className="text-3xl font-black tabular-nums leading-none">
                       {CURRENCY_SYMBOL}{(VIP_PLAN.priceCents / 100).toFixed(0)}
                     </div>
@@ -405,7 +405,7 @@ function BuyCoinsPage() {
                     size="lg"
                     disabled={isVip}
                     onClick={() => pickSelection({ type: "vip" })}
-                    className="h-12 bg-gradient-brand font-bold text-primary-foreground shadow-glow transition-transform hover:-translate-y-0.5 hover:opacity-90 active:translate-y-0"
+                    className="h-12 min-h-11 w-full shrink-0 bg-gradient-brand font-bold text-primary-foreground shadow-glow transition-transform hover:-translate-y-0.5 hover:opacity-90 active:translate-y-0 sm:w-auto"
                   >
                     {isVip ? "You're VIP" : (<><Crown className="mr-2 h-4 w-4" /> Join VIP</>)}
                   </Button>
@@ -416,14 +416,14 @@ function BuyCoinsPage() {
         </section>
 
         {/* Coin bundles grid */}
-        <section aria-labelledby="section-bundles">
+        <section aria-labelledby="section-bundles" className="scroll-mt-24">
           <SectionDivider
             id="section-bundles"
             eyebrow="Or grab a preset"
             title="Coin bundles"
             icon={<Gem className="h-3.5 w-3.5" />}
             action={
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-emerald-400 ring-1 ring-emerald-500/30">
+              <span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full bg-emerald-500/15 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-emerald-400 ring-1 ring-emerald-500/30">
                 <TrendingDown className="h-3 w-3" /> Save up to {Math.round((1 - (COIN_PACKS[COIN_PACKS.length - 1].priceCents / 100 / COIN_PACKS[COIN_PACKS.length - 1].coins) / basePerCoin) * 100)}%
               </span>
             }
@@ -442,6 +442,8 @@ function BuyCoinsPage() {
                   />
                 ))}
               </div>
+
+
 
               <p className="mt-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center text-[10px] font-medium uppercase tracking-wider text-muted-foreground sm:text-[11px]">
                 <Lock className="h-3 w-3" /> Secure checkout · Apple Pay · Google Pay · Card
