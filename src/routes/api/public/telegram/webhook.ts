@@ -781,11 +781,28 @@ async function handleTelegramUpdate(
 
         // ===== Linked user path =====
         if (linkedProfile && typeof text === "string") {
-          const trimmed = text.trim();
+          let trimmed = text.trim();
           const { admin: isBoss, roles } = await isAdmin(admin, linkedProfile.id);
+          const keyboard = isBoss ? BOSS_KEYBOARD : USER_KEYBOARD;
 
-          if (/^\/help\b/i.test(trimmed)) {
-            await reply(chat_id, isBoss ? HELP_ADMIN : HELP_USER);
+          // Map emoji-keyboard button taps → slash commands
+          const buttonMap: Record<string, string> = {
+            "💰 Balance": "/balance",
+            "🎧 Library": "/library",
+            "🛒 Buy Coins": "/buy",
+            "👤 My Profile": "/me",
+            "❓ Help": "/help",
+            "🟢 Online Now": "/online",
+            "🕒 Last Seen": "/lastseen",
+            "📊 Stats": "/stats",
+            "👥 Users": "/users",
+          };
+          if (buttonMap[trimmed]) trimmed = buttonMap[trimmed];
+
+          if (/^\/help\b/i.test(trimmed) || /^\/menu\b/i.test(trimmed)) {
+            await reply(chat_id, isBoss ? HELP_ADMIN : HELP_USER, {
+              reply_markup: keyboard,
+            });
             return Response.json({ ok: true, help: true });
           }
           if (/^\/balance\b/i.test(trimmed)) {
@@ -794,8 +811,28 @@ async function handleTelegramUpdate(
               .select("coin_balance")
               .eq("id", linkedProfile.id)
               .maybeSingle();
-            await reply(chat_id, `💰 Balance: <b>${p?.coin_balance ?? 0}</b> OG coins`);
+            await reply(chat_id, `💰 Balance: <b>${p?.coin_balance ?? 0}</b> OG coins`, {
+              reply_markup: keyboard,
+            });
             return Response.json({ ok: true, balance: true });
+          }
+          if (/^\/library\b/i.test(trimmed)) {
+            await reply(chat_id, "🎧 <b>Your library</b>", {
+              reply_markup: {
+                inline_keyboard: [[{ text: "Open Library", url: "https://og-196.lovable.app/library" }]],
+              },
+            });
+            return Response.json({ ok: true, library: true });
+          }
+          if (/^\/buy\b/i.test(trimmed)) {
+            await reply(chat_id, "🛒 <b>Top up OG coins</b>", {
+              reply_markup: {
+                inline_keyboard: [
+                  [{ text: "Open Store", url: "https://og-196.lovable.app/buy-coins" }],
+                ],
+              },
+            });
+            return Response.json({ ok: true, buy: true });
           }
           if (/^\/me\b/i.test(trimmed)) {
             const { data: p } = await admin
@@ -803,14 +840,15 @@ async function handleTelegramUpdate(
               .select(PROFILE_COLS)
               .eq("id", linkedProfile.id)
               .maybeSingle();
-            await reply(chat_id, p ? fmtProfile(p as AdminProfile) : "Profile not found.");
+            await reply(chat_id, p ? fmtProfile(p as AdminProfile) : "Profile not found.", {
+              reply_markup: keyboard,
+            });
             return Response.json({ ok: true, me: true });
           }
           if (/^\/start\b/i.test(trimmed)) {
-            await reply(
-              chat_id,
-              `✅ Already linked. Type /help for commands or just chat.`,
-            );
+            await reply(chat_id, `✅ Already linked. Tap a button below or type /help.`, {
+              reply_markup: keyboard,
+            });
             return Response.json({ ok: true, already_linked: true });
           }
 
@@ -822,9 +860,10 @@ async function handleTelegramUpdate(
 
           // Reject unknown slash commands for non-admins
           if (trimmed.startsWith("/")) {
-            await reply(chat_id, "Unknown command. Type /help.");
+            await reply(chat_id, "Unknown command. Type /help.", { reply_markup: keyboard });
             return Response.json({ ok: true, unknown_cmd: true });
           }
+
 
           // Otherwise route to AI chat
           await runChatAI(admin, linkedProfile.id, chat_id, text, roles);
