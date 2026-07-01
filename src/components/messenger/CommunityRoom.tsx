@@ -429,9 +429,6 @@ export function CommunityRoom() {
           {send.isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
         </Button>
       </form>
-      <p className="px-1 pt-1 text-center text-[11px] uppercase tracking-wider text-muted-foreground sm:text-[10px]">
-        Free to chat · OG Bot keeps replies short
-      </p>
     </div>
   );
 }
