@@ -55,6 +55,8 @@ export function CommunityRoom() {
   const messages: CommunityMessage[] = useMemo(() => data?.messages ?? [], [data?.messages]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const composerRef = useRef<HTMLTextAreaElement>(null);
+  const [jumpAnnounce, setJumpAnnounce] = useState("");
   const [text, setText] = useState("");
   const [hasMore, setHasMore] = useState(true);
   const [loadingOlder, setLoadingOlder] = useState(false);
@@ -225,9 +227,26 @@ export function CommunityRoom() {
     stickToBottomRef.current = true;
     setShowJump(false);
     setNewCount(0);
+    const el = scrollRef.current;
+    const reduce =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     if (messages.length > 0) {
       rowVirtualizer.scrollToIndex(messages.length - 1, { align: "end" });
     }
+    // Smooth scroll on the container as a fallback (virtualizer jumps instantly).
+    if (el) {
+      requestAnimationFrame(() => {
+        el.scrollTo({ top: el.scrollHeight, behavior: reduce ? "auto" : "smooth" });
+      });
+    }
+    // Announce arrival and hand focus to the composer so screen readers and
+    // keyboard users regain reading context.
+    setJumpAnnounce("Jumped to newest messages");
+    window.setTimeout(() => {
+      composerRef.current?.focus({ preventScroll: true });
+      setJumpAnnounce("");
+    }, 350);
   }, [messages.length, rowVirtualizer]);
 
 
@@ -403,7 +422,9 @@ export function CommunityRoom() {
               : "Jump to newest"}
           </Button>
         )}
-
+        <div aria-live="polite" aria-atomic="true" className="sr-only">
+          {jumpAnnounce}
+        </div>
       </div>
 
       {activeTypers.length > 0 && (
@@ -424,6 +445,7 @@ export function CommunityRoom() {
         className="sticky bottom-0 flex items-end gap-2.5 rounded-2xl border border-border/40 bg-background/85 p-2.5 pb-[max(0.875rem,env(safe-area-inset-bottom))] backdrop-blur-md sm:gap-2 sm:p-2 sm:pb-[max(0.5rem,env(safe-area-inset-bottom))]"
       >
         <Textarea
+          ref={composerRef}
           value={text}
           onChange={(e) => {
             setText(e.target.value);

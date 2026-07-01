@@ -260,12 +260,24 @@ export function OgChat({
   const [atBottom, setAtBottom] = useState(true);
   const [hasNew, setHasNew] = useState(false);
 
+  const [jumpAnnounce, setJumpAnnounce] = useState("");
+
   function scrollToBottom(behavior: ScrollBehavior = "smooth") {
     const el = scrollRef.current;
     if (!el) return;
-    el.scrollTo({ top: el.scrollHeight, behavior });
+    const reduce =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    el.scrollTo({ top: el.scrollHeight, behavior: reduce ? "auto" : behavior });
     setAtBottom(true);
     setHasNew(false);
+    // Announce arrival + hand focus to composer so screen readers regain
+    // context and keyboard users can immediately reply.
+    setJumpAnnounce("Jumped to latest message");
+    window.setTimeout(() => {
+      inputRef.current?.focus({ preventScroll: true });
+      setJumpAnnounce("");
+    }, 350);
   }
 
   useEffect(() => {
@@ -807,6 +819,9 @@ export function OgChat({
           {hasNew ? "New messages" : "Jump to latest"}
         </button>
       )}
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        {jumpAnnounce}
+      </div>
       </div>
 
 

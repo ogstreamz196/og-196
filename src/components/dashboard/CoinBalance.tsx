@@ -22,6 +22,8 @@ export function CoinBalance({ className }: { className?: string }) {
         role="status"
         aria-label="Loading coin balance"
         aria-busy="true"
+        data-coin-balance-pill
+        tabIndex={-1}
         className={cn(
           "inline-flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-full border-2 border-coin/25 bg-coin/5 px-2 py-1 backdrop-blur-md sm:gap-2 sm:px-3.5 sm:py-1.5",
           className,
@@ -45,6 +47,7 @@ export function CoinBalance({ className }: { className?: string }) {
     <Link
       to="/buy-coins"
       preload="intent"
+      data-coin-balance-pill
       aria-label={`OG coin balance: ${balance}. Tap to buy more.`}
       title={`OG coin balance: ${full} — tap to buy more`}
       className={cn(
