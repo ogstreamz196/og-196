@@ -443,6 +443,7 @@ export function CommunityRoom() {
         className="sticky bottom-0 flex items-end gap-2.5 rounded-2xl border border-border/40 bg-background/85 p-2.5 pb-[max(0.875rem,env(safe-area-inset-bottom))] backdrop-blur-md sm:gap-2 sm:p-2 sm:pb-[max(0.5rem,env(safe-area-inset-bottom))]"
       >
         <Textarea
+          ref={composerRef}
           value={text}
           onChange={(e) => {
             setText(e.target.value);
