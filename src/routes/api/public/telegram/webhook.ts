@@ -1020,7 +1020,9 @@ async function handleTelegramUpdate(
             : `Type /help for commands.\n\n`) +
           `Now go make some noise. 🎤`;
 
-        await reply(chat_id, greeting);
+        await reply(chat_id, greeting, {
+          reply_markup: isBoss ? BOSS_KEYBOARD : USER_KEYBOARD,
+        });
 
         await admin
           .from("og_messages")
