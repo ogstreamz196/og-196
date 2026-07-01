@@ -117,7 +117,8 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
 
   const isReady = song.status === "completed" && !!(song.audio_path || (song as any).sample_path);
   const isFailed = song.status === "failed";
-  const isPending = song.status === "pending" || song.status === "processing";
+  const isPending = song.status === "draft" || song.status === "pending" || song.status === "processing";
+  const wasPendingRef = useRef(isPending);
   const unlocked = !!song.unlocked;
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
