@@ -55,6 +55,8 @@ export function CommunityRoom() {
   const messages: CommunityMessage[] = useMemo(() => data?.messages ?? [], [data?.messages]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const composerRef = useRef<HTMLTextAreaElement>(null);
+  const [jumpAnnounce, setJumpAnnounce] = useState("");
   const [text, setText] = useState("");
   const [hasMore, setHasMore] = useState(true);
   const [loadingOlder, setLoadingOlder] = useState(false);
