@@ -51,31 +51,60 @@ async function tg(method: string, body: Record<string, unknown>) {
   return r;
 }
 
-async function reply(chat_id: number, text: string) {
+async function reply(chat_id: number, text: string, extra?: Record<string, unknown>) {
   await tg("sendMessage", {
     chat_id,
     text,
     parse_mode: "HTML",
     disable_web_page_preview: true,
+    ...(extra ?? {}),
   });
 }
 
-const HELP_USER = `🤖 <b>OG Bot commands</b>
-/help — this menu
-/balance — your OG coin balance
-/me — your linked profile
+// Persistent reply keyboards — one row of quick actions.
+const USER_KEYBOARD = {
+  keyboard: [
+    [{ text: "💰 Balance" }, { text: "🎧 Library" }],
+    [{ text: "🛒 Buy Coins" }, { text: "👤 My Profile" }],
+    [{ text: "❓ Help" }],
+  ],
+  resize_keyboard: true,
+  is_persistent: true,
+};
 
-Otherwise just chat — I'm your full OG assistant (same brain as the in-app messenger).`;
+const BOSS_KEYBOARD = {
+  keyboard: [
+    [{ text: "🟢 Online Now" }, { text: "🕒 Last Seen" }],
+    [{ text: "📊 Stats" }, { text: "👥 Users" }],
+    [{ text: "💰 Balance" }, { text: "❓ Help" }],
+  ],
+  resize_keyboard: true,
+  is_persistent: true,
+};
+
+const HELP_USER = `🤖 <b>OG Bot menu</b>
+Tap a button below or use a command:
+
+/balance — your OG coin balance
+/library — jump into your song library
+/buy — top up OG coins
+/me — your linked profile
+/help — this menu
+
+Just type anything else and I'll answer — same brain as the in-app messenger.`;
 
 const HELP_ADMIN = `${HELP_USER}
 
 👑 <b>Boss / admin commands</b>
-/users [query] — list/search profiles (name or email)
-/whois &lt;email|uuid&gt; — full profile + balance
-/addcoins &lt;email|uuid&gt; &lt;amount&gt; [reason] — credit OG coins (negative to debit)
-/setcoins &lt;email|uuid&gt; &lt;amount&gt; [reason] — set absolute balance
-/stats — quick platform stats
-/broadcast &lt;message&gt; — DM every linked Telegram user`;
+/online [minutes] — who's on site right now (default 5)
+/lastseen — 20 most recent visitors + their last menu item
+/user &lt;email|uuid&gt; — full snapshot (balance, VIP, last activity)
+/users [query] — search profiles
+/whois &lt;email|uuid&gt; — quick profile
+/addcoins &lt;who&gt; &lt;amount&gt; [reason]
+/setcoins &lt;who&gt; &lt;amount&gt; [reason]
+/stats — platform snapshot
+/broadcast &lt;msg&gt; — DM every linked user`;
 
 type AdminProfile = {
   id: string;
