@@ -345,6 +345,7 @@ function RootComponent() {
         <DisplayPrefsBridge />
         <AuraBridge />
         <UserActivityArchiver />
+        <ActivityTracker />
         <Outlet />
         <Toaster />
       </AuthProvider>
