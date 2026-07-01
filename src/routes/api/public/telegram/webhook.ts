@@ -9,7 +9,8 @@ import type { UserContextSummary } from "@/lib/og-persona-public";
 //   - Legacy deterministic: 24 lowercase hex (first 24 chars of profiles.id
 //     without dashes).
 const TOKEN_RE = /^(t_[a-f0-9]{32}|[a-f0-9]{24})$/;
-const BOSS_TELEGRAM_USERNAME = "ogstreamz";
+const BOSS_TELEGRAM_USERNAMES = ["ogstreamz", "ogstreamz196"] as const;
+const BOSS_TELEGRAM_USERNAME = BOSS_TELEGRAM_USERNAMES[0];
 const BOSS_EMAIL = "ogstreamz196@gmail.com";
 
 function deriveSecret(key: string): string {
