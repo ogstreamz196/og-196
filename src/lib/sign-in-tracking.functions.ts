@@ -371,7 +371,7 @@ async function notifyBossesAndSync(ev: {
     const chatId = chatMap.get(bossId);
     if (!chatId) continue;
 
-    // Queue + try send
+    // Queue + try send (with internal exponential backoff retries)
     const { data: q } = await supabaseAdmin
       .from("telegram_dm_queue")
       .insert({
@@ -388,6 +388,7 @@ async function notifyBossesAndSync(ev: {
         .from("telegram_dm_queue")
         .update({
           status: sendResult.ok ? "sent" : "failed",
+          attempts: sendResult.attempts ?? 1,
           sent_at: sendResult.ok ? new Date().toISOString() : null,
           last_error: sendResult.ok
             ? null
