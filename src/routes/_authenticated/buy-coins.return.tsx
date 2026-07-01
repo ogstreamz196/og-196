@@ -140,7 +140,7 @@ function CheckoutReturn() {
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${user.id}` },
         (payload: { new: { coin_balance?: number } | null }) => {
-          const nextBalance = Number((payload.new as { coin_balance?: number } | null)?.coin_balance ?? 0);
+          const nextBalance = Number(payload.new?.coin_balance ?? 0);
           handleBump(nextBalance);
         },
       )
