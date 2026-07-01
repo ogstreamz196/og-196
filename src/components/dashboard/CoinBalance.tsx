@@ -46,6 +46,7 @@ export function CoinBalance({ className }: { className?: string }) {
     <Link
       to="/buy-coins"
       preload="intent"
+      data-coin-balance-pill
       aria-label={`OG coin balance: ${balance}. Tap to buy more.`}
       title={`OG coin balance: ${full} — tap to buy more`}
       className={cn(
