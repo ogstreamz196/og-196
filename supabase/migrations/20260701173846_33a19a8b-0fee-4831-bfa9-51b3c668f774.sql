@@ -1,0 +1,1 @@
+UPDATE public.profiles SET telegram_chat_id = NULL, telegram_linked_at = NULL WHERE telegram_chat_id IS NOT NULL;
