@@ -15,12 +15,31 @@ import { cn } from "@/lib/utils";
 export function CoinBalance({ className }: { className?: string }) {
   const { data, isLoading } = useProfile();
   const raw = data?.coin_balance ?? 0;
-  const balance = isLoading ? "—" : raw;
-  // Compact format (e.g. 12.3k) for narrow screens to keep the top bar intact.
-  const compact = isLoading
-    ? "—"
-    : new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 }).format(raw);
-  const full = isLoading ? "—" : new Intl.NumberFormat("en").format(raw);
+
+  if (isLoading) {
+    return (
+      <div
+        role="status"
+        aria-label="Loading coin balance"
+        aria-busy="true"
+        className={cn(
+          "inline-flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-full border-2 border-coin/25 bg-coin/5 px-2 py-1 backdrop-blur-md sm:gap-2 sm:px-3.5 sm:py-1.5",
+          className,
+        )}
+      >
+        <span className="h-4 w-4 shrink-0 animate-pulse rounded-full bg-coin/30 sm:h-[1.05rem] sm:w-[1.05rem]" />
+        <span className="h-3.5 w-10 animate-pulse rounded bg-coin/25 sm:h-4 sm:w-14" />
+        <span className="hidden h-3 w-14 animate-pulse rounded bg-coin/20 sm:inline-block" />
+        <span className="ml-0.5 h-5 w-5 shrink-0 animate-pulse rounded-full bg-coin/25 sm:h-[1.25rem] sm:w-[1.25rem]" />
+        <span className="sr-only">Loading coin balance…</span>
+      </div>
+    );
+  }
+
+  const balance = raw;
+  const compact = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 }).format(raw);
+  const full = new Intl.NumberFormat("en").format(raw);
+
 
   return (
     <Link
@@ -35,11 +54,9 @@ export function CoinBalance({ className }: { className?: string }) {
     >
       <Coins
         aria-hidden
-        className={cn(
-          "h-4 w-4 shrink-0 text-coin transition-transform group-hover:scale-110 sm:h-[1.05rem] sm:w-[1.05rem]",
-          isLoading ? "animate-pulse" : "",
-        )}
+        className="h-4 w-4 shrink-0 text-coin transition-transform group-hover:scale-110 sm:h-[1.05rem] sm:w-[1.05rem]"
       />
+
       <span
         data-testid="coin-balance"
         aria-live="polite"

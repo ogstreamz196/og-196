@@ -60,6 +60,8 @@ export function CommunityRoom() {
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [typingUsers, setTypingUsers] = useState<Record<string, { name: string; at: number }>>({});
   const [showJump, setShowJump] = useState(false);
+  const [newCount, setNewCount] = useState(0);
+
   const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const lastTypingSentRef = useRef(0);
   const stickToBottomRef = useRef(true);
@@ -82,7 +84,11 @@ export function CommunityRoom() {
               return { messages: [...existing, row] };
             },
           );
+          if (!stickToBottomRef.current && row.user_id !== myId) {
+            setNewCount((n) => n + 1);
+          }
         },
+
       )
       .subscribe();
     return () => {
@@ -176,8 +182,10 @@ export function CommunityRoom() {
     const nearBottom = distanceFromBottom < 120;
     stickToBottomRef.current = nearBottom;
     setShowJump(!nearBottom && messages.length > 0);
+    if (nearBottom) setNewCount(0);
 
     if (el.scrollTop > 40 || loadingOlder || !hasMore || messages.length === 0) return;
+
     const oldest = messages[0];
     if (!oldest) return;
     setLoadingOlder(true);
@@ -216,10 +224,12 @@ export function CommunityRoom() {
   const jumpToBottom = useCallback(() => {
     stickToBottomRef.current = true;
     setShowJump(false);
+    setNewCount(0);
     if (messages.length > 0) {
       rowVirtualizer.scrollToIndex(messages.length - 1, { align: "end" });
     }
   }, [messages.length, rowVirtualizer]);
+
 
   const send = useMutation({
     mutationFn: (content: string) => postFn({ data: { content, foulMouth } }),
@@ -375,11 +385,25 @@ export function CommunityRoom() {
             type="button"
             size="sm"
             onClick={jumpToBottom}
-            className="absolute bottom-3 left-1/2 z-10 -translate-x-1/2 gap-1.5 rounded-full shadow-lg"
+            aria-label={
+              newCount > 0
+                ? `Jump to newest, ${newCount} new message${newCount === 1 ? "" : "s"}`
+                : "Jump to newest"
+            }
+            className={
+              "absolute bottom-3 left-1/2 z-10 -translate-x-1/2 gap-1.5 rounded-full shadow-lg " +
+              (newCount > 0
+                ? "border border-primary bg-primary text-primary-foreground shadow-glow animate-[pop_0.25s_ease-out]"
+                : "")
+            }
           >
-            <ArrowDown className="h-3.5 w-3.5" /> Jump to newest
+            <ArrowDown className="h-3.5 w-3.5" />
+            {newCount > 0
+              ? `${newCount > 99 ? "99+" : newCount} new message${newCount === 1 ? "" : "s"}`
+              : "Jump to newest"}
           </Button>
         )}
+
       </div>
 
       {activeTypers.length > 0 && (
