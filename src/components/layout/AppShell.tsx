@@ -202,11 +202,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                       // breakpoint while the menu was open) fall back to the
                       // Coin Balance pill so keyboard/screen-reader users keep
                       // context in the header.
-                      const trigger = event.currentTarget
-                        .closest("[data-radix-menu-content]")
-                        ?.parentElement?.querySelector<HTMLElement>(
-                          "[aria-label='More actions']",
-                        );
+                      const trigger = document.querySelector<HTMLElement>(
+                        "[aria-label='More actions']",
+                      );
                       const triggerVisible =
                         !!trigger && trigger.offsetParent !== null;
                       if (!triggerVisible) {
