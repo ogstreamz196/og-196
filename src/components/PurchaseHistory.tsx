@@ -428,7 +428,7 @@ function RefundsPanel() {
 export function PurchaseHistory() {
 
   const fetcher = useServerFn(getCoinPurchaseHistory);
-  const { isVip } = useRole();
+
   const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ["coin-transactions", "me"],
     queryFn: () => fetcher(),
