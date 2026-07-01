@@ -282,7 +282,8 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
   );
 
   return (
-    <article className="rounded-2xl border border-border bg-card p-6 shadow-card">
+    <article id="song-player" tabIndex={-1} aria-label="Song player" className="scroll-mt-20 rounded-2xl border border-border bg-card p-6 shadow-card focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+
       <div className="flex flex-col gap-6 sm:flex-row">
         <div className="relative h-48 w-48 shrink-0 self-center overflow-hidden rounded-xl bg-gradient-brand-soft">
           {song.cover_url ? (
