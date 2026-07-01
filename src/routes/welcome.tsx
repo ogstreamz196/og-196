@@ -361,7 +361,7 @@ function WelcomePage() {
         <Hero />
         <FoulMouthHype />
         <Pillars />
-        <HowItWorks />
+        
         <ClosingCta />
         <Footer />
         
