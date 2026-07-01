@@ -826,7 +826,7 @@ export function OgChat({
           e.preventDefault();
           sendText(input);
         }}
-        className="sticky bottom-0 z-20 border-t border-border bg-card/95 px-3 py-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))] backdrop-blur transition-transform duration-150 supports-[backdrop-filter]:bg-card/70 sm:px-4"
+        className="sticky bottom-0 z-20 border-t border-border bg-card/95 px-3 py-3 pb-[max(0.875rem,env(safe-area-inset-bottom))] backdrop-blur transition-transform duration-150 supports-[backdrop-filter]:bg-card/70 sm:px-4 sm:py-2.5 sm:pb-[max(0.625rem,env(safe-area-inset-bottom))]"
       >
 
         {attachment && (
