@@ -29,7 +29,7 @@ import { cn } from "@/lib/utils";
 import { SongCard, type Song } from "@/components/SongCard";
 import { SongCardSkeleton } from "@/components/library/SongCardSkeleton";
 import {
-  EXAMPLE_PROMPT_CHIPS,
+  
   META,
   PERSONAL_DETAILS_MAX,
   POOLS,
@@ -717,7 +717,7 @@ function LibraryPage() {
 
         {/* Title */}
         <div className="space-y-3">
-          <Label htmlFor="song-title" className="font-bungee text-2xl sm:text-3xl uppercase">
+          <Label htmlFor="song-title" className="font-bungee text-4xl sm:text-5xl uppercase">
             Title
           </Label>
           <div className="flex flex-wrap items-stretch gap-2">
@@ -754,31 +754,10 @@ function LibraryPage() {
 
         {/* Personal details */}
         <div className="space-y-3">
-          <Label htmlFor="personal-details" className="font-bungee text-2xl sm:text-3xl uppercase">
+          <Label htmlFor="personal-details" className="font-bungee text-4xl sm:text-5xl uppercase">
             Describe
           </Label>
-          <div
-            className="flex flex-wrap gap-2"
-            role="group"
-            aria-label="Example prompts"
-          >
-            {EXAMPLE_PROMPT_CHIPS.map((chip) => (
-              <button
-                key={chip.label}
-                type="button"
-                aria-label={`Insert example: ${chip.label}`}
-                onClick={() =>
-                  setPersonalDetails((v) => {
-                    const sep = v.length === 0 ? "" : v.endsWith("\n") ? "" : "\n";
-                    return (v + sep + chip.snippet).slice(0, PERSONAL_DETAILS_MAX);
-                  })
-                }
-                className="rounded-full border border-white/15 bg-white/[0.05] px-3.5 py-1.5 text-sm font-semibold text-foreground/85 transition hover:border-primary/60 hover:bg-primary/15 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-              >
-                {chip.label}
-              </button>
-            ))}
-          </div>
+
           {(() => {
             const check = personalDetailsCheck(personalDetails);
             const { status, message, pct, tone, barTone, length: len } = check;
@@ -832,7 +811,7 @@ function LibraryPage() {
 
         {/* Sound categories */}
         <div className="space-y-3">
-          <div className="font-bungee text-2xl sm:text-3xl uppercase">
+          <div className="font-bungee text-4xl sm:text-5xl uppercase">
             Sound
           </div>
           <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 sm:gap-5">
