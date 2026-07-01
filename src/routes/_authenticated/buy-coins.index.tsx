@@ -362,7 +362,7 @@ function BuyCoinsPage() {
                   <li className="flex items-center gap-2"><Star className="h-3.5 w-3.5 shrink-0 text-coin" /> Foul-mouth OG Bot unlocked</li>
                   <li className="flex items-center gap-2"><Star className="h-3.5 w-3.5 shrink-0 text-coin" /> Priority OG Bot replies</li>
                   <li className="flex items-center gap-2"><Star className="h-3.5 w-3.5 shrink-0 text-coin" /> VIP badge across the hub</li>
-                  <li className="flex items-center gap-2"><Gift className="h-3.5 w-3.5 shrink-0 text-coin" /> Instant Stripe refunds</li>
+                  <li className="flex items-center gap-2"><Gift className="h-3.5 w-3.5 shrink-0 text-coin" /> Daily 10-coin safety net</li>
                 </ul>
               </div>
               <div className="flex items-center justify-between gap-3 sm:flex-col sm:items-end sm:justify-center">
