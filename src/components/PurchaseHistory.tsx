@@ -533,14 +533,6 @@ export function PurchaseHistory() {
                         )}
                       </div>
                     ) : null}
-                    {row.stripe && (row.stripe.refunded || row.stripe.partiallyRefunded) && (
-                      <div className="text-xs tabular-nums text-destructive">
-                        Refunded {formatMoney(row.stripe.refundedAmount, row.stripe.currency)}
-                      </div>
-                    )}
-                    {isVip && parseStripeRef(row.reference) && (
-                      <RefundButton row={row} />
-                    )}
                   </div>
                 </li>
               );
@@ -549,8 +541,8 @@ export function PurchaseHistory() {
         );
       })()}
     </section>
-    <RefundsPanel />
     </>
   );
 }
+
 
