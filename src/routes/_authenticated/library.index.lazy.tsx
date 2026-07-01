@@ -418,9 +418,12 @@ function LibraryPage() {
 
   // Detect songs that just finished (pending → completed) and surface an
   // explicit "Song is ready" toast plus a prominent Review banner.
+  // Only tracks with status === "completed" reach `completedTracks`, so the
+  // Review affordance never appears before the song is actually playable.
   const previouslyActiveRef = useRef<Set<string>>(new Set());
   const notifiedReadyRef = useRef<Set<string>>(new Set());
   const [readyToReview, setReadyToReview] = useState<{ id: string; title: string } | null>(null);
+  const reviewBtnRef = useRef<HTMLButtonElement | null>(null);
   useEffect(() => {
     const activeIds = new Set(activeJobs.map((s) => s.id));
     for (const song of completedTracks) {
@@ -430,16 +433,37 @@ function LibraryPage() {
       const title = song.title || "Your song";
       setReadyToReview({ id: song.id, title });
       toast.success(`🎧 Song is ready · ${title}`, {
+        id: `song-ready-${song.id}`,
         duration: 12000,
         action: {
           label: "Review",
           onClick: () =>
-            navigate({ to: "/library/$songId", params: { songId: song.id } }),
+            navigate({
+              to: "/library/$songId",
+              params: { songId: song.id },
+              hash: "song-player",
+            }),
         },
       });
     }
     previouslyActiveRef.current = activeIds;
   }, [activeJobs, completedTracks, navigate]);
+
+  // Move keyboard focus to the Review button when the banner first appears
+  // so screen-reader and keyboard users can act on it immediately, and let
+  // Escape dismiss it.
+  useEffect(() => {
+    if (!readyToReview) return;
+    const t = window.setTimeout(() => reviewBtnRef.current?.focus(), 50);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setReadyToReview(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.clearTimeout(t);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [readyToReview]);
 
 
 
