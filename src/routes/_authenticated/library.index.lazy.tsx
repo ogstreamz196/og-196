@@ -417,16 +417,19 @@ function LibraryPage() {
   }, [user?.id]);
 
   // Detect songs that just finished (pending → completed) and surface an
-  // explicit "Song is ready" toast with a prominent Review action.
+  // explicit "Song is ready" toast plus a prominent Review banner.
   const previouslyActiveRef = useRef<Set<string>>(new Set());
   const notifiedReadyRef = useRef<Set<string>>(new Set());
+  const [readyToReview, setReadyToReview] = useState<{ id: string; title: string } | null>(null);
   useEffect(() => {
     const activeIds = new Set(activeJobs.map((s) => s.id));
     for (const song of completedTracks) {
       if (notifiedReadyRef.current.has(song.id)) continue;
       if (!previouslyActiveRef.current.has(song.id)) continue;
       notifiedReadyRef.current.add(song.id);
-      toast.success(`🎧 Song is ready · ${song.title}`, {
+      const title = song.title || "Your song";
+      setReadyToReview({ id: song.id, title });
+      toast.success(`🎧 Song is ready · ${title}`, {
         duration: 12000,
         action: {
           label: "Review",
