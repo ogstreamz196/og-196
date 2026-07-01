@@ -131,14 +131,14 @@ async function findProfile(
   if (/^[0-9a-f-]{32,36}$/i.test(v)) {
     const { data } = await admin
       .from("profiles")
-      .select("id, display_name, email, coin_balance, telegram_chat_id, telegram_username")
+      .select(PROFILE_COLS)
       .eq("id", v)
       .maybeSingle();
     if (data) return data as AdminProfile;
   }
   const { data } = await admin
     .from("profiles")
-    .select("id, display_name, email, coin_balance, telegram_chat_id, telegram_username")
+    .select(PROFILE_COLS)
     .or(`email.ilike.${v},display_name.ilike.${v},telegram_username.ilike.${v}`)
     .limit(2);
   if (data && data.length === 1) return data[0] as AdminProfile;
@@ -264,13 +264,13 @@ async function runAdminCommand(
     const q = arg.trim();
     const query = admin
       .from("profiles")
-      .select("id, display_name, email, coin_balance, telegram_username")
+      .select(PROFILE_COLS)
       .order("created_at", { ascending: false })
       .limit(10);
     const { data, error } = q
       ? await admin
           .from("profiles")
-          .select("id, display_name, email, coin_balance, telegram_username")
+          .select(PROFILE_COLS)
           .or(`email.ilike.%${q}%,display_name.ilike.%${q}%,telegram_username.ilike.%${q}%`)
           .limit(10)
       : await query;
@@ -698,7 +698,7 @@ async function handleTelegramUpdate(
           if (/^\/me\b/i.test(trimmed)) {
             const { data: p } = await admin
               .from("profiles")
-              .select("id, display_name, email, coin_balance, telegram_chat_id, telegram_username")
+              .select(PROFILE_COLS)
               .eq("id", linkedProfile.id)
               .maybeSingle();
             await reply(chat_id, p ? fmtProfile(p as AdminProfile) : "Profile not found.");
