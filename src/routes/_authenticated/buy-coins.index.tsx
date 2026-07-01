@@ -947,6 +947,48 @@ function Row({ label, value, hint }: { label: string; value: string; hint?: stri
   );
 }
 
+function SectionDivider({
+  id,
+  eyebrow,
+  title,
+  icon,
+  action,
+  tone = "default",
+}: {
+  id?: string;
+  eyebrow: string;
+  title: string;
+  icon?: ReactNode;
+  action?: ReactNode;
+  tone?: "default" | "coin";
+}) {
+  const accent = tone === "coin" ? "via-coin/40" : "via-border";
+  const chipTone = tone === "coin"
+    ? "border-coin/40 bg-coin/10 text-coin"
+    : "border-border bg-background/60 text-muted-foreground";
+  return (
+    <div className="mb-5 sm:mb-6">
+      <div className="flex items-center gap-3">
+        <span className={cn("h-px flex-1 bg-gradient-to-r from-transparent to-transparent", accent)} aria-hidden />
+        <span className={cn(
+          "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em]",
+          chipTone,
+        )}>
+          {icon}
+          {eyebrow}
+        </span>
+        <span className={cn("h-px flex-1 bg-gradient-to-r from-transparent to-transparent", accent)} aria-hidden />
+      </div>
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+        <h2 id={id} className="font-display text-xl font-black tracking-tight text-foreground sm:text-2xl">
+          {title}
+        </h2>
+        {action}
+      </div>
+    </div>
+  );
+}
+
 function NextStep({ n, title, body }: { n: number; title: string; body: string }) {
   return (
     <li className="flex items-start gap-3 rounded-xl border border-border/60 bg-background/40 p-3">
