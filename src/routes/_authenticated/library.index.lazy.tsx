@@ -857,7 +857,13 @@ function LibraryPage() {
             </Button>
             {!canGenerateLyrics && !genLyrics && (
               <p className="mt-3 text-center text-sm font-medium text-muted-foreground">
-                Pick a language and at least one style detail above to unlock
+                {balance < lyricsCost
+                  ? `Not enough coins — needs ${lyricsCost}, you have ${balance}`
+                  : !title.trim()
+                    ? `Add a title to unlock · costs ${lyricsCost} coin${lyricsCost === 1 ? "" : "s"}`
+                    : !selections.language
+                      ? `Pick a language to unlock · costs ${lyricsCost} coin${lyricsCost === 1 ? "" : "s"}`
+                      : `Pick at least one style detail to unlock · costs ${lyricsCost} coin${lyricsCost === 1 ? "" : "s"}`}
               </p>
             )}
           </div>
