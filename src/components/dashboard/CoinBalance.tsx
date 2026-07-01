@@ -54,11 +54,9 @@ export function CoinBalance({ className }: { className?: string }) {
     >
       <Coins
         aria-hidden
-        className={cn(
-          "h-4 w-4 shrink-0 text-coin transition-transform group-hover:scale-110 sm:h-[1.05rem] sm:w-[1.05rem]",
-          isLoading ? "animate-pulse" : "",
-        )}
+        className="h-4 w-4 shrink-0 text-coin transition-transform group-hover:scale-110 sm:h-[1.05rem] sm:w-[1.05rem]"
       />
+
       <span
         data-testid="coin-balance"
         aria-live="polite"
