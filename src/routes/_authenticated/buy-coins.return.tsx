@@ -19,6 +19,7 @@ import { PurchaseHistory } from "@/components/PurchaseHistory";
 import { reconcileCoinSession } from "@/lib/payments.functions";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/buy-coins/return")({
   validateSearch: (search: Record<string, unknown>): { session_id?: string; pack?: string } => ({
