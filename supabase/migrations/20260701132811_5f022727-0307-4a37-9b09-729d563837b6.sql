@@ -1,0 +1,1 @@
+update public.profiles set telegram_chat_id = null, telegram_linked_at = null where email = 'ogstreamz196@gmail.com' and telegram_chat_id = 5717189824;
