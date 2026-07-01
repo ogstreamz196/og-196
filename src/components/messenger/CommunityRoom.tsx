@@ -60,6 +60,8 @@ export function CommunityRoom() {
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [typingUsers, setTypingUsers] = useState<Record<string, { name: string; at: number }>>({});
   const [showJump, setShowJump] = useState(false);
+  const [newCount, setNewCount] = useState(0);
+
   const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const lastTypingSentRef = useRef(0);
   const stickToBottomRef = useRef(true);
