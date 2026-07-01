@@ -102,7 +102,15 @@ export function AppShell({ children }: { children: ReactNode }) {
           <AppSidebar />
 
           <div className="flex min-w-0 flex-1 flex-col">
-            <header className="sticky top-0 z-30 grid h-14 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 border-b border-white/8 bg-background/70 px-3 backdrop-blur-xl sm:h-16 sm:gap-3 sm:px-5 lg:px-7">
+            <header
+              className="sticky top-0 z-30 grid min-h-14 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 border-b border-white/8 bg-background/70 backdrop-blur-xl sm:min-h-16 sm:gap-3"
+              style={{
+                paddingTop: "env(safe-area-inset-top)",
+                paddingLeft: "max(0.75rem, env(safe-area-inset-left))",
+                paddingRight: "max(0.75rem, env(safe-area-inset-right))",
+              }}
+            >
+
               <SidebarTrigger className="shrink-0" />
 
               <div className="flex min-w-0 items-center gap-2 sm:gap-3">
