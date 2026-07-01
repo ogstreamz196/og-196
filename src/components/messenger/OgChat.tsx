@@ -826,7 +826,7 @@ export function OgChat({
           e.preventDefault();
           sendText(input);
         }}
-        className="sticky bottom-0 z-20 border-t border-border bg-card/95 px-3 py-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))] backdrop-blur transition-transform duration-150 supports-[backdrop-filter]:bg-card/70 sm:px-4"
+        className="sticky bottom-0 z-20 border-t border-border bg-card/95 px-3 py-3 pb-[max(0.875rem,env(safe-area-inset-bottom))] backdrop-blur transition-transform duration-150 supports-[backdrop-filter]:bg-card/70 sm:px-4 sm:py-2.5 sm:pb-[max(0.625rem,env(safe-area-inset-bottom))]"
       >
 
         {attachment && (
@@ -857,7 +857,7 @@ export function OgChat({
         {/* Unified composer pill — attachment | mic | textarea | send (Telegram/WhatsApp pattern) */}
         <div
           className={cn(
-            "flex items-end gap-1 rounded-full border border-white/10 bg-background/80 px-2 py-1.5 shadow-[0_14px_36px_-18px_rgba(0,0,0,0.55)] ring-1 ring-white/5 backdrop-blur-xl transition focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/30 sm:gap-1.5 sm:px-4 sm:py-2.5",
+            "flex items-end gap-1.5 rounded-3xl border border-white/10 bg-background/80 px-2.5 py-2 shadow-[0_14px_36px_-18px_rgba(0,0,0,0.55)] ring-1 ring-white/5 backdrop-blur-xl transition focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/30 sm:gap-2 sm:rounded-full sm:px-4 sm:py-2.5",
             (isOut || !user) && "opacity-70",
           )}
         >
@@ -867,7 +867,7 @@ export function OgChat({
             disabled={!user || m.isPending}
             aria-label="Attach image"
             title="Attach image"
-            className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-white/5 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 disabled:opacity-40"
+            className="grid h-12 w-12 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-white/5 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 disabled:opacity-40 sm:h-11 sm:w-11"
           >
             <Paperclip className="h-5 w-5" />
           </button>
@@ -879,7 +879,7 @@ export function OgChat({
             aria-pressed={recording}
             title={recording ? "Stop recording" : "Voice input"}
             className={cn(
-              "grid h-11 w-11 shrink-0 place-items-center rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 disabled:opacity-40",
+              "grid h-12 w-12 shrink-0 place-items-center rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 disabled:opacity-40 sm:h-11 sm:w-11",
               recording
                 ? "bg-destructive text-destructive-foreground hover:bg-destructive/90 animate-pulse"
                 : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
@@ -932,7 +932,7 @@ export function OgChat({
               setTimeout(() => e.currentTarget?.scrollIntoView({ block: "end", behavior: "smooth" }), 250);
             }}
             onBlur={handleComposerBlur}
-            className="min-h-[40px] max-h-[180px] flex-1 resize-none bg-transparent px-2 py-2 text-base leading-relaxed placeholder:text-muted-foreground/70 focus:outline-none disabled:cursor-not-allowed sm:px-3 sm:text-lg"
+            className="min-h-[48px] max-h-[180px] flex-1 resize-none bg-transparent px-2.5 py-2.5 text-[17px] leading-relaxed placeholder:text-muted-foreground/70 focus:outline-none disabled:cursor-not-allowed sm:min-h-[40px] sm:px-3 sm:py-2 sm:text-lg"
 
           />
           <button
@@ -941,12 +941,12 @@ export function OgChat({
             aria-label="Send message"
             title="Send"
             data-testid="og-loner-send"
-            className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-gradient-brand text-primary-foreground shadow-[0_8px_22px_-6px_hsl(var(--primary)/0.6)] ring-1 ring-primary/40 transition hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 disabled:bg-muted disabled:text-muted-foreground disabled:shadow-none disabled:ring-0"
+            className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-gradient-brand text-primary-foreground shadow-[0_8px_22px_-6px_hsl(var(--primary)/0.6)] ring-1 ring-primary/40 transition hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 disabled:bg-muted disabled:text-muted-foreground disabled:shadow-none disabled:ring-0 sm:h-11 sm:w-11"
           >
             {m.isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
           </button>
         </div>
-        <p className="mt-2 flex flex-wrap items-center gap-x-2 px-2 text-xs font-medium text-muted-foreground/80" aria-live="polite">
+        <p className="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1 px-2 text-[13px] font-medium text-muted-foreground/80 sm:text-xs" aria-live="polite">
           {m.isPending ? (
             <span className="inline-flex items-center gap-1.5 font-semibold text-foreground/90">
               <Loader2 className="h-3 w-3 animate-spin" /> Sending…

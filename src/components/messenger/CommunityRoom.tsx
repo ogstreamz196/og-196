@@ -249,7 +249,7 @@ export function CommunityRoom() {
   const activeTypers = Object.values(typingUsers);
 
   return (
-    <div className="flex h-full min-h-0 flex-1 flex-col gap-2 p-2 sm:p-3">
+    <div className="flex h-full min-h-0 flex-1 flex-col gap-3 p-3 sm:gap-2 sm:p-3">
       {canClear && (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-destructive/30 bg-destructive/5 px-2.5 py-1.5 sm:px-3">
           <span className="text-[10px] font-bold uppercase tracking-wider text-destructive/80">
@@ -395,7 +395,7 @@ export function CommunityRoom() {
 
       <form
         onSubmit={submit}
-        className="sticky bottom-0 flex items-end gap-2 rounded-2xl border border-border/40 bg-background/80 p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur-md"
+        className="sticky bottom-0 flex items-end gap-2.5 rounded-2xl border border-border/40 bg-background/85 p-2.5 pb-[max(0.875rem,env(safe-area-inset-bottom))] backdrop-blur-md sm:gap-2 sm:p-2 sm:pb-[max(0.5rem,env(safe-area-inset-bottom))]"
       >
         <Textarea
           value={text}
@@ -416,20 +416,20 @@ export function CommunityRoom() {
           rows={1}
           maxLength={1000}
           enterKeyHint="send"
-          className="min-h-[44px] max-h-32 resize-none border-0 bg-transparent text-base focus-visible:ring-0 sm:text-sm"
+          className="min-h-[52px] max-h-32 resize-none border-0 bg-transparent px-3 text-[17px] leading-relaxed focus-visible:ring-0 sm:min-h-[44px] sm:text-sm"
           disabled={send.isPending}
         />
         <Button
           type="submit"
           size="icon"
           disabled={!text.trim() || send.isPending}
-          className="h-11 w-11 shrink-0 rounded-xl"
+          className="h-12 w-12 shrink-0 rounded-2xl sm:h-11 sm:w-11 sm:rounded-xl"
           aria-label="Send message"
         >
-          {send.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+          {send.isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
         </Button>
       </form>
-      <p className="px-1 text-center text-[10px] uppercase tracking-wider text-muted-foreground">
+      <p className="px-1 pt-1 text-center text-[11px] uppercase tracking-wider text-muted-foreground sm:text-[10px]">
         Free to chat · OG Bot keeps replies short
       </p>
     </div>
