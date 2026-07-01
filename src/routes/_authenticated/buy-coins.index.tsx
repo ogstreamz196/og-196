@@ -308,7 +308,7 @@ function BuyCoinsPage() {
           </span>
         </div>
       </div>
-      <div className="mx-auto w-full max-w-6xl space-y-10 sm:space-y-12">
+      <div className="mx-auto w-full max-w-6xl space-y-8 sm:space-y-12">
         {/* Arcade-style hero */}
         <section className="relative overflow-hidden rounded-3xl border-2 border-coin/40 bg-gradient-to-br from-background via-card to-background shadow-glow">
           {/* scanline + glow fx */}
