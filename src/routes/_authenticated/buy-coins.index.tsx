@@ -357,49 +357,14 @@ function BuyCoinsPage() {
         {/* Your OG sharing code first — earn while others spend */}
         <ReferralReminder />
 
-        {/* Coin bundles */}
+        {/* Custom pack — build your own stack first */}
         <SectionCard>
-
-          <SectionHeader
-            eyebrow="Coin Bundles"
-            title="Pick your loot"
-            subtitle="Bigger crates = better price per coin. Rare tiers stack extra savings."
-            icon={<Gem className="h-5 w-5" />}
-            action={
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-emerald-400 ring-1 ring-emerald-500/30">
-                <TrendingDown className="h-3.5 w-3.5" /> Save up to {Math.round((1 - (COIN_PACKS[COIN_PACKS.length - 1].priceCents / 100 / COIN_PACKS[COIN_PACKS.length - 1].coins) / basePerCoin) * 100)}%
-              </span>
-            }
-          />
-          <div className="px-5 pb-5 sm:px-6 sm:pb-6">
-            {/* Custom pack */}
-            <div className="mb-5">
-              <CustomPackCard onBuy={(units) => pickSelection({ type: "custom", units })} />
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {COIN_PACKS.map((t, i) => (
-                <PackCard
-                  key={t.bundleId}
-                  pack={t}
-                  tierIndex={i}
-                  totalTiers={COIN_PACKS.length}
-                  basePerCoin={basePerCoin}
-                  onBuy={(effective) => pickSelection({ type: "coins", pack: effective })}
-                />
-              ))}
-            </div>
-
-
-            <p className="mt-4 flex items-center justify-center gap-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-              <Lock className="h-3 w-3" /> Secure checkout · Apple Pay · Google Pay · Card
-            </p>
+          <div className="p-5 sm:p-6">
+            <CustomPackCard onBuy={(units) => pickSelection({ type: "custom", units })} />
           </div>
         </SectionCard>
 
-
-
-        {/* VIP monthly subscription */}
+        {/* VIP monthly subscription — placed right below custom for max visibility */}
         <SectionCard className="border-coin/40">
           <SectionHeader
             eyebrow="Membership Pass"
@@ -442,6 +407,35 @@ function BuyCoinsPage() {
                 </Button>
               </div>
             </div>
+          </div>
+        </SectionCard>
+
+        {/* Coin bundles grid */}
+        <SectionCard>
+          <div className="px-5 pt-5 sm:px-6 sm:pt-6">
+            <div className="flex items-center justify-end">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-emerald-400 ring-1 ring-emerald-500/30">
+                <TrendingDown className="h-3.5 w-3.5" /> Save up to {Math.round((1 - (COIN_PACKS[COIN_PACKS.length - 1].priceCents / 100 / COIN_PACKS[COIN_PACKS.length - 1].coins) / basePerCoin) * 100)}%
+              </span>
+            </div>
+          </div>
+          <div className="px-5 pb-5 pt-4 sm:px-6 sm:pb-6">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {COIN_PACKS.map((t, i) => (
+                <PackCard
+                  key={t.bundleId}
+                  pack={t}
+                  tierIndex={i}
+                  totalTiers={COIN_PACKS.length}
+                  basePerCoin={basePerCoin}
+                  onBuy={(effective) => pickSelection({ type: "coins", pack: effective })}
+                />
+              ))}
+            </div>
+
+            <p className="mt-4 flex items-center justify-center gap-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+              <Lock className="h-3 w-3" /> Secure checkout · Apple Pay · Google Pay · Card
+            </p>
           </div>
         </SectionCard>
 
