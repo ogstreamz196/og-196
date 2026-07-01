@@ -1,11 +1,20 @@
 import type { ReactNode } from "react";
 import { useNavigate, useRouterState, Link } from "@tanstack/react-router";
-import { Search, ShieldCheck, LogOut, Crown } from "lucide-react";
+import { Search, ShieldCheck, LogOut, Crown, MoreVertical } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { SwipeToOpenSidebar } from "@/components/layout/SwipeToOpenSidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
 import {
   AdminEditModeProvider,
   AdminEditModeToggle,
@@ -114,7 +123,9 @@ export function AppShell({ children }: { children: ReactNode }) {
               <SidebarTrigger className="shrink-0" />
 
               <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-                <BrandLockup compact />
+                <div className="hidden min-[380px]:block">
+                  <BrandLockup compact />
+                </div>
                 <div className="hidden min-w-0 sm:block">
                   <h1 className="font-display truncate text-base font-black leading-tight tracking-tight text-gradient-brand sm:text-xl lg:text-2xl">
                     {title}
@@ -155,18 +166,66 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <AdminEditModeToggle className="hidden md:inline-flex" />
                 <HighContrastToggle className="hidden sm:inline-flex" />
                 <CoinBalance className="order-first sm:order-none" />
+
+                {/* Standalone sign-out on ≥380px */}
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
                   onClick={handleSignOut}
                   title={dev.isDev ? "Sign out (Dev mode)" : `Sign out${user?.email ? ` ${user.email}` : ""}`}
-                  className="h-9 w-9 hover:bg-white/5"
+                  className="hidden h-9 w-9 hover:bg-white/5 min-[380px]:inline-flex"
                 >
                   <LogOut className="h-4 w-4" />
                   <span className="sr-only">Sign out</span>
                 </Button>
+
+                {/* Overflow menu for ultra-narrow widths (<380px) */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 hover:bg-white/5 min-[380px]:hidden"
+                      aria-label="More actions"
+                    >
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel className="truncate">
+                      {user?.email ?? "Account"}
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {!roleLoading && isAdmin && (
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin">
+                          <ShieldCheck className="mr-2 h-4 w-4" /> Boss controls
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                    {!roleLoading && isVip && (
+                      <DropdownMenuItem asChild>
+                        <Link to="/settings">
+                          <Crown className="mr-2 h-4 w-4" /> VIP membership
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem asChild>
+                      <Link to="/buy-coins">Buy coins</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/settings">Settings</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onSelect={handleSignOut}>
+                      <LogOut className="mr-2 h-4 w-4" /> Sign out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
+
             </header>
 
             {!roleLoading && isAdmin && (
