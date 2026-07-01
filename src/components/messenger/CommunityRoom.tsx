@@ -182,8 +182,10 @@ export function CommunityRoom() {
     const nearBottom = distanceFromBottom < 120;
     stickToBottomRef.current = nearBottom;
     setShowJump(!nearBottom && messages.length > 0);
+    if (nearBottom) setNewCount(0);
 
     if (el.scrollTop > 40 || loadingOlder || !hasMore || messages.length === 0) return;
+
     const oldest = messages[0];
     if (!oldest) return;
     setLoadingOlder(true);
