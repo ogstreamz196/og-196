@@ -819,6 +819,9 @@ export function OgChat({
           {hasNew ? "New messages" : "Jump to latest"}
         </button>
       )}
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        {jumpAnnounce}
+      </div>
       </div>
 
 
