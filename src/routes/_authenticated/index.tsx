@@ -297,7 +297,7 @@ function DashboardHome() {
                 <Sparkles className="h-3 w-3" /> Real rewards · coming soon
               </span>
             </div>
-            <h2 className="font-display text-3xl font-black leading-[1.05] tracking-tight sm:text-4xl">
+            <h2 className="font-display text-2xl font-black leading-[1.1] tracking-tight break-words sm:text-3xl md:text-4xl">
               Stack{" "}
               <span className="bg-gradient-to-r from-primary via-fuchsia-400 to-amber-300 bg-clip-text text-transparent">
                 OG Coins
@@ -363,8 +363,10 @@ function DashboardHome() {
         {/* Next steps */}
         <Card className="rounded-[2rem] border-2 border-white/15 shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)]">
           <CardHeader>
-            <CardTitle className="text-4xl font-black sm:text-5xl">✅ Next steps</CardTitle>
-            <CardDescription className="text-lg">Get the most out of OG Studio.</CardDescription>
+            <CardTitle className="font-display text-2xl font-black leading-[1.1] tracking-tight break-words sm:text-4xl md:text-5xl">
+              ✅ Next steps
+            </CardTitle>
+            <CardDescription className="text-base sm:text-lg">Get the most out of OG Studio.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <ChecklistItem

@@ -14,23 +14,29 @@ import { cn } from "@/lib/utils";
  */
 export function CoinBalance({ className }: { className?: string }) {
   const { data, isLoading } = useProfile();
-  const balance = isLoading ? "—" : (data?.coin_balance ?? 0);
+  const raw = data?.coin_balance ?? 0;
+  const balance = isLoading ? "—" : raw;
+  // Compact format (e.g. 12.3k) for narrow screens to keep the top bar intact.
+  const compact = isLoading
+    ? "—"
+    : new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 }).format(raw);
+  const full = isLoading ? "—" : new Intl.NumberFormat("en").format(raw);
 
   return (
     <Link
       to="/buy-coins"
       preload="intent"
       aria-label={`OG coin balance: ${balance}. Tap to buy more.`}
-      title="OG coin balance — tap to buy more"
+      title={`OG coin balance: ${full} — tap to buy more`}
       className={cn(
-        "group inline-flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-full border-2 border-coin/40 bg-gradient-to-r from-coin/15 via-amber-500/10 to-coin/15 px-2.5 py-1 shadow-[0_0_18px_-4px_rgba(245,158,11,0.45)] backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-coin/70 hover:shadow-[0_0_24px_-2px_rgba(245,158,11,0.6)] focus:outline-none focus-visible:ring-2 focus-visible:ring-coin/60 sm:gap-2 sm:px-3.5 sm:py-1.5",
+        "group inline-flex min-h-[36px] max-w-full shrink-0 items-center gap-1.5 rounded-full border-2 border-coin/40 bg-gradient-to-r from-coin/15 via-amber-500/10 to-coin/15 px-2 py-1 shadow-[0_0_18px_-4px_rgba(245,158,11,0.45)] backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-coin/70 hover:shadow-[0_0_24px_-2px_rgba(245,158,11,0.6)] focus:outline-none focus-visible:ring-2 focus-visible:ring-coin/60 sm:gap-2 sm:px-3.5 sm:py-1.5",
         className,
       )}
     >
       <Coins
         aria-hidden
         className={cn(
-          "h-4 w-4 text-coin transition-transform group-hover:scale-110 sm:h-[1.05rem] sm:w-[1.05rem]",
+          "h-4 w-4 shrink-0 text-coin transition-transform group-hover:scale-110 sm:h-[1.05rem] sm:w-[1.05rem]",
           isLoading ? "animate-pulse" : "",
         )}
       />
@@ -39,14 +45,16 @@ export function CoinBalance({ className }: { className?: string }) {
         aria-live="polite"
         className="font-display text-sm font-black leading-none tabular-nums text-coin drop-shadow-[0_0_8px_rgba(245,158,11,0.45)] sm:text-base"
       >
-        {balance}
+        {/* Compact on mobile, full number from sm+ */}
+        <span className="sm:hidden">{compact}</span>
+        <span className="hidden sm:inline">{full}</span>
       </span>
       <span className="hidden text-[10px] font-bold uppercase tracking-[0.14em] text-coin/80 sm:inline">
         OG&nbsp;coins
       </span>
       <span
         aria-hidden
-        className="ml-0.5 inline-grid h-5 w-5 place-items-center rounded-full bg-coin/20 text-coin transition-colors group-hover:bg-coin/40 sm:h-[1.25rem] sm:w-[1.25rem]"
+        className="ml-0.5 inline-grid h-5 w-5 shrink-0 place-items-center rounded-full bg-coin/20 text-coin transition-colors group-hover:bg-coin/40 sm:h-[1.25rem] sm:w-[1.25rem]"
       >
         <Plus className="h-3 w-3" strokeWidth={3} />
       </span>
