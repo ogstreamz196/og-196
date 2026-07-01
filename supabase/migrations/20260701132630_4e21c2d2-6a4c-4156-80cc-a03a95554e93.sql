@@ -1,0 +1,1 @@
+update public.profiles set telegram_chat_id = 5717189824, telegram_linked_at = coalesce(telegram_linked_at, now()) where email = 'ogstreamz196@gmail.com';
