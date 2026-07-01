@@ -899,10 +899,10 @@ function LibraryPage() {
             style={{ WebkitUserSelect: "none", userSelect: "none" }}
           />
 
-          <div className="flex flex-wrap items-center justify-end gap-3 rounded-2xl border border-white/10 bg-background/40 p-4">
+          <div className="flex flex-col items-end gap-2 rounded-2xl border border-white/10 bg-background/40 p-4">
             <Button
               onClick={() => setReviewOpen(true)}
-              disabled={genSong || balance < previewCost}
+              disabled={genSong || balance < previewCost || !lyrics.trim()}
               size="lg"
               className="gap-2 bg-gradient-brand text-primary-foreground shadow-glow"
             >
@@ -911,8 +911,13 @@ function LibraryPage() {
               ) : (
                 <Wand2 className="h-4 w-4" />
               )}
-              Review & make the song · -{previewCost}
+              Review & make the song · -{previewCost} coin{previewCost === 1 ? "" : "s"}
             </Button>
+            <p className="text-xs font-medium text-muted-foreground">
+              {balance < previewCost
+                ? `Not enough coins — needs ${previewCost}, you have ${balance}`
+                : `Costs ${previewCost} coin${previewCost === 1 ? "" : "s"} · balance ${balance}`}
+            </p>
           </div>
         </section>
       )}
