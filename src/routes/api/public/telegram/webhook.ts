@@ -234,7 +234,8 @@ async function maybeBootstrapBossTelegram(
 
   await reply(
     chat_id,
-    `✅ <b>Connected!</b> OG Bot is linked to your account.\n\n👑 <b>Boss verified.</b> OG Bot is wired to this Telegram now.\n\n💰 Balance: <b>${boss.coin_balance ?? 0}</b> OG coins\nType /help for admin commands or just talk to me.`,
+    `✅ <b>Connected!</b> OG Bot is linked to your account.\n\n👑 <b>Boss verified.</b> OG Bot is wired to this Telegram now.\n\n💰 Balance: <b>${boss.coin_balance ?? 0}</b> OG coins\nTap a button below or type /help.`,
+    { reply_markup: BOSS_KEYBOARD },
   );
   return true;
 }
