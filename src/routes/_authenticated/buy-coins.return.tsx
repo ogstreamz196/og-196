@@ -19,6 +19,7 @@ import { PurchaseHistory } from "@/components/PurchaseHistory";
 import { reconcileCoinSession } from "@/lib/payments.functions";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/buy-coins/return")({
   validateSearch: (search: Record<string, unknown>): { session_id?: string; pack?: string } => ({
@@ -116,6 +117,57 @@ function CheckoutReturn() {
     run();
     return () => { cancelled = true; };
   }, [session_id, qc, reconcile, refetchProfile]);
+
+  // Realtime + polling fallback: watch the user's profile row for a coin_balance
+  // bump directly from the Stripe webhook, so the HUD updates even if reconcile
+  // is still churning. Bails out as soon as we detect an increase or after 45s.
+  useEffect(() => {
+    if (!session_id || !user?.id) return;
+    const baseline = profile?.coin_balance ?? 0;
+    let cancelled = false;
+
+    const handleBump = (nextBalance: number) => {
+      if (cancelled || nextBalance <= baseline) return;
+      applyBalance(nextBalance);
+      setConfirmedBalance((prev) => prev ?? nextBalance);
+      qc.invalidateQueries({ queryKey: ["profile"] });
+      qc.invalidateQueries({ queryKey: ["coin-transactions"] });
+    };
+
+    const channel = supabase
+      .channel(`buy-coins-return:${user.id}:${session_id}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${user.id}` },
+        (payload: { new: { coin_balance?: number } | null }) => {
+          const nextBalance = Number(payload.new?.coin_balance ?? 0);
+          handleBump(nextBalance);
+        },
+      )
+      .subscribe();
+
+    const pollId = window.setInterval(async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("coin_balance")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (data?.coin_balance != null) handleBump(Number(data.coin_balance));
+    }, 2500);
+
+    const stopId = window.setTimeout(() => {
+      window.clearInterval(pollId);
+    }, 45_000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(pollId);
+      window.clearTimeout(stopId);
+      supabase.removeChannel(channel);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session_id, user?.id]);
+
 
   // Auto-close on success after a short celebratory beat
   useEffect(() => {
