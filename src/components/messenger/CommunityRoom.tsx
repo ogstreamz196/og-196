@@ -84,7 +84,11 @@ export function CommunityRoom() {
               return { messages: [...existing, row] };
             },
           );
+          if (!stickToBottomRef.current && row.user_id !== myId) {
+            setNewCount((n) => n + 1);
+          }
         },
+
       )
       .subscribe();
     return () => {
