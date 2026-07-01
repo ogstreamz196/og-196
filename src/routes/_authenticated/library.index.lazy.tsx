@@ -113,7 +113,14 @@ function LibraryPage() {
   }, [profile?.display_name, user?.email, dev.isDev]);
 
   const [title, setTitle] = useState("");
-  const [selections, setSelections] = useState<Selections>({});
+  // Defaults: English locked as the default language, other categories are
+  // freshly randomised on every mount so the picker feels alive.
+  const [selections, setSelections] = useState<Selections>(() => ({
+    language: "English",
+    genre: randomPick(POOLS.genre),
+    mood: randomPick(POOLS.mood),
+    theme: randomPick(POOLS.theme),
+  }));
   const [chips, setChips] = useState<Record<Category, string[]>>(() => initialChips());
   const [lyrics, setLyrics] = useState("");
   const [genLyrics, setGenLyrics] = useState(false);
