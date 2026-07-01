@@ -655,47 +655,6 @@ function Pillars() {
 }
 
 
-function HowItWorks() {
-  const steps = [
-    { n: "1", emoji: "✍️", title: "Write the prompt", body: "A name, joke, mood, memory, drama or wild idea." },
-    { n: "2", emoji: "🎛️", title: "Choose the sound", body: "Rap, pop, drill, afrobeats, dance, R&B or ballad." },
-    { n: "3", emoji: "💿", title: "Drop the track", body: "Get lyrics, music and cover art made for the moment." },
-  ];
-  return (
-    <section className="relative border-t border-white/10">
-      <div className="mx-auto max-w-6xl px-4 py-16 sm:px-8 sm:py-24">
-        <div className="mx-auto max-w-3xl text-center">
-          <p className="text-xs font-medium uppercase tracking-[0.25em] text-muted-foreground sm:text-sm">
-            How it works
-          </p>
-          <h2 className="font-display mt-3 text-balance text-4xl font-semibold tracking-[-0.035em] sm:mt-4 sm:text-6xl md:text-7xl lg:text-8xl">
-            Easy as <em className="italic text-gradient-brand">1 · 2 · 3</em>
-          </h2>
-        </div>
-
-        <div className="mt-10 grid gap-4 sm:mt-14 sm:gap-6 md:grid-cols-3">
-          {steps.map((s, i) => (
-            <div
-              key={s.n}
-              className="group relative rounded-[2rem] border-2 border-white/15 bg-card/70 p-6 text-center shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)] backdrop-blur-xl transition hover:-translate-y-1 hover:border-primary/40 sm:p-8"
-              style={{ animationDelay: `${i * 120}ms` }}
-            >
-              <CardEditBadge />
-              <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-gradient-brand text-3xl font-black text-primary-foreground shadow-glow wc-bounce-soft sm:h-20 sm:w-20 sm:text-4xl">
-                {s.n}
-              </div>
-              <div className="mt-4 text-5xl sm:mt-5 sm:text-6xl">{s.emoji}</div>
-              <EditableContent as="h3" contentKey={`welcome.step.${s.n}.title`} defaultValue={s.title}
-                className="font-display mt-3 block text-4xl font-black sm:mt-4 sm:text-5xl" />
-              <EditableContent as="p" multiline contentKey={`welcome.step.${s.n}.body`} defaultValue={s.body}
-                className="mt-2 block text-lg text-muted-foreground sm:mt-3" />
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 
 function FoulMouthHype() {
   return (
