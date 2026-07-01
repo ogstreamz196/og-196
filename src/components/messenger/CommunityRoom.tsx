@@ -224,10 +224,12 @@ export function CommunityRoom() {
   const jumpToBottom = useCallback(() => {
     stickToBottomRef.current = true;
     setShowJump(false);
+    setNewCount(0);
     if (messages.length > 0) {
       rowVirtualizer.scrollToIndex(messages.length - 1, { align: "end" });
     }
   }, [messages.length, rowVirtualizer]);
+
 
   const send = useMutation({
     mutationFn: (content: string) => postFn({ data: { content, foulMouth } }),
