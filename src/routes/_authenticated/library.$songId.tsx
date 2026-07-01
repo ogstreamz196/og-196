@@ -159,6 +159,25 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
     return () => { cancelled = true; };
   }, [isReady, song.id, previewUrl, loadingPreview, communityMode]);
 
+  // Once the preview URL is warmed after a pending→ready transition, auto-play
+  // it so the user gets an immediate "song is ready" moment.
+  useEffect(() => {
+    if (!isReady || !previewUrl || !wasPendingRef.current) return;
+    wasPendingRef.current = false;
+    const el = audioRef.current;
+    if (!el) return;
+    if (el.src !== previewUrl) el.src = previewUrl;
+    el.play()
+      .then(() => {
+        setPlaying(true);
+        toast.success("Song is ready — playing preview");
+      })
+      .catch(() => {
+        // Autoplay blocked (no gesture yet) — just surface the ready toast.
+        toast.success("Song is ready to play");
+      });
+  }, [isReady, previewUrl]);
+
   // Enforce sample-seconds cap ONLY for the owner preview. Community viewers
   // hear the full track for free; the charge is on download.
   useEffect(() => {
