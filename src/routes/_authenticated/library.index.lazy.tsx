@@ -113,7 +113,14 @@ function LibraryPage() {
   }, [profile?.display_name, user?.email, dev.isDev]);
 
   const [title, setTitle] = useState("");
-  const [selections, setSelections] = useState<Selections>({});
+  // Defaults: English locked as the default language, other categories are
+  // freshly randomised on every mount so the picker feels alive.
+  const [selections, setSelections] = useState<Selections>(() => ({
+    language: "English",
+    genre: randomPick(POOLS.genre),
+    mood: randomPick(POOLS.mood),
+    theme: randomPick(POOLS.theme),
+  }));
   const [chips, setChips] = useState<Record<Category, string[]>>(() => initialChips());
   const [lyrics, setLyrics] = useState("");
   const [genLyrics, setGenLyrics] = useState(false);
@@ -850,7 +857,13 @@ function LibraryPage() {
             </Button>
             {!canGenerateLyrics && !genLyrics && (
               <p className="mt-3 text-center text-sm font-medium text-muted-foreground">
-                Pick a language and at least one style detail above to unlock
+                {balance < lyricsCost
+                  ? `Not enough coins — needs ${lyricsCost}, you have ${balance}`
+                  : !title.trim()
+                    ? `Add a title to unlock · costs ${lyricsCost} coin${lyricsCost === 1 ? "" : "s"}`
+                    : !selections.language
+                      ? `Pick a language to unlock · costs ${lyricsCost} coin${lyricsCost === 1 ? "" : "s"}`
+                      : `Pick at least one style detail to unlock · costs ${lyricsCost} coin${lyricsCost === 1 ? "" : "s"}`}
               </p>
             )}
           </div>
@@ -886,10 +899,10 @@ function LibraryPage() {
             style={{ WebkitUserSelect: "none", userSelect: "none" }}
           />
 
-          <div className="flex flex-wrap items-center justify-end gap-3 rounded-2xl border border-white/10 bg-background/40 p-4">
+          <div className="flex flex-col items-end gap-2 rounded-2xl border border-white/10 bg-background/40 p-4">
             <Button
               onClick={() => setReviewOpen(true)}
-              disabled={genSong || balance < previewCost}
+              disabled={genSong || balance < previewCost || !lyrics.trim()}
               size="lg"
               className="gap-2 bg-gradient-brand text-primary-foreground shadow-glow"
             >
@@ -898,8 +911,13 @@ function LibraryPage() {
               ) : (
                 <Wand2 className="h-4 w-4" />
               )}
-              Review & make the song · -{previewCost}
+              Review & make the song · -{previewCost} coin{previewCost === 1 ? "" : "s"}
             </Button>
+            <p className="text-xs font-medium text-muted-foreground">
+              {balance < previewCost
+                ? `Not enough coins — needs ${previewCost}, you have ${balance}`
+                : `Costs ${previewCost} coin${previewCost === 1 ? "" : "s"} · balance ${balance}`}
+            </p>
           </div>
         </section>
       )}
