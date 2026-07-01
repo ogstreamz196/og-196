@@ -361,7 +361,7 @@ function BuyCoinsPage() {
         <section aria-labelledby="section-custom">
           <SectionDivider id="section-custom" eyebrow="Step 1" title="Build your custom stack" icon={<SlidersHorizontal className="h-3.5 w-3.5" />} />
           <SectionCard>
-            <div className="p-5 sm:p-6">
+            <div className="p-2 sm:p-4">
               <CustomPackCard onBuy={(units) => pickSelection({ type: "custom", units })} />
             </div>
           </SectionCard>
