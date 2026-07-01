@@ -151,8 +151,7 @@ async function maybeBootstrapBossTelegram(
     return false;
   }
 
-  const username = msg?.from?.username?.trim().replace(/^@/, "").toLowerCase();
-  if (username !== BOSS_TELEGRAM_USERNAME) return false;
+  if (!username || !BOSS_TELEGRAM_USERNAMES.includes(username as (typeof BOSS_TELEGRAM_USERNAMES)[number])) return false;
 
   const { data: boss } = await admin
     .from("profiles")
