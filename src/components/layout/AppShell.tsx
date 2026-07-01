@@ -1,11 +1,20 @@
 import type { ReactNode } from "react";
 import { useNavigate, useRouterState, Link } from "@tanstack/react-router";
-import { Search, ShieldCheck, LogOut, Crown } from "lucide-react";
+import { Search, ShieldCheck, LogOut, Crown, MoreVertical } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { SwipeToOpenSidebar } from "@/components/layout/SwipeToOpenSidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
 import {
   AdminEditModeProvider,
   AdminEditModeToggle,
