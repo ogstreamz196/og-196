@@ -94,48 +94,87 @@ async function sendTelegramDirect(
   chatId: number,
   text: string,
   targetUserId?: string,
-): Promise<{ ok: boolean; error?: string; stale?: boolean }> {
+): Promise<{ ok: boolean; error?: string; stale?: boolean; attempts?: number }> {
   const lovableKey = process.env.LOVABLE_API_KEY;
   const tgKey = process.env.TELEGRAM_API_KEY;
   if (!lovableKey || !tgKey) return { ok: false, error: "missing_keys" };
-  try {
-    const res = await fetch(`${GATEWAY_TG}/sendMessage`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${lovableKey}`,
-        "X-Connection-Api-Key": tgKey,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ chat_id: chatId, text, parse_mode: "HTML" }),
-    });
-    if (res.ok) return { ok: true };
-    const j = (await res.json().catch(() => null)) as { description?: string } | null;
-    const desc = j?.description ?? `http_${res.status}`;
-    // Telegram says the chat is gone / bot was kicked / token swapped —
-    // unlink so we stop spamming failures and the user can re-/start.
-    const stale =
-      /chat not found|bot was blocked|user is deactivated|chat was deleted|bot was kicked/i.test(
-        desc,
-      );
-    if (stale && targetUserId) {
-      try {
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        await supabaseAdmin
-          .from("profiles")
-          .update({
-            telegram_chat_id: null,
-            telegram_linked_at: null,
-            telegram_link_token: null,
-          })
-          .eq("id", targetUserId);
-      } catch {
-        /* ignore */
+
+  // Exponential backoff: retry transient failures (network errors, 5xx, 429, 408)
+  // up to MAX_ATTEMPTS times. Permanent errors (chat not found, blocked, other
+  // 4xx) exit early so we don't hammer the gateway.
+  const MAX_ATTEMPTS = 4;
+  const BASE_MS = 400;
+  let lastErr = "send_failed";
+
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    let status = 0;
+    let desc = "";
+    try {
+      const res = await fetch(`${GATEWAY_TG}/sendMessage`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${lovableKey}`,
+          "X-Connection-Api-Key": tgKey,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ chat_id: chatId, text, parse_mode: "HTML" }),
+      });
+      if (res.ok) return { ok: true, attempts: attempt };
+      status = res.status;
+      const j = (await res.json().catch(() => null)) as
+        | { description?: string; parameters?: { retry_after?: number } }
+        | null;
+      desc = j?.description ?? `http_${res.status}`;
+      lastErr = desc;
+
+      const stale =
+        /chat not found|bot was blocked|user is deactivated|chat was deleted|bot was kicked/i.test(
+          desc,
+        );
+      if (stale) {
+        if (targetUserId) {
+          try {
+            const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+            await supabaseAdmin
+              .from("profiles")
+              .update({
+                telegram_chat_id: null,
+                telegram_linked_at: null,
+                telegram_link_token: null,
+              })
+              .eq("id", targetUserId);
+          } catch {
+            /* ignore */
+          }
+        }
+        return { ok: false, error: desc, stale: true, attempts: attempt };
+      }
+
+      // 4xx (except 408/429) = permanent client error, don't retry.
+      const retryable = status >= 500 || status === 429 || status === 408;
+      if (!retryable) {
+        return { ok: false, error: desc, attempts: attempt };
+      }
+
+      // Honor Telegram's retry_after hint for 429; otherwise exponential + jitter.
+      const retryAfter = j?.parameters?.retry_after;
+      const backoff = retryAfter
+        ? Math.min(retryAfter * 1000, 8000)
+        : Math.min(BASE_MS * 2 ** (attempt - 1), 6000) + Math.floor(Math.random() * 250);
+      if (attempt < MAX_ATTEMPTS) {
+        await new Promise((r) => setTimeout(r, backoff));
+      }
+    } catch (e) {
+      // Network/timeout: retry.
+      lastErr = (e as Error).message;
+      if (attempt < MAX_ATTEMPTS) {
+        const backoff =
+          Math.min(BASE_MS * 2 ** (attempt - 1), 6000) + Math.floor(Math.random() * 250);
+        await new Promise((r) => setTimeout(r, backoff));
       }
     }
-    return { ok: false, error: desc, stale };
-  } catch (e) {
-    return { ok: false, error: (e as Error).message };
   }
+  return { ok: false, error: lastErr, attempts: MAX_ATTEMPTS };
 }
 
 // ---------- main: recordSignIn ----------
