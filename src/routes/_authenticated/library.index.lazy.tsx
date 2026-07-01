@@ -416,6 +416,31 @@ function LibraryPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
+  // Detect songs that just finished (pending → completed) and surface an
+  // explicit "Song is ready" toast plus a prominent Review banner.
+  const previouslyActiveRef = useRef<Set<string>>(new Set());
+  const notifiedReadyRef = useRef<Set<string>>(new Set());
+  const [readyToReview, setReadyToReview] = useState<{ id: string; title: string } | null>(null);
+  useEffect(() => {
+    const activeIds = new Set(activeJobs.map((s) => s.id));
+    for (const song of completedTracks) {
+      if (notifiedReadyRef.current.has(song.id)) continue;
+      if (!previouslyActiveRef.current.has(song.id)) continue;
+      notifiedReadyRef.current.add(song.id);
+      const title = song.title || "Your song";
+      setReadyToReview({ id: song.id, title });
+      toast.success(`🎧 Song is ready · ${title}`, {
+        duration: 12000,
+        action: {
+          label: "Review",
+          onClick: () =>
+            navigate({ to: "/library/$songId", params: { songId: song.id } }),
+        },
+      });
+    }
+    previouslyActiveRef.current = activeIds;
+  }, [activeJobs, completedTracks, navigate]);
+
 
 
 
@@ -450,6 +475,46 @@ function LibraryPage() {
           <span className="hidden text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground sm:inline">coins</span>
         </div>
       </header>
+
+      {/* Prominent Review banner — only visible when a freshly finished song is waiting to be reviewed */}
+      {readyToReview && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border-2 border-emerald-400/60 bg-gradient-to-r from-emerald-500/20 via-emerald-500/10 to-emerald-500/5 px-4 py-3 shadow-[0_20px_60px_-25px_rgba(16,185,129,0.7)] sm:gap-4 sm:px-6 sm:py-4"
+        >
+          <div className="min-w-0">
+            <div className="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-300">
+              🎧 Song is ready
+            </div>
+            <p className="mt-0.5 truncate font-display text-lg font-black text-foreground sm:text-2xl">
+              {readyToReview.title}
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                const id = readyToReview.id;
+                setReadyToReview(null);
+                navigate({ to: "/library/$songId", params: { songId: id } });
+              }}
+              className="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-5 py-2.5 text-sm font-black uppercase tracking-wider text-emerald-950 shadow-[0_10px_28px_-8px_rgba(16,185,129,0.9)] ring-2 ring-emerald-300/60 transition hover:scale-105 active:scale-95 sm:text-base"
+            >
+              Review now
+            </button>
+            <button
+              type="button"
+              onClick={() => setReadyToReview(null)}
+              aria-label="Dismiss ready notice"
+              className="rounded-full border border-white/10 px-2 py-1 text-xs text-muted-foreground hover:bg-white/5"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
 
 
       {/* Library — luxury two-tab vault: Yours first, then Community */}
