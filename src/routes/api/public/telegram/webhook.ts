@@ -113,7 +113,14 @@ type AdminProfile = {
   coin_balance: number | null;
   telegram_chat_id: number | null;
   telegram_username: string | null;
+  last_activity_at?: string | null;
+  last_path?: string | null;
+  last_label?: string | null;
+  is_vip?: boolean | null;
 };
+
+const PROFILE_COLS =
+  "id, display_name, email, coin_balance, telegram_chat_id, telegram_username, last_activity_at, last_path, last_label, is_vip";
 
 async function findProfile(
   admin: Awaited<ReturnType<typeof loadAdmin>>,
