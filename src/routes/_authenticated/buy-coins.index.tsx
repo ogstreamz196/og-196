@@ -941,6 +941,20 @@ function Row({ label, value, hint }: { label: string; value: string; hint?: stri
   );
 }
 
+function NextStep({ n, title, body }: { n: number; title: string; body: string }) {
+  return (
+    <li className="flex items-start gap-3 rounded-xl border border-border/60 bg-background/40 p-3">
+      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-coin/50 bg-coin/15 text-[11px] font-black text-coin tabular-nums">
+        {n}
+      </span>
+      <div className="min-w-0">
+        <p className="text-sm font-bold leading-tight text-foreground">{title}</p>
+        <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">{body}</p>
+      </div>
+    </li>
+  );
+}
+
 function CustomPackCard({ onBuy }: { onBuy: (units: number) => void }) {
   const [units, setUnits] = useState<number>(CUSTOM_COIN_UNIT.minUnits);
   const [bumpError, setBumpError] = useState<string | null>(null);
