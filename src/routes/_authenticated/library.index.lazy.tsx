@@ -760,8 +760,11 @@ function LibraryPage() {
         </div>
 
         {/* Personal details */}
-        <div className="space-y-3">
-          <Label htmlFor="personal-details" className="font-bungee text-4xl sm:text-5xl uppercase">
+        <div className="space-y-4 sm:space-y-3">
+          <Label
+            htmlFor="personal-details"
+            className="block font-bungee text-3xl leading-[1.05] tracking-tight uppercase break-words sm:text-5xl"
+          >
             Describe
           </Label>
 
