@@ -43,13 +43,16 @@ function SongDetailPage() {
       if (error) throw error;
       return (data ?? null) as FullSong | null;
     },
-    // While the song is pending/processing, refetch in the background as a
-    // safety net even if realtime drops messages.
+    // While the song is still queued/generating (draft/pending/processing),
+    // poll every 3s as a safety net in case realtime drops an UPDATE.
     refetchInterval: (q) => {
       const s = q.state.data as FullSong | null | undefined;
-      if (!s) return 4000;
-      return s.status === "pending" || s.status === "processing" ? 4000 : false;
+      if (!s) return 3000;
+      return s.status === "draft" || s.status === "pending" || s.status === "processing"
+        ? 3000
+        : false;
     },
+    refetchIntervalInBackground: true,
   });
 
   // Realtime subscription scoped to this single row.
