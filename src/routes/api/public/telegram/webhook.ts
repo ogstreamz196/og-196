@@ -51,31 +51,60 @@ async function tg(method: string, body: Record<string, unknown>) {
   return r;
 }
 
-async function reply(chat_id: number, text: string) {
+async function reply(chat_id: number, text: string, extra?: Record<string, unknown>) {
   await tg("sendMessage", {
     chat_id,
     text,
     parse_mode: "HTML",
     disable_web_page_preview: true,
+    ...(extra ?? {}),
   });
 }
 
-const HELP_USER = `🤖 <b>OG Bot commands</b>
-/help — this menu
-/balance — your OG coin balance
-/me — your linked profile
+// Persistent reply keyboards — one row of quick actions.
+const USER_KEYBOARD = {
+  keyboard: [
+    [{ text: "💰 Balance" }, { text: "🎧 Library" }],
+    [{ text: "🛒 Buy Coins" }, { text: "👤 My Profile" }],
+    [{ text: "❓ Help" }],
+  ],
+  resize_keyboard: true,
+  is_persistent: true,
+};
 
-Otherwise just chat — I'm your full OG assistant (same brain as the in-app messenger).`;
+const BOSS_KEYBOARD = {
+  keyboard: [
+    [{ text: "🟢 Online Now" }, { text: "🕒 Last Seen" }],
+    [{ text: "📊 Stats" }, { text: "👥 Users" }],
+    [{ text: "💰 Balance" }, { text: "❓ Help" }],
+  ],
+  resize_keyboard: true,
+  is_persistent: true,
+};
+
+const HELP_USER = `🤖 <b>OG Bot menu</b>
+Tap a button below or use a command:
+
+/balance — your OG coin balance
+/library — jump into your song library
+/buy — top up OG coins
+/me — your linked profile
+/help — this menu
+
+Just type anything else and I'll answer — same brain as the in-app messenger.`;
 
 const HELP_ADMIN = `${HELP_USER}
 
 👑 <b>Boss / admin commands</b>
-/users [query] — list/search profiles (name or email)
-/whois &lt;email|uuid&gt; — full profile + balance
-/addcoins &lt;email|uuid&gt; &lt;amount&gt; [reason] — credit OG coins (negative to debit)
-/setcoins &lt;email|uuid&gt; &lt;amount&gt; [reason] — set absolute balance
-/stats — quick platform stats
-/broadcast &lt;message&gt; — DM every linked Telegram user`;
+/online [minutes] — who's on site right now (default 5)
+/lastseen — 20 most recent visitors + their last menu item
+/user &lt;email|uuid&gt; — full snapshot (balance, VIP, last activity)
+/users [query] — search profiles
+/whois &lt;email|uuid&gt; — quick profile
+/addcoins &lt;who&gt; &lt;amount&gt; [reason]
+/setcoins &lt;who&gt; &lt;amount&gt; [reason]
+/stats — platform snapshot
+/broadcast &lt;msg&gt; — DM every linked user`;
 
 type AdminProfile = {
   id: string;
@@ -84,7 +113,13 @@ type AdminProfile = {
   coin_balance: number | null;
   telegram_chat_id: number | null;
   telegram_username: string | null;
+  last_activity_at?: string | null;
+  last_path?: string | null;
+  last_label?: string | null;
 };
+
+const PROFILE_COLS =
+  "id, display_name, email, coin_balance, telegram_chat_id, telegram_username, last_activity_at, last_path, last_label";
 
 async function findProfile(
   admin: Awaited<ReturnType<typeof loadAdmin>>,
@@ -95,14 +130,14 @@ async function findProfile(
   if (/^[0-9a-f-]{32,36}$/i.test(v)) {
     const { data } = await admin
       .from("profiles")
-      .select("id, display_name, email, coin_balance, telegram_chat_id, telegram_username")
+      .select(PROFILE_COLS)
       .eq("id", v)
       .maybeSingle();
     if (data) return data as AdminProfile;
   }
   const { data } = await admin
     .from("profiles")
-    .select("id, display_name, email, coin_balance, telegram_chat_id, telegram_username")
+    .select(PROFILE_COLS)
     .or(`email.ilike.${v},display_name.ilike.${v},telegram_username.ilike.${v}`)
     .limit(2);
   if (data && data.length === 1) return data[0] as AdminProfile;
@@ -199,18 +234,41 @@ async function maybeBootstrapBossTelegram(
 
   await reply(
     chat_id,
-    `✅ <b>Connected!</b> OG Bot is linked to your account.\n\n👑 <b>Boss verified.</b> OG Bot is wired to this Telegram now.\n\n💰 Balance: <b>${boss.coin_balance ?? 0}</b> OG coins\nType /help for admin commands or just talk to me.`,
+    `✅ <b>Connected!</b> OG Bot is linked to your account.\n\n👑 <b>Boss verified.</b> OG Bot is wired to this Telegram now.\n\n💰 Balance: <b>${boss.coin_balance ?? 0}</b> OG coins\nTap a button below or type /help.`,
+    { reply_markup: BOSS_KEYBOARD },
   );
   return true;
 }
 
+function relTime(iso: string | null | undefined): string {
+  if (!iso) return "never";
+  const diff = Date.now() - new Date(iso).getTime();
+  if (Number.isNaN(diff)) return "never";
+  const s = Math.max(0, Math.floor(diff / 1000));
+  if (s < 60) return `${s}s ago`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
+
+function isOnline(iso: string | null | undefined, minutes = 3): boolean {
+  if (!iso) return false;
+  return Date.now() - new Date(iso).getTime() < minutes * 60_000;
+}
+
 function fmtProfile(p: AdminProfile): string {
+  const online = isOnline(p.last_activity_at) ? "🟢 Online" : "⚪ Offline";
   return [
-    `<b>${p.display_name ?? "(no name)"}</b>`,
+    `<b>${p.display_name ?? "(no name)"}</b>  ${online}`,
     p.email ? `📧 ${p.email}` : null,
     `🆔 <code>${p.id}</code>`,
     `💰 ${p.coin_balance ?? 0} OG coins`,
     p.telegram_username ? `✈️ @${p.telegram_username}` : null,
+    p.last_activity_at
+      ? `🕒 Last seen: ${relTime(p.last_activity_at)}${p.last_label ? ` · <i>${p.last_label}</i>` : ""}${p.last_path ? ` (<code>${p.last_path}</code>)` : ""}`
+      : null,
   ]
     .filter(Boolean)
     .join("\n");
@@ -224,17 +282,98 @@ async function runAdminCommand(
   const [cmd, ...rest] = text.trim().split(/\s+/);
   const arg = rest.join(" ");
 
+  if (cmd === "/online") {
+    const mins = Math.max(1, Math.min(1440, parseInt(rest[0] ?? "5", 10) || 5));
+    const { data, error } = await admin.rpc("boss_get_online_users", { p_minutes: mins });
+    if (error) {
+      await reply(chat_id, `❌ ${error.message}`);
+      return true;
+    }
+    const rows = (data ?? []) as AdminProfile[];
+    if (!rows.length) {
+      await reply(chat_id, `😴 No users active in the last ${mins} min.`);
+      return true;
+    }
+    const list = rows
+      .map((p, i) => {
+        const dot = isOnline(p.last_activity_at, 3) ? "🟢" : "🟡";
+        const who = p.display_name ?? p.email ?? p.id.slice(0, 8);
+        const where = p.last_label ?? "—";
+        return `${i + 1}. ${dot} <b>${who}</b> — <i>${where}</i>\n   🕒 ${relTime(p.last_activity_at)} · 💰${p.coin_balance ?? 0}`;
+      })
+      .join("\n");
+    await reply(chat_id, `🟢 <b>Online in last ${mins} min</b> (${rows.length})\n\n${list}`);
+    return true;
+  }
+
+  if (cmd === "/lastseen" || cmd === "/recent") {
+    const { data, error } = await admin
+      .from("profiles")
+      .select(PROFILE_COLS)
+      .not("last_activity_at", "is", null)
+      .order("last_activity_at", { ascending: false })
+      .limit(20);
+    if (error) {
+      await reply(chat_id, `❌ ${error.message}`);
+      return true;
+    }
+    const rows = (data ?? []) as AdminProfile[];
+    if (!rows.length) {
+      await reply(chat_id, "No activity recorded yet.");
+      return true;
+    }
+    const list = rows
+      .map((p, i) => {
+        const dot = isOnline(p.last_activity_at, 3) ? "🟢" : "⚪";
+        const who = p.display_name ?? p.email ?? p.id.slice(0, 8);
+        return `${i + 1}. ${dot} <b>${who}</b> — <i>${p.last_label ?? "—"}</i> · ${relTime(p.last_activity_at)}`;
+      })
+      .join("\n");
+    await reply(chat_id, `🕒 <b>Recent visitors</b>\n\n${list}`);
+    return true;
+  }
+
+  if (cmd === "/user" || cmd === "/inspect") {
+    if (!arg) {
+      await reply(chat_id, "Usage: /user &lt;email|uuid|@handle&gt;");
+      return true;
+    }
+    const p = await findProfile(admin, arg);
+    if (!p) {
+      await reply(chat_id, `No unique match for "${arg}".`);
+      return true;
+    }
+    // Pull last 5 activity rows for a menu-trail
+    const { data: trail } = await admin
+      .from("user_activity_log")
+      .select("label, path, action, created_at")
+      .eq("user_id", p.id)
+      .order("created_at", { ascending: false })
+      .limit(5);
+    const trailStr =
+      (trail ?? [])
+        .map(
+          (t: { label: string | null; path: string | null; action: string; created_at: string }) =>
+            `• ${relTime(t.created_at)} — <i>${t.label ?? t.path ?? t.action}</i>`,
+        )
+        .join("\n") || "• (no menu clicks recorded yet)";
+    await reply(chat_id, `${fmtProfile(p)}\n\n🧭 <b>Last actions</b>\n${trailStr}`);
+    return true;
+  }
+
+
+
   if (cmd === "/users" || cmd === "/find") {
     const q = arg.trim();
     const query = admin
       .from("profiles")
-      .select("id, display_name, email, coin_balance, telegram_username")
+      .select(PROFILE_COLS)
       .order("created_at", { ascending: false })
       .limit(10);
     const { data, error } = q
       ? await admin
           .from("profiles")
-          .select("id, display_name, email, coin_balance, telegram_username")
+          .select(PROFILE_COLS)
           .or(`email.ilike.%${q}%,display_name.ilike.%${q}%,telegram_username.ilike.%${q}%`)
           .limit(10)
       : await query;
@@ -643,11 +782,28 @@ async function handleTelegramUpdate(
 
         // ===== Linked user path =====
         if (linkedProfile && typeof text === "string") {
-          const trimmed = text.trim();
+          let trimmed = text.trim();
           const { admin: isBoss, roles } = await isAdmin(admin, linkedProfile.id);
+          const keyboard = isBoss ? BOSS_KEYBOARD : USER_KEYBOARD;
 
-          if (/^\/help\b/i.test(trimmed)) {
-            await reply(chat_id, isBoss ? HELP_ADMIN : HELP_USER);
+          // Map emoji-keyboard button taps → slash commands
+          const buttonMap: Record<string, string> = {
+            "💰 Balance": "/balance",
+            "🎧 Library": "/library",
+            "🛒 Buy Coins": "/buy",
+            "👤 My Profile": "/me",
+            "❓ Help": "/help",
+            "🟢 Online Now": "/online",
+            "🕒 Last Seen": "/lastseen",
+            "📊 Stats": "/stats",
+            "👥 Users": "/users",
+          };
+          if (buttonMap[trimmed]) trimmed = buttonMap[trimmed];
+
+          if (/^\/help\b/i.test(trimmed) || /^\/menu\b/i.test(trimmed)) {
+            await reply(chat_id, isBoss ? HELP_ADMIN : HELP_USER, {
+              reply_markup: keyboard,
+            });
             return Response.json({ ok: true, help: true });
           }
           if (/^\/balance\b/i.test(trimmed)) {
@@ -656,23 +812,44 @@ async function handleTelegramUpdate(
               .select("coin_balance")
               .eq("id", linkedProfile.id)
               .maybeSingle();
-            await reply(chat_id, `💰 Balance: <b>${p?.coin_balance ?? 0}</b> OG coins`);
+            await reply(chat_id, `💰 Balance: <b>${p?.coin_balance ?? 0}</b> OG coins`, {
+              reply_markup: keyboard,
+            });
             return Response.json({ ok: true, balance: true });
+          }
+          if (/^\/library\b/i.test(trimmed)) {
+            await reply(chat_id, "🎧 <b>Your library</b>", {
+              reply_markup: {
+                inline_keyboard: [[{ text: "Open Library", url: "https://og-196.lovable.app/library" }]],
+              },
+            });
+            return Response.json({ ok: true, library: true });
+          }
+          if (/^\/buy\b/i.test(trimmed)) {
+            await reply(chat_id, "🛒 <b>Top up OG coins</b>", {
+              reply_markup: {
+                inline_keyboard: [
+                  [{ text: "Open Store", url: "https://og-196.lovable.app/buy-coins" }],
+                ],
+              },
+            });
+            return Response.json({ ok: true, buy: true });
           }
           if (/^\/me\b/i.test(trimmed)) {
             const { data: p } = await admin
               .from("profiles")
-              .select("id, display_name, email, coin_balance, telegram_chat_id, telegram_username")
+              .select(PROFILE_COLS)
               .eq("id", linkedProfile.id)
               .maybeSingle();
-            await reply(chat_id, p ? fmtProfile(p as AdminProfile) : "Profile not found.");
+            await reply(chat_id, p ? fmtProfile(p as AdminProfile) : "Profile not found.", {
+              reply_markup: keyboard,
+            });
             return Response.json({ ok: true, me: true });
           }
           if (/^\/start\b/i.test(trimmed)) {
-            await reply(
-              chat_id,
-              `✅ Already linked. Type /help for commands or just chat.`,
-            );
+            await reply(chat_id, `✅ Already linked. Tap a button below or type /help.`, {
+              reply_markup: keyboard,
+            });
             return Response.json({ ok: true, already_linked: true });
           }
 
@@ -684,9 +861,10 @@ async function handleTelegramUpdate(
 
           // Reject unknown slash commands for non-admins
           if (trimmed.startsWith("/")) {
-            await reply(chat_id, "Unknown command. Type /help.");
+            await reply(chat_id, "Unknown command. Type /help.", { reply_markup: keyboard });
             return Response.json({ ok: true, unknown_cmd: true });
           }
+
 
           // Otherwise route to AI chat
           await runChatAI(admin, linkedProfile.id, chat_id, text, roles);
@@ -843,7 +1021,9 @@ async function handleTelegramUpdate(
             : `Type /help for commands.\n\n`) +
           `Now go make some noise. 🎤`;
 
-        await reply(chat_id, greeting);
+        await reply(chat_id, greeting, {
+          reply_markup: isBoss ? BOSS_KEYBOARD : USER_KEYBOARD,
+        });
 
         await admin
           .from("og_messages")

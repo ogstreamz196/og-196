@@ -507,12 +507,15 @@ export type Database = {
           gps_consent: boolean
           gps_consent_at: string | null
           id: string
+          last_activity_at: string | null
           last_city: string | null
           last_country: string | null
           last_device: string | null
           last_ip: string | null
+          last_label: string | null
           last_page: string | null
           last_page_at: string | null
+          last_path: string | null
           last_sign_in_at: string | null
           referral_code: string | null
           sign_in_count: number
@@ -534,12 +537,15 @@ export type Database = {
           gps_consent?: boolean
           gps_consent_at?: string | null
           id: string
+          last_activity_at?: string | null
           last_city?: string | null
           last_country?: string | null
           last_device?: string | null
           last_ip?: string | null
+          last_label?: string | null
           last_page?: string | null
           last_page_at?: string | null
+          last_path?: string | null
           last_sign_in_at?: string | null
           referral_code?: string | null
           sign_in_count?: number
@@ -561,12 +567,15 @@ export type Database = {
           gps_consent?: boolean
           gps_consent_at?: string | null
           id?: string
+          last_activity_at?: string | null
           last_city?: string | null
           last_country?: string | null
           last_device?: string | null
           last_ip?: string | null
+          last_label?: string | null
           last_page?: string | null
           last_page_at?: string | null
+          last_path?: string | null
           last_sign_in_at?: string | null
           referral_code?: string | null
           sign_in_count?: number
@@ -1075,6 +1084,36 @@ export type Database = {
           },
         ]
       }
+      user_activity_log: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          label: string | null
+          metadata: Json | null
+          path: string | null
+          user_id: string
+        }
+        Insert: {
+          action?: string
+          created_at?: string
+          id?: string
+          label?: string | null
+          metadata?: Json | null
+          path?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          label?: string | null
+          metadata?: Json | null
+          path?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_devices: {
         Row: {
           browser: string | null
@@ -1255,6 +1294,18 @@ export type Database = {
         Args: { amount: number; boss_notes?: string; target_user_id: string }
         Returns: number
       }
+      boss_get_online_users: {
+        Args: { p_minutes?: number }
+        Returns: {
+          coin_balance: number
+          display_name: string
+          email: string
+          id: string
+          last_activity_at: string
+          last_label: string
+          last_path: string
+        }[]
+      }
       boss_reclaim_coins: {
         Args: { amount: number; boss_notes?: string; target_user_id: string }
         Returns: number
@@ -1354,6 +1405,15 @@ export type Database = {
           token: string
           uses_remaining: number
         }[]
+      }
+      log_user_activity: {
+        Args: {
+          p_action: string
+          p_label: string
+          p_metadata?: Json
+          p_path: string
+        }
+        Returns: undefined
       }
       lookup_referrer: { Args: { p_referrer: string }; Returns: Json }
       lookup_referrer_by_code: { Args: { p_code: string }; Returns: Json }

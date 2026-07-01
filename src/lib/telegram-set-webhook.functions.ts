@@ -93,6 +93,38 @@ export const setTelegramWebhook = createServerFn({ method: "POST" })
       botUsername = null;
     }
 
+    // Publish the "/" menu of commands for both regular users and admins.
+    const publicCommands = [
+      { command: "help", description: "Show menu" },
+      { command: "balance", description: "Your OG coin balance" },
+      { command: "library", description: "Open your song library" },
+      { command: "buy", description: "Top up OG coins" },
+      { command: "me", description: "Your profile" },
+    ];
+    const adminCommands = [
+      ...publicCommands,
+      { command: "online", description: "Who's on site right now" },
+      { command: "lastseen", description: "Recent visitors + last menu" },
+      { command: "user", description: "Inspect a user by email/uuid" },
+      { command: "users", description: "Search profiles" },
+      { command: "stats", description: "Platform snapshot" },
+      { command: "addcoins", description: "Grant OG coins" },
+      { command: "broadcast", description: "DM every linked user" },
+    ];
+    const setCommands = async (scope: Record<string, unknown>, commands: unknown) => {
+      await fetch(`${GATEWAY_URL}/setMyCommands`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${lovableKey}`,
+          "X-Connection-Api-Key": tgKey,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ commands, scope }),
+      }).catch(() => undefined);
+    };
+    await setCommands({ type: "default" }, publicCommands);
+    await setCommands({ type: "all_private_chats" }, adminCommands);
+
     return {
       ok: true,
       url,
