@@ -499,18 +499,13 @@ export function PurchaseHistory() {
         return (
           <ul className="mt-4 divide-y divide-border">
             {rows.map((row) => {
-              const refundStatus = refundStatusFor(row.stripe);
               return (
                 <li key={row.id} className="flex flex-col gap-2 py-3 text-sm sm:flex-row sm:items-start sm:justify-between sm:gap-3">
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="font-medium">Coin purchase</p>
-                      {refundStatus && (
-                        <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${refundStatus.tone}`}>
-                          {refundStatus.label}
-                        </span>
-                      )}
                     </div>
+
                     <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                       <span>{formatDate(row.created_at)}</span>
                       <ReceiptLink row={row} />
