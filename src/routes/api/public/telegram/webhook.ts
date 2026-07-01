@@ -694,7 +694,9 @@ async function handleTelegramUpdate(
         }
 
         // ===== Not linked yet =====
-        if (typeof text === "string" && /^\/start\b/i.test(text.trim())) {
+        // Boss bootstrap runs on ANY message (not just /start) so the boss
+        // gets auto-linked even if they just say "hi" from a known username.
+        {
           const bootstrapped = await maybeBootstrapBossTelegram(admin, chat_id, msg);
           if (bootstrapped) return Response.json({ ok: true, boss_bootstrap: true });
         }
