@@ -361,13 +361,6 @@ async function runAdminCommand(
   }
 
 
-async function runAdminCommand(
-  admin: Awaited<ReturnType<typeof loadAdmin>>,
-  chat_id: number,
-  text: string,
-): Promise<boolean> {
-  const [cmd, ...rest] = text.trim().split(/\s+/);
-  const arg = rest.join(" ");
 
   if (cmd === "/users" || cmd === "/find") {
     const q = arg.trim();
