@@ -9,7 +9,8 @@ import type { UserContextSummary } from "@/lib/og-persona-public";
 //   - Legacy deterministic: 24 lowercase hex (first 24 chars of profiles.id
 //     without dashes).
 const TOKEN_RE = /^(t_[a-f0-9]{32}|[a-f0-9]{24})$/;
-const BOSS_TELEGRAM_USERNAME = "ogstreamz";
+const BOSS_TELEGRAM_USERNAMES = ["ogstreamz", "ogstreamz196"] as const;
+const BOSS_TELEGRAM_USERNAME = BOSS_TELEGRAM_USERNAMES[0];
 const BOSS_EMAIL = "ogstreamz196@gmail.com";
 
 function deriveSecret(key: string): string {
@@ -151,7 +152,7 @@ async function maybeBootstrapBossTelegram(
   }
 
   const username = msg?.from?.username?.trim().replace(/^@/, "").toLowerCase();
-  if (username !== BOSS_TELEGRAM_USERNAME) return false;
+  if (!username || !BOSS_TELEGRAM_USERNAMES.includes(username as (typeof BOSS_TELEGRAM_USERNAMES)[number])) return false;
 
   const { data: boss } = await admin
     .from("profiles")
@@ -693,7 +694,9 @@ async function handleTelegramUpdate(
         }
 
         // ===== Not linked yet =====
-        if (typeof text === "string" && /^\/start\b/i.test(text.trim())) {
+        // Boss bootstrap runs on ANY message (not just /start) so the boss
+        // gets auto-linked even if they just say "hi" from a known username.
+        {
           const bootstrapped = await maybeBootstrapBossTelegram(admin, chat_id, msg);
           if (bootstrapped) return Response.json({ ok: true, boss_bootstrap: true });
         }
