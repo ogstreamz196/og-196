@@ -717,7 +717,7 @@ function LibraryPage() {
 
         {/* Title */}
         <div className="space-y-3">
-          <Label htmlFor="song-title" className="font-bungee text-2xl sm:text-3xl uppercase">
+          <Label htmlFor="song-title" className="font-bungee text-4xl sm:text-5xl uppercase">
             Title
           </Label>
           <div className="flex flex-wrap items-stretch gap-2">
