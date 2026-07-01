@@ -867,7 +867,7 @@ export function OgChat({
             disabled={!user || m.isPending}
             aria-label="Attach image"
             title="Attach image"
-            className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-white/5 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 disabled:opacity-40"
+            className="grid h-12 w-12 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-white/5 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 disabled:opacity-40 sm:h-11 sm:w-11"
           >
             <Paperclip className="h-5 w-5" />
           </button>
