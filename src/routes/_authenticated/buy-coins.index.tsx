@@ -358,86 +358,98 @@ function BuyCoinsPage() {
         <ReferralReminder />
 
         {/* Custom pack — build your own stack first */}
-        <SectionCard>
-          <div className="p-5 sm:p-6">
-            <CustomPackCard onBuy={(units) => pickSelection({ type: "custom", units })} />
-          </div>
-        </SectionCard>
+        <section aria-labelledby="section-custom">
+          <SectionDivider id="section-custom" eyebrow="Step 1" title="Build your custom stack" icon={<SlidersHorizontal className="h-3.5 w-3.5" />} />
+          <SectionCard>
+            <div className="p-5 sm:p-6">
+              <CustomPackCard onBuy={(units) => pickSelection({ type: "custom", units })} />
+            </div>
+          </SectionCard>
+        </section>
 
         {/* VIP monthly subscription — placed right below custom for max visibility */}
-        <SectionCard className="border-coin/40">
-          <SectionHeader
-            eyebrow="Membership Pass"
-            title={<EditableContent contentKey="buyCoins.vip.heading" defaultValue="Unlock the OG VIP Pass" />}
-            subtitle={<EditableContent contentKey="buyCoins.vip.subtitle" defaultValue="Unlock exclusive privileges across OG Streamz — billed monthly, cancel anytime." multiline />}
-            icon={<Crown className="h-5 w-5 text-coin" />}
-          />
-          <div className="px-5 pb-5 sm:px-6 sm:pb-6">
-            <div className="relative grid gap-4 rounded-2xl border border-coin/30 bg-gradient-to-br from-coin/10 via-card to-card p-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-6">
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="text-lg font-bold">OG VIP</h3>
-                  {isVip && (
-                    <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400 ring-1 ring-emerald-500/30">
-                      Active
-                    </span>
-                  )}
-                </div>
-                <ul className="mt-3 grid gap-1.5 text-sm text-muted-foreground sm:grid-cols-2">
-                  <li className="flex items-center gap-2"><Star className="h-3.5 w-3.5 shrink-0 text-coin" /> Foul-mouth OG Bot unlocked</li>
-                  <li className="flex items-center gap-2"><Star className="h-3.5 w-3.5 shrink-0 text-coin" /> Priority OG Bot replies</li>
-                  <li className="flex items-center gap-2"><Star className="h-3.5 w-3.5 shrink-0 text-coin" /> VIP badge across the hub</li>
-                  <li className="flex items-center gap-2"><Gift className="h-3.5 w-3.5 shrink-0 text-coin" /> Daily 10-coin safety net</li>
-                </ul>
-              </div>
-              <div className="flex items-center justify-between gap-3 sm:flex-col sm:items-end sm:justify-center">
-                <div className="text-right">
-                  <div className="text-3xl font-black tabular-nums leading-none">
-                    {CURRENCY_SYMBOL}{(VIP_PLAN.priceCents / 100).toFixed(0)}
+        <section aria-labelledby="section-vip">
+          <SectionDivider id="section-vip" eyebrow="Or upgrade" title="Go VIP for the full pass" icon={<Crown className="h-3.5 w-3.5" />} tone="coin" />
+          <SectionCard className="border-coin/40">
+            <SectionHeader
+              eyebrow="Membership Pass"
+              title={<EditableContent contentKey="buyCoins.vip.heading" defaultValue="Unlock the OG VIP Pass" />}
+              subtitle={<EditableContent contentKey="buyCoins.vip.subtitle" defaultValue="Unlock exclusive privileges across OG Streamz — billed monthly, cancel anytime." multiline />}
+              icon={<Crown className="h-5 w-5 text-coin" />}
+            />
+            <div className="px-5 pb-5 sm:px-6 sm:pb-6">
+              <div className="relative grid gap-4 rounded-2xl border border-coin/30 bg-gradient-to-br from-coin/10 via-card to-card p-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-6">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="text-lg font-bold">OG VIP</h3>
+                    {isVip && (
+                      <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400 ring-1 ring-emerald-500/30">
+                        Active
+                      </span>
+                    )}
                   </div>
-                  <div className="mt-1 text-xs font-semibold text-muted-foreground">/ month</div>
+                  <ul className="mt-3 grid gap-1.5 text-sm text-muted-foreground sm:grid-cols-2">
+                    <li className="flex items-center gap-2"><Star className="h-3.5 w-3.5 shrink-0 text-coin" /> Foul-mouth OG Bot unlocked</li>
+                    <li className="flex items-center gap-2"><Star className="h-3.5 w-3.5 shrink-0 text-coin" /> Priority OG Bot replies</li>
+                    <li className="flex items-center gap-2"><Star className="h-3.5 w-3.5 shrink-0 text-coin" /> VIP badge across the hub</li>
+                    <li className="flex items-center gap-2"><Gift className="h-3.5 w-3.5 shrink-0 text-coin" /> Daily 10-coin safety net</li>
+                  </ul>
                 </div>
-                <Button
-                  size="lg"
-                  disabled={isVip}
-                  onClick={() => pickSelection({ type: "vip" })}
-                  className="bg-gradient-brand font-bold text-primary-foreground shadow-glow transition-transform hover:-translate-y-0.5 hover:opacity-90 active:translate-y-0"
-                >
-                  {isVip ? "You're VIP" : (<><Crown className="mr-2 h-4 w-4" /> Join VIP</>)}
-                </Button>
+                <div className="flex items-center justify-between gap-3 sm:flex-col sm:items-end sm:justify-center">
+                  <div className="text-right">
+                    <div className="text-3xl font-black tabular-nums leading-none">
+                      {CURRENCY_SYMBOL}{(VIP_PLAN.priceCents / 100).toFixed(0)}
+                    </div>
+                    <div className="mt-1 text-xs font-semibold text-muted-foreground">/ month</div>
+                  </div>
+                  <Button
+                    size="lg"
+                    disabled={isVip}
+                    onClick={() => pickSelection({ type: "vip" })}
+                    className="bg-gradient-brand font-bold text-primary-foreground shadow-glow transition-transform hover:-translate-y-0.5 hover:opacity-90 active:translate-y-0"
+                  >
+                    {isVip ? "You're VIP" : (<><Crown className="mr-2 h-4 w-4" /> Join VIP</>)}
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
-        </SectionCard>
+          </SectionCard>
+        </section>
 
         {/* Coin bundles grid */}
-        <SectionCard>
-          <div className="px-5 pt-5 sm:px-6 sm:pt-6">
-            <div className="flex items-center justify-end">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-emerald-400 ring-1 ring-emerald-500/30">
-                <TrendingDown className="h-3.5 w-3.5" /> Save up to {Math.round((1 - (COIN_PACKS[COIN_PACKS.length - 1].priceCents / 100 / COIN_PACKS[COIN_PACKS.length - 1].coins) / basePerCoin) * 100)}%
+        <section aria-labelledby="section-bundles">
+          <SectionDivider
+            id="section-bundles"
+            eyebrow="Or grab a preset"
+            title="Coin bundles"
+            icon={<Gem className="h-3.5 w-3.5" />}
+            action={
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-emerald-400 ring-1 ring-emerald-500/30">
+                <TrendingDown className="h-3 w-3" /> Save up to {Math.round((1 - (COIN_PACKS[COIN_PACKS.length - 1].priceCents / 100 / COIN_PACKS[COIN_PACKS.length - 1].coins) / basePerCoin) * 100)}%
               </span>
-            </div>
-          </div>
-          <div className="px-5 pb-5 pt-4 sm:px-6 sm:pb-6">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {COIN_PACKS.map((t, i) => (
-                <PackCard
-                  key={t.bundleId}
-                  pack={t}
-                  tierIndex={i}
-                  totalTiers={COIN_PACKS.length}
-                  basePerCoin={basePerCoin}
-                  onBuy={(effective) => pickSelection({ type: "coins", pack: effective })}
-                />
-              ))}
-            </div>
+            }
+          />
+          <SectionCard>
+            <div className="p-5 sm:p-6">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {COIN_PACKS.map((t, i) => (
+                  <PackCard
+                    key={t.bundleId}
+                    pack={t}
+                    tierIndex={i}
+                    totalTiers={COIN_PACKS.length}
+                    basePerCoin={basePerCoin}
+                    onBuy={(effective) => pickSelection({ type: "coins", pack: effective })}
+                  />
+                ))}
+              </div>
 
-            <p className="mt-4 flex items-center justify-center gap-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-              <Lock className="h-3 w-3" /> Secure checkout · Apple Pay · Google Pay · Card
-            </p>
-          </div>
-        </SectionCard>
+              <p className="mt-4 flex items-center justify-center gap-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                <Lock className="h-3 w-3" /> Secure checkout · Apple Pay · Google Pay · Card
+              </p>
+            </div>
+          </SectionCard>
+        </section>
 
         {/* Trust strip */}
         <SectionCard>
