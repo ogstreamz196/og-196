@@ -209,9 +209,6 @@ function MessengerPage() {
       </div>
       </div>
 
-      <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-3">
-        <PoweredByOgBot />
-      </div>
 
       <AlertDialog open={pendingMode !== null} onOpenChange={(o) => !o && setPendingMode(null)}>
         <AlertDialogContent>
