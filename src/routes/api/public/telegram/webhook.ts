@@ -239,17 +239,127 @@ async function maybeBootstrapBossTelegram(
   return true;
 }
 
+function relTime(iso: string | null | undefined): string {
+  if (!iso) return "never";
+  const diff = Date.now() - new Date(iso).getTime();
+  if (Number.isNaN(diff)) return "never";
+  const s = Math.max(0, Math.floor(diff / 1000));
+  if (s < 60) return `${s}s ago`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
+
+function isOnline(iso: string | null | undefined, minutes = 3): boolean {
+  if (!iso) return false;
+  return Date.now() - new Date(iso).getTime() < minutes * 60_000;
+}
+
 function fmtProfile(p: AdminProfile): string {
+  const online = isOnline(p.last_activity_at) ? "🟢 Online" : "⚪ Offline";
   return [
-    `<b>${p.display_name ?? "(no name)"}</b>`,
+    `<b>${p.display_name ?? "(no name)"}</b>  ${online}`,
     p.email ? `📧 ${p.email}` : null,
     `🆔 <code>${p.id}</code>`,
     `💰 ${p.coin_balance ?? 0} OG coins`,
     p.telegram_username ? `✈️ @${p.telegram_username}` : null,
+    p.last_activity_at
+      ? `🕒 Last seen: ${relTime(p.last_activity_at)}${p.last_label ? ` · <i>${p.last_label}</i>` : ""}${p.last_path ? ` (<code>${p.last_path}</code>)` : ""}`
+      : null,
   ]
     .filter(Boolean)
     .join("\n");
 }
+
+async function runAdminCommand(
+  admin: Awaited<ReturnType<typeof loadAdmin>>,
+  chat_id: number,
+  text: string,
+): Promise<boolean> {
+  const [cmd, ...rest] = text.trim().split(/\s+/);
+  const arg = rest.join(" ");
+
+  if (cmd === "/online") {
+    const mins = Math.max(1, Math.min(1440, parseInt(rest[0] ?? "5", 10) || 5));
+    const { data, error } = await admin.rpc("boss_get_online_users", { p_minutes: mins });
+    if (error) {
+      await reply(chat_id, `❌ ${error.message}`);
+      return true;
+    }
+    const rows = (data ?? []) as AdminProfile[];
+    if (!rows.length) {
+      await reply(chat_id, `😴 No users active in the last ${mins} min.`);
+      return true;
+    }
+    const list = rows
+      .map((p, i) => {
+        const dot = isOnline(p.last_activity_at, 3) ? "🟢" : "🟡";
+        const who = p.display_name ?? p.email ?? p.id.slice(0, 8);
+        const where = p.last_label ?? "—";
+        return `${i + 1}. ${dot} <b>${who}</b> — <i>${where}</i>\n   🕒 ${relTime(p.last_activity_at)} · 💰${p.coin_balance ?? 0}`;
+      })
+      .join("\n");
+    await reply(chat_id, `🟢 <b>Online in last ${mins} min</b> (${rows.length})\n\n${list}`);
+    return true;
+  }
+
+  if (cmd === "/lastseen" || cmd === "/recent") {
+    const { data, error } = await admin
+      .from("profiles")
+      .select(PROFILE_COLS)
+      .not("last_activity_at", "is", null)
+      .order("last_activity_at", { ascending: false })
+      .limit(20);
+    if (error) {
+      await reply(chat_id, `❌ ${error.message}`);
+      return true;
+    }
+    const rows = (data ?? []) as AdminProfile[];
+    if (!rows.length) {
+      await reply(chat_id, "No activity recorded yet.");
+      return true;
+    }
+    const list = rows
+      .map((p, i) => {
+        const dot = isOnline(p.last_activity_at, 3) ? "🟢" : "⚪";
+        const who = p.display_name ?? p.email ?? p.id.slice(0, 8);
+        return `${i + 1}. ${dot} <b>${who}</b> — <i>${p.last_label ?? "—"}</i> · ${relTime(p.last_activity_at)}`;
+      })
+      .join("\n");
+    await reply(chat_id, `🕒 <b>Recent visitors</b>\n\n${list}`);
+    return true;
+  }
+
+  if (cmd === "/user" || cmd === "/inspect") {
+    if (!arg) {
+      await reply(chat_id, "Usage: /user &lt;email|uuid|@handle&gt;");
+      return true;
+    }
+    const p = await findProfile(admin, arg);
+    if (!p) {
+      await reply(chat_id, `No unique match for "${arg}".`);
+      return true;
+    }
+    // Pull last 5 activity rows for a menu-trail
+    const { data: trail } = await admin
+      .from("user_activity_log")
+      .select("label, path, action, created_at")
+      .eq("user_id", p.id)
+      .order("created_at", { ascending: false })
+      .limit(5);
+    const trailStr =
+      (trail ?? [])
+        .map(
+          (t: { label: string | null; path: string | null; action: string; created_at: string }) =>
+            `• ${relTime(t.created_at)} — <i>${t.label ?? t.path ?? t.action}</i>`,
+        )
+        .join("\n") || "• (no menu clicks recorded yet)";
+    await reply(chat_id, `${fmtProfile(p)}\n\n🧭 <b>Last actions</b>\n${trailStr}`);
+    return true;
+  }
+
 
 async function runAdminCommand(
   admin: Awaited<ReturnType<typeof loadAdmin>>,
