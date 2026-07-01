@@ -857,7 +857,7 @@ export function OgChat({
         {/* Unified composer pill — attachment | mic | textarea | send (Telegram/WhatsApp pattern) */}
         <div
           className={cn(
-            "flex items-end gap-1 rounded-full border border-white/10 bg-background/80 px-2 py-1.5 shadow-[0_14px_36px_-18px_rgba(0,0,0,0.55)] ring-1 ring-white/5 backdrop-blur-xl transition focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/30 sm:gap-1.5 sm:px-4 sm:py-2.5",
+            "flex items-end gap-1.5 rounded-3xl border border-white/10 bg-background/80 px-2.5 py-2 shadow-[0_14px_36px_-18px_rgba(0,0,0,0.55)] ring-1 ring-white/5 backdrop-blur-xl transition focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/30 sm:gap-2 sm:rounded-full sm:px-4 sm:py-2.5",
             (isOut || !user) && "opacity-70",
           )}
         >
