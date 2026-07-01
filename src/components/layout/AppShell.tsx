@@ -193,7 +193,33 @@ export function AppShell({ children }: { children: ReactNode }) {
                       <MoreVertical className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuContent
+                    align="end"
+                    className="w-56"
+                    onCloseAutoFocus={(event) => {
+                      // Radix returns focus to the trigger by default. If the
+                      // trigger is hidden (viewport widened past the min-[380px]
+                      // breakpoint while the menu was open) fall back to the
+                      // Coin Balance pill so keyboard/screen-reader users keep
+                      // context in the header.
+                      const trigger = event.currentTarget
+                        .closest("[data-radix-menu-content]")
+                        ?.parentElement?.querySelector<HTMLElement>(
+                          "[aria-label='More actions']",
+                        );
+                      const triggerVisible =
+                        !!trigger && trigger.offsetParent !== null;
+                      if (!triggerVisible) {
+                        const pill = document.querySelector<HTMLElement>(
+                          "[data-coin-balance-pill]",
+                        );
+                        if (pill) {
+                          event.preventDefault();
+                          pill.focus();
+                        }
+                      }
+                    }}
+                  >
                     <DropdownMenuLabel className="truncate">
                       {user?.email ?? "Account"}
                     </DropdownMenuLabel>
