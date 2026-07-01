@@ -385,11 +385,25 @@ export function CommunityRoom() {
             type="button"
             size="sm"
             onClick={jumpToBottom}
-            className="absolute bottom-3 left-1/2 z-10 -translate-x-1/2 gap-1.5 rounded-full shadow-lg"
+            aria-label={
+              newCount > 0
+                ? `Jump to newest, ${newCount} new message${newCount === 1 ? "" : "s"}`
+                : "Jump to newest"
+            }
+            className={
+              "absolute bottom-3 left-1/2 z-10 -translate-x-1/2 gap-1.5 rounded-full shadow-lg " +
+              (newCount > 0
+                ? "border border-primary bg-primary text-primary-foreground shadow-glow animate-[pop_0.25s_ease-out]"
+                : "")
+            }
           >
-            <ArrowDown className="h-3.5 w-3.5" /> Jump to newest
+            <ArrowDown className="h-3.5 w-3.5" />
+            {newCount > 0
+              ? `${newCount > 99 ? "99+" : newCount} new message${newCount === 1 ? "" : "s"}`
+              : "Jump to newest"}
           </Button>
         )}
+
       </div>
 
       {activeTypers.length > 0 && (
