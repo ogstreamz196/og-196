@@ -429,8 +429,8 @@ function BuyCoinsPage() {
             }
           />
           <SectionCard>
-            <div className="p-5 sm:p-6">
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="p-3 sm:p-6">
+              <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
                 {COIN_PACKS.map((t, i) => (
                   <PackCard
                     key={t.bundleId}
@@ -443,7 +443,7 @@ function BuyCoinsPage() {
                 ))}
               </div>
 
-              <p className="mt-4 flex items-center justify-center gap-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+              <p className="mt-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center text-[10px] font-medium uppercase tracking-wider text-muted-foreground sm:text-[11px]">
                 <Lock className="h-3 w-3" /> Secure checkout · Apple Pay · Google Pay · Card
               </p>
             </div>
