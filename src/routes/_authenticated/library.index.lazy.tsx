@@ -29,7 +29,7 @@ import { cn } from "@/lib/utils";
 import { SongCard, type Song } from "@/components/SongCard";
 import { SongCardSkeleton } from "@/components/library/SongCardSkeleton";
 import {
-  EXAMPLE_PROMPT_CHIPS,
+  
   META,
   PERSONAL_DETAILS_MAX,
   POOLS,
