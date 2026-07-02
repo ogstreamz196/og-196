@@ -270,19 +270,44 @@ function AdminStorePage() {
           </div>
         </div>
 
-        {categories.map((cat) => {
+        {categories.map((cat, catIdx) => {
           const catItems = items.filter((i) => i.category_id === cat.id);
           return (
-            <section key={cat.id} className="rounded-2xl border border-border bg-card/60 p-4">
-              <div className="mb-3 flex items-center justify-between">
-                <div>
-                  <h2 className="font-display text-lg font-bold uppercase tracking-wider">{cat.label}</h2>
-                  {cat.description && <p className="text-xs text-muted-foreground">{cat.description}</p>}
+            <section
+              key={cat.id}
+              className={`rounded-2xl border p-4 ${cat.active ? "border-border bg-card/60" : "border-dashed border-slate-600 bg-card/30 opacity-70"}`}
+            >
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="flex flex-col">
+                    <Button size="icon" variant="ghost" className="h-6 w-6" disabled={catIdx === 0} onClick={() => moveCategory(catIdx, -1)} aria-label="Move category up">
+                      <ArrowUp className="h-3 w-3" />
+                    </Button>
+                    <Button size="icon" variant="ghost" className="h-6 w-6" disabled={catIdx === categories.length - 1} onClick={() => moveCategory(catIdx, 1)} aria-label="Move category down">
+                      <ArrowDown className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  <div>
+                    <h2 className="font-display text-lg font-bold uppercase tracking-wider">{cat.label}</h2>
+                    {cat.description && <p className="text-xs text-muted-foreground">{cat.description}</p>}
+                  </div>
                 </div>
-                <Button size="sm" onClick={() => openNew(cat.id)} className="bg-gradient-brand">
-                  <Plus className="mr-1 h-4 w-4" /> Add item
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => toggleCatMut.mutate(cat)}
+                    disabled={toggleCatMut.isPending}
+                  >
+                    {cat.active ? <EyeOff className="mr-1 h-4 w-4" /> : <Eye className="mr-1 h-4 w-4" />}
+                    {cat.active ? "Hide" : "Show"}
+                  </Button>
+                  <Button size="sm" onClick={() => openNew(cat.id)} className="bg-gradient-brand">
+                    <Plus className="mr-1 h-4 w-4" /> Add item
+                  </Button>
+                </div>
               </div>
+
               {catItems.length === 0 ? (
                 <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
                   No items yet in {cat.label}.
