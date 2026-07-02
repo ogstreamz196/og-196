@@ -35,6 +35,7 @@ import { Route as AuthenticatedAdminWebhooksRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminUsersProRouteImport } from './routes/_authenticated/admin.users-pro'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedAdminUserSettingsRouteImport } from './routes/_authenticated/admin.user-settings'
+import { Route as AuthenticatedAdminStoreRouteImport } from './routes/_authenticated/admin.store'
 import { Route as AuthenticatedAdminRouteMapRouteImport } from './routes/_authenticated/admin.route-map'
 import { Route as AuthenticatedAdminReferralsAuditRouteImport } from './routes/_authenticated/admin.referrals-audit'
 import { Route as AuthenticatedAdminOnboardingRouteImport } from './routes/_authenticated/admin.onboarding'
@@ -184,6 +185,11 @@ const AuthenticatedAdminUserSettingsRoute =
     path: '/admin/user-settings',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminStoreRoute = AuthenticatedAdminStoreRouteImport.update({
+  id: '/admin/store',
+  path: '/admin/store',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAdminRouteMapRoute =
   AuthenticatedAdminRouteMapRouteImport.update({
     id: '/admin/route-map',
@@ -268,6 +274,7 @@ export interface FileRoutesByFullPath {
   '/admin/onboarding': typeof AuthenticatedAdminOnboardingRoute
   '/admin/referrals-audit': typeof AuthenticatedAdminReferralsAuditRoute
   '/admin/route-map': typeof AuthenticatedAdminRouteMapRoute
+  '/admin/store': typeof AuthenticatedAdminStoreRoute
   '/admin/user-settings': typeof AuthenticatedAdminUserSettingsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/admin/users-pro': typeof AuthenticatedAdminUsersProRoute
@@ -304,6 +311,7 @@ export interface FileRoutesByTo {
   '/admin/onboarding': typeof AuthenticatedAdminOnboardingRoute
   '/admin/referrals-audit': typeof AuthenticatedAdminReferralsAuditRoute
   '/admin/route-map': typeof AuthenticatedAdminRouteMapRoute
+  '/admin/store': typeof AuthenticatedAdminStoreRoute
   '/admin/user-settings': typeof AuthenticatedAdminUserSettingsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/admin/users-pro': typeof AuthenticatedAdminUsersProRoute
@@ -342,6 +350,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/onboarding': typeof AuthenticatedAdminOnboardingRoute
   '/_authenticated/admin/referrals-audit': typeof AuthenticatedAdminReferralsAuditRoute
   '/_authenticated/admin/route-map': typeof AuthenticatedAdminRouteMapRoute
+  '/_authenticated/admin/store': typeof AuthenticatedAdminStoreRoute
   '/_authenticated/admin/user-settings': typeof AuthenticatedAdminUserSettingsRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/_authenticated/admin/users-pro': typeof AuthenticatedAdminUsersProRoute
@@ -380,6 +389,7 @@ export interface FileRouteTypes {
     | '/admin/onboarding'
     | '/admin/referrals-audit'
     | '/admin/route-map'
+    | '/admin/store'
     | '/admin/user-settings'
     | '/admin/users'
     | '/admin/users-pro'
@@ -416,6 +426,7 @@ export interface FileRouteTypes {
     | '/admin/onboarding'
     | '/admin/referrals-audit'
     | '/admin/route-map'
+    | '/admin/store'
     | '/admin/user-settings'
     | '/admin/users'
     | '/admin/users-pro'
@@ -453,6 +464,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/onboarding'
     | '/_authenticated/admin/referrals-audit'
     | '/_authenticated/admin/route-map'
+    | '/_authenticated/admin/store'
     | '/_authenticated/admin/user-settings'
     | '/_authenticated/admin/users'
     | '/_authenticated/admin/users-pro'
@@ -656,6 +668,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminUserSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/store': {
+      id: '/_authenticated/admin/store'
+      path: '/admin/store'
+      fullPath: '/admin/store'
+      preLoaderRoute: typeof AuthenticatedAdminStoreRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/route-map': {
       id: '/_authenticated/admin/route-map'
       path: '/admin/route-map'
@@ -760,6 +779,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminOnboardingRoute: typeof AuthenticatedAdminOnboardingRoute
   AuthenticatedAdminReferralsAuditRoute: typeof AuthenticatedAdminReferralsAuditRoute
   AuthenticatedAdminRouteMapRoute: typeof AuthenticatedAdminRouteMapRoute
+  AuthenticatedAdminStoreRoute: typeof AuthenticatedAdminStoreRoute
   AuthenticatedAdminUserSettingsRoute: typeof AuthenticatedAdminUserSettingsRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRouteWithChildren
   AuthenticatedAdminUsersProRoute: typeof AuthenticatedAdminUsersProRoute
@@ -788,6 +808,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminOnboardingRoute: AuthenticatedAdminOnboardingRoute,
   AuthenticatedAdminReferralsAuditRoute: AuthenticatedAdminReferralsAuditRoute,
   AuthenticatedAdminRouteMapRoute: AuthenticatedAdminRouteMapRoute,
+  AuthenticatedAdminStoreRoute: AuthenticatedAdminStoreRoute,
   AuthenticatedAdminUserSettingsRoute: AuthenticatedAdminUserSettingsRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRouteWithChildren,
   AuthenticatedAdminUsersProRoute: AuthenticatedAdminUsersProRoute,
