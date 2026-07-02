@@ -328,7 +328,7 @@ function AdminStorePage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {catItems.map((it) => (
+                      {catItems.map((it, itIdx) => (
                         <TableRow key={it.id}>
                           <TableCell className="max-w-xs truncate">
                             <div className="font-semibold">{it.name}</div>
@@ -354,21 +354,49 @@ function AdminStorePage() {
                             </span>
                           </TableCell>
                           <TableCell className="text-right">
-                            <Button size="sm" variant="ghost" onClick={() => openEdit(it)}>
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => {
-                                if (confirm(`Archive "${it.name}"?`)) delMut.mutate(it.id);
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
+                            <div className="inline-flex items-center gap-1">
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-7 w-7"
+                                disabled={itIdx === 0 || reorderItemsMut.isPending}
+                                onClick={() => moveItem(catItems, itIdx, -1)}
+                                aria-label="Move item up"
+                              >
+                                <ArrowUp className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-7 w-7"
+                                disabled={itIdx === catItems.length - 1 || reorderItemsMut.isPending}
+                                onClick={() => moveItem(catItems, itIdx, 1)}
+                                aria-label="Move item down"
+                              >
+                                <ArrowDown className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button size="sm" variant="ghost" onClick={() => openEdit(it)} aria-label="Edit item">
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => {
+                                  if (it.active) {
+                                    if (confirm(`Hide "${it.name}" from the storefront?`)) delMut.mutate(it.id);
+                                  } else {
+                                    toast.info("Item is already hidden. Edit it and toggle Active to bring it back.");
+                                  }
+                                }}
+                                aria-label="Archive item"
+                              >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}
+
                     </TableBody>
                   </Table>
                 </div>
