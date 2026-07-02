@@ -149,6 +149,45 @@ function AdminStorePage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const reorderItemsMut = useMutation({
+    mutationFn: (ids: string[]) => reorderStoreItems({ data: { ids } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-store"] });
+      qc.invalidateQueries({ queryKey: ["store-catalog"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const reorderCatsMut = useMutation({
+    mutationFn: (ids: string[]) => reorderStoreCategories({ data: { ids } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-store"] });
+      qc.invalidateQueries({ queryKey: ["store-catalog"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const toggleCatMut = useMutation({
+    mutationFn: (c: StoreCategory) =>
+      upsertStoreCategory({
+        data: {
+          id: c.id,
+          slug: c.slug,
+          label: c.label,
+          description: c.description ?? "",
+          sort_order: c.sort_order,
+          active: !c.active,
+        },
+      }),
+    onSuccess: () => {
+      toast.success("Category updated");
+      qc.invalidateQueries({ queryKey: ["admin-store"] });
+      qc.invalidateQueries({ queryKey: ["store-catalog"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+
   if (isLoading) {
     return (
       <DashboardShell title="Store admin">
