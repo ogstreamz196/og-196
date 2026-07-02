@@ -33,7 +33,7 @@ import { useDevMode } from "@/hooks/use-dev-mode";
 import ogStreamzLogo from "@/assets/ogstreamz-logo.jpg.asset.json";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
 
-type AppRoute = "/" | "/library" | "/messenger" | "/buy-coins" | "/settings" | "/developer" | "/admin" | "/referrals";
+type AppRoute = "/" | "/library" | "/messenger" | "/store" | "/buy-coins" | "/settings" | "/developer" | "/admin" | "/referrals";
 type NavItem = {
   title: string;
   url: AppRoute;
@@ -54,7 +54,7 @@ const primaryNav: NavItem[] = [
 
 const accountNav: NavItem[] = [
   { title: "Earnings", url: "/referrals", icon: Gift, accent: "from-pink-500/30 to-rose-400/30" },
-  { title: "Buy Coins", url: "/buy-coins", icon: Coins, accent: "from-amber-400/40 to-yellow-300/40" },
+  { title: "Store", url: "/store", icon: Coins, accent: "from-amber-400/40 to-yellow-300/40" },
   { title: "Settings", url: "/settings", icon: Settings, accent: "from-slate-400/25 to-zinc-400/25" },
 ];
 

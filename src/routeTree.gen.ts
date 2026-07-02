@@ -19,6 +19,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as RCodeRouteImport } from './routes/r.$code'
 import { Route as PortalSlugRouteImport } from './routes/portal.$slug'
+import { Route as AuthenticatedStoreRouteImport } from './routes/_authenticated/store'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedReferralsRouteImport } from './routes/_authenticated/referrals'
 import { Route as AuthenticatedPurchaseHistoryRouteImport } from './routes/_authenticated/purchase-history'
@@ -34,6 +35,7 @@ import { Route as AuthenticatedAdminWebhooksRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminUsersProRouteImport } from './routes/_authenticated/admin.users-pro'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedAdminUserSettingsRouteImport } from './routes/_authenticated/admin.user-settings'
+import { Route as AuthenticatedAdminStoreRouteImport } from './routes/_authenticated/admin.store'
 import { Route as AuthenticatedAdminRouteMapRouteImport } from './routes/_authenticated/admin.route-map'
 import { Route as AuthenticatedAdminReferralsAuditRouteImport } from './routes/_authenticated/admin.referrals-audit'
 import { Route as AuthenticatedAdminOnboardingRouteImport } from './routes/_authenticated/admin.onboarding'
@@ -87,6 +89,11 @@ const PortalSlugRoute = PortalSlugRouteImport.update({
   id: '/portal/$slug',
   path: '/portal/$slug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedStoreRoute = AuthenticatedStoreRouteImport.update({
+  id: '/store',
+  path: '/store',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
@@ -178,6 +185,11 @@ const AuthenticatedAdminUserSettingsRoute =
     path: '/admin/user-settings',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminStoreRoute = AuthenticatedAdminStoreRouteImport.update({
+  id: '/admin/store',
+  path: '/admin/store',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAdminRouteMapRoute =
   AuthenticatedAdminRouteMapRouteImport.update({
     id: '/admin/route-map',
@@ -252,6 +264,7 @@ export interface FileRoutesByFullPath {
   '/purchase-history': typeof AuthenticatedPurchaseHistoryRoute
   '/referrals': typeof AuthenticatedReferralsRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/store': typeof AuthenticatedStoreRoute
   '/portal/$slug': typeof PortalSlugRoute
   '/r/$code': typeof RCodeRoute
   '/admin/api-keys': typeof AuthenticatedAdminApiKeysRoute
@@ -261,6 +274,7 @@ export interface FileRoutesByFullPath {
   '/admin/onboarding': typeof AuthenticatedAdminOnboardingRoute
   '/admin/referrals-audit': typeof AuthenticatedAdminReferralsAuditRoute
   '/admin/route-map': typeof AuthenticatedAdminRouteMapRoute
+  '/admin/store': typeof AuthenticatedAdminStoreRoute
   '/admin/user-settings': typeof AuthenticatedAdminUserSettingsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/admin/users-pro': typeof AuthenticatedAdminUsersProRoute
@@ -286,6 +300,7 @@ export interface FileRoutesByTo {
   '/purchase-history': typeof AuthenticatedPurchaseHistoryRoute
   '/referrals': typeof AuthenticatedReferralsRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/store': typeof AuthenticatedStoreRoute
   '/portal/$slug': typeof PortalSlugRoute
   '/r/$code': typeof RCodeRoute
   '/': typeof AuthenticatedIndexRoute
@@ -296,6 +311,7 @@ export interface FileRoutesByTo {
   '/admin/onboarding': typeof AuthenticatedAdminOnboardingRoute
   '/admin/referrals-audit': typeof AuthenticatedAdminReferralsAuditRoute
   '/admin/route-map': typeof AuthenticatedAdminRouteMapRoute
+  '/admin/store': typeof AuthenticatedAdminStoreRoute
   '/admin/user-settings': typeof AuthenticatedAdminUserSettingsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/admin/users-pro': typeof AuthenticatedAdminUsersProRoute
@@ -323,6 +339,7 @@ export interface FileRoutesById {
   '/_authenticated/purchase-history': typeof AuthenticatedPurchaseHistoryRoute
   '/_authenticated/referrals': typeof AuthenticatedReferralsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/store': typeof AuthenticatedStoreRoute
   '/portal/$slug': typeof PortalSlugRoute
   '/r/$code': typeof RCodeRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
@@ -333,6 +350,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/onboarding': typeof AuthenticatedAdminOnboardingRoute
   '/_authenticated/admin/referrals-audit': typeof AuthenticatedAdminReferralsAuditRoute
   '/_authenticated/admin/route-map': typeof AuthenticatedAdminRouteMapRoute
+  '/_authenticated/admin/store': typeof AuthenticatedAdminStoreRoute
   '/_authenticated/admin/user-settings': typeof AuthenticatedAdminUserSettingsRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/_authenticated/admin/users-pro': typeof AuthenticatedAdminUsersProRoute
@@ -361,6 +379,7 @@ export interface FileRouteTypes {
     | '/purchase-history'
     | '/referrals'
     | '/settings'
+    | '/store'
     | '/portal/$slug'
     | '/r/$code'
     | '/admin/api-keys'
@@ -370,6 +389,7 @@ export interface FileRouteTypes {
     | '/admin/onboarding'
     | '/admin/referrals-audit'
     | '/admin/route-map'
+    | '/admin/store'
     | '/admin/user-settings'
     | '/admin/users'
     | '/admin/users-pro'
@@ -395,6 +415,7 @@ export interface FileRouteTypes {
     | '/purchase-history'
     | '/referrals'
     | '/settings'
+    | '/store'
     | '/portal/$slug'
     | '/r/$code'
     | '/'
@@ -405,6 +426,7 @@ export interface FileRouteTypes {
     | '/admin/onboarding'
     | '/admin/referrals-audit'
     | '/admin/route-map'
+    | '/admin/store'
     | '/admin/user-settings'
     | '/admin/users'
     | '/admin/users-pro'
@@ -431,6 +453,7 @@ export interface FileRouteTypes {
     | '/_authenticated/purchase-history'
     | '/_authenticated/referrals'
     | '/_authenticated/settings'
+    | '/_authenticated/store'
     | '/portal/$slug'
     | '/r/$code'
     | '/_authenticated/'
@@ -441,6 +464,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/onboarding'
     | '/_authenticated/admin/referrals-audit'
     | '/_authenticated/admin/route-map'
+    | '/_authenticated/admin/store'
     | '/_authenticated/admin/user-settings'
     | '/_authenticated/admin/users'
     | '/_authenticated/admin/users-pro'
@@ -524,6 +548,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/portal/$slug'
       preLoaderRoute: typeof PortalSlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/store': {
+      id: '/_authenticated/store'
+      path: '/store'
+      fullPath: '/store'
+      preLoaderRoute: typeof AuthenticatedStoreRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/settings': {
       id: '/_authenticated/settings'
@@ -637,6 +668,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminUserSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/store': {
+      id: '/_authenticated/admin/store'
+      path: '/admin/store'
+      fullPath: '/admin/store'
+      preLoaderRoute: typeof AuthenticatedAdminStoreRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/route-map': {
       id: '/_authenticated/admin/route-map'
       path: '/admin/route-map'
@@ -732,6 +770,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPurchaseHistoryRoute: typeof AuthenticatedPurchaseHistoryRoute
   AuthenticatedReferralsRoute: typeof AuthenticatedReferralsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedStoreRoute: typeof AuthenticatedStoreRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedAdminApiKeysRoute: typeof AuthenticatedAdminApiKeysRoute
   AuthenticatedAdminCoinAuditRoute: typeof AuthenticatedAdminCoinAuditRoute
@@ -740,6 +779,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminOnboardingRoute: typeof AuthenticatedAdminOnboardingRoute
   AuthenticatedAdminReferralsAuditRoute: typeof AuthenticatedAdminReferralsAuditRoute
   AuthenticatedAdminRouteMapRoute: typeof AuthenticatedAdminRouteMapRoute
+  AuthenticatedAdminStoreRoute: typeof AuthenticatedAdminStoreRoute
   AuthenticatedAdminUserSettingsRoute: typeof AuthenticatedAdminUserSettingsRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRouteWithChildren
   AuthenticatedAdminUsersProRoute: typeof AuthenticatedAdminUsersProRoute
@@ -759,6 +799,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPurchaseHistoryRoute: AuthenticatedPurchaseHistoryRoute,
   AuthenticatedReferralsRoute: AuthenticatedReferralsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedStoreRoute: AuthenticatedStoreRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedAdminApiKeysRoute: AuthenticatedAdminApiKeysRoute,
   AuthenticatedAdminCoinAuditRoute: AuthenticatedAdminCoinAuditRoute,
@@ -767,6 +808,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminOnboardingRoute: AuthenticatedAdminOnboardingRoute,
   AuthenticatedAdminReferralsAuditRoute: AuthenticatedAdminReferralsAuditRoute,
   AuthenticatedAdminRouteMapRoute: AuthenticatedAdminRouteMapRoute,
+  AuthenticatedAdminStoreRoute: AuthenticatedAdminStoreRoute,
   AuthenticatedAdminUserSettingsRoute: AuthenticatedAdminUserSettingsRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRouteWithChildren,
   AuthenticatedAdminUsersProRoute: AuthenticatedAdminUsersProRoute,
@@ -795,13 +837,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

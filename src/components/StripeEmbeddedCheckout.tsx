@@ -7,16 +7,20 @@ import {
   createVipCheckoutSession,
   createCustomCoinCheckoutSession,
 } from "@/lib/payments.functions";
+import { createStoreItemCheckoutSession } from "@/lib/store.functions";
 import { Button } from "@/components/ui/button";
 
 interface Props {
   priceId?: string;
   returnUrl: string;
-  type?: "coins" | "vip" | "custom";
+  type?: "coins" | "vip" | "custom" | "store_item";
   customUnits?: number;
+  storeItemId?: string;
 }
 
-export function StripeEmbeddedCheckoutInline({ priceId, returnUrl, type = "coins", customUnits }: Props) {
+export function StripeEmbeddedCheckoutInline({
+  priceId, returnUrl, type = "coins", customUnits, storeItemId,
+}: Props) {
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [ready, setReady] = useState(false);
@@ -32,13 +36,15 @@ export function StripeEmbeddedCheckoutInline({ priceId, returnUrl, type = "coins
           ? await createCustomCoinCheckoutSession({
               data: { units: customUnits!, returnUrl, environment: getStripeEnvironment() },
             })
+          : type === "store_item"
+          ? await createStoreItemCheckoutSession({
+              data: { itemId: storeItemId!, returnUrl, environment: getStripeEnvironment() },
+            })
           : await createCoinCheckoutSession({
               data: { priceId: priceId!, returnUrl, environment: getStripeEnvironment() },
             });
       if ("error" in result) throw new Error(result.error);
       if (!result.clientSecret) throw new Error("Stripe did not return a client secret");
-      // Once Stripe has a client secret, the iframe paints in <~1s.
-      // Hide the loading overlay shortly after so users see the form.
       setTimeout(() => setReady(true), 900);
       return result.clientSecret;
     } catch (e) {
@@ -46,7 +52,7 @@ export function StripeEmbeddedCheckoutInline({ priceId, returnUrl, type = "coins
       setError(msg);
       throw e;
     }
-  }, [priceId, returnUrl, type, customUnits, attempt]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [priceId, returnUrl, type, customUnits, storeItemId, attempt]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (error) {
     return (
