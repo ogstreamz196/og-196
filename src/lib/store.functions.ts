@@ -1,0 +1,365 @@
+import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import {
+  type StripeEnv,
+  createStripeClient,
+  getStripeErrorMessage,
+} from "@/lib/stripe.server";
+
+// ─── shared types ─────────────────────────────────────────────────────────
+export type StoreCategory = {
+  id: string;
+  slug: string;
+  label: string;
+  description: string | null;
+  sort_order: number;
+  active: boolean;
+};
+
+export type StoreItem = {
+  id: string;
+  category_id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  image_url: string | null;
+  price_cents: number;
+  currency: string;
+  recurring_interval: "month" | "year" | null;
+  stock: number | null;
+  stock_sold: number;
+  coin_reward: number | null;
+  perk_slug: string | null;
+  rarity: "common" | "rare" | "epic" | "legendary";
+  sort_order: number;
+  active: boolean;
+};
+
+export type StoreCatalog = {
+  categories: (StoreCategory & { items: StoreItem[] })[];
+};
+
+const SLUG_RE = /^[a-z0-9][a-z0-9_-]{1,60}$/;
+const CURRENCY_RE = /^[a-z]{3}$/;
+
+// ─── public: list catalog (any signed-in user) ───────────────────────────
+export const listStoreCatalog = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<StoreCatalog> => {
+    const { supabase } = context;
+    const [cats, items] = await Promise.all([
+      supabase
+        .from("store_categories")
+        .select("*")
+        .eq("active", true)
+        .order("sort_order", { ascending: true }),
+      supabase
+        .from("store_items")
+        .select("*")
+        .eq("active", true)
+        .order("sort_order", { ascending: true }),
+    ]);
+    if (cats.error) throw new Error(cats.error.message);
+    if (items.error) throw new Error(items.error.message);
+    const byCat = new Map<string, StoreItem[]>();
+    for (const it of (items.data ?? []) as StoreItem[]) {
+      const arr = byCat.get(it.category_id) ?? [];
+      arr.push(it);
+      byCat.set(it.category_id, arr);
+    }
+    return {
+      categories: ((cats.data ?? []) as StoreCategory[]).map((c) => ({
+        ...c,
+        items: byCat.get(c.id) ?? [],
+      })),
+    };
+  });
+
+// ─── admin: list everything (incl. inactive) ─────────────────────────────
+export const listAllStoreItems = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { data: isAdmin } = await supabase.rpc("has_role", {
+      _user_id: userId,
+      _role: "admin",
+    });
+    if (!isAdmin) throw new Error("Forbidden");
+    const [cats, items] = await Promise.all([
+      supabase
+        .from("store_categories")
+        .select("*")
+        .order("sort_order", { ascending: true }),
+      supabase
+        .from("store_items")
+        .select("*")
+        .order("sort_order", { ascending: true }),
+    ]);
+    if (cats.error) throw new Error(cats.error.message);
+    if (items.error) throw new Error(items.error.message);
+    return {
+      categories: (cats.data ?? []) as StoreCategory[],
+      items: (items.data ?? []) as StoreItem[],
+    };
+  });
+
+// ─── admin: upsert item ──────────────────────────────────────────────────
+type UpsertInput = {
+  id?: string;
+  category_id: string;
+  slug: string;
+  name: string;
+  description?: string | null;
+  image_url?: string | null;
+  price_cents: number;
+  currency: string;
+  recurring_interval?: "month" | "year" | null;
+  stock?: number | null;
+  coin_reward?: number | null;
+  perk_slug?: string | null;
+  rarity: "common" | "rare" | "epic" | "legendary";
+  sort_order?: number;
+  active?: boolean;
+};
+
+export const upsertStoreItem = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: UpsertInput) => {
+    if (!data.category_id) throw new Error("category_id required");
+    if (!SLUG_RE.test(data.slug)) throw new Error("Slug must be lowercase letters/digits/-/_");
+    if (!data.name?.trim()) throw new Error("Name required");
+    if (!Number.isInteger(data.price_cents) || data.price_cents < 0) throw new Error("Invalid price");
+    if (!CURRENCY_RE.test(data.currency)) throw new Error("Invalid currency");
+    if (data.recurring_interval && data.recurring_interval !== "month" && data.recurring_interval !== "year") {
+      throw new Error("Invalid interval");
+    }
+    if (!["common", "rare", "epic", "legendary"].includes(data.rarity)) throw new Error("Invalid rarity");
+    return data;
+  })
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: isAdmin } = await supabase.rpc("has_role", {
+      _user_id: userId,
+      _role: "admin",
+    });
+    if (!isAdmin) throw new Error("Forbidden");
+
+    const row = {
+      category_id: data.category_id,
+      slug: data.slug,
+      name: data.name.trim(),
+      description: data.description?.trim() || null,
+      image_url: data.image_url?.trim() || null,
+      price_cents: data.price_cents,
+      currency: data.currency.toLowerCase(),
+      recurring_interval: data.recurring_interval ?? null,
+      stock: data.stock ?? null,
+      coin_reward: data.coin_reward ?? null,
+      perk_slug: data.perk_slug?.trim() || null,
+      rarity: data.rarity,
+      sort_order: data.sort_order ?? 0,
+      active: data.active ?? true,
+    };
+
+    if (data.id) {
+      const { error } = await supabase.from("store_items").update(row).eq("id", data.id);
+      if (error) throw new Error(error.message);
+      return { id: data.id };
+    }
+    const { data: inserted, error } = await supabase
+      .from("store_items")
+      .insert(row)
+      .select("id")
+      .single();
+    if (error) throw new Error(error.message);
+    return { id: inserted!.id as string };
+  });
+
+export const deleteStoreItem = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: { id: string }) => data)
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: isAdmin } = await supabase.rpc("has_role", {
+      _user_id: userId,
+      _role: "admin",
+    });
+    if (!isAdmin) throw new Error("Forbidden");
+    // Soft-delete via active=false to preserve purchase history references.
+    const { error } = await supabase
+      .from("store_items")
+      .update({ active: false })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// ─── admin: category upsert / delete ─────────────────────────────────────
+export const upsertStoreCategory = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    (d: { id?: string; slug: string; label: string; description?: string; sort_order?: number; active?: boolean }) => {
+      if (!SLUG_RE.test(d.slug)) throw new Error("Invalid slug");
+      if (!d.label?.trim()) throw new Error("Label required");
+      return d;
+    },
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: isAdmin } = await supabase.rpc("has_role", {
+      _user_id: userId,
+      _role: "admin",
+    });
+    if (!isAdmin) throw new Error("Forbidden");
+    const row = {
+      slug: data.slug,
+      label: data.label.trim(),
+      description: data.description?.trim() || null,
+      sort_order: data.sort_order ?? 0,
+      active: data.active ?? true,
+    };
+    if (data.id) {
+      const { error } = await supabase.from("store_categories").update(row).eq("id", data.id);
+      if (error) throw new Error(error.message);
+      return { id: data.id };
+    }
+    const { data: ins, error } = await supabase
+      .from("store_categories")
+      .insert(row)
+      .select("id")
+      .single();
+    if (error) throw new Error(error.message);
+    return { id: ins!.id as string };
+  });
+
+// ─── purchase: create Stripe embedded checkout session ───────────────────
+type CheckoutResult = { clientSecret: string } | { error: string };
+
+export const createStoreItemCheckoutSession = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    (data: { itemId: string; returnUrl: string; environment: StripeEnv }) => {
+      if (!/^[0-9a-f-]{36}$/i.test(data.itemId)) throw new Error("Invalid itemId");
+      if (data.environment !== "sandbox" && data.environment !== "live") {
+        throw new Error("Invalid environment");
+      }
+      if (!/^https?:\/\//.test(data.returnUrl)) throw new Error("Invalid returnUrl");
+      return data;
+    },
+  )
+  .handler(async ({ data, context }): Promise<CheckoutResult> => {
+    const { userId, supabase } = context;
+    try {
+      const { data: item, error } = await supabase
+        .from("store_items")
+        .select("*")
+        .eq("id", data.itemId)
+        .eq("active", true)
+        .maybeSingle();
+      if (error || !item) return { error: "Item unavailable" };
+      const it = item as StoreItem;
+      if (it.stock !== null && it.stock_sold >= it.stock) {
+        return { error: "Sold out" };
+      }
+
+      const stripe = createStripeClient(data.environment);
+
+      let email: string | undefined;
+      try {
+        const { data: prof } = await supabase
+          .from("profiles").select("email").eq("id", userId).maybeSingle();
+        email = (prof?.email as string | undefined) ?? undefined;
+      } catch { /* optional */ }
+
+      // Resolve/create Customer inline (mirrors payments.functions helper).
+      let customerId: string | undefined;
+      try {
+        if (userId) {
+          const found = await stripe.customers.search({
+            query: `metadata['userId']:'${userId}'`,
+            limit: 1,
+          });
+          if (found?.data?.length) customerId = found.data[0].id;
+        }
+        if (!customerId && email) {
+          const existing = await stripe.customers.list({ email, limit: 1 });
+          if (existing?.data?.length) {
+            customerId = existing.data[0].id;
+            if (existing.data[0].metadata?.userId !== userId) {
+              await stripe.customers.update(customerId, {
+                metadata: { ...existing.data[0].metadata, userId },
+              });
+            }
+          }
+        }
+        if (!customerId) {
+          const created = await stripe.customers.create({
+            ...(email && { email }),
+            metadata: { userId },
+          });
+          customerId = created.id;
+        }
+      } catch (e) {
+        console.warn("customer resolve fallback", e);
+      }
+
+      const isRecurring = !!it.recurring_interval;
+      const bundleId = `store:${it.id}`;
+      const session = await stripe.checkout.sessions.create({
+        line_items: [
+          {
+            price_data: {
+              currency: it.currency,
+              unit_amount: it.price_cents,
+              product_data: {
+                name: it.name,
+                ...(it.description && { description: it.description }),
+                ...(it.image_url && /^https?:\/\//.test(it.image_url) && { images: [it.image_url] }),
+              },
+              ...(isRecurring && { recurring: { interval: it.recurring_interval! } }),
+            },
+            quantity: 1,
+          },
+        ],
+        mode: isRecurring ? "subscription" : "payment",
+        ui_mode: "embedded_page",
+        return_url: data.returnUrl,
+        ...(customerId && { customer: customerId }),
+        metadata: {
+          userId,
+          bundleId,
+          storeItemId: it.id,
+          coins: String(it.coin_reward ?? 0),
+          perkSlug: it.perk_slug ?? "",
+          environment: data.environment,
+        },
+        ...(!isRecurring && {
+          payment_intent_data: {
+            description: it.name,
+            metadata: {
+              userId,
+              bundleId,
+              storeItemId: it.id,
+              coins: String(it.coin_reward ?? 0),
+              perkSlug: it.perk_slug ?? "",
+            },
+          },
+        }),
+        ...(isRecurring && {
+          subscription_data: {
+            metadata: {
+              userId,
+              bundleId,
+              storeItemId: it.id,
+              perkSlug: it.perk_slug ?? "",
+            },
+          },
+        }),
+      });
+
+      return { clientSecret: session.client_secret ?? "" };
+    } catch (error) {
+      console.error("createStoreItemCheckoutSession failed", error);
+      return { error: getStripeErrorMessage(error) };
+    }
+  });
