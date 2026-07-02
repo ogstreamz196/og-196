@@ -9,6 +9,10 @@ import {
   Trash2,
   Pencil,
   Package,
+  ArrowUp,
+  ArrowDown,
+  EyeOff,
+  Eye,
 } from "lucide-react";
 import { useRole } from "@/hooks/use-role";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
@@ -33,9 +37,12 @@ import {
   upsertStoreItem,
   deleteStoreItem,
   upsertStoreCategory,
+  reorderStoreItems,
+  reorderStoreCategories,
   type StoreItem,
   type StoreCategory,
 } from "@/lib/store.functions";
+
 
 export const Route = createFileRoute("/_authenticated/admin/store")({
   component: AdminStorePage,
