@@ -30,9 +30,10 @@ export const Route = createFileRoute("/_authenticated/store")({
 function StorePage() {
   const catalog = useQuery({
     queryKey: ["store-catalog"],
-    queryFn: () => useServerFn(listStoreCatalog)(),
+    queryFn: () => listStoreCatalog(),
   });
   const [buyItemId, setBuyItemId] = useState<string | null>(null);
+
 
   const returnUrl = useMemo(
     () => `${window.location.origin}/buy-coins/return?session_id={CHECKOUT_SESSION_ID}`,
