@@ -867,6 +867,116 @@ export type Database = {
           },
         ]
       }
+      store_categories: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          id: string
+          label: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          label: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          label?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      store_items: {
+        Row: {
+          active: boolean
+          category_id: string
+          coin_reward: number | null
+          created_at: string
+          currency: string
+          description: string | null
+          id: string
+          image_url: string | null
+          name: string
+          perk_slug: string | null
+          price_cents: number
+          rarity: string
+          recurring_interval: string | null
+          slug: string
+          sort_order: number
+          stock: number | null
+          stock_sold: number
+          stripe_price_id: string | null
+          stripe_product_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          category_id: string
+          coin_reward?: number | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          perk_slug?: string | null
+          price_cents: number
+          rarity?: string
+          recurring_interval?: string | null
+          slug: string
+          sort_order?: number
+          stock?: number | null
+          stock_sold?: number
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          category_id?: string
+          coin_reward?: number | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          perk_slug?: string | null
+          price_cents?: number
+          rarity?: string
+          recurring_interval?: string | null
+          slug?: string
+          sort_order?: number
+          stock?: number | null
+          stock_sold?: number
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_items_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "store_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stripe_webhook_events: {
         Row: {
           environment: string
