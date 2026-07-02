@@ -1,10 +1,11 @@
+import type { ReactNode } from "react";
 import { Coins, Package, Sparkles, Crown, Gem, ShoppingBag, Repeat } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CoinPill } from "@/components/ui/coin-pill";
 import type { StoreItem } from "@/lib/store.functions";
 import { cn } from "@/lib/utils";
 
-const RARITY: Record<StoreItem["rarity"], { label: string; ring: string; glow: string; icon: JSX.Element }> = {
+const RARITY: Record<StoreItem["rarity"], { label: string; ring: string; glow: string; icon: ReactNode }> = {
   common: {
     label: "Common",
     ring: "border-slate-500/40",
