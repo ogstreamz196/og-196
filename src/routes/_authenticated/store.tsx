@@ -51,7 +51,7 @@ function StorePage() {
           <div className="mx-auto mb-3 grid h-14 w-14 place-items-center rounded-2xl bg-gradient-brand shadow-glow">
             <ShoppingBag className="h-7 w-7 text-primary-foreground" />
           </div>
-          <FlameHeading as="h1" size="2xl">OG Store</FlameHeading>
+          <FlameHeading as="h1" size="hero">OG Store</FlameHeading>
           <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
             Coins, VIP memberships, and limited-drop items. Every purchase is instant.
           </p>
