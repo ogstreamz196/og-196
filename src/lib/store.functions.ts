@@ -232,6 +232,61 @@ export const upsertStoreCategory = createServerFn({ method: "POST" })
     return { id: ins!.id as string };
   });
 
+// ─── admin: reorder helpers ──────────────────────────────────────────────
+export const reorderStoreItems = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { ids: string[] }) => {
+    if (!Array.isArray(d.ids) || d.ids.length === 0) throw new Error("ids required");
+    if (d.ids.length > 200) throw new Error("too many ids");
+    for (const id of d.ids) {
+      if (!/^[0-9a-f-]{36}$/i.test(id)) throw new Error("Invalid id");
+    }
+    return d;
+  })
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: isAdmin } = await supabase.rpc("has_role", {
+      _user_id: userId, _role: "admin",
+    });
+    if (!isAdmin) throw new Error("Forbidden");
+    // Sequential updates keep it simple and safe under RLS.
+    for (let i = 0; i < data.ids.length; i++) {
+      const { error } = await supabase
+        .from("store_items")
+        .update({ sort_order: i })
+        .eq("id", data.ids[i]);
+      if (error) throw new Error(error.message);
+    }
+    return { ok: true };
+  });
+
+export const reorderStoreCategories = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { ids: string[] }) => {
+    if (!Array.isArray(d.ids) || d.ids.length === 0) throw new Error("ids required");
+    if (d.ids.length > 100) throw new Error("too many ids");
+    for (const id of d.ids) {
+      if (!/^[0-9a-f-]{36}$/i.test(id)) throw new Error("Invalid id");
+    }
+    return d;
+  })
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: isAdmin } = await supabase.rpc("has_role", {
+      _user_id: userId, _role: "admin",
+    });
+    if (!isAdmin) throw new Error("Forbidden");
+    for (let i = 0; i < data.ids.length; i++) {
+      const { error } = await supabase
+        .from("store_categories")
+        .update({ sort_order: i })
+        .eq("id", data.ids[i]);
+      if (error) throw new Error(error.message);
+    }
+    return { ok: true };
+  });
+
+
 // ─── purchase: create Stripe embedded checkout session ───────────────────
 type CheckoutResult = { clientSecret: string } | { error: string };
 

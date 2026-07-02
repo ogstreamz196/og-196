@@ -9,6 +9,10 @@ import {
   Trash2,
   Pencil,
   Package,
+  ArrowUp,
+  ArrowDown,
+  EyeOff,
+  Eye,
 } from "lucide-react";
 import { useRole } from "@/hooks/use-role";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
@@ -33,9 +37,12 @@ import {
   upsertStoreItem,
   deleteStoreItem,
   upsertStoreCategory,
+  reorderStoreItems,
+  reorderStoreCategories,
   type StoreItem,
   type StoreCategory,
 } from "@/lib/store.functions";
+
 
 export const Route = createFileRoute("/_authenticated/admin/store")({
   component: AdminStorePage,
@@ -142,6 +149,45 @@ function AdminStorePage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const reorderItemsMut = useMutation({
+    mutationFn: (ids: string[]) => reorderStoreItems({ data: { ids } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-store"] });
+      qc.invalidateQueries({ queryKey: ["store-catalog"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const reorderCatsMut = useMutation({
+    mutationFn: (ids: string[]) => reorderStoreCategories({ data: { ids } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-store"] });
+      qc.invalidateQueries({ queryKey: ["store-catalog"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const toggleCatMut = useMutation({
+    mutationFn: (c: StoreCategory) =>
+      upsertStoreCategory({
+        data: {
+          id: c.id,
+          slug: c.slug,
+          label: c.label,
+          description: c.description ?? "",
+          sort_order: c.sort_order,
+          active: !c.active,
+        },
+      }),
+    onSuccess: () => {
+      toast.success("Category updated");
+      qc.invalidateQueries({ queryKey: ["admin-store"] });
+      qc.invalidateQueries({ queryKey: ["store-catalog"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+
   if (isLoading) {
     return (
       <DashboardShell title="Store admin">
@@ -184,6 +230,23 @@ function AdminStorePage() {
     });
   }
 
+  function moveItem(catItems: StoreItem[], idx: number, dir: -1 | 1) {
+    const next = [...catItems];
+    const swap = idx + dir;
+    if (swap < 0 || swap >= next.length) return;
+    [next[idx], next[swap]] = [next[swap], next[idx]];
+    reorderItemsMut.mutate(next.map((x) => x.id));
+  }
+  function moveCategory(idx: number, dir: -1 | 1) {
+    const next = [...categories];
+    const swap = idx + dir;
+    if (swap < 0 || swap >= next.length) return;
+    [next[idx], next[swap]] = [next[swap], next[idx]];
+    reorderCatsMut.mutate(next.map((x) => x.id));
+  }
+
+
+
   return (
     <DashboardShell title="Store admin">
       <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-8">
@@ -207,19 +270,44 @@ function AdminStorePage() {
           </div>
         </div>
 
-        {categories.map((cat) => {
+        {categories.map((cat, catIdx) => {
           const catItems = items.filter((i) => i.category_id === cat.id);
           return (
-            <section key={cat.id} className="rounded-2xl border border-border bg-card/60 p-4">
-              <div className="mb-3 flex items-center justify-between">
-                <div>
-                  <h2 className="font-display text-lg font-bold uppercase tracking-wider">{cat.label}</h2>
-                  {cat.description && <p className="text-xs text-muted-foreground">{cat.description}</p>}
+            <section
+              key={cat.id}
+              className={`rounded-2xl border p-4 ${cat.active ? "border-border bg-card/60" : "border-dashed border-slate-600 bg-card/30 opacity-70"}`}
+            >
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="flex flex-col">
+                    <Button size="icon" variant="ghost" className="h-6 w-6" disabled={catIdx === 0} onClick={() => moveCategory(catIdx, -1)} aria-label="Move category up">
+                      <ArrowUp className="h-3 w-3" />
+                    </Button>
+                    <Button size="icon" variant="ghost" className="h-6 w-6" disabled={catIdx === categories.length - 1} onClick={() => moveCategory(catIdx, 1)} aria-label="Move category down">
+                      <ArrowDown className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  <div>
+                    <h2 className="font-display text-lg font-bold uppercase tracking-wider">{cat.label}</h2>
+                    {cat.description && <p className="text-xs text-muted-foreground">{cat.description}</p>}
+                  </div>
                 </div>
-                <Button size="sm" onClick={() => openNew(cat.id)} className="bg-gradient-brand">
-                  <Plus className="mr-1 h-4 w-4" /> Add item
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => toggleCatMut.mutate(cat)}
+                    disabled={toggleCatMut.isPending}
+                  >
+                    {cat.active ? <EyeOff className="mr-1 h-4 w-4" /> : <Eye className="mr-1 h-4 w-4" />}
+                    {cat.active ? "Hide" : "Show"}
+                  </Button>
+                  <Button size="sm" onClick={() => openNew(cat.id)} className="bg-gradient-brand">
+                    <Plus className="mr-1 h-4 w-4" /> Add item
+                  </Button>
+                </div>
               </div>
+
               {catItems.length === 0 ? (
                 <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
                   No items yet in {cat.label}.
@@ -240,7 +328,7 @@ function AdminStorePage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {catItems.map((it) => (
+                      {catItems.map((it, itIdx) => (
                         <TableRow key={it.id}>
                           <TableCell className="max-w-xs truncate">
                             <div className="font-semibold">{it.name}</div>
@@ -266,21 +354,49 @@ function AdminStorePage() {
                             </span>
                           </TableCell>
                           <TableCell className="text-right">
-                            <Button size="sm" variant="ghost" onClick={() => openEdit(it)}>
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => {
-                                if (confirm(`Archive "${it.name}"?`)) delMut.mutate(it.id);
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
+                            <div className="inline-flex items-center gap-1">
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-7 w-7"
+                                disabled={itIdx === 0 || reorderItemsMut.isPending}
+                                onClick={() => moveItem(catItems, itIdx, -1)}
+                                aria-label="Move item up"
+                              >
+                                <ArrowUp className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-7 w-7"
+                                disabled={itIdx === catItems.length - 1 || reorderItemsMut.isPending}
+                                onClick={() => moveItem(catItems, itIdx, 1)}
+                                aria-label="Move item down"
+                              >
+                                <ArrowDown className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button size="sm" variant="ghost" onClick={() => openEdit(it)} aria-label="Edit item">
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => {
+                                  if (it.active) {
+                                    if (confirm(`Hide "${it.name}" from the storefront?`)) delMut.mutate(it.id);
+                                  } else {
+                                    toast.info("Item is already hidden. Edit it and toggle Active to bring it back.");
+                                  }
+                                }}
+                                aria-label="Archive item"
+                              >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}
+
                     </TableBody>
                   </Table>
                 </div>
