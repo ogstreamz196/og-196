@@ -33,7 +33,7 @@ import { useDevMode } from "@/hooks/use-dev-mode";
 import ogStreamzLogo from "@/assets/ogstreamz-logo.jpg.asset.json";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
 
-type AppRoute = "/" | "/library" | "/messenger" | "/buy-coins" | "/settings" | "/developer" | "/admin" | "/referrals";
+type AppRoute = "/" | "/library" | "/messenger" | "/store" | "/buy-coins" | "/settings" | "/developer" | "/admin" | "/referrals";
 type NavItem = {
   title: string;
   url: AppRoute;
