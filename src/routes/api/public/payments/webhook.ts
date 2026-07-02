@@ -363,6 +363,73 @@ async function handleChargeRefunded(charge: any, env: StripeEnv) {
   }
 }
 
+// ─── store items (CMS-created products) ────────────────────────────────────
+async function fulfilStoreItemCheckout(session: any, env: StripeEnv) {
+  const meta = (session?.metadata ?? {}) as Record<string, string | undefined>;
+  const userId = meta.userId;
+  const itemId = meta.storeItemId;
+  if (!userId || !itemId) {
+    log("warn", "store checkout missing userId/itemId", { sessionId: session?.id });
+    return;
+  }
+  if (session?.payment_status && session.payment_status !== "paid" && session.mode !== "subscription") {
+    log("info", "ignoring unpaid store session", { sessionId: session.id });
+    return;
+  }
+  const supabase = await getAdminClient();
+  const { data: item } = await supabase
+    .from("store_items").select("*").eq("id", itemId).maybeSingle();
+  if (!item) {
+    log("warn", "store item not found", { itemId });
+    return;
+  }
+  const reference = `stripe:${env}:store:${session.id}`;
+
+  // Idempotency check via coin_transactions reference (for coin-reward items)
+  // and a marker insert for perk/stock (any item).
+  const { data: already } = await supabase
+    .from("coin_transactions").select("id").eq("reference", reference).maybeSingle();
+  if (already) {
+    log("info", "store checkout already processed", { reference });
+    return;
+  }
+
+  const coinReward = Number((item as any).coin_reward ?? 0);
+  if (coinReward > 0) {
+    const { error: creditErr } = await (supabase as any).rpc("credit_coin_transaction", {
+      _user_id: userId,
+      _amount: coinReward,
+      _type: "stripe_purchase",
+      _reference: reference,
+    });
+    if (creditErr) log("error", "store coin reward failed", { reference, err: creditErr.message });
+  } else {
+    // Still log a zero-amount ledger row so the idempotency check works.
+    await supabase.from("coin_transactions").insert({
+      user_id: userId, amount: 0, type: "store_purchase", reference,
+    });
+  }
+
+  // Increment stock_sold
+  await supabase.from("store_items")
+    .update({ stock_sold: ((item as any).stock_sold ?? 0) + 1 })
+    .eq("id", itemId);
+
+  // Grant perks
+  const perk = (item as any).perk_slug as string | null;
+  if (perk?.startsWith("role:")) {
+    const role = perk.slice(5).trim();
+    if (role) {
+      const { error } = await supabase
+        .from("user_roles")
+        .upsert({ user_id: userId, role }, { onConflict: "user_id,role" });
+      if (error) log("error", "store perk role grant failed", { role, err: error.message });
+    }
+  }
+
+  log("info", "store item fulfilled", { itemId, userId, coinReward, perk });
+}
+
 // ─── dispatch ──────────────────────────────────────────────────────────────
 export async function handleEvent(event: { id: string; type: string; data: { object: any } }, env: StripeEnv) {
   log("info", "handling event", { eventId: event.id, type: event.type, env });
@@ -370,8 +437,9 @@ export async function handleEvent(event: { id: string; type: string; data: { obj
     case "checkout.session.completed":
     case "transaction.completed": {
       const session = event.data.object;
-      const bundleId = session?.metadata?.bundleId;
-      if (isVipBundle(bundleId)) await grantVipFromCheckout(session, env);
+      const bundleId = session?.metadata?.bundleId as string | undefined;
+      if (bundleId?.startsWith("store:")) await fulfilStoreItemCheckout(session, env);
+      else if (isVipBundle(bundleId)) await grantVipFromCheckout(session, env);
       else await creditCoinsForSession(session, env);
       break;
     }
