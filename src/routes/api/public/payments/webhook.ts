@@ -418,9 +418,9 @@ async function fulfilStoreItemCheckout(session: any, env: StripeEnv) {
   // Grant perks
   const perk = (item as any).perk_slug as string | null;
   if (perk?.startsWith("role:")) {
-    const role = perk.slice(5).trim();
+    const role = perk.slice(5).trim() as "admin" | "boss" | "dev" | "og_bot" | "user" | "vip";
     if (role) {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("user_roles")
         .upsert({ user_id: userId, role }, { onConflict: "user_id,role" });
       if (error) log("error", "store perk role grant failed", { role, err: error.message });
