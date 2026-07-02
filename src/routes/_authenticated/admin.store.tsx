@@ -230,6 +230,23 @@ function AdminStorePage() {
     });
   }
 
+  function moveItem(catItems: StoreItem[], idx: number, dir: -1 | 1) {
+    const next = [...catItems];
+    const swap = idx + dir;
+    if (swap < 0 || swap >= next.length) return;
+    [next[idx], next[swap]] = [next[swap], next[idx]];
+    reorderItemsMut.mutate(next.map((x) => x.id));
+  }
+  function moveCategory(idx: number, dir: -1 | 1) {
+    const next = [...categories];
+    const swap = idx + dir;
+    if (swap < 0 || swap >= next.length) return;
+    [next[idx], next[swap]] = [next[swap], next[idx]];
+    reorderCatsMut.mutate(next.map((x) => x.id));
+  }
+
+
+
   return (
     <DashboardShell title="Store admin">
       <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-8">
