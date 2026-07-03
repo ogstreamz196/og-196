@@ -642,7 +642,7 @@ export function OgChat({
       <div className="relative flex min-h-0 flex-1 flex-col">
       <div
         ref={scrollRef}
-        className="flex-1 space-y-6 overflow-y-auto overscroll-contain px-4 py-6 sm:px-6 scroll-smooth [-webkit-overflow-scrolling:touch]"
+        className="flex-1 space-y-6 overflow-y-auto overscroll-contain px-4 pb-8 pt-6 sm:px-6 sm:pb-10 scroll-smooth [-webkit-overflow-scrolling:touch]"
         style={{ touchAction: "pan-y" }}
       >
 
@@ -846,7 +846,7 @@ export function OgChat({
           e.preventDefault();
           sendText(input);
         }}
-        className="sticky bottom-0 z-20 border-t border-border bg-card/95 px-3 py-3 pb-[max(0.875rem,env(safe-area-inset-bottom))] backdrop-blur transition-transform duration-150 supports-[backdrop-filter]:bg-card/70 sm:px-4 sm:py-2.5 sm:pb-[max(0.625rem,env(safe-area-inset-bottom))]"
+        className="sticky bottom-0 z-20 border-t-2 border-border/80 bg-card/95 px-3 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-[0_-12px_28px_-16px_rgba(0,0,0,0.55)] backdrop-blur transition-transform duration-150 supports-[backdrop-filter]:bg-card/75 sm:px-5 sm:pt-4 sm:pb-[max(1rem,env(safe-area-inset-bottom))]"
       >
 
         {attachment && (
