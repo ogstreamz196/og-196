@@ -48,6 +48,7 @@ import { Disc3, Flame } from "lucide-react";
 import { PoweredByOgBot } from "@/components/PoweredByOgBot";
 import { JobQueuePanel } from "@/components/library/JobQueuePanel";
 import { CategoryCard } from "@/components/library/CategoryCard";
+import { StyleComposer } from "@/components/library/StyleComposer";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { FoulMouthToggle } from "@/components/FoulMouthToggle";
 
