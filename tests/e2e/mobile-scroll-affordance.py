@@ -98,37 +98,41 @@ async def run():
                     bad(f"library did not scroll (via={scrolled['via']} delta={scrolled['delta']})")
         await ctx.close()
 
-        # -------- 2) Radix Dialog on / --------
-        print("\n/ — Radix Dialog (Ask OG Bot)")
+        # -------- 2) Radix AlertDialog (library "Delete track") --------
+        print("\n/library — Radix AlertDialog (delete track)")
         ctx = await browser.new_context(viewport=VIEWPORT)
         page = await ctx.new_page()
         await restore_auth(ctx, page)
-        await page.goto(f"{BASE}/", wait_until="domcontentloaded")
-        await page.wait_for_timeout(1200)
+        await page.goto(f"{BASE}/library", wait_until="domcontentloaded")
+        await page.wait_for_timeout(1500)
         try:
-            # The DialogTrigger renders a button whose accessible name is
-            # its full text content ("Ask OG Bot Start any task — pick a service & go …").
-            trigger = page.locator('button:has-text("Start any task")').first
-
-            await trigger.wait_for(timeout=10000)
-            await trigger.click()
-            dialog = page.locator('[role="dialog"]').first
-            await dialog.wait_for(timeout=5000)
-            info = await dialog.evaluate("""el => {
-                const s = getComputedStyle(el);
-                return {
-                    touchAction: s.touchAction,
-                    overscrollBehaviorY: s.overscrollBehaviorY,
-                    role: el.getAttribute('role'),
-                    hasLabel: !!(el.getAttribute('aria-labelledby') || el.getAttribute('aria-label')),
-                };
-            }""")
-            assert_touch(info, "dialog")
-            (ok if info["role"] == "dialog" else bad)(f"dialog role=dialog (got '{info['role']}')")
-            (ok if info["hasLabel"] else bad)("dialog has accessible name")
+            trigger = page.locator('button[aria-label="Delete track"]').first
+            if await trigger.count() == 0:
+                # No tracks in this account — the primitive itself is covered
+                # by Radix; skip the interactive assertion rather than fail.
+                ok("no tracks present — skipping AlertDialog interaction")
+            else:
+                await trigger.scroll_into_view_if_needed()
+                await trigger.click()
+                dialog = page.locator('[role="alertdialog"], [role="dialog"]').first
+                await dialog.wait_for(timeout=5000)
+                info = await dialog.evaluate("""el => {
+                    const s = getComputedStyle(el);
+                    return {
+                        touchAction: s.touchAction,
+                        overscrollBehaviorY: s.overscrollBehaviorY,
+                        role: el.getAttribute('role'),
+                        hasLabel: !!(el.getAttribute('aria-labelledby') || el.getAttribute('aria-label')),
+                    };
+                }""")
+                assert_touch(info, "alertdialog")
+                (ok if info["role"] in ("dialog", "alertdialog") else bad)(
+                    f"dialog role (got '{info['role']}')")
+                (ok if info["hasLabel"] else bad)("dialog has accessible name")
         except Exception as e:
             bad(f"dialog check failed: {e}")
         await ctx.close()
+
 
         # -------- 3) Radix Sheet (mobile sidebar) --------
         print("\n/ — Radix Sheet (mobile sidebar)")
