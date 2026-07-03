@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Loader2, FileText, Wand2,
   Coins, Check, Sparkles, Music2, AlertCircle, Play, RefreshCw,
@@ -30,7 +31,7 @@ import ogBotAsset from "@/assets/ogbot.png.asset.json";
 
 
 const LANGUAGES = [
-  "English", "Spanish", "French", "Portuguese", "Hindi", "Gujarati",
+  "English", "Spanish", "French", "Portuguese", "Hindi", "Bharuchi Accent",
   "Marathi", "Bengali", "Tamil", "Telugu", "Kannada", "Malayalam",
   "Urdu", "Punjabi", "Arabic", "Swahili", "Patois", "Yoruba", "German",
   "Italian", "Romanian", "Filipino", "Tagalog", "Cebuano", "Mandarin", "Japanese",
@@ -69,6 +70,10 @@ interface Props {
 export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const { data: settings } = useSettings();
   const { data: profile } = useProfile();
+  const queryClient = useQueryClient();
+  const refreshCoinBalance = () => {
+    queryClient.invalidateQueries({ queryKey: ["profile"] });
+  };
   const { foulMouth } = useFoulMouth();
   const setFoulMouth = useSetFoulMouth();
 
@@ -150,6 +155,8 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       if (lastStatus.current === "pending" || lastStatus.current === "processing") {
         if (isReady) toast.success("Sample ready — full track unlocked");
         else if (isFailed) toast.error(song.error_message || "Generation failed — coins refunded");
+        // Refresh coin balance after generation settles (unlock cost or refund).
+        refreshCoinBalance();
       }
       lastStatus.current = song.status;
       return;
@@ -334,6 +341,8 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
         return;
       }
       toast.success(`Generating · -${previewCost} coins`);
+      // Refresh coin balance immediately after the deduction on the server.
+      refreshCoinBalance();
       onSaved?.();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not start generation");
