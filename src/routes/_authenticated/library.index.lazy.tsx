@@ -49,6 +49,7 @@ import { PoweredByOgBot } from "@/components/PoweredByOgBot";
 import { JobQueuePanel } from "@/components/library/JobQueuePanel";
 import { CategoryCard } from "@/components/library/CategoryCard";
 import { StyleComposer } from "@/components/library/StyleComposer";
+import { CollapsibleStep } from "@/components/library/CollapsibleStep";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { FoulMouthToggle } from "@/components/FoulMouthToggle";
 
