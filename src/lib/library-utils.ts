@@ -5,7 +5,7 @@ export type Category = "language" | "genre" | "mood" | "theme";
 export const POOLS: Record<Category, string[]> = {
   language: [
     "English", "Spanish", "French", "German", "Italian", "Portuguese",
-    "Japanese", "Korean", "Mandarin", "Hindi", "Bharuchi Accent", "Marathi",
+    "Japanese", "Korean", "Mandarin", "Hindi", "Gujarati", "Marathi",
     "Bengali", "Tamil", "Telugu", "Kannada", "Malayalam", "Punjabi",
     "Urdu", "Arabic", "Swahili", "Yoruba", "Russian", "Turkish",
     "Romanian", "Dutch", "Greek",
