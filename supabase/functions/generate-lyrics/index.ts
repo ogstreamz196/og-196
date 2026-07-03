@@ -33,6 +33,7 @@ Deno.serve(async (req) => {
     const language = (body.language ?? "English").toString().trim().slice(0, 50);
     let personalDetails = (body.personalDetails ?? "").toString().trim().slice(0, 500);
     const extraContext = (body.extraContext ?? "").toString().trim().slice(0, 1000);
+    const subjectName = (body.subjectName ?? "").toString().trim().slice(0, 60);
 
     if (!songName && !description) {
       return jsonResponse({ error: "Provide a song name or description" }, 400);
