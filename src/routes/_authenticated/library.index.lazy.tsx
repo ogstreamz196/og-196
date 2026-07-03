@@ -114,15 +114,14 @@ function LibraryPage() {
   }, [profile?.display_name, user?.email, dev.isDev]);
 
   const [title, setTitle] = useState("");
-  // Defaults: English locked as the default language, other categories are
-  // freshly randomised on every mount so the picker feels alive.
+  const [subjectName, setSubjectName] = useState("");
+  // Defaults: English locked as the default language. Genre/mood/theme are now
+  // composed via the single StyleComposer field below (styleText).
   const [selections, setSelections] = useState<Selections>(() => ({
     language: "English",
-    genre: randomPick(POOLS.genre),
-    mood: randomPick(POOLS.mood),
-    theme: randomPick(POOLS.theme),
   }));
   const [chips, setChips] = useState<Record<Category, string[]>>(() => initialChips());
+  const [styleText, setStyleText] = useState("");
   const [lyrics, setLyrics] = useState("");
   const [genLyrics, setGenLyrics] = useState(false);
   const { foulMouth } = useFoulMouth();
