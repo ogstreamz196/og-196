@@ -2,24 +2,6 @@
 """Mobile scrollability + scroll-affordance a11y check (see repo docs)."""
 import re
 
-
-
-At 390x844 (mobile), verifies:
-  1. /library main list is vertically scrollable and applies the shared
-     touch tokens (touch-action: pan-y, overscroll-behavior-y: contain).
-  2. A Radix Dialog (home "Ask OG Bot" trigger) opens, its [role="dialog"]
-     content applies the same touch tokens, and has an accessible name.
-  3. A Radix Sheet (mobile sidebar via the sidebar trigger) opens, its
-     content applies the same touch tokens, and exposes role="dialog".
-  4. Scroll-fade mask-image is gated by `prefers-contrast: no-preference`
-     AND `prefers-reduced-transparency: no-preference`, so faded edge text
-     is disabled for users who opted into higher contrast.
-
-Exit 0 clean, 1 on any failure.
-
-Run:
-  python3 tests/e2e/mobile-scroll-affordance.py
-"""
 import asyncio
 import json
 import os
