@@ -95,9 +95,11 @@ Deno.serve(async (req) => {
 
     const generationStartedAt = new Date().toISOString();
 
-    // If reusing an existing draft, load it and guard against double-charging
-
-    // a song that is already in flight (client retry / duplicate submit).
+    // Idempotency: if reusing an existing draft, atomically flip its status
+    // from a chargeable state (draft/failed) to 'pending' BEFORE deducting.
+    // Concurrent duplicate submissions (double-click, client retries, network
+    // retries) all target the same row — only one UPDATE affects a row, the
+    // rest see zero rows and short-circuit with 409 without charging.
     let existing: { id: string; user_id: string; status: string } | null = null;
     if (existingSongId) {
       const { data: row, error: exErr } = await admin
@@ -106,21 +108,41 @@ Deno.serve(async (req) => {
         .eq("id", existingSongId)
         .maybeSingle();
       if (exErr) return json({ error: exErr.message }, 500);
-      if (row && row.user_id !== user.id) return json({ error: "Song not found" }, 404);
-      if (row && (row.status === "pending" || row.status === "processing")) {
+      if (!row) return json({ error: "Song not found" }, 404);
+      if (row.user_id !== user.id) return json({ error: "Song not found" }, 404);
+      if (row.status === "pending" || row.status === "processing") {
         return json({ error: "Song is already generating", code: "already_generating", song_id: row.id }, 409);
+      }
+      // Atomic claim — only one concurrent request wins.
+      const { data: claimed, error: claimErr } = await admin
+        .from("songs")
+        .update({ status: "pending", generation_started_at: generationStartedAt, error_message: null })
+        .eq("id", existingSongId)
+        .in("status", ["draft", "failed", "completed"])
+        .select("id")
+        .maybeSingle();
+      if (claimErr) return json({ error: claimErr.message }, 500);
+      if (!claimed) {
+        return json({ error: "Song is already generating", code: "already_generating", song_id: existingSongId }, 409);
       }
       existing = row;
     }
 
     // Deduct coins FIRST so a rejected charge does not litter the library
-    // with an orphan "failed – insufficient coins" song row.
+    // with an orphan "failed – insufficient coins" song row. Using the song id
+    // as the charge reference makes the coin_transactions row idempotent per
+    // generation attempt.
+    const chargeReference = existing?.id ?? crypto.randomUUID();
     const { data: balance, error: deductErr } = await admin.rpc("deduct_coins", {
       p_user: user.id,
       p_amount: coinCost,
-      p_reference: existing?.id ?? crypto.randomUUID(),
+      p_reference: chargeReference,
     });
     if (deductErr) {
+      // Roll the row back so a retry can charge cleanly.
+      if (existing) {
+        await admin.from("songs").update({ status: existing.status }).eq("id", existing.id);
+      }
       return json({ error: "Insufficient coins", code: "insufficient_coins" }, 402);
     }
 

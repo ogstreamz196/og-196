@@ -166,11 +166,11 @@ function AdminPanel() {
           <AdminCollapsible storageKey="og-coins" title="OG Coins" subtitle="Boss coin operations" defaultOpen>
             <OgCoinsPanel />
           </AdminCollapsible>
-          <AdminCollapsible storageKey="pricing" title="Pricing & limits" subtitle="Generation, unlock and signup costs">
-            <PricingControls />
-          </AdminCollapsible>
           <AdminCollapsible storageKey="mint-coins" title="Mint coins" subtitle="Grant or deduct user balance">
             <MintCoinsPanel />
+          </AdminCollapsible>
+          <AdminCollapsible storageKey="pricing" title="Pricing & limits" subtitle="Generation, unlock and signup costs">
+            <PricingControls />
           </AdminCollapsible>
         </section>
 
@@ -186,14 +186,11 @@ function AdminPanel() {
           <AdminCollapsible storageKey="capabilities" title="Hardwired capabilities" subtitle="Connector & runtime status">
             <HardwiredCapabilities />
           </AdminCollapsible>
-          <AdminCollapsible storageKey="boss-notifs" title="Boss notifications" subtitle="DM preferences">
-            <BossNotificationsPanel />
-          </AdminCollapsible>
         </section>
 
-        {/* Group: Telegram & Diagnostics */}
+        {/* Group: Telegram — everything OG Bot / Telegram-related in one place */}
         <section className="space-y-3">
-          <FlameHeading as="h3" size="lg">Telegram & Diagnostics</FlameHeading>
+          <FlameHeading as="h3" size="lg">Telegram</FlameHeading>
           <AdminCollapsible storageKey="og-bot-ping" title="OG Bot ping" subtitle="Verify OG Bot connectivity">
             <OgBotPing />
           </AdminCollapsible>
@@ -203,6 +200,14 @@ function AdminPanel() {
           <AdminCollapsible storageKey="telegram-smoke" title="Telegram smoke test" subtitle="getMe + webhook check">
             <TelegramSmokeTest />
           </AdminCollapsible>
+          <AdminCollapsible storageKey="boss-notifs" title="Boss DM notifications" subtitle="Telegram DM preferences">
+            <BossNotificationsPanel />
+          </AdminCollapsible>
+        </section>
+
+        {/* Group: Diagnostics — non-Telegram smoke tests only */}
+        <section className="space-y-3">
+          <FlameHeading as="h3" size="lg">Diagnostics</FlameHeading>
           <AdminCollapsible storageKey="e2e-smoke" title="End-to-end smoke test" subtitle="Full stack flow">
             <E2ESmokeTest />
           </AdminCollapsible>
