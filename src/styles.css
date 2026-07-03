@@ -300,7 +300,7 @@
      full — but we disable them when the user prefers higher contrast or
      reduced transparency so faded text near the edge never drops below
      WCAG AA. The scrollbar affordance stays on in those modes. */
-  @media (max-width: 767px) and (prefers-contrast: no-preference) and (prefers-reduced-transparency: no-preference) {
+  @media (max-width: 767px) and (not (prefers-contrast: more)) and (not (prefers-reduced-transparency: reduce)) {
     [data-scroll-fade],
     [data-radix-scroll-area-viewport],
     main[class*="overflow-y-auto"] {
