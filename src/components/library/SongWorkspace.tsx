@@ -70,6 +70,10 @@ interface Props {
 export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const { data: settings } = useSettings();
   const { data: profile } = useProfile();
+  const queryClient = useQueryClient();
+  const refreshCoinBalance = () => {
+    queryClient.invalidateQueries({ queryKey: ["profile"] });
+  };
   const { foulMouth } = useFoulMouth();
   const setFoulMouth = useSetFoulMouth();
 
