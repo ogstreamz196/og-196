@@ -31,7 +31,7 @@ import ogBotAsset from "@/assets/ogbot.png.asset.json";
 
 
 const LANGUAGES = [
-  "English", "Spanish", "French", "Portuguese", "Hindi", "Bharuchi Accent",
+  "English", "Spanish", "French", "Portuguese", "Hindi", "Gujarati",
   "Marathi", "Bengali", "Tamil", "Telugu", "Kannada", "Malayalam",
   "Urdu", "Punjabi", "Arabic", "Swahili", "Patois", "Yoruba", "German",
   "Italian", "Romanian", "Filipino", "Tagalog", "Cebuano", "Mandarin", "Japanese",
