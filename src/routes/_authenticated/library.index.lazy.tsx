@@ -1076,7 +1076,9 @@ function LibraryPage() {
         open={reviewOpen}
         onOpenChange={(o) => !genSong && setReviewOpen(o)}
         title={title}
+        subjectName={subjectName}
         selections={selections}
+        styleText={styleText}
         personalDetails={personalDetails}
         extraContext={extraContext}
         foulMouth={foulMouth}
