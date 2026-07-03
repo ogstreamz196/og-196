@@ -70,44 +70,47 @@ export function CategoryCard({
           </SelectContent>
         </Select>
 
-        <div className="space-y-2.5">
-          <div className="flex items-center justify-between gap-2">
-            <div className="font-bungee text-base sm:text-lg uppercase text-muted-foreground">
-              Quick picks
+        {cat !== "language" && cat !== "mood" && (
+          <div className="space-y-2.5">
+            <div className="flex items-center justify-between gap-2">
+              <div className="font-bungee text-base sm:text-lg uppercase text-muted-foreground">
+                Quick picks
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={onRefresh}
+                aria-label={`Shuffle ${meta.label} suggestions`}
+                className={`h-8 shrink-0 gap-1.5 px-2.5 text-xs font-bold ${meta.accent} hover:bg-white/5`}
+              >
+                <RefreshCw className="h-3.5 w-3.5" />
+                Shuffle
+              </Button>
             </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={onRefresh}
-              aria-label={`Shuffle ${meta.label} suggestions`}
-              className={`h-8 shrink-0 gap-1.5 px-2.5 text-xs font-bold ${meta.accent} hover:bg-white/5`}
-            >
-              <RefreshCw className="h-3.5 w-3.5" />
-              Shuffle
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              {chips.map((chip) => {
+                const active = value === chip;
+                return (
+                  <button
+                    key={chip}
+                    type="button"
+                    onClick={() => onPickChip(chip)}
+                    className={
+                      "rounded-full border px-3.5 py-2 text-sm font-semibold transition-all hover:-translate-y-0.5 " +
+                      (active
+                        ? meta.chipActive
+                        : "border-white/10 bg-white/[0.04] text-foreground/90 hover:border-white/25 hover:bg-white/10")
+                    }
+                  >
+                    {chip}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {chips.map((chip) => {
-              const active = value === chip;
-              return (
-                <button
-                  key={chip}
-                  type="button"
-                  onClick={() => onPickChip(chip)}
-                  className={
-                    "rounded-full border px-3.5 py-2 text-sm font-semibold transition-all hover:-translate-y-0.5 " +
-                    (active
-                      ? meta.chipActive
-                      : "border-white/10 bg-white/[0.04] text-foreground/90 hover:border-white/25 hover:bg-white/10")
-                  }
-                >
-                  {chip}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        )}
+
       </div>
     </div>
   );
