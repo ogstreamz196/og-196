@@ -70,17 +70,34 @@ async def run():
         except Exception as e:
             bad(f"library-root did not render: {e}")
         else:
+            # Check the *actual* scrolling ancestor of the library root, not
+            # library-root itself — the list uses page-level scroll, so the
+            # touch/overscroll tokens live on <main> or <html>.
             info = await page.evaluate("""() => {
-                const el = document.querySelector('[data-testid=\"library-root\"]');
-                const s = getComputedStyle(el);
+                const root = document.querySelector('[data-testid=\"library-root\"]');
+                const scroller = document.scrollingElement || document.documentElement;
+                let node = root;
+                let owner = scroller;
+                while (node && node !== document.body) {
+                    const s = getComputedStyle(node);
+                    if (/(auto|scroll)/.test(s.overflowY)) { owner = node; break; }
+                    node = node.parentElement;
+                }
+                const rs = getComputedStyle(root);
+                const os = getComputedStyle(owner);
                 return {
-                    touchAction: s.touchAction,
-                    overscrollBehaviorY: s.overscrollBehaviorY,
+                    rootTouchAction: rs.touchAction,
+                    touchAction: os.touchAction,
+                    overscrollBehaviorY: os.overscrollBehaviorY,
+                    ownerTag: owner.tagName.toLowerCase() + (owner.id ? '#' + owner.id : ''),
                     dsh: document.documentElement.scrollHeight,
                     dch: document.documentElement.clientHeight,
                 };
             }""")
-            assert_touch(info, "library-root")
+            (ok if 'pan-y' in (info['rootTouchAction'] or '') else bad)(
+                f"library-root: touch-action pan-y (got '{info['rootTouchAction']}')")
+            assert_touch(info, f"library scroll owner ({info['ownerTag']})")
+
             if info["dsh"] <= info["dch"] + 4:
                 ok("library fits without scroll (nothing to scroll)")
             else:
