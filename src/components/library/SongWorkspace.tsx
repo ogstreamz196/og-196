@@ -155,6 +155,8 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       if (lastStatus.current === "pending" || lastStatus.current === "processing") {
         if (isReady) toast.success("Sample ready — full track unlocked");
         else if (isFailed) toast.error(song.error_message || "Generation failed — coins refunded");
+        // Refresh coin balance after generation settles (unlock cost or refund).
+        refreshCoinBalance();
       }
       lastStatus.current = song.status;
       return;
