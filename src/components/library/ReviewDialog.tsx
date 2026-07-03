@@ -9,13 +9,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { META, type Category, type Selections } from "@/lib/library-utils";
+import { META, type Selections } from "@/lib/library-utils";
 
 interface ReviewDialogProps {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   title: string;
+  subjectName?: string;
   selections: Selections;
+  styleText?: string;
   personalDetails: string;
   extraContext: string;
   foulMouth: boolean;
@@ -25,13 +27,13 @@ interface ReviewDialogProps {
   onConfirm: () => void | Promise<void>;
 }
 
-const CATS: Category[] = ["language", "genre", "mood", "theme"];
-
 export function ReviewDialog({
   open,
   onOpenChange,
   title,
+  subjectName = "",
   selections,
+  styleText = "",
   personalDetails,
   extraContext,
   foulMouth,
@@ -61,6 +63,11 @@ export function ReviewDialog({
               </h3>
               <div className="mt-2 rounded-xl border border-white/10 bg-card/60 p-3">
                 <p className="text-base font-bold">{title.trim() || "Untitled"}</p>
+                {subjectName.trim() && (
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    For <span className="font-semibold text-foreground">{subjectName.trim()}</span>
+                  </p>
+                )}
                 {foulMouth && (
                   <span className="mt-1 inline-block rounded-full border border-destructive/40 bg-destructive/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-destructive">
                     Explicit
@@ -73,20 +80,24 @@ export function ReviewDialog({
               <h3 id="rv-cats" className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
                 Style
               </h3>
-              <dl className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {CATS.map((c) => {
-                  const v = selections[c];
-                  if (!v) return null;
-                  return (
-                    <div key={c} className="rounded-xl border border-white/10 bg-card/60 p-3">
-                      <dt className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                        {META[c].emoji} {META[c].label}
-                      </dt>
-                      <dd className="mt-0.5 text-sm font-semibold">{v}</dd>
+              <div className="mt-2 space-y-2">
+                {selections.language && (
+                  <div className="rounded-xl border border-white/10 bg-card/60 p-3">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                      {META.language.emoji} {META.language.label}
                     </div>
-                  );
-                })}
-              </dl>
+                    <div className="mt-0.5 text-sm font-semibold">{selections.language}</div>
+                  </div>
+                )}
+                {styleText.trim() && (
+                  <div className="rounded-xl border border-white/10 bg-card/60 p-3">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                      ✨ Style description
+                    </div>
+                    <p className="mt-0.5 text-sm font-semibold leading-relaxed">{styleText.trim()}</p>
+                  </div>
+                )}
+              </div>
             </section>
 
             {personalDetails.trim() && (

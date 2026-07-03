@@ -48,6 +48,7 @@ import { Disc3, Flame } from "lucide-react";
 import { PoweredByOgBot } from "@/components/PoweredByOgBot";
 import { JobQueuePanel } from "@/components/library/JobQueuePanel";
 import { CategoryCard } from "@/components/library/CategoryCard";
+import { StyleComposer } from "@/components/library/StyleComposer";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { FoulMouthToggle } from "@/components/FoulMouthToggle";
 
@@ -113,15 +114,14 @@ function LibraryPage() {
   }, [profile?.display_name, user?.email, dev.isDev]);
 
   const [title, setTitle] = useState("");
-  // Defaults: English locked as the default language, other categories are
-  // freshly randomised on every mount so the picker feels alive.
+  const [subjectName, setSubjectName] = useState("");
+  // Defaults: English locked as the default language. Genre/mood/theme are now
+  // composed via the single StyleComposer field below (styleText).
   const [selections, setSelections] = useState<Selections>(() => ({
     language: "English",
-    genre: randomPick(POOLS.genre),
-    mood: randomPick(POOLS.mood),
-    theme: randomPick(POOLS.theme),
   }));
   const [chips, setChips] = useState<Record<Category, string[]>>(() => initialChips());
+  const [styleText, setStyleText] = useState("");
   const [lyrics, setLyrics] = useState("");
   const [genLyrics, setGenLyrics] = useState(false);
   const { foulMouth } = useFoulMouth();
@@ -141,14 +141,13 @@ function LibraryPage() {
   const [yoursSearch, setYoursSearch] = useState("");
   const [communitySearch, setCommunitySearch] = useState("");
 
-  // Build a human-readable line from the current category selections.
+  // Build a human-readable line from language + freeform style text.
   const selectionsLine = useMemo(() => {
-    const cats: Category[] = ["language", "genre", "mood", "theme"];
-    return cats
-      .map((c) => (selections[c] ? `${META[c].label}: ${selections[c]}` : null))
-      .filter(Boolean)
-      .join(" · ");
-  }, [selections]);
+    const parts: string[] = [];
+    if (selections.language) parts.push(`Language: ${selections.language}`);
+    if (styleText.trim()) parts.push(`Style: ${styleText.trim()}`);
+    return parts.join(" · ");
+  }, [selections.language, styleText]);
 
   // Sync the auto-built line into the lyric description box. Preserve any
   // free-text the user added below the auto-line on their own.
@@ -187,33 +186,38 @@ function LibraryPage() {
     });
   }
 
+  // Style tags fed to the AI = the tokens the user assembled in the composer.
   const styleTags = useMemo(
-    () => [selections.genre, selections.mood].filter(Boolean) as string[],
-    [selections.genre, selections.mood],
+    () =>
+      styleText
+        .split(/[·,\n]+/)
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .slice(0, 10),
+    [styleText],
   );
 
-  const filledExtras =
-    (selections.genre ? 1 : 0) +
-    (selections.mood ? 1 : 0) +
-    (selections.theme ? 1 : 0);
+  const hasStyle = styleText.trim().length > 0;
 
   const totalFilled =
-    (title.trim() ? 1 : 0) + (selections.language ? 1 : 0) + filledExtras;
+    (title.trim() ? 1 : 0) +
+    (subjectName.trim() ? 1 : 0) +
+    (selections.language ? 1 : 0) +
+    (hasStyle ? 1 : 0);
   const progress = Math.min(100, Math.round((totalFilled / 4) * 100));
 
   const canGenerateLyrics =
-    !!title.trim() && !!selections.language && filledExtras >= 1 && balance >= lyricsCost;
+    !!title.trim() &&
+    !!subjectName.trim() &&
+    !!selections.language &&
+    hasStyle &&
+    balance >= lyricsCost;
 
   async function generateLyrics() {
     if (!canGenerateLyrics) return;
     setGenLyrics(true);
     try {
-      const description = [
-        selections.theme ? `Theme: ${selections.theme}` : null,
-        selections.mood ? `Mood & Tempo: ${selections.mood}` : null,
-      ]
-        .filter(Boolean)
-        .join(" · ");
+      const description = styleText.trim();
       const combinedExtra = extraContext.trim();
 
       const { data, error } = await supabase.functions.invoke("generate-lyrics", {
@@ -225,6 +229,7 @@ function LibraryPage() {
           foulMouth,
           personalDetails: personalDetails.trim() || undefined,
           extraContext: combinedExtra || undefined,
+          subjectName: subjectName.trim() || undefined,
         },
       });
       if (error) {
@@ -250,6 +255,7 @@ function LibraryPage() {
     }
   }
 
+
   async function generateSong() {
     if (!user) return;
     if (!lyrics.trim()) {
@@ -263,12 +269,11 @@ function LibraryPage() {
     setGenSong(true);
     try {
       // Backend enforces global + per-user concurrency limits (returns 429 when over capacity).
-      const style = [selections.genre, selections.mood]
-        .filter(Boolean)
-        .join(" · ");
+      const style = styleText.trim();
       const promptText = [
         title.trim(),
-        selections.theme ? `About: ${selections.theme}` : null,
+        subjectName.trim() ? `For: ${subjectName.trim()}` : null,
+        style ? `Style: ${style}` : null,
         selections.language ? `Language: ${selections.language}` : null,
       ]
         .filter(Boolean)
@@ -842,12 +847,13 @@ function LibraryPage() {
               size="sm"
               onClick={() => {
                 setTitle(randomPick(SURPRISE_TITLES));
-                setSelections({
-                  language: randomPick(POOLS.language),
-                  genre: randomPick(POOLS.genre),
-                  mood: randomPick(POOLS.mood),
-                  theme: randomPick(POOLS.theme),
-                });
+                setSubjectName(
+                  randomPick(["Aaliyah", "Marcus", "Sam", "Jordan", "Dre", "Priya", "Leo", "Maya"]),
+                );
+                setSelections({ language: randomPick(POOLS.language) });
+                setStyleText(
+                  `${randomPick(POOLS.genre)} · ${randomPick(POOLS.mood)} · ${randomPick(POOLS.theme)}`,
+                );
                 setPersonalDetails(randomPick(SURPRISE_TEMPLATES).slice(0, PERSONAL_DETAILS_MAX));
                 toast.success("Surprise prompt loaded");
               }}
@@ -857,6 +863,27 @@ function LibraryPage() {
               Surprise me
             </Button>
           </div>
+        </div>
+
+        {/* Name — repeated throughout the lyrics so it feels made-for-them */}
+        <div className="space-y-3">
+          <Label
+            htmlFor="subject-name"
+            className="block font-bungee text-3xl leading-[1.05] tracking-tight uppercase break-words sm:text-5xl"
+          >
+            Name
+          </Label>
+          <Input
+            id="subject-name"
+            value={subjectName}
+            onChange={(e) => setSubjectName(e.target.value.slice(0, 60))}
+            placeholder="Who's this song for? e.g. Aaliyah"
+            maxLength={60}
+            className="h-12 min-w-0 rounded-xl border-2 border-primary/30 bg-background/80 px-3 text-lg font-bold focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/30 sm:h-14 sm:text-xl"
+          />
+          <p className="text-xs font-medium text-muted-foreground">
+            OG will weave <span className="text-foreground">{subjectName.trim() || "their name"}</span> through the hook and verses — heavy but never overpowering.
+          </p>
         </div>
 
         {/* Personal details */}
@@ -919,23 +946,21 @@ function LibraryPage() {
           </div>
         </div>
 
-        {/* Sound categories */}
+        {/* Sound — language picker + one unified style composer */}
         <div className="space-y-3">
           <div className="font-bungee text-4xl sm:text-5xl uppercase">
             Sound
           </div>
           <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 sm:gap-5">
-            {(["language", "genre", "mood", "theme"] as Category[]).map((cat) => (
-              <CategoryCard
-                key={cat}
-                cat={cat}
-                value={selections[cat]}
-                chips={chips[cat]}
-                onSelect={(v) => setField(cat, v)}
-                onPickChip={(v) => pickChip(cat, v)}
-                onRefresh={() => refreshRow(cat)}
-              />
-            ))}
+            <CategoryCard
+              cat="language"
+              value={selections.language}
+              chips={chips.language}
+              onSelect={(v) => setField("language", v)}
+              onPickChip={(v) => pickChip("language", v)}
+              onRefresh={() => refreshRow("language")}
+            />
+            <StyleComposer value={styleText} onChange={setStyleText} />
           </div>
         </div>
 
@@ -964,9 +989,11 @@ function LibraryPage() {
                   ? `Not enough coins — needs ${lyricsCost}, you have ${balance}`
                   : !title.trim()
                     ? `Add a title to unlock · costs ${lyricsCost} coin${lyricsCost === 1 ? "" : "s"}`
-                    : !selections.language
-                      ? `Pick a language to unlock · costs ${lyricsCost} coin${lyricsCost === 1 ? "" : "s"}`
-                      : `Pick at least one style detail to unlock · costs ${lyricsCost} coin${lyricsCost === 1 ? "" : "s"}`}
+                    : !subjectName.trim()
+                      ? `Add a name so we can weave it into the lyrics · costs ${lyricsCost} coin${lyricsCost === 1 ? "" : "s"}`
+                      : !selections.language
+                        ? `Pick a language to unlock · costs ${lyricsCost} coin${lyricsCost === 1 ? "" : "s"}`
+                        : `Add at least one style chip or type your own · costs ${lyricsCost} coin${lyricsCost === 1 ? "" : "s"}`}
               </p>
             )}
           </div>
@@ -1049,7 +1076,9 @@ function LibraryPage() {
         open={reviewOpen}
         onOpenChange={(o) => !genSong && setReviewOpen(o)}
         title={title}
+        subjectName={subjectName}
         selections={selections}
+        styleText={styleText}
         personalDetails={personalDetails}
         extraContext={extraContext}
         foulMouth={foulMouth}

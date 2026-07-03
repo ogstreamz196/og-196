@@ -33,6 +33,7 @@ Deno.serve(async (req) => {
     const language = (body.language ?? "English").toString().trim().slice(0, 50);
     let personalDetails = (body.personalDetails ?? "").toString().trim().slice(0, 500);
     const extraContext = (body.extraContext ?? "").toString().trim().slice(0, 1000);
+    const subjectName = (body.subjectName ?? "").toString().trim().slice(0, 60);
 
     if (!songName && !description) {
       return jsonResponse({ error: "Provide a song name or description" }, 400);
@@ -168,15 +169,20 @@ Deno.serve(async (req) => {
         structureRule + bilingualRule +
         ` Target 380–500 words. Output ONLY the lyrics, no explanations.`;
 
+    const subjectRule = subjectName
+      ? `\nSUBJECT NAME (very important): The song is dedicated to "${subjectName}". Repeat "${subjectName}" throughout the lyrics so it clearly feels made-for-them: land the name in the hook/chorus every single time it appears (so the name repeats naturally with every chorus), and drop it at least once in every verse and the bridge. Aim for the name to appear roughly 8–14 times across the full song. Blend it musically into the flow — never chant it back-to-back, never force it where it breaks the rhyme, and never let it overpower the theme. It should feel embedded and affectionate, not shouted.\n`
+      : "";
+
     const userPrompt =
       `Song title: ${songName || "(untitled)"}\n` +
+      (subjectName ? `Dedicated to: ${subjectName}\n` : "") +
       `Theme / description: ${description || "(none)"}\n` +
       `Style tags: ${styleTags.join(", ") || "(none)"}\n` +
       `Language: ${language}\n` +
       (personalDetails
         ? `Artist profile (weave these into the lyrics naturally — reference the artist's name and a couple of personal details across the song so it feels personal, but DO NOT force them into every line, and never let them overpower the theme. Aim for the name/details to appear roughly 2–4 times total, ideally in the hook/chorus or a memorable line, spread across different sections — not back-to-back): ${personalDetails}\n`
         : "") +
-
+      subjectRule +
       (extraContext ? `Extra context from the artist: ${extraContext}\n` : "") +
       `\nWrite the FULL two-minute song now — do not stop early.`;
 
