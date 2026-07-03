@@ -252,6 +252,25 @@
     padding-right: max(var(--safe-pad, 0px), env(safe-area-inset-right));
   }
 
+  /* ---- Smooth single-finger scroll on every scrollable region (iOS/Android) ----
+     Any element that opts into vertical scrolling gets momentum, contained
+     scroll-chaining, and pan-y touch so one finger never gets "stuck" between
+     nested scroll containers (main shell + inner chat/library lists). */
+  .overflow-y-auto,
+  .overflow-auto,
+  .overflow-y-scroll,
+  [data-scroll-container] {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+    scroll-behavior: smooth;
+  }
+  /* Kill the 300ms tap delay and grey flash so scrolling feels native. */
+  a, button, [role="button"], [role="tab"], [role="switch"], summary {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+
   /* ---- Mobile app-style polish ---- */
   @media (max-width: 767px) {
     /* No accidental horizontal scroll on phones. */
