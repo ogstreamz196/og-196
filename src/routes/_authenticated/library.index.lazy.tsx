@@ -989,9 +989,11 @@ function LibraryPage() {
                   ? `Not enough coins — needs ${lyricsCost}, you have ${balance}`
                   : !title.trim()
                     ? `Add a title to unlock · costs ${lyricsCost} coin${lyricsCost === 1 ? "" : "s"}`
-                    : !selections.language
-                      ? `Pick a language to unlock · costs ${lyricsCost} coin${lyricsCost === 1 ? "" : "s"}`
-                      : `Pick at least one style detail to unlock · costs ${lyricsCost} coin${lyricsCost === 1 ? "" : "s"}`}
+                    : !subjectName.trim()
+                      ? `Add a name so we can weave it into the lyrics · costs ${lyricsCost} coin${lyricsCost === 1 ? "" : "s"}`
+                      : !selections.language
+                        ? `Pick a language to unlock · costs ${lyricsCost} coin${lyricsCost === 1 ? "" : "s"}`
+                        : `Add at least one style chip or type your own · costs ${lyricsCost} coin${lyricsCost === 1 ? "" : "s"}`}
               </p>
             )}
           </div>
