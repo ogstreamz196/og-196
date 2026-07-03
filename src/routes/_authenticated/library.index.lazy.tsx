@@ -141,14 +141,13 @@ function LibraryPage() {
   const [yoursSearch, setYoursSearch] = useState("");
   const [communitySearch, setCommunitySearch] = useState("");
 
-  // Build a human-readable line from the current category selections.
+  // Build a human-readable line from language + freeform style text.
   const selectionsLine = useMemo(() => {
-    const cats: Category[] = ["language", "genre", "mood", "theme"];
-    return cats
-      .map((c) => (selections[c] ? `${META[c].label}: ${selections[c]}` : null))
-      .filter(Boolean)
-      .join(" · ");
-  }, [selections]);
+    const parts: string[] = [];
+    if (selections.language) parts.push(`Language: ${selections.language}`);
+    if (styleText.trim()) parts.push(`Style: ${styleText.trim()}`);
+    return parts.join(" · ");
+  }, [selections.language, styleText]);
 
   // Sync the auto-built line into the lyric description box. Preserve any
   // free-text the user added below the auto-line on their own.
@@ -187,33 +186,38 @@ function LibraryPage() {
     });
   }
 
+  // Style tags fed to the AI = the tokens the user assembled in the composer.
   const styleTags = useMemo(
-    () => [selections.genre, selections.mood].filter(Boolean) as string[],
-    [selections.genre, selections.mood],
+    () =>
+      styleText
+        .split(/[·,\n]+/)
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .slice(0, 10),
+    [styleText],
   );
 
-  const filledExtras =
-    (selections.genre ? 1 : 0) +
-    (selections.mood ? 1 : 0) +
-    (selections.theme ? 1 : 0);
+  const hasStyle = styleText.trim().length > 0;
 
   const totalFilled =
-    (title.trim() ? 1 : 0) + (selections.language ? 1 : 0) + filledExtras;
+    (title.trim() ? 1 : 0) +
+    (subjectName.trim() ? 1 : 0) +
+    (selections.language ? 1 : 0) +
+    (hasStyle ? 1 : 0);
   const progress = Math.min(100, Math.round((totalFilled / 4) * 100));
 
   const canGenerateLyrics =
-    !!title.trim() && !!selections.language && filledExtras >= 1 && balance >= lyricsCost;
+    !!title.trim() &&
+    !!subjectName.trim() &&
+    !!selections.language &&
+    hasStyle &&
+    balance >= lyricsCost;
 
   async function generateLyrics() {
     if (!canGenerateLyrics) return;
     setGenLyrics(true);
     try {
-      const description = [
-        selections.theme ? `Theme: ${selections.theme}` : null,
-        selections.mood ? `Mood & Tempo: ${selections.mood}` : null,
-      ]
-        .filter(Boolean)
-        .join(" · ");
+      const description = styleText.trim();
       const combinedExtra = extraContext.trim();
 
       const { data, error } = await supabase.functions.invoke("generate-lyrics", {
@@ -225,6 +229,7 @@ function LibraryPage() {
           foulMouth,
           personalDetails: personalDetails.trim() || undefined,
           extraContext: combinedExtra || undefined,
+          subjectName: subjectName.trim() || undefined,
         },
       });
       if (error) {
@@ -249,6 +254,7 @@ function LibraryPage() {
       setGenLyrics(false);
     }
   }
+
 
   async function generateSong() {
     if (!user) return;
