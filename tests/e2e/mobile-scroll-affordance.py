@@ -181,20 +181,38 @@ async def run():
         await restore_auth(ctx, page)
         await page.goto(f"{BASE}/library", wait_until="domcontentloaded")
         await page.wait_for_timeout(500)
-        guarded = await page.evaluate("""() => {
-            const wanted = ['prefers-contrast', 'prefers-reduced-transparency'];
-            for (const sheet of Array.from(document.styleSheets)) {
-                try {
-                    for (const rule of Array.from(sheet.cssRules || [])) {
-                        const t = rule.cssText || '';
-                        if (t.includes('mask-image') && wanted.every(w => t.includes(w))) return true;
-                    }
-                } catch (e) {}
-            }
-            return false;
-        }""")
-        (ok if guarded else bad)("mask-image is gated behind both a11y prefs media queries")
+        # Actually toggle prefers-contrast:more via emulateMedia and read the
+        # computed mask-image — if it's 'none', the fade was correctly gated.
+        # Chromium exposes 'more'/'less'/'no-preference' for contrast.
         await ctx.close()
+
+        async def mask_for(contrast: str, transparency: str):
+            c = await browser.new_context(viewport=VIEWPORT)
+            pg = await c.new_page()
+            await c.route("**/*", lambda route: route.continue_())
+            try:
+                await pg.emulate_media(contrast=contrast, reduced_motion="no-preference")
+            except Exception:
+                pass
+            await restore_auth(c, pg)
+            await pg.goto(f"{BASE}/library", wait_until="domcontentloaded")
+            await pg.wait_for_selector('[data-testid="library-root"]', timeout=15000)
+            val = await pg.evaluate("""() => {
+                const el = document.querySelector('[data-scroll-fade]');
+                if (!el) return 'no-node';
+                const s = getComputedStyle(el);
+                return s.maskImage || s.webkitMaskImage || 'none';
+            }""")
+            await c.close()
+            return val
+
+        baseline = await mask_for("no-preference", "no-preference")
+        high_contrast = await mask_for("more", "no-preference")
+        (ok if 'linear-gradient' in (baseline or '') else bad)(
+            f"baseline: fade mask applied (got '{baseline[:60]}')")
+        (ok if high_contrast in ('none', '', None) or 'linear-gradient' not in (high_contrast or '')
+             else bad)(f"prefers-contrast:more disables fade mask (got '{(high_contrast or '')[:60]}')")
+
 
         await browser.close()
 
