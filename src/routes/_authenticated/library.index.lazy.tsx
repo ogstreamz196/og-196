@@ -847,12 +847,13 @@ function LibraryPage() {
               size="sm"
               onClick={() => {
                 setTitle(randomPick(SURPRISE_TITLES));
-                setSelections({
-                  language: randomPick(POOLS.language),
-                  genre: randomPick(POOLS.genre),
-                  mood: randomPick(POOLS.mood),
-                  theme: randomPick(POOLS.theme),
-                });
+                setSubjectName(
+                  randomPick(["Aaliyah", "Marcus", "Sam", "Jordan", "Dre", "Priya", "Leo", "Maya"]),
+                );
+                setSelections({ language: randomPick(POOLS.language) });
+                setStyleText(
+                  `${randomPick(POOLS.genre)} · ${randomPick(POOLS.mood)} · ${randomPick(POOLS.theme)}`,
+                );
                 setPersonalDetails(randomPick(SURPRISE_TEMPLATES).slice(0, PERSONAL_DETAILS_MAX));
                 toast.success("Surprise prompt loaded");
               }}
@@ -862,6 +863,27 @@ function LibraryPage() {
               Surprise me
             </Button>
           </div>
+        </div>
+
+        {/* Name — repeated throughout the lyrics so it feels made-for-them */}
+        <div className="space-y-3">
+          <Label
+            htmlFor="subject-name"
+            className="block font-bungee text-3xl leading-[1.05] tracking-tight uppercase break-words sm:text-5xl"
+          >
+            Name
+          </Label>
+          <Input
+            id="subject-name"
+            value={subjectName}
+            onChange={(e) => setSubjectName(e.target.value.slice(0, 60))}
+            placeholder="Who's this song for? e.g. Aaliyah"
+            maxLength={60}
+            className="h-12 min-w-0 rounded-xl border-2 border-primary/30 bg-background/80 px-3 text-lg font-bold focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/30 sm:h-14 sm:text-xl"
+          />
+          <p className="text-xs font-medium text-muted-foreground">
+            OG will weave <span className="text-foreground">{subjectName.trim() || "their name"}</span> through the hook and verses — heavy but never overpowering.
+          </p>
         </div>
 
         {/* Personal details */}
