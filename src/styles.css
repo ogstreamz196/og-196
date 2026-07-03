@@ -283,10 +283,57 @@
     scroll-behavior: smooth;
   }
 
+  /* ---- Scrollable affordance (mobile especially) ----
+     Subtle top/bottom fade hint so users can see there's more content in a
+     scrollable region. Applied to any element opting into vertical scroll.
+     Uses a mask-image so it never adds a background color that clashes with
+     card surfaces. Sticky/absolute children still render fully on top. */
+  .overflow-y-auto,
+  .overflow-y-scroll,
+  [data-scroll-container],
+  [data-radix-scroll-area-viewport],
+  [cmdk-list] {
+    scroll-padding-block: 12px;
+  }
+  @media (max-width: 767px) {
+    [data-scroll-fade],
+    [data-radix-scroll-area-viewport],
+    main[class*="overflow-y-auto"] {
+      -webkit-mask-image: linear-gradient(
+        to bottom,
+        transparent 0,
+        #000 14px,
+        #000 calc(100% - 20px),
+        transparent 100%
+      );
+              mask-image: linear-gradient(
+        to bottom,
+        transparent 0,
+        #000 14px,
+        #000 calc(100% - 20px),
+        transparent 100%
+      );
+    }
+    /* Thin, always-visible scrollbar on mobile as a secondary affordance. */
+    .overflow-y-auto::-webkit-scrollbar,
+    .overflow-y-scroll::-webkit-scrollbar,
+    [data-scroll-container]::-webkit-scrollbar {
+      width: 3px;
+    }
+    .overflow-y-auto::-webkit-scrollbar-thumb,
+    .overflow-y-scroll::-webkit-scrollbar-thumb,
+    [data-scroll-container]::-webkit-scrollbar-thumb {
+      background: hsl(var(--primary) / 0.35);
+      border-radius: 999px;
+    }
+  }
+
   /* Kill the 300ms tap delay and grey flash so scrolling feels native. */
   a, button, [role="button"], [role="tab"], [role="switch"], summary {
     -webkit-tap-highlight-color: transparent;
   }
+
+
 
 
   /* ---- Mobile app-style polish ---- */
