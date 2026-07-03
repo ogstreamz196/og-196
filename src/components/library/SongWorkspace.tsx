@@ -341,6 +341,8 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
         return;
       }
       toast.success(`Generating · -${previewCost} coins`);
+      // Refresh coin balance immediately after the deduction on the server.
+      refreshCoinBalance();
       onSaved?.();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not start generation");
