@@ -92,6 +92,67 @@ async def main():
             "<main> reintroduced overscroll-behavior-y: contain (scroll trap)"
         )
 
+        # ---- 2b. Language / Mood / Theme cards remain scrollable ----
+        # After removing "Quick picks" on these categories, ensure the cards
+        # themselves are NOT scroll traps and that a touch over them still
+        # scrolls the document.
+        card_check = await page.evaluate(
+            """() => {
+              const out = {};
+              for (const label of ['Language', 'Mood', 'Theme']) {
+                const heading = [...document.querySelectorAll('*')].find(
+                  (el) => el.textContent && el.textContent.trim().startsWith(label)
+                    && /font-bungee/.test(el.className || '')
+                );
+                const card = heading ? heading.closest('.rounded-3xl') : null;
+                if (!card) { out[label] = 'not_found'; continue; }
+                const cs = getComputedStyle(card);
+                out[label] = {
+                  overflowY: cs.overflowY,
+                  touchAction: cs.touchAction,
+                  overscrollY: cs.overscrollBehaviorY,
+                  hasQuickPicks: !!card.querySelector('button[aria-label^="Shuffle"]'),
+                };
+              }
+              return out;
+            }"""
+        )
+        results["category_cards"] = card_check
+        for label in ("Language", "Mood", "Theme"):
+            info = card_check.get(label)
+            assert isinstance(info, dict), f"{label} card not found"
+            assert info["overflowY"] not in ("auto", "scroll"), (
+                f"{label} card became a scroll trap: overflow-y={info['overflowY']}"
+            )
+            assert info["overscrollY"] != "contain", (
+                f"{label} card overscroll-behavior-y=contain traps scroll"
+            )
+            assert info["touchAction"] in ("auto", "manipulation", "pan-y"), (
+                f"{label} card touch-action={info['touchAction']} blocks pan"
+            )
+            assert info["hasQuickPicks"] is False, (
+                f"{label} card still renders Quick picks (Shuffle button present)"
+            )
+
+        # Scroll to the Mood card and confirm touch-driven scroll still advances
+        await page.evaluate(
+            """() => {
+              const h = [...document.querySelectorAll('*')].find(
+                (el) => el.textContent && el.textContent.trim().startsWith('Mood')
+                  && /font-bungee/.test(el.className || '')
+              );
+              if (h) h.scrollIntoView({ block: 'center' });
+            }"""
+        )
+        await page.wait_for_timeout(200)
+        before = await page.evaluate("window.scrollY")
+        await page.evaluate("window.scrollBy({ top: 300, behavior: 'instant' })")
+        await page.wait_for_timeout(150)
+        after = await page.evaluate("window.scrollY")
+        results["mood_card_scroll_delta"] = after - before
+        assert after > before, "Document did not scroll while over Mood card"
+
+
         # ---- 3. Open sidebar sheet on mobile ----
         # SidebarTrigger button typically has aria-label or icon; try common triggers
         trigger = page.get_by_role("button", name="Toggle Sidebar")
