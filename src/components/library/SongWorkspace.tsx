@@ -356,6 +356,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       toast.error(e instanceof Error ? e.message : "Could not start generation");
     } finally {
       setGenPreview(false);
+      submitLockRef.current = false;
     }
   }
 
