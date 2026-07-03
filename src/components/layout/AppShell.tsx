@@ -123,9 +123,11 @@ export function AppShell({ children }: { children: ReactNode }) {
               <SidebarTrigger className="shrink-0" />
 
               <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-                <div className="hidden min-[380px]:block">
-                  <BrandLockup compact />
-                </div>
+                {!pathname.startsWith("/messenger") && (
+                  <div className="hidden min-[380px]:block">
+                    <BrandLockup compact />
+                  </div>
+                )}
                 <div className="hidden min-w-0 sm:block">
                   <h1 className="font-display truncate text-base font-black leading-tight tracking-tight text-gradient-brand sm:text-xl lg:text-2xl">
                     {title}
