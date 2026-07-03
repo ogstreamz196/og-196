@@ -177,10 +177,15 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
 
     // Tight 2s polling fallback in case Realtime drops a message.
     const poll = setInterval(() => onSaved?.(), 2000);
+    // Refresh the coin balance every 5s while a job is in flight — belt & braces
+    // for the realtime profile subscription, so users see refunds/deductions
+    // land even if the socket blips.
+    const coinPoll = setInterval(refreshCoinBalance, 5000);
 
     return () => {
       supabase.removeChannel(channel);
       clearInterval(poll);
+      clearInterval(coinPoll);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [song.id, song.status]);
