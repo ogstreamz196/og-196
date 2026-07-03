@@ -257,7 +257,9 @@ function LibraryPage() {
   }
 
 
+  const generateLockRef = useRef(false);
   async function generateSong() {
+    if (generateLockRef.current) return;
     if (!user) return;
     if (!lyrics.trim()) {
       toast.error("Generate lyrics first");
@@ -267,6 +269,7 @@ function LibraryPage() {
       toast.error(`Need ${previewCost} coins to generate a song`);
       return;
     }
+    generateLockRef.current = true;
     setGenSong(true);
     try {
       // Backend enforces global + per-user concurrency limits (returns 429 when over capacity).
