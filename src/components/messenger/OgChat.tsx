@@ -642,7 +642,7 @@ export function OgChat({
       <div className="relative flex min-h-0 flex-1 flex-col">
       <div
         ref={scrollRef}
-        className="flex-1 space-y-6 overflow-y-auto overscroll-contain px-4 py-6 sm:px-6 scroll-smooth [-webkit-overflow-scrolling:touch]"
+        className="flex-1 space-y-6 overflow-y-auto overscroll-contain px-4 pb-8 pt-6 sm:px-6 sm:pb-10 scroll-smooth [-webkit-overflow-scrolling:touch]"
         style={{ touchAction: "pan-y" }}
       >
 
