@@ -49,6 +49,7 @@ import { PoweredByOgBot } from "@/components/PoweredByOgBot";
 import { JobQueuePanel } from "@/components/library/JobQueuePanel";
 import { CategoryCard } from "@/components/library/CategoryCard";
 import { StyleComposer } from "@/components/library/StyleComposer";
+import { CollapsibleStep } from "@/components/library/CollapsibleStep";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { FoulMouthToggle } from "@/components/FoulMouthToggle";
 
@@ -827,12 +828,17 @@ function LibraryPage() {
           </span>
         </header>
 
-        {/* Title */}
-        <div className="space-y-3">
-          <Label htmlFor="song-title" className="font-bungee text-4xl sm:text-5xl uppercase">
-            Title
-          </Label>
+        {/* Step 1 — Title */}
+        <CollapsibleStep
+          step={1}
+          title="Title"
+          done={!!title.trim()}
+          summary={title.trim() || "Untitled"}
+        >
           <div className="flex flex-wrap items-stretch gap-2">
+            <Label htmlFor="song-title" className="sr-only">
+              Title
+            </Label>
             <Input
               id="song-title"
               value={title}
@@ -863,15 +869,17 @@ function LibraryPage() {
               Surprise me
             </Button>
           </div>
-        </div>
+        </CollapsibleStep>
 
-        {/* Name — repeated throughout the lyrics so it feels made-for-them */}
-        <div className="space-y-3">
-          <Label
-            htmlFor="subject-name"
-            className="block font-bungee text-3xl leading-[1.05] tracking-tight uppercase break-words sm:text-5xl"
-          >
-            Name
+        {/* Step 2 — Name (repeated across the lyrics) */}
+        <CollapsibleStep
+          step={2}
+          title="Name"
+          done={!!subjectName.trim()}
+          summary={subjectName.trim() ? `For ${subjectName.trim()}` : undefined}
+        >
+          <Label htmlFor="subject-name" className="sr-only">
+            Who's this song for?
           </Label>
           <Input
             id="subject-name"
@@ -881,36 +889,48 @@ function LibraryPage() {
             maxLength={60}
             className="h-12 min-w-0 rounded-xl border-2 border-primary/30 bg-background/80 px-3 text-lg font-bold focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/30 sm:h-14 sm:text-xl"
           />
-          <p className="text-xs font-medium text-muted-foreground">
-            OG will weave <span className="text-foreground">{subjectName.trim() || "their name"}</span> through the hook and verses — heavy but never overpowering.
+          <p className="mt-3 text-xs font-medium text-muted-foreground">
+            OG will weave{" "}
+            <span className="text-foreground">
+              {subjectName.trim() || "their name"}
+            </span>{" "}
+            through the hook and verses — heavy but never overpowering.
           </p>
-        </div>
+        </CollapsibleStep>
 
-        {/* Personal details */}
-        <div className="space-y-4 sm:space-y-3">
-          <Label
-            htmlFor="personal-details"
-            className="block font-bungee text-3xl leading-[1.05] tracking-tight uppercase break-words sm:text-5xl"
-          >
-            Describe
-          </Label>
-
+        {/* Step 3 — Describe */}
+        <CollapsibleStep
+          step={3}
+          title="Describe"
+          done={personalDetails.trim().length >= 20}
+          summary={
+            personalDetails.trim()
+              ? personalDetails.trim().slice(0, 90) +
+                (personalDetails.trim().length > 90 ? "…" : "")
+              : undefined
+          }
+        >
           {(() => {
             const check = personalDetailsCheck(personalDetails);
             const { status, message, pct, tone, barTone, length: len } = check;
             const invalid = status === "full" || status === "near";
             return (
-              <>
+              <div className="space-y-3">
+                <Label htmlFor="personal-details" className="sr-only">
+                  Describe
+                </Label>
                 <Textarea
                   id="personal-details"
                   aria-describedby="personal-details-help personal-details-count"
                   aria-invalid={invalid}
                   value={personalDetails}
-                  onChange={(e) => setPersonalDetails(e.target.value.slice(0, PERSONAL_DETAILS_MAX))}
+                  onChange={(e) =>
+                    setPersonalDetails(e.target.value.slice(0, PERSONAL_DETAILS_MAX))
+                  }
                   placeholder="✍️ Who is this song for? Their name, what they love, your history, inside jokes…"
                   maxLength={PERSONAL_DETAILS_MAX}
-                  rows={8}
-                  className="min-h-[200px] resize-y rounded-xl border-primary/30 bg-background/60 text-base leading-relaxed placeholder:text-muted-foreground/70 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/40 aria-[invalid=true]:border-destructive aria-[invalid=true]:focus-visible:ring-destructive/40"
+                  rows={6}
+                  className="min-h-[160px] resize-y rounded-xl border-primary/30 bg-background/60 text-base leading-relaxed placeholder:text-muted-foreground/70 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/40 aria-[invalid=true]:border-destructive aria-[invalid=true]:focus-visible:ring-destructive/40"
                 />
                 <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
                   <div
@@ -919,7 +939,13 @@ function LibraryPage() {
                   />
                 </div>
                 <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs sm:text-sm">
-                  <span id="personal-details-help" className={cn("min-w-0 flex-1 truncate font-medium", tone)} aria-live="polite">{message}</span>
+                  <span
+                    id="personal-details-help"
+                    className={cn("min-w-0 flex-1 truncate font-medium", tone)}
+                    aria-live="polite"
+                  >
+                    {message}
+                  </span>
                   <span
                     id="personal-details-count"
                     className={cn("shrink-0 tabular-nums font-semibold", tone)}
@@ -927,7 +953,7 @@ function LibraryPage() {
                     {len}/{PERSONAL_DETAILS_MAX}
                   </span>
                 </div>
-              </>
+              </div>
             );
           })()}
 
@@ -944,13 +970,19 @@ function LibraryPage() {
               readOnly
             />
           </div>
-        </div>
+        </CollapsibleStep>
 
-        {/* Sound — language picker + one unified style composer */}
-        <div className="space-y-3">
-          <div className="font-bungee text-4xl sm:text-5xl uppercase">
-            Sound
-          </div>
+        {/* Step 4 — Sound (language + style composer) */}
+        <CollapsibleStep
+          step={4}
+          title="Sound"
+          done={!!selections.language && hasStyle}
+          summary={
+            selections.language && hasStyle
+              ? `${selections.language} · ${styleText.trim().slice(0, 70)}${styleText.trim().length > 70 ? "…" : ""}`
+              : undefined
+          }
+        >
           <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 sm:gap-5">
             <CategoryCard
               cat="language"
@@ -962,7 +994,7 @@ function LibraryPage() {
             />
             <StyleComposer value={styleText} onChange={setStyleText} />
           </div>
-        </div>
+        </CollapsibleStep>
 
         {/* Foul mouth + Generate */}
         <div className="space-y-4">
