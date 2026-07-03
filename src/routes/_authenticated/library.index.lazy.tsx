@@ -322,6 +322,7 @@ function LibraryPage() {
       toast.error(e instanceof Error ? e.message : "Could not generate song");
     } finally {
       setGenSong(false);
+      generateLockRef.current = false;
     }
   }
 
