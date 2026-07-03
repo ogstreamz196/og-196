@@ -93,64 +93,79 @@ Deno.serve(async (req) => {
       ? `[Language: ${portalLanguage}] ${prompt}`
       : prompt;
 
-    let song: { id: string } | null = null;
-    const generationStartedAt = new Date().toISOString();
+    // If reusing an existing draft, load it and guard against double-charging
+    // a song that is already in flight (client retry / duplicate submit).
+    let existing: { id: string; user_id: string; status: string } | null = null;
     if (existingSongId) {
-      // Reuse the draft so the same song row progresses through the workflow stages.
-      const { data: existing, error: exErr } = await admin
+      const { data: row, error: exErr } = await admin
         .from("songs")
-        .select("id, user_id")
+        .select("id, user_id, status")
         .eq("id", existingSongId)
         .maybeSingle();
       if (exErr) return json({ error: exErr.message }, 500);
-      if (existing && existing.user_id !== user.id) {
-        return json({ error: "Song not found" }, 404);
+      if (row && row.user_id !== user.id) return json({ error: "Song not found" }, 404);
+      if (row && (row.status === "pending" || row.status === "processing")) {
+        return json({ error: "Song is already generating", code: "already_generating", song_id: row.id }, 409);
       }
-      if (existing) {
-        const { data: upd, error: updErr } = await admin
-          .from("songs")
-          .update({
-            prompt: effectivePrompt,
-            style,
-            lyrics: effectiveLyrics,
-            title,
-            status: "pending",
-            generation_started_at: generationStartedAt,
-            portal_id: portalId,
-            audio_path: null,
-            sample_path: null,
-            stream_audio_url: null,
-            error_message: null,
-          })
-          .eq("id", existingSongId)
-          .select("id")
-          .single();
-        if (updErr) return json({ error: updErr.message }, 500);
-        song = upd;
-      }
-      // If existing is null (stale id from client), fall through to insert a fresh row.
+      existing = row;
     }
-    if (!song) {
 
+    // Deduct coins FIRST so a rejected charge does not litter the library
+    // with an orphan "failed – insufficient coins" song row.
+    const { data: balance, error: deductErr } = await admin.rpc("deduct_coins", {
+      p_user: user.id,
+      p_amount: coinCost,
+      p_reference: existing?.id ?? crypto.randomUUID(),
+    });
+    if (deductErr) {
+      return json({ error: "Insufficient coins", code: "insufficient_coins" }, 402);
+    }
+
+    // Create or reuse the song row now that the charge has succeeded.
+    let song: { id: string } | null = null;
+    if (existing) {
+      const { data: upd, error: updErr } = await admin
+        .from("songs")
+        .update({
+          prompt: effectivePrompt,
+          style,
+          lyrics: effectiveLyrics,
+          title,
+          status: "pending",
+          generation_started_at: generationStartedAt,
+          portal_id: portalId,
+          audio_path: null,
+          sample_path: null,
+          stream_audio_url: null,
+          error_message: null,
+        })
+        .eq("id", existing.id)
+        .select("id")
+        .single();
+      if (updErr) {
+        await refund(admin, user.id, existing.id, "Failed to reuse draft", coinCost);
+        return json({ error: updErr.message }, 500);
+      }
+      song = upd;
+    } else {
       const { data: inserted, error: songErr } = await admin
         .from("songs")
         .insert({ user_id: user.id, prompt: effectivePrompt, style, lyrics: effectiveLyrics, title, status: "pending", generation_started_at: generationStartedAt, portal_id: portalId })
         .select("id")
         .single();
-      if (songErr) return json({ error: songErr.message }, 500);
+      if (songErr) {
+        // Refund against a synthetic reference since we have no song id yet.
+        await admin.rpc("refund_generation_charge", {
+          p_user: user.id,
+          p_amount: coinCost,
+          p_reference: crypto.randomUUID(),
+        });
+        return json({ error: songErr.message }, 500);
+      }
       song = inserted;
     }
     const songId = song!.id;
 
-    const { data: balance, error: deductErr } = await admin.rpc("deduct_coins", {
-      p_user: user.id,
-      p_amount: coinCost,
-      p_reference: songId,
-    });
-    if (deductErr) {
-      await admin.from("songs").update({ status: "failed", error_message: "Insufficient coins" }).eq("id", songId);
-      return json({ error: "Insufficient coins", code: "insufficient_coins" }, 402);
-    }
 
     const encoder = new TextEncoder();
     const hmacKey = await crypto.subtle.importKey(
