@@ -298,7 +298,9 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
     }
   }
 
+  const submitLockRef = useRef(false);
   async function generatePreview() {
+    if (submitLockRef.current) return;
     if (missing) {
       toast.error("This song is no longer available");
       return;
@@ -315,6 +317,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       toast.error(`Need ${previewCost} coins — current balance ${balance}`);
       return;
     }
+    submitLockRef.current = true;
     setGenPreview(true);
     try { localStorage.setItem("welcome.personal_banner.dismissed", "1"); } catch {}
     try { window.dispatchEvent(new CustomEvent("og:generate-start")); } catch {}
