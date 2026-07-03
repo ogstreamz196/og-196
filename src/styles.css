@@ -259,12 +259,30 @@
   .overflow-y-auto,
   .overflow-auto,
   .overflow-y-scroll,
-  [data-scroll-container] {
+  .overflow-scroll,
+  [data-scroll-container],
+  [data-radix-scroll-area-viewport],
+  [data-radix-dialog-content],
+  [data-radix-alert-dialog-content],
+  [data-radix-sheet-content],
+  [data-radix-popover-content],
+  [data-radix-dropdown-menu-content],
+  [data-radix-select-viewport],
+  [data-radix-menu-content],
+  [data-radix-hover-card-content],
+  [data-radix-toast-viewport],
+  [data-vaul-drawer],
+  [data-sonner-toaster],
+  [cmdk-list],
+  [role="dialog"],
+  [role="listbox"],
+  [role="menu"] {
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: contain;
     touch-action: pan-y;
     scroll-behavior: smooth;
   }
+
   /* Kill the 300ms tap delay and grey flash so scrolling feels native. */
   a, button, [role="button"], [role="tab"], [role="switch"], summary {
     -webkit-tap-highlight-color: transparent;
