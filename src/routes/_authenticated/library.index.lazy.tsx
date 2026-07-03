@@ -269,12 +269,11 @@ function LibraryPage() {
     setGenSong(true);
     try {
       // Backend enforces global + per-user concurrency limits (returns 429 when over capacity).
-      const style = [selections.genre, selections.mood]
-        .filter(Boolean)
-        .join(" · ");
+      const style = styleText.trim();
       const promptText = [
         title.trim(),
-        selections.theme ? `About: ${selections.theme}` : null,
+        subjectName.trim() ? `For: ${subjectName.trim()}` : null,
+        style ? `Style: ${style}` : null,
         selections.language ? `Language: ${selections.language}` : null,
       ]
         .filter(Boolean)
