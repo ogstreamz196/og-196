@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""
-Mobile scrollability + scroll-affordance a11y check.
+import re
+
 
 At 390x844 (mobile), verifies:
   1. /library main list is vertically scrollable and applies the shared
