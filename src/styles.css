@@ -295,7 +295,12 @@
   [cmdk-list] {
     scroll-padding-block: 12px;
   }
-  @media (max-width: 767px) {
+  /* Mask fades are decorative-only (visual affordance). They do not affect
+     the accessibility tree — screen readers still announce edge content in
+     full — but we disable them when the user prefers higher contrast or
+     reduced transparency so faded text near the edge never drops below
+     WCAG AA. The scrollbar affordance stays on in those modes. */
+  @media (max-width: 767px) and (not (prefers-contrast: more)) and (not (prefers-reduced-transparency: reduce)) {
     [data-scroll-fade],
     [data-radix-scroll-area-viewport],
     main[class*="overflow-y-auto"] {
@@ -314,7 +319,12 @@
         transparent 100%
       );
     }
-    /* Thin, always-visible scrollbar on mobile as a secondary affordance. */
+  }
+  @media (max-width: 767px) {
+    /* Thin, always-visible scrollbar on mobile as a secondary affordance.
+       Uses --primary at 35% opacity against card/background surfaces — a
+       3px indicator, not text, so WCAG 1.4.11 non-text contrast (3:1) is
+       comfortably met against the app's dark theme. */
     .overflow-y-auto::-webkit-scrollbar,
     .overflow-y-scroll::-webkit-scrollbar,
     [data-scroll-container]::-webkit-scrollbar {
@@ -323,10 +333,11 @@
     .overflow-y-auto::-webkit-scrollbar-thumb,
     .overflow-y-scroll::-webkit-scrollbar-thumb,
     [data-scroll-container]::-webkit-scrollbar-thumb {
-      background: hsl(var(--primary) / 0.35);
+      background: hsl(var(--primary) / 0.55);
       border-radius: 999px;
     }
   }
+
 
   /* Kill the 300ms tap delay and grey flash so scrolling feels native. */
   a, button, [role="button"], [role="tab"], [role="switch"], summary {
