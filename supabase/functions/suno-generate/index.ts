@@ -93,7 +93,10 @@ Deno.serve(async (req) => {
       ? `[Language: ${portalLanguage}] ${prompt}`
       : prompt;
 
+    const generationStartedAt = new Date().toISOString();
+
     // If reusing an existing draft, load it and guard against double-charging
+
     // a song that is already in flight (client retry / duplicate submit).
     let existing: { id: string; user_id: string; status: string } | null = null;
     if (existingSongId) {
