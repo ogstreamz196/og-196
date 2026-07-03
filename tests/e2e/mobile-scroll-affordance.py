@@ -106,7 +106,10 @@ async def run():
         await page.goto(f"{BASE}/", wait_until="domcontentloaded")
         await page.wait_for_timeout(1200)
         try:
-            trigger = page.get_by_role("button", name=re.compile(r"(Start any task|Ask OG Bot)", re.I)).first
+            # The DialogTrigger renders a button whose accessible name is
+            # its full text content ("Ask OG Bot Start any task — pick a service & go …").
+            trigger = page.locator('button:has-text("Start any task")').first
+
             await trigger.wait_for(timeout=10000)
             await trigger.click()
             dialog = page.locator('[role="dialog"]').first
