@@ -946,23 +946,21 @@ function LibraryPage() {
           </div>
         </div>
 
-        {/* Sound categories */}
+        {/* Sound — language picker + one unified style composer */}
         <div className="space-y-3">
           <div className="font-bungee text-4xl sm:text-5xl uppercase">
             Sound
           </div>
           <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 sm:gap-5">
-            {(["language", "genre", "mood", "theme"] as Category[]).map((cat) => (
-              <CategoryCard
-                key={cat}
-                cat={cat}
-                value={selections[cat]}
-                chips={chips[cat]}
-                onSelect={(v) => setField(cat, v)}
-                onPickChip={(v) => pickChip(cat, v)}
-                onRefresh={() => refreshRow(cat)}
-              />
-            ))}
+            <CategoryCard
+              cat="language"
+              value={selections.language}
+              chips={chips.language}
+              onSelect={(v) => setField("language", v)}
+              onPickChip={(v) => pickChip("language", v)}
+              onRefresh={() => refreshRow("language")}
+            />
+            <StyleComposer value={styleText} onChange={setStyleText} />
           </div>
         </div>
 
