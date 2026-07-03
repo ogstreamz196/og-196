@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
+"""Mobile scrollability + scroll-affordance a11y check (see repo docs)."""
 import re
+
 
 
 At 390x844 (mobile), verifies:
