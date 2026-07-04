@@ -642,7 +642,7 @@ export function OgChat({
       <div className="relative flex min-h-0 flex-1 flex-col">
       <div
         ref={scrollRef}
-        className="flex-1 space-y-6 overflow-y-auto overscroll-contain px-4 pb-8 pt-6 sm:px-6 sm:pb-10 scroll-smooth [-webkit-overflow-scrolling:touch]"
+        className="flex-1 space-y-4 overflow-y-auto overscroll-contain px-2 pb-6 pt-4 sm:space-y-5 sm:px-4 sm:pb-8 sm:pt-5 scroll-smooth [-webkit-overflow-scrolling:touch]"
         style={{ touchAction: "pan-y" }}
       >
 
@@ -736,7 +736,7 @@ export function OgChat({
               ) : (
                 <OgAvatar size={40} className="shrink-0" />
               )}
-              <div className={cn("flex max-w-[75%] flex-col gap-1.5", isUser ? "items-end" : "items-start")}>
+              <div className={cn("flex min-w-0 flex-1 max-w-[94%] sm:max-w-[85%] flex-col gap-1.5", isUser ? "items-end" : "items-start")}>
                 <span
                   className={cn(
                     "inline-flex items-center gap-1 px-2 text-[10px] font-black uppercase tracking-[0.18em]",
@@ -753,7 +753,7 @@ export function OgChat({
                 </span>
                 <div
                   className={cn(
-                    "px-5 py-3 text-base leading-[1.55] break-words sm:text-[17px]",
+                    "px-4 py-2.5 text-[15px] leading-[1.5] break-words sm:px-5 sm:py-3 sm:text-base",
                     isUser
                       ? isVip
                         ? "rounded-3xl rounded-br-md whitespace-pre-wrap font-medium text-amber-50 bg-gradient-to-br from-amber-500 via-amber-600 to-yellow-700 shadow-[0_14px_36px_-12px_rgba(217,119,6,0.65)] ring-1 ring-amber-300/60"
@@ -762,7 +762,7 @@ export function OgChat({
                   )}
                 >
                   {msg.role === "assistant" ? (
-                    <div className="prose prose-base dark:prose-invert max-w-none prose-p:my-2 prose-p:leading-relaxed prose-ul:my-2 prose-ol:my-2 prose-headings:my-2 prose-code:text-primary">
+                    <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none prose-p:my-1.5 prose-p:leading-snug prose-ul:my-1.5 prose-ol:my-1.5 prose-headings:my-1.5 prose-code:text-primary">
                       <ReactMarkdown>{msg.content}</ReactMarkdown>
                     </div>
 
