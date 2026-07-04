@@ -753,7 +753,7 @@ export function OgChat({
                 </span>
                 <div
                   className={cn(
-                    "px-5 py-3 text-base leading-[1.55] break-words sm:text-[17px]",
+                    "px-4 py-2.5 text-[15px] leading-[1.5] break-words sm:px-5 sm:py-3 sm:text-base",
                     isUser
                       ? isVip
                         ? "rounded-3xl rounded-br-md whitespace-pre-wrap font-medium text-amber-50 bg-gradient-to-br from-amber-500 via-amber-600 to-yellow-700 shadow-[0_14px_36px_-12px_rgba(217,119,6,0.65)] ring-1 ring-amber-300/60"
