@@ -762,7 +762,7 @@ export function OgChat({
                   )}
                 >
                   {msg.role === "assistant" ? (
-                    <div className="prose prose-base dark:prose-invert max-w-none prose-p:my-2 prose-p:leading-relaxed prose-ul:my-2 prose-ol:my-2 prose-headings:my-2 prose-code:text-primary">
+                    <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none prose-p:my-1.5 prose-p:leading-snug prose-ul:my-1.5 prose-ol:my-1.5 prose-headings:my-1.5 prose-code:text-primary">
                       <ReactMarkdown>{msg.content}</ReactMarkdown>
                     </div>
 
