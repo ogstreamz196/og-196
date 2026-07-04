@@ -736,7 +736,7 @@ export function OgChat({
               ) : (
                 <OgAvatar size={40} className="shrink-0" />
               )}
-              <div className={cn("flex max-w-[75%] flex-col gap-1.5", isUser ? "items-end" : "items-start")}>
+              <div className={cn("flex min-w-0 flex-1 max-w-[94%] sm:max-w-[85%] flex-col gap-1.5", isUser ? "items-end" : "items-start")}>
                 <span
                   className={cn(
                     "inline-flex items-center gap-1 px-2 text-[10px] font-black uppercase tracking-[0.18em]",
