@@ -140,6 +140,7 @@ function LibraryPage() {
   const [deleting, setDeleting] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [yoursSearch, setYoursSearch] = useState("");
+  const [showAllYours, setShowAllYours] = useState(false);
   const [communitySearch, setCommunitySearch] = useState("");
 
   // Build a human-readable line from language + freeform style text.
@@ -675,6 +676,11 @@ function LibraryPage() {
                         (s.style || "").toLowerCase().includes(q),
                     )
                   : completedTracks;
+                const PREVIEW_COUNT = 3;
+                const isSearching = q.length > 0;
+                const collapsed = !isSearching && !showAllYours && filtered.length > PREVIEW_COUNT;
+                const visible = collapsed ? filtered.slice(0, PREVIEW_COUNT) : filtered;
+                const hiddenCount = filtered.length - visible.length;
                 return (
                   <div data-testid="library-cards" className="grid gap-3">
                     {genSong && <SongCardSkeleton label="Generating" />}
@@ -683,30 +689,49 @@ function LibraryPage() {
                         No tracks match "{yoursSearch}".
                       </p>
                     ) : (
-                      filtered.map((s) => (
-                        <div key={s.id} className="relative">
-                          <Link
-                            to="/library/$songId"
-                            params={{ songId: s.id }}
-                            className="block rounded-2xl transition-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                          >
-                            <SongCard song={s} />
-                          </Link>
+                      <>
+                        {collapsed && (
+                          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                            Recently added · showing {visible.length} of {filtered.length}
+                          </p>
+                        )}
+                        {visible.map((s) => (
+                          <div key={s.id} className="relative">
+                            <Link
+                              to="/library/$songId"
+                              params={{ songId: s.id }}
+                              className="block rounded-2xl transition-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            >
+                              <SongCard song={s} />
+                            </Link>
+                            <Button
+                              variant="destructive"
+                              size="icon"
+                              className="absolute right-3 top-3 h-8 w-8 opacity-90 shadow-md"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setPendingDelete(s);
+                              }}
+                              aria-label="Delete track"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                        {!isSearching && filtered.length > PREVIEW_COUNT && (
                           <Button
-                            variant="destructive"
-                            size="icon"
-                            className="absolute right-3 top-3 h-8 w-8 opacity-90 shadow-md"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              setPendingDelete(s);
-                            }}
-                            aria-label="Delete track"
+                            type="button"
+                            variant="outline"
+                            onClick={() => setShowAllYours((v) => !v)}
+                            className="mt-1 h-11 w-full rounded-xl border-white/10 bg-white/[0.04] font-bold"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            {showAllYours
+                              ? `Show fewer · hide ${filtered.length - PREVIEW_COUNT}`
+                              : `Show all ${filtered.length} tracks · +${hiddenCount} more`}
                           </Button>
-                        </div>
-                      ))
+                        )}
+                      </>
                     )}
                   </div>
                 );
@@ -822,15 +847,39 @@ function LibraryPage() {
       )}
 
       {/* Unified create flow */}
-      <section className="flex flex-col gap-6 rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card/80 to-card/60 p-5 shadow-[0_24px_70px_-30px_oklch(0.7_0.2_300_/_0.5)] ring-1 ring-white/5 sm:gap-8 sm:p-8">
-        <header className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3 border-b border-white/10 pb-4">
-          <h2 className="truncate font-display text-xl font-black tracking-tight sm:text-3xl">
-            Create a song
-          </h2>
-          <span className="shrink-0 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
+      <section
+        aria-labelledby="create-song-heading"
+        className="relative flex flex-col gap-6 overflow-hidden rounded-[2rem] border-2 border-primary/40 bg-gradient-to-br from-primary/15 via-card/80 to-card/60 p-5 shadow-[0_30px_90px_-35px_oklch(0.7_0.2_300_/_0.7)] ring-1 ring-white/5 sm:gap-8 sm:p-10"
+      >
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-gradient-to-br from-primary/40 via-fuchsia-500/25 to-transparent blur-3xl"
+        />
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent"
+        />
+        <header className="relative grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3 border-b border-white/10 pb-5 sm:pb-6">
+          <div className="min-w-0 space-y-2">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/15 px-3 py-1 text-[10px] font-black uppercase tracking-[0.24em] text-primary sm:text-xs">
+              <Sparkles className="h-3.5 w-3.5" />
+              Studio · new track
+            </div>
+            <h2
+              id="create-song-heading"
+              className="font-display text-4xl font-black leading-[1.02] tracking-[-0.02em] sm:text-6xl lg:text-7xl"
+            >
+              Create <span className="text-gradient-brand">a song</span>
+            </h2>
+            <p className="text-sm text-muted-foreground sm:text-base">
+              Four quick steps — title, name, vibe, sound. Fill them in any order.
+            </p>
+          </div>
+          <span className="shrink-0 self-start rounded-full border border-primary/40 bg-primary/15 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-primary sm:text-sm">
             {totalFilled}/4
           </span>
         </header>
+
 
         {/* Step 1 — Title */}
         <CollapsibleStep
