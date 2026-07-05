@@ -676,6 +676,11 @@ function LibraryPage() {
                         (s.style || "").toLowerCase().includes(q),
                     )
                   : completedTracks;
+                const PREVIEW_COUNT = 3;
+                const isSearching = q.length > 0;
+                const collapsed = !isSearching && !showAllYours && filtered.length > PREVIEW_COUNT;
+                const visible = collapsed ? filtered.slice(0, PREVIEW_COUNT) : filtered;
+                const hiddenCount = filtered.length - visible.length;
                 return (
                   <div data-testid="library-cards" className="grid gap-3">
                     {genSong && <SongCardSkeleton label="Generating" />}
@@ -684,30 +689,49 @@ function LibraryPage() {
                         No tracks match "{yoursSearch}".
                       </p>
                     ) : (
-                      filtered.map((s) => (
-                        <div key={s.id} className="relative">
-                          <Link
-                            to="/library/$songId"
-                            params={{ songId: s.id }}
-                            className="block rounded-2xl transition-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                          >
-                            <SongCard song={s} />
-                          </Link>
+                      <>
+                        {collapsed && (
+                          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                            Recently added · showing {visible.length} of {filtered.length}
+                          </p>
+                        )}
+                        {visible.map((s) => (
+                          <div key={s.id} className="relative">
+                            <Link
+                              to="/library/$songId"
+                              params={{ songId: s.id }}
+                              className="block rounded-2xl transition-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            >
+                              <SongCard song={s} />
+                            </Link>
+                            <Button
+                              variant="destructive"
+                              size="icon"
+                              className="absolute right-3 top-3 h-8 w-8 opacity-90 shadow-md"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setPendingDelete(s);
+                              }}
+                              aria-label="Delete track"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                        {!isSearching && filtered.length > PREVIEW_COUNT && (
                           <Button
-                            variant="destructive"
-                            size="icon"
-                            className="absolute right-3 top-3 h-8 w-8 opacity-90 shadow-md"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              setPendingDelete(s);
-                            }}
-                            aria-label="Delete track"
+                            type="button"
+                            variant="outline"
+                            onClick={() => setShowAllYours((v) => !v)}
+                            className="mt-1 h-11 w-full rounded-xl border-white/10 bg-white/[0.04] font-bold"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            {showAllYours
+                              ? `Show fewer · hide ${filtered.length - PREVIEW_COUNT}`
+                              : `Show all ${filtered.length} tracks · +${hiddenCount} more`}
                           </Button>
-                        </div>
-                      ))
+                        )}
+                      </>
                     )}
                   </div>
                 );
