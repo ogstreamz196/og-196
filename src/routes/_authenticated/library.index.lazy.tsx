@@ -873,7 +873,7 @@ function LibraryPage() {
               Create <span className="text-gradient-brand">a song</span>
             </h2>
             <p className="text-sm text-muted-foreground sm:text-base">
-              Four quick steps — title, name, vibe, sound. Fill them in any order.
+              Five quick steps — title, name, describe, language, song style. Fill them in any order.
             </p>
           </div>
           <span className="shrink-0 self-start rounded-full border border-primary/40 bg-primary/15 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-primary sm:text-sm">
