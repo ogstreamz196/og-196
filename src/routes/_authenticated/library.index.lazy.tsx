@@ -140,6 +140,7 @@ function LibraryPage() {
   const [deleting, setDeleting] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [yoursSearch, setYoursSearch] = useState("");
+  const [showAllYours, setShowAllYours] = useState(false);
   const [communitySearch, setCommunitySearch] = useState("");
 
   // Build a human-readable line from language + freeform style text.
