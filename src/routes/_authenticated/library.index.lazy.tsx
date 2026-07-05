@@ -877,7 +877,7 @@ function LibraryPage() {
             </p>
           </div>
           <span className="shrink-0 self-start rounded-full border border-primary/40 bg-primary/15 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-primary sm:text-sm">
-            {totalFilled}/4
+            {totalFilled}/5
           </span>
         </header>
 
