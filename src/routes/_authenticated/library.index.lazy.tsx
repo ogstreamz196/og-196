@@ -204,9 +204,10 @@ function LibraryPage() {
   const totalFilled =
     (title.trim() ? 1 : 0) +
     (subjectName.trim() ? 1 : 0) +
+    (personalDetails.trim().length >= 20 ? 1 : 0) +
     (selections.language ? 1 : 0) +
     (hasStyle ? 1 : 0);
-  const progress = Math.min(100, Math.round((totalFilled / 4) * 100));
+  const progress = Math.min(100, Math.round((totalFilled / 5) * 100));
 
   const canGenerateLyrics =
     !!title.trim() &&
