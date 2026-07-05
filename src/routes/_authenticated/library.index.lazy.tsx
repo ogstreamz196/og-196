@@ -952,10 +952,10 @@ function LibraryPage() {
           </p>
         </CollapsibleStep>
 
-        {/* Step 3 — Describe */}
+        {/* Step 3 — Describe lyrics */}
         <CollapsibleStep
           step={3}
-          title="Describe"
+          title="Describe lyrics"
           done={personalDetails.trim().length >= 20}
           summary={
             personalDetails.trim()
