@@ -12,10 +12,10 @@ interface Props {
 }
 
 const EXAMPLES: string[] = [
-  "Afrobeats · happy & upbeat · summer nights",
+  "Afrobeats · happy & upbeat · Hip Hop ",
   "Drill · moody · late-night city drive",
   "Acoustic ballad · heartfelt · rainy Sunday",
-  "Amapiano · dreamy · rooftop sunset",
+  "Angry · Hyper · Slow Vocals",
 ];
 
 export function StyleComposer({ value, onChange }: Props) {
