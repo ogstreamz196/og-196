@@ -71,7 +71,7 @@ function MessengerPage() {
 
   return (
     <DashboardShell title={isCommunity ? "OG Community Mode" : "OG Bot Loner Mode"}>
-      <div className={`relative mx-auto w-full max-w-5xl ${foulMouth ? "hell-aura" : ""}`}>
+      <div className={`relative mx-auto w-full max-w-5xl lg:max-w-6xl xl:max-w-[88rem] 2xl:max-w-[96rem] ${foulMouth ? "hell-aura" : ""}`}>
         {foulMouth && (
           <>
             <span aria-hidden className="pointer-events-none absolute -inset-6 -z-10 rounded-[2rem] bg-[radial-gradient(ellipse_at_top,rgba(239,68,68,0.55),transparent_60%),radial-gradient(ellipse_at_bottom,rgba(220,38,38,0.5),transparent_65%)] blur-2xl animate-pulse" />
