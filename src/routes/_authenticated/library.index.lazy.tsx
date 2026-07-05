@@ -1026,28 +1026,35 @@ function LibraryPage() {
           </div>
         </CollapsibleStep>
 
-        {/* Step 4 — Sound (language + style composer) */}
+        {/* Step 4 — Language */}
         <CollapsibleStep
           step={4}
-          title="Sound"
-          done={!!selections.language && hasStyle}
+          title="Language"
+          done={!!selections.language}
+          summary={selections.language || undefined}
+        >
+          <CategoryCard
+            cat="language"
+            value={selections.language}
+            chips={chips.language}
+            onSelect={(v) => setField("language", v)}
+            onPickChip={(v) => pickChip("language", v)}
+            onRefresh={() => refreshRow("language")}
+          />
+        </CollapsibleStep>
+
+        {/* Step 5 — Song style */}
+        <CollapsibleStep
+          step={5}
+          title="Song style"
+          done={hasStyle}
           summary={
-            selections.language && hasStyle
-              ? `${selections.language} · ${styleText.trim().slice(0, 70)}${styleText.trim().length > 70 ? "…" : ""}`
+            hasStyle
+              ? `${styleText.trim().slice(0, 90)}${styleText.trim().length > 90 ? "…" : ""}`
               : undefined
           }
         >
-          <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 sm:gap-5">
-            <CategoryCard
-              cat="language"
-              value={selections.language}
-              chips={chips.language}
-              onSelect={(v) => setField("language", v)}
-              onPickChip={(v) => pickChip("language", v)}
-              onRefresh={() => refreshRow("language")}
-            />
-            <StyleComposer value={styleText} onChange={setStyleText} />
-          </div>
+          <StyleComposer value={styleText} onChange={setStyleText} />
         </CollapsibleStep>
 
         {/* Foul mouth + Generate */}
