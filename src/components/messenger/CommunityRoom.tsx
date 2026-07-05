@@ -374,7 +374,7 @@ export function CommunityRoom() {
                           )}
                         </span>
                         <div
-                          className={`min-w-0 max-w-[94%] rounded-2xl px-3 py-2 text-sm shadow-sm sm:max-w-[88%] ${
+                          className={`min-w-0 max-w-[94%] rounded-2xl px-3 py-2 text-sm shadow-sm sm:max-w-[88%] lg:max-w-[78%] xl:max-w-[70%] ${
                             isBot
                               ? "border border-primary/30 bg-primary/10 text-foreground"
                               : mine
