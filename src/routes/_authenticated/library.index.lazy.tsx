@@ -204,9 +204,10 @@ function LibraryPage() {
   const totalFilled =
     (title.trim() ? 1 : 0) +
     (subjectName.trim() ? 1 : 0) +
+    (personalDetails.trim().length >= 20 ? 1 : 0) +
     (selections.language ? 1 : 0) +
     (hasStyle ? 1 : 0);
-  const progress = Math.min(100, Math.round((totalFilled / 4) * 100));
+  const progress = Math.min(100, Math.round((totalFilled / 5) * 100));
 
   const canGenerateLyrics =
     !!title.trim() &&
@@ -872,11 +873,11 @@ function LibraryPage() {
               Create <span className="text-gradient-brand">a song</span>
             </h2>
             <p className="text-sm text-muted-foreground sm:text-base">
-              Four quick steps — title, name, vibe, sound. Fill them in any order.
+              Five quick steps — title, name, describe, language, song style. Fill them in any order.
             </p>
           </div>
           <span className="shrink-0 self-start rounded-full border border-primary/40 bg-primary/15 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-primary sm:text-sm">
-            {totalFilled}/4
+            {totalFilled}/5
           </span>
         </header>
 
@@ -951,10 +952,10 @@ function LibraryPage() {
           </p>
         </CollapsibleStep>
 
-        {/* Step 3 — Describe */}
+        {/* Step 3 — Describe lyrics */}
         <CollapsibleStep
           step={3}
-          title="Describe"
+          title="Describe lyrics"
           done={personalDetails.trim().length >= 20}
           summary={
             personalDetails.trim()
@@ -1025,28 +1026,35 @@ function LibraryPage() {
           </div>
         </CollapsibleStep>
 
-        {/* Step 4 — Sound (language + style composer) */}
+        {/* Step 4 — Language */}
         <CollapsibleStep
           step={4}
-          title="Sound"
-          done={!!selections.language && hasStyle}
+          title="Language"
+          done={!!selections.language}
+          summary={selections.language || undefined}
+        >
+          <CategoryCard
+            cat="language"
+            value={selections.language}
+            chips={chips.language}
+            onSelect={(v) => setField("language", v)}
+            onPickChip={(v) => pickChip("language", v)}
+            onRefresh={() => refreshRow("language")}
+          />
+        </CollapsibleStep>
+
+        {/* Step 5 — Song style */}
+        <CollapsibleStep
+          step={5}
+          title="Song style"
+          done={hasStyle}
           summary={
-            selections.language && hasStyle
-              ? `${selections.language} · ${styleText.trim().slice(0, 70)}${styleText.trim().length > 70 ? "…" : ""}`
+            hasStyle
+              ? `${styleText.trim().slice(0, 90)}${styleText.trim().length > 90 ? "…" : ""}`
               : undefined
           }
         >
-          <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 sm:gap-5">
-            <CategoryCard
-              cat="language"
-              value={selections.language}
-              chips={chips.language}
-              onSelect={(v) => setField("language", v)}
-              onPickChip={(v) => pickChip("language", v)}
-              onRefresh={() => refreshRow("language")}
-            />
-            <StyleComposer value={styleText} onChange={setStyleText} />
-          </div>
+          <StyleComposer value={styleText} onChange={setStyleText} />
         </CollapsibleStep>
 
         {/* Foul mouth + Generate */}
