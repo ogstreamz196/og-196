@@ -162,7 +162,7 @@ function MessengerPage() {
             ) : (
               <MessageCircle className="h-4 w-4 text-primary" />
             )}
-            <span className="whitespace-pre-line text-center leading-tight">{setMode.isPending ? "Saving…" : isCommunity ? "Start Private Mode" : "GO TO\nCOMMUNITY MODE"}</span>
+            <span className="whitespace-pre-line text-center leading-tight">{setMode.isPending ? "Saving…" : isCommunity ? "Start Private Mode" : "TURN ON\n GLOBAL MODE"}</span>
 
           </button>
         </header>
