@@ -23,6 +23,7 @@ import {
   Send,
   Smartphone,
   Globe,
+  Trophy,
 } from "lucide-react";
 import { useRef, useState, useCallback, type PointerEvent as ReactPointerEvent } from "react";
 import {
@@ -336,6 +337,33 @@ function DashboardHome() {
       {/* Continuity demo */}
       {/* <ContinuityDemo /> hidden per request */}
 
+      {/* Daily Challenge banner */}
+      <section>
+        <Link
+          to="/challenge"
+          preload="intent"
+          className="group relative flex flex-col gap-3 overflow-hidden rounded-3xl border-2 border-white/15 bg-gradient-to-br from-primary/25 via-card/70 to-accent/25 p-5 shadow-[0_20px_50px_-20px_rgba(80,60,255,0.5)] backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-glow sm:flex-row sm:items-center sm:justify-between sm:p-6"
+        >
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -inset-24 opacity-30 [background:conic-gradient(from_0deg,oklch(0.55_0.22_268/0.4),transparent_35%,oklch(0.7_0.22_25/0.35)_60%,transparent_85%,oklch(0.55_0.22_268/0.4))] animate-[spin_28s_linear_infinite] blur-3xl"
+          />
+          <div className="relative flex items-center gap-4">
+            <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-primary/30 text-3xl shadow-glow">
+              🏆
+            </div>
+            <div>
+              <div className="text-xs font-black uppercase tracking-[0.28em] text-primary">Daily Challenge</div>
+              <div className="text-lg font-black leading-tight sm:text-2xl">Today's Song Challenge is live</div>
+              <p className="text-sm text-muted-foreground">Fun for all ages. New prompt every day.</p>
+            </div>
+          </div>
+          <span className="relative inline-flex shrink-0 items-center gap-2 self-start rounded-full bg-primary px-5 py-2.5 text-sm font-black text-primary-foreground shadow-glow transition group-hover:scale-105 sm:self-auto">
+            <Sparkles className="h-4 w-4" /> Start Challenge
+          </span>
+        </Link>
+      </section>
+
       {/* Quick actions */}
       <section>
         <h2 className="mb-4 text-sm uppercase tracking-[0.28em] text-muted-foreground sm:text-base">
@@ -343,9 +371,9 @@ function DashboardHome() {
         </h2>
         <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 sm:gap-4">
           <QuickAction to="/library" icon={<Plus className="h-7 w-7" />} label="Create" tone="violet" />
-          <QuickAction to="/library" icon={<Library className="h-7 w-7" />} label="Music" tone="cyan" />
+          <QuickAction to="/challenge" icon={<Trophy className="h-7 w-7" />} label="Challenge" tone="amber" />
           <QuickAction to="/messenger" icon={<Wand2 className="h-7 w-7" />} label="Ask OG" tone="pink" />
-          <QuickAction to="/buy-coins" icon={<Coins className="h-7 w-7" />} label="Coins" tone="amber" />
+          <QuickAction to="/library" icon={<Library className="h-7 w-7" />} label="Music" tone="cyan" />
           <QuickAction to="/referrals" icon={<Gift className="h-7 w-7" />} label="Earn" tone="emerald" />
         </div>
       </section>
@@ -668,7 +696,7 @@ function QuickAction({
   label,
   tone,
 }: {
-  to: "/library" | "/messenger" | "/buy-coins" | "/referrals";
+  to: "/library" | "/messenger" | "/buy-coins" | "/referrals" | "/challenge";
   icon: React.ReactNode;
   label: string;
   tone: keyof typeof QUICK_TONES;

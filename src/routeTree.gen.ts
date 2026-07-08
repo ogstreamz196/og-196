@@ -27,6 +27,7 @@ import { Route as AuthenticatedPortalsRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedMessengerRouteImport } from './routes/_authenticated/messenger'
 import { Route as AuthenticatedDeveloperRouteImport } from './routes/_authenticated/developer'
 import { Route as AuthenticatedCommunityRouteImport } from './routes/_authenticated/community'
+import { Route as AuthenticatedChallengeRouteImport } from './routes/_authenticated/challenge'
 import { Route as AuthenticatedBuyCoinsIndexRouteImport } from './routes/_authenticated/buy-coins.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedLibrarySongIdRouteImport } from './routes/_authenticated/library.$songId'
@@ -129,6 +130,11 @@ const AuthenticatedDeveloperRoute = AuthenticatedDeveloperRouteImport.update({
 const AuthenticatedCommunityRoute = AuthenticatedCommunityRouteImport.update({
   id: '/community',
   path: '/community',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedChallengeRoute = AuthenticatedChallengeRouteImport.update({
+  id: '/challenge',
+  path: '/challenge',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedLibraryIndexLazyRoute =
@@ -257,6 +263,7 @@ export interface FileRoutesByFullPath {
   '/m-preview': typeof MPreviewRoute
   '/trust': typeof TrustRoute
   '/welcome': typeof WelcomeRoute
+  '/challenge': typeof AuthenticatedChallengeRoute
   '/community': typeof AuthenticatedCommunityRoute
   '/developer': typeof AuthenticatedDeveloperRoute
   '/messenger': typeof AuthenticatedMessengerRoute
@@ -293,6 +300,7 @@ export interface FileRoutesByTo {
   '/m-preview': typeof MPreviewRoute
   '/trust': typeof TrustRoute
   '/welcome': typeof WelcomeRoute
+  '/challenge': typeof AuthenticatedChallengeRoute
   '/community': typeof AuthenticatedCommunityRoute
   '/developer': typeof AuthenticatedDeveloperRoute
   '/messenger': typeof AuthenticatedMessengerRoute
@@ -332,6 +340,7 @@ export interface FileRoutesById {
   '/m-preview': typeof MPreviewRoute
   '/trust': typeof TrustRoute
   '/welcome': typeof WelcomeRoute
+  '/_authenticated/challenge': typeof AuthenticatedChallengeRoute
   '/_authenticated/community': typeof AuthenticatedCommunityRoute
   '/_authenticated/developer': typeof AuthenticatedDeveloperRoute
   '/_authenticated/messenger': typeof AuthenticatedMessengerRoute
@@ -372,6 +381,7 @@ export interface FileRouteTypes {
     | '/m-preview'
     | '/trust'
     | '/welcome'
+    | '/challenge'
     | '/community'
     | '/developer'
     | '/messenger'
@@ -408,6 +418,7 @@ export interface FileRouteTypes {
     | '/m-preview'
     | '/trust'
     | '/welcome'
+    | '/challenge'
     | '/community'
     | '/developer'
     | '/messenger'
@@ -446,6 +457,7 @@ export interface FileRouteTypes {
     | '/m-preview'
     | '/trust'
     | '/welcome'
+    | '/_authenticated/challenge'
     | '/_authenticated/community'
     | '/_authenticated/developer'
     | '/_authenticated/messenger'
@@ -603,6 +615,13 @@ declare module '@tanstack/react-router' {
       path: '/community'
       fullPath: '/community'
       preLoaderRoute: typeof AuthenticatedCommunityRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/challenge': {
+      id: '/_authenticated/challenge'
+      path: '/challenge'
+      fullPath: '/challenge'
+      preLoaderRoute: typeof AuthenticatedChallengeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/library/': {
@@ -763,6 +782,7 @@ const AuthenticatedAdminUsersRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedChallengeRoute: typeof AuthenticatedChallengeRoute
   AuthenticatedCommunityRoute: typeof AuthenticatedCommunityRoute
   AuthenticatedDeveloperRoute: typeof AuthenticatedDeveloperRoute
   AuthenticatedMessengerRoute: typeof AuthenticatedMessengerRoute
@@ -792,6 +812,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedChallengeRoute: AuthenticatedChallengeRoute,
   AuthenticatedCommunityRoute: AuthenticatedCommunityRoute,
   AuthenticatedDeveloperRoute: AuthenticatedDeveloperRoute,
   AuthenticatedMessengerRoute: AuthenticatedMessengerRoute,
@@ -837,13 +858,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
