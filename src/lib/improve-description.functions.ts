@@ -78,17 +78,30 @@ export const improveLyricDescription = createServerFn({ method: "POST" })
     return { improved, draftId };
   });
 
-/** List the signed-in user's most recent improved briefs for reuse. */
+const DRAFT_PAGE_SIZE = 8;
+
+/** List the signed-in user's most recent improved briefs for reuse (paginated). */
 export const listSongBriefDrafts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { data, error } = await context.supabase
+  .inputValidator((data?: { offset?: number }) => ({
+    offset: Math.max(0, Math.floor(Number(data?.offset ?? 0)) || 0),
+  }))
+  .handler(async ({ data, context }) => {
+    const from = data.offset;
+    const to = from + DRAFT_PAGE_SIZE; // fetch one extra to detect more
+    const { data: rows, error } = await context.supabase
       .from("song_brief_drafts")
       .select("id, subject_name, original_text, improved_text, created_at")
       .order("created_at", { ascending: false })
-      .limit(20);
+      .range(from, to);
     if (error) throw new Error(error.message);
-    return { drafts: data ?? [] };
+    const list = rows ?? [];
+    const hasMore = list.length > DRAFT_PAGE_SIZE;
+    return {
+      drafts: hasMore ? list.slice(0, DRAFT_PAGE_SIZE) : list,
+      hasMore,
+      nextOffset: from + DRAFT_PAGE_SIZE,
+    };
   });
 
 /** Permanently delete one of the user's saved briefs. */
@@ -103,6 +116,36 @@ export const deleteSongBriefDraft = createServerFn({ method: "POST" })
     const { error } = await context.supabase
       .from("song_brief_drafts")
       .delete()
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+/** Edit an existing saved brief (improved text and/or subject name). */
+export const updateSongBriefDraft = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: { id: string; improvedText?: string; subjectName?: string | null }) => {
+    const id = String(data?.id ?? "").trim();
+    if (!id) throw new Error("id required");
+    const improvedText =
+      data?.improvedText === undefined
+        ? undefined
+        : String(data.improvedText).trim().slice(0, 2000);
+    if (improvedText !== undefined && !improvedText) throw new Error("Brief can't be empty");
+    const subjectName =
+      data?.subjectName === undefined
+        ? undefined
+        : (String(data.subjectName ?? "").trim().slice(0, 60) || null);
+    return { id, improvedText, subjectName };
+  })
+  .handler(async ({ data, context }) => {
+    const patch: Record<string, string | null> = {};
+    if (data.improvedText !== undefined) patch.improved_text = data.improvedText;
+    if (data.subjectName !== undefined) patch.subject_name = data.subjectName;
+    if (Object.keys(patch).length === 0) return { ok: true };
+    const { error } = await context.supabase
+      .from("song_brief_drafts")
+      .update(patch)
       .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
