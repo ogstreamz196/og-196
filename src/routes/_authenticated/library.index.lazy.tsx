@@ -148,8 +148,11 @@ function LibraryPage() {
     setImproving(true);
     try {
       const { improved } = await improveDescription({ data: { text } });
-      setPersonalDetails(improved.slice(0, PERSONAL_DETAILS_MAX));
-      toast.success("Polished ✨");
+      const clipped = improved.slice(0, PERSONAL_DETAILS_MAX);
+      setPersonalDetails(clipped);
+      setExtraContext(improved.slice(0, 1000));
+      if (!styleText.trim()) setStyleText(improved.slice(0, 400));
+      toast.success("Polished ✨ — style & lyrics prompt filled in");
     } catch (err) {
       toast.error((err as Error).message || "Couldn't improve just now");
     } finally {
