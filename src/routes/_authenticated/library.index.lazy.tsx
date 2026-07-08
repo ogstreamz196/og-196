@@ -147,7 +147,9 @@ function LibraryPage() {
     }
     setImproving(true);
     try {
-      const { improved } = await improveDescription({ data: { text } });
+      const { improved } = await improveDescription({
+        data: { text, subjectName: subjectName.trim() || undefined },
+      });
       const clipped = improved.slice(0, PERSONAL_DETAILS_MAX);
       setPersonalDetails(clipped);
       setExtraContext(improved.slice(0, 1000));
