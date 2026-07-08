@@ -15,7 +15,10 @@ import {
   Search,
   Users,
   Crown,
+  Wand,
 } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { improveLyricDescription } from "@/lib/improve-description.functions";
 
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
