@@ -15,12 +15,16 @@ import {
   Search,
   Users,
   Crown,
+  Pencil,
+  Check,
+  X,
 } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import {
   improveLyricDescription,
   listSongBriefDrafts,
   deleteSongBriefDraft,
+  updateSongBriefDraft,
 } from "@/lib/improve-description.functions";
 
 import { toast } from "sonner";
@@ -145,11 +149,21 @@ function LibraryPage() {
   const improveDescription = useServerFn(improveLyricDescription);
   const listDrafts = useServerFn(listSongBriefDrafts);
   const deleteDraft = useServerFn(deleteSongBriefDraft);
-  const draftsQuery = useQuery({
+  const updateDraft = useServerFn(updateSongBriefDraft);
+  const draftsQuery = useInfiniteQuery({
     queryKey: ["song-brief-drafts"],
-    queryFn: () => listDrafts(),
+    initialPageParam: 0,
+    queryFn: ({ pageParam }) => listDrafts({ data: { offset: pageParam } }),
+    getNextPageParam: (last) => (last.hasMore ? last.nextOffset : undefined),
     staleTime: 30_000,
   });
+  const allDrafts = useMemo(
+    () => draftsQuery.data?.pages.flatMap((p) => p.drafts) ?? [],
+    [draftsQuery.data],
+  );
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingText, setEditingText] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
   // Build one consistent brief that fills BOTH the style prompt and the lyrics
   // description in the same shape every time Improve succeeds.
   const buildBrief = (improved: string) => {
@@ -164,7 +178,7 @@ function LibraryPage() {
     setExtraContext(lyrics);
     setStyleText(style);
     if (d.subject_name && !subjectName.trim()) setSubjectName(d.subject_name.slice(0, 60));
-    toast.success("Loaded saved brief");
+    toast.success("Loaded saved brief — style & lyrics filled in");
   };
   const removeDraft = async (id: string) => {
     try {
@@ -172,6 +186,33 @@ function LibraryPage() {
       await draftsQuery.refetch();
     } catch (err) {
       toast.error((err as Error).message || "Couldn't delete");
+    }
+  };
+  const startEdit = (d: { id: string; improved_text: string }) => {
+    setEditingId(d.id);
+    setEditingText(d.improved_text);
+  };
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditingText("");
+  };
+  const saveEdit = async () => {
+    if (!editingId) return;
+    const next = editingText.trim();
+    if (!next) {
+      toast.info("Brief can't be empty");
+      return;
+    }
+    setSavingEdit(true);
+    try {
+      await updateDraft({ data: { id: editingId, improvedText: next } });
+      await draftsQuery.refetch();
+      toast.success("Brief updated");
+      cancelEdit();
+    } catch (err) {
+      toast.error((err as Error).message || "Couldn't save");
+    } finally {
+      setSavingEdit(false);
     }
   };
   const handleImproveDescription = async () => {
@@ -1131,43 +1172,126 @@ function LibraryPage() {
             );
           })()}
 
-          {draftsQuery.data?.drafts && draftsQuery.data.drafts.length > 0 && (
+          {(draftsQuery.isLoading || allDrafts.length > 0) && (
             <div className="mt-4 space-y-2">
-              <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-                Saved briefs · tap to reuse
+              <div className="flex items-center justify-between gap-2">
+                <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                  Saved briefs · tap to reuse
+                </div>
+                {draftsQuery.isFetching && !draftsQuery.isFetchingNextPage && (
+                  <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                )}
               </div>
-              <ul className="space-y-1.5">
-                {draftsQuery.data.drafts.map((d) => (
-                  <li
-                    key={d.id}
-                    className="group flex items-start gap-2 rounded-lg border border-white/10 bg-card/60 p-2"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => applyDraft(d)}
-                      className="min-w-0 flex-1 text-left text-xs leading-snug hover:text-primary"
-                    >
-                      {d.subject_name && (
-                        <span className="mr-1 font-semibold text-foreground">
-                          {d.subject_name} ·
-                        </span>
-                      )}
-                      <span className="text-muted-foreground">
-                        {d.improved_text.slice(0, 140)}
-                        {d.improved_text.length > 140 ? "…" : ""}
-                      </span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => removeDraft(d.id)}
-                      aria-label="Delete saved brief"
-                      className="shrink-0 rounded p-1 text-muted-foreground opacity-60 hover:bg-destructive/10 hover:text-destructive hover:opacity-100"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  </li>
-                ))}
-              </ul>
+              {draftsQuery.isLoading ? (
+                <div className="space-y-1.5">
+                  {[0, 1, 2].map((i) => (
+                    <Skeleton key={i} className="h-10 w-full rounded-lg" />
+                  ))}
+                </div>
+              ) : (
+                <ul className="space-y-1.5">
+                  {allDrafts.map((d) => {
+                    const isEditing = editingId === d.id;
+                    return (
+                      <li
+                        key={d.id}
+                        className="group flex items-start gap-2 rounded-lg border border-white/10 bg-card/60 p-2"
+                      >
+                        {isEditing ? (
+                          <div className="min-w-0 flex-1 space-y-1.5">
+                            <Textarea
+                              value={editingText}
+                              onChange={(e) => setEditingText(e.target.value.slice(0, 2000))}
+                              rows={3}
+                              className="text-xs"
+                              autoFocus
+                            />
+                            <div className="flex items-center gap-1">
+                              <Button
+                                type="button"
+                                size="sm"
+                                onClick={saveEdit}
+                                disabled={savingEdit || !editingText.trim()}
+                                className="h-7 gap-1 px-2 text-xs"
+                              >
+                                {savingEdit ? (
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                ) : (
+                                  <Check className="h-3 w-3" />
+                                )}
+                                Save
+                              </Button>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="ghost"
+                                onClick={cancelEdit}
+                                disabled={savingEdit}
+                                className="h-7 gap-1 px-2 text-xs"
+                              >
+                                <X className="h-3 w-3" />
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => applyDraft(d)}
+                              className="min-w-0 flex-1 text-left text-xs leading-snug hover:text-primary"
+                            >
+                              {d.subject_name && (
+                                <span className="mr-1 font-semibold text-foreground">
+                                  {d.subject_name} ·
+                                </span>
+                              )}
+                              <span className="text-muted-foreground">
+                                {d.improved_text.slice(0, 140)}
+                                {d.improved_text.length > 140 ? "…" : ""}
+                              </span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => startEdit(d)}
+                              aria-label="Edit saved brief"
+                              className="shrink-0 rounded p-1 text-muted-foreground opacity-60 hover:bg-primary/10 hover:text-primary hover:opacity-100"
+                            >
+                              <Pencil className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => removeDraft(d.id)}
+                              aria-label="Delete saved brief"
+                              className="shrink-0 rounded p-1 text-muted-foreground opacity-60 hover:bg-destructive/10 hover:text-destructive hover:opacity-100"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+              {draftsQuery.hasNextPage && (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => draftsQuery.fetchNextPage()}
+                  disabled={draftsQuery.isFetchingNextPage}
+                  className="h-7 w-full gap-1 text-xs"
+                >
+                  {draftsQuery.isFetchingNextPage ? (
+                    <>
+                      <Loader2 className="h-3 w-3 animate-spin" /> Loading…
+                    </>
+                  ) : (
+                    "Load more"
+                  )}
+                </Button>
+              )}
             </div>
           )}
 
