@@ -61,7 +61,7 @@ function MessengerPage() {
   const [pendingMode, setPendingMode] = useState<MessengerMode | null>(null);
 
   function requestSwitch() {
-    setPendingMode(isCommunity ? "loner" : "community");
+    setMode.mutate(isCommunity ? "loner" : "community");
   }
 
   function confirmSwitch() {
