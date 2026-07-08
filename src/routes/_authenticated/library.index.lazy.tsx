@@ -15,7 +15,6 @@ import {
   Search,
   Users,
   Crown,
-  Wand,
 } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { improveLyricDescription } from "@/lib/improve-description.functions";
