@@ -1003,7 +1003,7 @@ function LibraryPage() {
                   onChange={(e) =>
                     setPersonalDetails(e.target.value.slice(0, PERSONAL_DETAILS_MAX))
                   }
-                  placeholder="✍️ Who is this song for? Their name, what they love, your history, inside jokes…"
+                  placeholder="✍️ What's this song about? Vibes, memories, inside jokes, moments you want in the lyrics…"
                   maxLength={PERSONAL_DETAILS_MAX}
                   rows={6}
                   className="min-h-[160px] resize-y rounded-xl border-primary/30 bg-background/60 text-base leading-relaxed placeholder:text-muted-foreground/70 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/40 aria-[invalid=true]:border-destructive aria-[invalid=true]:focus-visible:ring-destructive/40"
@@ -1029,6 +1029,28 @@ function LibraryPage() {
                     {len}/{PERSONAL_DETAILS_MAX}
                   </span>
                 </div>
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <Button
+                    type="button"
+                    onClick={handleImproveDescription}
+                    disabled={improving || personalDetails.trim().length < 8}
+                    className="gap-2 bg-gradient-brand text-primary-foreground shadow-glow"
+                  >
+                    {improving ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Wand2 className="h-4 w-4" />
+                    )}
+                    {improving ? "Improving…" : "Improve"}
+                  </Button>
+                  <span className="text-xs text-muted-foreground">
+                    Type a few words — OG will tighten it into a lyrics-ready brief.
+                  </span>
+                </div>
+              </div>
+            );
+          })()}
+
               </div>
             );
           })()}
