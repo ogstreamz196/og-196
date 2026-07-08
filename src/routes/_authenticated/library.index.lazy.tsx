@@ -141,6 +141,7 @@ function LibraryPage() {
 
   const [personalDetails, setPersonalDetails] = useState("");
   const [improving, setImproving] = useState(false);
+  const [improveError, setImproveError] = useState<string | null>(null);
   const improveDescription = useServerFn(improveLyricDescription);
   const listDrafts = useServerFn(listSongBriefDrafts);
   const deleteDraft = useServerFn(deleteSongBriefDraft);
@@ -149,11 +150,19 @@ function LibraryPage() {
     queryFn: () => listDrafts(),
     staleTime: 30_000,
   });
+  // Build one consistent brief that fills BOTH the style prompt and the lyrics
+  // description in the same shape every time Improve succeeds.
+  const buildBrief = (improved: string) => {
+    const clean = improved.replace(/\s+/g, " ").trim();
+    const style = `Style: ${clean}`.slice(0, 400);
+    const lyrics = `Style: ${clean}\nLyrics brief: ${clean}`.slice(0, 1000);
+    return { style, lyrics, clean };
+  };
   const applyDraft = (d: { improved_text: string; subject_name: string | null }) => {
-    const t = d.improved_text.slice(0, PERSONAL_DETAILS_MAX);
-    setPersonalDetails(t);
-    setExtraContext(d.improved_text.slice(0, 1000));
-    if (!styleText.trim()) setStyleText(d.improved_text.slice(0, 400));
+    const { style, lyrics, clean } = buildBrief(d.improved_text);
+    setPersonalDetails(clean.slice(0, PERSONAL_DETAILS_MAX));
+    setExtraContext(lyrics);
+    setStyleText(style);
     if (d.subject_name && !subjectName.trim()) setSubjectName(d.subject_name.slice(0, 60));
     toast.success("Loaded saved brief");
   };
@@ -173,18 +182,19 @@ function LibraryPage() {
       return;
     }
     setImproving(true);
+    setImproveError(null);
     try {
       const { improved } = await improveDescription({
         data: { text, subjectName: subjectName.trim() || undefined },
       });
-      const clipped = improved.slice(0, PERSONAL_DETAILS_MAX);
-      setPersonalDetails(clipped);
-      setExtraContext(improved.slice(0, 1000));
-      if (!styleText.trim()) setStyleText(improved.slice(0, 400));
+      const { style, lyrics, clean } = buildBrief(improved);
+      setPersonalDetails(clean.slice(0, PERSONAL_DETAILS_MAX));
+      setExtraContext(lyrics);
+      setStyleText(style);
       toast.success("Polished ✨ — style & lyrics prompt filled in");
       draftsQuery.refetch();
     } catch (err) {
-      toast.error((err as Error).message || "Couldn't improve just now");
+      setImproveError((err as Error).message || "Couldn't improve just now");
     } finally {
       setImproving(false);
     }
@@ -1080,6 +1090,43 @@ function LibraryPage() {
                     Type a few words — OG will tighten it into a lyrics-ready brief.
                   </span>
                 </div>
+                {improveError && (
+                  <div
+                    role="alert"
+                    className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive"
+                  >
+                    <span className="min-w-0 flex-1">
+                      <strong className="mr-1">Improve failed:</strong>
+                      {improveError}
+                    </span>
+                    <div className="flex shrink-0 items-center gap-1">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={handleImproveDescription}
+                        disabled={improving}
+                        className="h-7 gap-1 px-2 text-xs"
+                      >
+                        {improving ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <Wand2 className="h-3 w-3" />
+                        )}
+                        Retry
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setImproveError(null)}
+                        className="h-7 px-2 text-xs"
+                      >
+                        Dismiss
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })()}
