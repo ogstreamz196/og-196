@@ -64,7 +64,7 @@ export function useMessengerMode() {
   }, [uid, qc]);
 
 
-  const effectiveMode: MessengerMode = query.data ?? "loner";
+  const effectiveMode: MessengerMode = query.data ?? "community";
 
   return {
     mode: effectiveMode,
