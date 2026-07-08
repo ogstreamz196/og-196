@@ -182,6 +182,7 @@ function LibraryPage() {
       setExtraContext(improved.slice(0, 1000));
       if (!styleText.trim()) setStyleText(improved.slice(0, 400));
       toast.success("Polished ✨ — style & lyrics prompt filled in");
+      draftsQuery.refetch();
     } catch (err) {
       toast.error((err as Error).message || "Couldn't improve just now");
     } finally {
