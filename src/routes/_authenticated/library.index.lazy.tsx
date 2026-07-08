@@ -141,6 +141,7 @@ function LibraryPage() {
 
   const [personalDetails, setPersonalDetails] = useState("");
   const [improving, setImproving] = useState(false);
+  const [improveError, setImproveError] = useState<string | null>(null);
   const improveDescription = useServerFn(improveLyricDescription);
   const listDrafts = useServerFn(listSongBriefDrafts);
   const deleteDraft = useServerFn(deleteSongBriefDraft);
@@ -149,11 +150,19 @@ function LibraryPage() {
     queryFn: () => listDrafts(),
     staleTime: 30_000,
   });
+  // Build one consistent brief that fills BOTH the style prompt and the lyrics
+  // description in the same shape every time Improve succeeds.
+  const buildBrief = (improved: string) => {
+    const clean = improved.replace(/\s+/g, " ").trim();
+    const style = `Style: ${clean}`.slice(0, 400);
+    const lyrics = `Style: ${clean}\nLyrics brief: ${clean}`.slice(0, 1000);
+    return { style, lyrics, clean };
+  };
   const applyDraft = (d: { improved_text: string; subject_name: string | null }) => {
-    const t = d.improved_text.slice(0, PERSONAL_DETAILS_MAX);
-    setPersonalDetails(t);
-    setExtraContext(d.improved_text.slice(0, 1000));
-    if (!styleText.trim()) setStyleText(d.improved_text.slice(0, 400));
+    const { style, lyrics, clean } = buildBrief(d.improved_text);
+    setPersonalDetails(clean.slice(0, PERSONAL_DETAILS_MAX));
+    setExtraContext(lyrics);
+    setStyleText(style);
     if (d.subject_name && !subjectName.trim()) setSubjectName(d.subject_name.slice(0, 60));
     toast.success("Loaded saved brief");
   };
@@ -173,18 +182,19 @@ function LibraryPage() {
       return;
     }
     setImproving(true);
+    setImproveError(null);
     try {
       const { improved } = await improveDescription({
         data: { text, subjectName: subjectName.trim() || undefined },
       });
-      const clipped = improved.slice(0, PERSONAL_DETAILS_MAX);
-      setPersonalDetails(clipped);
-      setExtraContext(improved.slice(0, 1000));
-      if (!styleText.trim()) setStyleText(improved.slice(0, 400));
+      const { style, lyrics, clean } = buildBrief(improved);
+      setPersonalDetails(clean.slice(0, PERSONAL_DETAILS_MAX));
+      setExtraContext(lyrics);
+      setStyleText(style);
       toast.success("Polished ✨ — style & lyrics prompt filled in");
       draftsQuery.refetch();
     } catch (err) {
-      toast.error((err as Error).message || "Couldn't improve just now");
+      setImproveError((err as Error).message || "Couldn't improve just now");
     } finally {
       setImproving(false);
     }
