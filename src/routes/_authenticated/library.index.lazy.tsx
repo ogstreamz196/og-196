@@ -136,6 +136,26 @@ function LibraryPage() {
   const foulMouthSaving = setFoulMouthMutation.isPending;
 
   const [personalDetails, setPersonalDetails] = useState("");
+  const [improving, setImproving] = useState(false);
+  const improveDescription = useServerFn(improveLyricDescription);
+  const handleImproveDescription = async () => {
+    const text = personalDetails.trim();
+    if (!text || improving) return;
+    if (text.length < 8) {
+      toast.info("Write a few words first, then tap Improve.");
+      return;
+    }
+    setImproving(true);
+    try {
+      const { improved } = await improveDescription({ data: { text } });
+      setPersonalDetails(improved.slice(0, PERSONAL_DETAILS_MAX));
+      toast.success("Polished ✨");
+    } catch (err) {
+      toast.error((err as Error).message || "Couldn't improve just now");
+    } finally {
+      setImproving(false);
+    }
+  };
   const [extraContext, setExtraContext] = useState("");
   const [genSong, setGenSong] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<Song | null>(null);
