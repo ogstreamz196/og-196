@@ -149,11 +149,21 @@ function LibraryPage() {
   const improveDescription = useServerFn(improveLyricDescription);
   const listDrafts = useServerFn(listSongBriefDrafts);
   const deleteDraft = useServerFn(deleteSongBriefDraft);
-  const draftsQuery = useQuery({
+  const updateDraft = useServerFn(updateSongBriefDraft);
+  const draftsQuery = useInfiniteQuery({
     queryKey: ["song-brief-drafts"],
-    queryFn: () => listDrafts(),
+    initialPageParam: 0,
+    queryFn: ({ pageParam }) => listDrafts({ data: { offset: pageParam } }),
+    getNextPageParam: (last) => (last.hasMore ? last.nextOffset : undefined),
     staleTime: 30_000,
   });
+  const allDrafts = useMemo(
+    () => draftsQuery.data?.pages.flatMap((p) => p.drafts) ?? [],
+    [draftsQuery.data],
+  );
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingText, setEditingText] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
   // Build one consistent brief that fills BOTH the style prompt and the lyrics
   // description in the same shape every time Improve succeeds.
   const buildBrief = (improved: string) => {
@@ -168,7 +178,7 @@ function LibraryPage() {
     setExtraContext(lyrics);
     setStyleText(style);
     if (d.subject_name && !subjectName.trim()) setSubjectName(d.subject_name.slice(0, 60));
-    toast.success("Loaded saved brief");
+    toast.success("Loaded saved brief — style & lyrics filled in");
   };
   const removeDraft = async (id: string) => {
     try {
@@ -176,6 +186,33 @@ function LibraryPage() {
       await draftsQuery.refetch();
     } catch (err) {
       toast.error((err as Error).message || "Couldn't delete");
+    }
+  };
+  const startEdit = (d: { id: string; improved_text: string }) => {
+    setEditingId(d.id);
+    setEditingText(d.improved_text);
+  };
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditingText("");
+  };
+  const saveEdit = async () => {
+    if (!editingId) return;
+    const next = editingText.trim();
+    if (!next) {
+      toast.info("Brief can't be empty");
+      return;
+    }
+    setSavingEdit(true);
+    try {
+      await updateDraft({ data: { id: editingId, improvedText: next } });
+      await draftsQuery.refetch();
+      toast.success("Brief updated");
+      cancelEdit();
+    } catch (err) {
+      toast.error((err as Error).message || "Couldn't save");
+    } finally {
+      setSavingEdit(false);
     }
   };
   const handleImproveDescription = async () => {
