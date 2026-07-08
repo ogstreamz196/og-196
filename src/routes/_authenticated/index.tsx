@@ -668,7 +668,7 @@ function QuickAction({
   label,
   tone,
 }: {
-  to: "/library" | "/messenger" | "/buy-coins" | "/referrals";
+  to: "/library" | "/messenger" | "/buy-coins" | "/referrals" | "/challenge";
   icon: React.ReactNode;
   label: string;
   tone: keyof typeof QUICK_TONES;
