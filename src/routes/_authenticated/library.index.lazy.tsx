@@ -1051,9 +1051,7 @@ function LibraryPage() {
             );
           })()}
 
-              </div>
-            );
-          })()}
+
 
           {/* Hidden auto-filled lyric description for generation */}
           <div className="sr-only" aria-hidden="true">
