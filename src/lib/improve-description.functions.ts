@@ -9,12 +9,13 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
  */
 export const improveLyricDescription = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { text: string }) => {
+  .inputValidator((data: { text: string; subjectName?: string }) => {
     const text = String(data?.text ?? "").trim().slice(0, 2000);
     if (!text) throw new Error("Description is empty");
-    return { text };
+    const subjectName = String(data?.subjectName ?? "").trim().slice(0, 60) || null;
+    return { text, subjectName };
   })
-  .handler(async ({ data }): Promise<{ improved: string }> => {
+  .handler(async ({ data, context }): Promise<{ improved: string; draftId: string | null }> => {
     const apiKey = process.env.LOVABLE_API_KEY;
     if (!apiKey) throw new Error("AI gateway not configured");
 
@@ -57,5 +58,53 @@ export const improveLyricDescription = createServerFn({ method: "POST" })
     };
     const improved = (json.choices?.[0]?.message?.content ?? "").trim();
     if (!improved) throw new Error("No improved text returned");
-    return { improved };
+
+    // Persist as a reusable draft (best-effort; never block the response).
+    let draftId: string | null = null;
+    try {
+      const { data: row, error } = await context.supabase
+        .from("song_brief_drafts")
+        .insert({
+          user_id: context.userId,
+          subject_name: data.subjectName,
+          original_text: data.text,
+          improved_text: improved,
+        })
+        .select("id")
+        .single();
+      if (!error && row) draftId = (row as { id: string }).id;
+    } catch (_) { /* best-effort */ }
+
+    return { improved, draftId };
   });
+
+/** List the signed-in user's most recent improved briefs for reuse. */
+export const listSongBriefDrafts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("song_brief_drafts")
+      .select("id, subject_name, original_text, improved_text, created_at")
+      .order("created_at", { ascending: false })
+      .limit(20);
+    if (error) throw new Error(error.message);
+    return { drafts: data ?? [] };
+  });
+
+/** Permanently delete one of the user's saved briefs. */
+export const deleteSongBriefDraft = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: { id: string }) => {
+    const id = String(data?.id ?? "").trim();
+    if (!id) throw new Error("id required");
+    return { id };
+  })
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("song_brief_drafts")
+      .delete()
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+

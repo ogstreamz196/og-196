@@ -745,6 +745,36 @@ export type Database = {
         }
         Relationships: []
       }
+      song_brief_drafts: {
+        Row: {
+          created_at: string
+          id: string
+          improved_text: string
+          original_text: string
+          subject_name: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          improved_text: string
+          original_text: string
+          subject_name?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          improved_text?: string
+          original_text?: string
+          subject_name?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       songs: {
         Row: {
           audio_path: string | null
