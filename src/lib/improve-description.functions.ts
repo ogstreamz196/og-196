@@ -139,7 +139,7 @@ export const updateSongBriefDraft = createServerFn({ method: "POST" })
     return { id, improvedText, subjectName };
   })
   .handler(async ({ data, context }) => {
-    const patch: Record<string, string | null> = {};
+    const patch: { improved_text?: string; subject_name?: string | null } = {};
     if (data.improvedText !== undefined) patch.improved_text = data.improvedText;
     if (data.subjectName !== undefined) patch.subject_name = data.subjectName;
     if (Object.keys(patch).length === 0) return { ok: true };
