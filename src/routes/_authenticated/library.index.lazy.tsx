@@ -142,6 +142,29 @@ function LibraryPage() {
   const [personalDetails, setPersonalDetails] = useState("");
   const [improving, setImproving] = useState(false);
   const improveDescription = useServerFn(improveLyricDescription);
+  const listDrafts = useServerFn(listSongBriefDrafts);
+  const deleteDraft = useServerFn(deleteSongBriefDraft);
+  const draftsQuery = useQuery({
+    queryKey: ["song-brief-drafts"],
+    queryFn: () => listDrafts(),
+    staleTime: 30_000,
+  });
+  const applyDraft = (d: { improved_text: string; subject_name: string | null }) => {
+    const t = d.improved_text.slice(0, PERSONAL_DETAILS_MAX);
+    setPersonalDetails(t);
+    setExtraContext(d.improved_text.slice(0, 1000));
+    if (!styleText.trim()) setStyleText(d.improved_text.slice(0, 400));
+    if (d.subject_name && !subjectName.trim()) setSubjectName(d.subject_name.slice(0, 60));
+    toast.success("Loaded saved brief");
+  };
+  const removeDraft = async (id: string) => {
+    try {
+      await deleteDraft({ data: { id } });
+      await draftsQuery.refetch();
+    } catch (err) {
+      toast.error((err as Error).message || "Couldn't delete");
+    }
+  };
   const handleImproveDescription = async () => {
     const text = personalDetails.trim();
     if (!text || improving) return;
