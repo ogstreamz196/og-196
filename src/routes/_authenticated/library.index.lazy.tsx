@@ -1084,6 +1084,45 @@ function LibraryPage() {
             );
           })()}
 
+          {draftsQuery.data?.drafts && draftsQuery.data.drafts.length > 0 && (
+            <div className="mt-4 space-y-2">
+              <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                Saved briefs · tap to reuse
+              </div>
+              <ul className="space-y-1.5">
+                {draftsQuery.data.drafts.map((d) => (
+                  <li
+                    key={d.id}
+                    className="group flex items-start gap-2 rounded-lg border border-white/10 bg-card/60 p-2"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => applyDraft(d)}
+                      className="min-w-0 flex-1 text-left text-xs leading-snug hover:text-primary"
+                    >
+                      {d.subject_name && (
+                        <span className="mr-1 font-semibold text-foreground">
+                          {d.subject_name} ·
+                        </span>
+                      )}
+                      <span className="text-muted-foreground">
+                        {d.improved_text.slice(0, 140)}
+                        {d.improved_text.length > 140 ? "…" : ""}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => removeDraft(d.id)}
+                      aria-label="Delete saved brief"
+                      className="shrink-0 rounded p-1 text-muted-foreground opacity-60 hover:bg-destructive/10 hover:text-destructive hover:opacity-100"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
 
           {/* Hidden auto-filled lyric description for generation */}
