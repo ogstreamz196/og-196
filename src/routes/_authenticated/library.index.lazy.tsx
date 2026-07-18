@@ -434,6 +434,134 @@ function LibraryPage() {
     }
   }
 
+  /* ------------------------------------------------------------------
+   * One-tap pipeline: lyrics → save → kick off Suno preview → navigate.
+   * The user sees a single progress bar with a live ETA while everything
+   * happens in the backend, then lands on the song page for the sample.
+   * ------------------------------------------------------------------ */
+  type PipelineStage = "idle" | "lyrics" | "saving" | "submitting" | "handoff" | "error";
+  const [pipeline, setPipeline] = useState<{ stage: PipelineStage; startedAt: number; error?: string }>({
+    stage: "idle",
+    startedAt: 0,
+  });
+  const [pipelineElapsed, setPipelineElapsed] = useState(0);
+  const pipelineLockRef = useRef(false);
+  const totalCost = lyricsCost + previewCost;
+  const canRunPipeline =
+    !!user && canGenerateLyrics && balance >= totalCost && pipeline.stage === "idle";
+
+  // ETA: lyrics ~18s, save ~2s, submit ~5s, sample handoff to song page
+  const PIPELINE_ETA_MS = 25_000;
+
+  useEffect(() => {
+    if (pipeline.stage === "idle" || pipeline.stage === "error") return;
+    const id = window.setInterval(() => {
+      setPipelineElapsed(Date.now() - pipeline.startedAt);
+    }, 250);
+    return () => window.clearInterval(id);
+  }, [pipeline.stage, pipeline.startedAt]);
+
+  async function createSong() {
+    if (pipelineLockRef.current) return;
+    if (!user || !canRunPipeline) return;
+    pipelineLockRef.current = true;
+    const startedAt = Date.now();
+    setPipeline({ stage: "lyrics", startedAt });
+    setPipelineElapsed(0);
+    try {
+      // 1. Lyrics
+      const description = styleText.trim();
+      const combinedExtra = extraContext.trim();
+      const { data: lyricData, error: lyricErr } = await supabase.functions.invoke("generate-lyrics", {
+        body: {
+          songName: title.trim(),
+          description,
+          styleTags,
+          language: selections.language,
+          foulMouth,
+          personalDetails: personalDetails.trim() || undefined,
+          extraContext: combinedExtra || undefined,
+          subjectName: subjectName.trim() || undefined,
+        },
+      });
+      if (lyricErr) throw new Error(invokeError(lyricErr, "Lyrics generation failed"));
+      const nextLyrics = (lyricData?.lyrics ?? "").toString();
+      if (!nextLyrics) throw new Error("No lyrics returned");
+      setLyrics(nextLyrics);
+
+      // 2. Save the song row
+      setPipeline((p) => ({ ...p, stage: "saving" }));
+      const style = styleText.trim();
+      const promptText = [
+        title.trim(),
+        subjectName.trim() ? `For: ${subjectName.trim()}` : null,
+        style ? `Style: ${style}` : null,
+        selections.language ? `Language: ${selections.language}` : null,
+      ].filter(Boolean).join(" — ");
+
+      const { data: row, error: insertErr } = await supabase
+        .from("songs")
+        .insert({
+          user_id: user.id,
+          title: title.trim() || null,
+          prompt: promptText || title.trim() || "Untitled",
+          style: style || null,
+          lyrics: nextLyrics,
+          status: "draft",
+          extra_context: extraContext.trim() || null,
+        } as never)
+        .select("id")
+        .single();
+      if (insertErr || !row?.id) throw new Error(insertErr?.message || "Couldn't save song");
+
+      // 3. Kick off Suno preview
+      setPipeline((p) => ({ ...p, stage: "submitting" }));
+      const { error: genErr } = await supabase.functions.invoke("suno-generate", {
+        body: {
+          song_id: row.id,
+          prompt: promptText,
+          lyrics: nextLyrics,
+          title: title.trim() || null,
+          style: style || null,
+        },
+      });
+      if (genErr) throw new Error(invokeError(genErr, "Could not start generation"));
+
+      // 4. Hand off to the song page — sample streams in with its own status.
+      setPipeline((p) => ({ ...p, stage: "handoff" }));
+      toast.success(`Cooking your sample · -${totalCost} coins`);
+      navigate({ to: "/library/$songId", params: { songId: row.id } });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Something went wrong";
+      setPipeline({ stage: "error", startedAt, error: msg });
+      toast.error(msg);
+    } finally {
+      pipelineLockRef.current = false;
+    }
+  }
+
+  const pipelineActive = pipeline.stage !== "idle" && pipeline.stage !== "error";
+  const pipelinePct = pipelineActive
+    ? Math.min(97, Math.round((pipelineElapsed / PIPELINE_ETA_MS) * 100))
+    : pipeline.stage === "error" ? 0 : 0;
+  const pipelineEtaMs = Math.max(0, PIPELINE_ETA_MS - pipelineElapsed);
+  const pipelineEtaLabel =
+    pipeline.stage === "handoff"
+      ? "Opening your sample…"
+      : pipelineEtaMs > 1000
+        ? `~${Math.ceil(pipelineEtaMs / 1000)}s left`
+        : "Almost there…";
+  const pipelineStageLabel: Record<PipelineStage, string> = {
+    idle: "",
+    lyrics: "Writing lyrics around your details",
+    saving: "Saving your track",
+    submitting: "Sending to the studio",
+    handoff: "Loading your sample player",
+    error: "Something went wrong",
+  };
+
+
+
   const library = useQuery({
     queryKey: ["library", user?.id],
     enabled: !!user,
@@ -1342,86 +1470,131 @@ function LibraryPage() {
           <StyleComposer value={styleText} onChange={setStyleText} />
         </CollapsibleStep>
 
-        {/* Foul mouth + Generate */}
+        {/* Foul mouth + one-tap create */}
         <div className="space-y-4">
-          <FoulMouthToggle disabled={genLyrics} />
-
+          <FoulMouthToggle disabled={pipelineActive} />
 
           <div id="lyrics-section" className="relative scroll-mt-24">
             <Button
-              onClick={generateLyrics}
-              disabled={!canGenerateLyrics || genLyrics}
+              onClick={createSong}
+              disabled={!canRunPipeline}
               size="lg"
               className="h-14 w-full gap-2 rounded-2xl bg-gradient-brand text-base font-black text-primary-foreground shadow-glow ring-1 ring-primary/40 transition-transform hover:scale-[1.01] sm:h-20 sm:gap-2.5 sm:text-2xl"
             >
-              {genLyrics ? (
+              {pipelineActive ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
               ) : (
                 <Sparkles className="h-5 w-5" />
               )}
-              {lyrics ? "Regenerate lyrics" : "Generate lyrics"} · -{lyricsCost}
+              {pipelineActive ? "Cooking your sample…" : `Create my song · -${totalCost}`}
             </Button>
-            {!canGenerateLyrics && !genLyrics && (
+            {!canRunPipeline && pipeline.stage === "idle" && (
               <p className="mt-3 text-center text-sm font-medium text-muted-foreground">
-                {balance < lyricsCost
-                  ? `Not enough coins — needs ${lyricsCost}, you have ${balance}`
+                {balance < totalCost
+                  ? `Not enough coins — needs ${totalCost}, you have ${balance}`
                   : !title.trim()
-                    ? `Add a title to unlock · costs ${lyricsCost} coin${lyricsCost === 1 ? "" : "s"}`
+                    ? `Add a title to unlock · costs ${totalCost} coin${totalCost === 1 ? "" : "s"}`
                     : !subjectName.trim()
-                      ? `Add a name so we can weave it into the lyrics · costs ${lyricsCost} coin${lyricsCost === 1 ? "" : "s"}`
+                      ? `Add a name so we can weave it into the track · costs ${totalCost} coin${totalCost === 1 ? "" : "s"}`
                       : !selections.language
-                        ? `Pick a language to unlock · costs ${lyricsCost} coin${lyricsCost === 1 ? "" : "s"}`
-                        : `Add at least one style chip or type your own · costs ${lyricsCost} coin${lyricsCost === 1 ? "" : "s"}`}
+                        ? `Pick a language to unlock · costs ${totalCost} coin${totalCost === 1 ? "" : "s"}`
+                        : `Add at least one style chip or type your own · costs ${totalCost} coin${totalCost === 1 ? "" : "s"}`}
+              </p>
+            )}
+            {pipeline.stage === "idle" && canRunPipeline && (
+              <p className="mt-3 text-center text-xs font-medium text-muted-foreground">
+                Lyrics + free sample happen in the backend · ~25 seconds
               </p>
             )}
           </div>
         </div>
       </section>
 
-
-      {/* Lyrics ready — kept private. User pays for the free preview + full unlock, never sees raw lyrics. */}
-      {lyrics && (
-        <section className="space-y-4 rounded-3xl border border-primary/30 bg-card/60 p-5 shadow-glow backdrop-blur-xl sm:p-7">
+      {/* Live status bar — one-tap pipeline progress */}
+      {(pipelineActive || pipeline.stage === "error") && (
+        <section
+          role="status"
+          aria-live="polite"
+          className="space-y-4 rounded-3xl border border-primary/40 bg-card/70 p-5 shadow-glow backdrop-blur-xl sm:p-7"
+        >
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary/20 text-primary">
-                <Mic2 className="h-4 w-4" />
+            <div className="flex items-center gap-3">
+              <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/20 text-primary">
+                {pipeline.stage === "error" ? (
+                  <X className="h-5 w-5" />
+                ) : (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                )}
               </div>
               <div>
-                <p className="text-sm font-bold">Lyrics ready 🔒</p>
+                <p className="text-sm font-black uppercase tracking-wider">
+                  {pipeline.stage === "error" ? "Generation stopped" : "Cooking your sample"}
+                </p>
                 <p className="text-xs text-muted-foreground">
-                  Full-length track written around "{subjectName || title || "your song"}" — kept private until you generate the audio.
+                  {pipeline.stage === "error"
+                    ? pipeline.error || "Please try again."
+                    : pipelineStageLabel[pipeline.stage]}
                 </p>
               </div>
             </div>
-            <Button variant="ghost" size="sm" onClick={generateLyrics} disabled={genLyrics} className="gap-1.5">
-              <RefreshCw className={`h-3.5 w-3.5 ${genLyrics ? "animate-spin" : ""}`} />
-              New version
-            </Button>
+            <span className="rounded-full bg-primary/15 px-3 py-1 text-xs font-black text-primary">
+              {pipeline.stage === "error" ? "Retry" : pipelineEtaLabel}
+            </span>
           </div>
 
-          <div className="flex flex-col items-end gap-2 rounded-2xl border border-white/10 bg-background/40 p-4">
-            <Button
-              onClick={() => setReviewOpen(true)}
-              disabled={genSong || balance < previewCost || !lyrics.trim()}
-              size="lg"
-              className="gap-2 bg-gradient-brand text-primary-foreground shadow-glow"
-            >
-              {genSong ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Wand2 className="h-4 w-4" />
+          <div className="h-3 w-full overflow-hidden rounded-full bg-white/10">
+            <div
+              className={cn(
+                "h-full rounded-full transition-all duration-300 ease-out",
+                pipeline.stage === "error"
+                  ? "bg-destructive/80"
+                  : "bg-gradient-to-r from-primary via-accent to-primary",
               )}
-              Generate free preview · -{previewCost} coin{previewCost === 1 ? "" : "s"}
-            </Button>
-            <p className="text-xs font-medium text-muted-foreground">
-              {balance < previewCost
-                ? `Not enough coins — needs ${previewCost}, you have ${balance}`
-                : `Free sample now · unlock the full downloadable track after preview`}
-            </p>
+              style={{ width: `${pipeline.stage === "error" ? 100 : pipelinePct}%` }}
+            />
           </div>
+
+          <ol className="grid grid-cols-4 gap-2 text-[10px] font-bold uppercase tracking-widest sm:text-xs">
+            {(["lyrics", "saving", "submitting", "handoff"] as const).map((s, i) => {
+              const order = ["lyrics", "saving", "submitting", "handoff"];
+              const currentIdx = order.indexOf(pipeline.stage);
+              const done = pipeline.stage !== "error" && currentIdx > i;
+              const active = pipeline.stage === s;
+              return (
+                <li
+                  key={s}
+                  className={cn(
+                    "flex items-center gap-1.5 rounded-lg border px-2 py-1.5",
+                    done && "border-primary/50 bg-primary/10 text-primary",
+                    active && "border-primary bg-primary/20 text-primary animate-pulse",
+                    !done && !active && "border-white/10 text-muted-foreground",
+                  )}
+                >
+                  {done ? <Check className="h-3 w-3" /> : <span>{i + 1}</span>}
+                  <span className="truncate">
+                    {s === "lyrics" ? "Lyrics" : s === "saving" ? "Save" : s === "submitting" ? "Studio" : "Sample"}
+                  </span>
+                </li>
+              );
+            })}
+          </ol>
+
+          {pipeline.stage === "error" && (
+            <Button
+              onClick={() => {
+                setPipeline({ stage: "idle", startedAt: 0 });
+                setPipelineElapsed(0);
+              }}
+              size="sm"
+              variant="outline"
+              className="gap-2"
+            >
+              <RefreshCw className="h-3.5 w-3.5" /> Try again
+            </Button>
+          )}
         </section>
       )}
+
 
 
       <PoweredByOgBot />
