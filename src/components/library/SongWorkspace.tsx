@@ -364,10 +364,19 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
 
   async function unlockFull() {
     if (!isReady) return;
-    if (!song.unlocked && balance < fullUnlockCost) {
+    // Already-unlocked owners skip the confirmation modal — they've already paid.
+    if (song.unlocked) {
+      await performUnlock();
+      return;
+    }
+    if (balance < fullUnlockCost) {
       toast.error(`Need ${fullUnlockCost} coins to unlock the HQ version — current balance ${balance}`);
       return;
     }
+    setUnlockDialogOpen(true);
+  }
+
+  async function performUnlock() {
     setUnlocking(true);
     try {
       if (!song.unlocked) {
@@ -379,6 +388,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
           return;
         }
         if (!data?.already) toast.success(`Unlocked · -${data?.cost ?? fullUnlockCost} coins`);
+        refreshCoinBalance();
         onSaved?.();
       }
       const { data: urlData, error: urlErr } = await supabase.functions.invoke("song-url", {
@@ -389,6 +399,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
         return;
       }
       window.open(urlData.url, "_blank", "noopener");
+      setUnlockDialogOpen(false);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not unlock");
     } finally {
