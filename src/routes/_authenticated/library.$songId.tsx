@@ -364,7 +364,7 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
                     : communityMode ? "Play full track" : "Play preview"}
                 </Button>
                 <Button
-                  onClick={downloadFull}
+                  onClick={requestDownload}
                   disabled={downloading || (!communityMode && !unlocked)}
                   variant={communityMode || unlocked ? "default" : "outline"}
                   size="lg"
