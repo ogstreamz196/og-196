@@ -835,6 +835,17 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
 
         </div>
       </div>
+
+      <UnlockConfirmDialog
+        open={unlockDialogOpen}
+        onOpenChange={setUnlockDialogOpen}
+        onConfirm={performUnlock}
+        busy={unlocking}
+        cost={fullUnlockCost}
+        royalty={0}
+        balance={balance}
+        songTitle={song.title ?? title}
+      />
     </div>
   );
 }
