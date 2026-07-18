@@ -20,6 +20,8 @@ import { useSettings } from "@/hooks/use-settings";
 import { Button } from "@/components/ui/button";
 import type { Song } from "@/components/SongCard";
 import { SongWorkspace } from "@/components/library/SongWorkspace";
+import { UnlockConfirmDialog } from "@/components/library/UnlockConfirmDialog";
+import { useProfile } from "@/hooks/use-profile";
 import { ensureFullUrlAllowed } from "@/lib/ensure-full-url-allowed";
 
 export const Route = createFileRoute("/_authenticated/library/$songId")({
@@ -126,6 +128,9 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [downloading, setDownloading] = useState(false);
+  const [unlockDialogOpen, setUnlockDialogOpen] = useState(false);
+  const { data: profile } = useProfile();
+  const balance = profile?.coin_balance ?? 0;
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Auto-load the preview URL as soon as the song becomes ready,
@@ -209,11 +214,22 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
     }
   }
 
+  // Community viewers: open a confirmation modal before charging.
+  function requestDownload() {
+    if (communityMode) {
+      setUnlockDialogOpen(true);
+      return;
+    }
+    if (!unlocked) {
+      toast.error("This track isn't unlocked. Purchase or unlock to download the full version.");
+      return;
+    }
+    void downloadFull();
+  }
+
   async function downloadFull() {
     setDownloading(true);
     try {
-      // Community viewers (non-owners) must pay 2 OG coins per download
-      // (1 burnt + 1 royalty to the creator). Owners just need their HQ unlock.
       if (communityMode) {
         const { data: unlockData, error: unlockErr } = await supabase.functions.invoke(
           "unlock-full-song",
@@ -231,17 +247,12 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
             `Charged ${unlockData?.cost ?? 2} OG coins — ${unlockData?.royalty ?? 1} sent to the creator as a royalty.`,
           );
         }
-        // Refresh balance + song state so the UI flips to "unlocked".
         await Promise.all([
           qc.invalidateQueries({ queryKey: ["profile"] }),
           qc.invalidateQueries({ queryKey: ["song", song.id] }),
         ]);
         onRefresh();
       } else {
-        if (!unlocked) {
-          toast.error("This track isn't unlocked. Purchase or unlock to download the full version.");
-          return;
-        }
         const precheck = await ensureFullUrlAllowed(song.id);
         if (!precheck.ok) {
           toast.error(precheck.reason);
@@ -265,6 +276,7 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
       document.body.appendChild(a);
       a.click();
       a.remove();
+      setUnlockDialogOpen(false);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Download failed");
     } finally {
@@ -352,7 +364,7 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
                     : communityMode ? "Play full track" : "Play preview"}
                 </Button>
                 <Button
-                  onClick={downloadFull}
+                  onClick={requestDownload}
                   disabled={downloading || (!communityMode && !unlocked)}
                   variant={communityMode || unlocked ? "default" : "outline"}
                   size="lg"
@@ -399,6 +411,16 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
 
       <audio ref={audioRef} preload="auto" onEnded={() => setPlaying(false)} className="hidden" />
 
+      <UnlockConfirmDialog
+        open={unlockDialogOpen}
+        onOpenChange={setUnlockDialogOpen}
+        onConfirm={downloadFull}
+        busy={downloading}
+        cost={2}
+        royalty={1}
+        balance={balance}
+        songTitle={song.title}
+      />
     </article>
   );
 }

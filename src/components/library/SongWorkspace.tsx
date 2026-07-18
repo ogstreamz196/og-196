@@ -25,6 +25,7 @@ import { cn } from "@/lib/utils";
 import { CoinPill } from "@/components/ui/coin-pill";
 import { StageStepper, type Stage } from "./song-workspace/StageStepper";
 import { VariationsCard } from "./song-workspace/VariationsCard";
+import { UnlockConfirmDialog } from "./UnlockConfirmDialog";
 import type { WorkspaceSong } from "./song-workspace/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
@@ -92,6 +93,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const [genLyrics, setGenLyrics] = useState(false);
   const [genPreview, setGenPreview] = useState(false);
   const [unlocking, setUnlocking] = useState(false);
+  const [unlockDialogOpen, setUnlockDialogOpen] = useState(false);
   const [missing, setMissing] = useState(false);
   const [recheckActive, setRecheckActive] = useState(false);
   const [recheckCount, setRecheckCount] = useState(0);
@@ -362,10 +364,19 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
 
   async function unlockFull() {
     if (!isReady) return;
-    if (!song.unlocked && balance < fullUnlockCost) {
+    // Already-unlocked owners skip the confirmation modal — they've already paid.
+    if (song.unlocked) {
+      await performUnlock();
+      return;
+    }
+    if (balance < fullUnlockCost) {
       toast.error(`Need ${fullUnlockCost} coins to unlock the HQ version — current balance ${balance}`);
       return;
     }
+    setUnlockDialogOpen(true);
+  }
+
+  async function performUnlock() {
     setUnlocking(true);
     try {
       if (!song.unlocked) {
@@ -377,6 +388,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
           return;
         }
         if (!data?.already) toast.success(`Unlocked · -${data?.cost ?? fullUnlockCost} coins`);
+        refreshCoinBalance();
         onSaved?.();
       }
       const { data: urlData, error: urlErr } = await supabase.functions.invoke("song-url", {
@@ -387,6 +399,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
         return;
       }
       window.open(urlData.url, "_blank", "noopener");
+      setUnlockDialogOpen(false);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not unlock");
     } finally {
@@ -822,6 +835,17 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
 
         </div>
       </div>
+
+      <UnlockConfirmDialog
+        open={unlockDialogOpen}
+        onOpenChange={setUnlockDialogOpen}
+        onConfirm={performUnlock}
+        busy={unlocking}
+        cost={fullUnlockCost}
+        royalty={0}
+        balance={balance}
+        songTitle={song.title ?? title}
+      />
     </div>
   );
 }
