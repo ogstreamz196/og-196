@@ -440,36 +440,60 @@ function LibraryPage() {
    * happens in the backend, then lands on the song page for the sample.
    * ------------------------------------------------------------------ */
   type PipelineStage = "idle" | "lyrics" | "saving" | "submitting" | "handoff" | "error";
-  const [pipeline, setPipeline] = useState<{ stage: PipelineStage; startedAt: number; error?: string }>({
+  const PIPELINE_ORDER: PipelineStage[] = ["lyrics", "saving", "submitting", "handoff"];
+  // Baseline per-stage ETAs (ms) — recalibrated live from real timings below.
+  const BASE_STAGE_ETA: Record<Exclude<PipelineStage, "idle" | "error">, number> = {
+    lyrics: 18_000,
+    saving: 1_500,
+    submitting: 4_500,
+    handoff: 1_000,
+  };
+  type PipelineState = {
+    stage: PipelineStage;
+    startedAt: number;
+    stageStartedAt: number;
+    durations: Partial<Record<PipelineStage, number>>;
+    error?: string;
+  };
+  const [pipeline, setPipeline] = useState<PipelineState>({
     stage: "idle",
     startedAt: 0,
+    stageStartedAt: 0,
+    durations: {},
   });
-  const [pipelineElapsed, setPipelineElapsed] = useState(0);
+  const [pipelineNow, setPipelineNow] = useState(0);
   const pipelineLockRef = useRef(false);
   const totalCost = lyricsCost + previewCost;
   const canRunPipeline =
     !!user && canGenerateLyrics && balance >= totalCost && pipeline.stage === "idle";
 
-  // ETA: lyrics ~18s, save ~2s, submit ~5s, sample handoff to song page
-  const PIPELINE_ETA_MS = 25_000;
-
   useEffect(() => {
     if (pipeline.stage === "idle" || pipeline.stage === "error") return;
-    const id = window.setInterval(() => {
-      setPipelineElapsed(Date.now() - pipeline.startedAt);
-    }, 250);
+    setPipelineNow(Date.now());
+    const id = window.setInterval(() => setPipelineNow(Date.now()), 250);
     return () => window.clearInterval(id);
-  }, [pipeline.stage, pipeline.startedAt]);
+  }, [pipeline.stage, pipeline.stageStartedAt]);
+
+  const advanceStage = (next: PipelineStage) => {
+    setPipeline((p) => {
+      const now = Date.now();
+      const prev = p.stage;
+      const durations = { ...p.durations };
+      if (prev !== "idle" && prev !== "error") {
+        durations[prev] = now - p.stageStartedAt;
+      }
+      return { ...p, stage: next, stageStartedAt: now, durations };
+    });
+  };
 
   async function createSong() {
     if (pipelineLockRef.current) return;
     if (!user || !canRunPipeline) return;
     pipelineLockRef.current = true;
     const startedAt = Date.now();
-    setPipeline({ stage: "lyrics", startedAt });
-    setPipelineElapsed(0);
+    setPipeline({ stage: "lyrics", startedAt, stageStartedAt: startedAt, durations: {} });
+    setPipelineNow(startedAt);
     try {
-      // 1. Lyrics
       const description = styleText.trim();
       const combinedExtra = extraContext.trim();
       const { data: lyricData, error: lyricErr } = await supabase.functions.invoke("generate-lyrics", {
@@ -489,8 +513,7 @@ function LibraryPage() {
       if (!nextLyrics) throw new Error("No lyrics returned");
       setLyrics(nextLyrics);
 
-      // 2. Save the song row
-      setPipeline((p) => ({ ...p, stage: "saving" }));
+      advanceStage("saving");
       const style = styleText.trim();
       const promptText = [
         title.trim(),
@@ -514,8 +537,7 @@ function LibraryPage() {
         .single();
       if (insertErr || !row?.id) throw new Error(insertErr?.message || "Couldn't save song");
 
-      // 3. Kick off Suno preview
-      setPipeline((p) => ({ ...p, stage: "submitting" }));
+      advanceStage("submitting");
       const { error: genErr } = await supabase.functions.invoke("suno-generate", {
         body: {
           song_id: row.id,
@@ -527,13 +549,12 @@ function LibraryPage() {
       });
       if (genErr) throw new Error(invokeError(genErr, "Could not start generation"));
 
-      // 4. Hand off to the song page — sample streams in with its own status.
-      setPipeline((p) => ({ ...p, stage: "handoff" }));
+      advanceStage("handoff");
       toast.success(`Cooking your sample · -${totalCost} coins`);
       navigate({ to: "/library/$songId", params: { songId: row.id } });
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Something went wrong";
-      setPipeline({ stage: "error", startedAt, error: msg });
+      setPipeline((p) => ({ ...p, stage: "error", error: msg }));
       toast.error(msg);
     } finally {
       pipelineLockRef.current = false;
@@ -541,15 +562,45 @@ function LibraryPage() {
   }
 
   const pipelineActive = pipeline.stage !== "idle" && pipeline.stage !== "error";
+  const currentStage = pipeline.stage as Exclude<PipelineStage, "idle" | "error">;
+  const stageElapsed = pipelineActive ? Math.max(0, pipelineNow - pipeline.stageStartedAt) : 0;
+
+  // Adaptive ETA: use real durations from completed stages to scale future estimates.
+  const doneList = PIPELINE_ORDER.filter((s) => pipeline.durations[s] != null);
+  const calibration = (() => {
+    if (doneList.length === 0) return 1;
+    let actual = 0, base = 0;
+    for (const s of doneList) {
+      actual += pipeline.durations[s] ?? 0;
+      base += BASE_STAGE_ETA[s as keyof typeof BASE_STAGE_ETA];
+    }
+    if (base <= 0) return 1;
+    return Math.max(0.4, Math.min(2.5, actual / base));
+  })();
+
+  const currentBaseline = pipelineActive ? BASE_STAGE_ETA[currentStage] * calibration : 0;
+  const currentRemaining = Math.max(0, currentBaseline - stageElapsed);
+  const currentIdx = PIPELINE_ORDER.indexOf(currentStage);
+  const futureRemaining = pipelineActive
+    ? PIPELINE_ORDER.slice(currentIdx + 1).reduce(
+        (sum, s) => sum + BASE_STAGE_ETA[s as keyof typeof BASE_STAGE_ETA] * calibration,
+        0,
+      )
+    : 0;
+  const totalRemaining = currentRemaining + futureRemaining;
+  const totalBudget = PIPELINE_ORDER.reduce(
+    (sum, s) => sum + BASE_STAGE_ETA[s as keyof typeof BASE_STAGE_ETA] * calibration,
+    0,
+  );
+  const totalElapsed = pipelineActive ? Math.max(0, pipelineNow - pipeline.startedAt) : 0;
   const pipelinePct = pipelineActive
-    ? Math.min(97, Math.round((pipelineElapsed / PIPELINE_ETA_MS) * 100))
-    : pipeline.stage === "error" ? 0 : 0;
-  const pipelineEtaMs = Math.max(0, PIPELINE_ETA_MS - pipelineElapsed);
+    ? Math.min(97, Math.round((totalElapsed / Math.max(1, totalBudget)) * 100))
+    : 0;
   const pipelineEtaLabel =
     pipeline.stage === "handoff"
       ? "Opening your sample…"
-      : pipelineEtaMs > 1000
-        ? `~${Math.ceil(pipelineEtaMs / 1000)}s left`
+      : totalRemaining > 1000
+        ? `~${Math.ceil(totalRemaining / 1000)}s left`
         : "Almost there…";
   const pipelineStageLabel: Record<PipelineStage, string> = {
     idle: "",
@@ -558,6 +609,12 @@ function LibraryPage() {
     submitting: "Sending to the studio",
     handoff: "Loading your sample player",
     error: "Something went wrong",
+  };
+  const pipelineStageTitle: Record<Exclude<PipelineStage, "idle" | "error">, string> = {
+    lyrics: "Writing lyrics",
+    saving: "Saving",
+    submitting: "Studio",
+    handoff: "Sample",
   };
 
 
