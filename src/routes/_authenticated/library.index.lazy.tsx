@@ -1574,32 +1574,40 @@ function LibraryPage() {
           aria-live="polite"
           className="space-y-4 rounded-3xl border border-primary/40 bg-card/70 p-5 shadow-glow backdrop-blur-xl sm:p-7"
         >
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/20 text-primary">
-                {pipeline.stage === "error" ? (
-                  <X className="h-5 w-5" />
-                ) : (
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                )}
-              </div>
-              <div>
-                <p className="text-sm font-black uppercase tracking-wider">
-                  {pipeline.stage === "error" ? "Generation stopped" : "Cooking your sample"}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {pipeline.stage === "error"
-                    ? pipeline.error || "Please try again."
-                    : pipelineStageLabel[pipeline.stage]}
-                </p>
-              </div>
+          {/* Hero: the current stage is the main event */}
+          <div className="flex items-start gap-4">
+            <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-primary/20 text-primary shadow-glow">
+              {pipeline.stage === "error" ? (
+                <X className="h-7 w-7" />
+              ) : (
+                <Loader2 className="h-7 w-7 animate-spin" />
+              )}
             </div>
-            <span className="rounded-full bg-primary/15 px-3 py-1 text-xs font-black text-primary">
-              {pipeline.stage === "error" ? "Retry" : pipelineEtaLabel}
-            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                  {pipeline.stage === "error"
+                    ? "Stopped"
+                    : `Step ${Math.max(1, currentIdx + 1)} of ${PIPELINE_ORDER.length}`}
+                </p>
+                <span className="rounded-full bg-primary/15 px-3 py-1 text-xs font-black text-primary">
+                  {pipeline.stage === "error" ? "Retry" : pipelineEtaLabel}
+                </span>
+              </div>
+              <h3 className="mt-1 text-xl font-black leading-tight sm:text-2xl">
+                {pipeline.stage === "error"
+                  ? "Generation stopped"
+                  : pipelineStageTitle[currentStage]}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {pipeline.stage === "error"
+                  ? pipeline.error || "Please try again."
+                  : pipelineStageLabel[pipeline.stage]}
+              </p>
+            </div>
           </div>
 
-          <div className="h-3 w-full overflow-hidden rounded-full bg-white/10">
+          <div className="h-2.5 w-full overflow-hidden rounded-full bg-white/10">
             <div
               className={cn(
                 "h-full rounded-full transition-all duration-300 ease-out",
@@ -1611,36 +1619,39 @@ function LibraryPage() {
             />
           </div>
 
-          <ol className="grid grid-cols-4 gap-2 text-[10px] font-bold uppercase tracking-widest sm:text-xs">
-            {(["lyrics", "saving", "submitting", "handoff"] as const).map((s, i) => {
-              const order = ["lyrics", "saving", "submitting", "handoff"];
-              const currentIdx = order.indexOf(pipeline.stage);
-              const done = pipeline.stage !== "error" && currentIdx > i;
-              const active = pipeline.stage === s;
-              return (
-                <li
-                  key={s}
-                  className={cn(
-                    "flex items-center gap-1.5 rounded-lg border px-2 py-1.5",
-                    done && "border-primary/50 bg-primary/10 text-primary",
-                    active && "border-primary bg-primary/20 text-primary animate-pulse",
-                    !done && !active && "border-white/10 text-muted-foreground",
-                  )}
-                >
-                  {done ? <Check className="h-3 w-3" /> : <span>{i + 1}</span>}
-                  <span className="truncate">
-                    {s === "lyrics" ? "Lyrics" : s === "saving" ? "Save" : s === "submitting" ? "Studio" : "Sample"}
-                  </span>
-                </li>
-              );
-            })}
-          </ol>
+          {/* Collapsed past/future — a tight strip of dots + one label per side */}
+          {pipeline.stage !== "error" && (
+            <div className="flex items-center justify-between gap-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5">
+                <Check className="h-3 w-3 text-primary" />
+                {currentIdx === 0 ? "Just started" : `${currentIdx} done`}
+              </span>
+              <div className="flex items-center gap-1" aria-hidden>
+                {PIPELINE_ORDER.map((s, i) => (
+                  <span
+                    key={s}
+                    className={cn(
+                      "h-1.5 rounded-full transition-all",
+                      i < currentIdx && "w-4 bg-primary/70",
+                      i === currentIdx && "w-8 bg-primary animate-pulse",
+                      i > currentIdx && "w-2 bg-white/15",
+                    )}
+                  />
+                ))}
+              </div>
+              <span>
+                {currentIdx >= PIPELINE_ORDER.length - 1
+                  ? "Wrapping up"
+                  : `Next · ${pipelineStageTitle[PIPELINE_ORDER[currentIdx + 1] as keyof typeof pipelineStageTitle]}`}
+              </span>
+            </div>
+          )}
 
           {pipeline.stage === "error" && (
             <Button
               onClick={() => {
-                setPipeline({ stage: "idle", startedAt: 0 });
-                setPipelineElapsed(0);
+                setPipeline({ stage: "idle", startedAt: 0, stageStartedAt: 0, durations: {} });
+                setPipelineNow(0);
               }}
               size="sm"
               variant="outline"
