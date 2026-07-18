@@ -411,6 +411,16 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
 
       <audio ref={audioRef} preload="auto" onEnded={() => setPlaying(false)} className="hidden" />
 
+      <UnlockConfirmDialog
+        open={unlockDialogOpen}
+        onOpenChange={setUnlockDialogOpen}
+        onConfirm={downloadFull}
+        busy={downloading}
+        cost={2}
+        royalty={1}
+        balance={balance}
+        songTitle={song.title}
+      />
     </article>
   );
 }
