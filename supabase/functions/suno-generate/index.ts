@@ -214,7 +214,8 @@ Deno.serve(async (req) => {
           title: customMode ? sunoTitle : undefined,
           customMode,
           instrumental,
-          model: "V4_5ALL",
+          model: "V5",
+          negativeTags: "low quality, muddy mix, distorted, lo-fi, amateur, bad vocals",
           callBackUrl: callbackUrl,
         }),
       });
