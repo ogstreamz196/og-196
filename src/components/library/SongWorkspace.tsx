@@ -93,6 +93,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const [genLyrics, setGenLyrics] = useState(false);
   const [genPreview, setGenPreview] = useState(false);
   const [unlocking, setUnlocking] = useState(false);
+  const [unlockDialogOpen, setUnlockDialogOpen] = useState(false);
   const [missing, setMissing] = useState(false);
   const [recheckActive, setRecheckActive] = useState(false);
   const [recheckCount, setRecheckCount] = useState(0);
