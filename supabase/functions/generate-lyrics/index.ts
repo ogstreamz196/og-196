@@ -170,21 +170,21 @@ Deno.serve(async (req) => {
         ` Target 380–500 words. Output ONLY the lyrics, no explanations.`;
 
     const subjectRule = subjectName
-      ? `\nSUBJECT NAME (very important): The song is dedicated to "${subjectName}". Repeat "${subjectName}" throughout the lyrics so it clearly feels made-for-them: land the name in the hook/chorus every single time it appears (so the name repeats naturally with every chorus), and drop it at least once in every verse and the bridge. Aim for the name to appear roughly 8–14 times across the full song. Blend it musically into the flow — never chant it back-to-back, never force it where it breaks the rhyme, and never let it overpower the theme. It should feel embedded and affectionate, not shouted.\n`
+      ? `\nSUBJECT NAME (CRITICAL, top priority): This entire song is dedicated to "${subjectName}". Repeat the name "${subjectName}" as many times as musically possible — target AT LEAST 20 mentions across the full song, ideally 25–35. Land "${subjectName}" in EVERY line of the hook/chorus (so each chorus repetition drops the name 2–4 times), at least twice in every verse, in the pre-chorus, in the bridge, and in the outro as an ad-lib/chant. Rhyme other lines around the name so it feels inevitable. Never chant it back-to-back on the same line more than twice; keep it musical, affectionate, and embedded — but do NOT be shy: the listener must be in no doubt this song is about "${subjectName}".\n`
       : "";
 
     const userPrompt =
       `Song title: ${songName || "(untitled)"}\n` +
       (subjectName ? `Dedicated to: ${subjectName}\n` : "") +
-      `Theme / description: ${description || "(none)"}\n` +
+      `Theme / description (FOLLOW THIS PRECISELY — every verse, the hook, and the bridge must draw specific imagery, moments, feelings, and vocabulary directly from this brief; do not drift into generic filler): ${description || "(none)"}\n` +
       `Style tags: ${styleTags.join(", ") || "(none)"}\n` +
       `Language: ${language}\n` +
       (personalDetails
         ? `Artist profile (weave these into the lyrics naturally — reference the artist's name and a couple of personal details across the song so it feels personal, but DO NOT force them into every line, and never let them overpower the theme. Aim for the name/details to appear roughly 2–4 times total, ideally in the hook/chorus or a memorable line, spread across different sections — not back-to-back): ${personalDetails}\n`
         : "") +
       subjectRule +
-      (extraContext ? `Extra context from the artist: ${extraContext}\n` : "") +
-      `\nWrite the FULL two-minute song now — do not stop early.`;
+      (extraContext ? `Extra context from the artist (use these details literally in the lyrics): ${extraContext}\n` : "") +
+      `\nWrite the FULL two-minute song now — do not stop early. Hit the FULL structure, stay ruthlessly on-theme with the description above, and drop "${subjectName || "the subject"}" as often as the music allows.`;
 
     const url =
       `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent?key=${GEMINI_API_KEY}`;
