@@ -128,6 +128,9 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [downloading, setDownloading] = useState(false);
+  const [unlockDialogOpen, setUnlockDialogOpen] = useState(false);
+  const { data: profile } = useProfile();
+  const balance = profile?.coin_balance ?? 0;
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Auto-load the preview URL as soon as the song becomes ready,
