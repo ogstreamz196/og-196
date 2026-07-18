@@ -25,6 +25,7 @@ import { cn } from "@/lib/utils";
 import { CoinPill } from "@/components/ui/coin-pill";
 import { StageStepper, type Stage } from "./song-workspace/StageStepper";
 import { VariationsCard } from "./song-workspace/VariationsCard";
+import { UnlockConfirmDialog } from "./UnlockConfirmDialog";
 import type { WorkspaceSong } from "./song-workspace/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
