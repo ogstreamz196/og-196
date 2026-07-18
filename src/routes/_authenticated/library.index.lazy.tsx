@@ -434,6 +434,134 @@ function LibraryPage() {
     }
   }
 
+  /* ------------------------------------------------------------------
+   * One-tap pipeline: lyrics → save → kick off Suno preview → navigate.
+   * The user sees a single progress bar with a live ETA while everything
+   * happens in the backend, then lands on the song page for the sample.
+   * ------------------------------------------------------------------ */
+  type PipelineStage = "idle" | "lyrics" | "saving" | "submitting" | "handoff" | "error";
+  const [pipeline, setPipeline] = useState<{ stage: PipelineStage; startedAt: number; error?: string }>({
+    stage: "idle",
+    startedAt: 0,
+  });
+  const [pipelineElapsed, setPipelineElapsed] = useState(0);
+  const pipelineLockRef = useRef(false);
+  const totalCost = lyricsCost + previewCost;
+  const canRunPipeline =
+    !!user && canGenerateLyrics && balance >= totalCost && pipeline.stage === "idle";
+
+  // ETA: lyrics ~18s, save ~2s, submit ~5s, sample handoff to song page
+  const PIPELINE_ETA_MS = 25_000;
+
+  useEffect(() => {
+    if (pipeline.stage === "idle" || pipeline.stage === "error") return;
+    const id = window.setInterval(() => {
+      setPipelineElapsed(Date.now() - pipeline.startedAt);
+    }, 250);
+    return () => window.clearInterval(id);
+  }, [pipeline.stage, pipeline.startedAt]);
+
+  async function createSong() {
+    if (pipelineLockRef.current) return;
+    if (!user || !canRunPipeline) return;
+    pipelineLockRef.current = true;
+    const startedAt = Date.now();
+    setPipeline({ stage: "lyrics", startedAt });
+    setPipelineElapsed(0);
+    try {
+      // 1. Lyrics
+      const description = styleText.trim();
+      const combinedExtra = extraContext.trim();
+      const { data: lyricData, error: lyricErr } = await supabase.functions.invoke("generate-lyrics", {
+        body: {
+          songName: title.trim(),
+          description,
+          styleTags,
+          language: selections.language,
+          foulMouth,
+          personalDetails: personalDetails.trim() || undefined,
+          extraContext: combinedExtra || undefined,
+          subjectName: subjectName.trim() || undefined,
+        },
+      });
+      if (lyricErr) throw new Error(invokeError(lyricErr, "Lyrics generation failed"));
+      const nextLyrics = (lyricData?.lyrics ?? "").toString();
+      if (!nextLyrics) throw new Error("No lyrics returned");
+      setLyrics(nextLyrics);
+
+      // 2. Save the song row
+      setPipeline((p) => ({ ...p, stage: "saving" }));
+      const style = styleText.trim();
+      const promptText = [
+        title.trim(),
+        subjectName.trim() ? `For: ${subjectName.trim()}` : null,
+        style ? `Style: ${style}` : null,
+        selections.language ? `Language: ${selections.language}` : null,
+      ].filter(Boolean).join(" — ");
+
+      const { data: row, error: insertErr } = await supabase
+        .from("songs")
+        .insert({
+          user_id: user.id,
+          title: title.trim() || null,
+          prompt: promptText || title.trim() || "Untitled",
+          style: style || null,
+          lyrics: nextLyrics,
+          status: "draft",
+          extra_context: extraContext.trim() || null,
+        } as never)
+        .select("id")
+        .single();
+      if (insertErr || !row?.id) throw new Error(insertErr?.message || "Couldn't save song");
+
+      // 3. Kick off Suno preview
+      setPipeline((p) => ({ ...p, stage: "submitting" }));
+      const { error: genErr } = await supabase.functions.invoke("suno-generate", {
+        body: {
+          song_id: row.id,
+          prompt: promptText,
+          lyrics: nextLyrics,
+          title: title.trim() || null,
+          style: style || null,
+        },
+      });
+      if (genErr) throw new Error(invokeError(genErr, "Could not start generation"));
+
+      // 4. Hand off to the song page — sample streams in with its own status.
+      setPipeline((p) => ({ ...p, stage: "handoff" }));
+      toast.success(`Cooking your sample · -${totalCost} coins`);
+      navigate({ to: "/library/$songId", params: { songId: row.id } });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Something went wrong";
+      setPipeline({ stage: "error", startedAt, error: msg });
+      toast.error(msg);
+    } finally {
+      pipelineLockRef.current = false;
+    }
+  }
+
+  const pipelineActive = pipeline.stage !== "idle" && pipeline.stage !== "error";
+  const pipelinePct = pipelineActive
+    ? Math.min(97, Math.round((pipelineElapsed / PIPELINE_ETA_MS) * 100))
+    : pipeline.stage === "error" ? 0 : 0;
+  const pipelineEtaMs = Math.max(0, PIPELINE_ETA_MS - pipelineElapsed);
+  const pipelineEtaLabel =
+    pipeline.stage === "handoff"
+      ? "Opening your sample…"
+      : pipelineEtaMs > 1000
+        ? `~${Math.ceil(pipelineEtaMs / 1000)}s left`
+        : "Almost there…";
+  const pipelineStageLabel: Record<PipelineStage, string> = {
+    idle: "",
+    lyrics: "Writing lyrics around your details",
+    saving: "Saving your track",
+    submitting: "Sending to the studio",
+    handoff: "Loading your sample player",
+    error: "Something went wrong",
+  };
+
+
+
   const library = useQuery({
     queryKey: ["library", user?.id],
     enabled: !!user,
