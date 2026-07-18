@@ -127,9 +127,9 @@ export function ReviewDialog({
                 <h3 id="rv-lyrics" className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
                   Lyrics
                 </h3>
-                <pre className="mt-2 max-h-72 overflow-auto whitespace-pre-wrap rounded-xl border border-white/10 bg-background/40 p-3 font-mono text-xs leading-relaxed">
-                  {lyrics.trim()}
-                </pre>
+                <p className="mt-2 rounded-xl border border-white/10 bg-background/40 p-3 text-xs text-muted-foreground">
+                  🔒 Full-length lyrics are kept private. You'll hear them in your free preview, then unlock the full downloadable track.
+                </p>
               </section>
             )}
           </div>
