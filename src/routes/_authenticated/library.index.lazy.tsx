@@ -1379,7 +1379,7 @@ function LibraryPage() {
       </section>
 
 
-      {/* Lyrics result */}
+      {/* Lyrics ready — kept private. User pays for the free preview + full unlock, never sees raw lyrics. */}
       {lyrics && (
         <section className="space-y-4 rounded-3xl border border-primary/30 bg-card/60 p-5 shadow-glow backdrop-blur-xl sm:p-7">
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -1387,25 +1387,18 @@ function LibraryPage() {
               <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary/20 text-primary">
                 <Mic2 className="h-4 w-4" />
               </div>
-              <p className="text-sm font-bold">Your lyrics</p>
+              <div>
+                <p className="text-sm font-bold">Lyrics ready 🔒</p>
+                <p className="text-xs text-muted-foreground">
+                  Full-length track written around "{subjectName || title || "your song"}" — kept private until you generate the audio.
+                </p>
+              </div>
             </div>
             <Button variant="ghost" size="sm" onClick={generateLyrics} disabled={genLyrics} className="gap-1.5">
               <RefreshCw className={`h-3.5 w-3.5 ${genLyrics ? "animate-spin" : ""}`} />
               New version
             </Button>
           </div>
-          <Textarea
-            value={lyrics}
-            onChange={(e) => setLyrics(e.target.value)}
-            onCopy={(e) => e.preventDefault()}
-            onCut={(e) => e.preventDefault()}
-            onContextMenu={(e) => e.preventDefault()}
-            onDragStart={(e) => e.preventDefault()}
-            spellCheck={false}
-            aria-label="Lyrics (copying disabled)"
-            className="min-h-[280px] resize-y rounded-2xl border-white/10 bg-background/40 font-mono text-sm leading-relaxed [-webkit-user-select:none] [user-select:none]"
-            style={{ WebkitUserSelect: "none", userSelect: "none" }}
-          />
 
           <div className="flex flex-col items-end gap-2 rounded-2xl border border-white/10 bg-background/40 p-4">
             <Button
@@ -1419,16 +1412,17 @@ function LibraryPage() {
               ) : (
                 <Wand2 className="h-4 w-4" />
               )}
-              Review & make the song · -{previewCost} coin{previewCost === 1 ? "" : "s"}
+              Generate free preview · -{previewCost} coin{previewCost === 1 ? "" : "s"}
             </Button>
             <p className="text-xs font-medium text-muted-foreground">
               {balance < previewCost
                 ? `Not enough coins — needs ${previewCost}, you have ${balance}`
-                : `Costs ${previewCost} coin${previewCost === 1 ? "" : "s"} · balance ${balance}`}
+                : `Free sample now · unlock the full downloadable track after preview`}
             </p>
           </div>
         </section>
       )}
+
 
       <PoweredByOgBot />
 
