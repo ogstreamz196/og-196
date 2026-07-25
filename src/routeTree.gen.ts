@@ -13,6 +13,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as TrustRouteImport } from './routes/trust'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as MPreviewRouteImport } from './routes/m-preview'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
@@ -28,6 +29,8 @@ import { Route as AuthenticatedMessengerRouteImport } from './routes/_authentica
 import { Route as AuthenticatedDeveloperRouteImport } from './routes/_authenticated/developer'
 import { Route as AuthenticatedCommunityRouteImport } from './routes/_authenticated/community'
 import { Route as AuthenticatedChallengeRouteImport } from './routes/_authenticated/challenge'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as AuthenticatedBuyCoinsIndexRouteImport } from './routes/_authenticated/buy-coins.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedLibrarySongIdRouteImport } from './routes/_authenticated/library.$songId'
@@ -44,6 +47,8 @@ import { Route as AuthenticatedAdminOgPersonaRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminDebugContextRouteImport } from './routes/_authenticated/admin.debug-context'
 import { Route as AuthenticatedAdminCoinAuditRouteImport } from './routes/_authenticated/admin.coin-audit'
 import { Route as AuthenticatedAdminApiKeysRouteImport } from './routes/_authenticated/admin.api-keys'
+import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as ApiPublicTelegramWebhookRouteImport } from './routes/api/public/telegram/webhook'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as AuthenticatedAdminUsersUserIdRouteImport } from './routes/_authenticated/admin.users.$userId'
@@ -60,6 +65,11 @@ const WelcomeRoute = WelcomeRouteImport.update({
 const TrustRoute = TrustRouteImport.update({
   id: '/trust',
   path: '/trust',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MPreviewRoute = MPreviewRouteImport.update({
@@ -137,6 +147,18 @@ const AuthenticatedChallengeRoute = AuthenticatedChallengeRouteImport.update({
   path: '/challenge',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotmcpChar93ListToolsRoute =
+  Char91DotmcpChar93ListToolsRouteImport.update({
+    id: '/.mcp/list-tools',
+    path: '/.mcp/list-tools',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedLibraryIndexLazyRoute =
   AuthenticatedLibraryIndexLazyRouteImport.update({
     id: '/library/',
@@ -238,6 +260,17 @@ const AuthenticatedAdminApiKeysRoute =
     path: '/admin/api-keys',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const Char91DotmcpChar93InvokeToolToolRoute =
+  Char91DotmcpChar93InvokeToolToolRouteImport.update({
+    id: '/.mcp/invoke-tool/$tool',
+    path: '/.mcp/invoke-tool/$tool',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicTelegramWebhookRoute =
   ApiPublicTelegramWebhookRouteImport.update({
     id: '/api/public/telegram/webhook',
@@ -261,8 +294,11 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
   '/m-preview': typeof MPreviewRoute
+  '/mcp': typeof McpRoute
   '/trust': typeof TrustRoute
   '/welcome': typeof WelcomeRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/challenge': typeof AuthenticatedChallengeRoute
   '/community': typeof AuthenticatedCommunityRoute
   '/developer': typeof AuthenticatedDeveloperRoute
@@ -274,6 +310,8 @@ export interface FileRoutesByFullPath {
   '/store': typeof AuthenticatedStoreRoute
   '/portal/$slug': typeof PortalSlugRoute
   '/r/$code': typeof RCodeRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/api-keys': typeof AuthenticatedAdminApiKeysRoute
   '/admin/coin-audit': typeof AuthenticatedAdminCoinAuditRoute
   '/admin/debug-context': typeof AuthenticatedAdminDebugContextRoute
@@ -298,8 +336,11 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/m-preview': typeof MPreviewRoute
+  '/mcp': typeof McpRoute
   '/trust': typeof TrustRoute
   '/welcome': typeof WelcomeRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/challenge': typeof AuthenticatedChallengeRoute
   '/community': typeof AuthenticatedCommunityRoute
   '/developer': typeof AuthenticatedDeveloperRoute
@@ -312,6 +353,8 @@ export interface FileRoutesByTo {
   '/portal/$slug': typeof PortalSlugRoute
   '/r/$code': typeof RCodeRoute
   '/': typeof AuthenticatedIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/api-keys': typeof AuthenticatedAdminApiKeysRoute
   '/admin/coin-audit': typeof AuthenticatedAdminCoinAuditRoute
   '/admin/debug-context': typeof AuthenticatedAdminDebugContextRoute
@@ -338,8 +381,11 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/m-preview': typeof MPreviewRoute
+  '/mcp': typeof McpRoute
   '/trust': typeof TrustRoute
   '/welcome': typeof WelcomeRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/challenge': typeof AuthenticatedChallengeRoute
   '/_authenticated/community': typeof AuthenticatedCommunityRoute
   '/_authenticated/developer': typeof AuthenticatedDeveloperRoute
@@ -352,6 +398,8 @@ export interface FileRoutesById {
   '/portal/$slug': typeof PortalSlugRoute
   '/r/$code': typeof RCodeRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/admin/api-keys': typeof AuthenticatedAdminApiKeysRoute
   '/_authenticated/admin/coin-audit': typeof AuthenticatedAdminCoinAuditRoute
   '/_authenticated/admin/debug-context': typeof AuthenticatedAdminDebugContextRoute
@@ -379,8 +427,11 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/m-preview'
+    | '/mcp'
     | '/trust'
     | '/welcome'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/challenge'
     | '/community'
     | '/developer'
@@ -392,6 +443,8 @@ export interface FileRouteTypes {
     | '/store'
     | '/portal/$slug'
     | '/r/$code'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
     | '/admin/api-keys'
     | '/admin/coin-audit'
     | '/admin/debug-context'
@@ -416,8 +469,11 @@ export interface FileRouteTypes {
   to:
     | '/auth'
     | '/m-preview'
+    | '/mcp'
     | '/trust'
     | '/welcome'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/challenge'
     | '/community'
     | '/developer'
@@ -430,6 +486,8 @@ export interface FileRouteTypes {
     | '/portal/$slug'
     | '/r/$code'
     | '/'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
     | '/admin/api-keys'
     | '/admin/coin-audit'
     | '/admin/debug-context'
@@ -455,8 +513,11 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/m-preview'
+    | '/mcp'
     | '/trust'
     | '/welcome'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/_authenticated/challenge'
     | '/_authenticated/community'
     | '/_authenticated/developer'
@@ -469,6 +530,8 @@ export interface FileRouteTypes {
     | '/portal/$slug'
     | '/r/$code'
     | '/_authenticated/'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/admin/api-keys'
     | '/_authenticated/admin/coin-audit'
     | '/_authenticated/admin/debug-context'
@@ -495,10 +558,15 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   MPreviewRoute: typeof MPreviewRoute
+  McpRoute: typeof McpRoute
   TrustRoute: typeof TrustRoute
   WelcomeRoute: typeof WelcomeRoute
+  Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   PortalSlugRoute: typeof PortalSlugRoute
   RCodeRoute: typeof RCodeRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
+  Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   ApiPublicTelegramWebhookRoute: typeof ApiPublicTelegramWebhookRoute
 }
@@ -517,6 +585,13 @@ declare module '@tanstack/react-router' {
       path: '/trust'
       fullPath: '/trust'
       preLoaderRoute: typeof TrustRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/m-preview': {
@@ -623,6 +698,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/challenge'
       preLoaderRoute: typeof AuthenticatedChallengeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/list-tools': {
+      id: '/.mcp/list-tools'
+      path: '/.mcp/list-tools'
+      fullPath: '/.mcp/list-tools'
+      preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/library/': {
       id: '/_authenticated/library/'
@@ -743,6 +832,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminApiKeysRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/.mcp/invoke-tool/$tool': {
+      id: '/.mcp/invoke-tool/$tool'
+      path: '/.mcp/invoke-tool/$tool'
+      fullPath: '/.mcp/invoke-tool/$tool'
+      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/telegram/webhook': {
       id: '/api/public/telegram/webhook'
       path: '/api/public/telegram/webhook'
@@ -848,10 +951,16 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   MPreviewRoute: MPreviewRoute,
+  McpRoute: McpRoute,
   TrustRoute: TrustRoute,
   WelcomeRoute: WelcomeRoute,
+  Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
   PortalSlugRoute: PortalSlugRoute,
   RCodeRoute: RCodeRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
+  Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   ApiPublicTelegramWebhookRoute: ApiPublicTelegramWebhookRoute,
 }

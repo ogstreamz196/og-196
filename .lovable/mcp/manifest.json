@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "sdk_version": "0.24.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://khjoyiqxupykicqnvhlc.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "og-studio-mcp",
+      "version": "0.1.0",
+      "title": "OG Studio"
+    },
+    "tools": [
+      {
+        "name": "get_profile",
+        "title": "Get my profile",
+        "description": "Return the signed-in user's OG Studio profile: display name, email, coin balance, referral code, and Telegram link status.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_coin_balance",
+        "title": "Get OG coin balance",
+        "description": "Return the signed-in user's current OG coin balance.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_my_songs",
+        "title": "List my songs",
+        "description": "List songs created by the signed-in user, newest first. Returns title, prompt, style, status, unlocked flag, and creation time.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10,
+              "description": "Max songs to return (1-50)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
