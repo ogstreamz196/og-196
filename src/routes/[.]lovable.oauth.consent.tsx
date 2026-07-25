@@ -90,10 +90,11 @@ function Consent() {
         <ul className="list-disc pl-5 space-y-1 text-sm">
           {scopes.includes("profile") && <li>Share your basic profile</li>}
           {scopes.includes("email") && <li>Share your email address</li>}
-          {scopes.filter((s) => !["openid", "email", "profile"].includes(s)).map((s) => (
+          {scopes.filter((s: string) => !["openid", "email", "profile"].includes(s)).map((s: string) => (
             <li key={s}>Additional permission: {s}</li>
           ))}
         </ul>
+
         <p className="text-xs text-white/50 mt-3">
           This does not bypass OG Studio's permissions or backend policies.
         </p>
