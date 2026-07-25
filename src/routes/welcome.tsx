@@ -98,6 +98,15 @@ const albumCovers = [
 
 const PENDING_REF_KEY = "og_pending_ref";
 
+function safeRelativeNext(): string | null {
+  if (typeof window === "undefined") return null;
+  const raw = new URLSearchParams(window.location.search).get("next");
+  if (!raw) return null;
+  // Same-origin relative path only.
+  if (!raw.startsWith("/") || raw.startsWith("//")) return null;
+  return raw;
+}
+
 function useRedirectIfSignedIn() {
   const navigate = useNavigate();
   useEffect(() => {
@@ -109,16 +118,18 @@ function useRedirectIfSignedIn() {
       }
     }
     let cancelled = false;
-    // Initial restore from storage (handles full-page OAuth redirect back).
+    const target = safeRelativeNext() ?? "/";
     supabase.auth.getSession().then(({ data }) => {
-      if (!cancelled && data.session) navigate({ to: "/", replace: true });
+      if (!cancelled && data.session) {
+        if (target === "/") navigate({ to: "/", replace: true });
+        else window.location.replace(target);
+      }
     });
-    // Subsequent sign-in (popup/web_message flow in preview iframe sets the
-    // session asynchronously after lovable.auth.signInWithOAuth resolves).
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (cancelled) return;
       if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
-        navigate({ to: "/", replace: true });
+        if (target === "/") navigate({ to: "/", replace: true });
+        else window.location.replace(target);
       }
     });
     return () => {
@@ -137,8 +148,15 @@ function useOAuthSignIn() {
     async (provider: OAuthProvider) => {
       setPending(provider);
       try {
+        const next = safeRelativeNext();
+        // Preserve `next` across a full-page OAuth round-trip so we return to
+        // /welcome with the same param and can forward the user to their
+        // original destination (e.g. the MCP consent URL) after sign-in.
+        const redirectUri = next
+          ? `${window.location.origin}/welcome?next=${encodeURIComponent(next)}`
+          : window.location.origin;
         const result = await lovable.auth.signInWithOAuth(provider, {
-          redirect_uri: window.location.origin,
+          redirect_uri: redirectUri,
           extraParams: provider === "google" ? { prompt: "select_account" } : undefined,
         });
         if (result.error) {
@@ -149,7 +167,8 @@ function useOAuthSignIn() {
           return;
         }
         if (result.redirected) return;
-        navigate({ to: "/", replace: true });
+        if (next) window.location.replace(next);
+        else navigate({ to: "/", replace: true });
       } catch (e) {
         const raw = (e instanceof Error ? e.message : "").toLowerCase();
         const transient =
@@ -164,6 +183,7 @@ function useOAuthSignIn() {
 
   return { signIn, pending };
 }
+
 
 
 function GoogleIcon({ className }: { className?: string }) {
