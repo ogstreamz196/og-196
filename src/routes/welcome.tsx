@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useCallback, useEffect, useMemo, useState, type ReactElement } from "react";
+import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactElement } from "react";
 import {
   Music2,
   Sparkles,
@@ -18,6 +18,10 @@ import {
   useAdminEditMode,
 } from "@/components/admin/AdminEditMode";
 import { useRole } from "@/hooks/use-role";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
 
 import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
@@ -205,34 +209,8 @@ function AppleIcon({ className }: { className?: string }) {
   );
 }
 
-function AndroidIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden fill="#3DDC84">
-      <path d="M17.6 9.48l1.84-3.18c.16-.31.04-.69-.26-.85-.29-.15-.65-.06-.83.22l-1.88 3.24a11.43 11.43 0 0 0-8.94 0L5.65 5.67a.61.61 0 0 0-.83-.22c-.3.16-.42.54-.26.85L6.4 9.48A10.78 10.78 0 0 0 1 18h22a10.78 10.78 0 0 0-5.4-8.52zM7 15.25a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5zm10 0a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5z"/>
-    </svg>
-  );
-}
 
-function SamsungIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden>
-      <rect x="6" y="2" width="12" height="20" rx="2.5" fill="#1428A0"/>
-      <rect x="7.25" y="4" width="9.5" height="14" rx="0.6" fill="#0a1a6e"/>
-      <circle cx="12" cy="20" r="0.7" fill="#fff"/>
-    </svg>
-  );
-}
 
-function IPhoneIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden>
-      <rect x="6" y="2" width="12" height="20" rx="2.8" fill="#1a1a1a" stroke="#444" strokeWidth="0.5"/>
-      <rect x="7.25" y="4.5" width="9.5" height="13.5" rx="0.6" fill="#0d1117"/>
-      <rect x="10.5" y="3" width="3" height="0.7" rx="0.35" fill="#2a2a2a"/>
-      <circle cx="12" cy="20.2" r="0.6" fill="#2a2a2a"/>
-    </svg>
-  );
-}
 
 
 type Device = {
@@ -258,11 +236,6 @@ const PRIMARY_DEVICES: Device[] = [
   { key: "apple", label: "Apple ID", provider: "apple", Icon: AppleIcon, iconClass: "text-black" },
 ];
 
-const SECONDARY_DEVICES: Device[] = [
-  { key: "android", label: "Android", provider: "google", Icon: AndroidIcon, iconClass: "text-[#3ddc84]" },
-  { key: "samsung", label: "Samsung", provider: "google", Icon: SamsungIcon, iconClass: "text-[#1428a0]" },
-  { key: "iphone", label: "iPhone / iPad", provider: "apple", Icon: IPhoneIcon, iconClass: "text-black" },
-];
 
 function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
   const { signIn, pending } = useOAuthSignIn();
@@ -335,10 +308,6 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
   );
 
   const primaryTiles = useMemo(() => PRIMARY_DEVICES.map((d, i) => renderTile(d, i)), [renderTile]);
-  const secondaryTiles = useMemo(
-    () => SECONDARY_DEVICES.map((d, i) => renderTile(d, i + PRIMARY_DEVICES.length)),
-    [renderTile],
-  );
 
   return (
     <div className="w-full space-y-4 sm:space-y-6">
@@ -353,18 +322,110 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
         </p>
       </div>
 
-
-
       <div className="landing-card-tight relative overflow-hidden shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)]">
         <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-white/[0.06] via-transparent to-transparent" aria-hidden />
         <div className="relative landing-grid">
           <div className="landing-grid grid-cols-2">{primaryTiles}</div>
-          <div className="landing-grid grid-cols-3">{secondaryTiles}</div>
+          <EmailAuthPanel disabled={pending !== null} />
         </div>
       </div>
     </div>
   );
 }
+
+function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const submit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!email || password.length < 6) {
+      toast.error("Enter your email and a password of at least 6 characters");
+      return;
+    }
+    setBusy(true);
+    try {
+      if (mode === "signup") {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { emailRedirectTo: `${window.location.origin}/welcome` },
+        });
+        if (error) throw error;
+        toast.success("Account created — check your email if confirmation is required.");
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="mt-2 rounded-3xl border-2 border-white/15 bg-white/[0.04] p-4 sm:p-5">
+      <div className="mb-3 flex items-center gap-3">
+        <span className="h-px flex-1 bg-white/15" aria-hidden />
+        <span className="font-display text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+          Or use email
+        </span>
+        <span className="h-px flex-1 bg-white/15" aria-hidden />
+      </div>
+
+      <form onSubmit={submit} className="space-y-3">
+        <div className="space-y-1.5">
+          <Label htmlFor="wc-email" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            Email
+          </Label>
+          <Input
+            id="wc-email"
+            type="email"
+            autoComplete="email"
+            inputMode="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="h-12 text-base"
+            required
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="wc-password" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            Password
+          </Label>
+          <Input
+            id="wc-password"
+            type="password"
+            autoComplete={mode === "signup" ? "new-password" : "current-password"}
+            placeholder="At least 6 characters"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="h-12 text-base"
+            required
+          />
+        </div>
+
+        <Button type="submit" disabled={busy || disabled} className="h-12 w-full font-display text-base font-black uppercase tracking-wide">
+          {busy ? <Loader2 className="h-5 w-5 animate-spin" aria-hidden /> : mode === "signup" ? "Create account" : "Sign in"}
+        </Button>
+      </form>
+
+      <button
+        type="button"
+        onClick={() => setMode((m) => (m === "signin" ? "signup" : "signin"))}
+        className="mt-3 w-full text-center text-sm font-semibold text-foreground/80 underline underline-offset-4 hover:text-foreground"
+      >
+        {mode === "signin" ? "New here? Create an account with email" : "Already have an account? Sign in"}
+      </button>
+    </div>
+  );
+}
+
+
 
 
 
