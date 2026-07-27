@@ -69,11 +69,15 @@ function ChangePasswordPage() {
     e.preventDefault();
     const parsed = schema.safeParse({ current, next, confirm });
     if (!parsed.success) {
-      toast.error(parsed.error.issues[0]?.message ?? "Check the form and try again");
+      toast.error("Password not changed", {
+        description: parsed.error.issues[0]?.message ?? "Check the form and try again.",
+      });
       return;
     }
     if (!email) {
-      toast.error("No email on this account — password sign-in isn't available.");
+      toast.error("Password not changed", {
+        description: "No email on this account — password sign-in isn't available.",
+      });
       return;
     }
 
@@ -86,7 +90,9 @@ function ChangePasswordPage() {
         password: current,
       });
       if (reauthError) {
-        toast.error("Current password is incorrect");
+        toast.error("Current password is incorrect", {
+          description: "Double-check it and try again — your password was not changed.",
+        });
         return;
       }
 
@@ -98,11 +104,14 @@ function ChangePasswordPage() {
       setNext("");
       setConfirm("");
       toast.success("Password updated", {
-        description: "Your new password is active on this device.",
+        description: "Your new password is active. Taking you back to settings…",
       });
       setTimeout(() => navigate({ to: "/settings" }), 1800);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not update your password");
+      toast.error("Couldn't update your password", {
+        description:
+          err instanceof Error ? err.message : "Something went wrong. Please try again.",
+      });
     } finally {
       setBusy(false);
     }
