@@ -344,7 +344,23 @@ function SettingsPage() {
 
 
 
+        {/* Security */}
+        <section className="rounded-2xl border border-border bg-card p-6 shadow-card flex items-center justify-between gap-4">
+          <div>
+            <h2 className="font-semibold">Password</h2>
+            <p className="text-xs text-muted-foreground">
+              Change your password — current password required.
+            </p>
+          </div>
+          <Button asChild variant="outline">
+            <Link to="/change-password">
+              <KeyRound className="mr-2 h-4 w-4" /> Change password
+            </Link>
+          </Button>
+        </section>
+
         {/* Session */}
+
         <section className="rounded-2xl border border-border bg-card p-6 shadow-card flex items-center justify-between">
           <div>
             <h2 className="font-semibold">Session</h2>
