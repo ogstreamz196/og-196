@@ -175,7 +175,7 @@ function ResetPasswordPage() {
             <p className="font-display text-lg font-black uppercase tracking-wide text-foreground">
               Password updated
             </p>
-            <p className="text-sm text-muted-foreground">Taking you into the app…</p>
+            <p className="text-sm text-muted-foreground">Taking you to the sign-in page…</p>
           </div>
         ) : !linkValid ? (
           <div className="space-y-4 text-center">
