@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+const RESEND_COOLDOWN_S = 30;
+
 function ResetPasswordPage() {
   const navigate = useNavigate();
   const [ready, setReady] = useState(false);
@@ -15,18 +17,24 @@ function ResetPasswordPage() {
   const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
+  const [email, setEmail] = useState("");
+  const [resending, setResending] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+  const [status, setStatus] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "PASSWORD_RECOVERY" && !cancelled) {
         setLinkValid(true);
         setReady(true);
+        if (session?.user?.email) setEmail(session.user.email);
       }
     });
     supabase.auth.getSession().then(({ data }) => {
       if (cancelled) return;
       setLinkValid(Boolean(data.session));
+      if (data.session?.user?.email) setEmail(data.session.user.email);
       setReady(true);
     });
     return () => {
@@ -34,6 +42,84 @@ function ResetPasswordPage() {
       sub.subscription.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = window.setTimeout(() => setCooldown((c) => c - 1), 1000);
+    return () => window.clearTimeout(t);
+  }, [cooldown]);
+
+  const resend = async () => {
+    const target = email.trim();
+    if (!target) {
+      setStatus({ tone: "error", text: "Enter the email address you signed up with." });
+      return;
+    }
+    setResending(true);
+    setStatus(null);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(target, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      setCooldown(RESEND_COOLDOWN_S);
+      setStatus({ tone: "ok", text: `New reset link sent to ${target}. Check your inbox and spam folder.` });
+      toast.success("Reset email sent");
+    } catch (err) {
+      const text = err instanceof Error ? err.message : "Could not send the reset email";
+      setStatus({ tone: "error", text });
+      toast.error(text);
+    } finally {
+      setResending(false);
+    }
+  };
+
+  const resendBlock = (
+    <div className="space-y-2">
+      {!linkValid && (
+        <Input
+          type="email"
+          autoComplete="email"
+          inputMode="email"
+          placeholder="you@example.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="h-12 text-base"
+          aria-label="Email address"
+        />
+      )}
+      <Button
+        type="button"
+        variant="outline"
+        onClick={resend}
+        disabled={resending || cooldown > 0}
+        className="h-12 w-full font-display font-black uppercase tracking-wide"
+      >
+        {resending ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden /> Sending…
+          </>
+        ) : cooldown > 0 ? (
+          `Resend available in ${cooldown}s`
+        ) : (
+          <>
+            <MailCheck className="mr-2 h-4 w-4" aria-hidden /> Resend reset email
+          </>
+        )}
+      </Button>
+      <p
+        role="status"
+        aria-live="polite"
+        className={`text-center text-sm ${status?.tone === "error" ? "text-destructive" : "text-muted-foreground"}`}
+      >
+        {status?.text ??
+          (email
+            ? `We'll send a fresh link to ${email}.`
+            : "Didn't get the email? Enter your address and we'll send a new link.")}
+      </p>
+    </div>
+  );
+
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
