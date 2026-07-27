@@ -345,7 +345,7 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
   const [resetSent, setResetSent] = useState(false);
   const [createProgress, setCreateProgress] = useState(0);
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const progressIntervalRef = useRef<number | null>(null);
 
   const isCreating = busy && mode === "signup";
 
@@ -359,17 +359,18 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
         });
       }, 180);
     } else {
-      setCreateProgress(isCreating ? 0 : 100);
+      setCreateProgress(0);
     }
     return () => {
-      if (progressIntervalRef.current) {
-        clearInterval(progressIntervalRef.current);
+      if (progressIntervalRef.current !== null) {
+        window.clearInterval(progressIntervalRef.current);
         progressIntervalRef.current = null;
       }
     };
   }, [isCreating]);
 
   const onTabKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
+
 
     const current = AUTH_TABS.indexOf(mode as (typeof AUTH_TABS)[number]);
     if (current < 0) return;
