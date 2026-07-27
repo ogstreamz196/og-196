@@ -452,9 +452,7 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
   );
 }
 
-    </div>
-  );
-}
+
 
 
 
