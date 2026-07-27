@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useCallback, useEffect, useMemo, useState, type ReactElement } from "react";
+import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactElement } from "react";
 import {
   Music2,
   Sparkles,
@@ -209,34 +209,8 @@ function AppleIcon({ className }: { className?: string }) {
   );
 }
 
-function AndroidIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden fill="#3DDC84">
-      <path d="M17.6 9.48l1.84-3.18c.16-.31.04-.69-.26-.85-.29-.15-.65-.06-.83.22l-1.88 3.24a11.43 11.43 0 0 0-8.94 0L5.65 5.67a.61.61 0 0 0-.83-.22c-.3.16-.42.54-.26.85L6.4 9.48A10.78 10.78 0 0 0 1 18h22a10.78 10.78 0 0 0-5.4-8.52zM7 15.25a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5zm10 0a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5z"/>
-    </svg>
-  );
-}
 
-function SamsungIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden>
-      <rect x="6" y="2" width="12" height="20" rx="2.5" fill="#1428A0"/>
-      <rect x="7.25" y="4" width="9.5" height="14" rx="0.6" fill="#0a1a6e"/>
-      <circle cx="12" cy="20" r="0.7" fill="#fff"/>
-    </svg>
-  );
-}
 
-function IPhoneIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden>
-      <rect x="6" y="2" width="12" height="20" rx="2.8" fill="#1a1a1a" stroke="#444" strokeWidth="0.5"/>
-      <rect x="7.25" y="4.5" width="9.5" height="13.5" rx="0.6" fill="#0d1117"/>
-      <rect x="10.5" y="3" width="3" height="0.7" rx="0.35" fill="#2a2a2a"/>
-      <circle cx="12" cy="20.2" r="0.6" fill="#2a2a2a"/>
-    </svg>
-  );
-}
 
 
 type Device = {
@@ -262,11 +236,6 @@ const PRIMARY_DEVICES: Device[] = [
   { key: "apple", label: "Apple ID", provider: "apple", Icon: AppleIcon, iconClass: "text-black" },
 ];
 
-const SECONDARY_DEVICES: Device[] = [
-  { key: "android", label: "Android", provider: "google", Icon: AndroidIcon, iconClass: "text-[#3ddc84]" },
-  { key: "samsung", label: "Samsung", provider: "google", Icon: SamsungIcon, iconClass: "text-[#1428a0]" },
-  { key: "iphone", label: "iPhone / iPad", provider: "apple", Icon: IPhoneIcon, iconClass: "text-black" },
-];
 
 function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
   const { signIn, pending } = useOAuthSignIn();
@@ -370,7 +339,7 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const submit = async (e: React.FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (!email || password.length < 6) {
       toast.error("Enter your email and a password of at least 6 characters");
