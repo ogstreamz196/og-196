@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactElement } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent, type ReactElement } from "react";
 import {
   Music2,
   Sparkles,
@@ -333,12 +333,30 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
   );
 }
 
+const AUTH_TABS = ["signin", "signup"] as const;
+
 function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
   const [mode, setMode] = useState<"signin" | "signup" | "reset">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+
+  const onTabKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
+    const current = AUTH_TABS.indexOf(mode as (typeof AUTH_TABS)[number]);
+    if (current < 0) return;
+    let next = -1;
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") next = (current + 1) % AUTH_TABS.length;
+    else if (e.key === "ArrowLeft" || e.key === "ArrowUp") next = (current - 1 + AUTH_TABS.length) % AUTH_TABS.length;
+    else if (e.key === "Home") next = 0;
+    else if (e.key === "End") next = AUTH_TABS.length - 1;
+    if (next < 0) return;
+    e.preventDefault();
+    setMode(AUTH_TABS[next]);
+    tabRefs.current[next]?.focus();
+  };
+
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -391,14 +409,24 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
   return (
     <div className="mt-3 rounded-3xl border-2 border-primary/50 bg-card/85 p-4 shadow-[0_16px_44px_-18px_hsl(var(--primary)/0.6)] backdrop-blur-xl sm:p-6">
       {mode !== "reset" ? (
-        <div className="mb-4 grid grid-cols-2 items-stretch gap-2 rounded-2xl border border-white/15 bg-black/30 p-1.5">
-          {(["signin", "signup"] as const).map((m) => (
+        <div
+          role="tablist"
+          aria-label="Email sign in or create account"
+          className="mb-4 grid grid-cols-2 items-stretch gap-2 rounded-2xl border border-white/15 bg-black/30 p-1.5"
+        >
+          {AUTH_TABS.map((m, i) => (
             <button
               key={m}
+              ref={(el) => { tabRefs.current[i] = el; }}
               type="button"
+              role="tab"
+              id={`wc-tab-${m}`}
+              aria-selected={mode === m}
+              aria-controls="wc-auth-panel"
+              tabIndex={mode === m ? 0 : -1}
+              onKeyDown={onTabKeyDown}
               onClick={() => setMode(m)}
-              aria-pressed={mode === m}
-              className={`font-display flex min-h-[3.75rem] min-w-0 items-center justify-center text-balance rounded-xl px-2 py-3 text-center text-[clamp(0.9rem,3.4vw,1.15rem)] font-black uppercase leading-[1.1] tracking-wide transition sm:min-h-[3.5rem] sm:px-3 ${
+              className={`font-display flex min-h-[3.75rem] min-w-0 items-center justify-center text-balance rounded-xl px-2 py-3 text-center text-[clamp(0.9rem,3.4vw,1.15rem)] font-black uppercase leading-[1.1] tracking-wide transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:min-h-[3.5rem] sm:px-3 ${
                 mode === m
                   ? "bg-primary text-primary-foreground shadow-[0_10px_30px_-12px_hsl(var(--primary))]"
                   : "text-foreground/70 hover:text-foreground"
@@ -417,6 +445,8 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
           ))}
         </div>
 
+
+
       ) : (
         <div className="mb-4 text-center">
           <p className="font-display text-[clamp(1.15rem,4.5vw,1.6rem)] font-black uppercase leading-tight text-foreground">
@@ -426,7 +456,12 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
         </div>
       )}
 
-      <form onSubmit={submit} className="space-y-3">
+      <form
+        onSubmit={submit}
+        className="space-y-3"
+        id="wc-auth-panel"
+        {...(mode !== "reset" ? { role: "tabpanel", "aria-labelledby": `wc-tab-${mode}` } : {})}
+      >
         <div className="space-y-1.5">
           <Label htmlFor="wc-email" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
             Email
