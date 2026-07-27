@@ -334,17 +334,39 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
 }
 
 function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [mode, setMode] = useState<"signin" | "signup" | "reset">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
+    if (mode === "reset") {
+      if (!email) {
+        toast.error("Enter the email you signed up with");
+        return;
+      }
+      setBusy(true);
+      try {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) throw error;
+        setResetSent(true);
+        toast.success("Reset link sent — check your inbox.");
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Could not send the reset email");
+      } finally {
+        setBusy(false);
+      }
+      return;
+    }
     if (!email || password.length < 6) {
       toast.error("Enter your email and a password of at least 6 characters");
       return;
     }
+
     setBusy(true);
     try {
       if (mode === "signup") {
