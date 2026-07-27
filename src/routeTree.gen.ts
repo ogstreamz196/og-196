@@ -13,6 +13,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as TrustRouteImport } from './routes/trust'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as MPreviewRouteImport } from './routes/m-preview'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -65,6 +66,11 @@ const WelcomeRoute = WelcomeRouteImport.update({
 const TrustRoute = TrustRouteImport.update({
   id: '/trust',
   path: '/trust',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const McpRoute = McpRouteImport.update({
@@ -295,6 +301,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/m-preview': typeof MPreviewRoute
   '/mcp': typeof McpRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/trust': typeof TrustRoute
   '/welcome': typeof WelcomeRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -337,6 +344,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/m-preview': typeof MPreviewRoute
   '/mcp': typeof McpRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/trust': typeof TrustRoute
   '/welcome': typeof WelcomeRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -382,6 +390,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/m-preview': typeof MPreviewRoute
   '/mcp': typeof McpRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/trust': typeof TrustRoute
   '/welcome': typeof WelcomeRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -428,6 +437,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/m-preview'
     | '/mcp'
+    | '/reset-password'
     | '/trust'
     | '/welcome'
     | '/.mcp/list-tools'
@@ -470,6 +480,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/m-preview'
     | '/mcp'
+    | '/reset-password'
     | '/trust'
     | '/welcome'
     | '/.mcp/list-tools'
@@ -514,6 +525,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/m-preview'
     | '/mcp'
+    | '/reset-password'
     | '/trust'
     | '/welcome'
     | '/.mcp/list-tools'
@@ -559,6 +571,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   MPreviewRoute: typeof MPreviewRoute
   McpRoute: typeof McpRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   TrustRoute: typeof TrustRoute
   WelcomeRoute: typeof WelcomeRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
@@ -585,6 +598,13 @@ declare module '@tanstack/react-router' {
       path: '/trust'
       fullPath: '/trust'
       preLoaderRoute: typeof TrustRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mcp': {
@@ -952,6 +972,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   MPreviewRoute: MPreviewRoute,
   McpRoute: McpRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   TrustRoute: TrustRoute,
   WelcomeRoute: WelcomeRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
