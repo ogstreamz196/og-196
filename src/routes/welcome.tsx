@@ -335,10 +335,6 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
   );
 
   const primaryTiles = useMemo(() => PRIMARY_DEVICES.map((d, i) => renderTile(d, i)), [renderTile]);
-  const secondaryTiles = useMemo(
-    () => SECONDARY_DEVICES.map((d, i) => renderTile(d, i + PRIMARY_DEVICES.length)),
-    [renderTile],
-  );
 
   return (
     <div className="w-full space-y-4 sm:space-y-6">
@@ -353,15 +349,109 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
         </p>
       </div>
 
-
-
       <div className="landing-card-tight relative overflow-hidden shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)]">
         <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-white/[0.06] via-transparent to-transparent" aria-hidden />
         <div className="relative landing-grid">
           <div className="landing-grid grid-cols-2">{primaryTiles}</div>
-          <div className="landing-grid grid-cols-3">{secondaryTiles}</div>
+          <EmailAuthPanel disabled={pending !== null} />
         </div>
       </div>
+    </div>
+  );
+}
+
+function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || password.length < 6) {
+      toast.error("Enter your email and a password of at least 6 characters");
+      return;
+    }
+    setBusy(true);
+    try {
+      if (mode === "signup") {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { emailRedirectTo: `${window.location.origin}/welcome` },
+        });
+        if (error) throw error;
+        toast.success("Account created — check your email if confirmation is required.");
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="mt-2 rounded-3xl border-2 border-white/15 bg-white/[0.04] p-4 sm:p-5">
+      <div className="mb-3 flex items-center gap-3">
+        <span className="h-px flex-1 bg-white/15" aria-hidden />
+        <span className="font-display text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+          Or use email
+        </span>
+        <span className="h-px flex-1 bg-white/15" aria-hidden />
+      </div>
+
+      <form onSubmit={submit} className="space-y-3">
+        <div className="space-y-1.5">
+          <Label htmlFor="wc-email" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            Email
+          </Label>
+          <Input
+            id="wc-email"
+            type="email"
+            autoComplete="email"
+            inputMode="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="h-12 text-base"
+            required
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="wc-password" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            Password
+          </Label>
+          <Input
+            id="wc-password"
+            type="password"
+            autoComplete={mode === "signup" ? "new-password" : "current-password"}
+            placeholder="At least 6 characters"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="h-12 text-base"
+            required
+          />
+        </div>
+
+        <Button type="submit" disabled={busy || disabled} className="h-12 w-full font-display text-base font-black uppercase tracking-wide">
+          {busy ? <Loader2 className="h-5 w-5 animate-spin" aria-hidden /> : mode === "signup" ? "Create account" : "Sign in"}
+        </Button>
+      </form>
+
+      <button
+        type="button"
+        onClick={() => setMode((m) => (m === "signin" ? "signup" : "signin"))}
+        className="mt-3 w-full text-center text-sm font-semibold text-foreground/80 underline underline-offset-4 hover:text-foreground"
+      >
+        {mode === "signin" ? "New here? Create an account with email" : "Already have an account? Sign in"}
+      </button>
+    </div>
+  );
+}
+
     </div>
   );
 }
