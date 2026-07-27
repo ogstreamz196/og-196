@@ -390,22 +390,32 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
 
   return (
     <div className="mt-3 rounded-3xl border-2 border-primary/50 bg-card/85 p-4 shadow-[0_16px_44px_-18px_hsl(var(--primary)/0.6)] backdrop-blur-xl sm:p-6">
-      <div className="mb-4 text-center">
-        <span className="inline-flex items-center gap-2 rounded-full border border-primary/50 bg-primary/15 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-foreground">
-          Or use email
-        </span>
-        <p className="font-display mt-2 text-[clamp(1.15rem,4.5vw,1.6rem)] font-black uppercase leading-tight text-foreground">
-          {mode === "signup" ? "Create your account" : mode === "reset" ? "Reset your password" : "Sign in with email"}
-        </p>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {mode === "signup"
-            ? "Email and password — takes seconds."
-            : mode === "reset"
-            ? "We'll send you a secure link."
-            : "Already have an account? Enter your details."}
-        </p>
-      </div>
-
+      {mode !== "reset" ? (
+        <div className="mb-4 grid grid-cols-2 gap-2 rounded-2xl border border-white/15 bg-black/30 p-1.5">
+          {(["signin", "signup"] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => setMode(m)}
+              aria-pressed={mode === m}
+              className={`font-display rounded-xl px-3 py-3.5 text-[clamp(0.95rem,3.6vw,1.15rem)] font-black uppercase leading-tight tracking-wide transition ${
+                mode === m
+                  ? "bg-primary text-primary-foreground shadow-[0_10px_30px_-12px_hsl(var(--primary))]"
+                  : "text-foreground/70 hover:text-foreground"
+              }`}
+            >
+              {m === "signin" ? "Sign in with email" : "Create account"}
+            </button>
+          ))}
+        </div>
+      ) : (
+        <div className="mb-4 text-center">
+          <p className="font-display text-[clamp(1.15rem,4.5vw,1.6rem)] font-black uppercase leading-tight text-foreground">
+            Reset your password
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">We'll send you a secure link.</p>
+        </div>
+      )}
 
       <form onSubmit={submit} className="space-y-3">
         <div className="space-y-1.5">
@@ -473,17 +483,15 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
         </button>
       )}
 
-      <button
-        type="button"
-        onClick={() => setMode((m) => (m === "signin" ? "signup" : "signin"))}
-        className="mt-3 w-full text-center text-sm font-semibold text-foreground/80 underline underline-offset-4 hover:text-foreground"
-      >
-        {mode === "signin"
-          ? "New here? Create an account with email"
-          : mode === "reset"
-            ? "Back to sign in"
-            : "Already have an account? Sign in"}
-      </button>
+      {mode === "reset" && (
+        <button
+          type="button"
+          onClick={() => { setResetSent(false); setMode("signin"); }}
+          className="mt-3 w-full text-center text-sm font-semibold text-foreground/80 underline underline-offset-4 hover:text-foreground"
+        >
+          Back to sign in
+        </button>
+      )}
 
     </div>
   );
