@@ -389,14 +389,23 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
   };
 
   return (
-    <div className="mt-2 rounded-3xl border-2 border-white/15 bg-white/[0.04] p-4 sm:p-5">
-      <div className="mb-3 flex items-center gap-3">
-        <span className="h-px flex-1 bg-white/15" aria-hidden />
-        <span className="font-display text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+    <div className="mt-3 rounded-3xl border-2 border-primary/50 bg-card/85 p-4 shadow-[0_16px_44px_-18px_hsl(var(--primary)/0.6)] backdrop-blur-xl sm:p-6">
+      <div className="mb-4 text-center">
+        <span className="inline-flex items-center gap-2 rounded-full border border-primary/50 bg-primary/15 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-foreground">
           Or use email
         </span>
-        <span className="h-px flex-1 bg-white/15" aria-hidden />
+        <p className="font-display mt-2 text-[clamp(1.15rem,4.5vw,1.6rem)] font-black uppercase leading-tight text-foreground">
+          {mode === "signup" ? "Create your account" : mode === "reset" ? "Reset your password" : "Sign in with email"}
+        </p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {mode === "signup"
+            ? "Email and password — takes seconds."
+            : mode === "reset"
+            ? "We'll send you a secure link."
+            : "Already have an account? Enter your details."}
+        </p>
       </div>
+
 
       <form onSubmit={submit} className="space-y-3">
         <div className="space-y-1.5">
