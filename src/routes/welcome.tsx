@@ -391,23 +391,32 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
   return (
     <div className="mt-3 rounded-3xl border-2 border-primary/50 bg-card/85 p-4 shadow-[0_16px_44px_-18px_hsl(var(--primary)/0.6)] backdrop-blur-xl sm:p-6">
       {mode !== "reset" ? (
-        <div className="mb-4 grid grid-cols-2 gap-2 rounded-2xl border border-white/15 bg-black/30 p-1.5">
+        <div className="mb-4 grid grid-cols-2 items-stretch gap-2 rounded-2xl border border-white/15 bg-black/30 p-1.5">
           {(["signin", "signup"] as const).map((m) => (
             <button
               key={m}
               type="button"
               onClick={() => setMode(m)}
               aria-pressed={mode === m}
-              className={`font-display rounded-xl px-3 py-3.5 text-[clamp(0.95rem,3.6vw,1.15rem)] font-black uppercase leading-tight tracking-wide transition ${
+              className={`font-display flex min-h-[3.75rem] min-w-0 items-center justify-center text-balance rounded-xl px-2 py-3 text-center text-[clamp(0.9rem,3.4vw,1.15rem)] font-black uppercase leading-[1.1] tracking-wide transition sm:min-h-[3.5rem] sm:px-3 ${
                 mode === m
                   ? "bg-primary text-primary-foreground shadow-[0_10px_30px_-12px_hsl(var(--primary))]"
                   : "text-foreground/70 hover:text-foreground"
               }`}
             >
-              {m === "signin" ? "Sign in with email" : "Create account"}
+              <span className="block">
+                {m === "signin" ? (
+                  <>
+                    Sign in <span className="whitespace-nowrap">with email</span>
+                  </>
+                ) : (
+                  <span className="whitespace-nowrap">Create account</span>
+                )}
+              </span>
             </button>
           ))}
         </div>
+
       ) : (
         <div className="mb-4 text-center">
           <p className="font-display text-[clamp(1.15rem,4.5vw,1.6rem)] font-black uppercase leading-tight text-foreground">
