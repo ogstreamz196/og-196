@@ -391,14 +391,24 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
   return (
     <div className="mt-3 rounded-3xl border-2 border-primary/50 bg-card/85 p-4 shadow-[0_16px_44px_-18px_hsl(var(--primary)/0.6)] backdrop-blur-xl sm:p-6">
       {mode !== "reset" ? (
-        <div className="mb-4 grid grid-cols-2 items-stretch gap-2 rounded-2xl border border-white/15 bg-black/30 p-1.5">
-          {(["signin", "signup"] as const).map((m) => (
+        <div
+          role="tablist"
+          aria-label="Email sign in or create account"
+          className="mb-4 grid grid-cols-2 items-stretch gap-2 rounded-2xl border border-white/15 bg-black/30 p-1.5"
+        >
+          {AUTH_TABS.map((m, i) => (
             <button
               key={m}
+              ref={(el) => { tabRefs.current[i] = el; }}
               type="button"
+              role="tab"
+              id={`wc-tab-${m}`}
+              aria-selected={mode === m}
+              aria-controls="wc-auth-panel"
+              tabIndex={mode === m ? 0 : -1}
+              onKeyDown={onTabKeyDown}
               onClick={() => setMode(m)}
-              aria-pressed={mode === m}
-              className={`font-display flex min-h-[3.75rem] min-w-0 items-center justify-center text-balance rounded-xl px-2 py-3 text-center text-[clamp(0.9rem,3.4vw,1.15rem)] font-black uppercase leading-[1.1] tracking-wide transition sm:min-h-[3.5rem] sm:px-3 ${
+              className={`font-display flex min-h-[3.75rem] min-w-0 items-center justify-center text-balance rounded-xl px-2 py-3 text-center text-[clamp(0.9rem,3.4vw,1.15rem)] font-black uppercase leading-[1.1] tracking-wide transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:min-h-[3.5rem] sm:px-3 ${
                 mode === m
                   ? "bg-primary text-primary-foreground shadow-[0_10px_30px_-12px_hsl(var(--primary))]"
                   : "text-foreground/70 hover:text-foreground"
@@ -416,6 +426,8 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
             </button>
           ))}
         </div>
+
+
 
       ) : (
         <div className="mb-4 text-center">
