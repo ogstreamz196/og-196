@@ -504,6 +504,7 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="h-12 text-base"
+            disabled={busy || disabled}
             required
           />
         </div>
@@ -520,6 +521,7 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="h-12 text-base"
+              disabled={busy || disabled}
               required
             />
           </div>
@@ -533,9 +535,28 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
           </p>
         )}
 
+        {isCreating && (
+          <div className="space-y-1.5 rounded-xl border border-primary/40 bg-primary/10 p-3">
+            <div className="flex items-center justify-between">
+              <span className="font-display text-xs font-black uppercase tracking-wider text-primary-foreground">
+                Creating account
+              </span>
+              <span className="text-xs font-bold tabular-nums text-primary-foreground">{createProgress}%</span>
+            </div>
+            <Progress value={createProgress} className="h-1.5 bg-primary/20" />
+            <p className="text-xs text-muted-foreground">Please wait while we set up your OG Studio profile.</p>
+            <div aria-live="polite" className="sr-only">
+              Creating account, {createProgress} percent complete.
+            </div>
+          </div>
+        )}
+
         <Button type="submit" disabled={busy || disabled} className="h-12 w-full font-display text-base font-black uppercase tracking-wide">
-          {busy ? (
-            <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
+          {isCreating ? (
+            <>
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" aria-hidden />
+              Creating account...
+            </>
           ) : mode === "signup" ? (
             "Create account"
           ) : mode === "reset" ? (
@@ -545,6 +566,7 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
           )}
         </Button>
       </form>
+
 
       {mode === "signin" && (
         <button
