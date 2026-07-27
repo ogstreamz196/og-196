@@ -69,11 +69,15 @@ function ChangePasswordPage() {
     e.preventDefault();
     const parsed = schema.safeParse({ current, next, confirm });
     if (!parsed.success) {
-      toast.error(parsed.error.issues[0]?.message ?? "Check the form and try again");
+      toast.error("Password not changed", {
+        description: parsed.error.issues[0]?.message ?? "Check the form and try again.",
+      });
       return;
     }
     if (!email) {
-      toast.error("No email on this account — password sign-in isn't available.");
+      toast.error("Password not changed", {
+        description: "No email on this account — password sign-in isn't available.",
+      });
       return;
     }
 
