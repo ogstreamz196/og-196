@@ -334,17 +334,39 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
 }
 
 function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [mode, setMode] = useState<"signin" | "signup" | "reset">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
+    if (mode === "reset") {
+      if (!email) {
+        toast.error("Enter the email you signed up with");
+        return;
+      }
+      setBusy(true);
+      try {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) throw error;
+        setResetSent(true);
+        toast.success("Reset link sent — check your inbox.");
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Could not send the reset email");
+      } finally {
+        setBusy(false);
+      }
+      return;
+    }
     if (!email || password.length < 6) {
       toast.error("Enter your email and a password of at least 6 characters");
       return;
     }
+
     setBusy(true);
     try {
       if (mode === "signup") {
@@ -393,34 +415,67 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
             required
           />
         </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="wc-password" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-            Password
-          </Label>
-          <Input
-            id="wc-password"
-            type="password"
-            autoComplete={mode === "signup" ? "new-password" : "current-password"}
-            placeholder="At least 6 characters"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="h-12 text-base"
-            required
-          />
-        </div>
+        {mode !== "reset" && (
+          <div className="space-y-1.5">
+            <Label htmlFor="wc-password" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              Password
+            </Label>
+            <Input
+              id="wc-password"
+              type="password"
+              autoComplete={mode === "signup" ? "new-password" : "current-password"}
+              placeholder="At least 6 characters"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="h-12 text-base"
+              required
+            />
+          </div>
+        )}
+
+        {mode === "reset" && (
+          <p className="text-sm text-muted-foreground">
+            {resetSent
+              ? "We sent a reset link. Open it on this device to set a new password — it expires shortly."
+              : "We'll email you a secure link to set a new password."}
+          </p>
+        )}
 
         <Button type="submit" disabled={busy || disabled} className="h-12 w-full font-display text-base font-black uppercase tracking-wide">
-          {busy ? <Loader2 className="h-5 w-5 animate-spin" aria-hidden /> : mode === "signup" ? "Create account" : "Sign in"}
+          {busy ? (
+            <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
+          ) : mode === "signup" ? (
+            "Create account"
+          ) : mode === "reset" ? (
+            resetSent ? "Resend reset link" : "Send reset link"
+          ) : (
+            "Sign in"
+          )}
         </Button>
       </form>
+
+      {mode === "signin" && (
+        <button
+          type="button"
+          onClick={() => { setResetSent(false); setMode("reset"); }}
+          className="mt-3 w-full text-center text-sm font-semibold text-foreground/70 underline underline-offset-4 hover:text-foreground"
+        >
+          Forgot password?
+        </button>
+      )}
 
       <button
         type="button"
         onClick={() => setMode((m) => (m === "signin" ? "signup" : "signin"))}
         className="mt-3 w-full text-center text-sm font-semibold text-foreground/80 underline underline-offset-4 hover:text-foreground"
       >
-        {mode === "signin" ? "New here? Create an account with email" : "Already have an account? Sign in"}
+        {mode === "signin"
+          ? "New here? Create an account with email"
+          : mode === "reset"
+            ? "Back to sign in"
+            : "Already have an account? Sign in"}
       </button>
+
     </div>
   );
 }
