@@ -136,8 +136,13 @@ function ResetPasswordPage() {
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
       setDone(true);
-      toast.success("Password updated");
-      setTimeout(() => navigate({ to: "/" }), 1800);
+      toast.success("Password updated", {
+        description: "Sign in with your new password.",
+      });
+      // End the temporary recovery session so the user signs in fresh.
+      await supabase.auth.signOut().catch(() => {});
+      setTimeout(() => navigate({ to: "/welcome" }), 1800);
+
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not update your password");
     } finally {
@@ -170,7 +175,7 @@ function ResetPasswordPage() {
             <p className="font-display text-lg font-black uppercase tracking-wide text-foreground">
               Password updated
             </p>
-            <p className="text-sm text-muted-foreground">Taking you into the app…</p>
+            <p className="text-sm text-muted-foreground">Taking you to the sign-in page…</p>
           </div>
         ) : !linkValid ? (
           <div className="space-y-4 text-center">
