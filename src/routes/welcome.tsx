@@ -345,14 +345,14 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
   const [resetSent, setResetSent] = useState(false);
   const [createProgress, setCreateProgress] = useState(0);
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  const progressIntervalRef = useRef<ReturnType<typeof window.setInterval> | null>(null);
+  const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const isCreating = busy && mode === "signup";
 
   useEffect(() => {
     if (isCreating) {
       setCreateProgress(0);
-      progressIntervalRef.current = window.setInterval(() => {
+      progressIntervalRef.current = setInterval(() => {
         setCreateProgress((prev) => {
           if (prev >= 88) return prev;
           return prev + Math.max(1, Math.floor((90 - prev) / 6));
@@ -363,11 +363,12 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
     }
     return () => {
       if (progressIntervalRef.current !== null) {
-        window.clearInterval(progressIntervalRef.current);
+        clearInterval(progressIntervalRef.current);
         progressIntervalRef.current = null;
       }
     };
   }, [isCreating]);
+
 
   const onTabKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
 
