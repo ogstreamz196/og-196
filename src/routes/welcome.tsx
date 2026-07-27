@@ -343,9 +343,34 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  const [createProgress, setCreateProgress] = useState(0);
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const isCreating = busy && mode === "signup";
+
+  useEffect(() => {
+    if (isCreating) {
+      setCreateProgress(0);
+      progressIntervalRef.current = window.setInterval(() => {
+        setCreateProgress((prev) => {
+          if (prev >= 88) return prev;
+          return prev + Math.max(1, Math.floor((90 - prev) / 6));
+        });
+      }, 180);
+    } else {
+      setCreateProgress(isCreating ? 0 : 100);
+    }
+    return () => {
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
+    };
+  }, [isCreating]);
 
   const onTabKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
+
     const current = AUTH_TABS.indexOf(mode as (typeof AUTH_TABS)[number]);
     if (current < 0) return;
     let next = -1;
