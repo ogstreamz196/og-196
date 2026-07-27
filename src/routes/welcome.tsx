@@ -333,12 +333,30 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
   );
 }
 
+const AUTH_TABS = ["signin", "signup"] as const;
+
 function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
   const [mode, setMode] = useState<"signin" | "signup" | "reset">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+
+  const onTabKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
+    const current = AUTH_TABS.indexOf(mode as (typeof AUTH_TABS)[number]);
+    if (current < 0) return;
+    let next = -1;
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") next = (current + 1) % AUTH_TABS.length;
+    else if (e.key === "ArrowLeft" || e.key === "ArrowUp") next = (current - 1 + AUTH_TABS.length) % AUTH_TABS.length;
+    else if (e.key === "Home") next = 0;
+    else if (e.key === "End") next = AUTH_TABS.length - 1;
+    if (next < 0) return;
+    e.preventDefault();
+    setMode(AUTH_TABS[next]);
+    tabRefs.current[next]?.focus();
+  };
+
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
