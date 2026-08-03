@@ -11,7 +11,7 @@ type Tab = {
 
 const TABS: Tab[] = [
   { to: "/", label: "Home", icon: Home, match: (p) => p === "/" },
-  { to: "/library", label: "Library", icon: Library, match: (p) => p.startsWith("/library") },
+  { to: "/library", label: "Music", icon: Library, match: (p) => p.startsWith("/library") },
   { to: "/messenger", label: "OG Bot", icon: MessageCircle, match: (p) => p.startsWith("/messenger") },
   { to: "/buy-coins", label: "Coins", icon: Coins, match: (p) => p.startsWith("/buy-coins") },
   { to: "/referrals", label: "Earn", icon: Sparkles, match: (p) => p.startsWith("/referrals") },
