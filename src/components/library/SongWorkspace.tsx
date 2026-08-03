@@ -574,15 +574,15 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
               </div>
 
 
-              <div className="flex flex-wrap items-center justify-end gap-3">
+              <div className="grid grid-cols-2 items-center gap-2 sm:flex sm:flex-wrap sm:justify-end sm:gap-3">
                 {dirty && <span className="mr-auto text-xs text-muted-foreground">Unsaved changes</span>}
                 <label
                   htmlFor="foul-mouth-toggle"
-                  className="flex items-center gap-2 rounded-md border border-border/60 bg-muted/30 px-3 py-1.5 text-xs font-medium"
+                  className="col-span-2 grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded-md border border-border/60 bg-muted/30 px-3 py-2 text-xs font-medium sm:col-span-1 sm:flex sm:w-auto sm:py-1.5"
                   title="Allow explicit language in generated lyrics"
                 >
                   <span aria-hidden>🤬</span>
-                  <span>Foul mouth</span>
+                  <span className="min-w-0 whitespace-normal">Foul Mouth</span>
                   <Switch
                     id="foul-mouth-toggle"
                     checked={foulMouth}
@@ -590,11 +590,11 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                     disabled={setFoulMouth.isPending}
                   />
                 </label>
-                <Button variant="ghost" onClick={handleSave} disabled={!dirty || saving}>
+                <Button variant="ghost" onClick={handleSave} disabled={!dirty || saving} className="min-w-0">
                   {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save draft"}
                 </Button>
 
-                <Button onClick={generateLyrics} disabled={genLyrics || missing} className="gap-2">
+                <Button onClick={generateLyrics} disabled={genLyrics || missing} className="min-w-0 gap-1.5 sm:gap-2">
                   {genLyrics ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
                   {hasLyrics ? "Regenerate lyrics" : "Generate lyrics"}
                   <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-background/30 px-1.5 py-0.5 text-[10px] font-semibold">
