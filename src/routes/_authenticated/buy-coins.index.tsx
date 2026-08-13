@@ -30,9 +30,8 @@ import { ReferralReminder } from "@/components/referrals/ReferralReminder";
 import { SectionDivider } from "@/components/buy-coins/SectionDivider";
 
 export const Route = createFileRoute("/_authenticated/buy-coins/")({
-  validateSearch: (s: Record<string, unknown>) => ({
-    edit: s.edit === "1" || s.edit === 1 || s.edit === true ? 1 : undefined,
-  }),
+  validateSearch: (s: Record<string, unknown>): { edit?: 1 } =>
+    s.edit === "1" || s.edit === 1 || s.edit === true ? { edit: 1 } : {},
   component: BuyCoinsPage,
 });
 
