@@ -53,19 +53,12 @@ export function FoulMouthToggle({
         type="button"
         role="switch"
         aria-checked={foulMouth}
-        aria-pressed={foulMouth}
-        aria-label={`OG Foul Mouth — explicit lyrics mode, currently turned ${foulMouth ? "on" : "off"}. Activate to turn ${foulMouth ? "off" : "on"}.`}
+        aria-label="OG Foul Mouth — explicit lyrics mode"
         aria-describedby="foul-mouth-status"
-        aria-busy={locked || saving}
+        aria-disabled={locked || saving}
         onClick={toggle}
-        onKeyDown={(e) => {
-          if (locked) return;
-          if (e.key === " " || e.key === "Enter") {
-            e.preventDefault();
-            toggle();
-          }
-        }}
         disabled={locked}
+        style={{ touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}
         className={cn(
           "relative group grid w-full min-h-14 grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-3 rounded-2xl border-2 px-3 py-3 text-left transition-all sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:px-5 sm:py-4",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
@@ -75,6 +68,7 @@ export function FoulMouthToggle({
             : "border-white/15 bg-white/[0.04] hover:border-white/25",
         )}
       >
+
         <div
           aria-hidden="true"
           className={cn(
@@ -89,7 +83,7 @@ export function FoulMouthToggle({
             <span className="block">OG Foul Mouth</span>
             <span
               id="foul-mouth-status"
-              aria-live="polite"
+
               className={cn(
                 "mt-0.5 block font-bungee text-[clamp(0.75rem,3.2vw,1rem)]",
                 foulMouth ? "text-destructive" : "text-muted-foreground",
@@ -128,9 +122,16 @@ export function FoulMouthToggle({
             {saving ? "Saving…" : foulMouth ? "TURNED ON" : "TURNED OFF"}
           </span>
         </span>
-
-
       </button>
+
+      {/* Live region lives outside the switch so mobile screen readers
+          announce state changes without re-reading the whole control. */}
+      <span role="status" aria-live="polite" className="sr-only">
+        {saving
+          ? "Saving Foul Mouth setting"
+          : `Foul Mouth turned ${foulMouth ? "on" : "off"}`}
+      </span>
+
     </div>
   );
 }
