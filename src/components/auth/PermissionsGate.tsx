@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "@tanstack/react-router";
-import { ShieldCheck, MapPin, Bell, HardDrive, Loader2, Check, Settings2 } from "lucide-react";
+import { ShieldCheck, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -205,53 +204,16 @@ export function PermissionsGate({ userId }: { userId: string }) {
         if (!v) dismiss(false);
       }}
     >
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-sm">
         <DialogHeader>
-          <div className="mx-auto mb-2 grid h-12 w-12 place-items-center rounded-2xl bg-gradient-brand shadow-glow">
-            <ShieldCheck className="h-6 w-6 text-primary-foreground" />
-          </div>
-          <DialogTitle className="text-center text-xl">Quick setup — 3 permissions</DialogTitle>
-          <DialogDescription className="text-center">
-            One tap turns on every feature. Nothing is shared without your say-so, and you can
-            flip any of these off in Settings anytime.
+          <DialogTitle className="flex items-center gap-2 text-base">
+            <ShieldCheck className="h-5 w-5 text-primary" /> Enable all features?
+          </DialogTitle>
+          <DialogDescription className="text-sm">
+            One tap for location, notifications & offline storage. Private by default — revoke
+            anytime in Settings.
           </DialogDescription>
         </DialogHeader>
-
-        {/* At-a-glance summary chip */}
-        <div className="mx-auto inline-flex items-center gap-1.5 self-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
-          <Check className="h-3 w-3" /> Private by default · Revoke anytime
-        </div>
-
-        <ul className="my-3 space-y-2 text-sm">
-          <PermRow
-            icon={<MapPin className="h-4 w-4 text-primary" />}
-            title="Location"
-            blurb="Local drops & smarter recs. Off until you allow it."
-          />
-          <PermRow
-            icon={<Bell className="h-4 w-4 text-primary" />}
-            title="Notifications"
-            blurb="Pings when your song is ready or coins arrive."
-          />
-          <PermRow
-            icon={<HardDrive className="h-4 w-4 text-primary" />}
-            title="Offline storage"
-            blurb="Keeps your library fast and available offline."
-          />
-        </ul>
-
-        <p className="text-center text-[11px] text-muted-foreground">
-          Change any of these later in{" "}
-          <Link
-            to="/settings"
-            onClick={() => setOpen(false)}
-            className="inline-flex items-center gap-1 font-medium text-primary underline-offset-2 hover:underline"
-          >
-            <Settings2 className="h-3 w-3" /> Settings → Privacy
-          </Link>
-          .
-        </p>
-
         <DialogFooter className="flex-col gap-2 sm:flex-col">
           <Button onClick={grantAll} disabled={busy} className="w-full">
             {busy ? (
@@ -259,7 +221,7 @@ export function PermissionsGate({ userId }: { userId: string }) {
             ) : (
               <ShieldCheck className="mr-2 h-4 w-4" />
             )}
-            Allow all 3
+            Allow
           </Button>
           <Button variant="ghost" onClick={skip} disabled={busy} className="w-full">
             Maybe later
@@ -267,27 +229,5 @@ export function PermissionsGate({ userId }: { userId: string }) {
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
-}
-
-function PermRow({
-  icon,
-  title,
-  blurb,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  blurb: string;
-}) {
-  return (
-    <li className="flex items-start gap-3 rounded-xl border border-border bg-background/40 px-3 py-2.5">
-      <div className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-primary/10">
-        {icon}
-      </div>
-      <div className="min-w-0">
-        <p className="text-sm font-semibold leading-tight">{title}</p>
-        <p className="text-xs text-muted-foreground">{blurb}</p>
-      </div>
-    </li>
   );
 }
