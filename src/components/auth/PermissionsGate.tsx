@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "@tanstack/react-router";
-import { ShieldCheck, MapPin, Bell, HardDrive, Loader2, Check, Settings2 } from "lucide-react";
+import { ShieldCheck, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
