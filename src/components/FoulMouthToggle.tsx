@@ -83,7 +83,7 @@ export function FoulMouthToggle({
             <span className="block">OG Foul Mouth</span>
             <span
               id="foul-mouth-status"
-              aria-live="polite"
+
               className={cn(
                 "mt-0.5 block font-bungee text-[clamp(0.75rem,3.2vw,1rem)]",
                 foulMouth ? "text-destructive" : "text-muted-foreground",
