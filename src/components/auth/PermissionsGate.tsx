@@ -231,25 +231,3 @@ export function PermissionsGate({ userId }: { userId: string }) {
     </Dialog>
   );
 }
-
-function PermRow({
-  icon,
-  title,
-  blurb,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  blurb: string;
-}) {
-  return (
-    <li className="flex items-start gap-3 rounded-xl border border-border bg-background/40 px-3 py-2.5">
-      <div className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-primary/10">
-        {icon}
-      </div>
-      <div className="min-w-0">
-        <p className="text-sm font-semibold leading-tight">{title}</p>
-        <p className="text-xs text-muted-foreground">{blurb}</p>
-      </div>
-    </li>
-  );
-}
