@@ -122,9 +122,16 @@ export function FoulMouthToggle({
             {saving ? "Saving…" : foulMouth ? "TURNED ON" : "TURNED OFF"}
           </span>
         </span>
-
-
       </button>
+
+      {/* Live region lives outside the switch so mobile screen readers
+          announce state changes without re-reading the whole control. */}
+      <span role="status" aria-live="polite" className="sr-only">
+        {saving
+          ? "Saving Foul Mouth setting"
+          : `Foul Mouth turned ${foulMouth ? "on" : "off"}`}
+      </span>
+
     </div>
   );
 }
