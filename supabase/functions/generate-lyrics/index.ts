@@ -193,15 +193,25 @@ Deno.serve(async (req) => {
 
     await updateProgress(40, "Writing verses…");
 
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        systemInstruction: { role: "system", parts: [{ text: systemPrompt }] },
-        contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-        generationConfig: { temperature: 0.9, maxOutputTokens: 4096 },
-      }),
-    });
+    const callGemini = (contents: unknown[]) =>
+      fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          systemInstruction: { role: "system", parts: [{ text: systemPrompt }] },
+          contents,
+          generationConfig: { temperature: 0.9, maxOutputTokens: 8192 },
+        }),
+      });
+
+    const extractText = (data: unknown) =>
+      ((data as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> } | null)
+        ?.candidates?.[0]?.content?.parts ?? [])
+        .map((p) => p?.text ?? "")
+        .join("")
+        .trim();
+
+    const res = await callGemini([{ role: "user", parts: [{ text: userPrompt }] }]);
 
     if (!res.ok) {
       // Refund on failure
@@ -221,11 +231,34 @@ Deno.serve(async (req) => {
     await updateProgress(80, "Polishing bars…");
 
     const data = await res.json();
-    const lyrics =
-      (data?.candidates?.[0]?.content?.parts ?? [])
-        .map((p: { text?: string }) => p?.text ?? "")
-        .join("")
-        .trim() ?? "";
+    let lyrics = extractText(data);
+
+    // Length guard: a two-minute track needs ~420+ words. If the model came
+    // back short, ask it to extend the same song (never a new one) once.
+    const wordCount = (t: string) => t.split(/\s+/).filter(Boolean).length;
+    if (lyrics && wordCount(lyrics) < 420) {
+      await updateProgress(88, "Extending to full length…");
+      try {
+        const topUp = await callGemini([
+          { role: "user", parts: [{ text: userPrompt }] },
+          { role: "model", parts: [{ text: lyrics }] },
+          {
+            role: "user",
+            parts: [{
+              text:
+                "This draft is too short for a two-minute song. Rewrite the SAME song, keeping the existing title, theme, hook wording and section markers, but expand it to at least 480 words and 65+ lyric lines: add the missing sections from the structure, write every chorus out in full, and lengthen thin verses with new on-theme lines (no filler, no repetition beyond the hook). Output ONLY the complete lyrics.",
+            }],
+          },
+        ]);
+        if (topUp.ok) {
+          const extended = extractText(await topUp.json());
+          if (wordCount(extended) > wordCount(lyrics)) lyrics = extended;
+        }
+      } catch (e) {
+        console.error("lyrics top-up failed", e);
+      }
+    }
+
 
     if (songId) {
       await admin.from("songs").update({
