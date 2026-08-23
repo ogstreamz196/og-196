@@ -336,6 +336,7 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
 }
 
 const AUTH_TABS = ["signin", "signup"] as const;
+const AUTH_TAB_KEY = "og:auth-tab";
 
 function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
   const [mode, setMode] = useState<"signin" | "signup" | "reset">("signin");
@@ -347,7 +348,21 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // Restore last selected tab after hydration (avoids SSR mismatch).
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(AUTH_TAB_KEY);
+      if (saved === "signup" || saved === "signin") setMode(saved);
+    } catch { /* ignore */ }
+  }, []);
+
+  useEffect(() => {
+    if (mode === "reset") return;
+    try { localStorage.setItem(AUTH_TAB_KEY, mode); } catch { /* ignore */ }
+  }, [mode]);
+
   const isCreating = busy && mode === "signup";
+
 
   useEffect(() => {
     if (isCreating) {
