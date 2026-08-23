@@ -151,9 +151,11 @@ Deno.serve(async (req) => {
       : "[Intro] (4 lines) → [Verse 1] (8 lines) → [Pre-Chorus] (4 lines) → [Chorus] (6 lines, hook) → [Verse 2] (8 lines) → [Pre-Chorus] (4 lines) → [Chorus] (6 lines) → [Bridge] (6 lines) → [Verse 3] (6 lines) → [Chorus] (final, lifted, 8 lines) → [Outro] (4 lines)";
 
     const structureRule =
-      ` Deliver a COMPLETE, performable song sized to fill a TWO-MINUTE track (roughly 380–520 words, ~55–75 lines of lyric content excluding section markers). Follow this exact structure for the chosen style: ${structure}.` +
-      ` Use the bracketed section markers verbatim (e.g. [Verse 1], [Chorus], [Bridge], [Outro]). Every section must have lyrics — no placeholders, no "(instrumental)" unless the structure explicitly says so.` +
-      ` Make the chorus/hook genuinely repeatable and tied to the song title or central theme. Do NOT cut the song short — hit the full structure.`;
+      ` Deliver a COMPLETE, performable song that runs AT LEAST two minutes when sung (target 2:00–2:30). That means a MINIMUM of 420 words and 60 lyric lines (excluding section markers) — aim for 480–620 words and 65–85 lines. Follow this exact structure for the chosen style: ${structure}.` +
+      ` Use the bracketed section markers verbatim (e.g. [Verse 1], [Chorus], [Bridge], [Outro]), each on its own line, with a blank line between sections. Every section must have lyrics — no placeholders, no "(instrumental)" unless the structure explicitly says so.` +
+      ` The [Chorus] must be written out IN FULL every time it appears (never write "repeat chorus" or "x2" as a shortcut) — it is the same repeatable hook tied to the song title or central theme.` +
+      ` Do NOT cut the song short — hit every section in the structure and keep line counts at or above the numbers given.`;
+
 
     const systemPrompt = foulMouth
       ? `You are a foul-mouthed, no-holds-barred songwriter writing EXPLICIT adult song lyrics in ${language}. ` +
