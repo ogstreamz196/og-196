@@ -13,9 +13,12 @@ export function useFillViewport<T extends HTMLElement>(bottomGutter = 0) {
     function measure() {
       const el = ref.current;
       if (!el) return;
-      const top = el.getBoundingClientRect().top + window.scrollY - window.scrollY;
+      const top = el.getBoundingClientRect().top;
       const vh = window.visualViewport?.height ?? window.innerHeight;
-      setHeight(Math.max(320, Math.round(vh - top - bottomGutter)));
+      const nav = document.querySelector("nav.safe-bottom.fixed") as HTMLElement | null;
+      const navH = nav && getComputedStyle(nav).display !== "none" ? nav.offsetHeight : 0;
+      setHeight(Math.max(320, Math.round(vh - top - navH - bottomGutter)));
+
     }
     measure();
     const raf = requestAnimationFrame(measure);
