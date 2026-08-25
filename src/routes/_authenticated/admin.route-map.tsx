@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate, redirect } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { ShieldCheck, ShieldAlert, Lock, Globe, ExternalLink, Map } from "lucide-react";
 import { useRole } from "@/hooks/use-role";
@@ -8,7 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/admin/route-map")({
-  component: RouteMapPage,
+  beforeLoad: () => {
+    throw redirect({ to: "/admin/system" });
+  },
+  component: () => null,
 });
 
 type GuardKind = "public" | "auth" | "admin";

@@ -28,7 +28,10 @@ export const Route = createFileRoute("/_authenticated/admin/coin-audit")({
     });
     if (!isAdmin) throw redirect({ to: "/" });
   },
-  component: CoinAuditPage,
+  beforeLoad: () => {
+    throw redirect({ to: "/admin/audit" });
+  },
+  component: () => null,
 });
 
 export function CoinAuditPage() {

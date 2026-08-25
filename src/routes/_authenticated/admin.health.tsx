@@ -1,4 +1,4 @@
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { createFileRoute, Navigate, redirect } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { AlertTriangle, CheckCircle2, Loader2, RefreshCw, XCircle } from "lucide-react";
@@ -10,7 +10,10 @@ import { Badge } from "@/components/ui/badge";
 import { runApiHealthCheck, type HealthCheck } from "@/lib/api-health.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/health")({
-  component: ApiHealthPage,
+  beforeLoad: () => {
+    throw redirect({ to: "/admin/system" });
+  },
+  component: () => null,
   head: () => ({
     meta: [
       { title: "API health — OG Streamz Admin" },
