@@ -439,15 +439,22 @@ function LibraryPage() {
    * The user sees a single progress bar with a live ETA while everything
    * happens in the backend, then lands on the song page for the sample.
    * ------------------------------------------------------------------ */
-  type PipelineStage = "idle" | "lyrics" | "saving" | "submitting" | "handoff" | "error";
-  const PIPELINE_ORDER: PipelineStage[] = ["lyrics", "saving", "submitting", "handoff"];
+  type PipelineStage =
+    | "idle"
+    | "lyrics"
+    | "saving"
+    | "submitting"
+    | "rendering"
+    | "error";
+  const PIPELINE_ORDER: PipelineStage[] = ["lyrics", "saving", "submitting", "rendering"];
   // Baseline per-stage ETAs (ms) — recalibrated live from real timings below.
   const BASE_STAGE_ETA: Record<Exclude<PipelineStage, "idle" | "error">, number> = {
     lyrics: 18_000,
     saving: 1_500,
     submitting: 4_500,
-    handoff: 1_000,
+    rendering: 60_000,
   };
+
   type PipelineState = {
     stage: PipelineStage;
     startedAt: number;
