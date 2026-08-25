@@ -24,15 +24,22 @@ export function useFillViewport<T extends HTMLElement>(bottomGutter = 0) {
     }
     measure();
     const raf = requestAnimationFrame(measure);
+    // Chrome above the panel (boss bar, earn strip, bottom nav) can mount late.
+    const timers = [60, 250, 800].map((ms) => window.setTimeout(measure, ms));
+    const ro = new ResizeObserver(measure);
+    ro.observe(document.body);
     window.addEventListener("resize", measure);
     window.addEventListener("orientationchange", measure);
     window.visualViewport?.addEventListener("resize", measure);
     return () => {
       cancelAnimationFrame(raf);
+      timers.forEach(clearTimeout);
+      ro.disconnect();
       window.removeEventListener("resize", measure);
       window.removeEventListener("orientationchange", measure);
       window.visualViewport?.removeEventListener("resize", measure);
     };
+
   }, [bottomGutter]);
 
   return { ref, height };
