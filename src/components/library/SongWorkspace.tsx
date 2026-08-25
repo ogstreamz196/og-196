@@ -213,6 +213,8 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
     lyrics !== (song.lyrics ?? "");
 
   async function persist(patch: Partial<{ title: string | null; prompt: string; lyrics: string | null }>) {
+    // Community songs aren't editable by the viewer — skip persistence, keep generation working.
+    if (!isOwner) return;
     const { error } = await supabase.from("songs").update(patch).eq("id", song.id);
     if (error) throw error;
   }
@@ -239,10 +241,8 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       toast.error("This song is no longer available");
       return;
     }
-    if (!isOwner) {
-      toast.error("This is a community song — open the studio to create your own");
-      return;
-    }
+
+
     if (!brief.trim() && !title.trim()) {
       toast.error("Add a title or a brief first");
       return;
@@ -261,7 +261,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
 
       const { data, error } = await supabase.functions.invoke("generate-lyrics", {
         body: {
-          song_id: song.id,
+          song_id: isOwner ? song.id : null,
           songName: title.trim(),
           description: nextBrief.trim(),
           styleTags: song.style ? song.style.split("·").map((s) => s.trim()).filter(Boolean) : [],
@@ -307,10 +307,8 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       toast.error("This song is no longer available");
       return;
     }
-    if (!isOwner) {
-      toast.error("This is a community song — open the studio to create your own");
-      return;
-    }
+
+
     if (!hasLyrics) {
       toast.error("Generate lyrics first");
       return;
@@ -333,7 +331,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       }
       const { error } = await supabase.functions.invoke("suno-generate", {
         body: {
-          song_id: song.id,
+          song_id: isOwner ? song.id : null,
           prompt: brief,
           lyrics,
           title: title.trim() || null,
