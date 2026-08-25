@@ -608,25 +608,22 @@ function LibraryPage() {
     ? Math.min(97, Math.round((totalElapsed / Math.max(1, totalBudget)) * 100))
     : 0;
   const pipelineEtaLabel =
-    pipeline.stage === "handoff"
-      ? "Opening your sample…"
-      : totalRemaining > 1000
-        ? `~${Math.ceil(totalRemaining / 1000)}s left`
-        : "Almost there…";
+    totalRemaining > 1000 ? `~${Math.ceil(totalRemaining / 1000)}s left` : "Almost there…";
   const pipelineStageLabel: Record<PipelineStage, string> = {
     idle: "",
     lyrics: "Writing lyrics around your details",
     saving: "Saving your track",
     submitting: "Sending to the studio",
-    handoff: "Loading your sample player",
+    rendering: "Rendering your audio — this page updates the moment it's ready",
     error: "Something went wrong",
   };
   const pipelineStageTitle: Record<Exclude<PipelineStage, "idle" | "error">, string> = {
     lyrics: "Writing lyrics",
     saving: "Saving",
     submitting: "Studio",
-    handoff: "Sample",
+    rendering: "Rendering audio",
   };
+
 
 
 
