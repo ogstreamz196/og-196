@@ -1470,6 +1470,39 @@ function LibraryPage() {
             </Button>
           )}
         </section>
+      )}
+
+      {/* Fresh track preview — appears automatically the moment a generation completes */}
+      {freshTrack && (
+        <section
+          aria-label="Newly finished track"
+          className="space-y-3 rounded-3xl border border-emerald-400/40 bg-emerald-500/5 p-5 sm:p-6"
+        >
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-300">
+              Just finished · preview
+            </p>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => setFreshTrack(null)}
+              className="h-8 px-2 text-xs"
+            >
+              Hide
+            </Button>
+          </div>
+          <Link
+            to="/library/$songId"
+            params={{ songId: freshTrack.id }}
+            className="block rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <SongCard song={freshTrack} />
+          </Link>
+        </section>
+      )}
+
+
 
       {/* Library — luxury two-tab vault: Yours first, then Community */}
       <section>
