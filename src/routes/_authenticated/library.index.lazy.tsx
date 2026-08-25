@@ -136,6 +136,13 @@ function LibraryPage() {
   const [wizardDraft, setWizardDraft] = useState<WizardDraft>(EMPTY_DRAFT);
   const statusPanelRef = useRef<HTMLElement | null>(null);
   const libraryRef = useRef<HTMLElement | null>(null);
+  // Track length: a 3-minute floor is enforced backend-side; users may raise it.
+  const [targetMinutes, setTargetMinutes] = useState(MIN_TRACK_MINUTES);
+  const targetDurationSec = Math.max(MIN_TRACK_MINUTES, targetMinutes) * 60;
+  const expectedRange = `${targetMinutes}:00–${targetMinutes}:30+`;
+  // Actual estimate returned by the lyrics engine once a track is generated.
+  const [actualDurationLabel, setActualDurationLabel] = useState<string | null>(null);
+
 
 
   const [title, setTitle] = useState("");
