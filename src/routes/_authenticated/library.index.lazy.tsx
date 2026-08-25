@@ -1344,14 +1344,14 @@ function LibraryPage() {
         <div data-testid="library-your-header" className="mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
 
           <div className="min-w-0 space-y-1">
-            <div className="truncate text-xs font-bold uppercase tracking-[0.24em] text-primary">
-              <Disc3 className="mr-1.5 inline h-3.5 w-3.5 -translate-y-0.5" />
+            <div className="truncate text-[10px] font-black uppercase tracking-[0.28em] text-muted-foreground">
+              <Disc3 className="mr-1.5 inline h-3 w-3 -translate-y-0.5 text-primary" />
               MusicHUB · Vault
             </div>
-            <h2 data-testid="library-your-heading" className="truncate font-display text-2xl font-black tracking-tight sm:text-4xl">
+            <h2 data-testid="library-your-heading" className="truncate font-display text-2xl font-black tracking-tight sm:text-3xl">
               Your Library
             </h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs text-muted-foreground sm:text-sm">
               Your tracks first. Community drops live in the next tab.
             </p>
           </div>
@@ -1400,10 +1400,10 @@ function LibraryPage() {
         )}
 
         <Tabs defaultValue="yours" className="w-full">
-          <TabsList className="mb-5 grid h-auto w-full grid-cols-2 gap-1.5 rounded-2xl border border-white/10 bg-gradient-to-br from-card/80 to-card/40 p-1.5 shadow-[0_10px_40px_-20px_oklch(0.7_0.2_300_/_0.5)] backdrop-blur">
+          <TabsList className="mb-5 flex h-auto w-full justify-start gap-6 rounded-none border-0 border-b border-white/[0.07] bg-transparent p-0">
             <TabsTrigger
               value="yours"
-              className="group flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-bold transition-all data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary/30 data-[state=active]:to-fuchsia-500/15 data-[state=active]:text-foreground data-[state=active]:shadow-[0_8px_24px_-12px_oklch(0.7_0.2_300_/_0.7)] data-[state=active]:ring-1 data-[state=active]:ring-primary/40"
+              className="group flex items-center gap-2 rounded-none border-b-2 border-transparent bg-transparent px-1 pb-3 pt-0 text-sm font-bold text-muted-foreground shadow-none transition-colors data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none"
             >
               <Crown className="h-4 w-4 text-primary" />
               <span className="truncate">Yours</span>
@@ -1413,7 +1413,7 @@ function LibraryPage() {
             </TabsTrigger>
             <TabsTrigger
               value="community"
-              className="group flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-bold transition-all data-[state=active]:bg-gradient-to-br data-[state=active]:from-fuchsia-500/25 data-[state=active]:to-primary/15 data-[state=active]:text-foreground data-[state=active]:shadow-[0_8px_24px_-12px_oklch(0.7_0.2_300_/_0.7)] data-[state=active]:ring-1 data-[state=active]:ring-fuchsia-400/40"
+              className="group flex items-center gap-2 rounded-none border-b-2 border-transparent bg-transparent px-1 pb-3 pt-0 text-sm font-bold text-muted-foreground shadow-none transition-colors data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none"
             >
               <Users className="h-4 w-4 text-fuchsia-300" />
               <span className="truncate">Community</span>
