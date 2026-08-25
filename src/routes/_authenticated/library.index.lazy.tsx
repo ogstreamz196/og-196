@@ -1513,8 +1513,8 @@ function LibraryPage() {
                 );
               })()
             ) : (
-              <div className="rounded-3xl border border-dashed border-primary/30 bg-gradient-to-br from-primary/10 to-card/40 p-10 text-center ring-1 ring-white/5">
-                <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-primary/30 to-fuchsia-500/15 shadow-[0_12px_30px_-12px_oklch(0.7_0.2_300_/_0.6)]">
+              <div className="rounded-3xl border border-dashed border-primary/30 bg-gradient-to-br from-primary/10 to-card/40 p-8 text-center ring-1 ring-white/5 sm:p-10">
+                <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-primary/30 to-primary/10 shadow-[0_12px_30px_-12px_var(--primary)]">
                   {activeJobs.length > 0 ? (
                     <Loader2 className="h-6 w-6 animate-spin text-primary" />
                   ) : (
@@ -1524,11 +1524,22 @@ function LibraryPage() {
                 <p className="mt-4 font-display text-xl font-black leading-tight sm:text-2xl">
                   {activeJobs.length > 0 ? "Generating your first track…" : "Your vault is empty"}
                 </p>
-                <p className="mt-2 text-base leading-relaxed text-muted-foreground">
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
                   {activeJobs.length > 0
                     ? "Hang tight — finished songs will land here as soon as they're ready."
-                    : "Scroll down to write your first track — finished songs land here."}
+                    : "Tap Create now to write your first track — finished songs land here."}
                 </p>
+                {activeJobs.length === 0 && (
+                  <Button
+                    type="button"
+                    onClick={() => setWizardOpen(true)}
+                    disabled={pipelineActive}
+                    className="mt-5 h-12 gap-2 rounded-2xl bg-gradient-brand px-6 text-sm font-black uppercase tracking-[0.16em] text-primary-foreground"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    Create now
+                  </Button>
+                )}
               </div>
             )}
           </TabsContent>
