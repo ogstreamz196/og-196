@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Loader2, ShieldCheck, ShieldAlert, ArrowLeft, RefreshCw } from "lucide-react";
@@ -9,7 +9,10 @@ import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/admin/debug-context")({
-  component: DebugContextPage,
+  beforeLoad: () => {
+    throw redirect({ to: "/admin/system" });
+  },
+  component: () => null,
 });
 
 interface DebugRow {
@@ -21,7 +24,7 @@ interface DebugRow {
   extra_context: string | null;
 }
 
-function DebugContextPage() {
+export function DebugContextPage() {
   const { isAdmin, isLoading } = useRole();
 
   const query = useQuery({

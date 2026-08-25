@@ -1,11 +1,9 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
-import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation } from "@tanstack/react-query";
 import { AlertTriangle, CheckCircle2, Loader2, RefreshCw, Scale, ShieldCheck } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import { BossNav } from "@/components/admin/BossNav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,19 +18,14 @@ import {
 } from "@/lib/coin-audit.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/coin-audit")({
-  beforeLoad: async () => {
-    const { data } = await supabase.auth.getUser();
-    if (!data.user) throw redirect({ to: "/auth" });
-    const { data: isAdmin } = await supabase.rpc("has_role", {
-      _user_id: data.user.id,
-      _role: "admin",
-    });
-    if (!isAdmin) throw redirect({ to: "/" });
+  beforeLoad: () => {
+    throw redirect({ to: "/admin/audit" });
   },
-  component: CoinAuditPage,
+  component: () => null,
 });
 
-function CoinAuditPage() {
+
+export function CoinAuditPage() {
   const audit = useServerFn(auditCoinBalances);
   const reconcile = useServerFn(reconcileUserCoinBalance);
   const [userId, setUserId] = useState("");
@@ -77,7 +70,6 @@ function CoinAuditPage() {
 
   return (
     <DashboardShell title="Coin Balance Audit">
-      <BossNav />
       <div className="mx-auto max-w-6xl space-y-6">
         <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
           <div className="mb-4 flex items-center gap-2">
@@ -131,7 +123,7 @@ function CoinAuditPage() {
                 </span>
               </div>
               <Link
-                to="/admin/webhooks"
+                to="/admin/system"
                 className="text-xs text-muted-foreground underline-offset-4 hover:underline"
               >
                 Webhook delivery →

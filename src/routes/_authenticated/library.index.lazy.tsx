@@ -981,14 +981,11 @@ function LibraryPage() {
         className="pointer-events-none absolute bottom-40 -right-24 -z-10 h-56 w-56 rounded-full bg-primary/10 blur-[100px]"
       />
 
-      {/* Hero — restrained display type, quiet kicker, balance chip */}
-      <header data-testid="library-hero" className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4 border-b border-white/[0.07] pb-5">
+      {/* Hero — one line, balance chip */}
+      <header data-testid="library-hero" className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b-2 border-white/10 pb-5">
         <div className="min-w-0">
-          <p className="text-[10px] font-black uppercase tracking-[0.28em] text-muted-foreground">
-            Sonic laboratory
-          </p>
-          <h1 className="mt-1.5 font-display text-3xl font-black leading-[1.05] tracking-[-0.02em] break-words sm:text-4xl lg:text-5xl">
-            Hey <span className="text-gradient-brand">{firstName}</span> — let's write a song.
+          <h1 className="font-display text-3xl font-black leading-[1.05] tracking-[-0.02em] break-words sm:text-4xl">
+            Hey <span className="text-gradient-brand">{firstName}</span>
           </h1>
         </div>
         <div className="inline-flex shrink-0 items-center gap-2 rounded-full border border-primary/25 bg-card/60 px-3.5 py-2 backdrop-blur">
@@ -998,11 +995,15 @@ function LibraryPage() {
         </div>
       </header>
 
-      {/* Primary entry points — one dominant action, controls demoted to a quiet strip */}
+      {/* Create — one dominant action, controls demoted to a quiet strip */}
       <section
         aria-label="Create a track"
-        className="border-b border-white/[0.07] pb-6"
+        className="border-b-2 border-white/10 pb-7"
       >
+        <h2 className="mb-3 text-[11px] font-black uppercase tracking-[0.28em] text-primary">
+          Create
+        </h2>
+
 
         <div className="flex gap-3">
           <Button
@@ -1056,10 +1057,10 @@ function LibraryPage() {
             </span>
             <FoulMouthToggle disabled={pipelineActive} />
           </div>
-          <p className="text-[11px] leading-relaxed text-muted-foreground sm:col-span-2">
-            Five quick steps · -{totalCost} coins · expected length {expectedRange} · minimum{" "}
-            {MIN_TRACK_MINUTES} min, no upper limit.
+          <p className="text-[11px] font-semibold text-muted-foreground sm:col-span-2">
+            -{totalCost} coins · {expectedRange}
           </p>
+
         </div>
       </section>
 
@@ -1337,23 +1338,19 @@ function LibraryPage() {
 
 
 
-      {/* Library — luxury two-tab vault: Yours first, then Community */}
-      <section ref={libraryRef} id="library" className="scroll-mt-24">
-        <div data-testid="library-your-header" className="mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
-
-          <div className="min-w-0 space-y-1">
-            <div className="truncate text-[10px] font-black uppercase tracking-[0.28em] text-muted-foreground">
-              <Disc3 className="mr-1.5 inline h-3 w-3 -translate-y-0.5 text-primary" />
-              MusicHUB · Vault
-            </div>
-            <h2 data-testid="library-your-heading" className="truncate font-display text-2xl font-black tracking-tight sm:text-3xl">
-              Music Library
-            </h2>
-            <p className="text-xs text-muted-foreground sm:text-sm">
-              Two clear shelves — tracks you made, and tracks from everyone else.
-            </p>
-
+      {/* Library — two clearly divided shelves */}
+      <section ref={libraryRef} id="library" className="scroll-mt-24 border-t-2 border-white/10 pt-6">
+        <h2 className="mb-3 text-[11px] font-black uppercase tracking-[0.28em] text-primary">
+          Library
+        </h2>
+        <div data-testid="library-your-header" className="mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+          <div className="min-w-0">
+            <h3 data-testid="library-your-heading" className="truncate font-display text-2xl font-black tracking-tight sm:text-3xl">
+              <Disc3 className="mr-2 inline h-5 w-5 -translate-y-0.5 text-primary" />
+              Your tracks &amp; the world's
+            </h3>
           </div>
+
           <div className="flex shrink-0 items-center gap-2">
             {versionedLibrary.length > 0 && (
               <span className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-primary">

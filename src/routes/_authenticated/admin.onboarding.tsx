@@ -127,7 +127,7 @@ function OnboardingWizard() {
     <DashboardShell title="Onboarding">
       <div className="mx-auto max-w-4xl space-y-6 p-4 sm:p-6">
         <Link
-          to="/admin/health"
+          to="/admin/system"
           className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
         >
           Open automated API health check <ExternalLink className="h-3 w-3" />

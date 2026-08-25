@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Activity, CheckCircle2, AlertCircle, ExternalLink } from "lucide-react";
@@ -12,10 +12,13 @@ import { formatDistanceToNow } from "date-fns";
 import { E2ESmokeTest } from "@/components/admin/E2ESmokeTest";
 
 export const Route = createFileRoute("/_authenticated/admin/webhooks")({
-  component: WebhooksAdminPage,
+  beforeLoad: () => {
+    throw redirect({ to: "/admin/system" });
+  },
+  component: () => null,
 });
 
-function WebhooksAdminPage() {
+export function WebhooksAdminPage() {
   const { isAdmin, isLoading: roleLoading } = useRole();
   const fetchEvents = useServerFn(listStripeWebhookEvents);
 

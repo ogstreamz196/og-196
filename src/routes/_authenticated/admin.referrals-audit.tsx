@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, ArrowLeft, CheckCircle2, Copy, Scale, Search, ShieldCheck } from "lucide-react";
@@ -10,7 +10,10 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/referrals-audit")({
-  component: ReferralsAuditPage,
+  beforeLoad: () => {
+    throw redirect({ to: "/admin/audit" });
+  },
+  component: () => null,
 });
 
 type AuditUser = {
@@ -46,7 +49,7 @@ function copy(text: string, label = "Copied") {
   );
 }
 
-function ReferralsAuditPage() {
+export function ReferralsAuditPage() {
   const { isAdmin, isLoading: roleLoading } = useRole();
   const [search, setSearch] = useState("");
   const [query, setQuery] = useState("");

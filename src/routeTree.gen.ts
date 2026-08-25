@@ -40,6 +40,7 @@ import { Route as AuthenticatedAdminWebhooksRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminUsersProRouteImport } from './routes/_authenticated/admin.users-pro'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedAdminUserSettingsRouteImport } from './routes/_authenticated/admin.user-settings'
+import { Route as AuthenticatedAdminSystemRouteImport } from './routes/_authenticated/admin.system'
 import { Route as AuthenticatedAdminStoreRouteImport } from './routes/_authenticated/admin.store'
 import { Route as AuthenticatedAdminRouteMapRouteImport } from './routes/_authenticated/admin.route-map'
 import { Route as AuthenticatedAdminReferralsAuditRouteImport } from './routes/_authenticated/admin.referrals-audit'
@@ -48,6 +49,7 @@ import { Route as AuthenticatedAdminOgPersonaRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminHealthRouteImport } from './routes/_authenticated/admin.health'
 import { Route as AuthenticatedAdminDebugContextRouteImport } from './routes/_authenticated/admin.debug-context'
 import { Route as AuthenticatedAdminCoinAuditRouteImport } from './routes/_authenticated/admin.coin-audit'
+import { Route as AuthenticatedAdminAuditRouteImport } from './routes/_authenticated/admin.audit'
 import { Route as AuthenticatedAdminApiKeysRouteImport } from './routes/_authenticated/admin.api-keys'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
@@ -221,6 +223,12 @@ const AuthenticatedAdminUserSettingsRoute =
     path: '/admin/user-settings',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminSystemRoute =
+  AuthenticatedAdminSystemRouteImport.update({
+    id: '/admin/system',
+    path: '/admin/system',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminStoreRoute = AuthenticatedAdminStoreRouteImport.update({
   id: '/admin/store',
   path: '/admin/store',
@@ -268,6 +276,11 @@ const AuthenticatedAdminCoinAuditRoute =
     path: '/admin/coin-audit',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminAuditRoute = AuthenticatedAdminAuditRouteImport.update({
+  id: '/admin/audit',
+  path: '/admin/audit',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAdminApiKeysRoute =
   AuthenticatedAdminApiKeysRouteImport.update({
     id: '/admin/api-keys',
@@ -328,6 +341,7 @@ export interface FileRoutesByFullPath {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/api-keys': typeof AuthenticatedAdminApiKeysRoute
+  '/admin/audit': typeof AuthenticatedAdminAuditRoute
   '/admin/coin-audit': typeof AuthenticatedAdminCoinAuditRoute
   '/admin/debug-context': typeof AuthenticatedAdminDebugContextRoute
   '/admin/health': typeof AuthenticatedAdminHealthRoute
@@ -336,6 +350,7 @@ export interface FileRoutesByFullPath {
   '/admin/referrals-audit': typeof AuthenticatedAdminReferralsAuditRoute
   '/admin/route-map': typeof AuthenticatedAdminRouteMapRoute
   '/admin/store': typeof AuthenticatedAdminStoreRoute
+  '/admin/system': typeof AuthenticatedAdminSystemRoute
   '/admin/user-settings': typeof AuthenticatedAdminUserSettingsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/admin/users-pro': typeof AuthenticatedAdminUsersProRoute
@@ -373,6 +388,7 @@ export interface FileRoutesByTo {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/api-keys': typeof AuthenticatedAdminApiKeysRoute
+  '/admin/audit': typeof AuthenticatedAdminAuditRoute
   '/admin/coin-audit': typeof AuthenticatedAdminCoinAuditRoute
   '/admin/debug-context': typeof AuthenticatedAdminDebugContextRoute
   '/admin/health': typeof AuthenticatedAdminHealthRoute
@@ -381,6 +397,7 @@ export interface FileRoutesByTo {
   '/admin/referrals-audit': typeof AuthenticatedAdminReferralsAuditRoute
   '/admin/route-map': typeof AuthenticatedAdminRouteMapRoute
   '/admin/store': typeof AuthenticatedAdminStoreRoute
+  '/admin/system': typeof AuthenticatedAdminSystemRoute
   '/admin/user-settings': typeof AuthenticatedAdminUserSettingsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/admin/users-pro': typeof AuthenticatedAdminUsersProRoute
@@ -420,6 +437,7 @@ export interface FileRoutesById {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/admin/api-keys': typeof AuthenticatedAdminApiKeysRoute
+  '/_authenticated/admin/audit': typeof AuthenticatedAdminAuditRoute
   '/_authenticated/admin/coin-audit': typeof AuthenticatedAdminCoinAuditRoute
   '/_authenticated/admin/debug-context': typeof AuthenticatedAdminDebugContextRoute
   '/_authenticated/admin/health': typeof AuthenticatedAdminHealthRoute
@@ -428,6 +446,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/referrals-audit': typeof AuthenticatedAdminReferralsAuditRoute
   '/_authenticated/admin/route-map': typeof AuthenticatedAdminRouteMapRoute
   '/_authenticated/admin/store': typeof AuthenticatedAdminStoreRoute
+  '/_authenticated/admin/system': typeof AuthenticatedAdminSystemRoute
   '/_authenticated/admin/user-settings': typeof AuthenticatedAdminUserSettingsRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/_authenticated/admin/users-pro': typeof AuthenticatedAdminUsersProRoute
@@ -467,6 +486,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/admin/api-keys'
+    | '/admin/audit'
     | '/admin/coin-audit'
     | '/admin/debug-context'
     | '/admin/health'
@@ -475,6 +495,7 @@ export interface FileRouteTypes {
     | '/admin/referrals-audit'
     | '/admin/route-map'
     | '/admin/store'
+    | '/admin/system'
     | '/admin/user-settings'
     | '/admin/users'
     | '/admin/users-pro'
@@ -512,6 +533,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/admin/api-keys'
+    | '/admin/audit'
     | '/admin/coin-audit'
     | '/admin/debug-context'
     | '/admin/health'
@@ -520,6 +542,7 @@ export interface FileRouteTypes {
     | '/admin/referrals-audit'
     | '/admin/route-map'
     | '/admin/store'
+    | '/admin/system'
     | '/admin/user-settings'
     | '/admin/users'
     | '/admin/users-pro'
@@ -558,6 +581,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/admin/api-keys'
+    | '/_authenticated/admin/audit'
     | '/_authenticated/admin/coin-audit'
     | '/_authenticated/admin/debug-context'
     | '/_authenticated/admin/health'
@@ -566,6 +590,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/referrals-audit'
     | '/_authenticated/admin/route-map'
     | '/_authenticated/admin/store'
+    | '/_authenticated/admin/system'
     | '/_authenticated/admin/user-settings'
     | '/_authenticated/admin/users'
     | '/_authenticated/admin/users-pro'
@@ -810,6 +835,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminUserSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/system': {
+      id: '/_authenticated/admin/system'
+      path: '/admin/system'
+      fullPath: '/admin/system'
+      preLoaderRoute: typeof AuthenticatedAdminSystemRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/store': {
       id: '/_authenticated/admin/store'
       path: '/admin/store'
@@ -864,6 +896,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/coin-audit'
       fullPath: '/admin/coin-audit'
       preLoaderRoute: typeof AuthenticatedAdminCoinAuditRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/audit': {
+      id: '/_authenticated/admin/audit'
+      path: '/admin/audit'
+      fullPath: '/admin/audit'
+      preLoaderRoute: typeof AuthenticatedAdminAuditRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin/api-keys': {
@@ -937,6 +976,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedStoreRoute: typeof AuthenticatedStoreRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedAdminApiKeysRoute: typeof AuthenticatedAdminApiKeysRoute
+  AuthenticatedAdminAuditRoute: typeof AuthenticatedAdminAuditRoute
   AuthenticatedAdminCoinAuditRoute: typeof AuthenticatedAdminCoinAuditRoute
   AuthenticatedAdminDebugContextRoute: typeof AuthenticatedAdminDebugContextRoute
   AuthenticatedAdminHealthRoute: typeof AuthenticatedAdminHealthRoute
@@ -945,6 +985,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminReferralsAuditRoute: typeof AuthenticatedAdminReferralsAuditRoute
   AuthenticatedAdminRouteMapRoute: typeof AuthenticatedAdminRouteMapRoute
   AuthenticatedAdminStoreRoute: typeof AuthenticatedAdminStoreRoute
+  AuthenticatedAdminSystemRoute: typeof AuthenticatedAdminSystemRoute
   AuthenticatedAdminUserSettingsRoute: typeof AuthenticatedAdminUserSettingsRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRouteWithChildren
   AuthenticatedAdminUsersProRoute: typeof AuthenticatedAdminUsersProRoute
@@ -968,6 +1009,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedStoreRoute: AuthenticatedStoreRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedAdminApiKeysRoute: AuthenticatedAdminApiKeysRoute,
+  AuthenticatedAdminAuditRoute: AuthenticatedAdminAuditRoute,
   AuthenticatedAdminCoinAuditRoute: AuthenticatedAdminCoinAuditRoute,
   AuthenticatedAdminDebugContextRoute: AuthenticatedAdminDebugContextRoute,
   AuthenticatedAdminHealthRoute: AuthenticatedAdminHealthRoute,
@@ -976,6 +1018,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminReferralsAuditRoute: AuthenticatedAdminReferralsAuditRoute,
   AuthenticatedAdminRouteMapRoute: AuthenticatedAdminRouteMapRoute,
   AuthenticatedAdminStoreRoute: AuthenticatedAdminStoreRoute,
+  AuthenticatedAdminSystemRoute: AuthenticatedAdminSystemRoute,
   AuthenticatedAdminUserSettingsRoute: AuthenticatedAdminUserSettingsRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRouteWithChildren,
   AuthenticatedAdminUsersProRoute: AuthenticatedAdminUsersProRoute,

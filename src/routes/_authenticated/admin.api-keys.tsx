@@ -1,14 +1,17 @@
-import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
+import { createFileRoute, Navigate, Link, redirect } from "@tanstack/react-router";
 import { ExternalLink, KeyRound, ShieldCheck, AlertTriangle } from "lucide-react";
 import { useRole } from "@/hooks/use-role";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/admin/api-keys")({
-  component: AdminApiKeysPage,
+  beforeLoad: () => {
+    throw redirect({ to: "/admin/system" });
+  },
+  component: () => null,
 });
 
-function AdminApiKeysPage() {
+export function AdminApiKeysPage() {
   const { isAdmin, isDev, isLoading } = useRole();
   if (isLoading) return null;
   if (!isAdmin && !isDev) return <Navigate to="/" />;
