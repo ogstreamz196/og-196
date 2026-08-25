@@ -110,7 +110,7 @@ export const runE2ESmokeTest = createServerFn({ method: "POST" })
       // 3) Kick off generation
       if (songId) {
         await run("invoke_generate", "Invoke suno-generate", async () => {
-          const { error } = await supabase.functions.invoke("suno-generate", {
+          const { data, error } = await supabase.functions.invoke("suno-generate", {
             body: {
               song_id: songId,
               prompt: "Smoke test · automated",
@@ -120,6 +120,7 @@ export const runE2ESmokeTest = createServerFn({ method: "POST" })
             },
           });
           if (error) throw new Error(error.message || "invoke failed");
+          if (data?.accepted === false) throw new Error(data.error || "generation capacity full");
           return "queued";
         });
 

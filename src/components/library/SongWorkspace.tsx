@@ -344,7 +344,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
           lyrics: lyrics.trim() || null,
         });
       }
-      const { error } = await supabase.functions.invoke("suno-generate", {
+      const { data, error } = await supabase.functions.invoke("suno-generate", {
         body: {
           song_id: isOwner ? song.id : null,
           prompt: brief,
@@ -362,6 +362,10 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
           return;
         }
         toast.error(msg);
+        return;
+      }
+      if (data?.accepted === false) {
+        toast.info(data.error || "Your current generations need to finish first");
         return;
       }
       toast.success(`Generating · -${previewCost} coins`);

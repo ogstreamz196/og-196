@@ -135,7 +135,7 @@ export function JobQueuePanel({ songs }: { songs: Song[] }) {
   async function retry(song: Song) {
     setRetrying(song.id);
     try {
-      const { error } = await supabase.functions.invoke("suno-generate", {
+      const { data, error } = await supabase.functions.invoke("suno-generate", {
         body: {
           song_id: song.id,
           prompt: song.prompt ?? song.title ?? "Untitled",
@@ -145,6 +145,9 @@ export function JobQueuePanel({ songs }: { songs: Song[] }) {
         },
       });
       if (error) throw new Error(invokeError(error, "Retry failed"));
+      if (data?.accepted === false) {
+        throw new Error(data.error || "Your current generations need to finish first");
+      }
       toast.success("Retry queued");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Retry failed");

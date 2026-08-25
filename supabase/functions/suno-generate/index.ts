@@ -67,7 +67,10 @@ Deno.serve(async (req) => {
         const msg = cap.reason === "global_capacity_full"
           ? `Studio is at capacity (${cap.global_active}/${cap.global_cap} jobs running). Try again in a moment.`
           : `You already have ${cap.user_active} song${cap.user_active === 1 ? "" : "s"} generating (limit ${cap.user_cap}${cap.peak ? ", peak mode" : ""}). Wait for one to finish.`;
-        return json({ error: msg, code: cap.reason, capacity: cap }, 429);
+        // Capacity is an expected, recoverable app state. Return a successful
+        // transport response so the function client does not promote it to an
+        // uncaught runtime error; callers inspect `accepted` and keep the UI open.
+        return json({ accepted: false, error: msg, code: cap.reason, capacity: cap });
       }
     }
 
@@ -249,7 +252,7 @@ Deno.serve(async (req) => {
 
     await admin.from("songs").update({ status: "processing", suno_task_id: taskId }).eq("id", songId);
 
-    return json({ song_id: songId, task_id: taskId, coin_balance: balance });
+    return json({ accepted: true, song_id: songId, task_id: taskId, coin_balance: balance });
   } catch (e) {
     console.error("Unhandled error", e);
     return json({ error: (e as Error).message }, 500);
