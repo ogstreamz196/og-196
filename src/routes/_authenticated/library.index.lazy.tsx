@@ -1339,16 +1339,14 @@ function LibraryPage() {
 
       {/* Library — two clearly divided shelves */}
       <section ref={libraryRef} id="library" className="scroll-mt-24 border-t-2 border-white/10 pt-6">
-        <h2 className="mb-3 text-[11px] font-black uppercase tracking-[0.28em] text-primary">
-          Library
-        </h2>
         <div data-testid="library-your-header" className="mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
           <div className="min-w-0">
-            <h3 data-testid="library-your-heading" className="truncate font-display text-2xl font-black tracking-tight sm:text-3xl">
-              <Disc3 className="mr-2 inline h-5 w-5 -translate-y-0.5 text-primary" />
-              Your tracks &amp; the world's
-            </h3>
+            <h2 data-testid="library-your-heading" className="flex min-w-0 items-center gap-2 font-display text-2xl font-black tracking-tight sm:text-3xl">
+              <Disc3 className="h-5 w-5 shrink-0 text-primary" />
+              <span className="truncate">Library</span>
+            </h2>
           </div>
+
 
           <div className="flex shrink-0 items-center gap-2">
             {versionedLibrary.length > 0 && (
