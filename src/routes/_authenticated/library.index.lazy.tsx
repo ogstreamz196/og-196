@@ -524,6 +524,35 @@ function LibraryPage() {
     toast.info("Generation cancelled — the status panel is cleared");
   }
 
+  /* Watchdog: if a stage hangs (provider outage, lost callback) we surface a
+   * clear timeout error instead of spinning forever. Inputs stay in state so
+   * the retry button can re-run the exact same request. */
+  const STAGE_TIMEOUT_MS: Record<string, number> = {
+    lyrics: 120_000,
+    saving: 30_000,
+    submitting: 60_000,
+    rendering: 360_000,
+  };
+  useEffect(() => {
+    const limit = STAGE_TIMEOUT_MS[pipeline.stage];
+    if (!limit) return;
+    const id = window.setTimeout(() => {
+      pipelineRunRef.current += 1;
+      pipelineLockRef.current = false;
+      setTrackedSongId(null);
+      const which = pipeline.stage === "lyrics" ? "Lyrics generation" : "The studio";
+      setPipeline((p) => ({
+        ...p,
+        stage: "error",
+        error: `${which} timed out. Nothing was lost — your details are saved, tap Try again.`,
+      }));
+      toast.error("Timed out — tap Try again, your details are saved");
+    }, limit);
+    return () => window.clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pipeline.stage, pipeline.stageStartedAt]);
+
+
   type CreateOverrides = {
     title: string;
     subjectName: string;
