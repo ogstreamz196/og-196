@@ -582,8 +582,8 @@ function LibraryPage() {
         .from("songs")
         .insert({
           user_id: user.id,
-          title: title.trim() || null,
-          prompt: promptText || title.trim() || "Untitled",
+          title: songTitle || null,
+          prompt: promptText || songTitle || "Untitled",
           style: style || null,
           lyrics: nextLyrics,
           status: "draft",
@@ -600,7 +600,7 @@ function LibraryPage() {
           song_id: row.id,
           prompt: promptText,
           lyrics: nextLyrics,
-          title: title.trim() || null,
+          title: songTitle || null,
           style: style || null,
         },
       });
