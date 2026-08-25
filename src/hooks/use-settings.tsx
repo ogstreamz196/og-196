@@ -20,7 +20,7 @@ const DEFAULTS: AppSettings = {
   coins_per_lyric_video: 5,
   coins_per_variation_divisor: 2,
   songs_per_generation: 2,
-  sample_seconds: 30,
+  sample_seconds: 60,
   signup_credits: 5,
 };
 

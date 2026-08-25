@@ -263,7 +263,7 @@ function JobDetailsDrawer({
 }) {
   const { data: settings } = useSettings();
   const { data: profile, refetch: refetchProfile } = useProfile();
-  const sampleSeconds = settings?.sample_seconds ?? 30;
+  const sampleSeconds = settings?.sample_seconds ?? 60;
   const unlockCost = (settings as { coins_per_full_unlock?: number } | undefined)?.coins_per_full_unlock ?? 5;
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
