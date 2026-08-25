@@ -981,14 +981,11 @@ function LibraryPage() {
         className="pointer-events-none absolute bottom-40 -right-24 -z-10 h-56 w-56 rounded-full bg-primary/10 blur-[100px]"
       />
 
-      {/* Hero — restrained display type, quiet kicker, balance chip */}
-      <header data-testid="library-hero" className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4 border-b border-white/[0.07] pb-5">
+      {/* Hero — one line, balance chip */}
+      <header data-testid="library-hero" className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b-2 border-white/10 pb-5">
         <div className="min-w-0">
-          <p className="text-[10px] font-black uppercase tracking-[0.28em] text-muted-foreground">
-            Sonic laboratory
-          </p>
-          <h1 className="mt-1.5 font-display text-3xl font-black leading-[1.05] tracking-[-0.02em] break-words sm:text-4xl lg:text-5xl">
-            Hey <span className="text-gradient-brand">{firstName}</span> — let's write a song.
+          <h1 className="font-display text-3xl font-black leading-[1.05] tracking-[-0.02em] break-words sm:text-4xl">
+            Hey <span className="text-gradient-brand">{firstName}</span>
           </h1>
         </div>
         <div className="inline-flex shrink-0 items-center gap-2 rounded-full border border-primary/25 bg-card/60 px-3.5 py-2 backdrop-blur">
@@ -998,11 +995,15 @@ function LibraryPage() {
         </div>
       </header>
 
-      {/* Primary entry points — one dominant action, controls demoted to a quiet strip */}
+      {/* Create — one dominant action, controls demoted to a quiet strip */}
       <section
         aria-label="Create a track"
-        className="border-b border-white/[0.07] pb-6"
+        className="border-b-2 border-white/10 pb-7"
       >
+        <h2 className="mb-3 text-[11px] font-black uppercase tracking-[0.28em] text-primary">
+          Create
+        </h2>
+
 
         <div className="flex gap-3">
           <Button
