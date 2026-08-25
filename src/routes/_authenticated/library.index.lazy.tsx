@@ -66,7 +66,6 @@ import {
   type WizardDraft,
 } from "@/components/library/CreateNowWizard";
 import { CommunityTrackRow } from "@/components/library/CommunityTrackRow";
-import { GenerationHistory } from "@/components/library/GenerationHistory";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { FoulMouthToggle } from "@/components/FoulMouthToggle";
 
@@ -270,7 +269,6 @@ function LibraryPage() {
   const [deleting, setDeleting] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [yoursSearch, setYoursSearch] = useState("");
-  const [showAllYours, setShowAllYours] = useState(false);
   const [communitySearch, setCommunitySearch] = useState("");
 
   // Build a human-readable line from language + freeform style text.
