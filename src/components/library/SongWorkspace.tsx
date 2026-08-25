@@ -459,7 +459,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       {isPending && (
         <div className="sticky top-2 z-30">
           <GeneratingProgress
-            sampleSeconds={settings?.sample_seconds ?? 30}
+            sampleSeconds={settings?.sample_seconds ?? 60}
             startedAt={song.generation_started_at ?? song.updated_at ?? song.created_at}
             taskId={song.suno_task_id}
             hasLivePreview={!!song.stream_audio_url}
@@ -468,7 +468,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
           />
         </div>
       )}
-      <StageStepper current={stage} sampleSeconds={settings?.sample_seconds ?? 30} />
+      <StageStepper current={stage} sampleSeconds={settings?.sample_seconds ?? 60} />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
@@ -615,7 +615,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                     2 · Preview
                   </CardTitle>
                   <CardDescription>
-                    Free {settings?.sample_seconds ?? 30}s sample.
+                    Free {settings?.sample_seconds ?? 60}s sample.
                   </CardDescription>
 
                 </div>
@@ -631,7 +631,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
               {isPending && (
                 <>
                   <GeneratingProgress
-                    sampleSeconds={settings?.sample_seconds ?? 30}
+                    sampleSeconds={settings?.sample_seconds ?? 60}
                     startedAt={song.generation_started_at ?? song.updated_at ?? song.created_at}
                     taskId={song.suno_task_id}
                     hasLivePreview={!!song.stream_audio_url}
@@ -1234,7 +1234,7 @@ function GeneratingProgress({
  */
 function InlineSamplePlayer({ songId }: { songId: string }) {
   const { data: settings } = useSettings();
-  const sampleSeconds = settings?.sample_seconds ?? 30;
+  const sampleSeconds = settings?.sample_seconds ?? 60;
   const [url, setUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

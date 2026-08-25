@@ -26,7 +26,7 @@ export interface Song {
 
 function SongCardImpl({ song }: { song: Song }) {
   const { data: settings } = useSettings();
-  const sampleSeconds = settings?.sample_seconds ?? 30;
+  const sampleSeconds = settings?.sample_seconds ?? 60;
 
   const hasAudio = !!(song.audio_path || song.sample_path);
   const isReady = song.status === "completed" && hasAudio;
