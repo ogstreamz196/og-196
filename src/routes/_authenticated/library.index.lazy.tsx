@@ -556,9 +556,13 @@ function LibraryPage() {
       });
       if (genErr) throw new Error(invokeError(genErr, "Could not start generation"));
 
-      advanceStage("handoff");
+      // Stay on the page: a realtime subscription on this row drives the
+      // status indicator until the track is ready (or fails).
+      advanceStage("rendering");
+      setTrackedSongId(row.id);
+      library.refetch();
       toast.success(`Cooking your sample · -${totalCost} coins`);
-      navigate({ to: "/library/$songId", params: { songId: row.id } });
+
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Something went wrong";
       setPipeline((p) => ({ ...p, stage: "error", error: msg }));
