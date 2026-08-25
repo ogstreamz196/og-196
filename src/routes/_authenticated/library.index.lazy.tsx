@@ -1050,12 +1050,10 @@ function LibraryPage() {
               ))}
             </select>
           </div>
-          <div className="space-y-2">
-            <span className="block text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground">
-              Lyric filter
-            </span>
+          <div className="flex items-end">
             <FoulMouthToggle disabled={pipelineActive} />
           </div>
+
           <p className="text-[11px] font-semibold text-muted-foreground sm:col-span-2">
             -{totalCost} coins · {expectedRange}
           </p>
