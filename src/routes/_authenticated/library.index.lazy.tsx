@@ -1425,6 +1425,12 @@ function LibraryPage() {
           </TabsList>
 
           <TabsContent value="yours" className="mt-0 space-y-3">
+            <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+              <span>Made by you</span>
+              <span aria-hidden className="text-primary/60">•</span>
+              <span className="text-primary">Yours to play &amp; download</span>
+            </p>
+
             {completedTracks.length > 3 && (
               <div className="relative">
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
