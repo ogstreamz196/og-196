@@ -65,6 +65,7 @@ import {
   EMPTY_DRAFT,
   type WizardDraft,
 } from "@/components/library/CreateNowWizard";
+import { CommunityTrackRow } from "@/components/library/CommunityTrackRow";
 import { GenerationHistory } from "@/components/library/GenerationHistory";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { FoulMouthToggle } from "@/components/FoulMouthToggle";
