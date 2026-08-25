@@ -1417,7 +1417,7 @@ function LibraryPage() {
               className="group flex items-center gap-2 rounded-none border-b-2 border-transparent bg-transparent px-1 pb-3 pt-0 text-sm font-bold text-muted-foreground shadow-none transition-colors data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none"
             >
               <Users className="h-4 w-4 text-fuchsia-300" />
-              <span className="truncate">Community</span>
+              <span className="truncate">Global library</span>
               <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-black tabular-nums text-foreground/90">
                 {communityTracks.length}
               </span>
