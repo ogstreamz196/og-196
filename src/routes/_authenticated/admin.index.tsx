@@ -1,7 +1,7 @@
 import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, ShieldCheck, RefreshCw, Lock, Unlock, Music2, Save, Coins } from "lucide-react";
+import { Loader2, RefreshCw, Lock, Unlock, Music2, Save, Coins } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { maskDevIdentity } from "@/lib/dev-identity";
 import { useRole } from "@/hooks/use-role";
@@ -23,7 +23,6 @@ import { TelegramSmokeTest } from "@/components/admin/TelegramSmokeTest";
 import { E2ESmokeTest } from "@/components/admin/E2ESmokeTest";
 import { FoulMouthSmokeTest } from "@/components/admin/FoulMouthSmokeTest";
 
-import { AdminSection } from "@/components/admin/AdminSection";
 import { AdminCollapsible } from "@/components/admin/AdminCollapsible";
 import { AdminEditableLabel, AdminEditableBalance } from "@/components/admin/AdminEditMode";
 import { Button } from "@/components/ui/button";
