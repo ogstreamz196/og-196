@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import {
-  Loader2, FileText, Wand2,
+  Loader2, FileText, ChevronDown,
   Coins, Check, Sparkles, Music2, AlertCircle, Play, RefreshCw,
 } from "lucide-react";
 
