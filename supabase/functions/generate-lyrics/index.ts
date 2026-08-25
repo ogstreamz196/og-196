@@ -186,7 +186,7 @@ Deno.serve(async (req) => {
         : "") +
       subjectRule +
       (extraContext ? `Extra context from the artist (use these details literally in the lyrics): ${extraContext}\n` : "") +
-      `\nWrite the FULL song now — at least two minutes of singable material (420+ words, 60+ lyric lines). Do not stop early, do not abbreviate repeated choruses, hit EVERY section in the structure, stay ruthlessly on-theme with the description above, and drop "${subjectName || "the subject"}" as often as the music allows.`;
+      `\nWrite the FULL song now — at least three minutes of singable material (620+ words, 90+ lyric lines). Do not stop early, do not abbreviate repeated choruses, hit EVERY section in the structure, stay ruthlessly on-theme with the description above, and drop "${subjectName || "the subject"}" as often as the music allows.`;
 
     const url =
       `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent?key=${GEMINI_API_KEY}`;
