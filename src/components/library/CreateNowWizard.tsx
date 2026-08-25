@@ -22,6 +22,8 @@ export type WizardResult = {
   language: string;
 };
 
+const GENDERS = ["Female vocal", "Male vocal", "Duo", "Any voice"];
+
 const TOTAL_STEPS = 5;
 
 /** Curated styles first, then everything else we already support. */
@@ -48,8 +50,12 @@ export function CreateNowWizard({
   const [title, setTitle] = useState("");
   const [subjectName, setSubjectName] = useState("");
   const [description, setDescription] = useState("");
-  const [style, setStyle] = useState("");
-  const [language, setLanguage] = useState(defaultLanguage);
+  const [styles, setStyles] = useState<string[]>([]);
+  const [gender, setGender] = useState("");
+  const [languages, setLanguages] = useState<string[]>([]);
+
+  const toggle = (list: string[], v: string) =>
+    list.includes(v) ? list.filter((x) => x !== v) : [...list, v];
 
   // Fresh start each time the wizard opens.
   useEffect(() => {
@@ -66,11 +72,11 @@ export function CreateNowWizard({
       case 3:
         return description.trim().length >= 12;
       case 4:
-        return style.trim().length > 0;
+        return styles.length > 0;
       default:
-        return language.trim().length > 0;
+        return languages.length > 0;
     }
-  }, [step, title, subjectName, description, style, language]);
+  }, [step, title, subjectName, description, styles, languages]);
 
   const hint = useMemo(() => {
     if (stepValid) return null;
@@ -82,9 +88,9 @@ export function CreateNowWizard({
       case 3:
         return "Add a few more words about the story or vibe.";
       case 4:
-        return "Pick one style.";
+        return "Pick at least one style (you can stack a few).";
       default:
-        return "Pick a language.";
+        return "Pick at least one language — English is always in the mix.";
     }
   }, [step, stepValid]);
 
@@ -98,8 +104,8 @@ export function CreateNowWizard({
       title: title.trim(),
       subjectName: subjectName.trim(),
       description: description.trim(),
-      style: style.trim(),
-      language: language.trim(),
+      style: [...styles, gender].filter(Boolean).join(", "),
+      language: Array.from(new Set(["English", ...languages])).join(" + "),
     });
     onOpenChange(false);
   }
@@ -141,8 +147,8 @@ export function CreateNowWizard({
             {step === 1 && "This becomes the title of your track."}
             {step === 2 && "A person, a group, a brand — or yourself."}
             {step === 3 && "A short description, theme or story."}
-            {step === 4 && "One style shapes the whole beat."}
-            {step === 5 && "The lyrics will be written in this language."}
+            {step === 4 && "Stack as many styles as you like, then pick the voice."}
+            {step === 5 && "English is always part of the remix — add any others."}
           </DialogDescription>
         </DialogHeader>
 
@@ -208,60 +214,94 @@ export function CreateNowWizard({
           )}
 
           {step === 4 && (
-            <div
-              role="radiogroup"
-              aria-label="Track style"
-              className="grid grid-cols-2 gap-2 sm:grid-cols-3"
-            >
-              {STYLES.map((s) => {
-                const selected = style === s;
-                return (
-                  <button
-                    key={s}
-                    type="button"
-                    role="radio"
-                    aria-checked={selected}
-                    onClick={() => setStyle(s)}
-                    className={cn(
-                      "min-h-11 rounded-xl border px-3 py-2.5 text-sm font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
-                      selected
-                        ? "border-primary bg-primary/20 text-foreground shadow-glow"
-                        : "border-white/10 bg-card/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
-                    )}
-                  >
-                    {s}
-                  </button>
-                );
-              })}
+            <div className="space-y-4">
+              <div
+                role="group"
+                aria-label="Track styles"
+                className="grid grid-cols-2 gap-2 sm:grid-cols-3"
+              >
+                {STYLES.map((s) => {
+                  const selected = styles.includes(s);
+                  return (
+                    <button
+                      key={s}
+                      type="button"
+                      aria-pressed={selected}
+                      onClick={() => setStyles((prev) => toggle(prev, s))}
+                      className={cn(
+                        "min-h-11 rounded-xl border px-3 py-2.5 text-sm font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                        selected
+                          ? "border-primary bg-primary/20 text-foreground shadow-glow"
+                          : "border-white/10 bg-card/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
+                      )}
+                    >
+                      {s}
+                    </button>
+                  );
+                })}
+              </div>
+              <div>
+                <p className="mb-2 text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
+                  Artist voice (optional)
+                </p>
+                <div role="group" aria-label="Artist voice" className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  {GENDERS.map((g) => {
+                    const selected = gender === g;
+                    return (
+                      <button
+                        key={g}
+                        type="button"
+                        aria-pressed={selected}
+                        onClick={() => setGender((prev) => (prev === g ? "" : g))}
+                        className={cn(
+                          "min-h-11 rounded-xl border px-3 py-2 text-xs font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                          selected
+                            ? "border-primary bg-primary/20 text-foreground shadow-glow"
+                            : "border-white/10 bg-card/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
+                        )}
+                      >
+                        {g}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           )}
 
           {step === 5 && (
-            <div
-              role="radiogroup"
-              aria-label="Language"
-              className="grid max-h-[280px] grid-cols-2 gap-2 overflow-y-auto pr-1 sm:grid-cols-3"
-            >
-              {POOLS.language.map((l) => {
-                const selected = language === l;
-                return (
-                  <button
-                    key={l}
-                    type="button"
-                    role="radio"
-                    aria-checked={selected}
-                    onClick={() => setLanguage(l)}
-                    className={cn(
-                      "min-h-11 rounded-xl border px-3 py-2.5 text-sm font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
-                      selected
-                        ? "border-primary bg-primary/20 text-foreground shadow-glow"
-                        : "border-white/10 bg-card/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
-                    )}
-                  >
-                    {l}
-                  </button>
-                );
-              })}
+            <div className="space-y-3">
+              <p className="text-xs font-semibold text-primary">
+                English is always included in the remix.
+              </p>
+              <div
+                role="group"
+                aria-label="Languages"
+                className="grid max-h-[240px] grid-cols-2 gap-2 overflow-y-auto pr-1 sm:grid-cols-3"
+              >
+                {POOLS.language.map((l) => {
+                  const locked = l === "English";
+                  const selected = locked || languages.includes(l);
+                  return (
+                    <button
+                      key={l}
+                      type="button"
+                      aria-pressed={selected}
+                      onClick={() => !locked && setLanguages((prev) => toggle(prev, l))}
+                      className={cn(
+                        "min-h-11 rounded-xl border px-3 py-2.5 text-sm font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                        selected
+                          ? "border-primary bg-primary/20 text-foreground shadow-glow"
+                          : "border-white/10 bg-card/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
+                        locked && "cursor-default opacity-90",
+                      )}
+                    >
+                      {l}
+                      {locked && " ✓"}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>
