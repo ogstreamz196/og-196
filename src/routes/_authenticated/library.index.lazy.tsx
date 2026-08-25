@@ -972,7 +972,7 @@ function LibraryPage() {
   }
 
   return (
-    <div data-testid="library-root" data-scroll-fade className="mx-auto flex w-full max-w-5xl flex-col gap-4 pb-[calc(env(safe-area-inset-bottom)+96px)] [touch-action:pan-y] [scroll-padding-block:24px] md:pb-20">
+    <div data-testid="library-root" data-scroll-fade className="mx-auto flex w-full max-w-5xl flex-col gap-5 pb-[calc(env(safe-area-inset-bottom)+96px)] [touch-action:pan-y] [scroll-padding-block:24px] md:pb-20">
       {/* Hero — premium kicker, oversized headline, generous breathing room */}
       <header data-testid="library-hero" className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b border-white/10 pb-4">
         <div className="min-w-0">
@@ -1326,7 +1326,7 @@ function LibraryPage() {
 
       {/* Library — luxury two-tab vault: Yours first, then Community */}
       <section ref={libraryRef} id="library" className="scroll-mt-24">
-        <div data-testid="library-your-header" className="mb-3 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
+        <div data-testid="library-your-header" className="mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
 
           <div className="min-w-0 space-y-1">
             <div className="truncate text-xs font-bold uppercase tracking-[0.24em] text-primary">
