@@ -60,6 +60,8 @@ import { JobQueuePanel } from "@/components/library/JobQueuePanel";
 import { CategoryCard } from "@/components/library/CategoryCard";
 import { StyleComposer } from "@/components/library/StyleComposer";
 import { CollapsibleStep } from "@/components/library/CollapsibleStep";
+import { CreateNowWizard } from "@/components/library/CreateNowWizard";
+import { GenerationHistory } from "@/components/library/GenerationHistory";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { FoulMouthToggle } from "@/components/FoulMouthToggle";
 
@@ -124,6 +126,7 @@ function LibraryPage() {
     return raw.split(/\s|\./)[0] || "there";
   }, [profile?.display_name, user?.email, dev.isDev]);
 
+  const [wizardOpen, setWizardOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [subjectName, setSubjectName] = useState("");
   // Defaults: English locked as the default language. Genre/mood/theme are now
@@ -513,9 +516,33 @@ function LibraryPage() {
     toast.info("Generation cancelled — the status panel is cleared");
   }
 
-  async function createSong() {
+  type CreateOverrides = {
+    title: string;
+    subjectName: string;
+    description: string;
+    style: string;
+    language: string;
+  };
+
+  async function createSong(override?: CreateOverrides) {
     if (pipelineLockRef.current) return;
-    if (!user || !canRunPipeline) return;
+    if (!user) return;
+    if (override) {
+      if (balance < totalCost) {
+        toast.error(`Need ${totalCost} coins to create a song`);
+        return;
+      }
+    } else if (!canRunPipeline) {
+      return;
+    }
+    const songTitle = (override?.title ?? title).trim();
+    const songSubject = (override?.subjectName ?? subjectName).trim();
+    const songStyle = (override?.style ?? styleText).trim();
+    const songLanguage = (override?.language ?? selections.language ?? "English").trim();
+    const songDetails = (override?.description ?? personalDetails).trim();
+    const songStyleTags = override
+      ? [override.style].filter(Boolean)
+      : styleTags;
     pipelineLockRef.current = true;
     const runId = ++pipelineRunRef.current;
     const stale = () => pipelineRunRef.current !== runId;
@@ -524,18 +551,18 @@ function LibraryPage() {
     setPipelineNow(startedAt);
 
     try {
-      const description = styleText.trim();
+      const description = songStyle;
       const combinedExtra = extraContext.trim();
       const { data: lyricData, error: lyricErr } = await supabase.functions.invoke("generate-lyrics", {
         body: {
-          songName: title.trim(),
+          songName: songTitle,
           description,
-          styleTags,
-          language: selections.language,
+          styleTags: songStyleTags,
+          language: songLanguage,
           foulMouth,
-          personalDetails: personalDetails.trim() || undefined,
+          personalDetails: songDetails || undefined,
           extraContext: combinedExtra || undefined,
-          subjectName: subjectName.trim() || undefined,
+          subjectName: songSubject || undefined,
         },
       });
       if (stale()) return;
@@ -545,20 +572,21 @@ function LibraryPage() {
       setLyrics(nextLyrics);
 
       advanceStage("saving");
-      const style = styleText.trim();
+      const style = songStyle;
       const promptText = [
-        title.trim(),
-        subjectName.trim() ? `For: ${subjectName.trim()}` : null,
+        songTitle,
+        songSubject ? `For: ${songSubject}` : null,
         style ? `Style: ${style}` : null,
-        selections.language ? `Language: ${selections.language}` : null,
+        songLanguage ? `Language: ${songLanguage}` : null,
       ].filter(Boolean).join(" — ");
+
 
       const { data: row, error: insertErr } = await supabase
         .from("songs")
         .insert({
           user_id: user.id,
-          title: title.trim() || null,
-          prompt: promptText || title.trim() || "Untitled",
+          title: songTitle || null,
+          prompt: promptText || songTitle || "Untitled",
           style: style || null,
           lyrics: nextLyrics,
           status: "draft",
@@ -575,7 +603,7 @@ function LibraryPage() {
           song_id: row.id,
           prompt: promptText,
           lyrics: nextLyrics,
-          title: title.trim() || null,
+          title: songTitle || null,
           style: style || null,
         },
       });
@@ -891,6 +919,9 @@ function LibraryPage() {
           <h1 className="font-display text-2xl font-black leading-[1.1] tracking-[-0.02em] break-words sm:text-5xl lg:text-6xl">
             Hey <span className="text-gradient-brand">{firstName}</span> — let's write a song.
           </h1>
+          <p className="mt-1 text-sm font-semibold text-muted-foreground sm:text-base">
+            Create your track in minutes.
+          </p>
         </div>
         <div className="inline-flex shrink-0 items-center gap-2 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 to-card/60 px-4 py-2 shadow-[0_8px_28px_-12px_oklch(0.7_0.2_300_/_0.45)]">
           <Coins className="h-5 w-5 text-primary" aria-hidden="true" />
@@ -898,6 +929,41 @@ function LibraryPage() {
           <span className="hidden text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground sm:inline">coins</span>
         </div>
       </header>
+
+      {/* Primary entry point — opens the 5-step creation wizard */}
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <Button
+          type="button"
+          onClick={() => setWizardOpen(true)}
+          disabled={pipelineActive}
+          className="min-h-14 w-full gap-2 rounded-2xl bg-gradient-brand text-base font-black uppercase tracking-[0.14em] text-primary-foreground shadow-glow sm:w-auto sm:px-10 sm:text-lg"
+        >
+          <Sparkles className="h-5 w-5" />
+          {pipelineActive ? "Cooking your track…" : "Create now"}
+        </Button>
+        <p className="text-xs text-muted-foreground sm:text-sm">
+          Five quick steps · -{totalCost} coins
+        </p>
+      </div>
+
+      <CreateNowWizard
+        open={wizardOpen}
+        onOpenChange={setWizardOpen}
+        defaultLanguage={selections.language ?? "English"}
+        submitLabel={`Create · -${totalCost}`}
+        onComplete={(v) => {
+          setTitle(v.title);
+          setSubjectName(v.subjectName);
+          setPersonalDetails(v.description.slice(0, PERSONAL_DETAILS_MAX));
+          setStyleText(v.style);
+          setSelections({ language: v.language });
+          toast.success("Track created — generating lyrics…");
+          void createSong(v);
+        }}
+      />
+
+      <GenerationHistory songs={versionedLibrary} loading={library.isFetching} />
+
 
       {/* Prominent Review banner — only visible when a freshly finished song is waiting to be reviewed */}
       {readyToReview && (
@@ -1368,7 +1434,7 @@ function LibraryPage() {
 
           <div id="lyrics-section" className="relative scroll-mt-24">
             <Button
-              onClick={createSong}
+              onClick={() => void createSong()}
               disabled={!canRunPipeline}
               size="lg"
               className="h-14 w-full gap-2 rounded-2xl bg-gradient-brand text-base font-black text-primary-foreground shadow-glow ring-1 ring-primary/40 transition-transform hover:scale-[1.01] sm:h-20 sm:gap-2.5 sm:text-2xl"
