@@ -991,9 +991,10 @@ function LibraryPage() {
       <CreateNowWizard
         open={wizardOpen}
         onOpenChange={setWizardOpen}
-        defaultLanguage={selections.language ?? "English"}
+        initialDraft={wizardDraft}
         submitLabel={`Create · -${totalCost}`}
-        onComplete={(v) => {
+        onComplete={(v, draft) => {
+          setWizardDraft(draft);
           setTitle(v.title);
           setSubjectName(v.subjectName);
           setPersonalDetails(v.description.slice(0, PERSONAL_DETAILS_MAX));
@@ -1001,8 +1002,14 @@ function LibraryPage() {
           setSelections({ language: v.language });
           toast.success("Track created — generating lyrics…");
           void createSong(v);
+          // Bring the live status panel into view right after the toast.
+          window.setTimeout(
+            () => statusPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }),
+            250,
+          );
         }}
       />
+
 
       <GenerationHistory songs={versionedLibrary} loading={library.isFetching} />
 
