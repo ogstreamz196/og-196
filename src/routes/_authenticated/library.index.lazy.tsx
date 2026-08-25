@@ -513,9 +513,33 @@ function LibraryPage() {
     toast.info("Generation cancelled — the status panel is cleared");
   }
 
-  async function createSong() {
+  type CreateOverrides = {
+    title: string;
+    subjectName: string;
+    description: string;
+    style: string;
+    language: string;
+  };
+
+  async function createSong(override?: CreateOverrides) {
     if (pipelineLockRef.current) return;
-    if (!user || !canRunPipeline) return;
+    if (!user) return;
+    if (override) {
+      if (balance < totalCost) {
+        toast.error(`Need ${totalCost} coins to create a song`);
+        return;
+      }
+    } else if (!canRunPipeline) {
+      return;
+    }
+    const songTitle = (override?.title ?? title).trim();
+    const songSubject = (override?.subjectName ?? subjectName).trim();
+    const songStyle = (override?.style ?? styleText).trim();
+    const songLanguage = (override?.language ?? selections.language ?? "English").trim();
+    const songDetails = (override?.description ?? personalDetails).trim();
+    const songStyleTags = override
+      ? [override.style].filter(Boolean)
+      : styleTags;
     pipelineLockRef.current = true;
     const runId = ++pipelineRunRef.current;
     const stale = () => pipelineRunRef.current !== runId;
@@ -524,18 +548,18 @@ function LibraryPage() {
     setPipelineNow(startedAt);
 
     try {
-      const description = styleText.trim();
+      const description = songStyle;
       const combinedExtra = extraContext.trim();
       const { data: lyricData, error: lyricErr } = await supabase.functions.invoke("generate-lyrics", {
         body: {
-          songName: title.trim(),
+          songName: songTitle,
           description,
-          styleTags,
-          language: selections.language,
+          styleTags: songStyleTags,
+          language: songLanguage,
           foulMouth,
-          personalDetails: personalDetails.trim() || undefined,
+          personalDetails: songDetails || undefined,
           extraContext: combinedExtra || undefined,
-          subjectName: subjectName.trim() || undefined,
+          subjectName: songSubject || undefined,
         },
       });
       if (stale()) return;
@@ -545,13 +569,14 @@ function LibraryPage() {
       setLyrics(nextLyrics);
 
       advanceStage("saving");
-      const style = styleText.trim();
+      const style = songStyle;
       const promptText = [
-        title.trim(),
-        subjectName.trim() ? `For: ${subjectName.trim()}` : null,
+        songTitle,
+        songSubject ? `For: ${songSubject}` : null,
         style ? `Style: ${style}` : null,
-        selections.language ? `Language: ${selections.language}` : null,
+        songLanguage ? `Language: ${songLanguage}` : null,
       ].filter(Boolean).join(" — ");
+
 
       const { data: row, error: insertErr } = await supabase
         .from("songs")
