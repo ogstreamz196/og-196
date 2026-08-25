@@ -135,6 +135,8 @@ function LibraryPage() {
   // failure) never loses what the user already typed.
   const [wizardDraft, setWizardDraft] = useState<WizardDraft>(EMPTY_DRAFT);
   const statusPanelRef = useRef<HTMLElement | null>(null);
+  const libraryRef = useRef<HTMLElement | null>(null);
+
 
   const [title, setTitle] = useState("");
   const [subjectName, setSubjectName] = useState("");
@@ -973,21 +975,38 @@ function LibraryPage() {
         </div>
       </header>
 
-      {/* Primary entry point — opens the 5-step creation wizard */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-        <Button
-          type="button"
-          onClick={() => setWizardOpen(true)}
-          disabled={pipelineActive}
-          className="min-h-14 w-full gap-2 rounded-2xl bg-gradient-brand text-base font-black uppercase tracking-[0.14em] text-primary-foreground shadow-glow sm:w-auto sm:px-10 sm:text-lg"
-        >
-          <Sparkles className="h-5 w-5" />
-          {pipelineActive ? "Cooking your track…" : "Create now"}
-        </Button>
-        <p className="text-xs text-muted-foreground sm:text-sm">
-          Five quick steps · -{totalCost} coins
-        </p>
+      {/* Primary entry points — create, or jump straight to the library */}
+      <div className="flex flex-col gap-3">
+        <div className="grid gap-2 sm:grid-cols-2">
+          <Button
+            type="button"
+            onClick={() => setWizardOpen(true)}
+            disabled={pipelineActive}
+            className="min-h-14 w-full gap-2 rounded-2xl bg-gradient-brand text-base font-black uppercase tracking-[0.14em] text-primary-foreground shadow-glow sm:text-lg"
+          >
+            <Sparkles className="h-5 w-5" />
+            {pipelineActive ? "Cooking your track…" : "Create now"}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() =>
+              libraryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+            }
+            className="min-h-14 w-full gap-2 rounded-2xl border-primary/40 text-base font-black uppercase tracking-[0.14em] sm:text-lg"
+          >
+            <Disc3 className="h-5 w-5" />
+            Library
+          </Button>
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-xs text-muted-foreground sm:text-sm">
+            Five quick steps · -{totalCost} coins · ~3 minute track
+          </p>
+          <FoulMouthToggle disabled={pipelineActive} />
+        </div>
       </div>
+
 
       <CreateNowWizard
         open={wizardOpen}
@@ -1089,434 +1108,8 @@ function LibraryPage() {
 
 
 
-      {/* Unified create flow */}
-      <section
-        aria-labelledby="create-song-heading"
-        className="relative flex flex-col gap-6 overflow-hidden rounded-[2rem] border-2 border-primary/40 bg-gradient-to-br from-primary/15 via-card/80 to-card/60 p-5 shadow-[0_30px_90px_-35px_oklch(0.7_0.2_300_/_0.7)] ring-1 ring-white/5 sm:gap-8 sm:p-10"
-      >
-        <span
-          aria-hidden
-          className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-gradient-to-br from-primary/40 via-fuchsia-500/25 to-transparent blur-3xl"
-        />
-        <span
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent"
-        />
-        <header className="relative grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3 border-b border-white/10 pb-5 sm:pb-6">
-          <div className="min-w-0 space-y-2">
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/15 px-3 py-1 text-[10px] font-black uppercase tracking-[0.24em] text-primary sm:text-xs">
-              <Sparkles className="h-3.5 w-3.5" />
-              Studio · new track
-            </div>
-            <h2
-              id="create-song-heading"
-              className="font-display text-4xl font-black leading-[1.02] tracking-[-0.02em] sm:text-6xl lg:text-7xl"
-            >
-              Create <span className="text-gradient-brand">a song</span>
-            </h2>
-            <p className="text-sm text-muted-foreground sm:text-base">
-              Five quick steps — title, name, describe, language, song style. Fill them in any order.
-            </p>
-          </div>
-          <span className="shrink-0 self-start rounded-full border border-primary/40 bg-primary/15 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-primary sm:text-sm">
-            {totalFilled}/5
-          </span>
-        </header>
+      {/* Creation happens entirely inside the Create now wizard — no inline form. */}
 
-
-        {/* Step 1 — Title */}
-        <CollapsibleStep
-          step={1}
-          title="Title"
-          done={!!title.trim()}
-          summary={title.trim() || "Untitled"}
-        >
-          <div className="flex flex-wrap items-stretch gap-2">
-            <Label htmlFor="song-title" className="sr-only">
-              Title
-            </Label>
-            <Input
-              id="song-title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Late night drive"
-              maxLength={120}
-              className="h-12 min-w-0 flex-1 rounded-xl border-2 border-primary/30 bg-background/80 px-3 text-lg font-bold focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/30 sm:h-14 sm:text-xl"
-            />
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setTitle(randomPick(SURPRISE_TITLES));
-                setSubjectName(
-                  randomPick(["Aaliyah", "Marcus", "Sam", "Jordan", "Dre", "Priya", "Leo", "Maya"]),
-                );
-                setSelections({ language: randomPick(POOLS.language) });
-                setStyleText(
-                  `${randomPick(POOLS.genre)} · ${randomPick(POOLS.mood)} · ${randomPick(POOLS.theme)}`,
-                );
-                setPersonalDetails(randomPick(SURPRISE_TEMPLATES).slice(0, PERSONAL_DETAILS_MAX));
-                toast.success("Surprise prompt loaded");
-              }}
-              className="h-12 shrink-0 gap-1.5 rounded-xl sm:h-14"
-            >
-              <Shuffle className="h-4 w-4" />
-              Surprise me
-            </Button>
-          </div>
-        </CollapsibleStep>
-
-        {/* Step 2 — Name (repeated across the lyrics) */}
-        <CollapsibleStep
-          step={2}
-          title="Name"
-          done={!!subjectName.trim()}
-          summary={subjectName.trim() ? `For ${subjectName.trim()}` : undefined}
-        >
-          <Label htmlFor="subject-name" className="sr-only">
-            Who's this song for?
-          </Label>
-          <Input
-            id="subject-name"
-            value={subjectName}
-            onChange={(e) => setSubjectName(e.target.value.slice(0, 60))}
-            placeholder="Who's this song for? e.g. Aaliyah"
-            maxLength={60}
-            className="h-12 min-w-0 rounded-xl border-2 border-primary/30 bg-background/80 px-3 text-lg font-bold focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/30 sm:h-14 sm:text-xl"
-          />
-          <p className="mt-3 text-xs font-medium text-muted-foreground">
-            OG will weave{" "}
-            <span className="text-foreground">
-              {subjectName.trim() || "their name"}
-            </span>{" "}
-            through the hook and verses — heavy but never overpowering.
-          </p>
-        </CollapsibleStep>
-
-        {/* Step 3 — Describe lyrics */}
-        <CollapsibleStep
-          step={3}
-          title="Describe lyrics"
-          done={personalDetails.trim().length >= 20}
-          summary={
-            personalDetails.trim()
-              ? personalDetails.trim().slice(0, 90) +
-                (personalDetails.trim().length > 90 ? "…" : "")
-              : undefined
-          }
-        >
-          {(() => {
-            const check = personalDetailsCheck(personalDetails);
-            const { status, message, pct, tone, barTone, length: len } = check;
-            const invalid = status === "full" || status === "near";
-            return (
-              <div className="space-y-3">
-                <Label htmlFor="personal-details" className="sr-only">
-                  Describe
-                </Label>
-                <Textarea
-                  id="personal-details"
-                  aria-describedby="personal-details-help personal-details-count"
-                  aria-invalid={invalid}
-                  value={personalDetails}
-                  onChange={(e) =>
-                    setPersonalDetails(e.target.value.slice(0, PERSONAL_DETAILS_MAX))
-                  }
-                  placeholder="✍️ What's this song about? Vibes, memories, inside jokes, moments you want in the lyrics…"
-                  maxLength={PERSONAL_DETAILS_MAX}
-                  rows={6}
-                  className="min-h-[160px] resize-y rounded-xl border-primary/30 bg-background/60 text-base leading-relaxed placeholder:text-muted-foreground/70 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/40 aria-[invalid=true]:border-destructive aria-[invalid=true]:focus-visible:ring-destructive/40"
-                />
-                <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
-                  <div
-                    className={cn("h-full transition-all", barTone)}
-                    style={{ width: `${Math.min(100, pct)}%` }}
-                  />
-                </div>
-                <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs sm:text-sm">
-                  <span
-                    id="personal-details-help"
-                    className={cn("min-w-0 flex-1 truncate font-medium", tone)}
-                    aria-live="polite"
-                  >
-                    {message}
-                  </span>
-                  <span
-                    id="personal-details-count"
-                    className={cn("shrink-0 tabular-nums font-semibold", tone)}
-                  >
-                    {len}/{PERSONAL_DETAILS_MAX}
-                  </span>
-                </div>
-                <div className="flex flex-wrap items-center gap-2 pt-1">
-                  <Button
-                    type="button"
-                    onClick={handleImproveDescription}
-                    disabled={improving || personalDetails.trim().length < 8}
-                    className="gap-2 bg-gradient-brand text-primary-foreground shadow-glow"
-                  >
-                    {improving ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Wand2 className="h-4 w-4" />
-                    )}
-                    {improving ? "Improving…" : "Improve"}
-                  </Button>
-                  <span className="text-xs text-muted-foreground">
-                    Type a few words — OG will tighten it into a lyrics-ready brief.
-                  </span>
-                </div>
-                {improveError && (
-                  <div
-                    role="alert"
-                    className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive"
-                  >
-                    <span className="min-w-0 flex-1">
-                      <strong className="mr-1">Improve failed:</strong>
-                      {improveError}
-                    </span>
-                    <div className="flex shrink-0 items-center gap-1">
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={handleImproveDescription}
-                        disabled={improving}
-                        className="h-7 gap-1 px-2 text-xs"
-                      >
-                        {improving ? (
-                          <Loader2 className="h-3 w-3 animate-spin" />
-                        ) : (
-                          <Wand2 className="h-3 w-3" />
-                        )}
-                        Retry
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => setImproveError(null)}
-                        className="h-7 px-2 text-xs"
-                      >
-                        Dismiss
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })()}
-
-          {(draftsQuery.isLoading || allDrafts.length > 0) && (
-            <div className="mt-4 space-y-2">
-              <div className="flex items-center justify-between gap-2">
-                <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-                  Saved briefs · tap to reuse
-                </div>
-                {draftsQuery.isFetching && !draftsQuery.isFetchingNextPage && (
-                  <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
-                )}
-              </div>
-              {draftsQuery.isLoading ? (
-                <div className="space-y-1.5">
-                  {[0, 1, 2].map((i) => (
-                    <Skeleton key={i} className="h-10 w-full rounded-lg" />
-                  ))}
-                </div>
-              ) : (
-                <ul className="space-y-1.5">
-                  {allDrafts.map((d) => {
-                    const isEditing = editingId === d.id;
-                    return (
-                      <li
-                        key={d.id}
-                        className="group flex items-start gap-2 rounded-lg border border-white/10 bg-card/60 p-2"
-                      >
-                        {isEditing ? (
-                          <div className="min-w-0 flex-1 space-y-1.5">
-                            <Textarea
-                              value={editingText}
-                              onChange={(e) => setEditingText(e.target.value.slice(0, 2000))}
-                              rows={3}
-                              className="text-xs"
-                              autoFocus
-                            />
-                            <div className="flex items-center gap-1">
-                              <Button
-                                type="button"
-                                size="sm"
-                                onClick={saveEdit}
-                                disabled={savingEdit || !editingText.trim()}
-                                className="h-7 gap-1 px-2 text-xs"
-                              >
-                                {savingEdit ? (
-                                  <Loader2 className="h-3 w-3 animate-spin" />
-                                ) : (
-                                  <Check className="h-3 w-3" />
-                                )}
-                                Save
-                              </Button>
-                              <Button
-                                type="button"
-                                size="sm"
-                                variant="ghost"
-                                onClick={cancelEdit}
-                                disabled={savingEdit}
-                                className="h-7 gap-1 px-2 text-xs"
-                              >
-                                <X className="h-3 w-3" />
-                                Cancel
-                              </Button>
-                            </div>
-                          </div>
-                        ) : (
-                          <>
-                            <button
-                              type="button"
-                              onClick={() => applyDraft(d)}
-                              className="min-w-0 flex-1 text-left text-xs leading-snug hover:text-primary"
-                            >
-                              {d.subject_name && (
-                                <span className="mr-1 font-semibold text-foreground">
-                                  {d.subject_name} ·
-                                </span>
-                              )}
-                              <span className="text-muted-foreground">
-                                {d.improved_text.slice(0, 140)}
-                                {d.improved_text.length > 140 ? "…" : ""}
-                              </span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => startEdit(d)}
-                              aria-label="Edit saved brief"
-                              className="shrink-0 rounded p-1 text-muted-foreground opacity-60 hover:bg-primary/10 hover:text-primary hover:opacity-100"
-                            >
-                              <Pencil className="h-3.5 w-3.5" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => removeDraft(d.id)}
-                              aria-label="Delete saved brief"
-                              className="shrink-0 rounded p-1 text-muted-foreground opacity-60 hover:bg-destructive/10 hover:text-destructive hover:opacity-100"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </button>
-                          </>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-              {draftsQuery.hasNextPage && (
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  onClick={() => draftsQuery.fetchNextPage()}
-                  disabled={draftsQuery.isFetchingNextPage}
-                  className="h-7 w-full gap-1 text-xs"
-                >
-                  {draftsQuery.isFetchingNextPage ? (
-                    <>
-                      <Loader2 className="h-3 w-3 animate-spin" /> Loading…
-                    </>
-                  ) : (
-                    "Load more"
-                  )}
-                </Button>
-              )}
-            </div>
-          )}
-
-
-          {/* Hidden auto-filled lyric description for generation */}
-          <div className="sr-only" aria-hidden="true">
-            <Label htmlFor="extra-context">Lyric description</Label>
-            <Textarea
-              id="extra-context"
-              value={extraContext}
-              onChange={(e) => setExtraContext(e.target.value)}
-              tabIndex={-1}
-              maxLength={1000}
-              rows={4}
-              readOnly
-            />
-          </div>
-        </CollapsibleStep>
-
-        {/* Step 4 — Language */}
-        <CollapsibleStep
-          step={4}
-          title="Language"
-          done={!!selections.language}
-          summary={selections.language || undefined}
-        >
-          <CategoryCard
-            cat="language"
-            value={selections.language}
-            chips={chips.language}
-            onSelect={(v) => setField("language", v)}
-            onPickChip={(v) => pickChip("language", v)}
-            onRefresh={() => refreshRow("language")}
-          />
-        </CollapsibleStep>
-
-        {/* Step 5 — Song style */}
-        <CollapsibleStep
-          step={5}
-          title="Song style"
-          done={hasStyle}
-          summary={
-            hasStyle
-              ? `${styleText.trim().slice(0, 90)}${styleText.trim().length > 90 ? "…" : ""}`
-              : undefined
-          }
-        >
-          <StyleComposer value={styleText} onChange={setStyleText} />
-        </CollapsibleStep>
-
-        {/* Foul mouth + one-tap create */}
-        <div className="space-y-4">
-          <FoulMouthToggle disabled={pipelineActive} />
-
-          <div id="lyrics-section" className="relative scroll-mt-24">
-            <Button
-              onClick={() => void createSong()}
-              disabled={!canRunPipeline}
-              size="lg"
-              className="h-14 w-full gap-2 rounded-2xl bg-gradient-brand text-base font-black text-primary-foreground shadow-glow ring-1 ring-primary/40 transition-transform hover:scale-[1.01] sm:h-20 sm:gap-2.5 sm:text-2xl"
-            >
-              {pipelineActive ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <Sparkles className="h-5 w-5" />
-              )}
-              {pipelineActive ? "Cooking your sample…" : `Create my song · -${totalCost}`}
-            </Button>
-            {!canRunPipeline && pipeline.stage === "idle" && (
-              <p className="mt-3 text-center text-sm font-medium text-muted-foreground">
-                {balance < totalCost
-                  ? `Not enough coins — needs ${totalCost}, you have ${balance}`
-                  : !title.trim()
-                    ? `Add a title to unlock · costs ${totalCost} coin${totalCost === 1 ? "" : "s"}`
-                    : !subjectName.trim()
-                      ? `Add a name so we can weave it into the track · costs ${totalCost} coin${totalCost === 1 ? "" : "s"}`
-                      : !selections.language
-                        ? `Pick a language to unlock · costs ${totalCost} coin${totalCost === 1 ? "" : "s"}`
-                        : `Add at least one style chip or type your own · costs ${totalCost} coin${totalCost === 1 ? "" : "s"}`}
-              </p>
-            )}
-            {pipeline.stage === "idle" && canRunPipeline && (
-              <p className="mt-3 text-center text-xs font-medium text-muted-foreground">
-                Lyrics + free sample happen in the backend · ~25 seconds
-              </p>
-            )}
-          </div>
-        </div>
-      </section>
 
       {/* Live status bar — one-tap pipeline progress */}
       {(pipelineActive || pipeline.stage === "error") && (
@@ -1683,7 +1276,7 @@ function LibraryPage() {
 
 
       {/* Library — luxury two-tab vault: Yours first, then Community */}
-      <section>
+      <section ref={libraryRef} id="library" className="scroll-mt-24">
         <div data-testid="library-your-header" className="mb-3 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
 
           <div className="min-w-0 space-y-1">

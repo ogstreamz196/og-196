@@ -151,7 +151,7 @@ Deno.serve(async (req) => {
       : "[Intro] (4 lines) → [Verse 1] (8 lines) → [Pre-Chorus] (4 lines) → [Chorus] (6 lines, hook) → [Verse 2] (8 lines) → [Pre-Chorus] (4 lines) → [Chorus] (6 lines) → [Bridge] (6 lines) → [Verse 3] (6 lines) → [Chorus] (final, lifted, 8 lines) → [Outro] (4 lines)";
 
     const structureRule =
-      ` Deliver a COMPLETE, performable song that runs AT LEAST two minutes when sung (target 2:00–2:30). That means a MINIMUM of 420 words and 60 lyric lines (excluding section markers) — aim for 480–620 words and 65–85 lines. Follow this exact structure for the chosen style: ${structure}.` +
+      ` Deliver a COMPLETE, performable song that runs AT LEAST three minutes when sung (target 3:00–3:30). That means a MINIMUM of 620 words and 90 lyric lines (excluding section markers) — aim for 700–850 words and 95–120 lines. Where the structure lists a section, you may extend verses by 2–4 extra lines and add one extra verse/chorus pair to reach that length. Follow this structure for the chosen style: ${structure}.` +
       ` Use the bracketed section markers verbatim (e.g. [Verse 1], [Chorus], [Bridge], [Outro]), each on its own line, with a blank line between sections. Every section must have lyrics — no placeholders, no "(instrumental)" unless the structure explicitly says so.` +
       ` The [Chorus] must be written out IN FULL every time it appears (never write "repeat chorus" or "x2" as a shortcut) — it is the same repeatable hook tied to the song title or central theme.` +
       ` Do NOT cut the song short — hit every section in the structure and keep line counts at or above the numbers given.`;
@@ -165,11 +165,11 @@ Deno.serve(async (req) => {
         `Use unfiltered attitude, savage punchlines, and trash-talk energy from the very first line. Make it sound like a parental-advisory hip-hop / punk track, NOT a radio edit. ` +
         `Do NOT self-censor, do NOT use asterisks or bleeps, and do NOT add disclaimers. Avoid slurs, sexual content involving minors, and direct incitement to real-world violence — everything else is fair game.` +
         structureRule + bilingualRule +
-        ` Target 480–620 words (never fewer than 420). Output ONLY the lyrics, no explanations.`
+        ` Target 700–850 words (never fewer than 620). Output ONLY the lyrics, no explanations.`
       : `You are a professional songwriter writing CLEAN, radio-friendly song lyrics in ${language}. ` +
         `STRICT RULE: absolutely NO profanity, swear words, slurs, or vulgar terms in any language — no English swears, no ${language} swears either. No sexual content, no graphic violence, no drug references. If you need attitude, channel it through clever wordplay and metaphor — never through swearing. The result must be safe for radio, family streaming, and a children's playlist.` +
         structureRule + bilingualRule +
-        ` Target 480–600 words (never fewer than 420). Output ONLY the lyrics, no explanations.`;
+        ` Target 700–850 words (never fewer than 620). Output ONLY the lyrics, no explanations.`;
 
     const subjectRule = subjectName
       ? `\nSUBJECT NAME (CRITICAL, top priority): This entire song is dedicated to "${subjectName}". Repeat the name "${subjectName}" as many times as musically possible — target AT LEAST 20 mentions across the full song, ideally 25–35. Land "${subjectName}" in EVERY line of the hook/chorus (so each chorus repetition drops the name 2–4 times), at least twice in every verse, in the pre-chorus, in the bridge, and in the outro as an ad-lib/chant. Rhyme other lines around the name so it feels inevitable. Never chant it back-to-back on the same line more than twice; keep it musical, affectionate, and embedded — but do NOT be shy: the listener must be in no doubt this song is about "${subjectName}".\n`
@@ -186,7 +186,7 @@ Deno.serve(async (req) => {
         : "") +
       subjectRule +
       (extraContext ? `Extra context from the artist (use these details literally in the lyrics): ${extraContext}\n` : "") +
-      `\nWrite the FULL song now — at least two minutes of singable material (420+ words, 60+ lyric lines). Do not stop early, do not abbreviate repeated choruses, hit EVERY section in the structure, stay ruthlessly on-theme with the description above, and drop "${subjectName || "the subject"}" as often as the music allows.`;
+      `\nWrite the FULL song now — at least three minutes of singable material (620+ words, 90+ lyric lines). Do not stop early, do not abbreviate repeated choruses, hit EVERY section in the structure, stay ruthlessly on-theme with the description above, and drop "${subjectName || "the subject"}" as often as the music allows.`;
 
     const url =
       `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent?key=${GEMINI_API_KEY}`;
@@ -233,10 +233,10 @@ Deno.serve(async (req) => {
     const data = await res.json();
     let lyrics = extractText(data);
 
-    // Length guard: a two-minute track needs ~420+ words. If the model came
+    // Length guard: a three-minute track needs ~620+ words. If the model came
     // back short, ask it to extend the same song (never a new one) once.
     const wordCount = (t: string) => t.split(/\s+/).filter(Boolean).length;
-    if (lyrics && wordCount(lyrics) < 420) {
+    if (lyrics && wordCount(lyrics) < 620) {
       await updateProgress(88, "Extending to full length…");
       try {
         const topUp = await callGemini([
@@ -246,7 +246,7 @@ Deno.serve(async (req) => {
             role: "user",
             parts: [{
               text:
-                "This draft is too short for a two-minute song. Rewrite the SAME song, keeping the existing title, theme, hook wording and section markers, but expand it to at least 480 words and 65+ lyric lines: add the missing sections from the structure, write every chorus out in full, and lengthen thin verses with new on-theme lines (no filler, no repetition beyond the hook). Output ONLY the complete lyrics.",
+                "This draft is too short for a three-minute song. Rewrite the SAME song, keeping the existing title, theme, hook wording and section markers, but expand it to at least 700 words and 95+ lyric lines: add the missing sections from the structure, write every chorus out in full, and lengthen thin verses with new on-theme lines (no filler, no repetition beyond the hook). Output ONLY the complete lyrics.",
             }],
           },
         ]);
