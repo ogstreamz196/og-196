@@ -108,6 +108,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 
 
+const MIN_TRACK_MINUTES = 3;
+
 export const Route = createLazyFileRoute("/_authenticated/library/")({
   component: LibraryPage,
 });
@@ -136,6 +138,13 @@ function LibraryPage() {
   const [wizardDraft, setWizardDraft] = useState<WizardDraft>(EMPTY_DRAFT);
   const statusPanelRef = useRef<HTMLElement | null>(null);
   const libraryRef = useRef<HTMLElement | null>(null);
+  // Track length: a 3-minute floor is enforced backend-side; users may raise it.
+  const [targetMinutes, setTargetMinutes] = useState(MIN_TRACK_MINUTES);
+  const targetDurationSec = Math.max(MIN_TRACK_MINUTES, targetMinutes) * 60;
+  const expectedRange = `${targetMinutes}:00–${targetMinutes}:30+`;
+  // Actual estimate returned by the lyrics engine once a track is generated.
+  const [actualDurationLabel, setActualDurationLabel] = useState<string | null>(null);
+
 
 
   const [title, setTitle] = useState("");
@@ -349,6 +358,7 @@ function LibraryPage() {
           description,
           styleTags,
           language: selections.language,
+          targetDurationSec,
           foulMouth,
           personalDetails: personalDetails.trim() || undefined,
           extraContext: combinedExtra || undefined,
@@ -608,10 +618,14 @@ function LibraryPage() {
           personalDetails: songDetails || undefined,
           extraContext: combinedExtra || undefined,
           subjectName: songSubject || undefined,
+          targetDurationSec,
         },
       });
       if (stale()) return;
       if (lyricErr) throw new Error(invokeError(lyricErr, "Lyrics generation failed"));
+      setActualDurationLabel(
+        (lyricData?.estimated_duration_label ?? null) as string | null,
+      );
       const nextLyrics = (lyricData?.lyrics ?? "").toString();
       if (!nextLyrics) throw new Error("No lyrics returned");
       setLyrics(nextLyrics);
@@ -1001,11 +1015,33 @@ function LibraryPage() {
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-xs text-muted-foreground sm:text-sm">
-            Five quick steps · -{totalCost} coins · ~3 minute track
+            Five quick steps · -{totalCost} coins · expected length {expectedRange}
           </p>
           <FoulMouthToggle disabled={pipelineActive} />
         </div>
+        <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-primary/25 bg-card/50 p-3">
+          <Label htmlFor="target-length" className="text-xs font-black uppercase tracking-[0.16em]">
+            Track length
+          </Label>
+          <select
+            id="target-length"
+            value={targetMinutes}
+            onChange={(e) => setTargetMinutes(Number(e.target.value))}
+            disabled={pipelineActive}
+            className="min-h-10 rounded-xl border border-primary/30 bg-background/70 px-3 text-sm font-semibold disabled:opacity-60"
+          >
+            {[3, 4, 5, 6, 8].map((m) => (
+              <option key={m} value={m}>
+                {m} min minimum{m === 3 ? " (default)" : ""}
+              </option>
+            ))}
+          </select>
+          <span className="text-xs text-muted-foreground">
+            Minimum {MIN_TRACK_MINUTES} min is enforced — no upper limit, tracks can run longer.
+          </span>
+        </div>
       </div>
+
 
 
       <CreateNowWizard
@@ -1053,7 +1089,11 @@ function LibraryPage() {
             <p className="mt-0.5 truncate font-display text-lg font-black text-foreground sm:text-2xl">
               {readyToReview.title}
             </p>
+            <p className="mt-0.5 text-[11px] text-emerald-200/90">
+              Expected length {actualDurationLabel ?? expectedRange}
+            </p>
           </div>
+
           <div className="flex shrink-0 items-center gap-2">
             <button
               ref={reviewBtnRef}

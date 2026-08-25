@@ -50,6 +50,7 @@ const ROUTES: RouteEntry[] = [
   { path: "/admin/api-keys", file: "_authenticated/admin.api-keys.tsx", guard: "admin" },
   { path: "/admin/debug-context", file: "_authenticated/admin.debug-context.tsx", guard: "admin" },
   { path: "/admin/og-persona", file: "_authenticated/admin.og-persona.tsx", guard: "admin" },
+  { path: "/admin/health", file: "_authenticated/admin.health.tsx", guard: "admin", note: "Automated API key health check" },
   { path: "/admin/onboarding", file: "_authenticated/admin.onboarding.tsx", guard: "admin" },
   { path: "/admin/referrals-audit", file: "_authenticated/admin.referrals-audit.tsx", guard: "admin" },
   { path: "/admin/route-map", file: "_authenticated/admin.route-map.tsx", guard: "admin" },

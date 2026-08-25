@@ -45,6 +45,7 @@ import { Route as AuthenticatedAdminRouteMapRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminReferralsAuditRouteImport } from './routes/_authenticated/admin.referrals-audit'
 import { Route as AuthenticatedAdminOnboardingRouteImport } from './routes/_authenticated/admin.onboarding'
 import { Route as AuthenticatedAdminOgPersonaRouteImport } from './routes/_authenticated/admin.og-persona'
+import { Route as AuthenticatedAdminHealthRouteImport } from './routes/_authenticated/admin.health'
 import { Route as AuthenticatedAdminDebugContextRouteImport } from './routes/_authenticated/admin.debug-context'
 import { Route as AuthenticatedAdminCoinAuditRouteImport } from './routes/_authenticated/admin.coin-audit'
 import { Route as AuthenticatedAdminApiKeysRouteImport } from './routes/_authenticated/admin.api-keys'
@@ -249,6 +250,12 @@ const AuthenticatedAdminOgPersonaRoute =
     path: '/admin/og-persona',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminHealthRoute =
+  AuthenticatedAdminHealthRouteImport.update({
+    id: '/admin/health',
+    path: '/admin/health',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminDebugContextRoute =
   AuthenticatedAdminDebugContextRouteImport.update({
     id: '/admin/debug-context',
@@ -323,6 +330,7 @@ export interface FileRoutesByFullPath {
   '/admin/api-keys': typeof AuthenticatedAdminApiKeysRoute
   '/admin/coin-audit': typeof AuthenticatedAdminCoinAuditRoute
   '/admin/debug-context': typeof AuthenticatedAdminDebugContextRoute
+  '/admin/health': typeof AuthenticatedAdminHealthRoute
   '/admin/og-persona': typeof AuthenticatedAdminOgPersonaRoute
   '/admin/onboarding': typeof AuthenticatedAdminOnboardingRoute
   '/admin/referrals-audit': typeof AuthenticatedAdminReferralsAuditRoute
@@ -367,6 +375,7 @@ export interface FileRoutesByTo {
   '/admin/api-keys': typeof AuthenticatedAdminApiKeysRoute
   '/admin/coin-audit': typeof AuthenticatedAdminCoinAuditRoute
   '/admin/debug-context': typeof AuthenticatedAdminDebugContextRoute
+  '/admin/health': typeof AuthenticatedAdminHealthRoute
   '/admin/og-persona': typeof AuthenticatedAdminOgPersonaRoute
   '/admin/onboarding': typeof AuthenticatedAdminOnboardingRoute
   '/admin/referrals-audit': typeof AuthenticatedAdminReferralsAuditRoute
@@ -413,6 +422,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/api-keys': typeof AuthenticatedAdminApiKeysRoute
   '/_authenticated/admin/coin-audit': typeof AuthenticatedAdminCoinAuditRoute
   '/_authenticated/admin/debug-context': typeof AuthenticatedAdminDebugContextRoute
+  '/_authenticated/admin/health': typeof AuthenticatedAdminHealthRoute
   '/_authenticated/admin/og-persona': typeof AuthenticatedAdminOgPersonaRoute
   '/_authenticated/admin/onboarding': typeof AuthenticatedAdminOnboardingRoute
   '/_authenticated/admin/referrals-audit': typeof AuthenticatedAdminReferralsAuditRoute
@@ -459,6 +469,7 @@ export interface FileRouteTypes {
     | '/admin/api-keys'
     | '/admin/coin-audit'
     | '/admin/debug-context'
+    | '/admin/health'
     | '/admin/og-persona'
     | '/admin/onboarding'
     | '/admin/referrals-audit'
@@ -503,6 +514,7 @@ export interface FileRouteTypes {
     | '/admin/api-keys'
     | '/admin/coin-audit'
     | '/admin/debug-context'
+    | '/admin/health'
     | '/admin/og-persona'
     | '/admin/onboarding'
     | '/admin/referrals-audit'
@@ -548,6 +560,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/api-keys'
     | '/_authenticated/admin/coin-audit'
     | '/_authenticated/admin/debug-context'
+    | '/_authenticated/admin/health'
     | '/_authenticated/admin/og-persona'
     | '/_authenticated/admin/onboarding'
     | '/_authenticated/admin/referrals-audit'
@@ -832,6 +845,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminOgPersonaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/health': {
+      id: '/_authenticated/admin/health'
+      path: '/admin/health'
+      fullPath: '/admin/health'
+      preLoaderRoute: typeof AuthenticatedAdminHealthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/debug-context': {
       id: '/_authenticated/admin/debug-context'
       path: '/admin/debug-context'
@@ -919,6 +939,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminApiKeysRoute: typeof AuthenticatedAdminApiKeysRoute
   AuthenticatedAdminCoinAuditRoute: typeof AuthenticatedAdminCoinAuditRoute
   AuthenticatedAdminDebugContextRoute: typeof AuthenticatedAdminDebugContextRoute
+  AuthenticatedAdminHealthRoute: typeof AuthenticatedAdminHealthRoute
   AuthenticatedAdminOgPersonaRoute: typeof AuthenticatedAdminOgPersonaRoute
   AuthenticatedAdminOnboardingRoute: typeof AuthenticatedAdminOnboardingRoute
   AuthenticatedAdminReferralsAuditRoute: typeof AuthenticatedAdminReferralsAuditRoute
@@ -949,6 +970,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminApiKeysRoute: AuthenticatedAdminApiKeysRoute,
   AuthenticatedAdminCoinAuditRoute: AuthenticatedAdminCoinAuditRoute,
   AuthenticatedAdminDebugContextRoute: AuthenticatedAdminDebugContextRoute,
+  AuthenticatedAdminHealthRoute: AuthenticatedAdminHealthRoute,
   AuthenticatedAdminOgPersonaRoute: AuthenticatedAdminOgPersonaRoute,
   AuthenticatedAdminOnboardingRoute: AuthenticatedAdminOnboardingRoute,
   AuthenticatedAdminReferralsAuditRoute: AuthenticatedAdminReferralsAuditRoute,
