@@ -1494,18 +1494,8 @@ function LibraryPage() {
                             </Button>
                           </div>
                         ))}
-                        {!isSearching && filtered.length > PREVIEW_COUNT && (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => setShowAllYours((v) => !v)}
-                            className="mt-1 h-11 w-full rounded-xl border-white/10 bg-white/[0.04] font-bold"
-                          >
-                            {showAllYours
-                              ? `Show fewer · hide ${filtered.length - PREVIEW_COUNT}`
-                              : `Show all ${filtered.length} tracks · +${hiddenCount} more`}
-                          </Button>
-                        )}
+
+
                       </>
                     )}
                   </div>
