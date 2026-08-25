@@ -218,11 +218,17 @@
     max-width: 100%;
     height: auto;
   }
-  /* Long words/URLs/code can't blow out narrow phone widths */
+  /* Long words/URLs/code can't blow out narrow phone widths.
+     Elements explicitly opting out (whitespace-nowrap / truncate) keep one line. */
   p, li, dd, dt, h1, h2, h3, h4, h5, h6, span, a, button, label, blockquote {
     overflow-wrap: anywhere;
     word-break: break-word;
   }
+  .whitespace-nowrap, .truncate, .text-nowrap {
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+  }
+
   pre, code, kbd, samp {
     max-width: 100%;
     overflow-x: auto;

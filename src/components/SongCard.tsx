@@ -114,13 +114,13 @@ function SongCardImpl({ song }: { song: Song }) {
           </div>
         )}
 
-        <div className="mt-2 flex items-center justify-between">
+        <div className="mt-2 flex items-center justify-between gap-3">
           <span
             className={cn(
-              "text-xs font-medium",
+              "shrink-0 whitespace-nowrap text-xs font-medium",
               isReady && "text-primary",
               isPending && "text-muted-foreground",
-              isFailed && "text-destructive",
+              isFailed && "whitespace-normal text-destructive",
             )}
           >
             {isReady && "Ready"}
