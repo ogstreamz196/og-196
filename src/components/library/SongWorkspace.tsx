@@ -991,7 +991,7 @@ function LyricsSkeleton({ songId }: { songId?: string }) {
 
 
 function CostBadge({ cost }: { cost: number }) {
-  return <CoinPill>{cost} per send</CoinPill>;
+  return <CoinPill>{cost} coins</CoinPill>;
 }
 
 type GenerationStep = {
