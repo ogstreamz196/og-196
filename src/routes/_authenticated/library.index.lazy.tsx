@@ -1349,11 +1349,12 @@ function LibraryPage() {
               MusicHUB · Vault
             </div>
             <h2 data-testid="library-your-heading" className="truncate font-display text-2xl font-black tracking-tight sm:text-3xl">
-              Your Library
+              Music Library
             </h2>
             <p className="text-xs text-muted-foreground sm:text-sm">
-              Your tracks first. Community drops live in the next tab.
+              Two clear shelves — tracks you made, and tracks from everyone else.
             </p>
+
           </div>
           <div className="flex shrink-0 items-center gap-2">
             {versionedLibrary.length > 0 && (
