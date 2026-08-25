@@ -1276,7 +1276,7 @@ function LibraryPage() {
 
 
       {/* Library — luxury two-tab vault: Yours first, then Community */}
-      <section>
+      <section ref={libraryRef} id="library" className="scroll-mt-24">
         <div data-testid="library-your-header" className="mb-3 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
 
           <div className="min-w-0 space-y-1">
