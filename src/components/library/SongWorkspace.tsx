@@ -332,6 +332,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
         await persist({
           title: title.trim() || null,
           prompt: brief,
+          style: style.trim() || null,
           lyrics: lyrics.trim() || null,
         });
       }
@@ -341,9 +342,10 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
           prompt: brief,
           lyrics,
           title: title.trim() || null,
-          style: song.style ?? null,
+          style: style.trim() || song.style || null,
         },
       });
+
       if (error) {
         const msg = invokeError(error, "Could not start generation");
         if (/song not found/i.test(msg)) {
