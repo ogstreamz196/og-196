@@ -8,7 +8,7 @@ export const Route = createFileRoute("/_authenticated/admin/api-keys")({
   component: AdminApiKeysPage,
 });
 
-function AdminApiKeysPage() {
+export function AdminApiKeysPage() {
   const { isAdmin, isDev, isLoading } = useRole();
   if (isLoading) return null;
   if (!isAdmin && !isDev) return <Navigate to="/" />;

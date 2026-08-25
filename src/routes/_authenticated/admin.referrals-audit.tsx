@@ -46,7 +46,7 @@ function copy(text: string, label = "Copied") {
   );
 }
 
-function ReferralsAuditPage() {
+export function ReferralsAuditPage() {
   const { isAdmin, isLoading: roleLoading } = useRole();
   const [search, setSearch] = useState("");
   const [query, setQuery] = useState("");

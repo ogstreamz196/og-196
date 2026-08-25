@@ -35,7 +35,7 @@ function statusIcon(status: HealthCheck["status"]) {
   return <XCircle className="h-5 w-5 text-destructive" />;
 }
 
-function ApiHealthPage() {
+export function ApiHealthPage() {
   const { isAdmin, isLoading } = useRole();
   const run = useServerFn(runApiHealthCheck);
 

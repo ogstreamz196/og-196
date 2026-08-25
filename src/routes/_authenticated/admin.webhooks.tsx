@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_authenticated/admin/webhooks")({
   component: WebhooksAdminPage,
 });
 
-function WebhooksAdminPage() {
+export function WebhooksAdminPage() {
   const { isAdmin, isLoading: roleLoading } = useRole();
   const fetchEvents = useServerFn(listStripeWebhookEvents);
 

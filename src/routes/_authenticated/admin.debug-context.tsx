@@ -21,7 +21,7 @@ interface DebugRow {
   extra_context: string | null;
 }
 
-function DebugContextPage() {
+export function DebugContextPage() {
   const { isAdmin, isLoading } = useRole();
 
   const query = useQuery({

@@ -32,7 +32,7 @@ export const Route = createFileRoute("/_authenticated/admin/coin-audit")({
   component: CoinAuditPage,
 });
 
-function CoinAuditPage() {
+export function CoinAuditPage() {
   const audit = useServerFn(auditCoinBalances);
   const reconcile = useServerFn(reconcileUserCoinBalance);
   const [userId, setUserId] = useState("");
@@ -77,7 +77,6 @@ function CoinAuditPage() {
 
   return (
     <DashboardShell title="Coin Balance Audit">
-      <BossNav />
       <div className="mx-auto max-w-6xl space-y-6">
         <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
           <div className="mb-4 flex items-center gap-2">
