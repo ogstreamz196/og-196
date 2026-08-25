@@ -90,6 +90,10 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
 
   const [lyrics, setLyrics] = useState(song.lyrics ?? "");
   const [language, setLanguage] = useState(() => detectLanguage(song.prompt));
+  // Progressive disclosure: details/lyrics stay folded once the song has lyrics.
+  const [detailsOpen, setDetailsOpen] = useState(!song.lyrics);
+  const [lyricsOpen, setLyricsOpen] = useState(!song.lyrics);
+
   const { isVip } = useRole();
   const [saving, setSaving] = useState(false);
   const [genLyrics, setGenLyrics] = useState(false);
