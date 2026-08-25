@@ -233,10 +233,10 @@ Deno.serve(async (req) => {
     const data = await res.json();
     let lyrics = extractText(data);
 
-    // Length guard: a two-minute track needs ~420+ words. If the model came
+    // Length guard: a three-minute track needs ~620+ words. If the model came
     // back short, ask it to extend the same song (never a new one) once.
     const wordCount = (t: string) => t.split(/\s+/).filter(Boolean).length;
-    if (lyrics && wordCount(lyrics) < 420) {
+    if (lyrics && wordCount(lyrics) < 620) {
       await updateProgress(88, "Extending to full length…");
       try {
         const topUp = await callGemini([
@@ -246,7 +246,7 @@ Deno.serve(async (req) => {
             role: "user",
             parts: [{
               text:
-                "This draft is too short for a two-minute song. Rewrite the SAME song, keeping the existing title, theme, hook wording and section markers, but expand it to at least 480 words and 65+ lyric lines: add the missing sections from the structure, write every chorus out in full, and lengthen thin verses with new on-theme lines (no filler, no repetition beyond the hook). Output ONLY the complete lyrics.",
+                "This draft is too short for a three-minute song. Rewrite the SAME song, keeping the existing title, theme, hook wording and section markers, but expand it to at least 700 words and 95+ lyric lines: add the missing sections from the structure, write every chorus out in full, and lengthen thin verses with new on-theme lines (no filler, no repetition beyond the hook). Output ONLY the complete lyrics.",
             }],
           },
         ]);
