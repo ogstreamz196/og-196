@@ -133,7 +133,7 @@ function AdminPanel() {
   return (
     <DashboardShell title="Admin Controls">
       <BossNav />
-      <div className="mx-auto max-w-6xl space-y-8 rounded-3xl border border-border/60 bg-background/85 p-4 backdrop-blur-md sm:p-6">
+      <div className="mx-auto max-w-6xl space-y-8 rounded-3xl border border-border/60 bg-background/95 p-4 backdrop-blur-xl sm:p-6">
         {/* Expand/collapse master controls */}
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Sections</h2>
