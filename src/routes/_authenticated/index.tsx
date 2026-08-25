@@ -346,9 +346,6 @@ function DashboardHome() {
         </div>
       </section>
 
-      <TelegramConnectPrompt />
-      <TelegramLinkStatus />
-      <TelegramLinkChecklist />
 
 
 
