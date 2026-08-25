@@ -170,19 +170,29 @@ export function CreateNowWizard({
       setStep((s) => s + 1);
       return;
     }
-    onComplete({
-      title: title.trim(),
-      subjectName: subjectName.trim(),
-      description: description.trim(),
-      style: [...styles, gender].filter(Boolean).join(", "),
-      language: Array.from(new Set(["English", ...languages])).join(" + "),
-    });
+    onComplete(
+      {
+        title: title.trim(),
+        subjectName: subjectName.trim(),
+        description: description.trim(),
+        style: [...styles, gender].filter(Boolean).join(", "),
+        language: Array.from(new Set(["English", ...languages])).join(" + "),
+      },
+      { title, subjectName, description, styles, gender, languages },
+    );
     onOpenChange(false);
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] w-[calc(100vw-1.5rem)] max-w-lg overflow-y-auto rounded-2xl">
+    <Dialog open={open} onOpenChange={(v) => (v ? onOpenChange(true) : requestClose())}>
+      <DialogContent
+        onEscapeKeyDown={(e) => {
+          e.preventDefault();
+          requestClose();
+        }}
+        className="max-h-[90vh] w-[calc(100vw-1.5rem)] max-w-lg overflow-y-auto rounded-2xl"
+      >
+
         <DialogHeader className="space-y-2 text-left">
           <div className="flex items-center justify-between gap-3">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/15 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-primary">
