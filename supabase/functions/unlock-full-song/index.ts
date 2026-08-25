@@ -1,12 +1,12 @@
 // Owner unlock: charges `coins_per_full_unlock` and flips songs.unlocked=true.
 // Community unlock (non-owner downloading another user's revealed track):
-//   charges 2 OG coins from the buyer — 1 is burnt, 1 is transferred to the
+//   charges 3 OG coins from the buyer — 2 are burnt, 1 is transferred to the
 //   song's creator as a loyalty royalty. Records an unlocked_songs ledger row
 //   so song-url mode:"full" purpose:"download" can issue the signed URL.
 import { handlePreflight, jsonResponse } from "../_shared/cors.ts";
 import { adminClient, requireUser } from "../_shared/clients.ts";
 
-const COMMUNITY_COST = 2;
+const COMMUNITY_COST = 3;
 const COMMUNITY_ROYALTY = 1; // remainder (COMMUNITY_COST - COMMUNITY_ROYALTY) is burnt
 
 Deno.serve(async (req) => {
