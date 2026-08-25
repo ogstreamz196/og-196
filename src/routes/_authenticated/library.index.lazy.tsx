@@ -60,7 +60,11 @@ import { JobQueuePanel } from "@/components/library/JobQueuePanel";
 import { CategoryCard } from "@/components/library/CategoryCard";
 import { StyleComposer } from "@/components/library/StyleComposer";
 import { CollapsibleStep } from "@/components/library/CollapsibleStep";
-import { CreateNowWizard } from "@/components/library/CreateNowWizard";
+import {
+  CreateNowWizard,
+  EMPTY_DRAFT,
+  type WizardDraft,
+} from "@/components/library/CreateNowWizard";
 import { GenerationHistory } from "@/components/library/GenerationHistory";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { FoulMouthToggle } from "@/components/FoulMouthToggle";
@@ -127,6 +131,11 @@ function LibraryPage() {
   }, [profile?.display_name, user?.email, dev.isDev]);
 
   const [wizardOpen, setWizardOpen] = useState(false);
+  // Last raw wizard answers — kept so a retry (or reopening the wizard after a
+  // failure) never loses what the user already typed.
+  const [wizardDraft, setWizardDraft] = useState<WizardDraft>(EMPTY_DRAFT);
+  const statusPanelRef = useRef<HTMLElement | null>(null);
+
   const [title, setTitle] = useState("");
   const [subjectName, setSubjectName] = useState("");
   // Defaults: English locked as the default language. Genre/mood/theme are now
@@ -516,6 +525,35 @@ function LibraryPage() {
     toast.info("Generation cancelled — the status panel is cleared");
   }
 
+  /* Watchdog: if a stage hangs (provider outage, lost callback) we surface a
+   * clear timeout error instead of spinning forever. Inputs stay in state so
+   * the retry button can re-run the exact same request. */
+  const STAGE_TIMEOUT_MS: Record<string, number> = {
+    lyrics: 120_000,
+    saving: 30_000,
+    submitting: 60_000,
+    rendering: 360_000,
+  };
+  useEffect(() => {
+    const limit = STAGE_TIMEOUT_MS[pipeline.stage];
+    if (!limit) return;
+    const id = window.setTimeout(() => {
+      pipelineRunRef.current += 1;
+      pipelineLockRef.current = false;
+      setTrackedSongId(null);
+      const which = pipeline.stage === "lyrics" ? "Lyrics generation" : "The studio";
+      setPipeline((p) => ({
+        ...p,
+        stage: "error",
+        error: `${which} timed out. Nothing was lost — your details are saved, tap Try again.`,
+      }));
+      toast.error("Timed out — tap Try again, your details are saved");
+    }, limit);
+    return () => window.clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pipeline.stage, pipeline.stageStartedAt]);
+
+
   type CreateOverrides = {
     title: string;
     subjectName: string;
@@ -523,6 +561,9 @@ function LibraryPage() {
     style: string;
     language: string;
   };
+
+  // Keeps the exact payload of the last run so "Try again" reuses it verbatim.
+  const [lastOverrides, setLastOverrides] = useState<CreateOverrides | null>(null);
 
   async function createSong(override?: CreateOverrides) {
     if (pipelineLockRef.current) return;
@@ -532,9 +573,11 @@ function LibraryPage() {
         toast.error(`Need ${totalCost} coins to create a song`);
         return;
       }
+      setLastOverrides(override);
     } else if (!canRunPipeline) {
       return;
     }
+
     const songTitle = (override?.title ?? title).trim();
     const songSubject = (override?.subjectName ?? subjectName).trim();
     const songStyle = (override?.style ?? styleText).trim();
@@ -949,9 +992,10 @@ function LibraryPage() {
       <CreateNowWizard
         open={wizardOpen}
         onOpenChange={setWizardOpen}
-        defaultLanguage={selections.language ?? "English"}
+        initialDraft={wizardDraft}
         submitLabel={`Create · -${totalCost}`}
-        onComplete={(v) => {
+        onComplete={(v, draft) => {
+          setWizardDraft(draft);
           setTitle(v.title);
           setSubjectName(v.subjectName);
           setPersonalDetails(v.description.slice(0, PERSONAL_DETAILS_MAX));
@@ -959,8 +1003,14 @@ function LibraryPage() {
           setSelections({ language: v.language });
           toast.success("Track created — generating lyrics…");
           void createSong(v);
+          // Bring the live status panel into view right after the toast.
+          window.setTimeout(
+            () => statusPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }),
+            250,
+          );
         }}
       />
+
 
       <GenerationHistory songs={versionedLibrary} loading={library.isFetching} />
 
@@ -1471,6 +1521,7 @@ function LibraryPage() {
       {/* Live status bar — one-tap pipeline progress */}
       {(pipelineActive || pipeline.stage === "error") && (
         <section
+          ref={statusPanelRef}
           role="status"
           aria-live="polite"
           className="space-y-4 rounded-3xl border border-primary/40 bg-card/70 p-5 shadow-glow backdrop-blur-xl sm:p-7"
@@ -1549,15 +1600,36 @@ function LibraryPage() {
           )}
 
           {pipeline.stage === "error" && (
-            <Button
-              onClick={resetPipeline}
-              size="sm"
-              variant="outline"
-              className="gap-2"
-            >
-              <RefreshCw className="h-3.5 w-3.5" /> Try again
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                onClick={() => {
+                  resetPipeline();
+                  void createSong(lastOverrides ?? undefined);
+                }}
+                size="sm"
+                className="gap-2 bg-gradient-brand font-black uppercase tracking-wide text-primary-foreground"
+              >
+                <RefreshCw className="h-3.5 w-3.5" /> Try again
+              </Button>
+              <Button
+                type="button"
+                onClick={() => {
+                  resetPipeline();
+                  setWizardOpen(true);
+                }}
+                size="sm"
+                variant="outline"
+                className="gap-2"
+              >
+                <Sparkles className="h-3.5 w-3.5" /> Edit details
+              </Button>
+              <Button type="button" onClick={resetPipeline} size="sm" variant="ghost" className="gap-2">
+                <X className="h-3.5 w-3.5" /> Dismiss
+              </Button>
+            </div>
           )}
+
 
           {pipelineActive && (
             <Button

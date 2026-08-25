@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, Check, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Sparkles, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -7,6 +7,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,6 +30,25 @@ export type WizardResult = {
   description: string;
   style: string;
   language: string;
+};
+
+/** Raw wizard inputs — kept by the parent so a retry never loses them. */
+export type WizardDraft = {
+  title: string;
+  subjectName: string;
+  description: string;
+  styles: string[];
+  gender: string;
+  languages: string[];
+};
+
+export const EMPTY_DRAFT: WizardDraft = {
+  title: "",
+  subjectName: "",
+  description: "",
+  styles: [],
+  gender: "",
+  languages: [],
 };
 
 const GENDERS = ["Female vocal", "Male vocal", "Duo", "Any voice"];
@@ -37,13 +66,13 @@ export function CreateNowWizard({
   open,
   onOpenChange,
   onComplete,
-  defaultLanguage = "English",
+  initialDraft,
   submitLabel = "Create my song",
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  onComplete: (result: WizardResult) => void;
-  defaultLanguage?: string;
+  onComplete: (result: WizardResult, draft: WizardDraft) => void;
+  initialDraft?: WizardDraft;
   submitLabel?: string;
 }) {
   const [step, setStep] = useState(1);
@@ -53,15 +82,56 @@ export function CreateNowWizard({
   const [styles, setStyles] = useState<string[]>([]);
   const [gender, setGender] = useState("");
   const [languages, setLanguages] = useState<string[]>([]);
+  const [confirmClose, setConfirmClose] = useState(false);
 
   const toggle = (list: string[], v: string) =>
     list.includes(v) ? list.filter((x) => x !== v) : [...list, v];
 
-  // Fresh start each time the wizard opens.
+  // Reopen with whatever the user last entered so a retry keeps their work.
   useEffect(() => {
     if (!open) return;
     setStep(1);
+    setConfirmClose(false);
+    const d = initialDraft;
+    if (!d) return;
+    setTitle(d.title);
+    setSubjectName(d.subjectName);
+    setDescription(d.description);
+    setStyles(d.styles);
+    setGender(d.gender);
+    setLanguages(d.languages);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
+
+  const dirty =
+    title.trim().length > 0 ||
+    subjectName.trim().length > 0 ||
+    description.trim().length > 0 ||
+    styles.length > 0 ||
+    languages.length > 0 ||
+    gender.length > 0;
+
+  /** Guard closing mid-step: confirm first, unless nothing was entered. */
+  function requestClose() {
+    if (dirty || step > 1) {
+      setConfirmClose(true);
+      return;
+    }
+    onOpenChange(false);
+  }
+
+  function discardAndClose() {
+    setConfirmClose(false);
+    setTitle("");
+    setSubjectName("");
+    setDescription("");
+    setStyles([]);
+    setGender("");
+    setLanguages([]);
+    setStep(1);
+    onOpenChange(false);
+  }
+
 
   const stepValid = useMemo(() => {
     switch (step) {
@@ -100,19 +170,29 @@ export function CreateNowWizard({
       setStep((s) => s + 1);
       return;
     }
-    onComplete({
-      title: title.trim(),
-      subjectName: subjectName.trim(),
-      description: description.trim(),
-      style: [...styles, gender].filter(Boolean).join(", "),
-      language: Array.from(new Set(["English", ...languages])).join(" + "),
-    });
+    onComplete(
+      {
+        title: title.trim(),
+        subjectName: subjectName.trim(),
+        description: description.trim(),
+        style: [...styles, gender].filter(Boolean).join(", "),
+        language: Array.from(new Set(["English", ...languages])).join(" + "),
+      },
+      { title, subjectName, description, styles, gender, languages },
+    );
     onOpenChange(false);
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] w-[calc(100vw-1.5rem)] max-w-lg overflow-y-auto rounded-2xl">
+    <Dialog open={open} onOpenChange={(v) => (v ? onOpenChange(true) : requestClose())}>
+      <DialogContent
+        onEscapeKeyDown={(e) => {
+          e.preventDefault();
+          requestClose();
+        }}
+        className="max-h-[90vh] w-[calc(100vw-1.5rem)] max-w-lg overflow-y-auto rounded-2xl"
+      >
+
         <DialogHeader className="space-y-2 text-left">
           <div className="flex items-center justify-between gap-3">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/15 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-primary">
@@ -312,21 +392,31 @@ export function CreateNowWizard({
           </p>
         )}
 
-        <div className="flex items-center justify-between gap-2 pt-1">
+        <div className="flex flex-wrap items-center gap-2 pt-1">
           <Button
             type="button"
             variant="ghost"
-            onClick={() => (step === 1 ? onOpenChange(false) : setStep((s) => s - 1))}
+            disabled={step === 1}
+            onClick={() => setStep((s) => Math.max(1, s - 1))}
             className="min-h-11 gap-1.5"
           >
             <ArrowLeft className="h-4 w-4" />
-            {step === 1 ? "Cancel" : "Back"}
+            Back
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={requestClose}
+            className="min-h-11 gap-1.5 text-muted-foreground hover:text-destructive"
+          >
+            <X className="h-4 w-4" />
+            Cancel
           </Button>
           <Button
             type="button"
             onClick={next}
             disabled={!stepValid}
-            className="min-h-11 flex-1 gap-1.5 bg-gradient-brand font-black uppercase tracking-wide text-primary-foreground shadow-glow sm:flex-none"
+            className="ml-auto min-h-11 flex-1 gap-1.5 bg-gradient-brand font-black uppercase tracking-wide text-primary-foreground shadow-glow sm:flex-none"
           >
             {step === TOTAL_STEPS ? (
               <>
@@ -342,6 +432,40 @@ export function CreateNowWizard({
           </Button>
         </div>
       </DialogContent>
+
+      <AlertDialog open={confirmClose} onOpenChange={setConfirmClose}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Close before finishing?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You're on step {step} of {TOTAL_STEPS}. Keep your answers and come back later, or
+              discard them and start fresh.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2">
+            <AlertDialogCancel className="min-h-11">Keep editing</AlertDialogCancel>
+            <Button
+              type="button"
+              variant="secondary"
+              className="min-h-11"
+              onClick={() => {
+                setConfirmClose(false);
+                onOpenChange(false);
+              }}
+            >
+              Save &amp; close
+            </Button>
+            <AlertDialogAction
+              onClick={discardAndClose}
+              className="min-h-11 bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Discard
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
+
   );
+
 }
