@@ -538,6 +538,7 @@ function LibraryPage() {
           subjectName: subjectName.trim() || undefined,
         },
       });
+      if (stale()) return;
       if (lyricErr) throw new Error(invokeError(lyricErr, "Lyrics generation failed"));
       const nextLyrics = (lyricData?.lyrics ?? "").toString();
       if (!nextLyrics) throw new Error("No lyrics returned");
@@ -565,6 +566,7 @@ function LibraryPage() {
         } as never)
         .select("id")
         .single();
+      if (stale()) return;
       if (insertErr || !row?.id) throw new Error(insertErr?.message || "Couldn't save song");
 
       advanceStage("submitting");
@@ -577,6 +579,7 @@ function LibraryPage() {
           style: style || null,
         },
       });
+      if (stale()) return;
       if (genErr) throw new Error(invokeError(genErr, "Could not start generation"));
 
       // Stay on the page: a realtime subscription on this row drives the
@@ -587,6 +590,7 @@ function LibraryPage() {
       toast.success(`Cooking your sample · -${totalCost} coins`);
 
     } catch (e) {
+      if (stale()) return;
       const msg = e instanceof Error ? e.message : "Something went wrong";
       setPipeline((p) => ({ ...p, stage: "error", error: msg }));
       toast.error(msg);
@@ -1480,15 +1484,24 @@ function LibraryPage() {
 
           {pipeline.stage === "error" && (
             <Button
-              onClick={() => {
-                setPipeline({ stage: "idle", startedAt: 0, stageStartedAt: 0, durations: {} });
-                setPipelineNow(0);
-              }}
+              onClick={resetPipeline}
               size="sm"
               variant="outline"
               className="gap-2"
             >
               <RefreshCw className="h-3.5 w-3.5" /> Try again
+            </Button>
+          )}
+
+          {pipelineActive && (
+            <Button
+              type="button"
+              onClick={cancelGeneration}
+              size="sm"
+              variant="outline"
+              className="gap-2 border-destructive/50 text-destructive hover:bg-destructive/10"
+            >
+              <X className="h-3.5 w-3.5" /> Cancel generation
             </Button>
           )}
         </section>
