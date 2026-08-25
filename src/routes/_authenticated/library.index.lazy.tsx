@@ -532,6 +532,9 @@ function LibraryPage() {
     language: string;
   };
 
+  // Keeps the exact payload of the last run so "Try again" reuses it verbatim.
+  const [lastOverrides, setLastOverrides] = useState<CreateOverrides | null>(null);
+
   async function createSong(override?: CreateOverrides) {
     if (pipelineLockRef.current) return;
     if (!user) return;
@@ -540,9 +543,11 @@ function LibraryPage() {
         toast.error(`Need ${totalCost} coins to create a song`);
         return;
       }
+      setLastOverrides(override);
     } else if (!canRunPipeline) {
       return;
     }
+
     const songTitle = (override?.title ?? title).trim();
     const songSubject = (override?.subjectName ?? subjectName).trim();
     const songStyle = (override?.style ?? styleText).trim();
