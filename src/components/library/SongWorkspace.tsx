@@ -210,9 +210,12 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const dirty =
     title !== (song.title ?? "") ||
     brief !== (song.prompt ?? "") ||
+    style !== (song.style ?? "") ||
     lyrics !== (song.lyrics ?? "");
 
-  async function persist(patch: Partial<{ title: string | null; prompt: string; lyrics: string | null }>) {
+  async function persist(
+    patch: Partial<{ title: string | null; prompt: string; style: string | null; lyrics: string | null }>,
+  ) {
     // Community songs aren't editable by the viewer — skip persistence, keep generation working.
     if (!isOwner) return;
     const { error } = await supabase.from("songs").update(patch).eq("id", song.id);
@@ -225,9 +228,10 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       await persist({
         title: title.trim() || null,
         prompt: brief,
+        style: style.trim() || null,
         lyrics: lyrics.trim() || null,
       });
-      toast.success("Saved");
+      toast.success("Changes saved");
       onSaved?.();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not save");
@@ -235,6 +239,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       setSaving(false);
     }
   }
+
 
   async function generateLyrics() {
     if (missing) {
