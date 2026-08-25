@@ -916,6 +916,9 @@ function LibraryPage() {
           <h1 className="font-display text-2xl font-black leading-[1.1] tracking-[-0.02em] break-words sm:text-5xl lg:text-6xl">
             Hey <span className="text-gradient-brand">{firstName}</span> — let's write a song.
           </h1>
+          <p className="mt-1 text-sm font-semibold text-muted-foreground sm:text-base">
+            Create your track in minutes.
+          </p>
         </div>
         <div className="inline-flex shrink-0 items-center gap-2 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 to-card/60 px-4 py-2 shadow-[0_8px_28px_-12px_oklch(0.7_0.2_300_/_0.45)]">
           <Coins className="h-5 w-5 text-primary" aria-hidden="true" />
@@ -923,6 +926,41 @@ function LibraryPage() {
           <span className="hidden text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground sm:inline">coins</span>
         </div>
       </header>
+
+      {/* Primary entry point — opens the 5-step creation wizard */}
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <Button
+          type="button"
+          onClick={() => setWizardOpen(true)}
+          disabled={pipelineActive}
+          className="min-h-14 w-full gap-2 rounded-2xl bg-gradient-brand text-base font-black uppercase tracking-[0.14em] text-primary-foreground shadow-glow sm:w-auto sm:px-10 sm:text-lg"
+        >
+          <Sparkles className="h-5 w-5" />
+          {pipelineActive ? "Cooking your track…" : "Create now"}
+        </Button>
+        <p className="text-xs text-muted-foreground sm:text-sm">
+          Five quick steps · -{totalCost} coins
+        </p>
+      </div>
+
+      <CreateNowWizard
+        open={wizardOpen}
+        onOpenChange={setWizardOpen}
+        defaultLanguage={selections.language ?? "English"}
+        submitLabel={`Create · -${totalCost}`}
+        onComplete={(v) => {
+          setTitle(v.title);
+          setSubjectName(v.subjectName);
+          setPersonalDetails(v.description.slice(0, PERSONAL_DETAILS_MAX));
+          setStyleText(v.style);
+          setSelections({ language: v.language });
+          toast.success("Track created — generating lyrics…");
+          void createSong(v);
+        }}
+      />
+
+      <GenerationHistory songs={versionedLibrary} loading={library.isFetching} />
+
 
       {/* Prominent Review banner — only visible when a freshly finished song is waiting to be reviewed */}
       {readyToReview && (
