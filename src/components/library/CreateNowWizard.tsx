@@ -392,21 +392,31 @@ export function CreateNowWizard({
           </p>
         )}
 
-        <div className="flex items-center justify-between gap-2 pt-1">
+        <div className="flex flex-wrap items-center gap-2 pt-1">
           <Button
             type="button"
             variant="ghost"
-            onClick={() => (step === 1 ? onOpenChange(false) : setStep((s) => s - 1))}
+            disabled={step === 1}
+            onClick={() => setStep((s) => Math.max(1, s - 1))}
             className="min-h-11 gap-1.5"
           >
             <ArrowLeft className="h-4 w-4" />
-            {step === 1 ? "Cancel" : "Back"}
+            Back
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={requestClose}
+            className="min-h-11 gap-1.5 text-muted-foreground hover:text-destructive"
+          >
+            <X className="h-4 w-4" />
+            Cancel
           </Button>
           <Button
             type="button"
             onClick={next}
             disabled={!stepValid}
-            className="min-h-11 flex-1 gap-1.5 bg-gradient-brand font-black uppercase tracking-wide text-primary-foreground shadow-glow sm:flex-none"
+            className="ml-auto min-h-11 flex-1 gap-1.5 bg-gradient-brand font-black uppercase tracking-wide text-primary-foreground shadow-glow sm:flex-none"
           >
             {step === TOTAL_STEPS ? (
               <>
@@ -422,6 +432,40 @@ export function CreateNowWizard({
           </Button>
         </div>
       </DialogContent>
+
+      <AlertDialog open={confirmClose} onOpenChange={setConfirmClose}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Close before finishing?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You're on step {step} of {TOTAL_STEPS}. Keep your answers and come back later, or
+              discard them and start fresh.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2">
+            <AlertDialogCancel className="min-h-11">Keep editing</AlertDialogCancel>
+            <Button
+              type="button"
+              variant="secondary"
+              className="min-h-11"
+              onClick={() => {
+                setConfirmClose(false);
+                onOpenChange(false);
+              }}
+            >
+              Save &amp; close
+            </Button>
+            <AlertDialogAction
+              onClick={discardAndClose}
+              className="min-h-11 bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Discard
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
     </Dialog>
   );
+
 }
