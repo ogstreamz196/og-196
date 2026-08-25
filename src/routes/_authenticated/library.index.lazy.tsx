@@ -60,7 +60,11 @@ import { JobQueuePanel } from "@/components/library/JobQueuePanel";
 import { CategoryCard } from "@/components/library/CategoryCard";
 import { StyleComposer } from "@/components/library/StyleComposer";
 import { CollapsibleStep } from "@/components/library/CollapsibleStep";
-import { CreateNowWizard } from "@/components/library/CreateNowWizard";
+import {
+  CreateNowWizard,
+  EMPTY_DRAFT,
+  type WizardDraft,
+} from "@/components/library/CreateNowWizard";
 import { GenerationHistory } from "@/components/library/GenerationHistory";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { FoulMouthToggle } from "@/components/FoulMouthToggle";
