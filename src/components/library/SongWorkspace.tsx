@@ -239,10 +239,8 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       toast.error("This song is no longer available");
       return;
     }
-    if (!isOwner) {
-      toast.error("This is a community song — open the studio to create your own");
-      return;
-    }
+
+
     if (!brief.trim() && !title.trim()) {
       toast.error("Add a title or a brief first");
       return;
@@ -307,10 +305,8 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       toast.error("This song is no longer available");
       return;
     }
-    if (!isOwner) {
-      toast.error("This is a community song — open the studio to create your own");
-      return;
-    }
+
+
     if (!hasLyrics) {
       toast.error("Generate lyrics first");
       return;
