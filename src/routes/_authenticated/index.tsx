@@ -48,9 +48,6 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { TelegramLinkStatus } from "@/components/dashboard/TelegramLinkStatus";
-import { TelegramLinkChecklist } from "@/components/dashboard/TelegramLinkChecklist";
-import { TelegramConnectPrompt } from "@/components/dashboard/TelegramConnectPrompt";
 import { DodgyLogo } from "@/components/welcome/DodgyLogo";
 import { DodgyText } from "@/components/welcome/DodgyText";
 
