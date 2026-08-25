@@ -1539,22 +1539,22 @@ function LibraryPage() {
                     )
                   : communityTracks;
                 return (
-                  <div className="grid gap-3">
-                    {filtered.map((s) => (
-                      <div key={s.id} className="block rounded-2xl">
-                        <SongCard song={s} />
-                      </div>
-                    ))}
+                  <div className="space-y-2">
+                    <ul className="divide-y divide-border/40 overflow-hidden rounded-2xl border border-border/60 bg-card/30">
+                      {filtered.map((s) => (
+                        <CommunityTrackRow key={s.id} song={s} />
+                      ))}
+                    </ul>
                     <div ref={communitySentinelRef} className="h-1" aria-hidden />
                     {community.isFetchingNextPage && (
-                      <div className="grid gap-3">
+                      <div className="grid gap-2">
                         {[0, 1].map((i) => (
                           <SongCardSkeleton key={`more-${i}`} label="Loading" />
                         ))}
                       </div>
                     )}
                     {!community.hasNextPage && (
-                      <p className="py-4 text-center text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                      <p className="py-3 text-center text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                         You've reached the end
                       </p>
                     )}
