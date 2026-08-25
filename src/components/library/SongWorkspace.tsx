@@ -86,6 +86,8 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
 
   const [title, setTitle] = useState(song.title ?? "");
   const [brief, setBrief] = useState(song.prompt ?? "");
+  const [style, setStyle] = useState(song.style ?? "");
+
   const [lyrics, setLyrics] = useState(song.lyrics ?? "");
   const [language, setLanguage] = useState(() => detectLanguage(song.prompt));
   const { isVip } = useRole();
@@ -210,9 +212,12 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const dirty =
     title !== (song.title ?? "") ||
     brief !== (song.prompt ?? "") ||
+    style !== (song.style ?? "") ||
     lyrics !== (song.lyrics ?? "");
 
-  async function persist(patch: Partial<{ title: string | null; prompt: string; lyrics: string | null }>) {
+  async function persist(
+    patch: Partial<{ title: string | null; prompt: string; style: string | null; lyrics: string | null }>,
+  ) {
     // Community songs aren't editable by the viewer — skip persistence, keep generation working.
     if (!isOwner) return;
     const { error } = await supabase.from("songs").update(patch).eq("id", song.id);
@@ -225,9 +230,10 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       await persist({
         title: title.trim() || null,
         prompt: brief,
+        style: style.trim() || null,
         lyrics: lyrics.trim() || null,
       });
-      toast.success("Saved");
+      toast.success("Changes saved");
       onSaved?.();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not save");
@@ -235,6 +241,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       setSaving(false);
     }
   }
+
 
   async function generateLyrics() {
     if (missing) {
@@ -256,7 +263,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       const nextBrief = languageChanged ? setBriefLanguage(brief, language) : brief;
       if (nextBrief !== brief) setBrief(nextBrief);
       if (dirty || nextBrief !== (song.prompt ?? "")) {
-        await persist({ title: title.trim() || null, prompt: nextBrief });
+        await persist({ title: title.trim() || null, prompt: nextBrief, style: style.trim() || null });
       }
 
       const { data, error } = await supabase.functions.invoke("generate-lyrics", {
@@ -264,7 +271,8 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
           song_id: isOwner ? song.id : null,
           songName: title.trim(),
           description: nextBrief.trim(),
-          styleTags: song.style ? song.style.split("·").map((s) => s.trim()).filter(Boolean) : [],
+          styleTags: style ? style.split("·").map((s) => s.trim()).filter(Boolean) : [],
+
           foulMouth,
           language,
         },
@@ -326,6 +334,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
         await persist({
           title: title.trim() || null,
           prompt: brief,
+          style: style.trim() || null,
           lyrics: lyrics.trim() || null,
         });
       }
@@ -335,9 +344,10 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
           prompt: brief,
           lyrics,
           title: title.trim() || null,
-          style: song.style ?? null,
+          style: style.trim() || song.style || null,
         },
       });
+
       if (error) {
         const msg = invokeError(error, "Could not start generation");
         if (/song not found/i.test(msg)) {
@@ -529,6 +539,18 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                 </div>
               )}
               <div className="space-y-1.5">
+                <Label htmlFor="song-style">Song style</Label>
+                <Input
+                  id="song-style"
+                  value={style}
+                  onChange={(e) => setStyle(e.target.value)}
+                  placeholder="Drill · dark piano · gritty male vocal"
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  Separate style tags with · — these drive the sound of the next regenerate.
+                </p>
+              </div>
+              <div className="space-y-1.5">
                 <Label htmlFor="song-brief">Brief</Label>
                 <Textarea
                   id="song-brief"
@@ -538,6 +560,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                   placeholder="Who is the song about, the mood, references, memories…"
                 />
               </div>
+
 
 
               <div className="space-y-1.5">

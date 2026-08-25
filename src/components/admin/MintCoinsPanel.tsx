@@ -15,6 +15,8 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { UserAuditTrail } from "./UserAuditTrail";
 import { CollapsiblePanel } from "@/components/ui/collapsible-panel";
+import { ConfirmAction } from "./ConfirmAction";
+
 
 interface ProfileLite {
   id: string;
@@ -260,32 +262,75 @@ export function MintCoinsPanel() {
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        <Button
-          onClick={() => mint.mutate(Math.abs(numericAmount))}
-          disabled={disabled}
-          className="bg-gradient-brand text-primary-foreground"
+        <ConfirmAction
+          tooltip={`Adds ${Math.abs(numericAmount || 0)} coins to this user's balance. Logged in the coin audit trail.`}
+          title={`Award ${Math.abs(numericAmount || 0)} coins?`}
+          confirmLabel="Award coins"
+          description={
+            <>
+              <p>
+                <b>{selected?.email ?? "No user selected"}</b> goes from{" "}
+                <b>{selected?.coin_balance ?? 0}</b> to{" "}
+                <b>{(selected?.coin_balance ?? 0) + Math.abs(numericAmount || 0)}</b> coins.
+              </p>
+              <p>This is written to the coin audit trail with your notes.</p>
+            </>
+          }
+          onConfirm={() => mint.mutate(Math.abs(numericAmount))}
         >
-          {mint.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
-          Award {Math.abs(numericAmount || 0)} coins
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => mint.mutate(-Math.abs(numericAmount))}
-          disabled={disabled}
+          <Button disabled={disabled} className="bg-gradient-brand text-primary-foreground">
+            {mint.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
+            Award {Math.abs(numericAmount || 0)} coins
+          </Button>
+        </ConfirmAction>
+
+        <ConfirmAction
+          destructive
+          tooltip={`Burns ${Math.abs(numericAmount || 0)} coins from this user's balance. This cannot be undone automatically.`}
+          title={`Burn ${Math.abs(numericAmount || 0)} coins?`}
+          confirmLabel="Burn coins"
+          description={
+            <>
+              <p>
+                <b>{selected?.email ?? "No user selected"}</b> goes from{" "}
+                <b>{selected?.coin_balance ?? 0}</b> to{" "}
+                <b>{Math.max(0, (selected?.coin_balance ?? 0) - Math.abs(numericAmount || 0))}</b> coins.
+              </p>
+              <p>Deductions are permanent — you'd have to award coins back manually.</p>
+            </>
+          }
+          onConfirm={() => mint.mutate(-Math.abs(numericAmount))}
         >
-          <Minus className="mr-2 h-4 w-4" />
-          Deduct {Math.abs(numericAmount || 0)}
-        </Button>
-        <Button
-          variant="secondary"
-          onClick={() => setExact.mutate(Math.abs(numericAmount))}
-          disabled={setExact.isPending || !selected || !Number.isFinite(numericAmount) || numericAmount < 0}
-          title="Sets the balance to exactly this number (logs the delta)"
+          <Button variant="outline" disabled={disabled}>
+            <Minus className="mr-2 h-4 w-4" />
+            Deduct {Math.abs(numericAmount || 0)}
+          </Button>
+        </ConfirmAction>
+
+        <ConfirmAction
+          destructive
+          tooltip="Overwrites the balance with this exact number, ignoring the current value. The delta is logged."
+          title={`Set balance to exactly ${Math.abs(numericAmount || 0)}?`}
+          confirmLabel="Overwrite balance"
+          description={
+            <p>
+              <b>{selected?.email ?? "No user selected"}</b> currently has{" "}
+              <b>{selected?.coin_balance ?? 0}</b> coins. This overwrites the balance to{" "}
+              <b>{Math.abs(numericAmount || 0)}</b> and logs the difference.
+            </p>
+          }
+          onConfirm={() => setExact.mutate(Math.abs(numericAmount))}
         >
-          {setExact.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Equal className="mr-2 h-4 w-4" />}
-          Set to {Math.abs(numericAmount || 0)}
-        </Button>
+          <Button
+            variant="secondary"
+            disabled={setExact.isPending || !selected || !Number.isFinite(numericAmount) || numericAmount < 0}
+          >
+            {setExact.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Equal className="mr-2 h-4 w-4" />}
+            Set to {Math.abs(numericAmount || 0)}
+          </Button>
+        </ConfirmAction>
       </div>
+
 
       {selected && (
         <UserAuditTrail userId={selected.id} email={selected.email} />

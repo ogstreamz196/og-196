@@ -15,6 +15,8 @@ import { toast } from "sonner";
 import { getTelegramWebhookStatus } from "@/lib/telegram-webhook-status.functions";
 import { setTelegramWebhook } from "@/lib/telegram-set-webhook.functions";
 import { cn } from "@/lib/utils";
+import { ConfirmAction } from "./ConfirmAction";
+
 
 const LAST_SET_KEY = "telegram:lastSetWebhookAt";
 const AUTO_ATTEMPT_KEY = "telegram:autoRegisterAttemptedAt";
@@ -178,21 +180,33 @@ export function TelegramWebhookStatus({ autoRegister = true }: Props = {}) {
               />
               Refresh
             </button>
-            <button
-              type="button"
-              onClick={() => registerWebhook()}
-              disabled={registering}
-              className="inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary hover:bg-primary/20 disabled:opacity-60"
-              aria-label="Re-register webhook on the active bot"
-              title="Point Telegram at this app's webhook using the active bot token"
+            <ConfirmAction
+              tooltip="Points Telegram at this app's webhook using the active bot token. Any other app currently receiving this bot's updates will stop."
+              title="Re-register the Telegram webhook?"
+              confirmLabel="Re-register webhook"
+              description={
+                <>
+                  <p>Telegram allows one webhook per bot token.</p>
+                  <p>Updates for this bot will be delivered to this app from now on.</p>
+                </>
+              }
+              onConfirm={() => registerWebhook()}
             >
-              {registering ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
-              ) : (
-                <Plug className="h-3 w-3" />
-              )}
-              Re-register
-            </button>
+              <button
+                type="button"
+                disabled={registering}
+                className="inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary hover:bg-primary/20 disabled:opacity-60"
+                aria-label="Re-register webhook on the active bot"
+              >
+                {registering ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Plug className="h-3 w-3" />
+                )}
+                Re-register
+              </button>
+            </ConfirmAction>
+
           </div>
 
           {data?.url ? (
