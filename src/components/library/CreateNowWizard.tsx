@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, Check, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Sparkles, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -7,6 +7,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,6 +30,25 @@ export type WizardResult = {
   description: string;
   style: string;
   language: string;
+};
+
+/** Raw wizard inputs — kept by the parent so a retry never loses them. */
+export type WizardDraft = {
+  title: string;
+  subjectName: string;
+  description: string;
+  styles: string[];
+  gender: string;
+  languages: string[];
+};
+
+export const EMPTY_DRAFT: WizardDraft = {
+  title: "",
+  subjectName: "",
+  description: "",
+  styles: [],
+  gender: "",
+  languages: [],
 };
 
 const GENDERS = ["Female vocal", "Male vocal", "Duo", "Any voice"];
@@ -37,13 +66,13 @@ export function CreateNowWizard({
   open,
   onOpenChange,
   onComplete,
-  defaultLanguage = "English",
+  initialDraft,
   submitLabel = "Create my song",
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  onComplete: (result: WizardResult) => void;
-  defaultLanguage?: string;
+  onComplete: (result: WizardResult, draft: WizardDraft) => void;
+  initialDraft?: WizardDraft;
   submitLabel?: string;
 }) {
   const [step, setStep] = useState(1);
@@ -53,15 +82,56 @@ export function CreateNowWizard({
   const [styles, setStyles] = useState<string[]>([]);
   const [gender, setGender] = useState("");
   const [languages, setLanguages] = useState<string[]>([]);
+  const [confirmClose, setConfirmClose] = useState(false);
 
   const toggle = (list: string[], v: string) =>
     list.includes(v) ? list.filter((x) => x !== v) : [...list, v];
 
-  // Fresh start each time the wizard opens.
+  // Reopen with whatever the user last entered so a retry keeps their work.
   useEffect(() => {
     if (!open) return;
     setStep(1);
+    setConfirmClose(false);
+    const d = initialDraft;
+    if (!d) return;
+    setTitle(d.title);
+    setSubjectName(d.subjectName);
+    setDescription(d.description);
+    setStyles(d.styles);
+    setGender(d.gender);
+    setLanguages(d.languages);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
+
+  const dirty =
+    title.trim().length > 0 ||
+    subjectName.trim().length > 0 ||
+    description.trim().length > 0 ||
+    styles.length > 0 ||
+    languages.length > 0 ||
+    gender.length > 0;
+
+  /** Guard closing mid-step: confirm first, unless nothing was entered. */
+  function requestClose() {
+    if (dirty || step > 1) {
+      setConfirmClose(true);
+      return;
+    }
+    onOpenChange(false);
+  }
+
+  function discardAndClose() {
+    setConfirmClose(false);
+    setTitle("");
+    setSubjectName("");
+    setDescription("");
+    setStyles([]);
+    setGender("");
+    setLanguages([]);
+    setStep(1);
+    onOpenChange(false);
+  }
+
 
   const stepValid = useMemo(() => {
     switch (step) {
