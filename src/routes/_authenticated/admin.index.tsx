@@ -140,16 +140,17 @@ function AdminPanel() {
           padding="p-4"
           icon={<ShieldCheck className="h-5 w-5 text-primary-foreground" />}
           title="Admin tools"
-          subtitle="Standalone pages outside the main nav."
+          subtitle="Merged tool pages."
         >
           <div className="flex flex-wrap gap-2">
+            <Link to="/admin/system"><Button size="sm" variant="outline">System</Button></Link>
+            <Link to="/admin/audit"><Button size="sm" variant="outline">Audit</Button></Link>
+            <Link to="/admin/store"><Button size="sm" variant="outline">Store</Button></Link>
             <Link to="/admin/og-persona"><Button size="sm" variant="outline">OG Bot Persona</Button></Link>
-            
-            <Link to="/admin/api-keys"><Button size="sm" variant="outline">API Keys</Button></Link>
-            <Link to="/admin/debug-context"><Button size="sm" variant="outline">Lyric Context Debug</Button></Link>
-            <Link to="/admin/referrals-audit"><Button size="sm" variant="outline">Referral audit</Button></Link>
+            <Link to="/admin/onboarding"><Button size="sm" variant="outline">Onboarding</Button></Link>
           </div>
         </AdminSection>
+
 
         {/* Expand/collapse master controls */}
         <div className="flex flex-wrap items-center justify-between gap-2">
