@@ -3,7 +3,6 @@ import { useMemo } from "react";
 import { ShieldCheck, ShieldAlert, Lock, Globe, ExternalLink, Map } from "lucide-react";
 import { useRole } from "@/hooks/use-role";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import { BossNav } from "@/components/admin/BossNav";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";

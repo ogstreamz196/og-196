@@ -5,7 +5,6 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMutation } from "@tanstack/react-query";
 import { AlertTriangle, CheckCircle2, Loader2, RefreshCw, Scale, ShieldCheck } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import { BossNav } from "@/components/admin/BossNav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
