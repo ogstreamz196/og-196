@@ -132,7 +132,7 @@ export function CoinAuditPage() {
                 </span>
               </div>
               <Link
-                to="/admin/webhooks"
+                to="/admin/system"
                 className="text-xs text-muted-foreground underline-offset-4 hover:underline"
               >
                 Webhook delivery →
