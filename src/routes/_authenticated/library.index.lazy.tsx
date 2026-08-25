@@ -66,7 +66,6 @@ import {
   type WizardDraft,
 } from "@/components/library/CreateNowWizard";
 import { CommunityTrackRow } from "@/components/library/CommunityTrackRow";
-import { GenerationHistory } from "@/components/library/GenerationHistory";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { FoulMouthToggle } from "@/components/FoulMouthToggle";
 
@@ -270,7 +269,6 @@ function LibraryPage() {
   const [deleting, setDeleting] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [yoursSearch, setYoursSearch] = useState("");
-  const [showAllYours, setShowAllYours] = useState(false);
   const [communitySearch, setCommunitySearch] = useState("");
 
   // Build a human-readable line from language + freeform style text.
@@ -972,7 +970,7 @@ function LibraryPage() {
   }
 
   return (
-    <div data-testid="library-root" data-scroll-fade className="relative mx-auto flex w-full max-w-5xl flex-col gap-6 pb-[calc(env(safe-area-inset-bottom)+96px)] [touch-action:pan-y] [scroll-padding-block:24px] md:pb-20">
+    <div data-testid="library-root" data-scroll-fade className="relative mx-auto flex w-full max-w-5xl flex-col gap-8 rounded-none border-x-0 border-white/[0.06] bg-background/55 px-4 pb-[calc(env(safe-area-inset-bottom)+96px)] pt-2 backdrop-blur-2xl [scroll-padding-block:24px] [touch-action:pan-y] sm:rounded-3xl sm:border sm:px-6 md:pb-20">
       {/* Ambient crimson aura — prestige depth, never competes with content */}
       <div
         aria-hidden="true"
@@ -1003,8 +1001,9 @@ function LibraryPage() {
       {/* Primary entry points — one dominant action, controls demoted to a quiet strip */}
       <section
         aria-label="Create a track"
-        className="rounded-3xl border border-white/[0.07] bg-card/40 p-4 backdrop-blur-sm sm:p-5"
+        className="border-b border-white/[0.07] pb-6"
       >
+
         <div className="flex gap-3">
           <Button
             type="button"
@@ -1091,7 +1090,6 @@ function LibraryPage() {
       />
 
 
-      <GenerationHistory songs={versionedLibrary} loading={library.isFetching} />
 
 
       {/* Prominent Review banner — only visible when a freshly finished song is waiting to be reviewed */}
@@ -1349,11 +1347,12 @@ function LibraryPage() {
               MusicHUB · Vault
             </div>
             <h2 data-testid="library-your-heading" className="truncate font-display text-2xl font-black tracking-tight sm:text-3xl">
-              Your Library
+              Music Library
             </h2>
             <p className="text-xs text-muted-foreground sm:text-sm">
-              Your tracks first. Community drops live in the next tab.
+              Two clear shelves — tracks you made, and tracks from everyone else.
             </p>
+
           </div>
           <div className="flex shrink-0 items-center gap-2">
             {versionedLibrary.length > 0 && (
@@ -1406,7 +1405,7 @@ function LibraryPage() {
               className="group flex items-center gap-2 rounded-none border-b-2 border-transparent bg-transparent px-1 pb-3 pt-0 text-sm font-bold text-muted-foreground shadow-none transition-colors data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none"
             >
               <Crown className="h-4 w-4 text-primary" />
-              <span className="truncate">Yours</span>
+              <span className="truncate">My creations</span>
               <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-black tabular-nums text-foreground/90">
                 {completedTracks.length}
               </span>
@@ -1416,7 +1415,7 @@ function LibraryPage() {
               className="group flex items-center gap-2 rounded-none border-b-2 border-transparent bg-transparent px-1 pb-3 pt-0 text-sm font-bold text-muted-foreground shadow-none transition-colors data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none"
             >
               <Users className="h-4 w-4 text-fuchsia-300" />
-              <span className="truncate">Community</span>
+              <span className="truncate">Global library</span>
               <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-black tabular-nums text-foreground/90">
                 {communityTracks.length}
               </span>
@@ -1424,6 +1423,12 @@ function LibraryPage() {
           </TabsList>
 
           <TabsContent value="yours" className="mt-0 space-y-3">
+            <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+              <span>Made by you</span>
+              <span aria-hidden className="text-primary/60">•</span>
+              <span className="text-primary">Yours to play &amp; download</span>
+            </p>
+
             {completedTracks.length > 3 && (
               <div className="relative">
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -1452,11 +1457,7 @@ function LibraryPage() {
                         (s.style || "").toLowerCase().includes(q),
                     )
                   : completedTracks;
-                const PREVIEW_COUNT = 3;
-                const isSearching = q.length > 0;
-                const collapsed = !isSearching && !showAllYours && filtered.length > PREVIEW_COUNT;
-                const visible = collapsed ? filtered.slice(0, PREVIEW_COUNT) : filtered;
-                const hiddenCount = filtered.length - visible.length;
+                const visible = filtered;
                 return (
                   <div data-testid="library-cards" className="grid gap-3">
                     {genSong && <SongCardSkeleton label="Generating" />}
@@ -1466,11 +1467,7 @@ function LibraryPage() {
                       </p>
                     ) : (
                       <>
-                        {collapsed && (
-                          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-                            Recently added · showing {visible.length} of {filtered.length}
-                          </p>
-                        )}
+
                         {visible.map((s) => (
                           <div key={s.id} className="relative">
                             <Link
@@ -1495,18 +1492,8 @@ function LibraryPage() {
                             </Button>
                           </div>
                         ))}
-                        {!isSearching && filtered.length > PREVIEW_COUNT && (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => setShowAllYours((v) => !v)}
-                            className="mt-1 h-11 w-full rounded-xl border-white/10 bg-white/[0.04] font-bold"
-                          >
-                            {showAllYours
-                              ? `Show fewer · hide ${filtered.length - PREVIEW_COUNT}`
-                              : `Show all ${filtered.length} tracks · +${hiddenCount} more`}
-                          </Button>
-                        )}
+
+
                       </>
                     )}
                   </div>
@@ -1557,10 +1544,13 @@ function LibraryPage() {
               </div>
             )}
             <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+              <span>Made by other creators</span>
+              <span aria-hidden className="text-primary/60">•</span>
               <span>Full-length playback · free</span>
               <span aria-hidden className="text-primary/60">•</span>
               <span className="text-primary">3 OG coins to download</span>
             </p>
+
             {community.isLoading ? (
               <ul
                 aria-label="Loading community tracks"
