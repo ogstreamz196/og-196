@@ -1001,11 +1001,33 @@ function LibraryPage() {
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-xs text-muted-foreground sm:text-sm">
-            Five quick steps · -{totalCost} coins · ~3 minute track
+            Five quick steps · -{totalCost} coins · expected length {expectedRange}
           </p>
           <FoulMouthToggle disabled={pipelineActive} />
         </div>
+        <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-primary/25 bg-card/50 p-3">
+          <Label htmlFor="target-length" className="text-xs font-black uppercase tracking-[0.16em]">
+            Track length
+          </Label>
+          <select
+            id="target-length"
+            value={targetMinutes}
+            onChange={(e) => setTargetMinutes(Number(e.target.value))}
+            disabled={pipelineActive}
+            className="min-h-10 rounded-xl border border-primary/30 bg-background/70 px-3 text-sm font-semibold disabled:opacity-60"
+          >
+            {[3, 4, 5, 6, 8].map((m) => (
+              <option key={m} value={m}>
+                {m} min minimum{m === 3 ? " (default)" : ""}
+              </option>
+            ))}
+          </select>
+          <span className="text-xs text-muted-foreground">
+            Minimum {MIN_TRACK_MINUTES} min is enforced — no upper limit, tracks can run longer.
+          </span>
+        </div>
       </div>
+
 
 
       <CreateNowWizard
