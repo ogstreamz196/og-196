@@ -17,7 +17,7 @@ export function useFillViewport<T extends HTMLElement>(bottomGutter = 0) {
       const vh = window.visualViewport?.height ?? window.innerHeight;
       const nav = document.querySelector("nav.safe-bottom.fixed") as HTMLElement | null;
       // The mobile bottom nav is fixed — stop the panel at its top edge.
-      const limit = nav && nav.offsetParent !== null ? nav.getBoundingClientRect().top : vh;
+      const limit = nav && nav.offsetHeight > 0 ? nav.getBoundingClientRect().top : vh;
       setHeight(Math.max(320, Math.round(Math.min(limit, vh) - top - bottomGutter)));
 
 
