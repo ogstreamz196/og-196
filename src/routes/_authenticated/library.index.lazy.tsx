@@ -1003,8 +1003,9 @@ function LibraryPage() {
       {/* Primary entry points — one dominant action, controls demoted to a quiet strip */}
       <section
         aria-label="Create a track"
-        className="rounded-3xl border border-white/[0.07] bg-card/40 p-4 backdrop-blur-sm sm:p-5"
+        className="border-b border-white/[0.07] pb-6"
       >
+
         <div className="flex gap-3">
           <Button
             type="button"
