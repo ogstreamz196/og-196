@@ -146,7 +146,10 @@ export function CreateNowWizard({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="min-h-[168px] py-1 transition-opacity duration-200">
+        <div
+          key={step}
+          className="min-h-[168px] animate-in fade-in slide-in-from-right-4 py-1 duration-300"
+        >
           {step === 1 && (
             <>
               <Label htmlFor="wiz-title" className="sr-only">

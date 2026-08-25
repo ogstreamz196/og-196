@@ -1600,6 +1600,11 @@ function LibraryPage() {
           >
             <SongCard song={freshTrack} />
           </Link>
+          <Link to="/library/$songId" params={{ songId: freshTrack.id }} className="block">
+            <Button type="button" className="min-h-12 w-full gap-2 rounded-2xl bg-gradient-brand font-black uppercase tracking-[0.12em] text-primary-foreground shadow-glow">
+              <Sparkles className="h-4 w-4" /> Play sample · unlock full track
+            </Button>
+          </Link>
         </section>
       )}
 
