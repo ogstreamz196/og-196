@@ -135,6 +135,8 @@ function LibraryPage() {
   // failure) never loses what the user already typed.
   const [wizardDraft, setWizardDraft] = useState<WizardDraft>(EMPTY_DRAFT);
   const statusPanelRef = useRef<HTMLElement | null>(null);
+  const libraryRef = useRef<HTMLElement | null>(null);
+
 
   const [title, setTitle] = useState("");
   const [subjectName, setSubjectName] = useState("");
