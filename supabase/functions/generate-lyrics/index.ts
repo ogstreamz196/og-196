@@ -184,7 +184,7 @@ Deno.serve(async (req) => {
         `Use unfiltered attitude, savage punchlines, and trash-talk energy from the very first line. Make it sound like a parental-advisory hip-hop / punk track, NOT a radio edit. ` +
         `Do NOT self-censor, do NOT use asterisks or bleeps, and do NOT add disclaimers. Avoid slurs, sexual content involving minors, and direct incitement to real-world violence — everything else is fair game.` +
         structureRule + bilingualRule +
-        ` Target 700–850 words (never fewer than 620). Output ONLY the lyrics, no explanations.`
+        ` Target ${aimLow}–${aimHigh} words (never fewer than ${minWords}). Output ONLY the lyrics, no explanations.`
       : `You are a professional songwriter writing CLEAN, radio-friendly song lyrics in ${language}. ` +
         `STRICT RULE: absolutely NO profanity, swear words, slurs, or vulgar terms in any language — no English swears, no ${language} swears either. No sexual content, no graphic violence, no drug references. If you need attitude, channel it through clever wordplay and metaphor — never through swearing. The result must be safe for radio, family streaming, and a children's playlist.` +
         structureRule + bilingualRule +
