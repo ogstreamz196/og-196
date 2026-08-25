@@ -35,6 +35,25 @@ Deno.serve(async (req) => {
     const extraContext = (body.extraContext ?? "").toString().trim().slice(0, 1000);
     const subjectName = (body.subjectName ?? "").toString().trim().slice(0, 60);
 
+    // ---- Track length target -------------------------------------------------
+    // Hard floor of 3 minutes, no upper cap. Clients may pass a longer override
+    // via `targetDurationSec`; anything shorter is silently raised to the floor.
+    const MIN_TARGET_SEC = 180;
+    const requestedSec = Number(body.targetDurationSec);
+    const targetSec = Math.max(
+      MIN_TARGET_SEC,
+      Number.isFinite(requestedSec) ? Math.round(requestedSec) : MIN_TARGET_SEC,
+    );
+    // ~210 sung words per minute of finished audio (verse-heavy styles run hotter).
+    const minWords = Math.max(620, Math.round((targetSec / 60) * 210));
+    const aimLow = Math.round(minWords * 1.12);
+    const aimHigh = Math.round(minWords * 1.35);
+    const minLines = Math.max(90, Math.round(minWords / 7));
+    const aimLines = Math.round(minLines * 1.3);
+    const mmss = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+    const targetLabel = `${mmss(targetSec)}–${mmss(targetSec + 30)}`;
+
+
     if (!songName && !description) {
       return jsonResponse({ error: "Provide a song name or description" }, 400);
     }
