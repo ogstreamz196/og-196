@@ -14,6 +14,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+
 import { useSettings } from "@/hooks/use-settings";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { useRole } from "@/hooks/use-role";
