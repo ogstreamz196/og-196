@@ -8,7 +8,6 @@ import {
   RefreshCw,
   Wand2,
   Coins,
-  Trash2,
   Mic2,
   Music4,
   Shuffle,
@@ -970,7 +969,7 @@ function LibraryPage() {
   }
 
   return (
-    <div data-testid="library-root" data-scroll-fade className="relative mx-auto flex w-full max-w-5xl flex-col gap-8 rounded-none border-x-0 border-white/[0.06] bg-background/55 px-4 pb-[calc(env(safe-area-inset-bottom)+96px)] pt-2 backdrop-blur-2xl [scroll-padding-block:24px] [touch-action:pan-y] sm:rounded-3xl sm:border sm:px-6 md:pb-20">
+    <div data-testid="library-root" data-scroll-fade className="relative mx-auto flex w-full max-w-5xl flex-col gap-8 rounded-none border-x-0 border-white/[0.06] bg-background/80 px-4 pb-[calc(env(safe-area-inset-bottom)+96px)] pt-2 backdrop-blur-2xl [scroll-padding-block:24px] [touch-action:pan-y] sm:rounded-3xl sm:border sm:px-6 md:pb-20">
       {/* Ambient crimson aura — prestige depth, never competes with content */}
       <div
         aria-hidden="true"
@@ -1051,12 +1050,10 @@ function LibraryPage() {
               ))}
             </select>
           </div>
-          <div className="space-y-2">
-            <span className="block text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground">
-              Lyric filter
-            </span>
+          <div className="flex items-end">
             <FoulMouthToggle disabled={pipelineActive} />
           </div>
+
           <p className="text-[11px] font-semibold text-muted-foreground sm:col-span-2">
             -{totalCost} coins · {expectedRange}
           </p>
@@ -1340,16 +1337,14 @@ function LibraryPage() {
 
       {/* Library — two clearly divided shelves */}
       <section ref={libraryRef} id="library" className="scroll-mt-24 border-t-2 border-white/10 pt-6">
-        <h2 className="mb-3 text-[11px] font-black uppercase tracking-[0.28em] text-primary">
-          Library
-        </h2>
         <div data-testid="library-your-header" className="mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
           <div className="min-w-0">
-            <h3 data-testid="library-your-heading" className="truncate font-display text-2xl font-black tracking-tight sm:text-3xl">
-              <Disc3 className="mr-2 inline h-5 w-5 -translate-y-0.5 text-primary" />
-              Your tracks &amp; the world's
-            </h3>
+            <h2 data-testid="library-your-heading" className="flex min-w-0 items-center gap-2 font-display text-2xl font-black tracking-tight sm:text-3xl">
+              <Disc3 className="h-5 w-5 shrink-0 text-primary" />
+              <span className="truncate">Library</span>
+            </h2>
           </div>
+
 
           <div className="flex shrink-0 items-center gap-2">
             {versionedLibrary.length > 0 && (
@@ -1438,11 +1433,23 @@ function LibraryPage() {
               </div>
             )}
             {library.isLoading ? (
-              <div className="grid gap-3">
+              <ul
+                aria-label="Loading your tracks"
+                aria-busy="true"
+                className="divide-y divide-border/40 overflow-hidden rounded-2xl border border-border/60 bg-card/30"
+              >
                 {[0, 1, 2].map((i) => (
-                  <SongCardSkeleton key={i} />
+                  <li key={i} className="flex items-center gap-3 px-3 py-2.5">
+                    <div className="h-12 w-12 shrink-0 animate-pulse rounded-lg bg-white/[0.06]" />
+                    <div className="h-10 w-10 shrink-0 animate-pulse rounded-full bg-white/[0.06]" />
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <div className="h-3 w-2/3 animate-pulse rounded bg-white/[0.06]" />
+                      <div className="h-1.5 w-full animate-pulse rounded-full bg-white/[0.05]" />
+                    </div>
+                    <div className="h-10 w-16 shrink-0 animate-pulse rounded-full bg-white/[0.06]" />
+                  </li>
                 ))}
-              </div>
+              </ul>
             ) : completedTracks.length > 0 || genSong ? (
               (() => {
                 const q = yoursSearch.trim().toLowerCase();
@@ -1454,48 +1461,30 @@ function LibraryPage() {
                         (s.style || "").toLowerCase().includes(q),
                     )
                   : completedTracks;
-                const visible = filtered;
+                if (filtered.length === 0 && !genSong) {
+                  return (
+                    <p className="py-6 text-center text-sm text-muted-foreground">
+                      No tracks match "{yoursSearch}".
+                    </p>
+                  );
+                }
                 return (
-                  <div data-testid="library-cards" className="grid gap-3">
+                  <div data-testid="library-cards" className="space-y-2">
                     {genSong && <SongCardSkeleton label="Generating" />}
-                    {filtered.length === 0 && !genSong ? (
-                      <p className="py-6 text-center text-sm text-muted-foreground">
-                        No tracks match "{yoursSearch}".
-                      </p>
-                    ) : (
-                      <>
-
-                        {visible.map((s) => (
-                          <div key={s.id} className="relative">
-                            <Link
-                              to="/library/$songId"
-                              params={{ songId: s.id }}
-                              className="block rounded-2xl transition-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                            >
-                              <SongCard song={s} />
-                            </Link>
-                            <Button
-                              variant="destructive"
-                              size="icon"
-                              className="absolute right-3 top-3 h-8 w-8 opacity-90 shadow-md"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                setPendingDelete(s);
-                              }}
-                              aria-label="Delete track"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        ))}
-
-
-                      </>
-                    )}
+                    <ul className="divide-y divide-border/40 overflow-hidden rounded-2xl border border-border/60 bg-card/30">
+                      {filtered.map((s) => (
+                        <CommunityTrackRow
+                          key={s.id}
+                          song={s}
+                          variant="owned"
+                          onDelete={setPendingDelete}
+                        />
+                      ))}
+                    </ul>
                   </div>
                 );
               })()
+
             ) : (
               <div className="rounded-3xl border border-dashed border-primary/30 bg-gradient-to-br from-primary/10 to-card/40 p-8 text-center ring-1 ring-white/5 sm:p-10">
                 <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-primary/30 to-primary/10 shadow-[0_12px_30px_-12px_var(--primary)]">

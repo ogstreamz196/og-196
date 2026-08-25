@@ -1,6 +1,7 @@
 import { memo, useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Download, Loader2, Music2, Pause, Play } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { Download, Loader2, Music2, Pause, Pencil, Play, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useSongAudio } from "@/hooks/use-song-audio";
 import { useProfile } from "@/hooks/use-profile";
@@ -30,7 +31,17 @@ function hueFor(id: string) {
  * title, compact quick actions (play/pause, seek, unlock/download).
  * Community tracks stream in full; downloading costs coins.
  */
-function CommunityTrackRowImpl({ song }: { song: Song }) {
+function CommunityTrackRowImpl({
+  song,
+  variant = "community",
+  onDelete,
+}: {
+  song: Song;
+  /** "owned" rows link to the edit/regenerate workspace instead of charging coins. */
+  variant?: "owned" | "community";
+  onDelete?: (song: Song) => void;
+}) {
+  const owned = variant === "owned";
   const hasAudio = !!(song.audio_path || song.sample_path);
   const isReady = song.status === "completed" && hasAudio;
   const qc = useQueryClient();
@@ -157,7 +168,17 @@ function CommunityTrackRowImpl({ song }: { song: Song }) {
       </button>
 
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold leading-tight">{title}</p>
+        {owned ? (
+          <Link
+            to="/library/$songId"
+            params={{ songId: song.id }}
+            className="block truncate text-sm font-semibold leading-tight hover:text-primary focus:outline-none focus-visible:underline"
+          >
+            {title}
+          </Link>
+        ) : (
+          <p className="truncate text-sm font-semibold leading-tight">{title}</p>
+        )}
         <div className="mt-1.5 flex items-center gap-2">
           <input
             type="range"
@@ -183,24 +204,44 @@ function CommunityTrackRowImpl({ song }: { song: Song }) {
         </div>
       </div>
 
-      <button
-        type="button"
-        onClick={() => setUnlockOpen(true)}
-        disabled={!isReady || busy}
-        aria-label={`Download ${title} for ${COMMUNITY_DOWNLOAD_COST} OG coins`}
-        className={cn(
-          "inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 text-xs font-black tabular-nums text-primary transition-colors",
-          isReady && !busy ? "hover:bg-primary/20" : "opacity-40",
-        )}
-      >
-        {busy ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          <Download className="h-4 w-4" />
-        )}
-        <span>{COMMUNITY_DOWNLOAD_COST}</span>
-        <span className="sr-only">OG coins</span>
-      </button>
+      {owned ? (
+        <div className="flex shrink-0 items-center gap-1.5">
+          <Link
+            to="/library/$songId"
+            params={{ songId: song.id }}
+            aria-label={`Edit ${title}`}
+            className="inline-flex h-10 items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 text-xs font-black uppercase tracking-[0.12em] text-primary transition-colors hover:bg-primary/20"
+          >
+            <Pencil className="h-4 w-4" />
+            <span className="hidden sm:inline">Edit</span>
+          </Link>
+          {onDelete && (
+            <button
+              type="button"
+              onClick={() => onDelete(song)}
+              aria-label={`Delete ${title}`}
+              className="grid h-10 w-10 place-items-center rounded-full border border-destructive/40 bg-destructive/10 text-destructive transition-colors hover:bg-destructive/20"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setUnlockOpen(true)}
+          disabled={!isReady || busy}
+          aria-label={`Download ${title} for ${COMMUNITY_DOWNLOAD_COST} OG coins`}
+          className={cn(
+            "inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 text-xs font-black tabular-nums text-primary transition-colors",
+            isReady && !busy ? "hover:bg-primary/20" : "opacity-40",
+          )}
+        >
+          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+          <span>{COMMUNITY_DOWNLOAD_COST}</span>
+          <span className="sr-only">OG coins</span>
+        </button>
+      )}
 
       <audio
         ref={audioRef}
@@ -228,3 +269,4 @@ function CommunityTrackRowImpl({ song }: { song: Song }) {
 }
 
 export const CommunityTrackRow = memo(CommunityTrackRowImpl);
+export const TrackRow = CommunityTrackRow;

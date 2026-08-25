@@ -47,9 +47,30 @@ export function AdminCollapsible({
       const detail = (e as CustomEvent<{ open: boolean }>).detail;
       if (detail && typeof detail.open === "boolean") setOpen(detail.open);
     };
+    // Accordion: opening one section collapses the others.
+    const exclusive = (e: Event) => {
+      const detail = (e as CustomEvent<{ key: string }>).detail;
+      if (detail?.key && detail.key !== key) setOpen(false);
+    };
     window.addEventListener("admin-collapsible:set-all", handler);
-    return () => window.removeEventListener("admin-collapsible:set-all", handler);
-  }, []);
+    window.addEventListener("admin-collapsible:opened", exclusive);
+    return () => {
+      window.removeEventListener("admin-collapsible:set-all", handler);
+      window.removeEventListener("admin-collapsible:opened", exclusive);
+    };
+  }, [key]);
+
+  function toggle() {
+    setOpen((v) => {
+      const next = !v;
+      if (next) {
+        window.dispatchEvent(
+          new CustomEvent("admin-collapsible:opened", { detail: { key } }),
+        );
+      }
+      return next;
+    });
+  }
 
   return (
     <section
@@ -60,10 +81,11 @@ export function AdminCollapsible({
     >
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={toggle}
         aria-expanded={open}
         className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition hover:bg-muted/40"
       >
+
         <div className="min-w-0">
           <div className="truncate font-semibold leading-tight">{title}</div>
           {subtitle && (
