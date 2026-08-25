@@ -15,6 +15,8 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { UserAuditTrail } from "./UserAuditTrail";
 import { CollapsiblePanel } from "@/components/ui/collapsible-panel";
+import { ConfirmAction } from "./ConfirmAction";
+
 
 interface ProfileLite {
   id: string;
