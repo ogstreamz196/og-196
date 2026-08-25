@@ -66,7 +66,7 @@ const GUARD_META: Record<GuardKind, { label: string; tone: string; Icon: typeof 
   admin: { label: "Admin only", tone: "bg-red-500/10 text-red-300 border-red-500/30", Icon: ShieldCheck },
 };
 
-function RouteMapPage() {
+export function RouteMapPage() {
   const { isAdmin, isLoading } = useRole();
 
   const grouped = useMemo(() => {
@@ -93,7 +93,7 @@ function RouteMapPage() {
 
   return (
     <DashboardShell title="Route map">
-      <BossNav />
+
       <div className="space-y-6">
         <header className="flex flex-col gap-3 rounded-2xl border border-border/60 bg-card/40 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
