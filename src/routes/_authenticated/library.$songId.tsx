@@ -244,7 +244,7 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
         }
         if (!unlockData?.already) {
           toast.success(
-            `Charged ${unlockData?.cost ?? 2} OG coins — ${unlockData?.royalty ?? 1} sent to the creator as a royalty.`,
+            `Charged ${unlockData?.cost ?? 3} OG coins — ${unlockData?.royalty ?? 1} sent to the creator as a royalty.`,
           );
         }
         await Promise.all([
@@ -377,7 +377,7 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
                     <Lock className="h-5 w-5" />
                   )}
                   {communityMode
-                    ? "Download · 2 coins"
+                    ? "Download · 3 coins"
                     : unlocked ? "Download HQ" : "Locked"}
                 </Button>
               </div>
@@ -386,7 +386,7 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Lock className="h-3 w-3" />
                   {communityMode
-                    ? "Full community track plays free. Downloading costs 2 OG coins — 1 burnt, 1 royalty to the creator."
+                    ? "Full community track plays free. Downloading costs 3 OG coins — 2 burnt, 1 royalty to the creator."
                     : `Preview limited to ${sampleSeconds}s. ${unlocked ? "Full track download available." : "Unlock to download the full track."}`}
                 </div>
                 <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-muted">
@@ -416,7 +416,7 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
         onOpenChange={setUnlockDialogOpen}
         onConfirm={downloadFull}
         busy={downloading}
-        cost={2}
+        cost={3}
         royalty={1}
         balance={balance}
         songTitle={song.title}
