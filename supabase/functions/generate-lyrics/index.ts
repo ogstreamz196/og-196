@@ -252,10 +252,10 @@ Deno.serve(async (req) => {
     const data = await res.json();
     let lyrics = extractText(data);
 
-    // Length guard: a three-minute track needs ~620+ words. If the model came
-    // back short, ask it to extend the same song (never a new one) once.
+    // Length guard: enforce the minimum target. If the model came back short,
+    // ask it to extend the SAME song (never a new one), up to twice.
     const wordCount = (t: string) => t.split(/\s+/).filter(Boolean).length;
-    if (lyrics && wordCount(lyrics) < 620) {
+    for (let attempt = 0; attempt < 2 && lyrics && wordCount(lyrics) < minWords; attempt++) {
       await updateProgress(88, "Extending to full length…");
       try {
         const topUp = await callGemini([
@@ -265,19 +265,23 @@ Deno.serve(async (req) => {
             role: "user",
             parts: [{
               text:
-                "This draft is too short for a three-minute song. Rewrite the SAME song, keeping the existing title, theme, hook wording and section markers, but expand it to at least 700 words and 95+ lyric lines: add the missing sections from the structure, write every chorus out in full, and lengthen thin verses with new on-theme lines (no filler, no repetition beyond the hook). Output ONLY the complete lyrics.",
+                `This draft is too short for a ${mmss(targetSec)} song. Rewrite the SAME song, keeping the existing title, theme, hook wording and section markers, but expand it to at least ${aimLow} words and ${minLines}+ lyric lines: add the missing sections from the structure, write every chorus out in full, and lengthen thin verses with new on-theme lines (no filler, no repetition beyond the hook). Output ONLY the complete lyrics.`,
             }],
           },
         ]);
         if (topUp.ok) {
           const extended = extractText(await topUp.json());
           if (wordCount(extended) > wordCount(lyrics)) lyrics = extended;
-        }
+          else break;
+        } else break;
       } catch (e) {
         console.error("lyrics top-up failed", e);
+        break;
       }
     }
 
+    const words = wordCount(lyrics);
+    const estimatedSec = Math.max(targetSec, Math.round((words / 210) * 60));
 
     if (songId) {
       await admin.from("songs").update({
@@ -288,7 +292,15 @@ Deno.serve(async (req) => {
     }
 
 
-    return jsonResponse({ lyrics, coin_balance: balance, coin_cost: coinCost });
+    return jsonResponse({
+      lyrics,
+      coin_balance: balance,
+      coin_cost: coinCost,
+      word_count: words,
+      target_duration_sec: targetSec,
+      estimated_duration_sec: estimatedSec,
+      estimated_duration_label: `${mmss(estimatedSec)}–${mmss(estimatedSec + 30)}`,
+    });
   } catch (e) {
     console.error(e);
     return jsonResponse({ error: (e as Error).message }, 500);
