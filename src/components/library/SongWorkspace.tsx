@@ -261,7 +261,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       const nextBrief = languageChanged ? setBriefLanguage(brief, language) : brief;
       if (nextBrief !== brief) setBrief(nextBrief);
       if (dirty || nextBrief !== (song.prompt ?? "")) {
-        await persist({ title: title.trim() || null, prompt: nextBrief });
+        await persist({ title: title.trim() || null, prompt: nextBrief, style: style.trim() || null });
       }
 
       const { data, error } = await supabase.functions.invoke("generate-lyrics", {
@@ -269,7 +269,8 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
           song_id: isOwner ? song.id : null,
           songName: title.trim(),
           description: nextBrief.trim(),
-          styleTags: song.style ? song.style.split("·").map((s) => s.trim()).filter(Boolean) : [],
+          styleTags: style ? style.split("·").map((s) => s.trim()).filter(Boolean) : [],
+
           foulMouth,
           language,
         },
