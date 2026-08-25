@@ -478,9 +478,26 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       )}
       <StageStepper current={stage} sampleSeconds={settings?.sample_seconds ?? 60} />
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
-          {/* Stage 1 — Brief & lyrics */}
+      {/* Compact summary bar — replaces the old side rail */}
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-border bg-card/70 px-4 py-3">
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold">{title.trim() || "Untitled track"}</p>
+          <p className="truncate text-xs text-muted-foreground">
+            Lyrics {lyricsCost} · Sample {previewCost} · Full {fullUnlockCost} coins
+          </p>
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/60 px-3 py-1 text-sm font-bold tabular-nums">
+            <Coins className="h-4 w-4 text-coin" /> {balance.toLocaleString()}
+          </span>
+          <Button asChild variant="outline" size="sm">
+            <Link to="/buy-coins">Top up</Link>
+          </Button>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+          {/* Step 1 — Details & lyrics */}
           <Card className={cn(stage > 1 && !dirty && "border-primary/30")}>
             <CardHeader>
               <div className="flex flex-wrap items-start justify-between gap-3">
@@ -490,7 +507,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                     1 · Lyrics
                   </CardTitle>
                   <CardDescription>
-                    Write the brief, hit generate.
+                    Edit the details, then generate.
                   </CardDescription>
 
                 </div>
@@ -498,102 +515,117 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-[1fr_220px]">
-                <div className="space-y-1.5">
-                  <Label htmlFor="song-title">Title (optional)</Label>
-                  <Input
-                    id="song-title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Untitled"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="song-language" className="flex items-center gap-2">
-                    Language
-                    {!isVip && (
-                      <span className="rounded-full bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold text-primary">VIP</span>
+              <Collapsible open={detailsOpen} onOpenChange={setDetailsOpen}>
+                <CollapsibleTrigger className="flex w-full items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/20 px-3 py-2 text-left text-sm font-semibold hover:bg-muted/40">
+                  <span className="min-w-0 truncate">
+                    Track details
+                    {!detailsOpen && (
+                      <span className="ml-2 font-normal text-xs text-muted-foreground">
+                        {[title.trim() || "Untitled", language, style.trim()].filter(Boolean).join(" · ")}
+                      </span>
                     )}
-                  </Label>
-                  <Select value={language} onValueChange={setLanguage} disabled={!isVip}>
-                    <SelectTrigger id="song-language">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {LANGUAGES.map((l) => (
-                        <SelectItem key={l} value={l}>{l}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {!isVip && (
-                    <p className="text-[11px] text-muted-foreground">
-                      <Link to="/buy-coins" search={{ flow: "vip" } as never} className="text-primary underline">Get VIP</Link> to write songs in any language (Filipino, Spanish, Hindi, Patois…).
-                    </p>
-                  )}
-                </div>
-              </div>
+                  </span>
+                  <ChevronDown className={cn("h-4 w-4 shrink-0 transition-transform", detailsOpen && "rotate-180")} />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-4 pt-4">
+                  <div className="grid gap-4 sm:grid-cols-[1fr_220px]">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="song-title">Title</Label>
+                      <Input
+                        id="song-title"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        placeholder="Untitled"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="song-language" className="flex items-center gap-2">
+                        Language
+                        {!isVip && (
+                          <span className="rounded-full bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold text-primary">VIP</span>
+                        )}
+                      </Label>
+                      <Select value={language} onValueChange={setLanguage} disabled={!isVip}>
+                        <SelectTrigger id="song-language">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {LANGUAGES.map((l) => (
+                            <SelectItem key={l} value={l}>{l}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {!isVip && (
+                        <p className="text-[11px] text-muted-foreground">
+                          <Link to="/buy-coins" search={{ flow: "vip" } as never} className="text-primary underline">Get VIP</Link> to write in any language.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="song-style">Style</Label>
+                    <Input
+                      id="song-style"
+                      value={style}
+                      onChange={(e) => setStyle(e.target.value)}
+                      placeholder="Drill · dark piano · gritty male vocal"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="song-brief">What it's about</Label>
+                    <Textarea
+                      id="song-brief"
+                      value={brief}
+                      onChange={(e) => setBrief(e.target.value)}
+                      rows={4}
+                      placeholder="Who the song is about, the mood, memories…"
+                    />
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+
               {hasLyrics && languageChanged && (
                 <div className="rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-xs text-foreground/80">
-                  Language changed to <b>{language}</b>. Tap <b>Regenerate lyrics</b> to rewrite in {language},
-                  or keep your existing lyrics and just <b>Regenerate sample</b> in Stage 2.
+                  Language changed to <b>{language}</b> — regenerate lyrics to rewrite them.
                 </div>
               )}
-              <div className="space-y-1.5">
-                <Label htmlFor="song-style">Song style</Label>
-                <Input
-                  id="song-style"
-                  value={style}
-                  onChange={(e) => setStyle(e.target.value)}
-                  placeholder="Drill · dark piano · gritty male vocal"
-                />
-                <p className="text-[11px] text-muted-foreground">
-                  Separate style tags with · — these drive the sound of the next regenerate.
-                </p>
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="song-brief">Brief</Label>
-                <Textarea
-                  id="song-brief"
-                  value={brief}
-                  onChange={(e) => setBrief(e.target.value)}
-                  rows={5}
-                  placeholder="Who is the song about, the mood, references, memories…"
-                />
-              </div>
 
-
-
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="song-lyrics">Lyrics</Label>
+              <Collapsible open={lyricsOpen} onOpenChange={setLyricsOpen}>
+                <div className="flex items-center justify-between gap-3">
+                  <CollapsibleTrigger className="flex min-w-0 items-center gap-2 text-sm font-semibold hover:text-primary">
+                    <ChevronDown className={cn("h-4 w-4 shrink-0 transition-transform", lyricsOpen && "rotate-180")} />
+                    <span className="truncate">{lyricsOpen ? "Hide lyrics" : "View / edit lyrics"}</span>
+                  </CollapsibleTrigger>
                   {hasLyrics && !genLyrics && (
-                    <span className="inline-flex items-center gap-1 text-[11px] text-emerald-500">
-                      <Check className="h-3 w-3" /> Lyrics ready
+                    <span className="inline-flex shrink-0 items-center gap-1 text-[11px] text-emerald-500">
+                      <Check className="h-3 w-3" /> Ready
                     </span>
                   )}
                   {genLyrics && (
-                    <span className="inline-flex items-center gap-1 text-[11px] text-primary">
-                      <Loader2 className="h-3 w-3 animate-spin" /> Writing lyrics…
+                    <span className="inline-flex shrink-0 items-center gap-1 text-[11px] text-primary">
+                      <Loader2 className="h-3 w-3 animate-spin" /> Writing…
                     </span>
                   )}
                 </div>
                 {genLyrics ? (
-                  <LyricsSkeleton songId={song.id} />
+                  <div className="pt-3">
+                    <LyricsSkeleton songId={song.id} />
+                  </div>
                 ) : (
-
-                  <Textarea
-                    ref={lyricsRef}
-                    id="song-lyrics"
-                    value={lyrics}
-                    onChange={(e) => setLyrics(e.target.value)}
-                    rows={12}
-                    placeholder={"Tap Generate lyrics below — or paste your own.\n\n[Verse 1]\n…\n[Chorus]\n…"}
-                    className="font-mono text-sm"
-                  />
-
+                  <CollapsibleContent className="pt-3">
+                    <Label htmlFor="song-lyrics" className="sr-only">Lyrics</Label>
+                    <Textarea
+                      ref={lyricsRef}
+                      id="song-lyrics"
+                      value={lyrics}
+                      onChange={(e) => setLyrics(e.target.value)}
+                      rows={12}
+                      placeholder={"Tap Generate lyrics below — or paste your own.\n\n[Verse 1]\n…\n[Chorus]\n…"}
+                      className="font-mono text-sm"
+                    />
+                  </CollapsibleContent>
                 )}
-              </div>
-
+              </Collapsible>
 
               <div className="grid grid-cols-2 items-center gap-2 sm:flex sm:flex-wrap sm:justify-end sm:gap-3">
                 {dirty && <span className="mr-auto text-xs text-muted-foreground">Unsaved changes</span>}
@@ -612,7 +644,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                   />
                 </label>
                 <Button variant="ghost" onClick={handleSave} disabled={!dirty || saving} className="min-w-0">
-                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save draft"}
+                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
                 </Button>
 
                 <Button onClick={generateLyrics} disabled={genLyrics || missing} className="min-w-0 gap-1.5 sm:gap-2">
@@ -646,7 +678,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
             <CardContent className="space-y-3">
               {!hasLyrics && (
                 <p className="text-sm text-muted-foreground">
-                  Generate lyrics in stage 1 first.
+                  Generate lyrics in step 1 first.
                 </p>
               )}
               {isPending && (
@@ -696,7 +728,12 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => lyricsRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })}
+                      onClick={() => {
+                        setLyricsOpen(true);
+                        requestAnimationFrame(() =>
+                          lyricsRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }),
+                        );
+                      }}
                       className="gap-1.5"
                     >
                       <FileText className="h-3.5 w-3.5" /> Tweak lyrics
@@ -752,7 +789,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                   <p className="text-sm text-muted-foreground">
                     {song.unlocked
                       ? "Full HQ unlocked. Download as many times as you like."
-                      : "Sample plays in the player above. Unlock once to download the full HQ track."}
+                      : "Unlock once to download the full HQ track."}
                   </p>
 
                   {!song.unlocked && balance < fullUnlockCost && (
@@ -773,17 +810,6 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                   )}
 
                   <div className="flex flex-wrap justify-end gap-2">
-                    <Button
-                      variant="outline"
-                      onClick={generatePreview}
-                      disabled={genPreview || isPending || unlocking || missing}
-                    >
-                      {genPreview ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-                      Regenerate sample
-                      <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-background/30 px-1.5 py-0.5 text-[10px] font-semibold">
-                        <Coins className="h-3 w-3" /> {previewCost}
-                      </span>
-                    </Button>
                     <Button
                       onClick={unlockFull}
                       disabled={unlocking || (!song.unlocked && balance < fullUnlockCost)}
@@ -822,40 +848,8 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
             onClearBasket={clearBasket}
             onCheckoutBasket={checkoutBasket}
           />
-        </div>
-
-        {/* Side rail */}
-        <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Coins className="h-4 w-4 text-coin" /> Your coins
-              </CardTitle>
-              <CardDescription>Lyrics {lyricsCost} · Preview {previewCost} · Full {fullUnlockCost}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="text-3xl font-bold tabular-nums">{balance.toLocaleString()}</div>
-              <Button asChild variant="outline" size="sm" className="w-full">
-                <Link to="/buy-coins">Top up</Link>
-              </Button>
-            </CardContent>
-          </Card>
-
-          {song.style && (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-sm">
-                  <Wand2 className="h-3.5 w-3.5" /> Style
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-xs text-muted-foreground">{song.style}</p>
-              </CardContent>
-            </Card>
-          )}
-
-        </div>
       </div>
+
 
       <UnlockConfirmDialog
         open={unlockDialogOpen}
