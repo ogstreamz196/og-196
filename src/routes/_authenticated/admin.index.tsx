@@ -134,24 +134,7 @@ function AdminPanel() {
   return (
     <DashboardShell title="Admin Controls">
       <BossNav />
-      <div className="mx-auto max-w-6xl space-y-8">
-        {/* Quick links to standalone admin tools */}
-        <AdminSection
-          padding="p-4"
-          icon={<ShieldCheck className="h-5 w-5 text-primary-foreground" />}
-          title="Admin tools"
-          subtitle="Merged tool pages."
-        >
-          <div className="flex flex-wrap gap-2">
-            <Link to="/admin/system"><Button size="sm" variant="outline">System</Button></Link>
-            <Link to="/admin/audit"><Button size="sm" variant="outline">Audit</Button></Link>
-            <Link to="/admin/store"><Button size="sm" variant="outline">Store</Button></Link>
-            <Link to="/admin/og-persona"><Button size="sm" variant="outline">OG Bot Persona</Button></Link>
-            <Link to="/admin/onboarding"><Button size="sm" variant="outline">Onboarding</Button></Link>
-          </div>
-        </AdminSection>
-
-
+      <div className="mx-auto max-w-6xl space-y-8 rounded-3xl border border-border/60 bg-background/85 p-4 backdrop-blur-md sm:p-6">
         {/* Expand/collapse master controls */}
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Sections</h2>
@@ -160,6 +143,7 @@ function AdminPanel() {
             <Button size="sm" variant="outline" onClick={() => window.dispatchEvent(new CustomEvent("admin-collapsible:set-all", { detail: { open: false } }))}>Collapse all</Button>
           </div>
         </div>
+
 
         {/* Group: Coins & Pricing */}
         <section className="space-y-3">
