@@ -1459,11 +1459,7 @@ function LibraryPage() {
                         (s.style || "").toLowerCase().includes(q),
                     )
                   : completedTracks;
-                const PREVIEW_COUNT = 3;
-                const isSearching = q.length > 0;
-                const collapsed = !isSearching && !showAllYours && filtered.length > PREVIEW_COUNT;
-                const visible = collapsed ? filtered.slice(0, PREVIEW_COUNT) : filtered;
-                const hiddenCount = filtered.length - visible.length;
+                const visible = filtered;
                 return (
                   <div data-testid="library-cards" className="grid gap-3">
                     {genSong && <SongCardSkeleton label="Generating" />}
@@ -1473,11 +1469,7 @@ function LibraryPage() {
                       </p>
                     ) : (
                       <>
-                        {collapsed && (
-                          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-                            Recently added · showing {visible.length} of {filtered.length}
-                          </p>
-                        )}
+
                         {visible.map((s) => (
                           <div key={s.id} className="relative">
                             <Link
