@@ -990,9 +990,12 @@ function LibraryPage() {
         </div>
       </header>
 
-      {/* Primary entry points — create, or jump straight to the library */}
-      <div className="flex flex-col gap-3">
-        <div className="grid gap-2 sm:grid-cols-2">
+      {/* Primary entry points — one card holds create, browse and track options */}
+      <section
+        aria-label="Create a track"
+        className="rounded-3xl border border-white/10 bg-gradient-to-br from-card/80 to-card/40 p-4 shadow-[0_18px_60px_-30px_oklch(0.7_0.2_300_/_0.6)] sm:p-5"
+      >
+        <div className="grid gap-2.5 sm:grid-cols-2">
           <Button
             type="button"
             onClick={() => setWizardOpen(true)}
@@ -1014,34 +1017,39 @@ function LibraryPage() {
             Library
           </Button>
         </div>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-xs text-muted-foreground sm:text-sm">
-            Five quick steps · -{totalCost} coins · expected length {expectedRange}
+
+        <div className="mt-4 grid gap-3 border-t border-white/10 pt-4 sm:grid-cols-2 sm:items-center">
+          <div className="flex flex-wrap items-center gap-2">
+            <Label
+              htmlFor="target-length"
+              className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground"
+            >
+              Track length
+            </Label>
+            <select
+              id="target-length"
+              value={targetMinutes}
+              onChange={(e) => setTargetMinutes(Number(e.target.value))}
+              disabled={pipelineActive}
+              className="min-h-10 rounded-xl border border-primary/30 bg-background/70 px-3 text-sm font-semibold disabled:opacity-60"
+            >
+              {[3, 4, 5, 6, 8].map((m) => (
+                <option key={m} value={m}>
+                  {m} min minimum{m === MIN_TRACK_MINUTES ? " (default)" : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-center justify-start gap-2 sm:justify-end">
+            <FoulMouthToggle disabled={pipelineActive} />
+          </div>
+          <p className="text-xs leading-relaxed text-muted-foreground sm:col-span-2">
+            Five quick steps · -{totalCost} coins · expected length {expectedRange} (minimum{" "}
+            {MIN_TRACK_MINUTES} min enforced, no upper limit).
           </p>
-          <FoulMouthToggle disabled={pipelineActive} />
         </div>
-        <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-primary/25 bg-card/50 p-3">
-          <Label htmlFor="target-length" className="text-xs font-black uppercase tracking-[0.16em]">
-            Track length
-          </Label>
-          <select
-            id="target-length"
-            value={targetMinutes}
-            onChange={(e) => setTargetMinutes(Number(e.target.value))}
-            disabled={pipelineActive}
-            className="min-h-10 rounded-xl border border-primary/30 bg-background/70 px-3 text-sm font-semibold disabled:opacity-60"
-          >
-            {[3, 4, 5, 6, 8].map((m) => (
-              <option key={m} value={m}>
-                {m} min minimum{m === 3 ? " (default)" : ""}
-              </option>
-            ))}
-          </select>
-          <span className="text-xs text-muted-foreground">
-            Minimum {MIN_TRACK_MINUTES} min is enforced — no upper limit, tracks can run longer.
-          </span>
-        </div>
-      </div>
+      </section>
+
 
 
 
