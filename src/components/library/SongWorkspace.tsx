@@ -261,7 +261,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
 
       const { data, error } = await supabase.functions.invoke("generate-lyrics", {
         body: {
-          song_id: song.id,
+          song_id: isOwner ? song.id : null,
           songName: title.trim(),
           description: nextBrief.trim(),
           styleTags: song.style ? song.style.split("·").map((s) => s.trim()).filter(Boolean) : [],
