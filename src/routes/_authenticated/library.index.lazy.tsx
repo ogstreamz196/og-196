@@ -1544,10 +1544,13 @@ function LibraryPage() {
               </div>
             )}
             <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+              <span>Made by other creators</span>
+              <span aria-hidden className="text-primary/60">•</span>
               <span>Full-length playback · free</span>
               <span aria-hidden className="text-primary/60">•</span>
               <span className="text-primary">3 OG coins to download</span>
             </p>
+
             {community.isLoading ? (
               <ul
                 aria-label="Loading community tracks"
