@@ -462,10 +462,10 @@ export function CreateNowWizard({
               Discard
             </AlertDialogAction>
           </AlertDialogFooter>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
+
   );
 
 }
