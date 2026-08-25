@@ -1,7 +1,7 @@
 import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, ShieldCheck, RefreshCw, Lock, Unlock, Music2, Save, Coins } from "lucide-react";
+import { Loader2, RefreshCw, Lock, Unlock, Music2, Save, Coins } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { maskDevIdentity } from "@/lib/dev-identity";
 import { useRole } from "@/hooks/use-role";
@@ -23,7 +23,6 @@ import { TelegramSmokeTest } from "@/components/admin/TelegramSmokeTest";
 import { E2ESmokeTest } from "@/components/admin/E2ESmokeTest";
 import { FoulMouthSmokeTest } from "@/components/admin/FoulMouthSmokeTest";
 
-import { AdminSection } from "@/components/admin/AdminSection";
 import { AdminCollapsible } from "@/components/admin/AdminCollapsible";
 import { AdminEditableLabel, AdminEditableBalance } from "@/components/admin/AdminEditMode";
 import { Button } from "@/components/ui/button";
@@ -134,24 +133,7 @@ function AdminPanel() {
   return (
     <DashboardShell title="Admin Controls">
       <BossNav />
-      <div className="mx-auto max-w-6xl space-y-8">
-        {/* Quick links to standalone admin tools */}
-        <AdminSection
-          padding="p-4"
-          icon={<ShieldCheck className="h-5 w-5 text-primary-foreground" />}
-          title="Admin tools"
-          subtitle="Merged tool pages."
-        >
-          <div className="flex flex-wrap gap-2">
-            <Link to="/admin/system"><Button size="sm" variant="outline">System</Button></Link>
-            <Link to="/admin/audit"><Button size="sm" variant="outline">Audit</Button></Link>
-            <Link to="/admin/store"><Button size="sm" variant="outline">Store</Button></Link>
-            <Link to="/admin/og-persona"><Button size="sm" variant="outline">OG Bot Persona</Button></Link>
-            <Link to="/admin/onboarding"><Button size="sm" variant="outline">Onboarding</Button></Link>
-          </div>
-        </AdminSection>
-
-
+      <div className="mx-auto max-w-6xl space-y-8 rounded-3xl border border-border/60 bg-background/95 p-4 backdrop-blur-xl sm:p-6">
         {/* Expand/collapse master controls */}
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Sections</h2>
@@ -161,9 +143,10 @@ function AdminPanel() {
           </div>
         </div>
 
+
         {/* Group: Coins & Pricing */}
         <section className="space-y-3">
-          <FlameHeading as="h3" size="lg">Coins & Pricing</FlameHeading>
+          <FlameHeading as="h3" size="md">Coins & Pricing</FlameHeading>
           <AdminCollapsible storageKey="og-coins" title="OG Coins" subtitle="Boss coin operations" defaultOpen>
             <OgCoinsPanel />
           </AdminCollapsible>
@@ -177,7 +160,7 @@ function AdminPanel() {
 
         {/* Group: App Configuration */}
         <section className="space-y-3">
-          <FlameHeading as="h3" size="lg">App Configuration</FlameHeading>
+          <FlameHeading as="h3" size="md">App Configuration</FlameHeading>
           <AdminCollapsible storageKey="app-toggles" title="App toggles" subtitle="Global feature flags">
             <AppToggles />
           </AdminCollapsible>
@@ -191,7 +174,7 @@ function AdminPanel() {
 
         {/* Group: Telegram — everything OG Bot / Telegram-related in one place */}
         <section className="space-y-3">
-          <FlameHeading as="h3" size="lg">Telegram</FlameHeading>
+          <FlameHeading as="h3" size="md">Telegram</FlameHeading>
           <AdminCollapsible storageKey="og-bot-ping" title="OG Bot ping" subtitle="Verify OG Bot connectivity">
             <OgBotPing />
           </AdminCollapsible>
@@ -208,7 +191,7 @@ function AdminPanel() {
 
         {/* Group: Diagnostics — non-Telegram smoke tests only */}
         <section className="space-y-3">
-          <FlameHeading as="h3" size="lg">Diagnostics</FlameHeading>
+          <FlameHeading as="h3" size="md">Diagnostics</FlameHeading>
           <AdminCollapsible storageKey="e2e-smoke" title="End-to-end smoke test" subtitle="Full stack flow">
             <E2ESmokeTest />
           </AdminCollapsible>
@@ -219,7 +202,7 @@ function AdminPanel() {
 
         {/* Group: Activity */}
         <section className="space-y-3">
-          <FlameHeading as="h3" size="lg">Activity</FlameHeading>
+          <FlameHeading as="h3" size="md">Activity</FlameHeading>
           <AdminCollapsible storageKey="boss-audit" title="Boss audit log" subtitle="Recent admin actions">
             <BossAuditLog />
           </AdminCollapsible>
