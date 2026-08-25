@@ -972,35 +972,45 @@ function LibraryPage() {
   }
 
   return (
-    <div data-testid="library-root" data-scroll-fade className="mx-auto flex w-full max-w-5xl flex-col gap-5 pb-[calc(env(safe-area-inset-bottom)+96px)] [touch-action:pan-y] [scroll-padding-block:24px] md:pb-20">
-      {/* Hero — premium kicker, oversized headline, generous breathing room */}
-      <header data-testid="library-hero" className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b border-white/10 pb-4">
+    <div data-testid="library-root" data-scroll-fade className="relative mx-auto flex w-full max-w-5xl flex-col gap-6 pb-[calc(env(safe-area-inset-bottom)+96px)] [touch-action:pan-y] [scroll-padding-block:24px] md:pb-20">
+      {/* Ambient crimson aura — prestige depth, never competes with content */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-24 -left-24 -z-10 h-64 w-64 rounded-full bg-primary/15 blur-[110px]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-40 -right-24 -z-10 h-56 w-56 rounded-full bg-primary/10 blur-[100px]"
+      />
+
+      {/* Hero — restrained display type, quiet kicker, balance chip */}
+      <header data-testid="library-hero" className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4 border-b border-white/[0.07] pb-5">
         <div className="min-w-0">
-          <h1 className="font-display text-2xl font-black leading-[1.1] tracking-[-0.02em] break-words sm:text-5xl lg:text-6xl">
+          <p className="text-[10px] font-black uppercase tracking-[0.28em] text-muted-foreground">
+            Sonic laboratory
+          </p>
+          <h1 className="mt-1.5 font-display text-3xl font-black leading-[1.05] tracking-[-0.02em] break-words sm:text-4xl lg:text-5xl">
             Hey <span className="text-gradient-brand">{firstName}</span> — let's write a song.
           </h1>
-          <p className="mt-1 text-sm font-semibold text-muted-foreground sm:text-base">
-            Create your track in minutes.
-          </p>
         </div>
-        <div className="inline-flex shrink-0 items-center gap-2 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 to-card/60 px-4 py-2 shadow-[0_8px_28px_-12px_oklch(0.7_0.2_300_/_0.45)]">
-          <Coins className="h-5 w-5 text-primary" aria-hidden="true" />
-          <span className="text-lg font-black tabular-nums sm:text-xl">{balance}</span>
-          <span className="hidden text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground sm:inline">coins</span>
+        <div className="inline-flex shrink-0 items-center gap-2 rounded-full border border-primary/25 bg-card/60 px-3.5 py-2 backdrop-blur">
+          <Coins className="h-4 w-4 text-primary" aria-hidden="true" />
+          <span className="text-base font-black tabular-nums sm:text-lg">{balance}</span>
+          <span className="hidden text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground sm:inline">coins</span>
         </div>
       </header>
 
-      {/* Primary entry points — one card holds create, browse and track options */}
+      {/* Primary entry points — one dominant action, controls demoted to a quiet strip */}
       <section
         aria-label="Create a track"
-        className="rounded-3xl border border-white/10 bg-gradient-to-br from-card/80 to-card/40 p-4 shadow-[0_18px_60px_-30px_oklch(0.7_0.2_300_/_0.6)] sm:p-5"
+        className="rounded-3xl border border-white/[0.07] bg-card/40 p-4 backdrop-blur-sm sm:p-5"
       >
-        <div className="grid gap-2.5 sm:grid-cols-2">
+        <div className="flex gap-3">
           <Button
             type="button"
             onClick={() => setWizardOpen(true)}
             disabled={pipelineActive}
-            className="min-h-14 w-full gap-2 rounded-2xl bg-gradient-brand text-base font-black uppercase tracking-[0.14em] text-primary-foreground shadow-glow sm:text-lg"
+            className="min-h-14 flex-1 gap-2 rounded-2xl bg-gradient-brand text-sm font-black uppercase tracking-[0.16em] text-primary-foreground shadow-glow sm:text-base"
           >
             <Sparkles className="h-5 w-5" />
             {pipelineActive ? "Cooking your track…" : "Create now"}
@@ -1008,21 +1018,22 @@ function LibraryPage() {
           <Button
             type="button"
             variant="outline"
+            aria-label="Jump to your library"
             onClick={() =>
               libraryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
             }
-            className="min-h-14 w-full gap-2 rounded-2xl border-primary/40 text-base font-black uppercase tracking-[0.14em] sm:text-lg"
+            className="min-h-14 shrink-0 gap-2 rounded-2xl border-white/10 bg-card/60 px-5 text-sm font-black uppercase tracking-[0.16em] hover:border-primary/40"
           >
             <Disc3 className="h-5 w-5" />
-            Library
+            <span className="hidden sm:inline">Library</span>
           </Button>
         </div>
 
-        <div className="mt-4 grid gap-3 border-t border-white/10 pt-4 sm:grid-cols-2 sm:items-center">
-          <div className="flex flex-wrap items-center gap-2">
+        <div className="mt-4 grid gap-4 border-t border-white/[0.07] pt-4 sm:grid-cols-2">
+          <div className="space-y-2">
             <Label
               htmlFor="target-length"
-              className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground"
+              className="text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground"
             >
               Track length
             </Label>
@@ -1031,7 +1042,7 @@ function LibraryPage() {
               value={targetMinutes}
               onChange={(e) => setTargetMinutes(Number(e.target.value))}
               disabled={pipelineActive}
-              className="min-h-10 rounded-xl border border-primary/30 bg-background/70 px-3 text-sm font-semibold disabled:opacity-60"
+              className="min-h-10 w-full rounded-xl border border-white/10 bg-background/60 px-3 text-sm font-semibold disabled:opacity-60"
             >
               {[3, 4, 5, 6, 8].map((m) => (
                 <option key={m} value={m}>
@@ -1040,15 +1051,19 @@ function LibraryPage() {
               ))}
             </select>
           </div>
-          <div className="flex items-center justify-start gap-2 sm:justify-end">
+          <div className="space-y-2">
+            <span className="block text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground">
+              Lyric filter
+            </span>
             <FoulMouthToggle disabled={pipelineActive} />
           </div>
-          <p className="text-xs leading-relaxed text-muted-foreground sm:col-span-2">
-            Five quick steps · -{totalCost} coins · expected length {expectedRange} (minimum{" "}
-            {MIN_TRACK_MINUTES} min enforced, no upper limit).
+          <p className="text-[11px] leading-relaxed text-muted-foreground sm:col-span-2">
+            Five quick steps · -{totalCost} coins · expected length {expectedRange} · minimum{" "}
+            {MIN_TRACK_MINUTES} min, no upper limit.
           </p>
         </div>
       </section>
+
 
 
 
