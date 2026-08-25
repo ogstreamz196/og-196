@@ -731,6 +731,67 @@ function LibraryPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
+  /* ------------------------------------------------------------------
+   * Realtime generation status: watch the song we just submitted and flip
+   * the indicator the instant the backend marks it completed or failed.
+   * Falls back to a slow poll in case a realtime event is missed.
+   * ------------------------------------------------------------------ */
+  useEffect(() => {
+    if (!trackedSongId) return;
+    let cancelled = false;
+
+    const settle = (row: Song) => {
+      if (cancelled) return;
+      if (row.status === "completed") {
+        setFreshTrack(row);
+        setPipeline({ stage: "idle", startedAt: 0, stageStartedAt: 0, durations: {} });
+        setTrackedSongId(null);
+        library.refetch();
+        setReadyToReview({ id: row.id, title: row.title || "Your song" });
+        notifiedReadyRef.current.add(row.id);
+        toast.success(`🎧 Song is ready · ${row.title || "Your song"}`, {
+          id: `song-ready-${row.id}`,
+          duration: 12000,
+        });
+      } else if (row.status === "failed") {
+        setPipeline((p) => ({
+          ...p,
+          stage: "error",
+          error: "The studio couldn't finish this track. Your coins for a failed render are refunded automatically.",
+        }));
+        setTrackedSongId(null);
+        library.refetch();
+        toast.error("Generation failed — please try again");
+      }
+    };
+
+    const ch = supabase
+      .channel(`song-status-${trackedSongId}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "songs", filter: `id=eq.${trackedSongId}` },
+        (payload) => settle(payload.new as Song),
+      )
+      .subscribe();
+
+    const poll = window.setInterval(async () => {
+      const { data } = await supabase
+        .from("songs")
+        .select("*")
+        .eq("id", trackedSongId)
+        .maybeSingle();
+      if (data) settle(data as Song);
+    }, 8000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(poll);
+      supabase.removeChannel(ch);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [trackedSongId]);
+
+
   // Detect songs that just finished (pending → completed) and surface an
   // explicit "Song is ready" toast plus a prominent Review banner.
   // Only tracks with status === "completed" reach `completedTracks`, so the
