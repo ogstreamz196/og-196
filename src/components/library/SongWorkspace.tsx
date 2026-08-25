@@ -331,7 +331,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       }
       const { error } = await supabase.functions.invoke("suno-generate", {
         body: {
-          song_id: song.id,
+          song_id: isOwner ? song.id : null,
           prompt: brief,
           lyrics,
           title: title.trim() || null,
