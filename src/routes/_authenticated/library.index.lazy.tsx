@@ -134,6 +134,7 @@ function LibraryPage() {
   // Last raw wizard answers — kept so a retry (or reopening the wizard after a
   // failure) never loses what the user already typed.
   const [wizardDraft, setWizardDraft] = useState<WizardDraft>(EMPTY_DRAFT);
+  const statusPanelRef = useRef<HTMLElement | null>(null);
 
   const [title, setTitle] = useState("");
   const [subjectName, setSubjectName] = useState("");
