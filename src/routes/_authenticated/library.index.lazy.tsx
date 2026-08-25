@@ -1591,15 +1591,36 @@ function LibraryPage() {
           )}
 
           {pipeline.stage === "error" && (
-            <Button
-              onClick={resetPipeline}
-              size="sm"
-              variant="outline"
-              className="gap-2"
-            >
-              <RefreshCw className="h-3.5 w-3.5" /> Try again
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                onClick={() => {
+                  resetPipeline();
+                  void createSong(lastOverrides ?? undefined);
+                }}
+                size="sm"
+                className="gap-2 bg-gradient-brand font-black uppercase tracking-wide text-primary-foreground"
+              >
+                <RefreshCw className="h-3.5 w-3.5" /> Try again
+              </Button>
+              <Button
+                type="button"
+                onClick={() => {
+                  resetPipeline();
+                  setWizardOpen(true);
+                }}
+                size="sm"
+                variant="outline"
+                className="gap-2"
+              >
+                <Sparkles className="h-3.5 w-3.5" /> Edit details
+              </Button>
+              <Button type="button" onClick={resetPipeline} size="sm" variant="ghost" className="gap-2">
+                <X className="h-3.5 w-3.5" /> Dismiss
+              </Button>
+            </div>
           )}
+
 
           {pipelineActive && (
             <Button
