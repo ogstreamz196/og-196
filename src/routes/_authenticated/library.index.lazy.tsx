@@ -470,6 +470,10 @@ function LibraryPage() {
   });
   const [pipelineNow, setPipelineNow] = useState(0);
   const pipelineLockRef = useRef(false);
+  // The song we're watching in realtime while its audio renders.
+  const [trackedSongId, setTrackedSongId] = useState<string | null>(null);
+  const [freshTrack, setFreshTrack] = useState<Song | null>(null);
+
   const totalCost = lyricsCost + previewCost;
   const canRunPipeline =
     !!user && canGenerateLyrics && balance >= totalCost && pipeline.stage === "idle";
