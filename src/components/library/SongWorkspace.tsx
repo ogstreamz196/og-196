@@ -529,6 +529,18 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                 </div>
               )}
               <div className="space-y-1.5">
+                <Label htmlFor="song-style">Song style</Label>
+                <Input
+                  id="song-style"
+                  value={style}
+                  onChange={(e) => setStyle(e.target.value)}
+                  placeholder="Drill · dark piano · gritty male vocal"
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  Separate style tags with · — these drive the sound of the next regenerate.
+                </p>
+              </div>
+              <div className="space-y-1.5">
                 <Label htmlFor="song-brief">Brief</Label>
                 <Textarea
                   id="song-brief"
@@ -538,6 +550,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                   placeholder="Who is the song about, the mood, references, memories…"
                 />
               </div>
+
 
 
               <div className="space-y-1.5">
