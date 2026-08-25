@@ -1513,8 +1513,8 @@ function LibraryPage() {
                 );
               })()
             ) : (
-              <div className="rounded-3xl border border-dashed border-primary/30 bg-gradient-to-br from-primary/10 to-card/40 p-10 text-center ring-1 ring-white/5">
-                <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-primary/30 to-fuchsia-500/15 shadow-[0_12px_30px_-12px_oklch(0.7_0.2_300_/_0.6)]">
+              <div className="rounded-3xl border border-dashed border-primary/30 bg-gradient-to-br from-primary/10 to-card/40 p-8 text-center ring-1 ring-white/5 sm:p-10">
+                <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-primary/30 to-primary/10 shadow-[0_12px_30px_-12px_var(--primary)]">
                   {activeJobs.length > 0 ? (
                     <Loader2 className="h-6 w-6 animate-spin text-primary" />
                   ) : (
@@ -1524,11 +1524,22 @@ function LibraryPage() {
                 <p className="mt-4 font-display text-xl font-black leading-tight sm:text-2xl">
                   {activeJobs.length > 0 ? "Generating your first track…" : "Your vault is empty"}
                 </p>
-                <p className="mt-2 text-base leading-relaxed text-muted-foreground">
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
                   {activeJobs.length > 0
                     ? "Hang tight — finished songs will land here as soon as they're ready."
-                    : "Scroll down to write your first track — finished songs land here."}
+                    : "Tap Create now to write your first track — finished songs land here."}
                 </p>
+                {activeJobs.length === 0 && (
+                  <Button
+                    type="button"
+                    onClick={() => setWizardOpen(true)}
+                    disabled={pipelineActive}
+                    className="mt-5 h-12 gap-2 rounded-2xl bg-gradient-brand px-6 text-sm font-black uppercase tracking-[0.16em] text-primary-foreground"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    Create now
+                  </Button>
+                )}
               </div>
             )}
           </TabsContent>
@@ -1545,12 +1556,29 @@ function LibraryPage() {
                 />
               </div>
             )}
+            <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+              <span>Full-length playback · free</span>
+              <span aria-hidden className="text-primary/60">•</span>
+              <span className="text-primary">3 OG coins to download</span>
+            </p>
             {community.isLoading ? (
-              <div className="grid gap-3">
-                {[0, 1, 2].map((i) => (
-                  <SongCardSkeleton key={i} />
+              <ul
+                aria-label="Loading community tracks"
+                aria-busy="true"
+                className="divide-y divide-border/40 overflow-hidden rounded-2xl border border-border/60 bg-card/30"
+              >
+                {[0, 1, 2, 3].map((i) => (
+                  <li key={i} className="flex items-center gap-3 px-3 py-2.5">
+                    <div className="h-12 w-12 shrink-0 animate-pulse rounded-lg bg-white/[0.06]" />
+                    <div className="h-10 w-10 shrink-0 animate-pulse rounded-full bg-white/[0.06]" />
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <div className="h-3 w-2/3 animate-pulse rounded bg-white/[0.06]" />
+                      <div className="h-1.5 w-full animate-pulse rounded-full bg-white/[0.05]" />
+                    </div>
+                    <div className="h-10 w-14 shrink-0 animate-pulse rounded-full bg-white/[0.06]" />
+                  </li>
                 ))}
-              </div>
+              </ul>
             ) : communityTracks.length > 0 ? (
               (() => {
                 const q = communitySearch.trim().toLowerCase();
@@ -1562,6 +1590,13 @@ function LibraryPage() {
                         (s.style || "").toLowerCase().includes(q),
                     )
                   : communityTracks;
+                if (filtered.length === 0) {
+                  return (
+                    <p className="py-6 text-center text-sm text-muted-foreground">
+                      No community tracks match "{communitySearch}".
+                    </p>
+                  );
+                }
                 return (
                   <div className="space-y-2">
                     <ul className="divide-y divide-border/40 overflow-hidden rounded-2xl border border-border/60 bg-card/30">
@@ -1571,11 +1606,10 @@ function LibraryPage() {
                     </ul>
                     <div ref={communitySentinelRef} className="h-1" aria-hidden />
                     {community.isFetchingNextPage && (
-                      <div className="grid gap-2">
-                        {[0, 1].map((i) => (
-                          <SongCardSkeleton key={`more-${i}`} label="Loading" />
-                        ))}
-                      </div>
+                      <p className="flex items-center justify-center gap-2 py-3 text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                        <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+                        Loading more tracks
+                      </p>
                     )}
                     {!community.hasNextPage && (
                       <p className="py-3 text-center text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
@@ -1586,14 +1620,23 @@ function LibraryPage() {
                 );
               })()
             ) : (
-              <div className="rounded-3xl border border-dashed border-fuchsia-400/30 bg-gradient-to-br from-fuchsia-500/10 to-card/40 p-10 text-center ring-1 ring-white/5">
-                <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-fuchsia-500/30 to-primary/15">
-                  <Users className="h-6 w-6 text-fuchsia-300" />
+              <div className="rounded-3xl border border-dashed border-primary/30 bg-gradient-to-br from-primary/10 to-card/40 p-8 text-center ring-1 ring-white/5 sm:p-10">
+                <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-primary/30 to-primary/10">
+                  <Users className="h-6 w-6 text-primary" />
                 </div>
                 <p className="mt-4 font-display text-xl font-black leading-tight sm:text-2xl">Nothing here yet</p>
-                <p className="mt-2 text-base leading-relaxed text-muted-foreground">
-                  Be the first — finished tracks from the community will appear here.
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
+                  Be the first — finished tracks from the community land here and play full length for free.
                 </p>
+                <Button
+                  type="button"
+                  onClick={() => setWizardOpen(true)}
+                  disabled={pipelineActive}
+                  className="mt-5 h-12 gap-2 rounded-2xl bg-gradient-brand px-6 text-sm font-black uppercase tracking-[0.16em] text-primary-foreground"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  Create the first track
+                </Button>
               </div>
             )}
           </TabsContent>
