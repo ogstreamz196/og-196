@@ -147,7 +147,7 @@ function AdminPanel() {
 
         {/* Group: Coins & Pricing */}
         <section className="space-y-3">
-          <FlameHeading as="h3" size="lg">Coins & Pricing</FlameHeading>
+          <FlameHeading as="h3" size="md">Coins & Pricing</FlameHeading>
           <AdminCollapsible storageKey="og-coins" title="OG Coins" subtitle="Boss coin operations" defaultOpen>
             <OgCoinsPanel />
           </AdminCollapsible>
@@ -161,7 +161,7 @@ function AdminPanel() {
 
         {/* Group: App Configuration */}
         <section className="space-y-3">
-          <FlameHeading as="h3" size="lg">App Configuration</FlameHeading>
+          <FlameHeading as="h3" size="md">App Configuration</FlameHeading>
           <AdminCollapsible storageKey="app-toggles" title="App toggles" subtitle="Global feature flags">
             <AppToggles />
           </AdminCollapsible>
@@ -175,7 +175,7 @@ function AdminPanel() {
 
         {/* Group: Telegram — everything OG Bot / Telegram-related in one place */}
         <section className="space-y-3">
-          <FlameHeading as="h3" size="lg">Telegram</FlameHeading>
+          <FlameHeading as="h3" size="md">Telegram</FlameHeading>
           <AdminCollapsible storageKey="og-bot-ping" title="OG Bot ping" subtitle="Verify OG Bot connectivity">
             <OgBotPing />
           </AdminCollapsible>
@@ -192,7 +192,7 @@ function AdminPanel() {
 
         {/* Group: Diagnostics — non-Telegram smoke tests only */}
         <section className="space-y-3">
-          <FlameHeading as="h3" size="lg">Diagnostics</FlameHeading>
+          <FlameHeading as="h3" size="md">Diagnostics</FlameHeading>
           <AdminCollapsible storageKey="e2e-smoke" title="End-to-end smoke test" subtitle="Full stack flow">
             <E2ESmokeTest />
           </AdminCollapsible>
@@ -203,7 +203,7 @@ function AdminPanel() {
 
         {/* Group: Activity */}
         <section className="space-y-3">
-          <FlameHeading as="h3" size="lg">Activity</FlameHeading>
+          <FlameHeading as="h3" size="md">Activity</FlameHeading>
           <AdminCollapsible storageKey="boss-audit" title="Boss audit log" subtitle="Recent admin actions">
             <BossAuditLog />
           </AdminCollapsible>
