@@ -8,7 +8,6 @@ import {
   RefreshCw,
   Wand2,
   Coins,
-  Trash2,
   Mic2,
   Music4,
   Shuffle,
