@@ -213,6 +213,8 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
     lyrics !== (song.lyrics ?? "");
 
   async function persist(patch: Partial<{ title: string | null; prompt: string; lyrics: string | null }>) {
+    // Community songs aren't editable by the viewer — skip persistence, keep generation working.
+    if (!isOwner) return;
     const { error } = await supabase.from("songs").update(patch).eq("id", song.id);
     if (error) throw error;
   }
