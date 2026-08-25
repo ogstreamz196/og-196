@@ -1092,7 +1092,6 @@ function LibraryPage() {
       />
 
 
-      <GenerationHistory songs={versionedLibrary} loading={library.isFetching} />
 
 
       {/* Prominent Review banner — only visible when a freshly finished song is waiting to be reviewed */}
