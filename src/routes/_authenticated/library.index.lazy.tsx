@@ -1089,7 +1089,11 @@ function LibraryPage() {
             <p className="mt-0.5 truncate font-display text-lg font-black text-foreground sm:text-2xl">
               {readyToReview.title}
             </p>
+            <p className="mt-0.5 text-[11px] text-emerald-200/90">
+              Expected length {actualDurationLabel ?? expectedRange}
+            </p>
           </div>
+
           <div className="flex shrink-0 items-center gap-2">
             <button
               ref={reviewBtnRef}
