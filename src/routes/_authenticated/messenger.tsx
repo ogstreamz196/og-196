@@ -69,15 +69,22 @@ function MessengerPage() {
     setPendingMode(null);
   }
 
+  const { ref: fillRef, height: fillHeight } = useFillViewport<HTMLDivElement>(0);
+
   return (
     <DashboardShell title={isCommunity ? "OG Community Mode" : "OG Bot Loner Mode"}>
-      <div className={`relative -mx-4 -my-5 sm:-mx-6 sm:-my-8 lg:-mx-8 lg:-my-10 ${foulMouth ? "hell-aura" : ""}`}>
+      <div
+        ref={fillRef}
+        style={fillHeight ? { height: fillHeight } : undefined}
+        className={`relative -mx-4 -mb-5 -mt-5 flex flex-col overflow-hidden sm:-mx-6 sm:-mb-8 sm:-mt-8 lg:-mx-8 lg:-mb-10 lg:-mt-10 ${foulMouth ? "hell-aura" : ""}`}
+      >
         {foulMouth && (
           <>
             <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,rgba(239,68,68,0.35),transparent_60%),radial-gradient(ellipse_at_bottom,rgba(220,38,38,0.3),transparent_65%)] animate-pulse" />
           </>
         )}
-      <div className={`flex h-[calc(100dvh-var(--app-header-h,4rem))] min-h-[520px] w-full flex-col overflow-hidden border-0 ${foulMouth ? "bg-gradient-to-b from-[#1a0505]/95 via-[#220808]/90 to-[#0d0202]/95" : "bg-card/60"}`}>
+      <div className={`flex min-h-0 w-full flex-1 flex-col overflow-hidden border-0 ${foulMouth ? "bg-gradient-to-b from-[#1a0505]/95 via-[#220808]/90 to-[#0d0202]/95" : "bg-card/60"}`}>
+
 
         {/* Header — adapts to current mode */}
         <header
