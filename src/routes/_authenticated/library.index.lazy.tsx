@@ -108,6 +108,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 
 
+const MIN_TRACK_MINUTES = 3;
+
 export const Route = createLazyFileRoute("/_authenticated/library/")({
   component: LibraryPage,
 });
@@ -356,6 +358,7 @@ function LibraryPage() {
           description,
           styleTags,
           language: selections.language,
+          targetDurationSec,
           foulMouth,
           personalDetails: personalDetails.trim() || undefined,
           extraContext: combinedExtra || undefined,
@@ -615,10 +618,14 @@ function LibraryPage() {
           personalDetails: songDetails || undefined,
           extraContext: combinedExtra || undefined,
           subjectName: songSubject || undefined,
+          targetDurationSec,
         },
       });
       if (stale()) return;
       if (lyricErr) throw new Error(invokeError(lyricErr, "Lyrics generation failed"));
+      setActualDurationLabel(
+        (lyricData?.estimated_duration_label ?? null) as string | null,
+      );
       const nextLyrics = (lyricData?.lyrics ?? "").toString();
       if (!nextLyrics) throw new Error("No lyrics returned");
       setLyrics(nextLyrics);
