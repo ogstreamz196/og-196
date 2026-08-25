@@ -433,7 +433,7 @@ function LibraryPage() {
         return;
       }
 
-      const { error: genErr } = await supabase.functions.invoke("suno-generate", {
+      const { data: genData, error: genErr } = await supabase.functions.invoke("suno-generate", {
         body: {
           song_id: row.id,
           prompt: promptText,
@@ -444,6 +444,10 @@ function LibraryPage() {
       });
       if (genErr) {
         toast.error(invokeError(genErr, "Could not start generation"));
+        return;
+      }
+      if (genData?.accepted === false) {
+        toast.info(genData.error || "Your current generations need to finish first");
         return;
       }
       toast.success(`Generating your song · -${previewCost} coins`);
@@ -655,7 +659,7 @@ function LibraryPage() {
       if (insertErr || !row?.id) throw new Error(insertErr?.message || "Couldn't save song");
 
       advanceStage("submitting");
-      const { error: genErr } = await supabase.functions.invoke("suno-generate", {
+      const { data: genData, error: genErr } = await supabase.functions.invoke("suno-generate", {
         body: {
           song_id: row.id,
           prompt: promptText,
@@ -666,6 +670,9 @@ function LibraryPage() {
       });
       if (stale()) return;
       if (genErr) throw new Error(invokeError(genErr, "Could not start generation"));
+      if (genData?.accepted === false) {
+        throw new Error(genData.error || "Your current generations need to finish first");
+      }
 
       // Stay on the page: a realtime subscription on this row drives the
       // status indicator until the track is ready (or fails).
