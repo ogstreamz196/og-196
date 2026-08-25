@@ -1434,7 +1434,7 @@ function LibraryPage() {
 
           <div id="lyrics-section" className="relative scroll-mt-24">
             <Button
-              onClick={createSong}
+              onClick={() => void createSong()}
               disabled={!canRunPipeline}
               size="lg"
               className="h-14 w-full gap-2 rounded-2xl bg-gradient-brand text-base font-black text-primary-foreground shadow-glow ring-1 ring-primary/40 transition-transform hover:scale-[1.01] sm:h-20 sm:gap-2.5 sm:text-2xl"
