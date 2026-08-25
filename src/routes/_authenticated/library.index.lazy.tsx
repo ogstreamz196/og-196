@@ -1057,10 +1057,10 @@ function LibraryPage() {
             </span>
             <FoulMouthToggle disabled={pipelineActive} />
           </div>
-          <p className="text-[11px] leading-relaxed text-muted-foreground sm:col-span-2">
-            Five quick steps · -{totalCost} coins · expected length {expectedRange} · minimum{" "}
-            {MIN_TRACK_MINUTES} min, no upper limit.
+          <p className="text-[11px] font-semibold text-muted-foreground sm:col-span-2">
+            -{totalCost} coins · {expectedRange}
           </p>
+
         </div>
       </section>
 
