@@ -946,6 +946,9 @@ function LibraryPage() {
             <Skeleton className="h-3 w-11/12" />
           </div>
         </section>
+      )}
+
+
 
       {/* Unified create flow */}
       <section
