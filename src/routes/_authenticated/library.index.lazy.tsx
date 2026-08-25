@@ -497,13 +497,32 @@ function LibraryPage() {
     });
   };
 
+  const pipelineRunRef = useRef(0);
+
+  function resetPipeline() {
+    setPipeline({ stage: "idle", startedAt: 0, stageStartedAt: 0, durations: {} });
+    setPipelineNow(0);
+  }
+
+  /** Cancel an in-progress generation and clear the realtime status UI. */
+  function cancelGeneration() {
+    pipelineRunRef.current += 1;
+    pipelineLockRef.current = false;
+    setTrackedSongId(null);
+    resetPipeline();
+    toast.info("Generation cancelled — the status panel is cleared");
+  }
+
   async function createSong() {
     if (pipelineLockRef.current) return;
     if (!user || !canRunPipeline) return;
     pipelineLockRef.current = true;
+    const runId = ++pipelineRunRef.current;
+    const stale = () => pipelineRunRef.current !== runId;
     const startedAt = Date.now();
     setPipeline({ stage: "lyrics", startedAt, stageStartedAt: startedAt, durations: {} });
     setPipelineNow(startedAt);
+
     try {
       const description = styleText.trim();
       const combinedExtra = extraContext.trim();
