@@ -973,21 +973,38 @@ function LibraryPage() {
         </div>
       </header>
 
-      {/* Primary entry point — opens the 5-step creation wizard */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-        <Button
-          type="button"
-          onClick={() => setWizardOpen(true)}
-          disabled={pipelineActive}
-          className="min-h-14 w-full gap-2 rounded-2xl bg-gradient-brand text-base font-black uppercase tracking-[0.14em] text-primary-foreground shadow-glow sm:w-auto sm:px-10 sm:text-lg"
-        >
-          <Sparkles className="h-5 w-5" />
-          {pipelineActive ? "Cooking your track…" : "Create now"}
-        </Button>
-        <p className="text-xs text-muted-foreground sm:text-sm">
-          Five quick steps · -{totalCost} coins
-        </p>
+      {/* Primary entry points — create, or jump straight to the library */}
+      <div className="flex flex-col gap-3">
+        <div className="grid gap-2 sm:grid-cols-2">
+          <Button
+            type="button"
+            onClick={() => setWizardOpen(true)}
+            disabled={pipelineActive}
+            className="min-h-14 w-full gap-2 rounded-2xl bg-gradient-brand text-base font-black uppercase tracking-[0.14em] text-primary-foreground shadow-glow sm:text-lg"
+          >
+            <Sparkles className="h-5 w-5" />
+            {pipelineActive ? "Cooking your track…" : "Create now"}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() =>
+              libraryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+            }
+            className="min-h-14 w-full gap-2 rounded-2xl border-primary/40 text-base font-black uppercase tracking-[0.14em] sm:text-lg"
+          >
+            <Disc3 className="h-5 w-5" />
+            Library
+          </Button>
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-xs text-muted-foreground sm:text-sm">
+            Five quick steps · -{totalCost} coins · ~3 minute track
+          </p>
+          <FoulMouthToggle disabled={pipelineActive} />
+        </div>
       </div>
+
 
       <CreateNowWizard
         open={wizardOpen}
