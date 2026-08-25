@@ -1521,6 +1521,7 @@ function LibraryPage() {
       {/* Live status bar — one-tap pipeline progress */}
       {(pipelineActive || pipeline.stage === "error") && (
         <section
+          ref={statusPanelRef}
           role="status"
           aria-live="polite"
           className="space-y-4 rounded-3xl border border-primary/40 bg-card/70 p-5 shadow-glow backdrop-blur-xl sm:p-7"
