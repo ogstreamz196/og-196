@@ -144,7 +144,9 @@ export function CreateNowWizard({
       case 4:
         return styles.length > 0;
       default:
-        return languages.length > 0;
+        // English is always included in the remix, so selecting English alone
+        // (no additional languages) is a valid choice.
+        return true;
     }
   }, [step, title, subjectName, description, styles, languages]);
 
@@ -160,7 +162,7 @@ export function CreateNowWizard({
       case 4:
         return "Pick at least one style (you can stack a few).";
       default:
-        return "Pick at least one language — English is always in the mix.";
+        return "English is included by default — add other languages or continue.";
     }
   }, [step, stepValid]);
 
