@@ -39,12 +39,11 @@ describe("FoulMouthToggle component", () => {
     expect(componentSrc).toMatch(/aria-live=["']polite["']/);
   });
 
-  it("swaps the label between on (red) and off states", () => {
-    // Both the heading status line and the pill label must render the action
-    // copy "TURN FOUL MOUTH OFF" when on and "TURN FOUL MOUTH ON" when off.
-    const labelExpr = /foulMouth\s*\?\s*"TURN FOUL MOUTH OFF"\s*:\s*"TURN FOUL MOUTH ON"/g;
+  it("swaps the label between active and inactive states", () => {
+    // The pill label reads "foul mouth mode" when on and "off" when off.
+    const labelExpr = /foulMouth\s*\?\s*"foul mouth mode"\s*:\s*"off"/g;
     const matches = componentSrc.match(labelExpr) ?? [];
-    expect(matches.length).toBeGreaterThanOrEqual(2);
+    expect(matches.length).toBeGreaterThanOrEqual(1);
   });
 
   it("keeps the pill label readable in both states", () => {

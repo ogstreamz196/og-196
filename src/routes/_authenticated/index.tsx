@@ -19,7 +19,7 @@ import {
   Gift,
   Infinity as InfinityIcon,
   Share2,
-  TrendingUp,
+  
   Send,
   Smartphone,
   Globe,
@@ -270,60 +270,15 @@ function DashboardHome() {
         </div>
       </section>
 
-      {/* Earn promo — stack OG Coins for real rewards (coming soon) */}
+      {/* Refer to earn — compact CTA to the referrals/earnings page */}
       <section>
         <Link
           to="/referrals"
           preload="intent"
-          className="group relative flex flex-col gap-5 overflow-hidden rounded-[2rem] border-2 border-primary/40 bg-gradient-to-br from-primary/20 via-card/80 to-background p-6 shadow-[0_24px_60px_-20px_rgba(80,60,255,0.45)] backdrop-blur-xl transition-all hover:-translate-y-1 hover:border-primary/60 hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:p-8 md:flex-row md:items-center md:justify-between"
+          className="group inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-primary shadow-glow transition hover:scale-105 hover:bg-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-primary/30 blur-3xl transition-transform duration-700 group-hover:scale-110"
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -left-12 bottom-0 h-40 w-40 rounded-full bg-accent/25 blur-3xl"
-          />
-          <div className="relative space-y-3 md:max-w-2xl">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/15 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                <Gift className="h-3 w-3" /> Earn · 10% lifetime
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-400/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-amber-300">
-                <Sparkles className="h-3 w-3" /> Real rewards · coming soon
-              </span>
-            </div>
-            <h2 className="font-display text-2xl font-black leading-[1.1] tracking-tight break-words sm:text-3xl md:text-4xl">
-              Stack{" "}
-              <span className="bg-gradient-to-r from-primary via-fuchsia-400 to-amber-300 bg-clip-text text-transparent">
-                OG Coins
-              </span>{" "}
-              now — redeem for real, valuable items soon.
-            </h2>
-            <p className="text-sm text-muted-foreground sm:text-base">
-              Share your OG Link, earn{" "}
-              <span className="font-semibold text-foreground">10% lifetime cashback</span> on every coin your crew
-              burns, and bank a balance ready for upcoming{" "}
-              <span className="font-semibold text-amber-300">real-world drops, merch and exclusive perks</span>.
-              Stack up while it's early.
-            </p>
-            <div className="flex flex-wrap gap-2 pt-1">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.05] px-2.5 py-1 text-[11px] font-semibold text-foreground/85">
-                <InfinityIcon className="h-3 w-3 text-primary" /> Lifetime
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.05] px-2.5 py-1 text-[11px] font-semibold text-foreground/85">
-                <TrendingUp className="h-3 w-3 text-emerald-400" /> Auto-paid
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.05] px-2.5 py-1 text-[11px] font-semibold text-foreground/85">
-                <Gift className="h-3 w-3 text-amber-300" /> Redeem soon
-              </span>
-            </div>
-          </div>
-          <div className="relative flex shrink-0 items-center gap-2 self-start rounded-full border border-primary/40 bg-background/70 px-5 py-3 text-sm font-bold text-primary shadow-glow backdrop-blur md:self-auto">
-            <Share2 className="h-4 w-4" /> Start stacking
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </div>
+          <Share2 className="h-4 w-4" /> Refer to earn
+          <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
         </Link>
       </section>
 
