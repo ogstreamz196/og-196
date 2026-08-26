@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import ReactMarkdown from "react-markdown";
 import { Send, Trash2, Skull, ShieldCheck, Paperclip, Mic, MicOff, Crown, X, Loader2, ArrowDown } from "lucide-react";
+import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
 import { chatOgBot, type OgChatMessage } from "@/lib/og-messenger.functions";
 import { transcribeOgAudio } from "@/lib/og-transcribe.functions";
 import { postCommunityMessage } from "@/lib/community.functions";
@@ -531,7 +531,7 @@ export function OgChat({
       {showHeader && (
         <div
           data-testid="ogchat-header"
-          className="flex flex-col gap-2.5 border-b border-border/60 bg-muted/30 px-3 py-3 sm:flex-row sm:items-center sm:gap-3"
+          className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b border-border/60 bg-muted/30 px-2.5 py-2 sm:flex sm:gap-3 sm:px-3 sm:py-3"
         >
 
 
@@ -545,16 +545,16 @@ export function OgChat({
             data-testid="ogchat-foulmouth-hero"
 
             className={cn(
-              "group relative flex w-full sm:flex-1 sm:min-w-0 items-center justify-between gap-3 overflow-hidden rounded-2xl border-2 px-4 py-3 text-left shadow-sm transition-all active:scale-[0.99] disabled:opacity-50",
+              "group relative flex min-w-0 items-center justify-between gap-2 overflow-hidden rounded-xl border px-2.5 py-1.5 text-left shadow-sm transition-all active:scale-[0.99] disabled:opacity-50 sm:w-full sm:flex-1 sm:rounded-2xl sm:border-2 sm:px-4 sm:py-3",
               foulActive
                 ? "border-destructive bg-gradient-to-br from-destructive/25 via-destructive/15 to-destructive/10 shadow-[0_6px_24px_-8px_hsl(var(--destructive)/0.6)] hover:shadow-[0_8px_28px_-6px_hsl(var(--destructive)/0.7)]"
                 : "border-border bg-card hover:border-destructive/60 hover:bg-destructive/5",
             )}
           >
-            <span className="flex min-w-0 items-center gap-3">
+            <span className="flex min-w-0 items-center gap-2 sm:gap-3">
               <span
                 className={cn(
-                  "grid h-11 w-11 shrink-0 place-items-center rounded-xl text-2xl transition-transform group-hover:scale-110",
+                  "grid h-8 w-8 shrink-0 place-items-center rounded-lg text-base transition-transform group-hover:scale-110 sm:h-11 sm:w-11 sm:rounded-xl sm:text-2xl",
                   foulActive
                     ? "bg-destructive text-destructive-foreground shadow-[0_0_18px_-2px_hsl(var(--destructive)/0.8)]"
                     : "bg-muted text-muted-foreground",
@@ -565,10 +565,10 @@ export function OgChat({
               </span>
               <span className="flex min-w-0 flex-col leading-tight">
                 <span className={cn(
-                  "text-[15px] font-black uppercase tracking-wide",
+                  "truncate text-[11px] font-black uppercase tracking-normal sm:text-[15px] sm:tracking-wide",
                   foulActive ? "text-destructive" : "text-foreground",
                 )}>
-                  {foulActive ? "Foul Mouth ON" : "Turn on Foul Mouth"}
+                  {foulActive ? "Foul mouth on" : "Foul mouth off"}
                 </span>
               </span>
 
@@ -576,7 +576,7 @@ export function OgChat({
             {/* Big visual switch */}
             <span
               className={cn(
-                "relative h-7 w-12 shrink-0 rounded-full border-2 transition-colors",
+                "relative h-6 w-10 shrink-0 rounded-full border transition-colors sm:h-7 sm:w-12 sm:border-2",
                 foulActive
                   ? "border-destructive bg-destructive"
                   : "border-border bg-muted",
@@ -585,8 +585,8 @@ export function OgChat({
             >
               <span
                 className={cn(
-                  "absolute top-1/2 h-5 w-5 -translate-y-1/2 rounded-full bg-background shadow-md transition-all",
-                  foulActive ? "left-[calc(100%-1.4rem)]" : "left-0.5",
+                  "absolute top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-background shadow-md transition-all sm:h-5 sm:w-5",
+                  foulActive ? "left-[calc(100%-1.15rem)] sm:left-[calc(100%-1.4rem)]" : "left-0.5",
                 )}
               />
             </span>
@@ -595,10 +595,10 @@ export function OgChat({
           {/* Secondary controls row */}
           <div
             data-testid="ogchat-controls"
-            className="flex flex-wrap items-center gap-2 text-xs sm:flex-col sm:items-stretch sm:flex-nowrap sm:w-[180px] sm:shrink-0 sm:justify-center"
+            className="flex shrink-0 items-center justify-end gap-1.5 text-xs sm:flex-col sm:items-stretch sm:flex-nowrap sm:w-[180px] sm:shrink-0 sm:justify-center"
           >
 
-            <span className="mr-auto inline-flex items-center gap-1.5 text-muted-foreground">
+            <span className="hidden items-center gap-1.5 text-muted-foreground sm:mr-auto sm:inline-flex">
               <OgAvatar size={18} />
               <span className="font-semibold">{balance} coin{balance === 1 ? "" : "s"}</span>
             </span>
@@ -607,7 +607,7 @@ export function OgChat({
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
-                className="inline-flex items-center rounded-lg border-2 border-amber-400/50 bg-amber-400/10 px-3 py-1.5 text-[12px] font-bold text-amber-600 dark:text-amber-300 transition hover:bg-amber-400/20 focus:outline-none focus:ring-2 focus:ring-amber-400/50"
+                className="h-8 max-w-[88px] rounded-lg border border-amber-400/50 bg-amber-400/10 px-1.5 text-[10px] font-bold text-amber-600 transition hover:bg-amber-400/20 focus:outline-none focus:ring-2 focus:ring-amber-400/50 dark:text-amber-300 sm:h-auto sm:max-w-none sm:border-2 sm:px-3 sm:py-1.5 sm:text-[12px]"
                 title="Reply language (VIP)"
                 aria-label="Reply language"
               >
@@ -619,7 +619,7 @@ export function OgChat({
               <Link
                 to="/buy-coins"
                 search={{ flow: "vip" } as never}
-                className="inline-flex items-center gap-1.5 rounded-lg border-2 border-border bg-muted px-3 py-1.5 text-[12px] font-bold text-muted-foreground transition hover:bg-muted/80"
+                className="hidden items-center gap-1.5 rounded-lg border-2 border-border bg-muted px-3 py-1.5 text-[12px] font-bold text-muted-foreground transition hover:bg-muted/80 sm:inline-flex"
                 title="VIP unlocks any language"
               >
                 🌐 English <Crown className="h-3.5 w-3.5 text-amber-500" />
@@ -629,10 +629,10 @@ export function OgChat({
               <button
                 type="button"
                 onClick={clearChat}
-                className="inline-flex items-center gap-1 rounded-lg border-2 border-border bg-muted px-2.5 py-1.5 text-[12px] font-semibold text-muted-foreground transition hover:bg-muted/80"
+                className="grid h-8 w-8 place-items-center rounded-lg border border-border bg-muted text-muted-foreground transition hover:bg-muted/80 sm:inline-flex sm:w-auto sm:gap-1 sm:border-2 sm:px-2.5 sm:py-1.5 sm:text-[12px] sm:font-semibold"
                 title="Clear chat history"
               >
-                <Trash2 className="h-3.5 w-3.5" /> Clear
+                <Trash2 className="h-3.5 w-3.5" /> <span className="sr-only sm:not-sr-only">Clear</span>
               </button>
             )}
           </div>
@@ -642,14 +642,14 @@ export function OgChat({
       <div className="relative flex min-h-0 flex-1 flex-col">
       <div
         ref={scrollRef}
-        className="flex-1 space-y-4 overflow-y-auto overscroll-contain px-2 pb-6 pt-4 sm:space-y-5 sm:px-4 sm:pb-8 sm:pt-5 scroll-smooth [-webkit-overflow-scrolling:touch]"
+        className="flex-1 space-y-3 overflow-y-auto overscroll-contain px-2.5 pb-4 pt-3 sm:space-y-5 sm:px-4 sm:pb-8 sm:pt-5 scroll-smooth [-webkit-overflow-scrolling:touch]"
         style={{ touchAction: "pan-y" }}
       >
 
         {messages.length === 0 && (
           <div className="grid h-full place-items-center text-center">
-            <div className="w-full max-w-md space-y-6">
-              <div className="relative mx-auto h-56 w-56 sm:h-64 sm:w-64">
+            <div className="w-full max-w-md space-y-3 sm:space-y-6">
+              <div className="relative mx-auto h-24 w-24 sm:h-64 sm:w-64">
                 <div className="absolute inset-0 rounded-full bg-primary/40 blur-[60px] animate-pulse" />
                 <div
                   aria-hidden="true"
@@ -667,15 +667,12 @@ export function OgChat({
                 />
               </div>
               <div className="space-y-2">
-                <h2 className="font-display text-3xl font-black tracking-tight sm:text-4xl">
-                  Welcome to <span className="text-gradient-brand">OG Bot</span> 🎤
+                <h2 className="font-display text-xl font-black tracking-tight sm:text-4xl">
+                  Message <span className="text-gradient-brand">OG Bot</span>
                 </h2>
-                <p className="text-sm text-muted-foreground sm:text-base">
-                  Your AI studio sidekick. Drop a vibe, a joke, a memory —
-                  I'll spin lyrics, hooks &amp; full Suno prompts on demand.
-                </p>
+                <p className="text-xs text-muted-foreground sm:text-base">Ask anything. Replies cost 1 coin.</p>
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary/80">
-                  1 coin per message · {balance} left
+                  {balance} coins left
                 </p>
               </div>
               {showQuickStarts && (
@@ -714,7 +711,7 @@ export function OgChat({
             <div
               key={i}
               className={cn(
-                "flex items-end gap-3 animate-[pop_0.25s_ease-out]",
+                    "flex items-end gap-2 animate-[pop_0.25s_ease-out] sm:gap-3",
                 isUser ? "flex-row-reverse" : "flex-row",
               )}
             >
@@ -734,9 +731,9 @@ export function OgChat({
                   )}
                 </div>
               ) : (
-                <OgAvatar size={40} className="shrink-0" />
+                  <OgAvatar size={32} className="shrink-0 sm:h-10 sm:w-10" />
               )}
-              <div className={cn("flex min-w-0 flex-1 max-w-[94%] sm:max-w-[85%] lg:max-w-[78%] xl:max-w-[70%] flex-col gap-1.5", isUser ? "items-end" : "items-start")}>
+              <Message from={msg.role} className={cn("min-w-0 flex-1 max-w-[calc(100%-2.5rem)] gap-1 sm:max-w-[85%] lg:max-w-[78%] xl:max-w-[70%]", isUser ? "items-end" : "items-start")}>
                 <span
                   className={cn(
                     "inline-flex items-center gap-1 px-2 text-[10px] font-black uppercase tracking-[0.18em]",
@@ -751,26 +748,24 @@ export function OgChat({
                     </>
                   )}
                 </span>
-                <div
+                <MessageContent
                   className={cn(
-                    "px-4 py-2.5 text-[15px] leading-[1.5] break-words sm:px-5 sm:py-3 sm:text-base",
+                    "break-words text-[15px] leading-[1.45]",
                     isUser
                       ? isVip
                         ? "rounded-3xl rounded-br-md whitespace-pre-wrap font-medium text-amber-50 bg-gradient-to-br from-amber-500 via-amber-600 to-yellow-700 shadow-[0_14px_36px_-12px_rgba(217,119,6,0.65)] ring-1 ring-amber-300/60"
                         : "rounded-3xl rounded-br-md bg-primary text-primary-foreground whitespace-pre-wrap font-medium shadow-[0_14px_36px_-12px_hsl(var(--primary)/0.55)]"
-                      : "rounded-3xl rounded-bl-md bg-card/80 border border-white/10 text-foreground shadow-[0_10px_30px_-18px_rgba(0,0,0,0.6)] ring-1 ring-white/5 backdrop-blur-sm",
+                        : "w-full bg-transparent p-0 text-foreground shadow-none",
                   )}
                 >
                   {msg.role === "assistant" ? (
-                    <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none prose-p:my-1.5 prose-p:leading-snug prose-ul:my-1.5 prose-ol:my-1.5 prose-headings:my-1.5 prose-code:text-primary">
-                      <ReactMarkdown>{msg.content}</ReactMarkdown>
-                    </div>
+                    <MessageResponse className="prose-sm max-w-none prose-p:my-1 prose-p:leading-snug prose-ul:my-1 prose-ol:my-1 prose-headings:my-1 prose-code:text-primary">{msg.content}</MessageResponse>
 
                   ) : (
                     msg.content
                   )}
-                </div>
-              </div>
+                </MessageContent>
+              </Message>
             </div>
           );
         })}
@@ -846,7 +841,7 @@ export function OgChat({
           e.preventDefault();
           sendText(input);
         }}
-        className="sticky bottom-0 z-20 border-t-2 border-border/80 bg-card/95 px-3 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-[0_-12px_28px_-16px_rgba(0,0,0,0.55)] backdrop-blur transition-transform duration-150 supports-[backdrop-filter]:bg-card/75 sm:px-5 sm:pt-4 sm:pb-[max(1rem,env(safe-area-inset-bottom))]"
+        className="sticky bottom-0 z-20 border-t border-border/80 bg-card/95 px-2.5 pb-2 pt-2 shadow-[0_-12px_28px_-16px_rgba(0,0,0,0.55)] backdrop-blur transition-transform duration-150 supports-[backdrop-filter]:bg-card/75 sm:px-5 sm:pt-4 sm:pb-[max(1rem,env(safe-area-inset-bottom))]"
       >
 
         {attachment && (
@@ -877,7 +872,7 @@ export function OgChat({
         {/* Unified composer pill — attachment | mic | textarea | send (Telegram/WhatsApp pattern) */}
         <div
           className={cn(
-            "flex items-end gap-1.5 rounded-3xl border border-white/10 bg-background/80 px-2.5 py-2 shadow-[0_14px_36px_-18px_rgba(0,0,0,0.55)] ring-1 ring-white/5 backdrop-blur-xl transition focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/30 sm:gap-2 sm:rounded-full sm:px-4 sm:py-2.5",
+            "flex items-end gap-0.5 rounded-2xl border border-primary/40 bg-background/80 px-1.5 py-1.5 shadow-[0_14px_36px_-18px_rgba(0,0,0,0.55)] ring-1 ring-primary/20 backdrop-blur-xl transition focus-within:border-primary/70 focus-within:ring-2 focus-within:ring-primary/30 sm:gap-2 sm:rounded-full sm:px-4 sm:py-2.5",
             (isOut || !user) && "opacity-70",
           )}
         >
@@ -887,7 +882,7 @@ export function OgChat({
             disabled={!user || m.isPending}
             aria-label="Attach image"
             title="Attach image"
-            className="grid h-12 w-12 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-white/5 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 disabled:opacity-40 sm:h-11 sm:w-11"
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-white/5 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 disabled:opacity-40 sm:h-11 sm:w-11"
           >
             <Paperclip className="h-5 w-5" />
           </button>
@@ -899,7 +894,7 @@ export function OgChat({
             aria-pressed={recording}
             title={recording ? "Stop recording" : "Voice input"}
             className={cn(
-              "grid h-12 w-12 shrink-0 place-items-center rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 disabled:opacity-40 sm:h-11 sm:w-11",
+              "grid h-9 w-9 shrink-0 place-items-center rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 disabled:opacity-40 sm:h-11 sm:w-11",
               recording
                 ? "bg-destructive text-destructive-foreground hover:bg-destructive/90 animate-pulse"
                 : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
@@ -936,9 +931,7 @@ export function OgChat({
                   ? "Listening… tap mic to stop"
                   : isOut
                     ? "Out of coins — top up to chat"
-                    : foulActive
-                      ? "Go on then, type something…"
-                      : "Message OG Bot…"
+                    : "Message OG Bot…"
             }
             disabled={m.isPending || isOut || !user || transcribing}
             maxLength={2000}
@@ -952,7 +945,7 @@ export function OgChat({
               setTimeout(() => e.currentTarget?.scrollIntoView({ block: "end", behavior: "smooth" }), 250);
             }}
             onBlur={handleComposerBlur}
-            className="min-h-[48px] max-h-[180px] flex-1 resize-none bg-transparent px-2.5 py-2.5 text-[17px] leading-relaxed placeholder:text-muted-foreground/70 focus:outline-none disabled:cursor-not-allowed sm:min-h-[40px] sm:px-3 sm:py-2 sm:text-lg"
+            className="min-h-9 max-h-28 flex-1 resize-none bg-transparent px-1.5 py-1.5 text-base leading-normal placeholder:text-muted-foreground/70 focus:outline-none disabled:cursor-not-allowed sm:min-h-[40px] sm:max-h-[180px] sm:px-3 sm:py-2 sm:text-lg"
 
           />
           <button
@@ -961,20 +954,20 @@ export function OgChat({
             aria-label="Send message"
             title="Send"
             data-testid="og-loner-send"
-            className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-gradient-brand text-primary-foreground shadow-[0_8px_22px_-6px_hsl(var(--primary)/0.6)] ring-1 ring-primary/40 transition hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 disabled:bg-muted disabled:text-muted-foreground disabled:shadow-none disabled:ring-0 sm:h-11 sm:w-11"
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-brand text-primary-foreground shadow-[0_8px_22px_-6px_hsl(var(--primary)/0.6)] ring-1 ring-primary/40 transition hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 disabled:bg-muted disabled:text-muted-foreground disabled:shadow-none disabled:ring-0 sm:h-11 sm:w-11"
           >
             {m.isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
           </button>
         </div>
-        <p className="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1 px-2 text-[13px] font-medium text-muted-foreground/80 sm:text-xs" aria-live="polite">
+        <p className="mt-1 flex items-center justify-between gap-2 px-1 text-[10px] font-medium text-muted-foreground/80 sm:mt-2.5 sm:flex-wrap sm:justify-start sm:px-2 sm:text-xs" aria-live="polite">
           {m.isPending ? (
             <span className="inline-flex items-center gap-1.5 font-semibold text-foreground/90">
               <Loader2 className="h-3 w-3 animate-spin" /> Sending…
             </span>
           ) : (
-            <span>Enter to send · Shift+Enter for newline</span>
+            <span className="hidden sm:inline">Enter to send · Shift+Enter for newline</span>
           )}
-          <span aria-hidden>·</span>
+          <span aria-hidden className="hidden sm:inline">·</span>
           <span><span className="font-bold text-foreground/90">{balance}</span> coin{balance === 1 ? "" : "s"} left</span>
         </p>
 
