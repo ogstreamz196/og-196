@@ -45,7 +45,7 @@ export function FreshTrackCard({
     if (autoUnlockPrompt) setUnlockOpen(true);
   }, [autoUnlockPrompt]);
   const [busy, setBusy] = useState(false);
-  const [unlocked, setUnlocked] = useState(!!song.unlocked);
+  const [unlocked, setUnlocked] = useState(!!(song as { unlocked?: boolean | null }).unlocked);
   const title = song.title || "Your track";
   const cap = Math.max(5, sampleSeconds);
 
