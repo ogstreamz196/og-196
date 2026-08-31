@@ -1102,25 +1102,6 @@ function LibraryPage() {
 
 
 
-      {/* Lyrics generating skeleton */}
-      {genLyrics && !lyrics && (
-        <section className="space-y-3 rounded-2xl border border-primary/30 bg-card/60 p-5 sm:p-6">
-          <div className="flex items-center gap-2">
-            <Loader2 className="h-4 w-4 animate-spin text-primary" />
-            <p className="text-sm font-bold">OG is writing your lyrics…</p>
-          </div>
-          <div className="space-y-2">
-            <Skeleton className="h-3 w-1/3" />
-            <Skeleton className="h-3 w-full" />
-            <Skeleton className="h-3 w-11/12" />
-            <Skeleton className="h-3 w-10/12" />
-            <Skeleton className="mt-3 h-3 w-1/4" />
-            <Skeleton className="h-3 w-full" />
-            <Skeleton className="h-3 w-9/12" />
-            <Skeleton className="h-3 w-11/12" />
-          </div>
-        </section>
-      )}
 
 
 
