@@ -69,6 +69,8 @@ import { FoulMouthToggle } from "@/components/FoulMouthToggle";
 
 import { FreshTrackCard } from "@/components/library/FreshTrackCard";
 import { StudioMeter, StudioLed } from "@/components/library/StudioConsole";
+import { CookingDialog } from "@/components/library/CookingDialog";
+import { BeatLibrary, type SavedBeat } from "@/components/library/BeatLibrary";
 import { ReviewDialog } from "@/components/library/ReviewDialog";
 import { useInfiniteScrollSentinel } from "@/hooks/use-infinite-scroll-sentinel";
 
@@ -134,6 +136,11 @@ function LibraryPage() {
   }, [profile?.display_name, user?.email, dev.isDev]);
 
   const [wizardOpen, setWizardOpen] = useState(false);
+  // "It's cooking" popup shown right after the wizard is submitted.
+  const [cooking, setCooking] = useState<{ open: boolean; title: string }>({
+    open: false,
+    title: "",
+  });
   // Last raw wizard answers — kept so a retry (or reopening the wizard after a
   // failure) never loses what the user already typed.
   const [wizardDraft, setWizardDraft] = useState<WizardDraft>(EMPTY_DRAFT);
@@ -820,6 +827,27 @@ function LibraryPage() {
     [versionedLibrary],
   );
 
+  /** Live queue read-out that drives the console meter + status LEDs. */
+  const queue = useMemo(() => {
+    let queued = 0,
+      rendering = 0,
+      failed = 0;
+    for (const s of activeJobs) {
+      if (s.status === "failed") failed++;
+      else if (s.status === "processing") rendering++;
+      else queued++;
+    }
+    const inFlight = queued + rendering;
+    return {
+      queued,
+      rendering,
+      failed,
+      inFlight,
+      // 2 concurrent generations = the desk is at capacity.
+      load: Math.min(1, (rendering * 1 + queued * 0.5) / 2),
+    };
+  }, [activeJobs]);
+
   const COMMUNITY_PAGE_SIZE = 12;
   const community = useInfiniteQuery({
     queryKey: ["library-community", user?.id],
@@ -1010,7 +1038,11 @@ function LibraryPage() {
             </h1>
           </div>
           <div className="flex shrink-0 items-center gap-3">
-            <StudioMeter active={pipelineActive} className="hidden sm:flex" />
+            <StudioMeter
+              active={pipelineActive || queue.inFlight > 0}
+              load={pipelineActive ? Math.max(0.5, queue.load) : queue.load}
+              className="hidden sm:flex"
+            />
             <div className="inline-flex shrink-0 items-center gap-2 rounded-full border border-primary/25 bg-background/50 px-3.5 py-2 backdrop-blur">
               <Coins className="h-4 w-4 text-primary" aria-hidden="true" />
               <span className="text-base font-black tabular-nums sm:text-lg">{balance}</span>
@@ -1022,15 +1054,37 @@ function LibraryPage() {
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-white/[0.07] pt-2.5">
           <StudioLed
-            label={pipelineActive ? "Recording" : "Desk ready"}
-            tone={pipelineActive ? "busy" : "ok"}
-            pulse={pipelineActive}
+            label={
+              pipeline.stage === "error"
+                ? "Fault"
+                : pipelineActive
+                  ? pipelineStageTitle[currentStage]
+                  : queue.inFlight > 0
+                    ? "Desk busy"
+                    : "Desk ready"
+            }
+            tone={
+              pipeline.stage === "error"
+                ? "alert"
+                : pipelineActive || queue.inFlight > 0
+                  ? "busy"
+                  : "ok"
+            }
+            pulse={pipelineActive || queue.inFlight > 0}
           />
           <StudioLed
-            label={`${activeJobs.length} in booth`}
-            tone={activeJobs.length > 0 ? "busy" : "idle"}
-            pulse={activeJobs.length > 0}
+            label={`${queue.queued} queued`}
+            tone={queue.queued > 0 ? "busy" : "idle"}
+            pulse={queue.queued > 0}
           />
+          <StudioLed
+            label={`${queue.rendering} rendering`}
+            tone={queue.rendering > 0 ? "busy" : "idle"}
+            pulse={queue.rendering > 0}
+          />
+          {queue.failed > 0 && (
+            <StudioLed label={`${queue.failed} failed`} tone="alert" pulse />
+          )}
           <StudioLed
             label={`${completedTracks.length} mastered`}
             tone={completedTracks.length > 0 ? "ok" : "idle"}
@@ -1136,6 +1190,22 @@ function LibraryPage() {
         </section>
       )}
 
+      {/* Beat library — save instrumentals, remix new vocals over them */}
+      {!pipelineActive && (
+        <BeatLibrary
+          userId={user?.id}
+          onRemix={(beat: SavedBeat) => {
+            setWizardDraft({
+              ...wizardDraft,
+              vocalsOnly: true,
+              beatPath: beat.path,
+              beatName: beat.name,
+            });
+            setWizardOpen(true);
+          }}
+        />
+      )}
+
       <CreateNowWizard
         open={wizardOpen}
         onOpenChange={setWizardOpen}
@@ -1148,14 +1218,23 @@ function LibraryPage() {
           setPersonalDetails(v.description.slice(0, PERSONAL_DETAILS_MAX));
           setStyleText(v.style);
           setSelections({ language: v.language });
-          toast.success("Track created — generating lyrics…");
+          // Everything now runs in the backend — set expectations with a
+          // celebratory "come back in 5" popup instead of a bare toast.
+          setCooking({ open: true, title: v.title });
           void createSong(v);
-          // Bring the live status panel into view right after the toast.
+          // Bring the live status panel into view right after the popup.
           window.setTimeout(
             () => statusPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }),
             250,
           );
         }}
+      />
+
+      <CookingDialog
+        open={cooking.open}
+        onOpenChange={(o) => setCooking((c) => ({ ...c, open: o }))}
+        title={cooking.title}
+        etaMinutes={5}
       />
 
       {/* Creation happens entirely inside the Create now wizard — no inline form. */}
