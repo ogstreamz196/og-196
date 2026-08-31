@@ -28,12 +28,12 @@ describe("Switch accessibility contract", () => {
     expect(src).toMatch(/\{\.\.\.props\}/);
   });
 
-  it("renders 'Turn on' label for the unchecked state", () => {
-    expect(src).toMatch(/group-data-\[state=checked\]:hidden[^>]*>\s*Turn on/);
+  it("renders 'Turned off' label for the unchecked state", () => {
+    expect(src).toMatch(/group-data-\[state=checked\]:hidden[^>]*>\s*Turned off/);
   });
 
-  it("renders 'Turn off' label for the checked state", () => {
-    expect(src).toMatch(/group-data-\[state=unchecked\]:hidden[^>]*>\s*Turn off/);
+  it("renders 'Turned on' label for the checked state", () => {
+    expect(src).toMatch(/group-data-\[state=unchecked\]:hidden[^>]*>\s*Turned on/);
   });
 
   it("includes an sr-only state announcement for screen readers", () => {
