@@ -574,6 +574,8 @@ function LibraryPage() {
     description: string;
     style: string;
     language: string;
+    /** Artist voice from the wizard — drives Suno's vocalGender + style tags. */
+    vocal?: string;
   };
 
   // Keeps the exact payload of the last run so "Try again" reuses it verbatim.
