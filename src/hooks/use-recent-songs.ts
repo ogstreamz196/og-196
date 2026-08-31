@@ -9,6 +9,9 @@ export interface RecentSong {
   status: string;
   cover_url: string | null;
   created_at: string;
+  generation_started_at: string | null;
+  beat_path: string | null;
+  vocals_only: boolean;
 }
 
 export function useRecentSongs(userId: string | undefined, limit = 6) {
@@ -21,7 +24,7 @@ export function useRecentSongs(userId: string | undefined, limit = 6) {
     queryFn: async (): Promise<RecentSong[]> => {
       const { data, error } = await supabase
         .from("songs")
-        .select("id, title, prompt, status, cover_url, created_at")
+        .select("id, title, prompt, status, cover_url, created_at, generation_started_at, beat_path, vocals_only")
         .order("created_at", { ascending: false })
         .limit(limit);
       if (error) throw error;

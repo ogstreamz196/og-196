@@ -207,13 +207,14 @@ Deno.serve(async (req) => {
       (extraContext ? `Extra context from the artist (use these details literally in the lyrics): ${extraContext}\n` : "") +
       `\nWrite the FULL song now — at least ${mmss(targetSec)} of singable material (${minWords}+ words, ${minLines}+ lyric lines; going longer is welcome). Do not stop early, do not abbreviate repeated choruses, hit EVERY section in the structure, stay ruthlessly on-theme with the description above, and drop "${subjectName || "the subject"}" as often as the music allows.`;
 
-    const url =
-      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent?key=${GEMINI_API_KEY}`;
+    const modelUrl = (model: string) =>
+      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${GEMINI_API_KEY}`;
+    
 
     await updateProgress(40, "Writing verses…");
 
-    const callGemini = (contents: unknown[]) =>
-      fetch(url, {
+    const postTo = (model: string, contents: unknown[]) =>
+      fetch(modelUrl(model), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -222,6 +223,23 @@ Deno.serve(async (req) => {
           generationConfig: { temperature: 0.9, maxOutputTokens: 8192 },
         }),
       });
+
+    // Gemini regularly returns 503 "high demand" spikes. Retry with backoff on
+    // the primary model, then fall back to a lighter model before giving up so
+    // a transient upstream blip never kills (and refunds) a generation.
+    const FALLBACK_MODELS = [GEMINI_MODEL, GEMINI_MODEL, "gemini-2.5-flash-lite", "gemini-2.0-flash"];
+    const callGemini = async (contents: unknown[]) => {
+      let last: Response | null = null;
+      for (let i = 0; i < FALLBACK_MODELS.length; i++) {
+        const res = await postTo(FALLBACK_MODELS[i], contents);
+        if (res.ok) return res;
+        last = res;
+        if (res.status !== 429 && res.status < 500) return res;
+        console.error("Gemini transient error", FALLBACK_MODELS[i], res.status);
+        await new Promise((r) => setTimeout(r, 1200 * (i + 1)));
+      }
+      return last as Response;
+    };
 
     const extractText = (data: unknown) =>
       ((data as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> } | null)
