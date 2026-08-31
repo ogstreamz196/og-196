@@ -1054,15 +1054,37 @@ function LibraryPage() {
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-white/[0.07] pt-2.5">
           <StudioLed
-            label={pipelineActive ? "Recording" : "Desk ready"}
-            tone={pipelineActive ? "busy" : "ok"}
-            pulse={pipelineActive}
+            label={
+              pipeline.stage === "error"
+                ? "Fault"
+                : pipelineActive
+                  ? pipelineStageTitle[currentStage]
+                  : queue.inFlight > 0
+                    ? "Desk busy"
+                    : "Desk ready"
+            }
+            tone={
+              pipeline.stage === "error"
+                ? "alert"
+                : pipelineActive || queue.inFlight > 0
+                  ? "busy"
+                  : "ok"
+            }
+            pulse={pipelineActive || queue.inFlight > 0}
           />
           <StudioLed
-            label={`${activeJobs.length} in booth`}
-            tone={activeJobs.length > 0 ? "busy" : "idle"}
-            pulse={activeJobs.length > 0}
+            label={`${queue.queued} queued`}
+            tone={queue.queued > 0 ? "busy" : "idle"}
+            pulse={queue.queued > 0}
           />
+          <StudioLed
+            label={`${queue.rendering} rendering`}
+            tone={queue.rendering > 0 ? "busy" : "idle"}
+            pulse={queue.rendering > 0}
+          />
+          {queue.failed > 0 && (
+            <StudioLed label={`${queue.failed} failed`} tone="alert" pulse />
+          )}
           <StudioLed
             label={`${completedTracks.length} mastered`}
             tone={completedTracks.length > 0 ? "ok" : "idle"}
