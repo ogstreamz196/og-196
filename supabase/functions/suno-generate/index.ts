@@ -64,8 +64,15 @@ Deno.serve(async (req) => {
       ? "duet, male and female vocals trading lines"
       : null;
     const rawStyle = (body.style ?? "").toString().trim();
+    const vocalsOnly = !!body.vocals_only;
+    const beatPath = body.beat_path ? String(body.beat_path) : null;
+    // Vocals-only: sing over the uploaded beat, or fall back to a nasheed-style
+    // a cappella with humming and zero instrumentation.
+    const vocalsOnlyStyle = vocalsOnly
+      ? (beatPath ? VOCALS_OVER_BEAT_STYLE : NASHEED_STYLE)
+      : null;
     const style = limitText(
-      [rawStyle, vocalStyle].filter(Boolean).join(", ") || null,
+      [rawStyle, vocalStyle, vocalsOnlyStyle].filter(Boolean).join(", ") || null,
       MAX_STYLE_CHARS,
     );
     const lyrics = limitText((body.lyrics ?? "").toString().trim() || null, MAX_PROMPT_CHARS);
