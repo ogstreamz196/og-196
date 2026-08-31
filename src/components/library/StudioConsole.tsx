@@ -64,6 +64,7 @@ export function StudioLed({
           tone === "ok" && "bg-emerald-400 text-emerald-400",
           tone === "busy" && "bg-primary text-primary",
           tone === "idle" && "bg-white/25 text-white/25",
+          tone === "alert" && "bg-rose-500 text-rose-500",
           pulse && "studio-led",
         )}
       />
