@@ -180,8 +180,9 @@ export function CreateNowWizard({
         title: title.trim(),
         subjectName: subjectName.trim(),
         description: description.trim(),
-        style: [...styles, gender].filter(Boolean).join(", "),
+        style: styles.filter(Boolean).join(", "),
         language: Array.from(new Set(["English", ...languages])).join(" + "),
+        vocal: gender,
       },
       { title, subjectName, description, styles, gender, languages },
     );
