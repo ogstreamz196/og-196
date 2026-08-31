@@ -50,6 +50,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { DodgyLogo } from "@/components/welcome/DodgyLogo";
 import { DodgyText } from "@/components/welcome/DodgyText";
+import { DashboardGenerationHistory } from "@/components/dashboard/DashboardGenerationHistory";
 
 export const Route = createFileRoute("/_authenticated/")({
   component: DashboardHome,
@@ -304,6 +305,8 @@ function DashboardHome() {
 
 
 
+
+      <DashboardGenerationHistory songs={recentSongs} />
 
       <div className="grid grid-cols-1 gap-6">
 
