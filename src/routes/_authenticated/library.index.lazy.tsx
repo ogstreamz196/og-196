@@ -69,6 +69,8 @@ import { FoulMouthToggle } from "@/components/FoulMouthToggle";
 
 import { FreshTrackCard } from "@/components/library/FreshTrackCard";
 import { StudioMeter, StudioLed } from "@/components/library/StudioConsole";
+import { CookingDialog } from "@/components/library/CookingDialog";
+import { BeatLibrary, type SavedBeat } from "@/components/library/BeatLibrary";
 import { ReviewDialog } from "@/components/library/ReviewDialog";
 import { useInfiniteScrollSentinel } from "@/hooks/use-infinite-scroll-sentinel";
 
