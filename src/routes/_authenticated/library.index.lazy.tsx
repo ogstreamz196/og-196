@@ -827,6 +827,27 @@ function LibraryPage() {
     [versionedLibrary],
   );
 
+  /** Live queue read-out that drives the console meter + status LEDs. */
+  const queue = useMemo(() => {
+    let queued = 0,
+      rendering = 0,
+      failed = 0;
+    for (const s of activeJobs) {
+      if (s.status === "failed") failed++;
+      else if (s.status === "processing") rendering++;
+      else queued++;
+    }
+    const inFlight = queued + rendering;
+    return {
+      queued,
+      rendering,
+      failed,
+      inFlight,
+      // 2 concurrent generations = the desk is at capacity.
+      load: Math.min(1, (rendering * 1 + queued * 0.5) / 2),
+    };
+  }, [activeJobs]);
+
   const COMMUNITY_PAGE_SIZE = 12;
   const community = useInfiniteQuery({
     queryKey: ["library-community", user?.id],
