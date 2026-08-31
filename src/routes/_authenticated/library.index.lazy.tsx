@@ -1190,6 +1190,22 @@ function LibraryPage() {
         </section>
       )}
 
+      {/* Beat library — save instrumentals, remix new vocals over them */}
+      {!pipelineActive && (
+        <BeatLibrary
+          userId={user?.id}
+          onRemix={(beat: SavedBeat) => {
+            setWizardDraft({
+              ...wizardDraft,
+              vocalsOnly: true,
+              beatPath: beat.path,
+              beatName: beat.name,
+            });
+            setWizardOpen(true);
+          }}
+        />
+      )}
+
       <CreateNowWizard
         open={wizardOpen}
         onOpenChange={setWizardOpen}
@@ -1202,14 +1218,23 @@ function LibraryPage() {
           setPersonalDetails(v.description.slice(0, PERSONAL_DETAILS_MAX));
           setStyleText(v.style);
           setSelections({ language: v.language });
-          toast.success("Track created — generating lyrics…");
+          // Everything now runs in the backend — set expectations with a
+          // celebratory "come back in 5" popup instead of a bare toast.
+          setCooking({ open: true, title: v.title });
           void createSong(v);
-          // Bring the live status panel into view right after the toast.
+          // Bring the live status panel into view right after the popup.
           window.setTimeout(
             () => statusPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }),
             250,
           );
         }}
+      />
+
+      <CookingDialog
+        open={cooking.open}
+        onOpenChange={(o) => setCooking((c) => ({ ...c, open: o }))}
+        title={cooking.title}
+        etaMinutes={5}
       />
 
       {/* Creation happens entirely inside the Create now wizard — no inline form. */}
