@@ -599,9 +599,14 @@ function LibraryPage() {
     const songStyle = (override?.style ?? styleText).trim();
     const songLanguage = (override?.language ?? selections.language ?? "English").trim();
     const songDetails = (override?.description ?? personalDetails).trim();
-    const songStyleTags = override
-      ? [override.style].filter(Boolean)
-      : styleTags;
+    const songVocal = (override?.vocal ?? "").trim();
+    // Each style is its own tag (the wizard returns them comma-separated), and
+    // the chosen voice rides along so the lyrics engine writes for it too.
+    const songStyleTags = (
+      override
+        ? override.style.split(",").map((s) => s.trim()).filter(Boolean)
+        : styleTags
+    ).concat(songVocal && !/^any/i.test(songVocal) ? [songVocal] : []);
     pipelineLockRef.current = true;
     const runId = ++pipelineRunRef.current;
     const stale = () => pipelineRunRef.current !== runId;
