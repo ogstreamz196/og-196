@@ -223,6 +223,29 @@ Deno.serve(async (req) => {
     const token = Array.from(new Uint8Array(sigBuf)).map((b) => b.toString(16).padStart(2, "0")).join("");
     const callbackUrl = `${SUPABASE_URL}/functions/v1/suno-callback?song_id=${songId}&token=${token}`;
 
+    // Sign the uploaded beat so Suno can fetch it (path is namespaced per user).
+    let beatUrl: string | null = null;
+    if (vocalsOnly && beatPath) {
+      if (!beatPath.startsWith(`${user.id}/`)) {
+        await refund(admin, user.id, songId, "Beat does not belong to this user", coinCost);
+        return json({ error: "Beat not found" }, 404);
+      }
+      const { data: signed, error: signErr } = await admin.storage
+        .from("beats")
+        .createSignedUrl(beatPath, 60 * 60);
+      if (signErr || !signed?.signedUrl) {
+        await refund(admin, user.id, songId, "Could not read the uploaded beat", coinCost);
+        return json({ error: "Could not read the uploaded beat" }, 400);
+      }
+      beatUrl = signed.signedUrl;
+    }
+    if (vocalsOnly) {
+      await admin
+        .from("songs")
+        .update({ vocals_only: true, beat_path: beatUrl ? beatPath : null })
+        .eq("id", songId);
+    }
+
     const customMode = !!(style || effectiveLyrics || title);
     const sunoTitle = limitText(title || "Untitled track", MAX_TITLE_CHARS);
     let sunoRes: Response;
