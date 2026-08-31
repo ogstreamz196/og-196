@@ -53,7 +53,7 @@ export function StudioLed({
   pulse = false,
 }: {
   label: string;
-  tone?: "ok" | "busy" | "idle";
+  tone?: "ok" | "busy" | "idle" | "alert";
   pulse?: boolean;
 }) {
   return (
