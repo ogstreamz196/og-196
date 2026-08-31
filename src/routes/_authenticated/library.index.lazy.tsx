@@ -38,7 +38,6 @@ import { cn } from "@/lib/utils";
 import { SongCard, type Song } from "@/components/SongCard";
 import { SongCardSkeleton } from "@/components/library/SongCardSkeleton";
 import {
-  
   META,
   PERSONAL_DETAILS_MAX,
   POOLS,
@@ -68,9 +67,9 @@ import { CommunityTrackRow } from "@/components/library/CommunityTrackRow";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { FoulMouthToggle } from "@/components/FoulMouthToggle";
 
+import { FreshTrackCard } from "@/components/library/FreshTrackCard";
 import { ReviewDialog } from "@/components/library/ReviewDialog";
 import { useInfiniteScrollSentinel } from "@/hooks/use-infinite-scroll-sentinel";
-
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -105,8 +104,6 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
-
-
 const MIN_TRACK_MINUTES = 3;
 
 export const Route = createLazyFileRoute("/_authenticated/library/")({
@@ -123,6 +120,10 @@ function LibraryPage() {
 
   const lyricsCost = settings?.coins_per_lyrics_generation ?? 1;
   const previewCost = settings?.coins_per_generation ?? 3;
+  const unlockCost = settings?.coins_per_full_unlock ?? 5;
+  const sampleSeconds = settings?.sample_seconds ?? 60;
+  /** Set from the toast CTA so the finished-track card opens its unlock sheet. */
+  const [autoUnlockPrompt, setAutoUnlockPrompt] = useState(false);
   // download cost is configured via settings.coins_per_full_unlock when needed
   const balance = profile?.coin_balance ?? 0;
   const firstName = useMemo(() => {
@@ -143,8 +144,6 @@ function LibraryPage() {
   const expectedRange = `${targetMinutes}:00–${targetMinutes}:30+`;
   // Actual estimate returned by the lyrics engine once a track is generated.
   const [actualDurationLabel, setActualDurationLabel] = useState<string | null>(null);
-
-
 
   const [title, setTitle] = useState("");
   const [subjectName, setSubjectName] = useState("");
@@ -289,9 +288,7 @@ function LibraryPage() {
       if (!selectionsLine) return userTail;
       return userTail ? `${selectionsLine}\n${marker}\n${userTail}` : selectionsLine;
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectionsLine]);
-
 
   function setField(cat: Category, value: string) {
     setSelections((prev) => ({ ...prev, [cat]: value }));
@@ -310,7 +307,7 @@ function LibraryPage() {
       const replacement = pickFresh(cat, used, 1, ctx)[0];
       return {
         ...prev,
-        [cat]: prev[cat].map((c) => (c === value ? replacement ?? c : c)),
+        [cat]: prev[cat].map((c) => (c === value ? (replacement ?? c) : c)),
       };
     });
   }
@@ -386,7 +383,6 @@ function LibraryPage() {
     }
   }
 
-
   const generateLockRef = useRef(false);
   async function generateSong() {
     if (generateLockRef.current) return;
@@ -412,7 +408,6 @@ function LibraryPage() {
       ]
         .filter(Boolean)
         .join(" — ");
-
 
       const { data: row, error: insertErr } = await supabase
         .from("songs")
@@ -465,13 +460,7 @@ function LibraryPage() {
    * The user sees a single progress bar with a live ETA while everything
    * happens in the backend, then lands on the song page for the sample.
    * ------------------------------------------------------------------ */
-  type PipelineStage =
-    | "idle"
-    | "lyrics"
-    | "saving"
-    | "submitting"
-    | "rendering"
-    | "error";
+  type PipelineStage = "idle" | "lyrics" | "saving" | "submitting" | "rendering" | "error";
   const PIPELINE_ORDER: PipelineStage[] = ["lyrics", "saving", "submitting", "rendering"];
   // Baseline per-stage ETAs (ms) — recalibrated live from real timings below.
   const BASE_STAGE_ETA: Record<Exclude<PipelineStage, "idle" | "error">, number> = {
@@ -567,13 +556,14 @@ function LibraryPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pipeline.stage, pipeline.stageStartedAt]);
 
-
   type CreateOverrides = {
     title: string;
     subjectName: string;
     description: string;
     style: string;
     language: string;
+    /** Artist voice from the wizard — drives Suno's vocalGender + style tags. */
+    vocal?: string;
   };
 
   // Keeps the exact payload of the last run so "Try again" reuses it verbatim.
@@ -597,9 +587,17 @@ function LibraryPage() {
     const songStyle = (override?.style ?? styleText).trim();
     const songLanguage = (override?.language ?? selections.language ?? "English").trim();
     const songDetails = (override?.description ?? personalDetails).trim();
-    const songStyleTags = override
-      ? [override.style].filter(Boolean)
-      : styleTags;
+    const songVocal = (override?.vocal ?? "").trim();
+    // Each style is its own tag (the wizard returns them comma-separated), and
+    // the chosen voice rides along so the lyrics engine writes for it too.
+    const songStyleTags = (
+      override
+        ? override.style
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : styleTags
+    ).concat(songVocal && !/^any/i.test(songVocal) ? [songVocal] : []);
     pipelineLockRef.current = true;
     const runId = ++pipelineRunRef.current;
     const stale = () => pipelineRunRef.current !== runId;
@@ -610,37 +608,41 @@ function LibraryPage() {
     try {
       const description = songStyle;
       const combinedExtra = extraContext.trim();
-      const { data: lyricData, error: lyricErr } = await supabase.functions.invoke("generate-lyrics", {
-        body: {
-          songName: songTitle,
-          description,
-          styleTags: songStyleTags,
-          language: songLanguage,
-          foulMouth,
-          personalDetails: songDetails || undefined,
-          extraContext: combinedExtra || undefined,
-          subjectName: songSubject || undefined,
-          targetDurationSec,
+      const { data: lyricData, error: lyricErr } = await supabase.functions.invoke(
+        "generate-lyrics",
+        {
+          body: {
+            songName: songTitle,
+            description,
+            styleTags: songStyleTags,
+            language: songLanguage,
+            foulMouth,
+            personalDetails: songDetails || undefined,
+            extraContext: combinedExtra || undefined,
+            subjectName: songSubject || undefined,
+            targetDurationSec,
+          },
         },
-      });
+      );
       if (stale()) return;
       if (lyricErr) throw new Error(invokeError(lyricErr, "Lyrics generation failed"));
-      setActualDurationLabel(
-        (lyricData?.estimated_duration_label ?? null) as string | null,
-      );
+      setActualDurationLabel((lyricData?.estimated_duration_label ?? null) as string | null);
       const nextLyrics = (lyricData?.lyrics ?? "").toString();
       if (!nextLyrics) throw new Error("No lyrics returned");
       setLyrics(nextLyrics);
 
       advanceStage("saving");
-      const style = songStyle;
+      const style = [songStyle, songVocal && !/^any/i.test(songVocal) ? songVocal : null]
+        .filter(Boolean)
+        .join(", ");
       const promptText = [
         songTitle,
         songSubject ? `For: ${songSubject}` : null,
         style ? `Style: ${style}` : null,
         songLanguage ? `Language: ${songLanguage}` : null,
-      ].filter(Boolean).join(" — ");
-
+      ]
+        .filter(Boolean)
+        .join(" — ");
 
       const { data: row, error: insertErr } = await supabase
         .from("songs")
@@ -665,7 +667,8 @@ function LibraryPage() {
           prompt: promptText,
           lyrics: nextLyrics,
           title: songTitle || null,
-          style: style || null,
+          style: songStyle || null,
+          vocal: songVocal || null,
         },
       });
       if (stale()) return;
@@ -680,7 +683,6 @@ function LibraryPage() {
       setTrackedSongId(row.id);
       library.refetch();
       toast.success(`Cooking your sample · -${totalCost} coins`);
-
     } catch (e) {
       if (stale()) return;
       const msg = e instanceof Error ? e.message : "Something went wrong";
@@ -699,7 +701,8 @@ function LibraryPage() {
   const doneList = PIPELINE_ORDER.filter((s) => pipeline.durations[s] != null);
   const calibration = (() => {
     if (doneList.length === 0) return 1;
-    let actual = 0, base = 0;
+    let actual = 0,
+      base = 0;
     for (const s of doneList) {
       actual += pipeline.durations[s] ?? 0;
       base += BASE_STAGE_ETA[s as keyof typeof BASE_STAGE_ETA];
@@ -742,9 +745,6 @@ function LibraryPage() {
     submitting: "Studio",
     rendering: "Rendering audio",
   };
-
-
-
 
   const library = useQuery({
     queryKey: ["library", user?.id],
@@ -819,10 +819,7 @@ function LibraryPage() {
     getNextPageParam: (lastPage, allPages) =>
       lastPage.length < COMMUNITY_PAGE_SIZE ? undefined : allPages.length,
   });
-  const communityTracks = useMemo(
-    () => community.data?.pages.flat() ?? [],
-    [community.data],
-  );
+  const communityTracks = useMemo(() => community.data?.pages.flat() ?? [], [community.data]);
   const communitySentinelRef = useRef<HTMLDivElement | null>(null);
   useInfiniteScrollSentinel(communitySentinelRef, {
     enabled: !!community.hasNextPage && !community.isFetchingNextPage,
@@ -859,20 +856,29 @@ function LibraryPage() {
       if (cancelled) return;
       if (row.status === "completed") {
         setFreshTrack(row);
+        setAutoUnlockPrompt(false);
         setPipeline({ stage: "idle", startedAt: 0, stageStartedAt: 0, durations: {} });
         setTrackedSongId(null);
         library.refetch();
-        setReadyToReview({ id: row.id, title: row.title || "Your song" });
         notifiedReadyRef.current.add(row.id);
-        toast.success(`🎧 Song is ready · ${row.title || "Your song"}`, {
+        window.setTimeout(
+          () => statusPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }),
+          200,
+        );
+        toast.success(`🎧 Track completed · ${row.title || "Your song"}`, {
           id: `song-ready-${row.id}`,
-          duration: 12000,
+          duration: 14000,
+          action: {
+            label: `Unlock full · ${unlockCost}`,
+            onClick: () => setAutoUnlockPrompt(true),
+          },
         });
       } else if (row.status === "failed") {
         setPipeline((p) => ({
           ...p,
           stage: "error",
-          error: "The studio couldn't finish this track. Your coins for a failed render are refunded automatically.",
+          error:
+            "The studio couldn't finish this track. Your coins for a failed render are refunded automatically.",
         }));
         setTrackedSongId(null);
         library.refetch();
@@ -906,15 +912,10 @@ function LibraryPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trackedSongId]);
 
-
-  // Detect songs that just finished (pending → completed) and surface an
-  // explicit "Song is ready" toast plus a prominent Review banner.
-  // Only tracks with status === "completed" reach `completedTracks`, so the
-  // Review affordance never appears before the song is actually playable.
+  // Detect songs that just finished (pending → completed) and surface the
+  // "Track completed" toast + the inline finished-track card.
   const previouslyActiveRef = useRef<Set<string>>(new Set());
   const notifiedReadyRef = useRef<Set<string>>(new Set());
-  const [readyToReview, setReadyToReview] = useState<{ id: string; title: string } | null>(null);
-  const reviewBtnRef = useRef<HTMLButtonElement | null>(null);
   useEffect(() => {
     const activeIds = new Set(activeJobs.map((s) => s.id));
     for (const song of completedTracks) {
@@ -922,42 +923,20 @@ function LibraryPage() {
       if (!previouslyActiveRef.current.has(song.id)) continue;
       notifiedReadyRef.current.add(song.id);
       const title = song.title || "Your song";
-      setReadyToReview({ id: song.id, title });
-      toast.success(`🎧 Song is ready · ${title}`, {
+      setFreshTrack(song);
+      setAutoUnlockPrompt(false);
+      toast.success(`🎧 Track completed · ${title}`, {
         id: `song-ready-${song.id}`,
-        duration: 12000,
+        duration: 14000,
         action: {
-          label: "Review",
-          onClick: () =>
-            navigate({
-              to: "/library/$songId",
-              params: { songId: song.id },
-              hash: "song-player",
-            }),
+          label: `Unlock full · ${unlockCost}`,
+          onClick: () => setAutoUnlockPrompt(true),
         },
       });
     }
     previouslyActiveRef.current = activeIds;
-  }, [activeJobs, completedTracks, navigate]);
-
-  // Move keyboard focus to the Review button when the banner first appears
-  // so screen-reader and keyboard users can act on it immediately, and let
-  // Escape dismiss it.
-  useEffect(() => {
-    if (!readyToReview) return;
-    const t = window.setTimeout(() => reviewBtnRef.current?.focus(), 50);
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setReadyToReview(null);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => {
-      window.clearTimeout(t);
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [readyToReview]);
-
-
-
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeJobs, completedTracks]);
 
   async function handleDelete() {
     if (!pendingDelete) return;
@@ -976,7 +955,11 @@ function LibraryPage() {
   }
 
   return (
-    <div data-testid="library-root" data-scroll-fade className="relative mx-auto flex w-full max-w-5xl flex-col gap-8 rounded-none border-x-0 border-white/[0.06] bg-background/80 px-4 pb-[calc(env(safe-area-inset-bottom)+96px)] pt-2 backdrop-blur-2xl [scroll-padding-block:24px] [touch-action:pan-y] sm:rounded-3xl sm:border sm:px-6 md:pb-20">
+    <div
+      data-testid="library-root"
+      data-scroll-fade
+      className="relative mx-auto flex w-full max-w-5xl flex-col gap-8 rounded-none border-x-0 border-white/[0.06] bg-background/80 px-4 pb-[calc(env(safe-area-inset-bottom)+96px)] pt-2 backdrop-blur-2xl [scroll-padding-block:24px] [touch-action:pan-y] sm:rounded-3xl sm:border sm:px-6 md:pb-20"
+    >
       {/* Ambient crimson aura — prestige depth, never competes with content */}
       <div
         aria-hidden="true"
@@ -988,7 +971,10 @@ function LibraryPage() {
       />
 
       {/* Hero — one line, balance chip */}
-      <header data-testid="library-hero" className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b-2 border-white/10 pb-5">
+      <header
+        data-testid="library-hero"
+        className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b-2 border-white/10 pb-5"
+      >
         <div className="min-w-0">
           <h1 className="font-display text-3xl font-black leading-[1.05] tracking-[-0.02em] break-words sm:text-4xl">
             Hey <span className="text-gradient-brand">{firstName}</span>
@@ -997,80 +983,75 @@ function LibraryPage() {
         <div className="inline-flex shrink-0 items-center gap-2 rounded-full border border-primary/25 bg-card/60 px-3.5 py-2 backdrop-blur">
           <Coins className="h-4 w-4 text-primary" aria-hidden="true" />
           <span className="text-base font-black tabular-nums sm:text-lg">{balance}</span>
-          <span className="hidden text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground sm:inline">coins</span>
+          <span className="hidden text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground sm:inline">
+            coins
+          </span>
         </div>
       </header>
 
-      {/* Create — one dominant action, controls demoted to a quiet strip */}
-      <section
-        aria-label="Create a track"
-        className="border-b-2 border-white/10 pb-7"
-      >
-        <h2 className="mb-3 text-[11px] font-black uppercase tracking-[0.28em] text-primary">
-          Create
-        </h2>
+      {/* Create — hidden while a generation runs so the status card is the only focus */}
+      {!pipelineActive && (
+        <section aria-label="Create a track" className="border-b-2 border-white/10 pb-7">
+          <h2 className="mb-3 text-[11px] font-black uppercase tracking-[0.28em] text-primary">
+            Create
+          </h2>
 
-
-        <div className="flex gap-3">
-          <Button
-            type="button"
-            onClick={() => setWizardOpen(true)}
-            disabled={pipelineActive}
-            className="min-h-14 flex-1 gap-2 rounded-2xl bg-gradient-brand text-sm font-black uppercase tracking-[0.16em] text-primary-foreground shadow-glow sm:text-base"
-          >
-            <Sparkles className="h-5 w-5" />
-            {pipelineActive ? "Cooking your track…" : "Create now"}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            aria-label="Jump to your library"
-            onClick={() =>
-              libraryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
-            }
-            className="min-h-14 shrink-0 gap-2 rounded-2xl border-white/10 bg-card/60 px-5 text-sm font-black uppercase tracking-[0.16em] hover:border-primary/40"
-          >
-            <Disc3 className="h-5 w-5" />
-            <span className="hidden sm:inline">Library</span>
-          </Button>
-        </div>
-
-        <div className="mt-4 grid gap-4 border-t border-white/[0.07] pt-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label
-              htmlFor="target-length"
-              className="text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground"
-            >
-              Track length
-            </Label>
-            <select
-              id="target-length"
-              value={targetMinutes}
-              onChange={(e) => setTargetMinutes(Number(e.target.value))}
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              onClick={() => setWizardOpen(true)}
               disabled={pipelineActive}
-              className="min-h-10 w-full rounded-xl border border-white/10 bg-background/60 px-3 text-sm font-semibold disabled:opacity-60"
+              className="min-h-14 flex-1 gap-2 rounded-2xl bg-gradient-brand text-sm font-black uppercase tracking-[0.16em] text-primary-foreground shadow-glow sm:text-base"
             >
-              {[3, 4, 5, 6, 8].map((m) => (
-                <option key={m} value={m}>
-                  {m} min minimum{m === MIN_TRACK_MINUTES ? " (default)" : ""}
-                </option>
-              ))}
-            </select>
+              <Sparkles className="h-5 w-5" />
+              {pipelineActive ? "Cooking your track…" : "Create now"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              aria-label="Jump to your library"
+              onClick={() =>
+                libraryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+              }
+              className="min-h-14 shrink-0 gap-2 rounded-2xl border-white/10 bg-card/60 px-5 text-sm font-black uppercase tracking-[0.16em] hover:border-primary/40"
+            >
+              <Disc3 className="h-5 w-5" />
+              <span className="hidden sm:inline">Library</span>
+            </Button>
           </div>
-          <div className="flex items-end">
-            <FoulMouthToggle disabled={pipelineActive} />
+
+          <div className="mt-4 grid gap-4 border-t border-white/[0.07] pt-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label
+                htmlFor="target-length"
+                className="text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground"
+              >
+                Track length
+              </Label>
+              <select
+                id="target-length"
+                value={targetMinutes}
+                onChange={(e) => setTargetMinutes(Number(e.target.value))}
+                disabled={pipelineActive}
+                className="min-h-10 w-full rounded-xl border border-white/10 bg-background/60 px-3 text-sm font-semibold disabled:opacity-60"
+              >
+                {[3, 4, 5, 6, 8].map((m) => (
+                  <option key={m} value={m}>
+                    {m} min minimum{m === MIN_TRACK_MINUTES ? " (default)" : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-end">
+              <FoulMouthToggle disabled={pipelineActive} />
+            </div>
+
+            <p className="text-[11px] font-semibold text-muted-foreground sm:col-span-2">
+              -{totalCost} coins · {expectedRange}
+            </p>
           </div>
-
-          <p className="text-[11px] font-semibold text-muted-foreground sm:col-span-2">
-            -{totalCost} coins · {expectedRange}
-          </p>
-
-        </div>
-      </section>
-
-
-
-
+        </section>
+      )}
 
       <CreateNowWizard
         open={wizardOpen}
@@ -1094,89 +1075,7 @@ function LibraryPage() {
         }}
       />
 
-
-
-
-      {/* Prominent Review banner — only visible when a freshly finished song is waiting to be reviewed */}
-      {readyToReview && (
-        <section
-          role="region"
-          aria-labelledby="song-ready-heading"
-          aria-live="polite"
-          aria-atomic="true"
-          className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border-2 border-emerald-400/60 bg-gradient-to-r from-emerald-500/20 via-emerald-500/10 to-emerald-500/5 px-4 py-3 shadow-[0_20px_60px_-25px_rgba(16,185,129,0.7)] sm:gap-4 sm:px-6 sm:py-4"
-        >
-          <div className="min-w-0">
-            <h2
-              id="song-ready-heading"
-              className="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-300"
-            >
-              <span aria-hidden="true">🎧 </span>Song is ready to play
-            </h2>
-            <p className="mt-0.5 truncate font-display text-lg font-black text-foreground sm:text-2xl">
-              {readyToReview.title}
-            </p>
-            <p className="mt-0.5 text-[11px] text-emerald-200/90">
-              Expected length {actualDurationLabel ?? expectedRange}
-            </p>
-          </div>
-
-          <div className="flex shrink-0 items-center gap-2">
-            <button
-              ref={reviewBtnRef}
-              type="button"
-              onClick={() => {
-                const id = readyToReview.id;
-                setReadyToReview(null);
-                navigate({
-                  to: "/library/$songId",
-                  params: { songId: id },
-                  hash: "song-player",
-                });
-              }}
-              aria-label={`Review ${readyToReview.title} — open the player`}
-              className="inline-flex min-h-11 items-center gap-2 rounded-full bg-emerald-500 px-5 py-2.5 text-sm font-black uppercase tracking-wider text-emerald-950 shadow-[0_10px_28px_-8px_rgba(16,185,129,0.9)] ring-2 ring-emerald-300/60 transition hover:scale-105 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200 active:scale-95 sm:text-base"
-            >
-              Review now
-            </button>
-            <button
-              type="button"
-              onClick={() => setReadyToReview(null)}
-              aria-label="Dismiss song ready notice"
-              className="inline-grid min-h-11 min-w-11 place-items-center rounded-full border border-white/10 text-sm text-muted-foreground hover:bg-white/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
-            >
-              <span aria-hidden="true">✕</span>
-            </button>
-          </div>
-        </section>
-      )}
-
-
-
-      {/* Lyrics generating skeleton */}
-      {genLyrics && !lyrics && (
-        <section className="space-y-3 rounded-2xl border border-primary/30 bg-card/60 p-5 sm:p-6">
-          <div className="flex items-center gap-2">
-            <Loader2 className="h-4 w-4 animate-spin text-primary" />
-            <p className="text-sm font-bold">OG is writing your lyrics…</p>
-          </div>
-          <div className="space-y-2">
-            <Skeleton className="h-3 w-1/3" />
-            <Skeleton className="h-3 w-full" />
-            <Skeleton className="h-3 w-11/12" />
-            <Skeleton className="h-3 w-10/12" />
-            <Skeleton className="mt-3 h-3 w-1/4" />
-            <Skeleton className="h-3 w-full" />
-            <Skeleton className="h-3 w-9/12" />
-            <Skeleton className="h-3 w-11/12" />
-          </div>
-        </section>
-      )}
-
-
-
       {/* Creation happens entirely inside the Create now wizard — no inline form. */}
-
 
       {/* Live status bar — one-tap pipeline progress */}
       {(pipelineActive || pipeline.stage === "error") && (
@@ -1284,12 +1183,17 @@ function LibraryPage() {
               >
                 <Sparkles className="h-3.5 w-3.5" /> Edit details
               </Button>
-              <Button type="button" onClick={resetPipeline} size="sm" variant="ghost" className="gap-2">
+              <Button
+                type="button"
+                onClick={resetPipeline}
+                size="sm"
+                variant="ghost"
+                className="gap-2"
+              >
                 <X className="h-3.5 w-3.5" /> Dismiss
               </Button>
             </div>
           )}
-
 
           {pipelineActive && (
             <Button
@@ -1305,53 +1209,41 @@ function LibraryPage() {
         </section>
       )}
 
-      {/* Fresh track preview — appears automatically the moment a generation completes */}
-      {freshTrack && (
-        <section
-          aria-label="Newly finished track"
-          className="space-y-3 rounded-3xl border border-emerald-400/40 bg-emerald-500/5 p-5 sm:p-6"
-        >
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-300">
-              Just finished · preview
-            </p>
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              onClick={() => setFreshTrack(null)}
-              className="h-8 px-2 text-xs"
-            >
-              Hide
-            </Button>
-          </div>
-          <Link
-            to="/library/$songId"
-            params={{ songId: freshTrack.id }}
-            className="block rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <SongCard song={freshTrack} />
-          </Link>
-          <Link to="/library/$songId" params={{ songId: freshTrack.id }} className="block">
-            <Button type="button" className="min-h-12 w-full gap-2 rounded-2xl bg-gradient-brand font-black uppercase tracking-[0.12em] text-primary-foreground shadow-glow">
-              <Sparkles className="h-4 w-4" /> Play sample · unlock full track
-            </Button>
-          </Link>
-        </section>
+      {/* Finished track — auto-plays the preview and unlocks the full version inline */}
+      {freshTrack && !pipelineActive && (
+        <FreshTrackCard
+          key={freshTrack.id}
+          song={freshTrack}
+          sampleSeconds={sampleSeconds}
+          unlockCost={unlockCost}
+          balance={profile?.coin_balance ?? 0}
+          autoUnlockPrompt={autoUnlockPrompt}
+          onDismiss={() => {
+            setFreshTrack(null);
+            setAutoUnlockPrompt(false);
+          }}
+        />
       )}
 
-
-
       {/* Library — two clearly divided shelves */}
-      <section ref={libraryRef} id="library" className="scroll-mt-24 border-t-2 border-white/10 pt-6">
-        <div data-testid="library-your-header" className="mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+      <section
+        ref={libraryRef}
+        id="library"
+        className="scroll-mt-24 border-t-2 border-white/10 pt-6"
+      >
+        <div
+          data-testid="library-your-header"
+          className="mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3"
+        >
           <div className="min-w-0">
-            <h2 data-testid="library-your-heading" className="flex min-w-0 items-center gap-2 font-display text-2xl font-black tracking-tight sm:text-3xl">
+            <h2
+              data-testid="library-your-heading"
+              className="flex min-w-0 items-center gap-2 font-display text-2xl font-black tracking-tight sm:text-3xl"
+            >
               <Disc3 className="h-5 w-5 shrink-0 text-primary" />
               <span className="truncate">Library</span>
             </h2>
           </div>
-
 
           <div className="flex shrink-0 items-center gap-2">
             {versionedLibrary.length > 0 && (
@@ -1373,7 +1265,9 @@ function LibraryPage() {
                 const afterActive = list.filter((s) => s.status !== "completed").length;
                 const newReady = after - before;
                 if (newReady > 0) {
-                  toast.success(`Library refreshed · ${newReady} new track${newReady === 1 ? "" : "s"} ready`);
+                  toast.success(
+                    `Library refreshed · ${newReady} new track${newReady === 1 ? "" : "s"} ready`,
+                  );
                 } else if (afterActive > 0) {
                   toast(`Still generating · ${afterActive} in progress`);
                 } else if (beforeActive > 0 && afterActive === 0 && newReady === 0) {
@@ -1424,7 +1318,9 @@ function LibraryPage() {
           <TabsContent value="yours" className="mt-0 space-y-3">
             <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
               <span>Made by you</span>
-              <span aria-hidden className="text-primary/60">•</span>
+              <span aria-hidden className="text-primary/60">
+                •
+              </span>
               <span className="text-primary">Yours to play &amp; download</span>
             </p>
 
@@ -1491,7 +1387,6 @@ function LibraryPage() {
                   </div>
                 );
               })()
-
             ) : (
               <div className="rounded-3xl border border-dashed border-primary/30 bg-gradient-to-br from-primary/10 to-card/40 p-8 text-center ring-1 ring-white/5 sm:p-10">
                 <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-primary/30 to-primary/10 shadow-[0_12px_30px_-12px_var(--primary)]">
@@ -1538,9 +1433,13 @@ function LibraryPage() {
             )}
             <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
               <span>Made by other creators</span>
-              <span aria-hidden className="text-primary/60">•</span>
+              <span aria-hidden className="text-primary/60">
+                •
+              </span>
               <span>Full-length playback · free</span>
-              <span aria-hidden className="text-primary/60">•</span>
+              <span aria-hidden className="text-primary/60">
+                •
+              </span>
               <span className="text-primary">3 OG coins to download</span>
             </p>
 
@@ -1607,9 +1506,12 @@ function LibraryPage() {
                 <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-primary/30 to-primary/10">
                   <Users className="h-6 w-6 text-primary" />
                 </div>
-                <p className="mt-4 font-display text-xl font-black leading-tight sm:text-2xl">Nothing here yet</p>
+                <p className="mt-4 font-display text-xl font-black leading-tight sm:text-2xl">
+                  Nothing here yet
+                </p>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
-                  Be the first — finished tracks from the community land here and play full length for free.
+                  Be the first — finished tracks from the community land here and play full length
+                  for free.
                 </p>
                 <Button
                   type="button"
@@ -1625,10 +1527,6 @@ function LibraryPage() {
           </TabsContent>
         </Tabs>
       </section>
-
-
-
-
 
       <PoweredByOgBot />
 
@@ -1667,8 +1565,6 @@ function LibraryPage() {
           await generateSong();
         }}
       />
-
     </div>
   );
 }
-
