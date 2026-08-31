@@ -48,7 +48,26 @@ Deno.serve(async (req) => {
 
     const body = await req.json();
     const prompt = (body.prompt ?? "").toString().trim();
-    const style = limitText((body.style ?? "").toString().trim() || null, MAX_STYLE_CHARS);
+    // Artist voice picked in the wizard ("Female vocal" | "Male vocal" | "Duo" | "Any voice").
+    const vocal = (body.vocal ?? "").toString().trim().slice(0, 40);
+    const vocalLower = vocal.toLowerCase();
+    const vocalGender = vocalLower.startsWith("female")
+      ? "f"
+      : vocalLower.startsWith("male")
+      ? "m"
+      : null;
+    const vocalStyle = vocalLower.startsWith("female")
+      ? "female vocals, female lead singer"
+      : vocalLower.startsWith("male")
+      ? "male vocals, male lead singer"
+      : vocalLower.startsWith("duo")
+      ? "duet, male and female vocals trading lines"
+      : null;
+    const rawStyle = (body.style ?? "").toString().trim();
+    const style = limitText(
+      [rawStyle, vocalStyle].filter(Boolean).join(", ") || null,
+      MAX_STYLE_CHARS,
+    );
     const lyrics = limitText((body.lyrics ?? "").toString().trim() || null, MAX_PROMPT_CHARS);
     const title = limitText((body.title ?? "").toString().trim() || null, MAX_TITLE_CHARS);
     const instrumental = !!body.instrumental;
