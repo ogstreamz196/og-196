@@ -41,6 +41,9 @@ export function FreshTrackCard({
   const [progress, setProgress] = useState(0);
   const [loading, setLoading] = useState(true);
   const [unlockOpen, setUnlockOpen] = useState(!!autoUnlockPrompt);
+  useEffect(() => {
+    if (autoUnlockPrompt) setUnlockOpen(true);
+  }, [autoUnlockPrompt]);
   const [busy, setBusy] = useState(false);
   const [unlocked, setUnlocked] = useState(!!song.unlocked);
   const title = song.title || "Your track";
