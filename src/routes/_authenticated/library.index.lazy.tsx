@@ -970,34 +970,64 @@ function LibraryPage() {
         className="pointer-events-none absolute bottom-40 -right-24 -z-10 h-56 w-56 rounded-full bg-primary/10 blur-[100px]"
       />
 
-      {/* Hero — one line, balance chip */}
+      {/* Studio console header — desk rail, VU meter, live status LEDs */}
       <header
         data-testid="library-hero"
-        className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b-2 border-white/10 pb-5"
+        className="studio-panel overflow-hidden px-4 pb-4 pt-3 sm:px-5"
       >
-        <div className="min-w-0">
-          <h1 className="font-display text-3xl font-black leading-[1.05] tracking-[-0.02em] break-words sm:text-4xl">
-            Hey <span className="text-gradient-brand">{firstName}</span>
-          </h1>
+        <div aria-hidden className="studio-rail -mx-4 mb-3 h-[3px] opacity-60 sm:-mx-5" />
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+          <div className="min-w-0">
+            <p className="text-[9px] font-black uppercase tracking-[0.34em] text-primary/80">
+              OG Studio · Live desk
+            </p>
+            <h1 className="font-display text-3xl font-black leading-[1.05] tracking-[-0.02em] break-words sm:text-4xl">
+              Hey <span className="text-gradient-brand">{firstName}</span>
+            </h1>
+          </div>
+          <div className="flex shrink-0 items-center gap-3">
+            <StudioMeter active={pipelineActive} className="hidden sm:flex" />
+            <div className="inline-flex shrink-0 items-center gap-2 rounded-full border border-primary/25 bg-background/50 px-3.5 py-2 backdrop-blur">
+              <Coins className="h-4 w-4 text-primary" aria-hidden="true" />
+              <span className="text-base font-black tabular-nums sm:text-lg">{balance}</span>
+              <span className="hidden text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground sm:inline">
+                coins
+              </span>
+            </div>
+          </div>
         </div>
-        <div className="inline-flex shrink-0 items-center gap-2 rounded-full border border-primary/25 bg-card/60 px-3.5 py-2 backdrop-blur">
-          <Coins className="h-4 w-4 text-primary" aria-hidden="true" />
-          <span className="text-base font-black tabular-nums sm:text-lg">{balance}</span>
-          <span className="hidden text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground sm:inline">
-            coins
-          </span>
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-white/[0.07] pt-2.5">
+          <StudioLed
+            label={pipelineActive ? "Recording" : "Desk ready"}
+            tone={pipelineActive ? "busy" : "ok"}
+            pulse={pipelineActive}
+          />
+          <StudioLed
+            label={`${activeJobs.length} in booth`}
+            tone={activeJobs.length > 0 ? "busy" : "idle"}
+            pulse={activeJobs.length > 0}
+          />
+          <StudioLed
+            label={`${completedTracks.length} mastered`}
+            tone={completedTracks.length > 0 ? "ok" : "idle"}
+          />
+          <StudioLed label={`${sampleSeconds}s monitor`} tone="idle" />
         </div>
       </header>
 
       {/* Create — hidden while a generation runs so the status card is the only focus */}
       {!pipelineActive && (
-        <section aria-label="Create a track" className="border-b-2 border-white/10 pb-7">
-          <h2 className="mb-4 text-center text-[11px] font-black uppercase tracking-[0.28em] text-primary">
-            Create
-          </h2>
+        <section aria-label="Create a track" className="studio-panel px-4 pb-6 pt-4 sm:px-6">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <h2 className="text-[11px] font-black uppercase tracking-[0.28em] text-primary">
+              Control room
+            </h2>
+            <StudioMeter active={false} bars={5} className="h-4" />
+          </div>
 
           {/* Length + Foul Mouth — centred, equal width columns */}
           <div className="mx-auto flex max-w-md flex-col items-center gap-3 sm:flex-row sm:justify-center">
+
             <div className="w-full space-y-1.5 sm:w-44">
               <Label
                 htmlFor="target-length"
