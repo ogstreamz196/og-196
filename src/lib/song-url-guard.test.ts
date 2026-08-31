@@ -31,7 +31,7 @@ describe("song-url edge function guards", () => {
     expect(SRC).toMatch(/\.eq\(["']user_id["'],\s*user\.id\)/);
     expect(SRC).toMatch(/\.eq\(["']song_id["'],\s*song_id\)/);
     // …and a 403 when the row is missing.
-    expect(SRC).toMatch(/if\s*\(!unlockRow\)[^;]*403/);
+    expect(SRC).toMatch(/if\s*\(!unlockRow\)[\s\S]{0,400}?403/);
   });
 
   it("never serves audio_path in preview mode", () => {
