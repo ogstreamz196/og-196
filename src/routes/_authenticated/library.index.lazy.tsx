@@ -68,6 +68,7 @@ import { CommunityTrackRow } from "@/components/library/CommunityTrackRow";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { FoulMouthToggle } from "@/components/FoulMouthToggle";
 
+import { FreshTrackCard } from "@/components/library/FreshTrackCard";
 import { ReviewDialog } from "@/components/library/ReviewDialog";
 import { useInfiniteScrollSentinel } from "@/hooks/use-infinite-scroll-sentinel";
 
