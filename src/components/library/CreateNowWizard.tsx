@@ -28,8 +28,11 @@ export type WizardResult = {
   title: string;
   subjectName: string;
   description: string;
+  /** Comma-separated musical styles only — the voice is kept separate. */
   style: string;
   language: string;
+  /** Selected artist voice label, e.g. "Female vocal" / "Duo" ("" = any). */
+  vocal: string;
 };
 
 /** Raw wizard inputs — kept by the parent so a retry never loses them. */
