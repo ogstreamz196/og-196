@@ -419,8 +419,6 @@ function LibraryPage() {
           style: style || null,
           lyrics,
           status: "draft",
-          vocals_only: vocalsOnly,
-          beat_path: beatPath || null,
           extra_context: extraContext.trim() || null,
         } as never)
         .select("id")
