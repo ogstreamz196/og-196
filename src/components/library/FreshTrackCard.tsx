@@ -163,7 +163,13 @@ export function FreshTrackCard({
             {sampleSeconds}s preview playing · full version ready to unlock
           </p>
         </div>
-        <Button type="button" size="sm" variant="ghost" onClick={onDismiss} className="h-8 px-2 text-xs">
+        <Button
+          type="button"
+          size="sm"
+          variant="ghost"
+          onClick={onDismiss}
+          className="h-8 px-2 text-xs"
+        >
           Hide
         </Button>
       </div>

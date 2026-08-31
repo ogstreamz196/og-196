@@ -135,7 +135,6 @@ export function CreateNowWizard({
     onOpenChange(false);
   }
 
-
   const stepValid = useMemo(() => {
     switch (step) {
       case 1:
@@ -198,7 +197,6 @@ export function CreateNowWizard({
         }}
         className="max-h-[90vh] w-[calc(100vw-1.5rem)] max-w-lg overflow-y-auto rounded-2xl"
       >
-
         <DialogHeader className="space-y-2 text-left">
           <div className="flex items-center justify-between gap-3">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/15 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-primary">
@@ -330,7 +328,11 @@ export function CreateNowWizard({
                 <p className="mb-2 text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
                   Artist voice (optional)
                 </p>
-                <div role="group" aria-label="Artist voice" className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                <div
+                  role="group"
+                  aria-label="Artist voice"
+                  className="grid grid-cols-2 gap-2 sm:grid-cols-4"
+                >
                   {GENDERS.map((g) => {
                     const selected = gender === g;
                     return (
@@ -471,7 +473,5 @@ export function CreateNowWizard({
         </AlertDialogContent>
       </AlertDialog>
     </Dialog>
-
   );
-
 }
