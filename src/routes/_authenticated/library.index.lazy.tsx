@@ -640,7 +640,9 @@ function LibraryPage() {
       setLyrics(nextLyrics);
 
       advanceStage("saving");
-      const style = songStyle;
+      const style = [songStyle, songVocal && !/^any/i.test(songVocal) ? songVocal : null]
+        .filter(Boolean)
+        .join(", ");
       const promptText = [
         songTitle,
         songSubject ? `For: ${songSubject}` : null,
