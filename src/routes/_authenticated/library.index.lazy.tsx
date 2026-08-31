@@ -136,6 +136,11 @@ function LibraryPage() {
   }, [profile?.display_name, user?.email, dev.isDev]);
 
   const [wizardOpen, setWizardOpen] = useState(false);
+  // "It's cooking" popup shown right after the wizard is submitted.
+  const [cooking, setCooking] = useState<{ open: boolean; title: string }>({
+    open: false,
+    title: "",
+  });
   // Last raw wizard answers — kept so a retry (or reopening the wizard after a
   // failure) never loses what the user already typed.
   const [wizardDraft, setWizardDraft] = useState<WizardDraft>(EMPTY_DRAFT);
