@@ -1099,59 +1099,6 @@ function LibraryPage() {
 
 
 
-      {/* Prominent Review banner — only visible when a freshly finished song is waiting to be reviewed */}
-      {readyToReview && (
-        <section
-          role="region"
-          aria-labelledby="song-ready-heading"
-          aria-live="polite"
-          aria-atomic="true"
-          className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border-2 border-emerald-400/60 bg-gradient-to-r from-emerald-500/20 via-emerald-500/10 to-emerald-500/5 px-4 py-3 shadow-[0_20px_60px_-25px_rgba(16,185,129,0.7)] sm:gap-4 sm:px-6 sm:py-4"
-        >
-          <div className="min-w-0">
-            <h2
-              id="song-ready-heading"
-              className="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-300"
-            >
-              <span aria-hidden="true">🎧 </span>Song is ready to play
-            </h2>
-            <p className="mt-0.5 truncate font-display text-lg font-black text-foreground sm:text-2xl">
-              {readyToReview.title}
-            </p>
-            <p className="mt-0.5 text-[11px] text-emerald-200/90">
-              Expected length {actualDurationLabel ?? expectedRange}
-            </p>
-          </div>
-
-          <div className="flex shrink-0 items-center gap-2">
-            <button
-              ref={reviewBtnRef}
-              type="button"
-              onClick={() => {
-                const id = readyToReview.id;
-                setReadyToReview(null);
-                navigate({
-                  to: "/library/$songId",
-                  params: { songId: id },
-                  hash: "song-player",
-                });
-              }}
-              aria-label={`Review ${readyToReview.title} — open the player`}
-              className="inline-flex min-h-11 items-center gap-2 rounded-full bg-emerald-500 px-5 py-2.5 text-sm font-black uppercase tracking-wider text-emerald-950 shadow-[0_10px_28px_-8px_rgba(16,185,129,0.9)] ring-2 ring-emerald-300/60 transition hover:scale-105 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200 active:scale-95 sm:text-base"
-            >
-              Review now
-            </button>
-            <button
-              type="button"
-              onClick={() => setReadyToReview(null)}
-              aria-label="Dismiss song ready notice"
-              className="inline-grid min-h-11 min-w-11 place-items-center rounded-full border border-white/10 text-sm text-muted-foreground hover:bg-white/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
-            >
-              <span aria-hidden="true">✕</span>
-            </button>
-          </div>
-        </section>
-      )}
 
 
 
