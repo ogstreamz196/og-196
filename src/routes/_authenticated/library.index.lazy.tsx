@@ -1038,7 +1038,11 @@ function LibraryPage() {
             </h1>
           </div>
           <div className="flex shrink-0 items-center gap-3">
-            <StudioMeter active={pipelineActive} className="hidden sm:flex" />
+            <StudioMeter
+              active={pipelineActive || queue.inFlight > 0}
+              load={pipelineActive ? Math.max(0.5, queue.load) : queue.load}
+              className="hidden sm:flex"
+            />
             <div className="inline-flex shrink-0 items-center gap-2 rounded-full border border-primary/25 bg-background/50 px-3.5 py-2 backdrop-blur">
               <Coins className="h-4 w-4 text-primary" aria-hidden="true" />
               <span className="text-base font-black tabular-nums sm:text-lg">{balance}</span>
