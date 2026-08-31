@@ -1429,3 +1429,40 @@ button.graffiti-accent:hover {
 
 
 
+/* ---------- Studio console (Music Hub) ---------- */
+@keyframes studio-vu {
+  0%, 100% { transform: scaleY(0.25); }
+  50%      { transform: scaleY(1); }
+}
+@keyframes studio-led {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0.5em currentColor; }
+  50%      { opacity: 0.45; box-shadow: 0 0 0.15em currentColor; }
+}
+.studio-vu-bar {
+  transform-origin: bottom;
+  animation: studio-vu 1.1s ease-in-out infinite;
+}
+.studio-led {
+  animation: studio-led 2.2s ease-in-out infinite;
+}
+@utility studio-panel {
+  border: 1px solid color-mix(in oklab, var(--primary) 22%, transparent);
+  border-radius: 1.25rem;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012)),
+    color-mix(in oklab, var(--card) 82%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.07),
+    inset 0 -1px 0 rgba(0,0,0,0.4),
+    0 18px 40px -28px color-mix(in oklab, var(--primary) 70%, transparent);
+}
+@utility studio-rail {
+  background-image: repeating-linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--primary) 30%, transparent) 0 2px,
+    transparent 2px 10px
+  );
+}
+@media (prefers-reduced-motion: reduce) {
+  .studio-vu-bar, .studio-led { animation: none; }
+}
