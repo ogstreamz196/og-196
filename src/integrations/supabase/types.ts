@@ -778,6 +778,7 @@ export type Database = {
       songs: {
         Row: {
           audio_path: string | null
+          beat_path: string | null
           completed_at: string | null
           cover_url: string | null
           created_at: string
@@ -812,9 +813,11 @@ export type Database = {
           unlocked: boolean
           updated_at: string
           user_id: string
+          vocals_only: boolean
         }
         Insert: {
           audio_path?: string | null
+          beat_path?: string | null
           completed_at?: string | null
           cover_url?: string | null
           created_at?: string
@@ -849,9 +852,11 @@ export type Database = {
           unlocked?: boolean
           updated_at?: string
           user_id: string
+          vocals_only?: boolean
         }
         Update: {
           audio_path?: string | null
+          beat_path?: string | null
           completed_at?: string | null
           cover_url?: string | null
           created_at?: string
@@ -886,6 +891,7 @@ export type Database = {
           unlocked?: boolean
           updated_at?: string
           user_id?: string
+          vocals_only?: boolean
         }
         Relationships: [
           {
