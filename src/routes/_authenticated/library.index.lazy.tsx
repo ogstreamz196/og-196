@@ -674,7 +674,8 @@ function LibraryPage() {
           prompt: promptText,
           lyrics: nextLyrics,
           title: songTitle || null,
-          style: style || null,
+          style: songStyle || null,
+          vocal: songVocal || null,
         },
       });
       if (stale()) return;
