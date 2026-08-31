@@ -123,6 +123,10 @@ function LibraryPage() {
 
   const lyricsCost = settings?.coins_per_lyrics_generation ?? 1;
   const previewCost = settings?.coins_per_generation ?? 3;
+  const unlockCost = settings?.coins_per_full_unlock ?? 5;
+  const sampleSeconds = settings?.sample_seconds ?? 60;
+  /** Set from the toast CTA so the finished-track card opens its unlock sheet. */
+  const [autoUnlockPrompt, setAutoUnlockPrompt] = useState(false);
   // download cost is configured via settings.coins_per_full_unlock when needed
   const balance = profile?.coin_balance ?? 0;
   const firstName = useMemo(() => {
