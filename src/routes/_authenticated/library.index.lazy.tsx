@@ -869,14 +869,22 @@ function LibraryPage() {
       if (cancelled) return;
       if (row.status === "completed") {
         setFreshTrack(row);
+        setAutoUnlockPrompt(false);
         setPipeline({ stage: "idle", startedAt: 0, stageStartedAt: 0, durations: {} });
         setTrackedSongId(null);
         library.refetch();
-        setReadyToReview({ id: row.id, title: row.title || "Your song" });
         notifiedReadyRef.current.add(row.id);
-        toast.success(`🎧 Song is ready · ${row.title || "Your song"}`, {
+        window.setTimeout(
+          () => statusPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }),
+          200,
+        );
+        toast.success(`🎧 Track completed · ${row.title || "Your song"}`, {
           id: `song-ready-${row.id}`,
-          duration: 12000,
+          duration: 14000,
+          action: {
+            label: `Unlock full · ${unlockCost}`,
+            onClick: () => setAutoUnlockPrompt(true),
+          },
         });
       } else if (row.status === "failed") {
         setPipeline((p) => ({
