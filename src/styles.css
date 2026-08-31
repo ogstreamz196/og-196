@@ -839,6 +839,33 @@ button.graffiti-accent:hover {
   0%, 100% { transform: rotate(-2deg); }
   50% { transform: rotate(2deg); }
 }
+/* Hazard robotic CREATE button — a mech-style circular trigger. */
+@keyframes hazard-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 oklch(0.62 0.22 25 / 0.55), 0 14px 40px -10px oklch(0.62 0.22 25 / 0.65); }
+  50% { box-shadow: 0 0 0 14px oklch(0.62 0.22 25 / 0), 0 22px 60px -8px oklch(0.62 0.22 25 / 0.85); }
+}
+@keyframes hazard-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes hazard-core-breathe {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50% { transform: scale(1.08); opacity: 1; }
+}
+.hazard-create {
+  position: relative;
+  animation: hazard-pulse 1.8s ease-in-out infinite;
+}
+.hazard-create:active {
+  transform: scale(0.92);
+  transition: transform 0.08s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.hazard-ring {
+  animation: hazard-spin 9s linear infinite;
+}
+.hazard-core {
+  animation: hazard-core-breathe 2.4s ease-in-out infinite;
+}
 
 /* Red & blue flame aura — GPU-friendly: only opacity animates.
    Two stacked pseudo-elements with static shadows cross-fade, avoiding
