@@ -227,7 +227,7 @@ Deno.serve(async (req) => {
     const sunoTitle = limitText(title || "Untitled track", MAX_TITLE_CHARS);
     let sunoRes: Response;
     try {
-      sunoRes = await fetch(SUNO_API_URL, {
+      sunoRes = await fetch(beatUrl ? SUNO_UPLOAD_COVER_URL : SUNO_API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${SUNO_API_KEY}` },
         body: JSON.stringify({
