@@ -992,39 +992,16 @@ function LibraryPage() {
       {/* Create — hidden while a generation runs so the status card is the only focus */}
       {!pipelineActive && (
         <section aria-label="Create a track" className="border-b-2 border-white/10 pb-7">
-          <h2 className="mb-3 text-[11px] font-black uppercase tracking-[0.28em] text-primary">
+          <h2 className="mb-4 text-center text-[11px] font-black uppercase tracking-[0.28em] text-primary">
             Create
           </h2>
 
-          <div className="flex gap-3">
-            <Button
-              type="button"
-              onClick={() => setWizardOpen(true)}
-              disabled={pipelineActive}
-              className="min-h-14 flex-1 gap-2 rounded-2xl bg-gradient-brand text-sm font-black uppercase tracking-[0.16em] text-primary-foreground shadow-glow sm:text-base"
-            >
-              <Sparkles className="h-5 w-5" />
-              {pipelineActive ? "Cooking your track…" : "Create now"}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              aria-label="Jump to your library"
-              onClick={() =>
-                libraryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
-              }
-              className="min-h-14 shrink-0 gap-2 rounded-2xl border-white/10 bg-card/60 px-5 text-sm font-black uppercase tracking-[0.16em] hover:border-primary/40"
-            >
-              <Disc3 className="h-5 w-5" />
-              <span className="hidden sm:inline">Library</span>
-            </Button>
-          </div>
-
-          <div className="mt-4 grid gap-4 border-t border-white/[0.07] pt-4 sm:grid-cols-2">
-            <div className="space-y-2">
+          {/* Length + Foul Mouth — centred, equal width columns */}
+          <div className="mx-auto flex max-w-md flex-col items-center gap-3 sm:flex-row sm:justify-center">
+            <div className="w-full space-y-1.5 sm:w-44">
               <Label
                 htmlFor="target-length"
-                className="text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground"
+                className="block text-center text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground"
               >
                 Track length
               </Label>
@@ -1033,22 +1010,74 @@ function LibraryPage() {
                 value={targetMinutes}
                 onChange={(e) => setTargetMinutes(Number(e.target.value))}
                 disabled={pipelineActive}
-                className="min-h-10 w-full rounded-xl border border-white/10 bg-background/60 px-3 text-sm font-semibold disabled:opacity-60"
+                className="min-h-10 w-full rounded-xl border border-white/10 bg-background/60 px-3 text-center text-sm font-semibold disabled:opacity-60"
               >
                 {[3, 4, 5, 6, 8].map((m) => (
                   <option key={m} value={m}>
-                    {m} min minimum{m === MIN_TRACK_MINUTES ? " (default)" : ""}
+                    {m} min min{m === MIN_TRACK_MINUTES ? " (default)" : ""}
                   </option>
                 ))}
               </select>
             </div>
-            <div className="flex items-end">
-              <FoulMouthToggle disabled={pipelineActive} />
+            <div className="flex w-full flex-col items-center gap-1.5 sm:w-44 sm:pt-5">
+              <FoulMouthToggle disabled={pipelineActive} className="justify-center" />
             </div>
+          </div>
 
-            <p className="text-[11px] font-semibold text-muted-foreground sm:col-span-2">
-              -{totalCost} coins · {expectedRange}
-            </p>
+          <p className="mt-3 text-center text-[11px] font-semibold text-muted-foreground">
+            -{totalCost} coins · {expectedRange}
+          </p>
+
+          {/* Hazard robotic CREATE button — a big circular mech trigger */}
+          <div className="mt-5 flex flex-col items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setWizardOpen(true)}
+              disabled={pipelineActive}
+              aria-label="Create now — start a new track"
+              className="hazard-create group grid h-32 w-32 place-items-center rounded-full border-2 border-destructive/70 bg-gradient-brand text-primary-foreground transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-destructive/40 disabled:cursor-not-allowed disabled:opacity-50 sm:h-36 sm:w-36"
+            >
+              {/* Rotating hazard stripe ring */}
+              <span
+                aria-hidden="true"
+                className="hazard-ring absolute inset-1.5 rounded-full"
+                style={{
+                  background:
+                    "repeating-conic-gradient(from 0deg, oklch(0.62 0.22 25 / 0.32) 0deg 22.5deg, transparent 22.5deg 45deg)",
+                  WebkitMask:
+                    "radial-gradient(farthest-side, transparent calc(100% - 8px), #000 calc(100% - 7px))",
+                  mask: "radial-gradient(farthest-side, transparent calc(100% - 8px), #000 calc(100% - 7px))",
+                }}
+              />
+              {/* Breathing core glow */}
+              <span
+                aria-hidden="true"
+                className="hazard-core absolute inset-6 rounded-full bg-white/15 blur-md"
+              />
+              <span className="relative z-10 flex flex-col items-center gap-0.5">
+                <Sparkles className="h-6 w-6 drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] sm:h-7 sm:w-7" />
+                <span className="font-display text-base font-black uppercase leading-none tracking-[0.12em] drop-shadow-[0_2px_3px_rgba(0,0,0,0.7)] sm:text-lg">
+                  Create
+                </span>
+                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/80">
+                  now
+                </span>
+              </span>
+            </button>
+
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              aria-label="Jump to your library"
+              onClick={() =>
+                libraryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+              }
+              className="h-8 gap-1.5 px-3 text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground"
+            >
+              <Disc3 className="h-4 w-4" />
+              Library
+            </Button>
           </div>
         </section>
       )}
