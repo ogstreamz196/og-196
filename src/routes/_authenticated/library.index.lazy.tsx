@@ -68,6 +68,7 @@ import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { FoulMouthToggle } from "@/components/FoulMouthToggle";
 
 import { FreshTrackCard } from "@/components/library/FreshTrackCard";
+import { StudioMeter, StudioLed } from "@/components/library/StudioConsole";
 import { ReviewDialog } from "@/components/library/ReviewDialog";
 import { useInfiniteScrollSentinel } from "@/hooks/use-infinite-scroll-sentinel";
 
@@ -1300,7 +1301,7 @@ function LibraryPage() {
               className="flex min-w-0 items-center gap-2 font-display text-2xl font-black tracking-tight sm:text-3xl"
             >
               <Disc3 className="h-5 w-5 shrink-0 text-primary" />
-              <span className="truncate">Library</span>
+              <span className="truncate">Tape vault</span>
             </h2>
           </div>
 
