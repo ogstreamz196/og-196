@@ -565,6 +565,10 @@ function LibraryPage() {
     language: string;
     /** Artist voice from the wizard — drives Suno's vocalGender + style tags. */
     vocal?: string;
+    /** Vocals-only mode — a cappella / sing over an uploaded beat. */
+    vocalsOnly?: boolean;
+    /** Storage path of the uploaded beat, when one was provided. */
+    beatPath?: string;
   };
 
   // Keeps the exact payload of the last run so "Try again" reuses it verbatim.
@@ -589,6 +593,15 @@ function LibraryPage() {
     const songLanguage = (override?.language ?? selections.language ?? "English").trim();
     const songDetails = (override?.description ?? personalDetails).trim();
     const songVocal = (override?.vocal ?? "").trim();
+    const vocalsOnly = !!override?.vocalsOnly;
+    const beatPath = (override?.beatPath ?? "").trim();
+    // Vocals-only: either the user's own beat carries the music, or we fall
+    // back to a nasheed-style a cappella with humming and no instruments.
+    const vocalsOnlyTags = vocalsOnly
+      ? beatPath
+        ? ["vocals only", "a cappella over the uploaded beat", "no added instruments"]
+        : ["islamic nasheed", "a cappella", "vocals only", "humming", "no instruments", "no percussion"]
+      : [];
     // Each style is its own tag (the wizard returns them comma-separated), and
     // the chosen voice rides along so the lyrics engine writes for it too.
     const songStyleTags = (
@@ -598,7 +611,9 @@ function LibraryPage() {
             .map((s) => s.trim())
             .filter(Boolean)
         : styleTags
-    ).concat(songVocal && !/^any/i.test(songVocal) ? [songVocal] : []);
+    )
+      .concat(songVocal && !/^any/i.test(songVocal) ? [songVocal] : [])
+      .concat(vocalsOnlyTags);
     pipelineLockRef.current = true;
     const runId = ++pipelineRunRef.current;
     const stale = () => pipelineRunRef.current !== runId;
@@ -633,7 +648,11 @@ function LibraryPage() {
       setLyrics(nextLyrics);
 
       advanceStage("saving");
-      const style = [songStyle, songVocal && !/^any/i.test(songVocal) ? songVocal : null]
+      const style = [
+        songStyle,
+        songVocal && !/^any/i.test(songVocal) ? songVocal : null,
+        ...vocalsOnlyTags,
+      ]
         .filter(Boolean)
         .join(", ");
       const promptText = [
@@ -654,6 +673,8 @@ function LibraryPage() {
           style: style || null,
           lyrics: nextLyrics,
           status: "draft",
+          vocals_only: vocalsOnly,
+          beat_path: beatPath || null,
           extra_context: extraContext.trim() || null,
         } as never)
         .select("id")
@@ -670,6 +691,8 @@ function LibraryPage() {
           title: songTitle || null,
           style: songStyle || null,
           vocal: songVocal || null,
+          vocals_only: vocalsOnly,
+          beat_path: beatPath || null,
         },
       });
       if (stale()) return;

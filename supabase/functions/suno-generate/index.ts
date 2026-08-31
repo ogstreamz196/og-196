@@ -11,6 +11,12 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const SUNO_API_KEY = Deno.env.get("SUNO_API_KEY")!;
 const SUNO_API_URL = "https://apibox.erweima.ai/api/v1/generate";
+// Used when the user uploads their own beat — Suno performs vocals over it.
+const SUNO_UPLOAD_COVER_URL = "https://apibox.erweima.ai/api/v1/generate/upload-cover";
+const NASHEED_STYLE =
+  "islamic nasheed, a cappella, vocals only, humming, no instruments, no percussion";
+const VOCALS_OVER_BEAT_STYLE =
+  "vocals only, a cappella lead vocal riding the supplied beat, no added instruments";
 const MAX_PROMPT_CHARS = 4_800;
 const MAX_STYLE_CHARS = 900;
 const MAX_TITLE_CHARS = 80;
@@ -64,8 +70,15 @@ Deno.serve(async (req) => {
       ? "duet, male and female vocals trading lines"
       : null;
     const rawStyle = (body.style ?? "").toString().trim();
+    const vocalsOnly = !!body.vocals_only;
+    const beatPath = body.beat_path ? String(body.beat_path) : null;
+    // Vocals-only: sing over the uploaded beat, or fall back to a nasheed-style
+    // a cappella with humming and zero instrumentation.
+    const vocalsOnlyStyle = vocalsOnly
+      ? (beatPath ? VOCALS_OVER_BEAT_STYLE : NASHEED_STYLE)
+      : null;
     const style = limitText(
-      [rawStyle, vocalStyle].filter(Boolean).join(", ") || null,
+      [rawStyle, vocalStyle, vocalsOnlyStyle].filter(Boolean).join(", ") || null,
       MAX_STYLE_CHARS,
     );
     const lyrics = limitText((body.lyrics ?? "").toString().trim() || null, MAX_PROMPT_CHARS);
@@ -223,11 +236,34 @@ Deno.serve(async (req) => {
     const token = Array.from(new Uint8Array(sigBuf)).map((b) => b.toString(16).padStart(2, "0")).join("");
     const callbackUrl = `${SUPABASE_URL}/functions/v1/suno-callback?song_id=${songId}&token=${token}`;
 
+    // Sign the uploaded beat so Suno can fetch it (path is namespaced per user).
+    let beatUrl: string | null = null;
+    if (vocalsOnly && beatPath) {
+      if (!beatPath.startsWith(`${user.id}/`)) {
+        await refund(admin, user.id, songId, "Beat does not belong to this user", coinCost);
+        return json({ error: "Beat not found" }, 404);
+      }
+      const { data: signed, error: signErr } = await admin.storage
+        .from("beats")
+        .createSignedUrl(beatPath, 60 * 60);
+      if (signErr || !signed?.signedUrl) {
+        await refund(admin, user.id, songId, "Could not read the uploaded beat", coinCost);
+        return json({ error: "Could not read the uploaded beat" }, 400);
+      }
+      beatUrl = signed.signedUrl;
+    }
+    if (vocalsOnly) {
+      await admin
+        .from("songs")
+        .update({ vocals_only: true, beat_path: beatUrl ? beatPath : null })
+        .eq("id", songId);
+    }
+
     const customMode = !!(style || effectiveLyrics || title);
     const sunoTitle = limitText(title || "Untitled track", MAX_TITLE_CHARS);
     let sunoRes: Response;
     try {
-      sunoRes = await fetch(SUNO_API_URL, {
+      sunoRes = await fetch(beatUrl ? SUNO_UPLOAD_COVER_URL : SUNO_API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${SUNO_API_KEY}` },
         body: JSON.stringify({
@@ -235,7 +271,8 @@ Deno.serve(async (req) => {
           style: style || undefined,
           title: customMode ? sunoTitle : undefined,
           customMode,
-          instrumental,
+          instrumental: vocalsOnly ? false : instrumental,
+          ...(beatUrl ? { uploadUrl: beatUrl } : {}),
           ...(vocalGender ? { vocalGender } : {}),
           model: "V5",
           negativeTags: "low quality, muddy mix, distorted, lo-fi, amateur, bad vocals",
