@@ -1045,7 +1045,7 @@ function LibraryPage() {
               >
                 {[3, 4, 5, 6, 8].map((m) => (
                   <option key={m} value={m}>
-                    {m} min min{m === MIN_TRACK_MINUTES ? " (default)" : ""}
+                    Min {m} min{m === MIN_TRACK_MINUTES ? " · default" : ""}
                   </option>
                 ))}
               </select>
