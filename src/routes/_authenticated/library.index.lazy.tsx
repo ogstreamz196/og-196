@@ -1000,7 +1000,8 @@ function LibraryPage() {
         </div>
       </header>
 
-      {/* Create — one dominant action, controls demoted to a quiet strip */}
+      {/* Create — hidden while a generation runs so the status card is the only focus */}
+      {!pipelineActive && (
       <section
         aria-label="Create a track"
         className="border-b-2 border-white/10 pb-7"
