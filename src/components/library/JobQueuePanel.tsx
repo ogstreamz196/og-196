@@ -77,9 +77,11 @@ const META: Record<JobStatus, { label: string; icon: typeof Clock3; cls: string;
   failed:     { label: "Failed",     icon: AlertTriangle, cls: "border-rose-500/40 bg-rose-500/10 text-rose-200",     dot: "bg-rose-500" },
 };
 
-export function JobQueuePanel({ songs }: { songs: Song[] }) {
+export function JobQueuePanel({ songs, onRemoved }: { songs: Song[]; onRemoved?: () => void }) {
   const [retrying, setRetrying] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
   const [detailsSong, setDetailsSong] = useState<Song | null>(null);
+
 
   // Tick once per second while there are in-flight jobs so the elapsed/stall
   // indicators stay accurate without forcing a parent refetch.
