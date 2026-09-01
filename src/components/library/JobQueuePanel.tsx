@@ -15,6 +15,7 @@ import {
   Lock,
   Unlock,
   ExternalLink,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -28,6 +29,7 @@ import {
 } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import { invokeError } from "@/lib/invoke-error";
+import { deleteQueuedSong } from "@/lib/song-queue-actions";
 import { useSettings } from "@/hooks/use-settings";
 import { useProfile } from "@/hooks/use-profile";
 import type { Song } from "@/components/SongCard";
