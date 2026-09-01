@@ -213,7 +213,7 @@ export function JobQueuePanel({ songs, onRemoved }: { songs: Song[]; onRemoved?:
             <li
               key={song.id}
               className={cn(
-                "flex items-center gap-3 rounded-2xl border border-white/10 bg-background/40 p-3",
+                "flex w-full min-w-0 items-center gap-2 overflow-hidden rounded-2xl border border-white/10 bg-background/40 p-3",
                 stuck && "border-rose-500/40 bg-rose-500/5",
                 slow && !stuck && "border-amber-400/40 bg-amber-400/5",
               )}
@@ -235,32 +235,50 @@ export function JobQueuePanel({ songs, onRemoved }: { songs: Song[]; onRemoved?:
               </div>
               {showRetry && (
                 <Button
-                  size="sm"
+                  size="icon"
                   variant="secondary"
                   onClick={() => retry(song)}
-                  disabled={retrying === song.id}
-                  className="shrink-0"
+                  disabled={retrying === song.id || deleting === song.id}
+                  aria-label={`Retry ${song.title || "track"}`}
+                  title="Retry"
+                  className="h-9 w-9 shrink-0 rounded-full"
                 >
                   {retrying === song.id ? (
-                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
-                    <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
+                    <RefreshCw className="h-4 w-4" />
                   )}
-                  Retry
                 </Button>
               )}
               {kind === "completed" && (
                 <Button
-                  size="sm"
+                  size="icon"
                   variant="secondary"
                   onClick={() => setDetailsSong(song)}
-                  className="shrink-0"
+                  aria-label={`View details for ${song.title || "track"}`}
+                  title="View details"
+                  className="h-9 w-9 shrink-0 rounded-full"
                 >
-                  <Eye className="mr-1.5 h-3.5 w-3.5" />
-                  View details
+                  <Eye className="h-4 w-4" />
                 </Button>
               )}
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => void removeJob(song)}
+                disabled={deleting === song.id}
+                aria-label={`Delete ${song.title || "track"}`}
+                title="Delete"
+                className="h-9 w-9 shrink-0 rounded-full border border-white/10 text-muted-foreground hover:border-destructive/50 hover:text-destructive"
+              >
+                {deleting === song.id ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Trash2 className="h-4 w-4" />
+                )}
+              </Button>
             </li>
+
           );
         })}
       </ul>
