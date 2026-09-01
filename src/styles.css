@@ -867,6 +867,36 @@ button.graffiti-accent:hover {
   animation: hazard-core-breathe 2.4s ease-in-out infinite;
 }
 
+/* Falling sparks — each ember drops, drifts and burns out, then repeats.
+   Staggered delays make the shower feel random rather than metronomic. */
+@keyframes hazard-spark-fall {
+  0%   { transform: translate3d(0, 0, 0) scale(1); opacity: 0; }
+  8%   { opacity: 1; }
+  70%  { opacity: 0.9; }
+  100% { transform: translate3d(var(--spark-drift, 6px), 70px, 0) scale(0.3); opacity: 0; }
+}
+.hazard-spark {
+  position: absolute;
+  bottom: 10%;
+  width: 3px;
+  height: 3px;
+  border-radius: 9999px;
+  background: oklch(0.85 0.2 60);
+  box-shadow: 0 0 6px 1px oklch(0.7 0.24 35 / 0.9);
+  opacity: 0;
+  animation: hazard-spark-fall var(--spark-dur, 1.6s) linear infinite;
+  animation-delay: var(--spark-delay, 0s);
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hazard-create,
+  .hazard-ring,
+  .hazard-core,
+  .hazard-spark { animation: none; }
+  .hazard-spark { display: none; }
+}
+
+
 /* Red & blue flame aura — GPU-friendly: only opacity animates.
    Two stacked pseudo-elements with static shadows cross-fade, avoiding
    per-frame box-shadow repaints that tank low-end mobile GPUs. */
