@@ -15,6 +15,7 @@ import {
   Lock,
   Unlock,
   ExternalLink,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -28,6 +29,7 @@ import {
 } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import { invokeError } from "@/lib/invoke-error";
+import { deleteQueuedSong } from "@/lib/song-queue-actions";
 import { useSettings } from "@/hooks/use-settings";
 import { useProfile } from "@/hooks/use-profile";
 import type { Song } from "@/components/SongCard";
@@ -77,9 +79,11 @@ const META: Record<JobStatus, { label: string; icon: typeof Clock3; cls: string;
   failed:     { label: "Failed",     icon: AlertTriangle, cls: "border-rose-500/40 bg-rose-500/10 text-rose-200",     dot: "bg-rose-500" },
 };
 
-export function JobQueuePanel({ songs }: { songs: Song[] }) {
+export function JobQueuePanel({ songs, onRemoved }: { songs: Song[]; onRemoved?: () => void }) {
   const [retrying, setRetrying] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
   const [detailsSong, setDetailsSong] = useState<Song | null>(null);
+
 
   // Tick once per second while there are in-flight jobs so the elapsed/stall
   // indicators stay accurate without forcing a parent refetch.
@@ -156,6 +160,23 @@ export function JobQueuePanel({ songs }: { songs: Song[] }) {
     }
   }
 
+  /** Remove a job from the queue — cancels + refunds it first when in flight. */
+  async function removeJob(song: Song) {
+    if (!window.confirm(`Remove "${song.title || "Untitled"}" from the queue?`)) return;
+    setDeleting(song.id);
+    try {
+      await deleteQueuedSong(song);
+      toast.success("Removed from the queue");
+      onRemoved?.();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Couldn't remove that track");
+    } finally {
+      setDeleting(null);
+    }
+  }
+
+
+
   if (jobs.length === 0) return null;
 
   return (
@@ -194,7 +215,7 @@ export function JobQueuePanel({ songs }: { songs: Song[] }) {
             <li
               key={song.id}
               className={cn(
-                "flex items-center gap-3 rounded-2xl border border-white/10 bg-background/40 p-3",
+                "flex w-full min-w-0 items-center gap-2 overflow-hidden rounded-2xl border border-white/10 bg-background/40 p-3",
                 stuck && "border-rose-500/40 bg-rose-500/5",
                 slow && !stuck && "border-amber-400/40 bg-amber-400/5",
               )}
@@ -216,32 +237,50 @@ export function JobQueuePanel({ songs }: { songs: Song[] }) {
               </div>
               {showRetry && (
                 <Button
-                  size="sm"
+                  size="icon"
                   variant="secondary"
                   onClick={() => retry(song)}
-                  disabled={retrying === song.id}
-                  className="shrink-0"
+                  disabled={retrying === song.id || deleting === song.id}
+                  aria-label={`Retry ${song.title || "track"}`}
+                  title="Retry"
+                  className="h-9 w-9 shrink-0 rounded-full"
                 >
                   {retrying === song.id ? (
-                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
-                    <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
+                    <RefreshCw className="h-4 w-4" />
                   )}
-                  Retry
                 </Button>
               )}
               {kind === "completed" && (
                 <Button
-                  size="sm"
+                  size="icon"
                   variant="secondary"
                   onClick={() => setDetailsSong(song)}
-                  className="shrink-0"
+                  aria-label={`View details for ${song.title || "track"}`}
+                  title="View details"
+                  className="h-9 w-9 shrink-0 rounded-full"
                 >
-                  <Eye className="mr-1.5 h-3.5 w-3.5" />
-                  View details
+                  <Eye className="h-4 w-4" />
                 </Button>
               )}
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => void removeJob(song)}
+                disabled={deleting === song.id}
+                aria-label={`Delete ${song.title || "track"}`}
+                title="Delete"
+                className="h-9 w-9 shrink-0 rounded-full border border-white/10 text-muted-foreground hover:border-destructive/50 hover:text-destructive"
+              >
+                {deleting === song.id ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Trash2 className="h-4 w-4" />
+                )}
+              </Button>
             </li>
+
           );
         })}
       </ul>

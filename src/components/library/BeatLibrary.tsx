@@ -12,8 +12,14 @@ const MAX_BYTES = 20 * 1024 * 1024;
 function pretty(name: string) {
   // Uploads are stored as `<timestamp>-<original name>`; show the readable part.
   const stripped = name.replace(/^\d{10,}-/, "");
-  return stripped.replace(/\.[a-z0-9]+$/i, "") || stripped;
+  const base = stripped.replace(/\.[a-z0-9]+$/i, "") || stripped;
+  // Wizard uploads land as bare UUIDs — give those a friendly short label.
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(base)) {
+    return `Beat ${base.slice(0, 8).toUpperCase()}`;
+  }
+  return base;
 }
+
 
 /**
  * Beat library — the user's own uploaded instrumentals, saved in the private
@@ -189,12 +195,12 @@ export function BeatLibrary({
             over it.
           </p>
         ) : (
-          <ul className="grid gap-1.5">
+          <ul className="grid w-full gap-1.5">
             {beats.map((b) => (
               <li
                 key={b.path}
                 className={cn(
-                  "flex items-center gap-3 rounded-2xl border border-white/10 bg-background/40 px-3 py-2.5",
+                  "flex w-full min-w-0 items-center gap-2 overflow-hidden rounded-2xl border border-white/10 bg-background/40 px-3 py-2.5",
                   playing === b.path && "border-primary/40 bg-primary/5",
                 )}
               >
@@ -215,15 +221,18 @@ export function BeatLibrary({
                     <Play className="h-4 w-4" />
                   )}
                 </Button>
-                <p className="min-w-0 flex-1 truncate text-sm font-bold">{b.name}</p>
+                <p className="min-w-0 flex-1 truncate text-sm font-bold" title={b.name}>
+                  {b.name}
+                </p>
                 <Button
                   type="button"
                   size="sm"
                   onClick={() => onRemix(b)}
-                  className="h-8 shrink-0 gap-1.5 bg-gradient-brand text-[11px] font-black uppercase tracking-wide text-primary-foreground"
+                  aria-label={`New vocals over ${b.name}`}
+                  className="h-8 shrink-0 gap-1.5 bg-gradient-brand px-2.5 text-[11px] font-black uppercase tracking-wide text-primary-foreground sm:px-3"
                 >
                   <Wand2 className="h-3.5 w-3.5" />
-                  New vocals
+                  <span className="hidden sm:inline">New vocals</span>
                 </Button>
                 <Button
                   type="button"
@@ -239,6 +248,7 @@ export function BeatLibrary({
               </li>
             ))}
           </ul>
+
         )}
       </div>
     </section>
