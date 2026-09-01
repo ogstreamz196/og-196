@@ -1496,7 +1496,7 @@ function LibraryPage() {
               className="group flex items-center gap-2 rounded-none border-b-2 border-transparent bg-transparent px-1 pb-3 pt-0 text-sm font-bold text-muted-foreground shadow-none transition-colors data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none"
             >
               <Crown className="h-4 w-4 text-primary" />
-              <span className="truncate">My creations</span>
+              <span className="truncate">Mine</span>
               <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-black tabular-nums text-foreground/90">
                 {completedTracks.length}
               </span>
@@ -1506,7 +1506,7 @@ function LibraryPage() {
               className="group flex items-center gap-2 rounded-none border-b-2 border-transparent bg-transparent px-1 pb-3 pt-0 text-sm font-bold text-muted-foreground shadow-none transition-colors data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none"
             >
               <Users className="h-4 w-4 text-fuchsia-300" />
-              <span className="truncate">Global library</span>
+              <span className="truncate">Global</span>
               <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-black tabular-nums text-foreground/90">
                 {communityTracks.length}
               </span>
@@ -1515,10 +1515,6 @@ function LibraryPage() {
 
           <TabsContent value="yours" className="mt-0 space-y-3">
             <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-              <span>Made by you</span>
-              <span aria-hidden className="text-primary/60">
-                •
-              </span>
               <span className="text-primary">Yours to play &amp; download</span>
             </p>
 
