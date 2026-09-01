@@ -7,7 +7,7 @@ const FEATURES = [
     to: "/library",
     icon: <Library className="h-6 w-6" />,
     title: "MusicHUB",
-    description: "Every track you generate lives here. Stream, review, and build your personal catalog.",
+    description: "All your tracks. Stream and review.",
     cta: "Open MusicHUB",
     primary: true,
   },
@@ -15,7 +15,7 @@ const FEATURES = [
     to: "/messenger",
     icon: <MessageCircle className="h-6 w-6" />,
     title: "OG Bot",
-    description: "Chat with OG Bot for tips, recommendations, and production advice. 5 free OG Coins on sign-up.",
+    description: "Ask OG Bot anything. 5 free coins on sign-up.",
     cta: "Chat",
   },
 ] as const;
