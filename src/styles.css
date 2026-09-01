@@ -854,13 +854,52 @@ button.graffiti-accent:hover {
   0%, 100% { transform: scale(1); opacity: 0.85; }
   50% { transform: scale(1.08); opacity: 1; }
 }
+/* 3D push-button pedestal: a fixed base plate the cap sits on top of, so
+   pressing the cap physically sinks it into the base. */
+.hazard-pedestal {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  padding-bottom: 18px;
+  perspective: 700px;
+}
+.hazard-base {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  translate: -50% 0;
+  width: 96%;
+  height: 46%;
+  border-radius: 9999px;
+  background: linear-gradient(180deg, oklch(0.32 0.09 25), oklch(0.16 0.05 25));
+  box-shadow:
+    inset 0 -3px 6px oklch(0 0 0 / 0.6),
+    0 18px 34px -12px oklch(0.62 0.22 25 / 0.7);
+  pointer-events: none;
+}
 .hazard-create {
   position: relative;
   animation: hazard-pulse 1.8s ease-in-out infinite;
+  /* Stacked rims + drop shadow give the cap real thickness. */
+  box-shadow:
+    inset 0 -10px 18px oklch(0 0 0 / 0.45),
+    inset 0 10px 20px oklch(1 0 0 / 0.22),
+    0 14px 0 oklch(0.28 0.11 25),
+    0 20px 0 oklch(0.19 0.07 25),
+    0 26px 34px -8px oklch(0 0 0 / 0.75);
+  transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.12s ease;
 }
-.hazard-create:active {
-  transform: scale(0.92);
-  transition: transform 0.08s cubic-bezier(0.34, 1.56, 0.64, 1);
+.hazard-create:hover:not(:disabled) {
+  transform: translateY(-3px);
+}
+.hazard-create:active:not(:disabled) {
+  transform: translateY(14px) scale(0.98);
+  animation: none;
+  box-shadow:
+    inset 0 -4px 10px oklch(0 0 0 / 0.55),
+    inset 0 6px 14px oklch(1 0 0 / 0.18),
+    0 3px 0 oklch(0.24 0.09 25),
+    0 6px 14px -4px oklch(0 0 0 / 0.7);
 }
 .hazard-ring {
   animation: hazard-spin 9s linear infinite;
@@ -868,6 +907,7 @@ button.graffiti-accent:hover {
 .hazard-core {
   animation: hazard-core-breathe 2.4s ease-in-out infinite;
 }
+
 
 /* Falling sparks — each ember drops, drifts and burns out, then repeats.
    Staggered delays make the shower feel random rather than metronomic. */
