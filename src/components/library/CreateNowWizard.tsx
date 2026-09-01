@@ -68,7 +68,7 @@ export const EMPTY_DRAFT: WizardDraft = {
 
 const GENDERS = ["Female vocal", "Male vocal", "Duo", "Any voice"];
 
-const TOTAL_STEPS = 6;
+const TOTAL_STEPS = 5;
 
 /** Curated styles first, then everything else we already support. */
 const STYLES: string[] = (() => {
@@ -284,17 +284,17 @@ export function CreateNowWizard({
             {step === 2 && "Who is this track about?"}
             {step === 3 && "What will this track be about?"}
             {step === 4 && "Choose a style"}
-            {step === 5 && "Vocals only mode"}
-            {step === 6 && "Select language"}
+            {step === 5 && "Language & vocals"}
           </DialogTitle>
           <DialogDescription className="text-sm">
             {step === 1 && "This becomes the title of your track."}
             {step === 2 && "A person, a group, a brand — or yourself."}
             {step === 3 && "A short description, theme or story."}
             {step === 4 && "Stack as many styles as you like, then pick the voice."}
-            {step === 5 && "Pure vocals — sing over your own beat, or skip for a nasheed-style a cappella."}
-            {step === 6 && "English is always part of the remix — add any others."}
+            {step === 5 &&
+              "English is always part of the remix. Flip vocals only to sing over your own beat."}
           </DialogDescription>
+
         </DialogHeader>
 
         <div
@@ -420,6 +420,7 @@ export function CreateNowWizard({
 
           {step === 5 && (
             <div className="space-y-4">
+              {/* Vocals-only sits at the very top of the language step. */}
               <button
                 type="button"
                 aria-pressed={vocalsOnly}
@@ -442,6 +443,41 @@ export function CreateNowWizard({
                 </span>
               </button>
 
+              <div className="space-y-3">
+                <p className="text-xs font-semibold text-primary">
+                  English is always included in the remix.
+                </p>
+                <div
+                  role="group"
+                  aria-label="Languages"
+                  className="grid max-h-[220px] grid-cols-2 gap-2 overflow-y-auto pr-1 sm:grid-cols-3"
+                >
+                  {POOLS.language.map((l) => {
+                    const locked = l === "English";
+                    const selected = locked || languages.includes(l);
+                    return (
+                      <button
+                        key={l}
+                        type="button"
+                        aria-pressed={selected}
+                        onClick={() => !locked && setLanguages((prev) => toggle(prev, l))}
+                        className={cn(
+                          "min-h-11 rounded-xl border px-3 py-2.5 text-sm font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                          selected
+                            ? "border-primary bg-primary/20 text-foreground shadow-glow"
+                            : "border-white/10 bg-card/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
+                          locked && "cursor-default opacity-90",
+                        )}
+                      >
+                        {l}
+                        {locked && " ✓"}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Beat upload lives at the bottom, under the languages. */}
               {vocalsOnly && (
                 <div className="space-y-3 rounded-2xl border border-white/10 bg-background/50 p-4">
                   <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
@@ -492,41 +528,6 @@ export function CreateNowWizard({
             </div>
           )}
 
-          {step === 6 && (
-            <div className="space-y-3">
-              <p className="text-xs font-semibold text-primary">
-                English is always included in the remix.
-              </p>
-              <div
-                role="group"
-                aria-label="Languages"
-                className="grid max-h-[240px] grid-cols-2 gap-2 overflow-y-auto pr-1 sm:grid-cols-3"
-              >
-                {POOLS.language.map((l) => {
-                  const locked = l === "English";
-                  const selected = locked || languages.includes(l);
-                  return (
-                    <button
-                      key={l}
-                      type="button"
-                      aria-pressed={selected}
-                      onClick={() => !locked && setLanguages((prev) => toggle(prev, l))}
-                      className={cn(
-                        "min-h-11 rounded-xl border px-3 py-2.5 text-sm font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
-                        selected
-                          ? "border-primary bg-primary/20 text-foreground shadow-glow"
-                          : "border-white/10 bg-card/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
-                        locked && "cursor-default opacity-90",
-                      )}
-                    >
-                      {l}
-                      {locked && " ✓"}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
         </div>
 
         {hint && (
