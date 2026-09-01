@@ -1,6 +1,17 @@
 import { createLazyFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+
+/** Falling ember config for the hazard CREATE button — staggered so the shower looks random. */
+const SPARKS = [
+  { left: "22%", delay: "0s", dur: "1.7s", drift: "-14px" },
+  { left: "38%", delay: "0.6s", dur: "2.1s", drift: "10px" },
+  { left: "52%", delay: "1.2s", dur: "1.5s", drift: "-6px" },
+  { left: "66%", delay: "0.3s", dur: "2.4s", drift: "16px" },
+  { left: "78%", delay: "1.8s", dur: "1.9s", drift: "-10px" },
+  { left: "30%", delay: "2.2s", dur: "2.2s", drift: "8px" },
+];
+
 import {
   Loader2,
   Library as LibraryIcon,
