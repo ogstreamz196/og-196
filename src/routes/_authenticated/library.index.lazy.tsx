@@ -1,6 +1,17 @@
 import { createLazyFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+
+/** Falling ember config for the hazard CREATE button — staggered so the shower looks random. */
+const SPARKS = [
+  { left: "22%", delay: "0s", dur: "1.7s", drift: "-14px" },
+  { left: "38%", delay: "0.6s", dur: "2.1s", drift: "10px" },
+  { left: "52%", delay: "1.2s", dur: "1.5s", drift: "-6px" },
+  { left: "66%", delay: "0.3s", dur: "2.4s", drift: "16px" },
+  { left: "78%", delay: "1.8s", dur: "1.9s", drift: "-10px" },
+  { left: "30%", delay: "2.2s", dur: "2.2s", drift: "8px" },
+];
+
 import {
   Loader2,
   Library as LibraryIcon,
@@ -1143,7 +1154,11 @@ function LibraryPage() {
               onClick={() => setWizardOpen(true)}
               disabled={pipelineActive}
               aria-label="Create now — start a new track"
-              className="hazard-create group grid h-32 w-32 place-items-center rounded-full border-2 border-destructive/70 bg-gradient-brand text-primary-foreground transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-destructive/40 disabled:cursor-not-allowed disabled:opacity-50 sm:h-36 sm:w-36"
+              style={{
+                background:
+                  "radial-gradient(circle at 50% 32%, oklch(0.7 0.24 28), oklch(0.45 0.21 26) 68%, oklch(0.26 0.13 25))",
+              }}
+              className="hazard-create group grid h-44 w-44 place-items-center rounded-full border-[5px] border-destructive text-white transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-destructive/50 disabled:cursor-not-allowed disabled:opacity-50 sm:h-52 sm:w-52"
             >
               {/* Rotating hazard stripe ring */}
               <span
@@ -1151,27 +1166,44 @@ function LibraryPage() {
                 className="hazard-ring absolute inset-1.5 rounded-full"
                 style={{
                   background:
-                    "repeating-conic-gradient(from 0deg, oklch(0.62 0.22 25 / 0.32) 0deg 22.5deg, transparent 22.5deg 45deg)",
+                    "repeating-conic-gradient(from 0deg, oklch(0.85 0.19 85 / 0.55) 0deg 18deg, transparent 18deg 36deg)",
                   WebkitMask:
-                    "radial-gradient(farthest-side, transparent calc(100% - 8px), #000 calc(100% - 7px))",
-                  mask: "radial-gradient(farthest-side, transparent calc(100% - 8px), #000 calc(100% - 7px))",
+                    "radial-gradient(farthest-side, transparent calc(100% - 12px), #000 calc(100% - 11px))",
+                  mask: "radial-gradient(farthest-side, transparent calc(100% - 12px), #000 calc(100% - 11px))",
                 }}
               />
               {/* Breathing core glow */}
               <span
                 aria-hidden="true"
-                className="hazard-core absolute inset-6 rounded-full bg-white/15 blur-md"
+                className="hazard-core absolute inset-8 rounded-full bg-white/20 blur-md"
               />
-              <span className="relative z-10 flex flex-col items-center gap-0.5">
-                <Sparkles className="h-6 w-6 drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] sm:h-7 sm:w-7" />
-                <span className="font-display text-base font-black uppercase leading-none tracking-[0.12em] drop-shadow-[0_2px_3px_rgba(0,0,0,0.7)] sm:text-lg">
+              {/* Falling sparks */}
+              {SPARKS.map((s, i) => (
+                <span
+                  key={i}
+                  aria-hidden="true"
+                  className="hazard-spark"
+                  style={
+                    {
+                      left: s.left,
+                      "--spark-delay": s.delay,
+                      "--spark-dur": s.dur,
+                      "--spark-drift": s.drift,
+                    } as CSSProperties
+                  }
+                />
+              ))}
+              <span className="relative z-10 flex flex-col items-center gap-1">
+                <Sparkles className="h-8 w-8 drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)] sm:h-9 sm:w-9" />
+                <span className="font-display text-2xl font-black uppercase leading-none tracking-[0.12em] drop-shadow-[0_3px_4px_rgba(0,0,0,0.8)] sm:text-3xl">
                   Create
                 </span>
-                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/80">
+                <span className="text-[11px] font-black uppercase tracking-[0.28em] text-white/85">
                   now
                 </span>
               </span>
             </button>
+
 
             <Button
               type="button"
