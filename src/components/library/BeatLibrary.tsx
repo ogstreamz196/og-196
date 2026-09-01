@@ -12,8 +12,14 @@ const MAX_BYTES = 20 * 1024 * 1024;
 function pretty(name: string) {
   // Uploads are stored as `<timestamp>-<original name>`; show the readable part.
   const stripped = name.replace(/^\d{10,}-/, "");
-  return stripped.replace(/\.[a-z0-9]+$/i, "") || stripped;
+  const base = stripped.replace(/\.[a-z0-9]+$/i, "") || stripped;
+  // Wizard uploads land as bare UUIDs — give those a friendly short label.
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(base)) {
+    return `Beat ${base.slice(0, 8).toUpperCase()}`;
+  }
+  return base;
 }
+
 
 /**
  * Beat library — the user's own uploaded instrumentals, saved in the private
