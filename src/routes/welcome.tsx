@@ -855,7 +855,7 @@ function Pillars() {
       icon: <Music2 className="h-7 w-7" />,
       emoji: "🎵",
       title: "Prompt anything",
-      body: "Drop a birthday roast, love note, voice note, inside joke or full story — turn the chaos into a song.",
+      body: "Birthday roast, love note, inside joke — turn it into a song.",
       tilt: "-2",
     },
     {
@@ -863,7 +863,7 @@ function Pillars() {
       icon: <Wand2 className="h-7 w-7" />,
       emoji: "🪄",
       title: "Pick the vibe",
-      body: "Go drill, rap, afrobeats, dance, pop, R&B, sad ballad, hype anthem or silly meme song.",
+      body: "Drill, rap, afrobeats, pop, ballad or meme song.",
       tilt: "1.5",
     },
     {
@@ -871,7 +871,7 @@ function Pillars() {
       icon: <Sparkles className="h-7 w-7" />,
       emoji: "💿",
       title: "Cover included",
-      body: "Every song idea feels like a real drop with colourful cover art and a track ready to play.",
+      body: "Real cover art and a track ready to play.",
       tilt: "-1",
     },
   ];

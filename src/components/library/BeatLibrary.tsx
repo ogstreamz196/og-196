@@ -159,7 +159,7 @@ export function BeatLibrary({
               Beat library
             </h2>
             <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
-              Save beats · remix vocals over them anytime
+              Save beats · remix anytime
             </p>
           </div>
         </div>
@@ -191,8 +191,7 @@ export function BeatLibrary({
           <p className="py-6 text-center text-sm text-muted-foreground">Loading your beats…</p>
         ) : beats.length === 0 ? (
           <p className="rounded-2xl border border-dashed border-white/10 px-4 py-6 text-center text-sm text-muted-foreground">
-            No beats saved yet. Upload an instrumental and the studio will sing your vocals right
-            over it.
+            No beats yet. Upload an instrumental to sing over.
           </p>
         ) : (
           <ul className="grid w-full gap-1.5">

@@ -23,11 +23,11 @@ const FLOW_COPY: Record<CreationFlow, { title: string; description: string }> = 
   },
   memory: {
     title: "From a memory",
-    description: "Pick the feeling, drop the moment. Everything is optional.",
+    description: "Pick the feeling. All optional.",
   },
   tribute: {
     title: "Dedication or tribute",
-    description: "For someone special. Tap what fits, add a note if you like.",
+    description: "For someone special. Tap what fits.",
   },
   messenger: {
     title: "With OG Bot",
