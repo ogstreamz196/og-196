@@ -1147,62 +1147,66 @@ function LibraryPage() {
             -{totalCost} coins · {expectedRange}
           </p>
 
-          {/* Hazard robotic CREATE button — a big circular mech trigger */}
-          <div className="mt-5 flex flex-col items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setWizardOpen(true)}
-              disabled={pipelineActive}
-              aria-label="Create now — start a new track"
-              style={{
-                background:
-                  "radial-gradient(circle at 50% 32%, oklch(0.7 0.24 28), oklch(0.45 0.21 26) 68%, oklch(0.26 0.13 25))",
-              }}
-              className="hazard-create group grid h-44 w-44 place-items-center rounded-full border-[5px] border-destructive text-white transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-destructive/50 disabled:cursor-not-allowed disabled:opacity-50 sm:h-52 sm:w-52"
-            >
-              {/* Rotating hazard stripe ring */}
-              <span
-                aria-hidden="true"
-                className="hazard-ring absolute inset-1.5 rounded-full"
+          {/* Hazard robotic CREATE button — a big 3D push-button on a base plate */}
+          <div className="mt-6 flex flex-col items-center gap-4">
+            <div className="hazard-pedestal">
+              <span aria-hidden="true" className="hazard-base" />
+              <button
+                type="button"
+                onClick={() => setWizardOpen(true)}
+                disabled={pipelineActive}
+                aria-label="Create now — start a new track"
                 style={{
                   background:
-                    "repeating-conic-gradient(from 0deg, oklch(0.85 0.19 85 / 0.55) 0deg 18deg, transparent 18deg 36deg)",
-                  WebkitMask:
-                    "radial-gradient(farthest-side, transparent calc(100% - 12px), #000 calc(100% - 11px))",
-                  mask: "radial-gradient(farthest-side, transparent calc(100% - 12px), #000 calc(100% - 11px))",
+                    "radial-gradient(circle at 50% 28%, oklch(0.74 0.24 28), oklch(0.47 0.21 26) 66%, oklch(0.24 0.12 25))",
                 }}
-              />
-              {/* Breathing core glow */}
-              <span
-                aria-hidden="true"
-                className="hazard-core absolute inset-8 rounded-full bg-white/20 blur-md"
-              />
-              {/* Falling sparks */}
-              {SPARKS.map((s, i) => (
+                className="hazard-create group grid h-56 w-56 place-items-center rounded-full border-[6px] border-destructive text-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-destructive/50 disabled:cursor-not-allowed disabled:opacity-50 sm:h-64 sm:w-64"
+              >
+                {/* Rotating hazard stripe ring */}
                 <span
-                  key={i}
                   aria-hidden="true"
-                  className="hazard-spark"
-                  style={
-                    {
-                      left: s.left,
-                      "--spark-delay": s.delay,
-                      "--spark-dur": s.dur,
-                      "--spark-drift": s.drift,
-                    } as CSSProperties
-                  }
+                  className="hazard-ring absolute inset-2 rounded-full"
+                  style={{
+                    background:
+                      "repeating-conic-gradient(from 0deg, oklch(0.85 0.19 85 / 0.55) 0deg 18deg, transparent 18deg 36deg)",
+                    WebkitMask:
+                      "radial-gradient(farthest-side, transparent calc(100% - 14px), #000 calc(100% - 13px))",
+                    mask: "radial-gradient(farthest-side, transparent calc(100% - 14px), #000 calc(100% - 13px))",
+                  }}
                 />
-              ))}
-              <span className="relative z-10 flex flex-col items-center gap-1">
-                <Sparkles className="h-8 w-8 drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)] sm:h-9 sm:w-9" />
-                <span className="font-display text-2xl font-black uppercase leading-none tracking-[0.12em] drop-shadow-[0_3px_4px_rgba(0,0,0,0.8)] sm:text-3xl">
-                  Create
+                {/* Breathing core glow */}
+                <span
+                  aria-hidden="true"
+                  className="hazard-core absolute inset-9 rounded-full bg-white/20 blur-md"
+                />
+                {/* Falling sparks */}
+                {SPARKS.map((s, i) => (
+                  <span
+                    key={i}
+                    aria-hidden="true"
+                    className="hazard-spark"
+                    style={
+                      {
+                        left: s.left,
+                        "--spark-delay": s.delay,
+                        "--spark-dur": s.dur,
+                        "--spark-drift": s.drift,
+                      } as CSSProperties
+                    }
+                  />
+                ))}
+                <span className="relative z-10 flex flex-col items-center gap-1.5">
+                  <Sparkles className="h-10 w-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] sm:h-11 sm:w-11" />
+                  <span className="font-display text-4xl font-black uppercase leading-none tracking-[0.04em] drop-shadow-[0_3px_5px_rgba(0,0,0,0.9)] sm:text-5xl">
+                    Create
+                  </span>
+                  <span className="font-display text-2xl font-black uppercase leading-none tracking-[0.18em] drop-shadow-[0_3px_5px_rgba(0,0,0,0.9)] sm:text-3xl">
+                    Now
+                  </span>
                 </span>
-                <span className="text-[11px] font-black uppercase tracking-[0.28em] text-white/85">
-                  now
-                </span>
-              </span>
-            </button>
+              </button>
+            </div>
+
 
 
             <Button
