@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { AudioLines, Clock3, History, Mic2 } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { AudioLines, Clock3, History, Loader2, Mic2, RefreshCw, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import type { RecentSong } from "@/hooks/use-recent-songs";
+import { deleteQueuedSong, retryGeneration } from "@/lib/song-queue-actions";
 import { cn } from "@/lib/utils";
+
 
 type UiStatus = "queued" | "generating" | "ready" | "failed" | "cancelled";
 
@@ -64,6 +68,8 @@ function beatLabel(song: RecentSong) {
  */
 export function DashboardGenerationHistory({ songs }: { songs: RecentSong[] }) {
   const [now, setNow] = useState(() => Date.now());
+  const [busy, setBusy] = useState<string | null>(null);
+  const queryClient = useQueryClient();
   const active = songs.some((s) => ["queued", "generating"].includes(toUiStatus(s.status)));
 
   useEffect(() => {
@@ -71,6 +77,37 @@ export function DashboardGenerationHistory({ songs }: { songs: RecentSong[] }) {
     const id = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(id);
   }, [active]);
+
+  const refresh = () =>
+    queryClient.invalidateQueries({ predicate: (q) => String(q.queryKey[0]).includes("songs") });
+
+  async function onDelete(song: RecentSong) {
+    if (!window.confirm(`Delete "${song.title || "Untitled track"}"? Any coins in flight are refunded.`))
+      return;
+    setBusy(song.id);
+    try {
+      await deleteQueuedSong(song);
+      toast.success("Removed from the queue");
+      await refresh();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Couldn't delete that track");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function onRetry(song: RecentSong) {
+    setBusy(song.id);
+    try {
+      await retryGeneration(song.id);
+      toast.success("Re-generating — it's back in the queue");
+      await refresh();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Couldn't restart that track");
+    } finally {
+      setBusy(null);
+    }
+  }
 
   return (
     <section
@@ -99,8 +136,10 @@ export function DashboardGenerationHistory({ songs }: { songs: RecentSong[] }) {
             const st = toUiStatus(s.status);
             const meta = STATUS_META[st];
             const pending = st === "queued" || st === "generating";
+            const canRetry = st === "failed" || st === "cancelled";
+            const working = busy === s.id;
             return (
-              <li key={s.id} className="flex items-center gap-3 py-3">
+              <li key={s.id} className="flex items-center gap-2 py-3 sm:gap-3">
                 <div className="min-w-0 flex-1">
                   <Link
                     to="/library/$songId"
@@ -130,6 +169,34 @@ export function DashboardGenerationHistory({ songs }: { songs: RecentSong[] }) {
                 >
                   {meta.label}
                 </span>
+                {canRetry && (
+                  <button
+                    type="button"
+                    onClick={() => void onRetry(s)}
+                    disabled={working}
+                    aria-label={`Retry ${s.title || "track"}`}
+                    className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-primary/40 bg-primary/10 text-primary transition hover:bg-primary/20 disabled:opacity-50"
+                  >
+                    {working ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <RefreshCw className="h-4 w-4" />
+                    )}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => void onDelete(s)}
+                  disabled={working}
+                  aria-label={`Delete ${s.title || "track"}`}
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-white/10 bg-white/5 text-muted-foreground transition hover:border-destructive/50 hover:text-destructive disabled:opacity-50"
+                >
+                  {working && !canRetry ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-4 w-4" />
+                  )}
+                </button>
               </li>
             );
           })}
@@ -137,4 +204,5 @@ export function DashboardGenerationHistory({ songs }: { songs: RecentSong[] }) {
       )}
     </section>
   );
+
 }
