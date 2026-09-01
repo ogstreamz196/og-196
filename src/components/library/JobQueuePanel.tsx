@@ -158,6 +158,23 @@ export function JobQueuePanel({ songs, onRemoved }: { songs: Song[]; onRemoved?:
     }
   }
 
+  /** Remove a job from the queue — cancels + refunds it first when in flight. */
+  async function removeJob(song: Song) {
+    if (!window.confirm(`Remove "${song.title || "Untitled"}" from the queue?`)) return;
+    setDeleting(song.id);
+    try {
+      await deleteQueuedSong(song);
+      toast.success("Removed from the queue");
+      onRemoved?.();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Couldn't remove that track");
+    } finally {
+      setDeleting(null);
+    }
+  }
+
+
+
   if (jobs.length === 0) return null;
 
   return (
