@@ -177,11 +177,13 @@
     border-color: var(--color-border);
   }
   html, body {
-    /* Pages always fit the viewport at any browser zoom level — no horizontal scroll. */
-    max-width: 100vw;
-    overflow-x: hidden;
+    /* Pages always fit the viewport — `clip` (not `hidden`) keeps the page a
+       normal scroll container, so vertical touch scrolling and sticky headers
+       keep working on mobile. */
+    overflow-x: clip;
     overscroll-behavior-x: none;
   }
+
   html {
     background-color: var(--color-background);
     /* Responsive base font-size — scales smoothly between mobile (15px) and desktop (17px),
