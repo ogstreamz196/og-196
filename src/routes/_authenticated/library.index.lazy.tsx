@@ -1154,7 +1154,11 @@ function LibraryPage() {
               onClick={() => setWizardOpen(true)}
               disabled={pipelineActive}
               aria-label="Create now — start a new track"
-              className="hazard-create group grid h-44 w-44 place-items-center rounded-full border-[5px] border-destructive bg-[radial-gradient(circle_at_50%_35%,oklch(0.68_0.24_28),oklch(0.42_0.2_25)_70%,oklch(0.28_0.14_25))] text-primary-foreground transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-destructive/50 disabled:cursor-not-allowed disabled:opacity-50 sm:h-52 sm:w-52"
+              style={{
+                background:
+                  "radial-gradient(circle at 50% 32%, oklch(0.7 0.24 28), oklch(0.45 0.21 26) 68%, oklch(0.26 0.13 25))",
+              }}
+              className="hazard-create group grid h-44 w-44 place-items-center rounded-full border-[5px] border-destructive text-white transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-destructive/50 disabled:cursor-not-allowed disabled:opacity-50 sm:h-52 sm:w-52"
             >
               {/* Rotating hazard stripe ring */}
               <span
