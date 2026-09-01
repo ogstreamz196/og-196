@@ -1449,7 +1449,7 @@ function LibraryPage() {
 
         {activeJobs.length > 0 && (
           <div className="mb-4">
-            <JobQueuePanel songs={activeJobs} />
+            <JobQueuePanel songs={activeJobs} onRemoved={() => void library.refetch()} />
           </div>
         )}
 
