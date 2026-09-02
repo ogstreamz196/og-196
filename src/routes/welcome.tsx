@@ -608,11 +608,12 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
         <button
           type="button"
           onClick={() => { setResetSent(false); setMode("reset"); }}
-          className="mt-3 w-full text-center text-sm font-semibold text-foreground/70 underline underline-offset-4 hover:text-foreground"
+          className="mt-3 w-full text-center text-xs font-semibold text-foreground/60 underline underline-offset-4 hover:text-foreground"
         >
-          Forgot password?
+          Signed up with an email? Reset password
         </button>
       )}
+
 
       {mode === "reset" && (
         <button
