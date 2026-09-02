@@ -338,10 +338,17 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
 const AUTH_TABS = ["signin", "signup"] as const;
 const AUTH_TAB_KEY = "og:auth-tab";
 
+/** Usernames become a deterministic hidden address so no inbox is needed. */
+const USERNAME_DOMAIN = "ogstreamz.app";
+const normalizeHandle = (v: string) => v.trim().toLowerCase().replace(/[^a-z0-9._-]/g, "");
+const toLoginEmail = (v: string) =>
+  v.includes("@") ? v.trim() : `${normalizeHandle(v)}@${USERNAME_DOMAIN}`;
+
 function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
   const [mode, setMode] = useState<"signin" | "signup" | "reset">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [busy, setBusy] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   const [createProgress, setCreateProgress] = useState(0);
@@ -424,25 +431,36 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
       }
       return;
     }
-    if (!email || password.length < 6) {
-      toast.error("Enter your email and a password of at least 6 characters");
+    const handle = email.trim();
+    const isEmail = handle.includes("@");
+    if (!isEmail && normalizeHandle(handle).length < 3) {
+      toast.error("Pick a username with at least 3 letters or numbers");
       return;
     }
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+    const loginEmail = toLoginEmail(handle);
 
     setBusy(true);
     try {
       if (mode === "signup") {
         const { error } = await supabase.auth.signUp({
-          email,
+          email: loginEmail,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/welcome` },
+          options: {
+            emailRedirectTo: `${window.location.origin}/welcome`,
+            data: { display_name: isEmail ? handle.split("@")[0] : normalizeHandle(handle) },
+          },
         });
         if (error) throw error;
-        toast.success("Account created — check your email if confirmation is required.");
+        toast.success("You're in — welcome to OG Streamz.");
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await supabase.auth.signInWithPassword({ email: loginEmail, password });
         if (error) throw error;
       }
+
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -476,15 +494,10 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
                   : "text-foreground/70 hover:text-foreground"
               }`}
             >
-              <span className="block">
-                {m === "signin" ? (
-                  <>
-                    Sign in <span className="whitespace-nowrap">with email</span>
-                  </>
-                ) : (
-                  <span className="whitespace-nowrap">Create account</span>
-                )}
+              <span className="block whitespace-nowrap">
+                {m === "signin" ? "Sign in" : "Create account"}
               </span>
+
             </button>
           ))}
         </div>
@@ -507,27 +520,35 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
         {...(mode !== "reset" ? { role: "tabpanel", "aria-labelledby": `wc-tab-${mode}` } : {})}
       >
         <div className="space-y-1.5">
+
           <Label htmlFor="wc-email" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-            Email
+            {mode === "reset" ? "Email" : "Username"}
           </Label>
           <Input
             id="wc-email"
-            type="email"
-            autoComplete="email"
-            inputMode="email"
-            placeholder="you@example.com"
+            type="text"
+            autoComplete="username"
+            autoCapitalize="none"
+            spellCheck={false}
+            placeholder={mode === "reset" ? "you@example.com" : "pick a username"}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="h-12 text-base"
+            className="h-14 text-lg"
             disabled={busy || disabled}
             required
           />
+          {mode !== "reset" && (
+            <p className="text-xs text-muted-foreground">
+              No email needed — just a name and a password.
+            </p>
+          )}
         </div>
         {mode !== "reset" && (
           <div className="space-y-1.5">
             <Label htmlFor="wc-password" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
               Password
             </Label>
+
             <Input
               id="wc-password"
               type="password"
@@ -587,11 +608,12 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
         <button
           type="button"
           onClick={() => { setResetSent(false); setMode("reset"); }}
-          className="mt-3 w-full text-center text-sm font-semibold text-foreground/70 underline underline-offset-4 hover:text-foreground"
+          className="mt-3 w-full text-center text-xs font-semibold text-foreground/60 underline underline-offset-4 hover:text-foreground"
         >
-          Forgot password?
+          Signed up with an email? Reset password
         </button>
       )}
+
 
       {mode === "reset" && (
         <button
