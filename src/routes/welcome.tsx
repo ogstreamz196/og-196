@@ -513,7 +513,14 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
         </div>
       )}
 
+      <form
+        onSubmit={submit}
+        className="space-y-3"
+        id="wc-auth-panel"
+        {...(mode !== "reset" ? { role: "tabpanel", "aria-labelledby": `wc-tab-${mode}` } : {})}
+      >
         <div className="space-y-1.5">
+
           <Label htmlFor="wc-email" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
             {mode === "reset" ? "Email" : "Username"}
           </Label>
