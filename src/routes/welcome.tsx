@@ -494,15 +494,10 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
                   : "text-foreground/70 hover:text-foreground"
               }`}
             >
-              <span className="block">
-                {m === "signin" ? (
-                  <>
-                    Sign in <span className="whitespace-nowrap">with email</span>
-                  </>
-                ) : (
-                  <span className="whitespace-nowrap">Create account</span>
-                )}
+              <span className="block whitespace-nowrap">
+                {m === "signin" ? "Sign in" : "Create account"}
               </span>
+
             </button>
           ))}
         </div>
