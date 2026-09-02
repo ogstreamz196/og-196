@@ -431,25 +431,36 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
       }
       return;
     }
-    if (!email || password.length < 6) {
-      toast.error("Enter your email and a password of at least 6 characters");
+    const handle = email.trim();
+    const isEmail = handle.includes("@");
+    if (!isEmail && normalizeHandle(handle).length < 3) {
+      toast.error("Pick a username with at least 3 letters or numbers");
       return;
     }
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+    const loginEmail = toLoginEmail(handle);
 
     setBusy(true);
     try {
       if (mode === "signup") {
         const { error } = await supabase.auth.signUp({
-          email,
+          email: loginEmail,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/welcome` },
+          options: {
+            emailRedirectTo: `${window.location.origin}/welcome`,
+            data: { display_name: isEmail ? handle.split("@")[0] : normalizeHandle(handle) },
+          },
         });
         if (error) throw error;
-        toast.success("Account created — check your email if confirmation is required.");
+        toast.success("You're in — welcome to OG Streamz.");
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await supabase.auth.signInWithPassword({ email: loginEmail, password });
         if (error) throw error;
       }
+
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Something went wrong");
     } finally {
