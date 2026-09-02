@@ -513,34 +513,35 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
         </div>
       )}
 
-      <form
-        onSubmit={submit}
-        className="space-y-3"
-        id="wc-auth-panel"
-        {...(mode !== "reset" ? { role: "tabpanel", "aria-labelledby": `wc-tab-${mode}` } : {})}
-      >
         <div className="space-y-1.5">
           <Label htmlFor="wc-email" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-            Email
+            {mode === "reset" ? "Email" : "Username"}
           </Label>
           <Input
             id="wc-email"
-            type="email"
-            autoComplete="email"
-            inputMode="email"
-            placeholder="you@example.com"
+            type="text"
+            autoComplete="username"
+            autoCapitalize="none"
+            spellCheck={false}
+            placeholder={mode === "reset" ? "you@example.com" : "pick a username"}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="h-12 text-base"
+            className="h-14 text-lg"
             disabled={busy || disabled}
             required
           />
+          {mode !== "reset" && (
+            <p className="text-xs text-muted-foreground">
+              No email needed — just a name and a password.
+            </p>
+          )}
         </div>
         {mode !== "reset" && (
           <div className="space-y-1.5">
             <Label htmlFor="wc-password" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
               Password
             </Label>
+
             <Input
               id="wc-password"
               type="password"
