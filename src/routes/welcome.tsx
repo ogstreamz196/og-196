@@ -338,10 +338,17 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
 const AUTH_TABS = ["signin", "signup"] as const;
 const AUTH_TAB_KEY = "og:auth-tab";
 
+/** Usernames become a deterministic hidden address so no inbox is needed. */
+const USERNAME_DOMAIN = "ogstreamz.app";
+const normalizeHandle = (v: string) => v.trim().toLowerCase().replace(/[^a-z0-9._-]/g, "");
+const toLoginEmail = (v: string) =>
+  v.includes("@") ? v.trim() : `${normalizeHandle(v)}@${USERNAME_DOMAIN}`;
+
 function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
   const [mode, setMode] = useState<"signin" | "signup" | "reset">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [busy, setBusy] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   const [createProgress, setCreateProgress] = useState(0);
