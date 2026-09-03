@@ -331,9 +331,6 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
   );
 }
 
-const AUTH_TABS = ["signin", "signup"] as const;
-const AUTH_TAB_KEY = "og:auth-tab";
-
 /** Usernames become a deterministic hidden address so no inbox is needed. */
 const USERNAME_DOMAIN = "ogstreamz.app";
 const normalizeHandle = (v: string) => v.trim().toLowerCase().replace(/[^a-z0-9._-]/g, "");
@@ -341,31 +338,17 @@ const toLoginEmail = (v: string) =>
   v.includes("@") ? v.trim() : `${normalizeHandle(v)}@${USERNAME_DOMAIN}`;
 
 function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
-  const [mode, setMode] = useState<"signin" | "signup" | "reset">("signup");
+  // One smart form: tries sign-in first, creates the account when it's new.
+  const [mode, setMode] = useState<"enter" | "reset">("enter");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const [busy, setBusy] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   const [createProgress, setCreateProgress] = useState(0);
-  const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Restore last selected tab after hydration (avoids SSR mismatch).
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(AUTH_TAB_KEY);
-      if (saved === "signup" || saved === "signin") setMode(saved);
-    } catch { /* ignore */ }
-  }, []);
-
-  useEffect(() => {
-    if (mode === "reset") return;
-    try { localStorage.setItem(AUTH_TAB_KEY, mode); } catch { /* ignore */ }
-  }, [mode]);
-
-  const isCreating = busy && mode === "signup";
-
+  const isCreating = busy && mode === "enter";
 
   useEffect(() => {
     if (isCreating) {
@@ -386,24 +369,6 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
       }
     };
   }, [isCreating]);
-
-
-  const onTabKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
-
-
-    const current = AUTH_TABS.indexOf(mode as (typeof AUTH_TABS)[number]);
-    if (current < 0) return;
-    let next = -1;
-    if (e.key === "ArrowRight" || e.key === "ArrowDown") next = (current + 1) % AUTH_TABS.length;
-    else if (e.key === "ArrowLeft" || e.key === "ArrowUp") next = (current - 1 + AUTH_TABS.length) % AUTH_TABS.length;
-    else if (e.key === "Home") next = 0;
-    else if (e.key === "End") next = AUTH_TABS.length - 1;
-    if (next < 0) return;
-    e.preventDefault();
-    setMode(AUTH_TABS[next]);
-    tabRefs.current[next]?.focus();
-  };
-
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -441,22 +406,38 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
 
     setBusy(true);
     try {
-      if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
-          email: loginEmail,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/welcome`,
-            data: { display_name: isEmail ? handle.split("@")[0] : normalizeHandle(handle) },
-          },
-        });
-        if (error) throw error;
-        toast.success("You're in — welcome to OG Streamz.");
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({ email: loginEmail, password });
-        if (error) throw error;
+      // 1) Existing account? Sign straight in.
+      const signIn = await supabase.auth.signInWithPassword({ email: loginEmail, password });
+      if (!signIn.error) {
+        toast.success("Welcome back!");
+        return;
       }
+      const msg = (signIn.error.message ?? "").toLowerCase();
+      const unknownUser = msg.includes("invalid login credentials") || msg.includes("user not found");
+      if (!unknownUser) throw signIn.error;
 
+      // 2) Otherwise create it — unless the name exists with another password.
+      const signUp = await supabase.auth.signUp({
+        email: loginEmail,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/welcome`,
+          data: { display_name: isEmail ? handle.split("@")[0] : normalizeHandle(handle) },
+        },
+      });
+      if (signUp.error) {
+        const upMsg = (signUp.error.message ?? "").toLowerCase();
+        if (upMsg.includes("already registered") || upMsg.includes("already been registered")) {
+          toast.error("That username is taken — check your password.");
+          return;
+        }
+        throw signUp.error;
+      }
+      if (signUp.data.user?.identities?.length === 0) {
+        toast.error("That username is taken — check your password.");
+        return;
+      }
+      toast.success("Account created — welcome to OG Streamz!");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Something went wrong");
     } finally {
