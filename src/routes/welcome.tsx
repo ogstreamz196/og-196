@@ -448,38 +448,14 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
   return (
     <div className="mt-3 rounded-3xl border-2 border-primary/50 bg-card/85 p-4 shadow-[0_16px_44px_-18px_hsl(var(--primary)/0.6)] backdrop-blur-xl sm:p-6">
       {mode !== "reset" ? (
-        <div
-          role="tablist"
-          aria-label="Create account or sign in"
-          className="mb-4 grid grid-cols-2 items-stretch gap-1.5 rounded-2xl border border-white/15 bg-black/30 p-1"
-        >
-          {AUTH_TABS.map((m, i) => (
-            <button
-              key={m}
-              ref={(el) => { tabRefs.current[i] = el; }}
-              type="button"
-              role="tab"
-              id={`wc-tab-${m}`}
-              aria-selected={mode === m}
-              aria-controls="wc-auth-panel"
-              tabIndex={mode === m ? 0 : -1}
-              onKeyDown={onTabKeyDown}
-              onClick={() => setMode(m)}
-              className={`font-display flex min-h-[2.75rem] min-w-0 items-center justify-center text-balance rounded-xl px-2 py-2 text-center text-[clamp(0.8rem,3vw,1rem)] font-black uppercase leading-tight tracking-wide transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:min-h-[2.5rem] ${
-                mode === m
-                  ? "bg-primary text-primary-foreground shadow-[0_8px_24px_-12px_hsl(var(--primary))]"
-                  : "text-foreground/70 hover:text-foreground"
-              }`}
-            >
-              <span className="block whitespace-nowrap">
-                {m === "signin" ? "Sign in" : "Create account"}
-              </span>
-            </button>
-          ))}
+        <div className="mb-4 text-center">
+          <p className="font-display text-[clamp(1.3rem,5vw,1.9rem)] font-black uppercase leading-tight text-foreground">
+            Jump in
+          </p>
+          <p className="mt-1.5 text-sm font-medium text-muted-foreground">
+            New here? We create your account automatically. Been before? You're back in.
+          </p>
         </div>
-
-
-
       ) : (
         <div className="mb-4 text-center">
           <p className="font-display text-[clamp(1.15rem,4.5vw,1.6rem)] font-black uppercase leading-tight text-foreground">
@@ -493,7 +469,6 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
         onSubmit={submit}
         className="space-y-3"
         id="wc-auth-panel"
-        {...(mode !== "reset" ? { role: "tabpanel", "aria-labelledby": `wc-tab-${mode}` } : {})}
       >
         <div className="space-y-1.5">
 
