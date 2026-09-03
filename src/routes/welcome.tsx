@@ -34,7 +34,7 @@ import heartbreakCoverAsset from "@/assets/album-heartbreak.jpg.asset.json";
 import drillCoverAsset from "@/assets/album-drill.jpg.asset.json";
 import afrobeatsCoverAsset from "@/assets/album-afrobeats.jpg.asset.json";
 import { WelcomeBackdrop } from "@/components/layout/WelcomeBackdrop";
-import { DodgyLogo } from "@/components/welcome/DodgyLogo";
+
 
 function OgBotLogo({ className = "h-8 w-8" }: { className?: string }) {
   return (
@@ -234,8 +234,8 @@ const TILE_CLASS =
   "disabled:opacity-70 disabled:cursor-wait disabled:translate-y-0 cursor-pointer";
 
 const PRIMARY_DEVICES: Device[] = [
-  { key: "google", label: "Google", provider: "google", Icon: GoogleIcon },
-  { key: "apple", label: "Apple ID", provider: "apple", Icon: AppleIcon, iconClass: "text-black" },
+  { key: "google", label: "Continue with Google", provider: "google", Icon: GoogleIcon },
+  { key: "apple", label: "Continue with Apple ID", provider: "apple", Icon: AppleIcon, iconClass: "text-black" },
 ];
 
 
@@ -273,13 +273,12 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
   const renderTile = useCallback(
     (d: Device, idx: number) => {
       const isPending = pending === d.provider;
-      const sub = d.provider === "google" ? "Sign in with Google" : "Sign in with Apple";
       return (
         <button
           key={d.key}
           onClick={() => signIn(d.provider)}
           disabled={pending !== null}
-          aria-label={`${d.label} — ${sub}`}
+          aria-label={d.label}
           style={{ ["--luxe-delay" as string]: `${idx * 0.6}s` }}
           className={`${h} ${TILE_CLASS} ${auraOn ? "luxe-glow" : ""} flex flex-col items-center justify-between gap-[clamp(0.5rem,1.2vw,0.875rem)] px-[clamp(0.5rem,1.2vw,0.875rem)] pt-[clamp(0.875rem,2vw,1.25rem)] pb-[clamp(0.5rem,1.2vw,0.875rem)] text-foreground`}
         >
@@ -295,12 +294,9 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
               </div>
             )}
           </div>
-          <div className="w-full min-w-0 space-y-1">
-            <span className="font-display landing-tile-label block w-full rounded-xl bg-white px-[clamp(0.375rem,0.8vw,0.625rem)] py-[clamp(0.375rem,0.8vw,0.5rem)] text-center text-black shadow-[0_3px_0_0_rgba(0,0,0,0.15)] break-words">
+          <div className="w-full min-w-0">
+            <span className="font-display landing-tile-label block w-full rounded-xl bg-white px-[clamp(0.375rem,0.8vw,0.625rem)] py-[clamp(0.5rem,1vw,0.75rem)] text-center text-black shadow-[0_3px_0_0_rgba(0,0,0,0.15)] break-words text-[clamp(0.85rem,2.6vw,1.25rem)]">
               {d.label}
-            </span>
-            <span className="landing-tile-sub block text-center text-foreground/70 break-words">
-              {sub}
             </span>
           </div>
         </button>
@@ -345,7 +341,7 @@ const toLoginEmail = (v: string) =>
   v.includes("@") ? v.trim() : `${normalizeHandle(v)}@${USERNAME_DOMAIN}`;
 
 function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
-  const [mode, setMode] = useState<"signin" | "signup" | "reset">("signin");
+  const [mode, setMode] = useState<"signin" | "signup" | "reset">("signup");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -645,8 +641,9 @@ function WelcomePage() {
         <TopNav />
         <Hero />
         <FoulMouthHype />
+        <AlbumCoverShowcase />
         <Pillars />
-        
+
         <ClosingCta />
         <Footer />
         
@@ -729,9 +726,7 @@ function Hero() {
           </span>
         </div>
 
-        <div className="mt-6 flex justify-center sm:mt-8">
-          <DodgyLogo size={256} className="sm:[--s:320px]" />
-        </div>
+
 
 
 
@@ -763,7 +758,7 @@ function Hero() {
 
 
 
-        <AlbumCoverShowcase />
+        
       </div>
 
 
