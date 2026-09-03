@@ -469,8 +469,8 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
       {mode !== "reset" ? (
         <div
           role="tablist"
-          aria-label="Email sign in or create account"
-          className="mb-4 grid grid-cols-2 items-stretch gap-2 rounded-2xl border border-white/15 bg-black/30 p-1.5"
+          aria-label="Create account or sign in"
+          className="mb-4 grid grid-cols-2 items-stretch gap-1.5 rounded-2xl border border-white/15 bg-black/30 p-1"
         >
           {AUTH_TABS.map((m, i) => (
             <button
@@ -484,16 +484,15 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
               tabIndex={mode === m ? 0 : -1}
               onKeyDown={onTabKeyDown}
               onClick={() => setMode(m)}
-              className={`font-display flex min-h-[3.75rem] min-w-0 items-center justify-center text-balance rounded-xl px-2 py-3 text-center text-[clamp(0.9rem,3.4vw,1.15rem)] font-black uppercase leading-[1.1] tracking-wide transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:min-h-[3.5rem] sm:px-3 ${
+              className={`font-display flex min-h-[2.75rem] min-w-0 items-center justify-center text-balance rounded-xl px-2 py-2 text-center text-[clamp(0.8rem,3vw,1rem)] font-black uppercase leading-tight tracking-wide transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:min-h-[2.5rem] ${
                 mode === m
-                  ? "bg-primary text-primary-foreground shadow-[0_10px_30px_-12px_hsl(var(--primary))]"
+                  ? "bg-primary text-primary-foreground shadow-[0_8px_24px_-12px_hsl(var(--primary))]"
                   : "text-foreground/70 hover:text-foreground"
               }`}
             >
               <span className="block whitespace-nowrap">
                 {m === "signin" ? "Sign in" : "Create account"}
               </span>
-
             </button>
           ))}
         </div>
