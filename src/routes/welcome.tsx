@@ -849,17 +849,17 @@ function Pillars() {
 
   return (
     <section id="studio" className="relative scroll-mt-24">
-      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-8 sm:py-14 lg:py-16">
-        <div className="grid gap-4 sm:gap-5 md:grid-cols-3">
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
+        <div className="grid gap-3 sm:gap-4 md:grid-cols-3 lg:gap-5">
           {items.map((it, idx) => (
             <div
               key={it.key}
               style={{ transform: `rotate(${it.tilt}deg)` }}
-              className="transition-transform duration-300 hover:rotate-0"
+              className="md:transition-transform md:duration-300 md:hover:rotate-0"
             >
               <article
-                style={{ animationDelay: `${idx * 0.14}s` }}
-                className="group wc-pop relative overflow-hidden rounded-[1.75rem] border-2 border-white/15 bg-card/80 p-5 shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-2 hover:border-primary/40 hover:shadow-glow sm:p-7"
+                style={{ animationDelay: `${idx * 0.14}s`, contain: "paint" }}
+                className="group wc-pop relative h-full overflow-hidden rounded-[1.5rem] border-2 border-white/15 bg-card/80 p-4 shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)] transition-all duration-300 sm:rounded-[1.75rem] sm:p-6 md:backdrop-blur-xl md:hover:-translate-y-2 md:hover:border-primary/40 md:hover:shadow-glow"
               >
                 {/* hover aurora */}
                 <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-[radial-gradient(circle_at_top_right,oklch(0.55_0.22_268/0.22),transparent_60%)]" />
