@@ -818,6 +818,24 @@ button.graffiti-accent:hover {
 .wc-float-slow { animation: wc-float-slow 9s ease-in-out infinite; }
 .wc-wiggle { animation: wc-wiggle 3s ease-in-out infinite; transform-origin: center; }
 .wc-pop { animation: wc-pop 0.6s cubic-bezier(.34,1.56,.64,1) both; }
+/* Keep looping decorative motion cheap: isolate to its own layer */
+.wc-float, .wc-float-slow, .wc-wiggle, .wc-bounce-soft {
+  display: inline-block;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+/* Mobile: drop endless decorative loops so scrolling stays smooth */
+@media (max-width: 767px) {
+  .wc-float, .wc-float-slow, .wc-wiggle, .wc-bounce-soft, .wc-blob {
+    animation: none !important;
+    will-change: auto;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wc-float, .wc-float-slow, .wc-wiggle, .wc-pop, .wc-blob, .wc-bounce-soft {
+    animation: none !important;
+  }
+}
 .wc-blob { animation: wc-blob 14s ease-in-out infinite; }
 .wc-bounce-soft { animation: wc-bounce-soft 2.4s ease-in-out infinite; }
 .wc-shimmer {
