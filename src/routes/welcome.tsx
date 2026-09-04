@@ -823,7 +823,7 @@ function Pillars() {
       icon: <Music2 className="h-7 w-7" />,
       emoji: "🎵",
       title: "Prompt anything",
-      body: "Birthday roast, love note, inside joke — turn it into a song.",
+      body: "Any idea — roast, love note, inside joke.",
       tilt: "-2",
       floatClass: "wc-float",
     },
@@ -832,7 +832,7 @@ function Pillars() {
       icon: <Wand2 className="h-7 w-7" />,
       emoji: "🪄",
       title: "Pick the vibe",
-      body: "Drill, rap, afrobeats, pop, ballad or meme song.",
+      body: "Drill, rap, afrobeats, pop or ballad.",
       tilt: "1.5",
       floatClass: "wc-float-slow",
     },
@@ -841,7 +841,7 @@ function Pillars() {
       icon: <Sparkles className="h-7 w-7" />,
       emoji: "💿",
       title: "Cover included",
-      body: "Real cover art and a track ready to play.",
+      body: "Cover art plus a track ready to play.",
       tilt: "-1",
       floatClass: "wc-wiggle",
     },
@@ -849,23 +849,23 @@ function Pillars() {
 
   return (
     <section id="studio" className="relative scroll-mt-24">
-      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-8 sm:py-14 lg:py-16">
-        <div className="grid gap-4 sm:gap-5 md:grid-cols-3">
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
+        <div className="grid gap-3 sm:gap-4 md:grid-cols-3 lg:gap-5">
           {items.map((it, idx) => (
             <div
               key={it.key}
               style={{ transform: `rotate(${it.tilt}deg)` }}
-              className="transition-transform duration-300 hover:rotate-0"
+              className="md:transition-transform md:duration-300 md:hover:rotate-0"
             >
               <article
-                style={{ animationDelay: `${idx * 0.14}s` }}
-                className="group wc-pop relative overflow-hidden rounded-[1.75rem] border-2 border-white/15 bg-card/80 p-5 shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-2 hover:border-primary/40 hover:shadow-glow sm:p-7"
+                style={{ animationDelay: `${idx * 0.14}s`, contain: "paint" }}
+                className="group wc-pop relative h-full overflow-hidden rounded-[1.5rem] border-2 border-white/15 bg-card/80 p-4 shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)] transition-all duration-300 sm:rounded-[1.75rem] sm:p-6 md:backdrop-blur-xl md:hover:-translate-y-2 md:hover:border-primary/40 md:hover:shadow-glow"
               >
                 {/* hover aurora */}
                 <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-[radial-gradient(circle_at_top_right,oklch(0.55_0.22_268/0.22),transparent_60%)]" />
                 <CardEditBadge />
                 <div className="flex items-center gap-3">
-                  <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-brand text-primary-foreground shadow-glow transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6 sm:h-14 sm:w-14">
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gradient-brand text-primary-foreground shadow-glow transition-transform duration-300 sm:h-13 sm:w-13 md:group-hover:scale-110 md:group-hover:rotate-6">
                     {it.icon}
                   </span>
                   <span className={`text-2xl sm:text-3xl ${it.floatClass}`}>{it.emoji}</span>
@@ -874,14 +874,14 @@ function Pillars() {
                   as="h3"
                   contentKey={`welcome.pillar.${it.key}.title`}
                   defaultValue={String(it.title)}
-                  className="font-display mt-4 block text-3xl font-black tracking-tight sm:mt-5 sm:text-4xl"
+                  className="font-display mt-3 block text-2xl font-black tracking-tight sm:mt-4 sm:text-3xl"
                 />
                 <EditableContent
                   as="p"
                   multiline
                   contentKey={`welcome.pillar.${it.key}.body`}
                   defaultValue={it.body}
-                  className="mt-2.5 block text-base leading-relaxed text-muted-foreground sm:mt-3 sm:text-lg"
+                  className="mt-2 block text-sm leading-snug text-balance text-muted-foreground sm:text-base"
                 />
               </article>
             </div>
