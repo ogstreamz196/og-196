@@ -823,7 +823,7 @@ function Pillars() {
       icon: <Music2 className="h-7 w-7" />,
       emoji: "🎵",
       title: "Prompt anything",
-      body: "Birthday roast, love note, inside joke — turn it into a song.",
+      body: "Any idea — roast, love note, inside joke.",
       tilt: "-2",
       floatClass: "wc-float",
     },
