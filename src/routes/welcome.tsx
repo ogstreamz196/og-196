@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent, type ReactElement } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type ReactElement } from "react";
 import {
   Music2,
   Sparkles,
@@ -331,9 +331,6 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
   );
 }
 
-const AUTH_TABS = ["signin", "signup"] as const;
-const AUTH_TAB_KEY = "og:auth-tab";
-
 /** Usernames become a deterministic hidden address so no inbox is needed. */
 const USERNAME_DOMAIN = "ogstreamz.app";
 const normalizeHandle = (v: string) => v.trim().toLowerCase().replace(/[^a-z0-9._-]/g, "");
@@ -341,31 +338,17 @@ const toLoginEmail = (v: string) =>
   v.includes("@") ? v.trim() : `${normalizeHandle(v)}@${USERNAME_DOMAIN}`;
 
 function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
-  const [mode, setMode] = useState<"signin" | "signup" | "reset">("signup");
+  // One smart form: tries sign-in first, creates the account when it's new.
+  const [mode, setMode] = useState<"enter" | "reset">("enter");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const [busy, setBusy] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   const [createProgress, setCreateProgress] = useState(0);
-  const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Restore last selected tab after hydration (avoids SSR mismatch).
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(AUTH_TAB_KEY);
-      if (saved === "signup" || saved === "signin") setMode(saved);
-    } catch { /* ignore */ }
-  }, []);
-
-  useEffect(() => {
-    if (mode === "reset") return;
-    try { localStorage.setItem(AUTH_TAB_KEY, mode); } catch { /* ignore */ }
-  }, [mode]);
-
-  const isCreating = busy && mode === "signup";
-
+  const isCreating = busy && mode === "enter";
 
   useEffect(() => {
     if (isCreating) {
@@ -386,24 +369,6 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
       }
     };
   }, [isCreating]);
-
-
-  const onTabKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
-
-
-    const current = AUTH_TABS.indexOf(mode as (typeof AUTH_TABS)[number]);
-    if (current < 0) return;
-    let next = -1;
-    if (e.key === "ArrowRight" || e.key === "ArrowDown") next = (current + 1) % AUTH_TABS.length;
-    else if (e.key === "ArrowLeft" || e.key === "ArrowUp") next = (current - 1 + AUTH_TABS.length) % AUTH_TABS.length;
-    else if (e.key === "Home") next = 0;
-    else if (e.key === "End") next = AUTH_TABS.length - 1;
-    if (next < 0) return;
-    e.preventDefault();
-    setMode(AUTH_TABS[next]);
-    tabRefs.current[next]?.focus();
-  };
-
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -441,22 +406,38 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
 
     setBusy(true);
     try {
-      if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
-          email: loginEmail,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/welcome`,
-            data: { display_name: isEmail ? handle.split("@")[0] : normalizeHandle(handle) },
-          },
-        });
-        if (error) throw error;
-        toast.success("You're in — welcome to OG Streamz.");
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({ email: loginEmail, password });
-        if (error) throw error;
+      // 1) Existing account? Sign straight in.
+      const signIn = await supabase.auth.signInWithPassword({ email: loginEmail, password });
+      if (!signIn.error) {
+        toast.success("Welcome back!");
+        return;
       }
+      const msg = (signIn.error.message ?? "").toLowerCase();
+      const unknownUser = msg.includes("invalid login credentials") || msg.includes("user not found");
+      if (!unknownUser) throw signIn.error;
 
+      // 2) Otherwise create it — unless the name exists with another password.
+      const signUp = await supabase.auth.signUp({
+        email: loginEmail,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/welcome`,
+          data: { display_name: isEmail ? handle.split("@")[0] : normalizeHandle(handle) },
+        },
+      });
+      if (signUp.error) {
+        const upMsg = (signUp.error.message ?? "").toLowerCase();
+        if (upMsg.includes("already registered") || upMsg.includes("already been registered")) {
+          toast.error("That username is taken — check your password.");
+          return;
+        }
+        throw signUp.error;
+      }
+      if (signUp.data.user?.identities?.length === 0) {
+        toast.error("That username is taken — check your password.");
+        return;
+      }
+      toast.success("Account created — welcome to OG Streamz!");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -467,38 +448,14 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
   return (
     <div className="mt-3 rounded-3xl border-2 border-primary/50 bg-card/85 p-4 shadow-[0_16px_44px_-18px_hsl(var(--primary)/0.6)] backdrop-blur-xl sm:p-6">
       {mode !== "reset" ? (
-        <div
-          role="tablist"
-          aria-label="Create account or sign in"
-          className="mb-4 grid grid-cols-2 items-stretch gap-1.5 rounded-2xl border border-white/15 bg-black/30 p-1"
-        >
-          {AUTH_TABS.map((m, i) => (
-            <button
-              key={m}
-              ref={(el) => { tabRefs.current[i] = el; }}
-              type="button"
-              role="tab"
-              id={`wc-tab-${m}`}
-              aria-selected={mode === m}
-              aria-controls="wc-auth-panel"
-              tabIndex={mode === m ? 0 : -1}
-              onKeyDown={onTabKeyDown}
-              onClick={() => setMode(m)}
-              className={`font-display flex min-h-[2.75rem] min-w-0 items-center justify-center text-balance rounded-xl px-2 py-2 text-center text-[clamp(0.8rem,3vw,1rem)] font-black uppercase leading-tight tracking-wide transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:min-h-[2.5rem] ${
-                mode === m
-                  ? "bg-primary text-primary-foreground shadow-[0_8px_24px_-12px_hsl(var(--primary))]"
-                  : "text-foreground/70 hover:text-foreground"
-              }`}
-            >
-              <span className="block whitespace-nowrap">
-                {m === "signin" ? "Sign in" : "Create account"}
-              </span>
-            </button>
-          ))}
+        <div className="mb-4 text-center">
+          <p className="font-display text-[clamp(1.3rem,5vw,1.9rem)] font-black uppercase leading-tight text-foreground">
+            Jump in
+          </p>
+          <p className="mt-1.5 text-sm font-medium text-muted-foreground">
+            New here? We create your account automatically. Been before? You're back in.
+          </p>
         </div>
-
-
-
       ) : (
         <div className="mb-4 text-center">
           <p className="font-display text-[clamp(1.15rem,4.5vw,1.6rem)] font-black uppercase leading-tight text-foreground">
@@ -512,7 +469,6 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
         onSubmit={submit}
         className="space-y-3"
         id="wc-auth-panel"
-        {...(mode !== "reset" ? { role: "tabpanel", "aria-labelledby": `wc-tab-${mode}` } : {})}
       >
         <div className="space-y-1.5">
 
@@ -547,7 +503,7 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
             <Input
               id="wc-password"
               type="password"
-              autoComplete={mode === "signup" ? "new-password" : "current-password"}
+              autoComplete="current-password"
               placeholder="At least 6 characters"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -570,36 +526,41 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
           <div className="space-y-1.5 rounded-xl border border-primary/40 bg-primary/10 p-3">
             <div className="flex items-center justify-between">
               <span className="font-display text-xs font-black uppercase tracking-wider text-primary-foreground">
-                Creating account
+                Getting you in
               </span>
               <span className="text-xs font-bold tabular-nums text-primary-foreground">{createProgress}%</span>
             </div>
             <Progress value={createProgress} className="h-1.5 bg-primary/20" />
-            <p className="text-xs text-muted-foreground">Please wait while we set up your OG Studio profile.</p>
+            <p className="text-xs text-muted-foreground">Setting up your OG Studio profile.</p>
             <div aria-live="polite" className="sr-only">
-              Creating account, {createProgress} percent complete.
+              Signing you in, {createProgress} percent complete.
             </div>
           </div>
         )}
 
-        <Button type="submit" disabled={busy || disabled} className="h-12 w-full font-display text-base font-black uppercase tracking-wide">
-          {isCreating ? (
+        <Button
+          type="submit"
+          disabled={busy || disabled}
+          className="h-14 w-full font-display text-lg font-black uppercase tracking-wide shadow-[0_10px_30px_-10px_hsl(var(--primary))] transition-transform hover:-translate-y-0.5 active:translate-y-0"
+        >
+          {busy ? (
             <>
               <Loader2 className="mr-2 h-5 w-5 animate-spin" aria-hidden />
-              Creating account...
+              {mode === "reset" ? "Sending..." : "One sec..."}
             </>
-          ) : mode === "signup" ? (
-            "Create account"
           ) : mode === "reset" ? (
             resetSent ? "Resend reset link" : "Send reset link"
           ) : (
-            "Sign in"
+            <>
+              <Sparkles className="mr-2 h-5 w-5" aria-hidden />
+              Let's go
+            </>
           )}
         </Button>
       </form>
 
 
-      {mode === "signin" && (
+      {mode !== "reset" && (
         <button
           type="button"
           onClick={() => { setResetSent(false); setMode("reset"); }}
@@ -613,10 +574,10 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
       {mode === "reset" && (
         <button
           type="button"
-          onClick={() => { setResetSent(false); setMode("signin"); }}
+          onClick={() => { setResetSent(false); setMode("enter"); }}
           className="mt-3 w-full text-center text-sm font-semibold text-foreground/80 underline underline-offset-4 hover:text-foreground"
         >
-          Back to sign in
+          Back
         </button>
       )}
 
