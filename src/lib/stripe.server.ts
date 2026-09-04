@@ -80,9 +80,13 @@ export async function verifyWebhook(
 ): Promise<{ type: string; data: { object: any } }> {
   const signature = req.headers.get("stripe-signature");
   const body = await req.text();
-  const secret = env === "sandbox"
-    ? getEnv("PAYMENTS_SANDBOX_WEBHOOK_SECRET")
-    : getEnv("PAYMENTS_LIVE_WEBHOOK_SECRET");
+  // BYOK uses a single project webhook signing secret; managed mode uses the
+  // per-environment secrets provisioned by the Lovable payments integration.
+  const secret = isByok()
+    ? getEnv("STRIPE_WEBHOOK_SECRET")
+    : env === "sandbox"
+      ? getEnv("PAYMENTS_SANDBOX_WEBHOOK_SECRET")
+      : getEnv("PAYMENTS_LIVE_WEBHOOK_SECRET");
 
   if (!signature || !body) throw new Error("Missing signature or body");
 
