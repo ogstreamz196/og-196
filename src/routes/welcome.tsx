@@ -526,36 +526,41 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
           <div className="space-y-1.5 rounded-xl border border-primary/40 bg-primary/10 p-3">
             <div className="flex items-center justify-between">
               <span className="font-display text-xs font-black uppercase tracking-wider text-primary-foreground">
-                Creating account
+                Getting you in
               </span>
               <span className="text-xs font-bold tabular-nums text-primary-foreground">{createProgress}%</span>
             </div>
             <Progress value={createProgress} className="h-1.5 bg-primary/20" />
-            <p className="text-xs text-muted-foreground">Please wait while we set up your OG Studio profile.</p>
+            <p className="text-xs text-muted-foreground">Setting up your OG Studio profile.</p>
             <div aria-live="polite" className="sr-only">
-              Creating account, {createProgress} percent complete.
+              Signing you in, {createProgress} percent complete.
             </div>
           </div>
         )}
 
-        <Button type="submit" disabled={busy || disabled} className="h-12 w-full font-display text-base font-black uppercase tracking-wide">
-          {isCreating ? (
+        <Button
+          type="submit"
+          disabled={busy || disabled}
+          className="h-14 w-full font-display text-lg font-black uppercase tracking-wide shadow-[0_10px_30px_-10px_hsl(var(--primary))] transition-transform hover:-translate-y-0.5 active:translate-y-0"
+        >
+          {busy ? (
             <>
               <Loader2 className="mr-2 h-5 w-5 animate-spin" aria-hidden />
-              Creating account...
+              {mode === "reset" ? "Sending..." : "One sec..."}
             </>
-          ) : mode === "signup" ? (
-            "Create account"
           ) : mode === "reset" ? (
             resetSent ? "Resend reset link" : "Send reset link"
           ) : (
-            "Sign in"
+            <>
+              <Sparkles className="mr-2 h-5 w-5" aria-hidden />
+              Let's go
+            </>
           )}
         </Button>
       </form>
 
 
-      {mode === "signin" && (
+      {mode !== "reset" && (
         <button
           type="button"
           onClick={() => { setResetSent(false); setMode("reset"); }}
@@ -569,10 +574,10 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
       {mode === "reset" && (
         <button
           type="button"
-          onClick={() => { setResetSent(false); setMode("signin"); }}
+          onClick={() => { setResetSent(false); setMode("enter"); }}
           className="mt-3 w-full text-center text-sm font-semibold text-foreground/80 underline underline-offset-4 hover:text-foreground"
         >
-          Back to sign in
+          Back
         </button>
       )}
 
