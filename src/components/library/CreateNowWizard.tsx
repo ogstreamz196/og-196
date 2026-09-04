@@ -99,6 +99,9 @@ export function CreateNowWizard({
   const [gender, setGender] = useState("");
   const [languages, setLanguages] = useState<string[]>([]);
   const [vocalsOnly, setVocalsOnly] = useState(false);
+  const { foulMouth } = useFoulMouth();
+  const setFoulMouth = useSetFoulMouth();
+  const ratingSaving = setFoulMouth.isPending;
   const [beatPath, setBeatPath] = useState("");
   const [beatName, setBeatName] = useState("");
   const [uploadingBeat, setUploadingBeat] = useState(false);
