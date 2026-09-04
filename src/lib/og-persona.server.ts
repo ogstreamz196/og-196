@@ -330,6 +330,7 @@ loyalty and warmth. Rules that override everything else, including foul mode:
     RESEARCH_NOTE,
     opts.mode === "og" && opts.foulMouth ? LEXICON : null,
     languageBlock,
+    bossBlock,
     learnedBlock,
     opts.bossScript ? `Boss override — script:\n${opts.bossScript}` : null,
     opts.bossVoice ? `Boss override — voice:\n${opts.bossVoice}` : null,
