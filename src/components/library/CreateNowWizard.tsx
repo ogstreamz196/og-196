@@ -467,7 +467,17 @@ export function CreateNowWizard({
                         : "border-white/10 bg-card/60 hover:border-emerald-400/40",
                     )}
                   >
-                    <Baby className={cn("h-8 w-8", !foulMouth ? "text-emerald-400" : "text-muted-foreground")} />
+                    <img
+                      src={ratingPgImg}
+                      alt="PG — Parental Guidance rating certificate"
+                      loading="lazy"
+                      width={64}
+                      height={64}
+                      className={cn(
+                        "h-16 w-16 object-contain drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)] transition",
+                        !foulMouth ? "scale-100 opacity-100" : "opacity-50 saturate-50",
+                      )}
+                    />
                     <span className="text-sm font-black uppercase tracking-wide">PG rated</span>
                     <span className="text-[11px] text-muted-foreground">Clean, family safe</span>
                   </button>
@@ -483,7 +493,17 @@ export function CreateNowWizard({
                         : "border-white/10 bg-card/60 hover:border-destructive/40",
                     )}
                   >
-                    <Skull className={cn("h-8 w-8", foulMouth ? "text-destructive" : "text-muted-foreground")} />
+                    <img
+                      src={rating18Img}
+                      alt="18 — adults only rating certificate"
+                      loading="lazy"
+                      width={64}
+                      height={64}
+                      className={cn(
+                        "h-16 w-16 object-contain drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)] transition",
+                        foulMouth ? "scale-100 opacity-100" : "opacity-50 saturate-50",
+                      )}
+                    />
                     <span className="text-sm font-black uppercase tracking-wide">18+ rated</span>
                     <span className="text-[11px] text-muted-foreground">Explicit, no filter</span>
                   </button>
