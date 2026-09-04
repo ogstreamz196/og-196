@@ -309,43 +309,63 @@ export function BeatLibrary({
                       {b.name}
                     </p>
 
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => onRemix(b)}
+                      aria-label={`New vocals over ${b.name} for ${remixCost} coins`}
+                      className="h-8 shrink-0 gap-1.5 bg-gradient-brand px-2.5 text-[11px] font-black uppercase tracking-wide text-primary-foreground sm:px-3"
+                    >
+                      <Wand2 className="h-3.5 w-3.5" />
+                      <span className="hidden sm:inline">New vocals</span>
+                    </Button>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      aria-label={`Rename ${b.name}`}
+                      disabled={busy}
+                      onClick={() => {
+                        setRenaming(b);
+                        setRenameValue(b.name);
+                      }}
+                      className="h-8 w-8 shrink-0 text-muted-foreground hover:text-primary"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      aria-label={`Delete ${b.name}`}
+                      disabled={busy}
+                      onClick={() => setConfirmDelete(b)}
+                      className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
 
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={() => onRemix(b)}
-                    aria-label={`New vocals over ${b.name} for ${remixCost} coins`}
-                    className="h-8 shrink-0 gap-1.5 bg-gradient-brand px-2.5 text-[11px] font-black uppercase tracking-wide text-primary-foreground sm:px-3"
-                  >
-                    <Wand2 className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">New vocals</span>
-                  </Button>
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="ghost"
-                    aria-label={`Rename ${b.name}`}
-                    disabled={busy}
-                    onClick={() => {
-                      setRenaming(b);
-                      setRenameValue(b.name);
-                    }}
-                    className="h-8 w-8 shrink-0 text-muted-foreground hover:text-primary"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="ghost"
-                    aria-label={`Delete ${b.name}`}
-                    disabled={busy}
-                    onClick={() => setConfirmDelete(b)}
-                    className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <p className="mt-1.5 flex flex-wrap items-center gap-1.5 pl-11 text-[10px] uppercase tracking-wider text-muted-foreground">
+                    <span
+                      className={cn(
+                        "rounded-full border px-1.5 py-px font-black",
+                        isPlaying
+                          ? "border-primary/50 text-primary"
+                          : busy
+                            ? "border-white/20 text-muted-foreground"
+                            : "border-emerald-400/40 text-emerald-300",
+                      )}
+                    >
+                      {status}
+                    </span>
+                    <span className="rounded-full border border-amber-400/40 px-1.5 py-px font-black text-amber-300">
+                      {remixCost} coins to remix
+                    </span>
+                    {size ? <span>{size}</span> : null}
+                  </p>
                 </li>
+
               );
             })}
           </ul>
