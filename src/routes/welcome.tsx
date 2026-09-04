@@ -446,24 +446,19 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
   };
 
   return (
-    <div className="mt-3 rounded-3xl border-2 border-primary/50 bg-card/85 p-4 shadow-[0_16px_44px_-18px_hsl(var(--primary)/0.6)] backdrop-blur-xl sm:p-6">
-      {mode !== "reset" ? (
-        <div className="mb-4 text-center">
-          <p className="font-display text-[clamp(1.3rem,5vw,1.9rem)] font-black uppercase leading-tight text-foreground">
-            Jump in
-          </p>
-          <p className="mt-1.5 text-sm font-medium text-muted-foreground">
-            New here? We create your account automatically. Been before? You're back in.
-          </p>
-        </div>
-      ) : (
-        <div className="mb-4 text-center">
-          <p className="font-display text-[clamp(1.15rem,4.5vw,1.6rem)] font-black uppercase leading-tight text-foreground">
-            Reset your password
-          </p>
-          <p className="mt-1 text-sm text-muted-foreground">We'll send you a secure link.</p>
-        </div>
-      )}
+    <div className="relative mt-3 rounded-3xl border-2 border-primary/60 bg-card/90 p-5 shadow-[0_20px_60px_-16px_hsl(var(--primary)/0.75),0_0_0_1px_hsl(var(--primary)/0.25),inset_0_1px_0_hsl(var(--foreground)/0.08)] backdrop-blur-xl sm:p-7">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-10 left-1/2 -z-10 h-40 w-72 -translate-x-1/2 rounded-full bg-primary/25 blur-3xl"
+      />
+      <div className="mb-5 text-center">
+        <p className="font-display text-[clamp(1.6rem,6vw,2.3rem)] font-black uppercase leading-none tracking-tight text-gradient-brand drop-shadow-[0_2px_12px_hsl(var(--primary)/0.5)]">
+          {mode === "reset" ? "Reset password" : "Jump in"}
+        </p>
+        {mode === "reset" && (
+          <p className="mt-1.5 text-sm text-muted-foreground">We'll send you a secure link.</p>
+        )}
+      </div>
 
       <form
         onSubmit={submit}
