@@ -56,14 +56,20 @@ describe("FoulMouthToggle component", () => {
   });
 });
 
-describe("Library page uses the shared component", () => {
-  it("imports FoulMouthToggle", () => {
-    expect(librarySrc).toMatch(/from\s+["']@\/components\/FoulMouthToggle["']/);
+describe("Music creation page keeps the toggle hidden", () => {
+  it("does not render the toggle on the music page", () => {
+    expect(librarySrc).not.toMatch(/<FoulMouthToggle\b/);
+    expect(librarySrc).not.toMatch(/from\s+["']@\/components\/FoulMouthToggle["']/);
   });
 
-  it("renders FoulMouthToggle exactly once", () => {
-    const matches = librarySrc.match(/<FoulMouthToggle\b/g) ?? [];
-    expect(matches.length).toBe(1);
+  it("offers the rating choice inside the creation wizard instead", () => {
+    const wizardSrc = readFileSync(
+      join(process.cwd(), "src/components/library/CreateNowWizard.tsx"),
+      "utf8",
+    );
+    expect(wizardSrc).toMatch(/PG rated/);
+    expect(wizardSrc).toMatch(/18\+ rated/);
+    expect(wizardSrc).toMatch(/useSetFoulMouth/);
   });
 
   it("does not inline a second foul-mouth-toggle button", () => {
