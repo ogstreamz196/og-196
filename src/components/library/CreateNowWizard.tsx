@@ -443,6 +443,47 @@ export function CreateNowWizard({
                 </span>
               </button>
 
+              {/* Content rating — replaces the old foul mouth toggle. */}
+              <div className="space-y-2">
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
+                  Lyrics rating
+                </p>
+                <div role="group" aria-label="Lyrics rating" className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    aria-pressed={!foulMouth}
+                    disabled={ratingSaving}
+                    onClick={() => setFoulMouth.mutate(false)}
+                    className={cn(
+                      "flex flex-col items-center gap-1.5 rounded-2xl border px-3 py-4 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-60",
+                      !foulMouth
+                        ? "border-emerald-400 bg-emerald-400/15 shadow-glow"
+                        : "border-white/10 bg-card/60 hover:border-emerald-400/40",
+                    )}
+                  >
+                    <Baby className={cn("h-8 w-8", !foulMouth ? "text-emerald-400" : "text-muted-foreground")} />
+                    <span className="text-sm font-black uppercase tracking-wide">PG rated</span>
+                    <span className="text-[11px] text-muted-foreground">Clean, family safe</span>
+                  </button>
+                  <button
+                    type="button"
+                    aria-pressed={foulMouth}
+                    disabled={ratingSaving}
+                    onClick={() => setFoulMouth.mutate(true)}
+                    className={cn(
+                      "flex flex-col items-center gap-1.5 rounded-2xl border px-3 py-4 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-60",
+                      foulMouth
+                        ? "border-destructive bg-destructive/20 shadow-glow"
+                        : "border-white/10 bg-card/60 hover:border-destructive/40",
+                    )}
+                  >
+                    <Skull className={cn("h-8 w-8", foulMouth ? "text-destructive" : "text-muted-foreground")} />
+                    <span className="text-sm font-black uppercase tracking-wide">18+ rated</span>
+                    <span className="text-[11px] text-muted-foreground">Explicit, no filter</span>
+                  </button>
+                </div>
+              </div>
+
               <div className="space-y-3">
                 <p className="text-xs font-semibold text-primary">
                   English is always included in the remix.
