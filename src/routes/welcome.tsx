@@ -479,15 +479,10 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
             placeholder={mode === "reset" ? "you@example.com" : "pick a username"}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="h-14 text-lg"
+            className="h-14 border-white/15 bg-background/50 text-lg focus-visible:border-primary/60"
             disabled={busy || disabled}
             required
           />
-          {mode !== "reset" && (
-            <p className="text-xs text-muted-foreground">
-              No email needed — just a name and a password.
-            </p>
-          )}
         </div>
         {mode !== "reset" && (
           <div className="space-y-1.5">
