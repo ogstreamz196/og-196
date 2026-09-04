@@ -1,8 +1,28 @@
 import { useEffect, useRef, useState } from "react";
-import { Disc3, Loader2, Pause, Play, Plus, Trash2, Wand2 } from "lucide-react";
+import { Disc3, Loader2, Pause, Pencil, Play, Plus, Trash2, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { useSettings } from "@/hooks/use-settings";
 import { cn } from "@/lib/utils";
 
 export type SavedBeat = { path: string; name: string; size: number };
@@ -20,11 +40,28 @@ function pretty(name: string) {
   return base;
 }
 
+function prettySize(bytes: number) {
+  if (!bytes) return null;
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+/** Keep the stored `<timestamp>-` prefix and file extension, swap the label. */
+function renamedPath(path: string, label: string) {
+  const slash = path.lastIndexOf("/");
+  const dir = path.slice(0, slash);
+  const file = path.slice(slash + 1);
+  const prefix = /^(\d{10,})-/.exec(file)?.[1] ?? String(Date.now());
+  const ext = /\.([a-z0-9]+)$/i.exec(file)?.[1] ?? "mp3";
+  const safe = label.trim().replace(/[^a-zA-Z0-9._ -]+/g, "-").replace(/\s+/g, "-").slice(0, 60);
+  return `${dir}/${prefix}-${safe || "beat"}.${ext}`;
+}
 
 /**
  * Beat library — the user's own uploaded instrumentals, saved in the private
- * `beats` bucket. Beats can be previewed, deleted, and remixed: "New vocals"
- * opens the create wizard pre-armed with vocals-only mode over that beat.
+ * `beats` bucket. Every row shows its live status, what a remix costs, and
+ * clear rename / delete controls. "New vocals" opens the create wizard
+ * pre-armed with vocals-only mode over that beat.
  */
 export function BeatLibrary({
   userId,
@@ -38,8 +75,14 @@ export function BeatLibrary({
   const [uploading, setUploading] = useState(false);
   const [busyPath, setBusyPath] = useState<string | null>(null);
   const [playing, setPlaying] = useState<string | null>(null);
+  const [renaming, setRenaming] = useState<SavedBeat | null>(null);
+  const [renameValue, setRenameValue] = useState("");
+  const [savingName, setSavingName] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<SavedBeat | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
+  const { data: settings } = useSettings();
+  const remixCost = settings?.coins_per_generation ?? 3;
 
   async function load() {
     if (!userId) return;
@@ -129,6 +172,41 @@ export function BeatLibrary({
     }
   }
 
+  async function saveRename() {
+    const beat = renaming;
+    const label = renameValue.trim();
+    if (!beat) return;
+    if (label.length < 2) {
+      toast.error("Give the beat a name of at least 2 characters");
+      return;
+    }
+    const target = renamedPath(beat.path, label);
+    if (target === beat.path) {
+      setRenaming(null);
+      return;
+    }
+    setSavingName(true);
+    try {
+      const { error } = await supabase.storage.from("beats").move(beat.path, target);
+      if (error) throw error;
+      if (playing === beat.path) {
+        audioRef.current?.pause();
+        setPlaying(null);
+      }
+      setBeats((list) =>
+        list.map((b) =>
+          b.path === beat.path ? { ...b, path: target, name: pretty(target.split("/").pop() ?? label) } : b,
+        ),
+      );
+      toast.success("Beat renamed");
+      setRenaming(null);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Rename failed");
+    } finally {
+      setSavingName(false);
+    }
+  }
+
   async function remove(beat: SavedBeat) {
     setBusyPath(beat.path);
     try {
@@ -195,61 +273,154 @@ export function BeatLibrary({
           </p>
         ) : (
           <ul className="grid w-full gap-1.5">
-            {beats.map((b) => (
-              <li
-                key={b.path}
-                className={cn(
-                  "flex w-full min-w-0 items-center gap-2 overflow-hidden rounded-2xl border border-white/10 bg-background/40 px-3 py-2.5",
-                  playing === b.path && "border-primary/40 bg-primary/5",
-                )}
-              >
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="ghost"
-                  aria-label={playing === b.path ? `Pause ${b.name}` : `Play ${b.name}`}
-                  disabled={busyPath === b.path}
-                  onClick={() => void togglePlay(b)}
-                  className="h-9 w-9 shrink-0 rounded-full border border-primary/30 text-primary"
-                >
-                  {busyPath === b.path ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : playing === b.path ? (
-                    <Pause className="h-4 w-4" />
-                  ) : (
-                    <Play className="h-4 w-4" />
+            {beats.map((b) => {
+              const busy = busyPath === b.path;
+              const isPlaying = playing === b.path;
+              const status = busy ? "Working" : isPlaying ? "Playing" : "Ready";
+              const size = prettySize(b.size);
+              return (
+                <li
+                  key={b.path}
+                  className={cn(
+                    "flex w-full min-w-0 items-center gap-2 overflow-hidden rounded-2xl border border-white/10 bg-background/40 px-3 py-2.5",
+                    isPlaying && "border-primary/40 bg-primary/5",
                   )}
-                </Button>
-                <p className="min-w-0 flex-1 truncate text-sm font-bold" title={b.name}>
-                  {b.name}
-                </p>
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={() => onRemix(b)}
-                  aria-label={`New vocals over ${b.name}`}
-                  className="h-8 shrink-0 gap-1.5 bg-gradient-brand px-2.5 text-[11px] font-black uppercase tracking-wide text-primary-foreground sm:px-3"
                 >
-                  <Wand2 className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">New vocals</span>
-                </Button>
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="ghost"
-                  aria-label={`Delete ${b.name}`}
-                  disabled={busyPath === b.path}
-                  onClick={() => void remove(b)}
-                  className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </li>
-            ))}
-          </ul>
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    aria-label={isPlaying ? `Pause ${b.name}` : `Play ${b.name}`}
+                    disabled={busy}
+                    onClick={() => void togglePlay(b)}
+                    className="h-9 w-9 shrink-0 rounded-full border border-primary/30 text-primary"
+                  >
+                    {busy ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : isPlaying ? (
+                      <Pause className="h-4 w-4" />
+                    ) : (
+                      <Play className="h-4 w-4" />
+                    )}
+                  </Button>
 
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-bold" title={b.name}>
+                      {b.name}
+                    </p>
+                    <p className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground">
+                      <span
+                        className={cn(
+                          "rounded-full border px-1.5 py-px font-black",
+                          isPlaying
+                            ? "border-primary/50 text-primary"
+                            : busy
+                              ? "border-white/20 text-muted-foreground"
+                              : "border-emerald-400/40 text-emerald-300",
+                        )}
+                      >
+                        {status}
+                      </span>
+                      <span className="rounded-full border border-amber-400/40 px-1.5 py-px font-black text-amber-300">
+                        {remixCost} coins
+                      </span>
+                      {size ? <span>{size}</span> : null}
+                    </p>
+                  </div>
+
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => onRemix(b)}
+                    aria-label={`New vocals over ${b.name} for ${remixCost} coins`}
+                    className="h-8 shrink-0 gap-1.5 bg-gradient-brand px-2.5 text-[11px] font-black uppercase tracking-wide text-primary-foreground sm:px-3"
+                  >
+                    <Wand2 className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">New vocals</span>
+                  </Button>
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    aria-label={`Rename ${b.name}`}
+                    disabled={busy}
+                    onClick={() => {
+                      setRenaming(b);
+                      setRenameValue(b.name);
+                    }}
+                    className="h-8 w-8 shrink-0 text-muted-foreground hover:text-primary"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    aria-label={`Delete ${b.name}`}
+                    disabled={busy}
+                    onClick={() => setConfirmDelete(b)}
+                    className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </li>
+              );
+            })}
+          </ul>
         )}
       </div>
+
+      <Dialog open={!!renaming} onOpenChange={(open) => !open && setRenaming(null)}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Rename beat</DialogTitle>
+            <DialogDescription>Pick a name you'll recognise in your library.</DialogDescription>
+          </DialogHeader>
+          <Input
+            value={renameValue}
+            autoFocus
+            maxLength={60}
+            onChange={(e) => setRenameValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") void saveRename();
+            }}
+            aria-label="Beat name"
+          />
+          <DialogFooter>
+            <Button type="button" variant="ghost" onClick={() => setRenaming(null)}>
+              Cancel
+            </Button>
+            <Button type="button" disabled={savingName} onClick={() => void saveRename()}>
+              {savingName ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : null}
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={!!confirmDelete} onOpenChange={(open) => !open && setConfirmDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this beat?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmDelete?.name} will be removed from your library. Tracks you already made with
+              it stay safe.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep it</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                const beat = confirmDelete;
+                setConfirmDelete(null);
+                if (beat) void remove(beat);
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </section>
   );
 }
