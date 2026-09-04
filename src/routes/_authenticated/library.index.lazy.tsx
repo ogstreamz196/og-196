@@ -1138,9 +1138,6 @@ function LibraryPage() {
                 ))}
               </select>
             </div>
-            <div className="flex w-full flex-col items-center gap-1.5 sm:w-44 sm:pt-5">
-              <FoulMouthToggle disabled={pipelineActive} className="justify-center" />
-            </div>
           </div>
 
           <p className="mt-3 text-center text-[11px] font-semibold text-muted-foreground">
