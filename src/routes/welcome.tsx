@@ -865,7 +865,7 @@ function Pillars() {
                 <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-[radial-gradient(circle_at_top_right,oklch(0.55_0.22_268/0.22),transparent_60%)]" />
                 <CardEditBadge />
                 <div className="flex items-center gap-3">
-                  <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-brand text-primary-foreground shadow-glow transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6 sm:h-14 sm:w-14">
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gradient-brand text-primary-foreground shadow-glow transition-transform duration-300 sm:h-13 sm:w-13 md:group-hover:scale-110 md:group-hover:rotate-6">
                     {it.icon}
                   </span>
                   <span className={`text-2xl sm:text-3xl ${it.floatClass}`}>{it.emoji}</span>
@@ -874,14 +874,14 @@ function Pillars() {
                   as="h3"
                   contentKey={`welcome.pillar.${it.key}.title`}
                   defaultValue={String(it.title)}
-                  className="font-display mt-4 block text-3xl font-black tracking-tight sm:mt-5 sm:text-4xl"
+                  className="font-display mt-3 block text-2xl font-black tracking-tight sm:mt-4 sm:text-3xl"
                 />
                 <EditableContent
                   as="p"
                   multiline
                   contentKey={`welcome.pillar.${it.key}.body`}
                   defaultValue={it.body}
-                  className="mt-2.5 block text-base leading-relaxed text-muted-foreground sm:mt-3 sm:text-lg"
+                  className="mt-2 block text-sm leading-snug text-balance text-muted-foreground sm:text-base"
                 />
               </article>
             </div>
