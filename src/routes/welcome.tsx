@@ -503,7 +503,7 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
             <Input
               id="wc-password"
               type="password"
-              autoComplete={mode === "signup" ? "new-password" : "current-password"}
+              autoComplete="current-password"
               placeholder="At least 6 characters"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
