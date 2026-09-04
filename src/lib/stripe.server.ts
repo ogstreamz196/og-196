@@ -11,17 +11,31 @@ export type StripeEnv = "sandbox" | "live";
 
 const GATEWAY_STRIPE_BASE = "https://connector-gateway.lovable.dev/stripe";
 
+// BYOK (bring-your-own-key) mode: the project holds its own Stripe secret key
+// (STRIPE_SECRET_KEY) and calls api.stripe.com directly. Managed mode routes
+// through the Lovable connector gateway using sandbox/live connection keys.
+function isByok(): boolean {
+  return !!process.env["STRIPE_SECRET_KEY"];
+}
+
 export function getConnectionApiKey(env: StripeEnv): string {
+  if (isByok()) return getEnv("STRIPE_SECRET_KEY");
   return env === "sandbox"
     ? getEnv("STRIPE_SANDBOX_API_KEY")
     : getEnv("STRIPE_LIVE_API_KEY");
 }
 
 export function createStripeClient(env: StripeEnv): Stripe {
-  const connectionApiKey = getConnectionApiKey(env);
-  const lovableApiKey = getEnv("LOVABLE_API_KEY");
+  const apiKey = getConnectionApiKey(env);
 
-  return new Stripe(connectionApiKey, {
+  // BYOK: call api.stripe.com directly with the project's own secret key.
+  if (isByok()) {
+    return new Stripe(apiKey, { apiVersion: "2026-03-25.dahlia" });
+  }
+
+  // Managed: route through the connector gateway, which attaches the real key.
+  const lovableApiKey = getEnv("LOVABLE_API_KEY");
+  return new Stripe(apiKey, {
     apiVersion: "2026-03-25.dahlia",
     httpClient: Stripe.createFetchHttpClient(((input: URL | RequestInfo, init?: RequestInit) => {
       const original = typeof input === "string" || input instanceof URL ? input.toString() : input.url;
@@ -30,7 +44,7 @@ export function createStripeClient(env: StripeEnv): Stripe {
         ...init,
         headers: {
           ...Object.fromEntries(new Headers(init?.headers).entries()),
-          "X-Connection-Api-Key": connectionApiKey,
+          "X-Connection-Api-Key": apiKey,
           "Lovable-API-Key": lovableApiKey,
         },
       });
@@ -66,9 +80,13 @@ export async function verifyWebhook(
 ): Promise<{ type: string; data: { object: any } }> {
   const signature = req.headers.get("stripe-signature");
   const body = await req.text();
-  const secret = env === "sandbox"
-    ? getEnv("PAYMENTS_SANDBOX_WEBHOOK_SECRET")
-    : getEnv("PAYMENTS_LIVE_WEBHOOK_SECRET");
+  // BYOK uses a single project webhook signing secret; managed mode uses the
+  // per-environment secrets provisioned by the Lovable payments integration.
+  const secret = isByok()
+    ? getEnv("STRIPE_WEBHOOK_SECRET")
+    : env === "sandbox"
+      ? getEnv("PAYMENTS_SANDBOX_WEBHOOK_SECRET")
+      : getEnv("PAYMENTS_LIVE_WEBHOOK_SECRET");
 
   if (!signature || !body) throw new Error("Missing signature or body");
 
