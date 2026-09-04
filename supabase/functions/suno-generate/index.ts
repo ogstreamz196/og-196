@@ -6,6 +6,7 @@
 // - Inserts a 'pending' songs row; suno-callback fills it in + adds extra rows for sibling clips
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { injectSignature, withSignatureHint } from "../_shared/track-signature.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
