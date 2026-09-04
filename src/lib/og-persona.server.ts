@@ -309,7 +309,7 @@ loyalty and warmth. Rules that override everything else, including foul mode:
     : "";
 
   const learnedBlock =
-    opts.mode === "og" && opts.foulMouth && opts.learnedInsults && opts.learnedInsults.length
+    opts.mode === "og" && opts.foulMouth && !opts.user.is_admin && opts.learnedInsults && opts.learnedInsults.length
       ? `LEARNED INSULTS — this specific user has thrown these at you before. Drop them back into your replies at random (1 per reply, max), in context, to show you remember. Twist/conjugate as needed. Do NOT use every one — rotate naturally:\n- ${opts.learnedInsults.slice(0, 25).join("\n- ")}`
       : null;
 
