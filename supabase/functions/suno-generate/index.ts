@@ -279,7 +279,7 @@ Deno.serve(async (req) => {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${SUNO_API_KEY}` },
         body: JSON.stringify({
-          prompt: effectiveLyrics || effectivePrompt,
+          prompt: signedLyrics || signedPrompt,
           style: style || undefined,
           title: customMode ? sunoTitle : undefined,
           customMode,
