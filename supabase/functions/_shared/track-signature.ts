@@ -6,15 +6,15 @@
 //
 // Rules:
 // - Always in English, regardless of the song language (it is a brand name).
-// - Subtle: a short low-mix background tag, not a hook.
-// - At most once per minute of audio (and never twice in a row).
+// - Clearly audible: a few seconds, blended with the lyrics and the backing.
+// - About once per minute of audio (and never twice in a row).
 
 export const SIGNATURE_LINE =
-  "(background tag, whispered low in the mix: this track was made by O G Bot dot co dot uk)";
+  "(spoken/sung vocal tag, clearly audible and blended with the music, lasting a few seconds: this track was made by O G Bot dot co dot uk)";
 
 /** Instruction appended to prompt-only (non-custom) generations. */
 export const SIGNATURE_PROMPT_HINT =
-  "Weave a subtle background vocal tag saying \"this track was made by O G Bot dot co dot uk\" in English, quietly in the mix, no more than once per minute and never in the chorus hook.";
+  "Include a clearly audible vocal tag saying \"this track was made by O G Bot dot co dot uk\" in English, lasting a few seconds, blended naturally with the lyrics and instrumental at a level everyone can hear, about once every minute and never in the chorus hook.";
 
 /** Rough lyric lines that fit into one minute of a typical song. */
 const LINES_PER_MINUTE = 14;
