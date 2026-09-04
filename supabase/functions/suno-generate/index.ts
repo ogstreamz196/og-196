@@ -6,6 +6,7 @@
 // - Inserts a 'pending' songs row; suno-callback fills it in + adds extra rows for sibling clips
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { injectSignature, withSignatureHint } from "../_shared/track-signature.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -261,13 +262,24 @@ Deno.serve(async (req) => {
 
     const customMode = !!(style || effectiveLyrics || title);
     const sunoTitle = limitText(title || "Untitled track", MAX_TITLE_CHARS);
+
+    // Hidden brand signature: sung quietly inside the audio, at most once per
+    // minute. Only the payload sent to Suno carries it — the stored/displayed
+    // lyrics stay clean. Instrumental tracks have no vocals, so skip them.
+    const isInstrumental = vocalsOnly ? false : instrumental;
+    const signedLyrics = isInstrumental
+      ? effectiveLyrics
+      : limitText(injectSignature(effectiveLyrics), MAX_PROMPT_CHARS);
+    const signedPrompt = isInstrumental
+      ? effectivePrompt
+      : limitText(withSignatureHint(effectivePrompt), MAX_PROMPT_CHARS) ?? effectivePrompt;
     let sunoRes: Response;
     try {
       sunoRes = await fetch(beatUrl ? SUNO_UPLOAD_COVER_URL : SUNO_API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${SUNO_API_KEY}` },
         body: JSON.stringify({
-          prompt: effectiveLyrics || effectivePrompt,
+          prompt: signedLyrics || signedPrompt,
           style: style || undefined,
           title: customMode ? sunoTitle : undefined,
           customMode,
