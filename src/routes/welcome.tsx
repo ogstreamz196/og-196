@@ -554,9 +554,9 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
         <button
           type="button"
           onClick={() => { setResetSent(false); setMode("reset"); }}
-          className="mt-3 w-full text-center text-xs font-semibold text-foreground/60 underline underline-offset-4 hover:text-foreground"
+          className="mt-3 w-full text-center text-[11px] font-medium text-muted-foreground/70 underline underline-offset-4 hover:text-foreground"
         >
-          Signed up with an email? Reset password
+          Forgot password?
         </button>
       )}
 
