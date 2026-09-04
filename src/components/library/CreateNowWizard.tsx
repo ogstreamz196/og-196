@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, Baby, Check, Mic2, Music4, Skull, Sparkles, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Mic2, Music4, Sparkles, X } from "lucide-react";
+import ratingPgImg from "@/assets/rating-pg.png";
+import rating18Img from "@/assets/rating-18.png";
 import {
   Dialog,
   DialogContent,
