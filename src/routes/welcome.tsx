@@ -497,7 +497,7 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
               placeholder="At least 6 characters"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="h-12 text-base"
+              className="h-14 border-white/15 bg-background/50 text-lg focus-visible:border-primary/60"
               disabled={busy || disabled}
               required
             />
