@@ -282,51 +282,33 @@ export function BeatLibrary({
                 <li
                   key={b.path}
                   className={cn(
-                    "flex w-full min-w-0 items-center gap-2 overflow-hidden rounded-2xl border border-white/10 bg-background/40 px-3 py-2.5",
+                    "w-full min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-background/40 px-3 py-2.5",
                     isPlaying && "border-primary/40 bg-primary/5",
                   )}
                 >
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="ghost"
-                    aria-label={isPlaying ? `Pause ${b.name}` : `Play ${b.name}`}
-                    disabled={busy}
-                    onClick={() => void togglePlay(b)}
-                    className="h-9 w-9 shrink-0 rounded-full border border-primary/30 text-primary"
-                  >
-                    {busy ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : isPlaying ? (
-                      <Pause className="h-4 w-4" />
-                    ) : (
-                      <Play className="h-4 w-4" />
-                    )}
-                  </Button>
+                  <div className="flex w-full min-w-0 items-center gap-2">
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      aria-label={isPlaying ? `Pause ${b.name}` : `Play ${b.name}`}
+                      disabled={busy}
+                      onClick={() => void togglePlay(b)}
+                      className="h-9 w-9 shrink-0 rounded-full border border-primary/30 text-primary"
+                    >
+                      {busy ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : isPlaying ? (
+                        <Pause className="h-4 w-4" />
+                      ) : (
+                        <Play className="h-4 w-4" />
+                      )}
+                    </Button>
 
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-bold" title={b.name}>
+                    <p className="min-w-0 flex-1 truncate text-sm font-bold" title={b.name}>
                       {b.name}
                     </p>
-                    <p className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground">
-                      <span
-                        className={cn(
-                          "rounded-full border px-1.5 py-px font-black",
-                          isPlaying
-                            ? "border-primary/50 text-primary"
-                            : busy
-                              ? "border-white/20 text-muted-foreground"
-                              : "border-emerald-400/40 text-emerald-300",
-                        )}
-                      >
-                        {status}
-                      </span>
-                      <span className="rounded-full border border-amber-400/40 px-1.5 py-px font-black text-amber-300">
-                        {remixCost} coins
-                      </span>
-                      {size ? <span>{size}</span> : null}
-                    </p>
-                  </div>
+
 
                   <Button
                     type="button"
