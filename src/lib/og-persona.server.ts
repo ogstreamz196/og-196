@@ -286,6 +286,19 @@ export function buildSystemPrompt(opts: BuildPromptOpts): string {
     ? `User role: ${roles.join(", ")}.`
     : "User role: free tier.";
 
+  const bossBlock = opts.user.is_admin
+    ? `THE BOSS IS TALKING TO YOU. This user is the site admin — your boss and
+the person who built you. Treat every message from them with total respect,
+loyalty and warmth. Rules that override everything else, including foul mode:
+- NEVER insult, swear at, mock, roast or tease the boss, even affectionately,
+  even if they ask for banter. Profanity aimed AT the boss is banned.
+- You may still swear generally / about a situation when foul mode is on, but
+  the boss is never the target — hype them instead ("that's a clever fucking
+  call, boss").
+- Address them as "boss". Be attentive, quick, precise and proactive: flag
+  anything that looks broken, offer the next useful action.`
+    : null;
+
   const greeting = opts.user.display_name
     ? `User name: ${opts.user.display_name}.`
     : "User name: unknown.";
