@@ -446,24 +446,19 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
   };
 
   return (
-    <div className="mt-3 rounded-3xl border-2 border-primary/50 bg-card/85 p-4 shadow-[0_16px_44px_-18px_hsl(var(--primary)/0.6)] backdrop-blur-xl sm:p-6">
-      {mode !== "reset" ? (
-        <div className="mb-4 text-center">
-          <p className="font-display text-[clamp(1.3rem,5vw,1.9rem)] font-black uppercase leading-tight text-foreground">
-            Jump in
-          </p>
-          <p className="mt-1.5 text-sm font-medium text-muted-foreground">
-            New here? We create your account automatically. Been before? You're back in.
-          </p>
-        </div>
-      ) : (
-        <div className="mb-4 text-center">
-          <p className="font-display text-[clamp(1.15rem,4.5vw,1.6rem)] font-black uppercase leading-tight text-foreground">
-            Reset your password
-          </p>
-          <p className="mt-1 text-sm text-muted-foreground">We'll send you a secure link.</p>
-        </div>
-      )}
+    <div className="relative mt-3 rounded-3xl border-2 border-primary/60 bg-card/90 p-5 shadow-[0_20px_60px_-16px_hsl(var(--primary)/0.75),0_0_0_1px_hsl(var(--primary)/0.25),inset_0_1px_0_hsl(var(--foreground)/0.08)] backdrop-blur-xl sm:p-7">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-10 left-1/2 -z-10 h-40 w-72 -translate-x-1/2 rounded-full bg-primary/25 blur-3xl"
+      />
+      <div className="mb-5 text-center">
+        <p className="font-display text-[clamp(1.6rem,6vw,2.3rem)] font-black uppercase leading-none tracking-tight text-gradient-brand drop-shadow-[0_2px_12px_hsl(var(--primary)/0.5)]">
+          {mode === "reset" ? "Reset password" : "Jump in"}
+        </p>
+        {mode === "reset" && (
+          <p className="mt-1.5 text-sm text-muted-foreground">We'll send you a secure link.</p>
+        )}
+      </div>
 
       <form
         onSubmit={submit}
@@ -484,15 +479,10 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
             placeholder={mode === "reset" ? "you@example.com" : "pick a username"}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="h-14 text-lg"
+            className="h-14 border-white/15 bg-background/50 text-lg focus-visible:border-primary/60"
             disabled={busy || disabled}
             required
           />
-          {mode !== "reset" && (
-            <p className="text-xs text-muted-foreground">
-              No email needed — just a name and a password.
-            </p>
-          )}
         </div>
         {mode !== "reset" && (
           <div className="space-y-1.5">
@@ -507,7 +497,7 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
               placeholder="At least 6 characters"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="h-12 text-base"
+              className="h-14 border-white/15 bg-background/50 text-lg focus-visible:border-primary/60"
               disabled={busy || disabled}
               required
             />
@@ -564,9 +554,9 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
         <button
           type="button"
           onClick={() => { setResetSent(false); setMode("reset"); }}
-          className="mt-3 w-full text-center text-xs font-semibold text-foreground/60 underline underline-offset-4 hover:text-foreground"
+          className="mt-3 w-full text-center text-[11px] font-medium text-muted-foreground/70 underline underline-offset-4 hover:text-foreground"
         >
-          Signed up with an email? Reset password
+          Forgot password?
         </button>
       )}
 
