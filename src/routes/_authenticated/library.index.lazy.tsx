@@ -76,7 +76,7 @@ import {
 } from "@/components/library/CreateNowWizard";
 import { CommunityTrackRow } from "@/components/library/CommunityTrackRow";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
-import { FoulMouthToggle } from "@/components/FoulMouthToggle";
+
 
 import { FreshTrackCard } from "@/components/library/FreshTrackCard";
 import { StudioMeter, StudioLed } from "@/components/library/StudioConsole";
@@ -1137,9 +1137,6 @@ function LibraryPage() {
                   </option>
                 ))}
               </select>
-            </div>
-            <div className="flex w-full flex-col items-center gap-1.5 sm:w-44 sm:pt-5">
-              <FoulMouthToggle disabled={pipelineActive} className="justify-center" />
             </div>
           </div>
 
