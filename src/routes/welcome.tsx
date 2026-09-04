@@ -841,7 +841,7 @@ function Pillars() {
       icon: <Sparkles className="h-7 w-7" />,
       emoji: "💿",
       title: "Cover included",
-      body: "Real cover art and a track ready to play.",
+      body: "Cover art plus a track ready to play.",
       tilt: "-1",
       floatClass: "wc-wiggle",
     },
