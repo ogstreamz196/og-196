@@ -832,7 +832,7 @@ function Pillars() {
       icon: <Wand2 className="h-7 w-7" />,
       emoji: "🪄",
       title: "Pick the vibe",
-      body: "Drill, rap, afrobeats, pop, ballad or meme song.",
+      body: "Drill, rap, afrobeats, pop or ballad.",
       tilt: "1.5",
       floatClass: "wc-float-slow",
     },
