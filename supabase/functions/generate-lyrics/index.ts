@@ -173,6 +173,12 @@ Deno.serve(async (req) => {
       : "";
 
 
+    // One non-English pick: the WHOLE song is sung in it — English only ever
+    // appears as the parenthesised translation line underneath.
+    const singleLanguageRule = (!multiLanguage && !isEnglish)
+      ? ` SINGLE-LANGUAGE REQUIREMENT (critical): the artist picked ${languageList[0]} and ONLY ${languageList[0]}. Every sung line — intro, every verse, every chorus, pre-chorus, bridge, outro and ad-libs — must be written in ${languageList[0]}. Do NOT write the song in English and sprinkle a few ${languageList[0]} words in, and do NOT default to English for the hook. The only English allowed is the bracketed section markers and the parenthesised translation line printed under each ${languageList[0]} line.`
+      : "";
+
     // Pick a full-song structure driven by the chosen style tags so the
     // output reads as a complete, performable track — not a few stray verses.
     const tagsLower = styleTags.map((t) => t.toLowerCase()).join(" ");
