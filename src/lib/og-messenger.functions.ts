@@ -90,7 +90,7 @@ export const chatOgBot = createServerFn({ method: "POST" })
     const rawProfile = profileRes.data;
     if (!rawProfile) throw new Error("Profile not found");
     const { maskDevIdentity } = await import("@/lib/dev-identity");
-    const profile = maskDevIdentity(rawProfile)!;
+    const profile = maskDevIdentity(rawProfile) ?? rawProfile;
     if ((profile.coin_balance ?? 0) <= 0) {
       throw new Error(
         "Out of OG coins. Top up from Buy OG Coins or grab VIP to keep chatting.",
@@ -238,8 +238,9 @@ export const chatOgBot = createServerFn({ method: "POST" })
           Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: "google/gemini-3.7-flash",
-          temperature: data.mode === "og" && foulMouth ? 0.9 : data.mode === "og" ? 0.75 : 0.6,
+          model: "google/gemini-3.1-pro-preview",
+          temperature: data.mode === "og" && foulMouth ? 0.9 : data.mode === "og" ? 0.75 : 0.65,
+          max_tokens: 1_600,
           messages: [
             { role: "system", content: system },
             ...outgoing.slice(0, -1),
