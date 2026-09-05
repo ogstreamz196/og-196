@@ -347,22 +347,70 @@ export function CommunityRoom() {
             </p>
           </div>
         </div>
-        <Button
-          type="button"
-          variant="destructive"
-          size="sm"
-          className="h-8 shrink-0 gap-1.5 text-[11px] font-black uppercase tracking-wide"
-          disabled={quit.isPending}
-          onClick={() => quit.mutate()}
-        >
-          {quit.isPending ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          ) : (
-            <Flag className="h-3.5 w-3.5" />
-          )}
-          End battle, I quit
-        </Button>
+        <div className="flex shrink-0 items-center gap-1.5">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1.5 text-[11px] font-black uppercase tracking-wide"
+            aria-expanded={showBoard}
+            onClick={() => setShowBoard((v) => !v)}
+          >
+            <Trophy className="h-3.5 w-3.5" />
+            Ranks
+          </Button>
+          <Button
+            type="button"
+            variant="destructive"
+            size="sm"
+            className="h-8 gap-1.5 text-[11px] font-black uppercase tracking-wide"
+            disabled={quit.isPending}
+            onClick={() => quit.mutate()}
+          >
+            {quit.isPending ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Flag className="h-3.5 w-3.5" />
+            )}
+            End battle, I quit
+          </Button>
+        </div>
       </div>
+
+      {showBoard && (
+        <div className="rounded-xl border border-primary/25 bg-background/70 p-2.5">
+          <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            Most savage roasters
+          </p>
+          {boardLoading ? (
+            <p className="py-2 text-xs text-muted-foreground">Counting the bodies…</p>
+          ) : (board?.rows.length ?? 0) === 0 ? (
+            <p className="py-2 text-xs text-muted-foreground">
+              Nobody has banked a win yet. Be the first.
+            </p>
+          ) : (
+            <ol className="space-y-1">
+              {board!.rows.slice(0, 10).map((row, i) => (
+                <li
+                  key={row.userId}
+                  className={`flex items-center justify-between gap-2 rounded-lg px-2 py-1 text-xs ${
+                    row.isMe ? "bg-primary/10 font-bold text-foreground" : "text-muted-foreground"
+                  }`}
+                >
+                  <span className="flex min-w-0 items-center gap-2">
+                    <span className="w-4 shrink-0 tabular-nums">{i + 1}</span>
+                    <span className="truncate">{row.name}{row.isMe ? " (you)" : ""}</span>
+                  </span>
+                  <span className="shrink-0 tabular-nums text-primary">
+                    {row.coinsWon} OG
+                  </span>
+                </li>
+              ))}
+            </ol>
+          )}
+        </div>
+      )}
+
 
       {canClear && (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-destructive/30 bg-destructive/5 px-2.5 py-1.5 sm:px-3">
