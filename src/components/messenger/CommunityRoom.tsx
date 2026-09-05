@@ -338,11 +338,11 @@ export function CommunityRoom() {
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col gap-3 p-3 sm:gap-2 sm:p-3">
-      <div className="flex items-center justify-between gap-2 rounded-xl border border-primary/30 bg-primary/5 px-2.5 py-1.5 sm:px-3">
+      <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-2 rounded-xl border border-primary/30 bg-primary/5 px-2.5 py-1.5 sm:flex-nowrap sm:px-3">
         <div className="flex min-w-0 items-center gap-2">
           <Coins className="h-4 w-4 shrink-0 text-primary" aria-hidden />
           <div className="min-w-0 leading-tight">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            <p className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
               Battle purse
             </p>
             <p
@@ -358,12 +358,12 @@ export function CommunityRoom() {
             </p>
           </div>
         </div>
-        <div className="flex shrink-0 items-center gap-1.5">
+        <div className="flex shrink-0 items-center gap-1.5 max-sm:w-full">
           <Button
             type="button"
             variant="outline"
             size="sm"
-            className="h-8 gap-1.5 text-[11px] font-black uppercase tracking-wide"
+            className="h-8 gap-1.5 text-[11px] font-black uppercase tracking-wide max-sm:flex-1"
             aria-expanded={showBoard}
             onClick={() => setShowBoard((v) => !v)}
           >
@@ -374,7 +374,7 @@ export function CommunityRoom() {
             type="button"
             variant="destructive"
             size="sm"
-            className="h-8 gap-1.5 text-[11px] font-black uppercase tracking-wide"
+            className="h-8 gap-1.5 text-[11px] font-black uppercase tracking-wide max-sm:flex-1"
             disabled={quit.isPending}
             onClick={() => quit.mutate()}
           >
@@ -383,7 +383,8 @@ export function CommunityRoom() {
             ) : (
               <Flag className="h-3.5 w-3.5" />
             )}
-            End battle, I quit
+            <span className="sm:hidden">End battle</span>
+            <span className="hidden sm:inline">End battle, I quit</span>
           </Button>
         </div>
       </div>
