@@ -146,8 +146,18 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
 
   const lyricsRef = useRef<HTMLTextAreaElement | null>(null);
 
-  const briefLanguage = useMemo(() => detectLanguage(brief), [brief]);
-  const languageChanged = language !== briefLanguage;
+  // Derived, always-current values for saving + generating.
+  const styleTags = useMemo(
+    () => [...styles, ...styleExtra.split(/[,·]/).map((s) => s.trim())].filter(Boolean),
+    [styles, styleExtra],
+  );
+  const styleValue = styleTags.join(", ");
+  const languageValue = useMemo(
+    () => Array.from(new Set(languages.length ? languages : ["English"])).join(" + "),
+    [languages],
+  );
+  const nextBriefValue = useMemo(() => setBriefLanguage(brief, languageValue), [brief, languageValue]);
+  const languageChanged = languageValue !== detectLanguages(song.prompt).join(" + ");
 
 
   const {
