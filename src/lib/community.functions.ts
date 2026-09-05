@@ -179,6 +179,7 @@ export const postCommunityMessage = createServerFn({ method: "POST" })
 
     // 3. Call AI gateway for short reply (fire-and-forget; if it fails, just no reply)
     const apiKey = process.env.LOVABLE_API_KEY;
+    let botReply: string | null = null;
     if (apiKey) {
       // Live chat = foul mouth by default for everyone.
       // VIPs still get it (and can toggle off via their preference), but the
@@ -217,6 +218,7 @@ export const postCommunityMessage = createServerFn({ method: "POST" })
           const cap = useFoul ? 320 : 220;
           if (reply.length > cap) reply = reply.slice(0, cap - 3) + "…";
           if (reply) {
+            botReply = reply;
             await supabaseAdmin.from("community_messages").insert({
               user_id: null,
               role: "bot",
@@ -230,8 +232,98 @@ export const postCommunityMessage = createServerFn({ method: "POST" })
       }
     }
 
-    return { message: userRow as CommunityMessage };
+    // 4. Judge the roast and bank the reward (tenths of a coin, max 10 per message)
+    let earnedTenths = 0;
+    let pendingTenths = 0;
+    let rounds = 0;
+    try {
+      const { data: tally } = await supabaseAdmin
+        .from("battle_tallies")
+        .select("pending_tenths, rounds")
+        .eq("user_id", context.userId)
+        .maybeSingle();
+      pendingTenths = tally?.pending_tenths ?? 0;
+      rounds = tally?.rounds ?? 0;
+      if (apiKey) earnedTenths = await scoreRoast(apiKey, data.content, botReply);
+      pendingTenths += earnedTenths;
+      rounds += 1;
+      await supabaseAdmin.from("battle_tallies").upsert(
+        {
+          user_id: context.userId,
+          pending_tenths: pendingTenths,
+          rounds,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "user_id" },
+      );
+    } catch (err) {
+      console.warn("battle scoring failed:", (err as Error).message);
+    }
+
+    return {
+      message: userRow as CommunityMessage,
+      award: { earnedTenths, pendingTenths, rounds },
+    };
   });
+
+/** Current pending battle reward for the signed-in user. */
+export const getBattleTally = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin
+      .from("battle_tallies")
+      .select("pending_tenths, rounds, total_awarded_coins")
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    return {
+      pendingTenths: data?.pending_tenths ?? 0,
+      rounds: data?.rounds ?? 0,
+      totalAwardedCoins: data?.total_awarded_coins ?? 0,
+    };
+  });
+
+/** End the battle: pay out the accumulated reward and reset the tally. */
+export const endBattle = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: tally } = await supabaseAdmin
+      .from("battle_tallies")
+      .select("pending_tenths, rounds, total_awarded_coins")
+      .eq("user_id", context.userId)
+      .maybeSingle();
+
+    const pendingTenths = tally?.pending_tenths ?? 0;
+    const rounds = tally?.rounds ?? 0;
+    // Whole coins only — leftover tenths roll over into the next battle.
+    const coins = Math.floor(pendingTenths / 10);
+    const remainder = pendingTenths - coins * 10;
+
+    if (coins > 0) {
+      const { error } = await supabaseAdmin.rpc("credit_coin_transaction", {
+        _user_id: context.userId,
+        _amount: coins,
+        _type: "battle_reward",
+        _reference: `battle:${new Date().toISOString()}`,
+      });
+      if (error) throw new Error(error.message);
+    }
+
+    await supabaseAdmin.from("battle_tallies").upsert(
+      {
+        user_id: context.userId,
+        pending_tenths: remainder,
+        rounds: 0,
+        total_awarded_coins: (tally?.total_awarded_coins ?? 0) + coins,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id" },
+    );
+
+    return { coins, rounds, pendingTenths, remainderTenths: remainder };
+  });
+
 
 /** Initial fetch of the latest N messages, oldest-first. */
 export const listCommunityMessages = createServerFn({ method: "GET" })
