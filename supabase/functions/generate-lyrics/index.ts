@@ -173,10 +173,10 @@ Deno.serve(async (req) => {
       : "[Intro] (4 lines) → [Verse 1] (8 lines) → [Pre-Chorus] (4 lines) → [Chorus] (6 lines, hook) → [Verse 2] (8 lines) → [Pre-Chorus] (4 lines) → [Chorus] (6 lines) → [Bridge] (6 lines) → [Verse 3] (6 lines) → [Chorus] (final, lifted, 8 lines) → [Outro] (4 lines)";
 
     const structureRule =
-      ` Deliver a COMPLETE, performable song that runs AT LEAST ${mmss(targetSec)} when sung (target ${targetLabel}, longer is fine — there is no maximum). That means a MINIMUM of ${minWords} words and ${minLines} lyric lines (excluding section markers) — aim for ${aimLow}–${aimHigh} words and ${minLines}–${aimLines} lines. Where the structure lists a section, extend verses by 2–4 extra lines and add extra verse/chorus pairs as needed to reach that length. Follow this structure for the chosen style: ${structure}.` +
+      ` Deliver a COMPLETE, performable song that runs ${targetLabel} when sung — NOT longer. That means ${aimLow}–${aimHigh} words and ${minLines}–${aimLines} lyric lines (excluding section markers). Going over ${aimHigh} words is a failure: trim sections rather than exceed it. Follow this structure for the chosen style: ${structure}.` +
       ` Use the bracketed section markers verbatim (e.g. [Verse 1], [Chorus], [Bridge], [Outro]), each on its own line, with a blank line between sections. Every section must have lyrics — no placeholders, no "(instrumental)" unless the structure explicitly says so.` +
       ` The [Chorus] must be written out IN FULL every time it appears (never write "repeat chorus" or "x2" as a shortcut) — it is the same repeatable hook tied to the song title or central theme.` +
-      ` Do NOT cut the song short — hit every section in the structure and keep line counts at or above the numbers given.`;
+      ` Do NOT cut the song short either — hit every section in the structure and stay inside the word range given.`;
 
 
     const systemPrompt = foulMouth
