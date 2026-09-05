@@ -1,7 +1,7 @@
 import type { MessengerMode } from "@/hooks/use-messenger-mode";
 
 /**
- * Pure label/state helpers for the Loner ↔ OG Community toggle.
+ * Pure label/state helpers for the Loner ↔ OG Battle Zone toggle.
  * Centralised so UI copy and the underlying mode can't drift apart
  * (covered by src/lib/messenger-mode-labels.test.ts).
  */
@@ -11,12 +11,12 @@ export function isCommunityMode(mode: MessengerMode): boolean {
 }
 
 export function modeHeading(mode: MessengerMode): string {
-  return isCommunityMode(mode) ? "OG Community Mode" : "OG Bot Loner Mode";
+  return isCommunityMode(mode) ? "OG Battle Zone" : "OG Bot Loner Mode";
 }
 
 export function modeBadge(mode: MessengerMode): string {
   return isCommunityMode(mode)
-    ? "OG Community Mode · public room"
+    ? "OG Battle Zone · everyone vs OG Bot"
     : "OG Bot Loner Mode · private";
 }
 
@@ -29,8 +29,8 @@ export function toggleActionLabel(mode: MessengerMode, isSaving: boolean): strin
 /** Screen-reader label — full action sentence. */
 export function toggleAriaLabel(mode: MessengerMode): string {
   return isCommunityMode(mode)
-    ? "Start Private Mode (leave OG Community)"
-    : "Leave Private Mode (switch to OG Community Mode)";
+    ? "Start Private Mode (leave the OG Battle Zone)"
+    : "Leave Private Mode (enter the OG Battle Zone)";
 }
 
 /** The mode the toggle will move to when clicked. */
