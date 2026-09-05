@@ -309,7 +309,7 @@ export function CommunityRoom() {
         <div
           ref={scrollRef}
           onScroll={onScroll}
-          className="absolute inset-0 overflow-y-auto overscroll-contain rounded-2xl border border-border/40 bg-background/40 p-2 backdrop-blur-md sm:p-3 [-webkit-overflow-scrolling:touch]"
+          className="absolute inset-0 overflow-y-auto overscroll-contain rounded-2xl border border-border/40 bg-background/75 p-2 backdrop-blur-md sm:p-3 [-webkit-overflow-scrolling:touch]"
           style={{ touchAction: "pan-y" }}
         >
 
@@ -442,7 +442,7 @@ export function CommunityRoom() {
 
       <form
         onSubmit={submit}
-        className="sticky bottom-0 flex items-end gap-2.5 rounded-2xl border border-border/40 bg-background/85 p-2.5 pb-[max(0.875rem,env(safe-area-inset-bottom))] backdrop-blur-md sm:gap-2 sm:p-2 sm:pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+        className="sticky bottom-0 flex items-end gap-2.5 rounded-2xl border border-border/40 bg-card/95 shadow-lg shadow-black/40 p-2.5 pb-[max(0.875rem,env(safe-area-inset-bottom))] backdrop-blur-md sm:gap-2 sm:p-2 sm:pb-[max(0.5rem,env(safe-area-inset-bottom))]"
       >
         <Textarea
           ref={composerRef}
@@ -460,11 +460,11 @@ export function CommunityRoom() {
               submit(e as unknown as React.FormEvent);
             }
           }}
-          placeholder="Say something to the OG Community…"
+          placeholder="Message the community…"
           rows={1}
           maxLength={1000}
           enterKeyHint="send"
-          className="min-h-[52px] max-h-32 resize-none border-0 bg-transparent px-3 text-[17px] leading-relaxed focus-visible:ring-0 sm:min-h-[44px] sm:text-sm"
+          className="min-h-[52px] max-h-32 resize-none overflow-y-auto border-0 bg-transparent px-3 text-base leading-relaxed focus-visible:ring-0 sm:min-h-[44px] sm:text-sm"
           disabled={send.isPending}
         />
         <Button
