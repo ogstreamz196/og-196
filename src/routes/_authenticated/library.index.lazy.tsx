@@ -487,7 +487,8 @@ function LibraryPage() {
     lyrics: 18_000,
     saving: 1_500,
     submitting: 4_500,
-    rendering: 60_000,
+    // Real-world Suno renders run 2-5 minutes; keep the estimate honest.
+    rendering: 150_000,
   };
 
   type PipelineState = {
@@ -784,14 +785,21 @@ function LibraryPage() {
   const pipelinePct = pipelineActive
     ? Math.min(97, Math.round((totalElapsed / Math.max(1, totalBudget)) * 100))
     : 0;
-  const pipelineEtaLabel =
-    totalRemaining > 1000 ? `~${Math.ceil(totalRemaining / 1000)}s left` : "Almost there…";
+  // Past the estimate we stop counting down and say plainly that it's still
+  // rendering, rather than sitting on "Almost there…" for minutes.
+  const pipelineEtaLabel = (() => {
+    if (totalRemaining <= 1000) return "Still rendering — no fixed time";
+    const secs = Math.ceil(totalRemaining / 1000);
+    return secs >= 60
+      ? `~${Math.floor(secs / 60)}m ${String(secs % 60).padStart(2, "0")}s left`
+      : `~${secs}s left`;
+  })();
   const pipelineStageLabel: Record<PipelineStage, string> = {
     idle: "",
     lyrics: "Writing lyrics around your details",
     saving: "Saving your track",
     submitting: "Sending to the studio",
-    rendering: "Rendering your audio — this page updates the moment it's ready",
+    rendering: "Rendering your audio — usually 2-5 minutes, sometimes longer",
     error: "Something went wrong",
   };
   const pipelineStageTitle: Record<Exclude<PipelineStage, "idle" | "error">, string> = {
