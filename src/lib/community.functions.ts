@@ -334,9 +334,10 @@ export const endBattle = createServerFn({ method: "POST" })
 
     const pendingTenths = tally?.pending_tenths ?? 0;
     const rounds = tally?.rounds ?? 0;
-    // Whole coins only — leftover tenths roll over into the next battle.
-    const coins = Math.floor(pendingTenths / 10);
-    const remainder = pendingTenths - coins * 10;
+    // Pay out everything earned, decimals included: fractions round to the
+    // nearest coin and any earned fraction is always worth at least 1 coin.
+    const coins = pendingTenths > 0 ? Math.max(1, Math.round(pendingTenths / 10)) : 0;
+    const remainder = 0;
 
     if (coins > 0) {
       const { error } = await supabaseAdmin.rpc("credit_coin_transaction", {
@@ -361,6 +362,55 @@ export const endBattle = createServerFn({ method: "POST" })
 
     return { coins, rounds, pendingTenths, remainderTenths: remainder };
   });
+
+export type BattleLeaderboardRow = {
+  userId: string;
+  name: string;
+  coinsWon: number;
+  pendingTenths: number;
+  rounds: number;
+  isMe: boolean;
+};
+
+/** Top roasters ranked by coins won in the Battle Zone. */
+export const getBattleLeaderboard = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: tallies } = await supabaseAdmin
+      .from("battle_tallies")
+      .select("user_id, total_awarded_coins, pending_tenths, rounds")
+      .order("total_awarded_coins", { ascending: false })
+      .limit(20);
+    const rows = tallies ?? [];
+    if (!rows.length) return { rows: [] as BattleLeaderboardRow[] };
+
+    const { data: profiles } = await supabaseAdmin
+      .from("profiles")
+      .select("id, display_name, email")
+      .in("id", rows.map((r) => r.user_id));
+    const { maskDevIdentity } = await import("@/lib/dev-identity");
+    const nameById = new Map<string, string>();
+    for (const p of profiles ?? []) {
+      const masked = (maskDevIdentity(p) ?? p) as { display_name?: string | null; email?: string | null };
+      nameById.set(
+        p.id,
+        masked.display_name || (masked.email ? String(masked.email).split("@")[0]! : "OG member"),
+      );
+    }
+
+    return {
+      rows: rows.map((r) => ({
+        userId: r.user_id,
+        name: nameById.get(r.user_id) ?? "OG member",
+        coinsWon: r.total_awarded_coins ?? 0,
+        pendingTenths: r.pending_tenths ?? 0,
+        rounds: r.rounds ?? 0,
+        isMe: r.user_id === context.userId,
+      })) satisfies BattleLeaderboardRow[],
+    };
+  });
+
 
 
 /** Initial fetch of the latest N messages, oldest-first. */
