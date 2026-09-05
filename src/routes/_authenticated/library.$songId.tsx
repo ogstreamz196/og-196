@@ -164,7 +164,23 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
     }
     load();
     return () => { cancelled = true; };
-  }, [isReady, song.id, previewUrl, loadingPreview, communityMode]);
+  }, [isReady, song.id, previewUrl, loadingPreview, communityMode, unlocked]);
+
+  // The moment a track becomes paid-for, drop the sample link so the player
+  // reloads with the full-length version.
+  const wasUnlockedRef = useRef(unlocked);
+  useEffect(() => {
+    if (unlocked && !wasUnlockedRef.current) {
+      wasUnlockedRef.current = true;
+      setPreviewUrl(null);
+      setProgress(0);
+      setPlaying(false);
+      const el = audioRef.current;
+      if (el) { el.pause(); el.removeAttribute("src"); }
+    }
+    wasUnlockedRef.current = unlocked;
+  }, [unlocked]);
+
 
   // Once the preview URL is warmed after a pending→ready transition, auto-play
   // it so the user gets an immediate "song is ready" moment.
