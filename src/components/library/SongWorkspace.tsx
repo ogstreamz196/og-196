@@ -283,6 +283,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
     nextBriefValue !== (song.prompt ?? "") ||
     lyrics !== (song.lyrics ?? "") ||
     vocalsOnly !== !!song.vocals_only ||
+    vocal !== detectVocal(song.style) ||
     targetMinutes * 60 !== (song.target_duration_sec ?? MIN_LENGTH * 60);
 
   async function persist(
