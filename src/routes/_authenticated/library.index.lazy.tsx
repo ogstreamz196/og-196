@@ -75,6 +75,8 @@ import {
   type WizardDraft,
 } from "@/components/library/CreateNowWizard";
 import { CommunityTrackRow } from "@/components/library/CommunityTrackRow";
+import { MiniPlayer } from "@/components/library/MiniPlayer";
+import { PlaylistProvider, PlaylistOrder } from "@/hooks/use-playlist";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 
 
@@ -122,8 +124,17 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 const MIN_TRACK_MINUTES = 3;
 
 export const Route = createLazyFileRoute("/_authenticated/library/")({
-  component: LibraryPage,
+  component: LibraryRoute,
 });
+
+/** Playlist context wraps the page so rows and the media bar share one queue. */
+function LibraryRoute() {
+  return (
+    <PlaylistProvider>
+      <LibraryPage />
+    </PlaylistProvider>
+  );
+}
 
 function LibraryPage() {
   const { user } = useAuth();
@@ -1584,6 +1595,8 @@ function LibraryPage() {
                 return (
                   <div data-testid="library-cards" className="space-y-2">
                     {genSong && <SongCardSkeleton label="Generating" />}
+                    <PlaylistOrder ids={filtered.map((s) => s.id)} />
+                    <MiniPlayer />
                     <ul className="divide-y divide-border/40 overflow-hidden rounded-2xl border border-border/60 bg-card/30">
                       {filtered.map((s) => (
                         <CommunityTrackRow
@@ -1691,6 +1704,8 @@ function LibraryPage() {
                 }
                 return (
                   <div className="space-y-2">
+                    <PlaylistOrder ids={filtered.map((s) => s.id)} />
+                    <MiniPlayer />
                     <ul className="divide-y divide-border/40 overflow-hidden rounded-2xl border border-border/60 bg-card/30">
                       {filtered.map((s) => (
                         <CommunityTrackRow

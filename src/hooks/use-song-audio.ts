@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { usePlaylist } from "@/hooks/use-playlist";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadFile } from "@/lib/download-file";
 import { shareTrack } from "@/lib/share-track";
@@ -15,13 +16,23 @@ interface UseSongAudioOptions {
    * Community listeners may stream "full" for free — downloading still costs coins.
    */
   mode?: "preview" | "full";
+  /** Joins the shared playlist queue (auto-advance + mini player controls). */
+  playlistTitle?: string;
 }
 
 /**
  * Owns the signed-URL fetch, audio element lifecycle, sample cap, and play/pause
  * controls for a song card. Keeps `SongCard` purely presentational.
  */
-export function useSongAudio({ songId, hasAudio, ready, sampleSeconds, mode = "preview" }: UseSongAudioOptions) {
+export function useSongAudio({
+  songId,
+  hasAudio,
+  ready,
+  sampleSeconds,
+  mode = "preview",
+  playlistTitle,
+}: UseSongAudioOptions) {
+  const playlist = usePlaylist();
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
   const [loadingUrl, setLoadingUrl] = useState(false);
@@ -82,7 +93,10 @@ export function useSongAudio({ songId, hasAudio, ready, sampleSeconds, mode = "p
     const el = audioRef.current;
     if (!el) return;
     const onPause = () => setPlaying(false);
-    const onPlayEvt = () => setPlaying(true);
+    const onPlayEvt = () => {
+      setPlaying(true);
+      if (playlistTitle) playlist?.markCurrent(songId);
+    };
     el.addEventListener("pause", onPause);
     el.addEventListener("play", onPlayEvt);
     return () => {
@@ -91,6 +105,36 @@ export function useSongAudio({ songId, hasAudio, ready, sampleSeconds, mode = "p
     };
   }, []);
 
+
+  const playRef = useRef<() => Promise<void>>(async () => {});
+  const pauseRef = useRef<() => void>(() => {});
+
+  async function start() {
+    const url = await ensureUrl();
+    if (!url) return;
+    const el = audioRef.current;
+    if (!el) return;
+    if (el.src !== url) el.src = url;
+    await el.play();
+    setPlaying(true);
+  }
+  playRef.current = start;
+  pauseRef.current = () => {
+    audioRef.current?.pause();
+    setPlaying(false);
+  };
+
+  // Register with the surrounding playlist so the media bar can drive us.
+  useEffect(() => {
+    if (!playlist || !playlistTitle) return;
+    return playlist.register(songId, {
+      title: playlistTitle,
+      play: () => playRef.current(),
+      pause: () => pauseRef.current(),
+      el: () => audioRef.current,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playlist, songId, playlistTitle]);
 
   async function togglePlay() {
     const url = await ensureUrl();
@@ -103,6 +147,7 @@ export function useSongAudio({ songId, hasAudio, ready, sampleSeconds, mode = "p
       if (el.src !== url) el.src = url;
       await el.play();
       setPlaying(true);
+      if (playlistTitle) playlist?.markCurrent(songId);
     }
   }
 
@@ -116,6 +161,7 @@ export function useSongAudio({ songId, hasAudio, ready, sampleSeconds, mode = "p
 
   function handleEnded() {
     setPlaying(false);
+    if (playlistTitle) playlist?.handleEnded(songId);
   }
 
   return {
