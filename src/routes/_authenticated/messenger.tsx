@@ -49,18 +49,38 @@ function MessengerPage() {
   const { mode, isReady } = useMessengerMode();
   const setMode = useSetMessengerMode();
   const { foulMouth } = useFoulMouth();
+  const { user } = useAuth();
+  const uid = user?.id ?? null;
+  const [greetOpen, setGreetOpen] = useState(false);
 
   // One-time bootstrap: ?live=1 deep-link wins over saved pref on first load.
   useEffect(() => {
     if (!isReady) return;
     if (initialLive && mode !== "community") {
       setMode.mutate("community");
+      markGreeted(uid, false);
+      return;
     }
+    if (shouldGreet(uid)) setGreetOpen(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isReady]);
 
   const isCommunity = mode === "community";
   const [pendingMode, setPendingMode] = useState<MessengerMode | null>(null);
+
+  function handleGreetChoice(next: MessengerMode, remember: boolean) {
+    markGreeted(uid, remember);
+    if (next !== mode) {
+      setMode.mutate(next, { onSettled: () => setGreetOpen(false) });
+    } else {
+      setGreetOpen(false);
+    }
+  }
+
+  function handleGreetDismiss() {
+    markGreeted(uid, false);
+    setGreetOpen(false);
+  }
 
   function requestSwitch() {
     setMode.mutate(isCommunity ? "loner" : "community");
@@ -70,6 +90,7 @@ function MessengerPage() {
     if (pendingMode) setMode.mutate(pendingMode);
     setPendingMode(null);
   }
+
 
   const { ref: fillRef, height: fillHeight } = useFillViewport<HTMLDivElement>(0);
 
