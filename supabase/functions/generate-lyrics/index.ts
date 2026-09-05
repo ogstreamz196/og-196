@@ -226,7 +226,7 @@ Deno.serve(async (req) => {
       (subjectName ? `Dedicated to: ${subjectName}\n` : "") +
       `Theme / description (FOLLOW THIS PRECISELY — every verse, the hook, and the bridge must draw specific imagery, moments, feelings, and vocabulary directly from this brief; do not drift into generic filler): ${description || "(none)"}\n` +
       `Style tags: ${styleTags.join(", ") || "(none)"}\n` +
-      `Language: ${language}\n` +
+      `Language(s) — every one of these must actually be sung somewhere in the song: ${languagesLabel}\n` +
       (personalDetails
         ? `Artist profile (weave these into the lyrics naturally — reference the artist's name and a couple of personal details across the song so it feels personal, but DO NOT force them into every line, and never let them overpower the theme. Aim for the name/details to appear roughly 2–4 times total, ideally in the hook/chorus or a memorable line, spread across different sections — not back-to-back): ${personalDetails}\n`
         : "") +
