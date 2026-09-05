@@ -249,9 +249,56 @@ Deno.serve(async (req) => {
 
     const modelUrl = (model: string) =>
       `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${GEMINI_API_KEY}`;
-    
 
     await updateProgress(40, "Writing verses…");
+
+    // Turn (role, parts) history into OpenAI-style chat messages for the gateway.
+    type Turn = { role: string; parts: Array<{ text: string }> };
+    const toChatMessages = (contents: unknown[]) => [
+      { role: "system", content: systemPrompt },
+      ...(contents as Turn[]).map((c) => ({
+        role: c.role === "model" ? "assistant" : "user",
+        content: (c.parts ?? []).map((p) => p?.text ?? "").join(""),
+      })),
+    ];
+
+    type Gen = { ok: boolean; status: number; text: string; detail?: string };
+
+    // Primary: Lovable AI Gateway (no user key, current models).
+    const callGateway = async (contents: unknown[]): Promise<Gen | null> => {
+      if (!LOVABLE_API_KEY) return null;
+      for (const model of ["google/gemini-3.7-flash", "google/gemini-3.6-flash"]) {
+        try {
+          const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Lovable-API-Key": LOVABLE_API_KEY,
+            },
+            body: JSON.stringify({
+              model,
+              messages: toChatMessages(contents),
+              temperature: 0.9,
+            }),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            const text = (data?.choices?.[0]?.message?.content ?? "").toString().trim();
+            if (text) return { ok: true, status: 200, text };
+            continue;
+          }
+          const detail = await res.text();
+          console.error("Lovable AI error", model, res.status, detail.slice(0, 300));
+          // 402/403 are terminal for the workspace — surface them.
+          if (res.status === 402 || res.status === 403) {
+            return { ok: false, status: res.status, text: "", detail };
+          }
+        } catch (e) {
+          console.error("Lovable AI request failed", model, e);
+        }
+      }
+      return null;
+    };
 
     const postTo = (model: string, contents: unknown[]) =>
       fetch(modelUrl(model), {
@@ -264,23 +311,6 @@ Deno.serve(async (req) => {
         }),
       });
 
-    // Gemini regularly returns 503 "high demand" spikes. Retry with backoff on
-    // the primary model, then fall back to a lighter model before giving up so
-    // a transient upstream blip never kills (and refunds) a generation.
-    const FALLBACK_MODELS = [GEMINI_MODEL, GEMINI_MODEL, "gemini-2.5-flash-lite", "gemini-2.0-flash"];
-    const callGemini = async (contents: unknown[]) => {
-      let last: Response | null = null;
-      for (let i = 0; i < FALLBACK_MODELS.length; i++) {
-        const res = await postTo(FALLBACK_MODELS[i], contents);
-        if (res.ok) return res;
-        last = res;
-        if (res.status !== 429 && res.status < 500) return res;
-        console.error("Gemini transient error", FALLBACK_MODELS[i], res.status);
-        await new Promise((r) => setTimeout(r, 1200 * (i + 1)));
-      }
-      return last as Response;
-    };
-
     const extractText = (data: unknown) =>
       ((data as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> } | null)
         ?.candidates?.[0]?.content?.parts ?? [])
@@ -288,7 +318,35 @@ Deno.serve(async (req) => {
         .join("")
         .trim();
 
-    const res = await callGemini([{ role: "user", parts: [{ text: userPrompt }] }]);
+    // Fallback: the user's own Gemini key, retried across live model ids.
+    const FALLBACK_MODELS = [GEMINI_MODEL, GEMINI_MODEL, "gemini-2.0-flash"];
+    const callGemini = async (contents: unknown[]): Promise<Gen> => {
+      if (!GEMINI_API_KEY) {
+        return { ok: false, status: 503, text: "", detail: "No lyrics model available" };
+      }
+      let last: Gen = { ok: false, status: 503, text: "", detail: "No response" };
+      for (let i = 0; i < FALLBACK_MODELS.length; i++) {
+        const res = await postTo(FALLBACK_MODELS[i], contents);
+        if (res.ok) return { ok: true, status: 200, text: extractText(await res.json()) };
+        const detail = await res.text();
+        last = { ok: false, status: res.status, text: "", detail };
+        if (res.status !== 429 && res.status < 500) return last;
+        console.error("Gemini transient error", FALLBACK_MODELS[i], res.status);
+        await new Promise((r) => setTimeout(r, 1200 * (i + 1)));
+      }
+      return last;
+    };
+
+    const generate = async (contents: unknown[]): Promise<Gen> => {
+      const viaGateway = await callGateway(contents);
+      if (viaGateway?.ok) return viaGateway;
+      const viaGemini = await callGemini(contents);
+      if (viaGemini.ok) return viaGemini;
+      return viaGateway ?? viaGemini;
+    };
+
+    const res = await generate([{ role: "user", parts: [{ text: userPrompt }] }]);
+
 
     if (!res.ok) {
       // Refund on failure
