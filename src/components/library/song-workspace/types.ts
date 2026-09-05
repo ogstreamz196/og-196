@@ -12,6 +12,14 @@ export type WorkspaceSong = Song & {
   suno_task_id?: string | null;
   /** Suno stream URL surfaced by the "first"/"text" callback — playable while the full sample is still rendering. */
   stream_audio_url?: string | null;
+  /** Selected artist voice, e.g. "Female vocal". */
+  vocal?: string | null;
+  /** Vocals-only mode (no generated instrumental). */
+  vocals_only?: boolean | null;
+  /** Uploaded beat the vocals ride on. */
+  beat_path?: string | null;
+  /** Requested track length in seconds. */
+  target_duration_sec?: number | null;
 };
 
 export type Variation = {

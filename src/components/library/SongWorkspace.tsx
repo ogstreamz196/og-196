@@ -31,6 +31,9 @@ import { UnlockConfirmDialog } from "./UnlockConfirmDialog";
 import type { WorkspaceSong } from "./song-workspace/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
+import type { TablesUpdate } from "@/integrations/supabase/types";
+import { POOLS } from "@/lib/library-utils";
+import { LENGTH_OPTIONS, MIN_LENGTH, MAX_LENGTH } from "./CreateNowWizard";
 
 
 const LANGUAGES = [
@@ -42,13 +45,53 @@ const LANGUAGES = [
   "Vietnamese", "Indonesian", "Malay", "Hebrew",
 ];
 
-const LANG_RE = /Language:\s*(?:write the lyrics in\s*)?([A-Za-z][A-Za-z\s]{1,30})/i;
+const LANG_RE = /Language:\s*(?:write the lyrics in\s*)?([A-Za-z][A-Za-z\s+]{1,80})/i;
 
-function detectLanguage(text: string | null | undefined): string {
+const VOCALS = ["Any voice", "Female vocal", "Male vocal", "Duo"];
+
+/** Styles offered as chips — curated first, then the rest of the pool. */
+const STYLE_OPTIONS: string[] = (() => {
+  const featured = ["Drill", "Hip Hop", "Bass Beats", "Reggae", "Trap"];
+  const rest = POOLS.genre.filter((g) => !featured.includes(g));
+  return [...featured, ...rest];
+})();
+
+function toggleItem(list: string[], v: string) {
+  return list.includes(v) ? list.filter((x) => x !== v) : [...list, v];
+}
+
+/** Split a saved style string into known chips + custom leftovers. */
+function splitStyles(style: string | null | undefined): { known: string[]; extra: string } {
+  const parts = (style ?? "").split(/[,·]/).map((s) => s.trim()).filter(Boolean);
+  const known: string[] = [];
+  const extra: string[] = [];
+  for (const p of parts) {
+    const match = STYLE_OPTIONS.find((s) => s.toLowerCase() === p.toLowerCase());
+    if (match) { if (!known.includes(match)) known.push(match); }
+    else extra.push(p);
+  }
+  return { known, extra: extra.join(", ") };
+}
+
+/** Recover the voice choice from the saved style tags. */
+function detectVocal(style: string | null | undefined): string {
+  const s = (style ?? "").toLowerCase();
+  if (s.includes("duet") || s.includes("duo")) return "Duo";
+  if (s.includes("female")) return "Female vocal";
+  if (s.includes("male")) return "Male vocal";
+  return "Any voice";
+}
+
+function detectLanguages(text: string | null | undefined): string[] {
   const m = text?.match(LANG_RE);
   const found = m?.[1]?.trim();
-  if (!found) return "English";
-  return LANGUAGES.find((l) => l.toLowerCase() === found.toLowerCase()) ?? "English";
+  if (!found) return ["English"];
+  const picked = found
+    .split("+")
+    .map((p) => p.trim())
+    .map((p) => LANGUAGES.find((l) => l.toLowerCase() === p.toLowerCase()))
+    .filter((l): l is string => !!l);
+  return picked.length ? Array.from(new Set(picked)) : ["English"];
 }
 
 function setBriefLanguage(brief: string, language: string): string {
@@ -86,12 +129,21 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const balance = profile?.coin_balance ?? 0;
   const isOwner = !!profile?.id && song.user_id === profile.id;
 
-  const [title, setTitle] = useState(song.title ?? "");
+  const [title] = useState(song.title ?? "");
   const [brief, setBrief] = useState(song.prompt ?? "");
-  const [style, setStyle] = useState(song.style ?? "");
+  // Styles split into known chips + anything custom the user typed.
+  const initialStyles = useMemo(() => splitStyles(song.style), [song.style]);
+  const [styles, setStyles] = useState<string[]>(() => initialStyles.known);
+  const [styleExtra, setStyleExtra] = useState(() => initialStyles.extra);
+  const [vocal, setVocal] = useState(() => detectVocal(song.style));
+  const [vocalsOnly, setVocalsOnly] = useState(!!song.vocals_only);
+  const [targetMinutes, setTargetMinutes] = useState(() => {
+    const mins = Math.round((song.target_duration_sec ?? MIN_LENGTH * 60) / 60);
+    return Math.min(MAX_LENGTH, Math.max(MIN_LENGTH, mins || MIN_LENGTH));
+  });
 
   const [lyrics, setLyrics] = useState(song.lyrics ?? "");
-  const [language, setLanguage] = useState(() => detectLanguage(song.prompt));
+  const [languages, setLanguages] = useState<string[]>(() => detectLanguages(song.prompt));
   // Progressive disclosure: each step stays folded unless it's the one to act on.
   const [lyricsOpen, setLyricsOpen] = useState(false);
   const [step1Open, setStep1Open] = useState(!song.lyrics);
@@ -137,8 +189,18 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
 
   const lyricsRef = useRef<HTMLTextAreaElement | null>(null);
 
-  const briefLanguage = useMemo(() => detectLanguage(brief), [brief]);
-  const languageChanged = language !== briefLanguage;
+  // Derived, always-current values for saving + generating.
+  const styleTags = useMemo(
+    () => [...styles, ...styleExtra.split(/[,·]/).map((s) => s.trim())].filter(Boolean),
+    [styles, styleExtra],
+  );
+  const styleValue = styleTags.join(", ");
+  const languageValue = useMemo(
+    () => Array.from(new Set(languages.length ? languages : ["English"])).join(" + "),
+    [languages],
+  );
+  const nextBriefValue = useMemo(() => setBriefLanguage(brief, languageValue), [brief, languageValue]);
+  const languageChanged = languageValue !== detectLanguages(song.prompt).join(" + ");
 
 
   const {
@@ -217,13 +279,15 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const stage: Stage = isReady ? 3 : hasLyrics ? 2 : 1;
 
   const dirty =
-    title !== (song.title ?? "") ||
-    brief !== (song.prompt ?? "") ||
-    style !== (song.style ?? "") ||
-    lyrics !== (song.lyrics ?? "");
+    styleValue !== (song.style ?? "") ||
+    nextBriefValue !== (song.prompt ?? "") ||
+    lyrics !== (song.lyrics ?? "") ||
+    vocalsOnly !== !!song.vocals_only ||
+    vocal !== detectVocal(song.style) ||
+    targetMinutes * 60 !== (song.target_duration_sec ?? MIN_LENGTH * 60);
 
   async function persist(
-    patch: Partial<{ title: string | null; prompt: string; style: string | null; lyrics: string | null }>,
+    patch: TablesUpdate<"songs">,
   ) {
     // Community songs aren't editable by the viewer — skip persistence, keep generation working.
     if (!isOwner) return;
@@ -231,17 +295,22 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
     if (error) throw error;
   }
 
+  /** Save every editable selection (everything except name/story) plus lyrics. */
+  async function saveSettingsPatch() {
+    if (nextBriefValue !== brief) setBrief(nextBriefValue);
+    await persist({
+      prompt: nextBriefValue,
+      style: styleValue || null,
+      lyrics: lyrics.trim() || null,
+      vocals_only: vocalsOnly,
+      target_duration_sec: targetMinutes * 60,
+    });
+  }
+
   async function handleSave() {
     setSaving(true);
     try {
-      const nextBrief = languageChanged ? setBriefLanguage(brief, language) : brief;
-      if (nextBrief !== brief) setBrief(nextBrief);
-      await persist({
-        title: title.trim() || null,
-        prompt: nextBrief,
-        style: style.trim() || null,
-        lyrics: lyrics.trim() || null,
-      });
+      await saveSettingsPatch();
       toast.success("Changes saved");
       onSaved?.();
     } catch (e) {
@@ -250,6 +319,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       setSaving(false);
     }
   }
+
 
 
   async function generateLyrics() {
@@ -269,23 +339,22 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
     }
     setGenLyrics(true);
     try {
-      const nextBrief = languageChanged ? setBriefLanguage(brief, language) : brief;
-      if (nextBrief !== brief) setBrief(nextBrief);
-      if (dirty || nextBrief !== (song.prompt ?? "")) {
-        await persist({ title: title.trim() || null, prompt: nextBrief, style: style.trim() || null });
-      }
+      await saveSettingsPatch();
 
       const { data, error } = await supabase.functions.invoke("generate-lyrics", {
         body: {
           song_id: isOwner ? song.id : null,
           songName: title.trim(),
-          description: nextBrief.trim(),
-          styleTags: style ? style.split("·").map((s) => s.trim()).filter(Boolean) : [],
-
+          description: nextBriefValue.trim(),
+          styleTags: styleTags,
+          vocal: vocal && vocal !== "Any voice" ? vocal : null,
+          vocals_only: vocalsOnly,
+          target_duration_sec: targetMinutes * 60,
           foulMouth,
-          language,
+          language: languageValue,
         },
       });
+
 
       if (error) {
         const msg = invokeError(error, "Lyrics generation failed");
@@ -339,23 +408,21 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
     try { localStorage.setItem("welcome.personal_banner.dismissed", "1"); } catch {}
     try { window.dispatchEvent(new CustomEvent("og:generate-start")); } catch {}
     try {
-      if (dirty) {
-        await persist({
-          title: title.trim() || null,
-          prompt: brief,
-          style: style.trim() || null,
-          lyrics: lyrics.trim() || null,
-        });
-      }
+      if (dirty) await saveSettingsPatch();
       const { data, error } = await supabase.functions.invoke("suno-generate", {
         body: {
           song_id: isOwner ? song.id : null,
-          prompt: brief,
+          prompt: nextBriefValue,
           lyrics,
           title: title.trim() || null,
-          style: style.trim() || song.style || null,
+          style: styleValue || song.style || null,
+          vocal: vocal && vocal !== "Any voice" ? vocal : null,
+          vocals_only: vocalsOnly,
+          beat_path: song.beat_path ?? null,
+          target_duration_sec: targetMinutes * 60,
         },
       });
+
 
       if (error) {
         const msg = invokeError(error, "Could not start generation");
@@ -527,54 +594,136 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
               </CollapsibleTrigger>
               <CollapsibleContent>
             <CardContent className="space-y-4">
-                  <div className="grid gap-4 sm:grid-cols-[1fr_220px]">
-                    <div className="space-y-1.5">
-                      <Label htmlFor="song-title">Title</Label>
-                      <Input
-                        id="song-title"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        placeholder="Untitled"
-                      />
+                  {/* Locked identity — the track name and story stay as created */}
+                  <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+                    <p className="text-sm font-semibold">{title.trim() || "Untitled track"}</p>
+                    <p className="mt-1 line-clamp-3 text-xs text-muted-foreground">
+                      {brief.trim() || "No description saved."}
+                    </p>
+                    <p className="mt-2 text-[11px] text-muted-foreground/80">
+                      Name and story can't be changed — everything below can.
+                    </p>
+                  </div>
+
+                  {/* Styles — stack as many as you like */}
+                  <div className="space-y-2">
+                    <Label>Styles <span className="text-xs font-normal text-muted-foreground">(pick one or more)</span></Label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {STYLE_OPTIONS.map((s) => {
+                        const on = styles.includes(s);
+                        return (
+                          <button
+                            key={s}
+                            type="button"
+                            aria-pressed={on}
+                            onClick={() => setStyles((list) => toggleItem(list, s))}
+                            className={cn(
+                              "rounded-full border px-3 py-1.5 text-xs font-semibold transition",
+                              on
+                                ? "border-primary bg-primary/15 text-foreground shadow-[0_0_14px_-6px_hsl(var(--primary))]"
+                                : "border-border bg-background/40 text-muted-foreground hover:border-primary/50",
+                            )}
+                          >
+                            {s}
+                          </button>
+                        );
+                      })}
                     </div>
+                    <Input
+                      id="song-style-extra"
+                      value={styleExtra}
+                      onChange={(e) => setStyleExtra(e.target.value)}
+                      placeholder="Add your own, e.g. dark piano, 90s boom bap"
+                    />
+                  </div>
+
+                  {/* Languages — multi select, English always included */}
+                  <div className="space-y-2">
+                    <Label>Languages <span className="text-xs font-normal text-muted-foreground">(mix as many as you like)</span></Label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {LANGUAGES.map((l) => {
+                        const on = languages.includes(l);
+                        return (
+                          <button
+                            key={l}
+                            type="button"
+                            aria-pressed={on}
+                            onClick={() => setLanguages((list) => {
+                              const next = toggleItem(list, l);
+                              return next.length ? next : ["English"];
+                            })}
+                            className={cn(
+                              "rounded-full border px-3 py-1.5 text-xs font-semibold transition",
+                              on
+                                ? "border-primary bg-primary/15 text-foreground"
+                                : "border-border bg-background/40 text-muted-foreground hover:border-primary/50",
+                            )}
+                          >
+                            {l}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Voice + length */}
+                  <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-1.5">
-                      <Label htmlFor="song-language">Language</Label>
-                      <Select value={language} onValueChange={setLanguage}>
-                        <SelectTrigger id="song-language">
+                      <Label htmlFor="song-vocal">Voice</Label>
+                      <Select value={vocal || "Any voice"} onValueChange={setVocal}>
+                        <SelectTrigger id="song-vocal">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {LANGUAGES.map((l) => (
-                            <SelectItem key={l} value={l}>{l}</SelectItem>
+                          {VOCALS.map((v) => (
+                            <SelectItem key={v} value={v}>{v}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="song-length">Track length</Label>
+                      <Select
+                        value={String(targetMinutes)}
+                        onValueChange={(v) => setTargetMinutes(Number(v))}
+                      >
+                        <SelectTrigger id="song-length">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {LENGTH_OPTIONS.map((m) => (
+                            <SelectItem key={m} value={String(m)}>
+                              {m} min{m > MIN_LENGTH ? ` · +${m - MIN_LENGTH} coin${m - MIN_LENGTH === 1 ? "" : "s"}` : ""}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="song-style">Style</Label>
-                    <Input
-                      id="song-style"
-                      value={style}
-                      onChange={(e) => setStyle(e.target.value)}
-                      placeholder="Drill · dark piano · gritty male vocal"
+
+                  {/* Vocals only */}
+                  <label
+                    htmlFor="vocals-only-toggle"
+                    className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-muted/20 px-3 py-2.5 text-sm font-medium"
+                  >
+                    <span className="min-w-0">
+                      Vocals only {vocalsOnly ? "· ON" : "· OFF"}
+                      <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
+                        A cappella vocals with no generated instrumental.
+                      </span>
+                    </span>
+                    <Switch
+                      id="vocals-only-toggle"
+                      checked={vocalsOnly}
+                      onCheckedChange={setVocalsOnly}
                     />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="song-brief">What it's about</Label>
-                    <Textarea
-                      id="song-brief"
-                      value={brief}
-                      onChange={(e) => setBrief(e.target.value)}
-                      rows={4}
-                      placeholder="Who the song is about, the mood, memories…"
-                    />
-                  </div>
+                  </label>
+
 
 
               {hasLyrics && languageChanged && (
                 <div className="rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-xs text-foreground/80">
-                  Language changed to <b>{language}</b> — regenerate lyrics to rewrite them.
+                  Language changed to <b>{languageValue}</b> — regenerate lyrics to rewrite them.
                 </div>
               )}
 
@@ -1202,19 +1351,31 @@ function GeneratingProgress({
         ))}
       </div>
 
-      {/* Animated waveform skeleton */}
-      <div className="flex h-14 items-end gap-1" aria-hidden="true">
-        {Array.from({ length: 28 }).map((_, i) => (
-          <span
-            key={i}
-            className="flex-1 rounded-sm bg-gradient-to-t from-primary/50 to-primary shadow-[0_0_8px_hsl(var(--primary)/0.55)]"
-            style={{
-              height: `${30 + Math.abs(Math.sin((i + elapsed) * 0.6)) * 70}%`,
-              opacity: 0.45 + (i % 4) * 0.15,
-              transition: "height 320ms ease-in-out",
-            }}
-          />
-        ))}
+      {/* Animated waveform skeleton with the live percentage front and centre */}
+      <div className="relative h-24 overflow-hidden rounded-xl border border-primary/25 bg-background/30 p-2 sm:h-28">
+        <div className="flex h-full items-end gap-1 opacity-60" aria-hidden="true">
+          {Array.from({ length: 28 }).map((_, i) => (
+            <span
+              key={i}
+              className="flex-1 rounded-sm bg-gradient-to-t from-primary/50 to-primary shadow-[0_0_8px_hsl(var(--primary)/0.55)]"
+              style={{
+                height: `${30 + Math.abs(Math.sin((i + elapsed) * 0.6)) * 70}%`,
+                opacity: 0.45 + (i % 4) * 0.15,
+                transition: "height 320ms ease-in-out",
+              }}
+            />
+          ))}
+        </div>
+        <div className="pointer-events-none absolute inset-0 grid place-items-center">
+          <div className="rounded-2xl bg-background/55 px-4 py-1.5 text-center backdrop-blur-sm">
+            <span className="block text-4xl font-black leading-none tabular-nums text-white drop-shadow-[0_0_18px_hsl(var(--primary))] sm:text-5xl">
+              {pct}%
+            </span>
+            <span className="mt-1 block text-[10px] font-semibold uppercase tracking-[0.2em] text-primary/90">
+              {status.etaSeconds > 0 ? `ETA ${etaLabel}` : etaLabel}
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Progress bar — thicker, glowing, with moving shimmer */}
