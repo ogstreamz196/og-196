@@ -757,7 +757,10 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                 </Button>
               </div>
             </CardContent>
+              </CollapsibleContent>
+            </Collapsible>
           </Card>
+
 
           {/* Stage 3 — Final song */}
           <Card className={cn(stage === 3 && "border-primary/40 shadow-glow", stage < 3 && "opacity-60")}>
