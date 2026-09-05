@@ -1,11 +1,13 @@
-// Lyrics generation using the user's own Gemini API key (stored in Supabase secrets).
-// Calls Google's Generative Language API directly — no Lovable AI gateway involved.
+// Lyrics generation. Primary provider is the Lovable AI Gateway (always-current
+// models, no user key); the user's own Gemini key is kept as a fallback.
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { handlePreflight, jsonResponse } from "../_shared/cors.ts";
 import { adminClient, requireUser } from "../_shared/clients.ts";
 
-const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!;
+const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY") ?? "";
+const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY") ?? "";
 const GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") ?? "gemini-2.5-flash";
+
 
 async function getSetting(admin: SupabaseClient, key: string, fallback: number): Promise<number> {
   const { data } = await admin.from("app_settings").select("value").eq("key", key).maybeSingle();
@@ -20,7 +22,7 @@ Deno.serve(async (req) => {
   if (pre) return pre;
 
   try {
-    if (!GEMINI_API_KEY) return jsonResponse({ error: "GEMINI_API_KEY not configured" }, 500);
+    if (!GEMINI_API_KEY && !LOVABLE_API_KEY) return jsonResponse({ error: "No lyrics model configured" }, 500);
 
     const auth = await requireUser(req);
     if (auth.error) return auth.error;
@@ -249,9 +251,56 @@ Deno.serve(async (req) => {
 
     const modelUrl = (model: string) =>
       `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${GEMINI_API_KEY}`;
-    
 
     await updateProgress(40, "Writing verses…");
+
+    // Turn (role, parts) history into OpenAI-style chat messages for the gateway.
+    type Turn = { role: string; parts: Array<{ text: string }> };
+    const toChatMessages = (contents: unknown[]) => [
+      { role: "system", content: systemPrompt },
+      ...(contents as Turn[]).map((c) => ({
+        role: c.role === "model" ? "assistant" : "user",
+        content: (c.parts ?? []).map((p) => p?.text ?? "").join(""),
+      })),
+    ];
+
+    type Gen = { ok: boolean; status: number; text: string; detail?: string };
+
+    // Primary: Lovable AI Gateway (no user key, current models).
+    const callGateway = async (contents: unknown[]): Promise<Gen | null> => {
+      if (!LOVABLE_API_KEY) return null;
+      for (const model of ["google/gemini-3.7-flash", "google/gemini-3.6-flash"]) {
+        try {
+          const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Lovable-API-Key": LOVABLE_API_KEY,
+            },
+            body: JSON.stringify({
+              model,
+              messages: toChatMessages(contents),
+              temperature: 0.9,
+            }),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            const text = (data?.choices?.[0]?.message?.content ?? "").toString().trim();
+            if (text) return { ok: true, status: 200, text };
+            continue;
+          }
+          const detail = await res.text();
+          console.error("Lovable AI error", model, res.status, detail.slice(0, 300));
+          // 402/403 are terminal for the workspace — surface them.
+          if (res.status === 402 || res.status === 403) {
+            return { ok: false, status: res.status, text: "", detail };
+          }
+        } catch (e) {
+          console.error("Lovable AI request failed", model, e);
+        }
+      }
+      return null;
+    };
 
     const postTo = (model: string, contents: unknown[]) =>
       fetch(modelUrl(model), {
@@ -264,23 +313,6 @@ Deno.serve(async (req) => {
         }),
       });
 
-    // Gemini regularly returns 503 "high demand" spikes. Retry with backoff on
-    // the primary model, then fall back to a lighter model before giving up so
-    // a transient upstream blip never kills (and refunds) a generation.
-    const FALLBACK_MODELS = [GEMINI_MODEL, GEMINI_MODEL, "gemini-2.5-flash-lite", "gemini-2.0-flash"];
-    const callGemini = async (contents: unknown[]) => {
-      let last: Response | null = null;
-      for (let i = 0; i < FALLBACK_MODELS.length; i++) {
-        const res = await postTo(FALLBACK_MODELS[i], contents);
-        if (res.ok) return res;
-        last = res;
-        if (res.status !== 429 && res.status < 500) return res;
-        console.error("Gemini transient error", FALLBACK_MODELS[i], res.status);
-        await new Promise((r) => setTimeout(r, 1200 * (i + 1)));
-      }
-      return last as Response;
-    };
-
     const extractText = (data: unknown) =>
       ((data as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> } | null)
         ?.candidates?.[0]?.content?.parts ?? [])
@@ -288,7 +320,35 @@ Deno.serve(async (req) => {
         .join("")
         .trim();
 
-    const res = await callGemini([{ role: "user", parts: [{ text: userPrompt }] }]);
+    // Fallback: the user's own Gemini key, retried across live model ids.
+    const FALLBACK_MODELS = [GEMINI_MODEL, GEMINI_MODEL, "gemini-2.0-flash"];
+    const callGemini = async (contents: unknown[]): Promise<Gen> => {
+      if (!GEMINI_API_KEY) {
+        return { ok: false, status: 503, text: "", detail: "No lyrics model available" };
+      }
+      let last: Gen = { ok: false, status: 503, text: "", detail: "No response" };
+      for (let i = 0; i < FALLBACK_MODELS.length; i++) {
+        const res = await postTo(FALLBACK_MODELS[i], contents);
+        if (res.ok) return { ok: true, status: 200, text: extractText(await res.json()) };
+        const detail = await res.text();
+        last = { ok: false, status: res.status, text: "", detail };
+        if (res.status !== 429 && res.status < 500) return last;
+        console.error("Gemini transient error", FALLBACK_MODELS[i], res.status);
+        await new Promise((r) => setTimeout(r, 1200 * (i + 1)));
+      }
+      return last;
+    };
+
+    const generate = async (contents: unknown[]): Promise<Gen> => {
+      const viaGateway = await callGateway(contents);
+      if (viaGateway?.ok) return viaGateway;
+      const viaGemini = await callGemini(contents);
+      if (viaGemini.ok) return viaGemini;
+      return viaGateway ?? viaGemini;
+    };
+
+    const res = await generate([{ role: "user", parts: [{ text: userPrompt }] }]);
+
 
     if (!res.ok) {
       // Refund on failure
@@ -299,16 +359,17 @@ Deno.serve(async (req) => {
       await admin.from("profiles").update({ coin_balance: ((prof as { coin_balance?: number } | null)?.coin_balance ?? 0) + coinCost }).eq("id", user.id);
       await updateProgress(0, "");
 
-      if (res.status === 429) return jsonResponse({ error: "Gemini rate limit, try again shortly" }, 429);
-      const txt = await res.text();
-      console.error("Gemini API error", res.status, txt);
+      if (res.status === 429) return jsonResponse({ error: "AI is busy right now — try again shortly" }, 429);
+      if (res.status === 402) return jsonResponse({ error: "AI credits exhausted — top up to keep creating" }, 402);
+      const txt = res.detail ?? "";
+      console.error("Lyrics model error", res.status, txt);
       return jsonResponse({ error: "Lyrics generation failed", detail: txt.slice(0, 500) }, 502);
     }
 
     await updateProgress(80, "Polishing bars…");
 
-    const data = await res.json();
-    let lyrics = extractText(data);
+    let lyrics = res.text;
+
 
     // Length guard: enforce the minimum target. If the model came back short,
     // ask it to extend the SAME song (never a new one), up to twice.
@@ -316,7 +377,7 @@ Deno.serve(async (req) => {
     for (let attempt = 0; attempt < 2 && lyrics && wordCount(lyrics) < minWords; attempt++) {
       await updateProgress(88, "Extending to full length…");
       try {
-        const topUp = await callGemini([
+        const topUp = await generate([
           { role: "user", parts: [{ text: userPrompt }] },
           { role: "model", parts: [{ text: lyrics }] },
           {
@@ -328,10 +389,11 @@ Deno.serve(async (req) => {
           },
         ]);
         if (topUp.ok) {
-          const extended = extractText(await topUp.json());
+          const extended = topUp.text;
           if (wordCount(extended) > wordCount(lyrics)) lyrics = extended;
           else break;
         } else break;
+
       } catch (e) {
         console.error("lyrics top-up failed", e);
         break;
