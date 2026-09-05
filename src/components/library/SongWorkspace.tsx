@@ -642,25 +642,31 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                 </Button>
               </div>
             </CardContent>
+              </CollapsibleContent>
+            </Collapsible>
           </Card>
 
           {/* Stage 2 — Sample */}
           <Card className={cn(stage === 2 && "border-primary/40 shadow-glow", stage < 2 && "opacity-60")}>
-            <CardHeader>
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Play className="h-4 w-4 text-primary" />
+            <Collapsible open={step2Open} onOpenChange={setStep2Open}>
+              <CollapsibleTrigger className="flex w-full items-center justify-between gap-3 p-4 text-left sm:p-5">
+                <div className="min-w-0">
+                  <span className="flex items-center gap-2 text-lg font-semibold">
+                    <Play className="h-4 w-4 shrink-0 text-primary" />
                     2 · Preview
-                  </CardTitle>
-                  <CardDescription>
-                    Free {settings?.sample_seconds ?? 60}s sample.
-                  </CardDescription>
-
+                  </span>
+                  <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+                    {isReady
+                      ? `Free ${settings?.sample_seconds ?? 60}s sample ready`
+                      : isPending
+                        ? "Generating…"
+                        : `Free ${settings?.sample_seconds ?? 60}s sample · ${previewCost} coins`}
+                  </span>
                 </div>
-                <CostBadge cost={previewCost} />
-              </div>
-            </CardHeader>
+                <ChevronDown className={cn("h-5 w-5 shrink-0 transition-transform", step2Open && "rotate-180")} />
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+
             <CardContent className="space-y-3">
               {!hasLyrics && (
                 <p className="text-sm text-muted-foreground">
