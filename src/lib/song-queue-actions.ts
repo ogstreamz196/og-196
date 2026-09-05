@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { languageFromPrompt } from "@/lib/library-utils";
 
 /**
  * Shared actions for the generation queue / history surfaces:
