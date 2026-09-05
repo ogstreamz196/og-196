@@ -131,7 +131,7 @@ export const postCommunityMessage = createServerFn({ method: "POST" })
             Authorization: `Bearer ${apiKey}`,
           },
           body: JSON.stringify({
-            model: "google/gemini-2.5-flash",
+            model: "google/gemini-3.7-flash",
             temperature: useFoul ? 1.05 : 0.85,
             max_tokens: useFoul ? 200 : 120,
             messages: [
