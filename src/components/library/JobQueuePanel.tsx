@@ -147,6 +147,7 @@ export function JobQueuePanel({ songs, onRemoved }: { songs: Song[]; onRemoved?:
           lyrics: (song as { lyrics?: string }).lyrics ?? "",
           title: song.title ?? null,
           style: (song as { style?: string }).style ?? null,
+          language: languageFromPrompt(song.prompt ?? null),
         },
       });
       if (error) throw new Error(invokeError(error, "Retry failed"));
