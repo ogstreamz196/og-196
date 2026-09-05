@@ -1,11 +1,13 @@
-// Lyrics generation using the user's own Gemini API key (stored in Supabase secrets).
-// Calls Google's Generative Language API directly — no Lovable AI gateway involved.
+// Lyrics generation. Primary provider is the Lovable AI Gateway (always-current
+// models, no user key); the user's own Gemini key is kept as a fallback.
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { handlePreflight, jsonResponse } from "../_shared/cors.ts";
 import { adminClient, requireUser } from "../_shared/clients.ts";
 
-const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!;
+const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY") ?? "";
+const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY") ?? "";
 const GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") ?? "gemini-2.5-flash";
+
 
 async function getSetting(admin: SupabaseClient, key: string, fallback: number): Promise<number> {
   const { data } = await admin.from("app_settings").select("value").eq("key", key).maybeSingle();
