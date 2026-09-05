@@ -5,6 +5,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { PresenceTracker } from "@/hooks/use-presence";
 import { SignInTracker } from "@/components/auth/SignInTracker";
 import { PermissionsGate } from "@/components/auth/PermissionsGate";
+import { RoyaltyCelebration } from "@/components/celebration/RoyaltyCelebration";
 
 // Floating OG Bot widget removed site-wide. The full chat lives on /messenger.
 
@@ -42,6 +43,7 @@ export const Route = createFileRoute("/_authenticated")({
         <PresenceTracker />
         <TrackerLoader userId={user.id} />
         <PermissionsGate userId={user.id} />
+        <RoyaltyCelebration userId={user.id} />
         <Outlet />
 
       </AppShell>

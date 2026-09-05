@@ -198,7 +198,7 @@ function MessengerPage() {
             ) : (
               <MessageCircle className="h-4 w-4 text-primary" />
             )}
-             <span className="max-w-[74px] whitespace-normal text-center leading-tight sm:max-w-none sm:whitespace-pre-line">{setMode.isPending ? "Saving…" : isCommunity ? "Private" : "Global"}</span>
+             <span className="max-w-[74px] whitespace-normal text-center leading-tight sm:max-w-none sm:whitespace-pre-line">{setMode.isPending ? "Saving…" : isCommunity ? "Go Private" : "Go Global"}</span>
 
           </button>
         </header>
