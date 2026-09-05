@@ -185,14 +185,14 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
       });
   }, [isReady, previewUrl]);
 
-  // Enforce sample-seconds cap ONLY for the owner preview. Community viewers
-  // hear the full track for free; the charge is on download.
+  // Enforce the sample cap only when the track hasn't been paid for. Once it's
+  // unlocked (or you're listening to a community track) the whole song plays.
   useEffect(() => {
     const el = audioRef.current;
     if (!el) return;
     const onTime = () => {
       setProgress(el.currentTime);
-      if (!communityMode && el.currentTime >= sampleSeconds) {
+      if (!communityMode && !unlocked && el.currentTime >= sampleSeconds) {
         el.pause();
         el.currentTime = 0;
         setPlaying(false);
@@ -200,7 +200,8 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
     };
     el.addEventListener("timeupdate", onTime);
     return () => el.removeEventListener("timeupdate", onTime);
-  }, [sampleSeconds, communityMode]);
+  }, [sampleSeconds, communityMode, unlocked]);
+
 
 
   async function togglePlay() {
