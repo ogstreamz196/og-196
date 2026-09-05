@@ -73,6 +73,15 @@ function splitStyles(style: string | null | undefined): { known: string[]; extra
   return { known, extra: extra.join(", ") };
 }
 
+/** Recover the voice choice from the saved style tags. */
+function detectVocal(style: string | null | undefined): string {
+  const s = (style ?? "").toLowerCase();
+  if (s.includes("duet") || s.includes("duo")) return "Duo";
+  if (s.includes("female")) return "Female vocal";
+  if (s.includes("male")) return "Male vocal";
+  return "Any voice";
+}
+
 function detectLanguages(text: string | null | undefined): string[] {
   const m = text?.match(LANG_RE);
   const found = m?.[1]?.trim();
@@ -126,7 +135,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const initialStyles = useMemo(() => splitStyles(song.style), [song.style]);
   const [styles, setStyles] = useState<string[]>(() => initialStyles.known);
   const [styleExtra, setStyleExtra] = useState(() => initialStyles.extra);
-  const [vocal, setVocal] = useState(song.vocal ?? "");
+  const [vocal, setVocal] = useState(() => detectVocal(song.style));
   const [vocalsOnly, setVocalsOnly] = useState(!!song.vocals_only);
   const [targetMinutes, setTargetMinutes] = useState(() => {
     const mins = Math.round((song.target_duration_sec ?? MIN_LENGTH * 60) / 60);
@@ -273,7 +282,6 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
     styleValue !== (song.style ?? "") ||
     nextBriefValue !== (song.prompt ?? "") ||
     lyrics !== (song.lyrics ?? "") ||
-    (vocal || "") !== (song.vocal ?? "") ||
     vocalsOnly !== !!song.vocals_only ||
     targetMinutes * 60 !== (song.target_duration_sec ?? MIN_LENGTH * 60);
 
@@ -293,7 +301,6 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       prompt: nextBriefValue,
       style: styleValue || null,
       lyrics: lyrics.trim() || null,
-      vocal: vocal && vocal !== "Any voice" ? vocal : null,
       vocals_only: vocalsOnly,
       target_duration_sec: targetMinutes * 60,
     });
