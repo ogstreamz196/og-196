@@ -45,6 +45,8 @@ export function CommunityRoom() {
   const olderFn = useServerFn(listOlderCommunityMessages);
   const postFn = useServerFn(postCommunityMessage);
   const clearFn = useServerFn(clearCommunityMessages);
+  const tallyFn = useServerFn(getBattleTally);
+  const endFn = useServerFn(endBattle);
   const { foulMouth } = useFoulMouth();
   const { isDev, isAdmin } = useRole();
   const canClear = isDev || isAdmin;
@@ -54,7 +56,15 @@ export function CommunityRoom() {
     queryFn: () => listFn(),
     staleTime: 10_000,
   });
+  const { data: tally } = useQuery<BattleTally>({
+    queryKey: ["battle-tally"],
+    queryFn: () => tallyFn(),
+    staleTime: 30_000,
+  });
+  const [lastEarned, setLastEarned] = useState<number | null>(null);
+  const pendingCoins = ((tally?.pendingTenths ?? 0) / 10).toFixed(2);
   const messages: CommunityMessage[] = useMemo(() => data?.messages ?? [], [data?.messages]);
+
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const composerRef = useRef<HTMLTextAreaElement>(null);
