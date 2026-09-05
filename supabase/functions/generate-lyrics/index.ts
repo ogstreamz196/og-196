@@ -375,7 +375,7 @@ Deno.serve(async (req) => {
     for (let attempt = 0; attempt < 2 && lyrics && wordCount(lyrics) < minWords; attempt++) {
       await updateProgress(88, "Extending to full length…");
       try {
-        const topUp = await callGemini([
+        const topUp = await generate([
           { role: "user", parts: [{ text: userPrompt }] },
           { role: "model", parts: [{ text: lyrics }] },
           {
@@ -387,10 +387,11 @@ Deno.serve(async (req) => {
           },
         ]);
         if (topUp.ok) {
-          const extended = extractText(await topUp.json());
+          const extended = topUp.text;
           if (wordCount(extended) > wordCount(lyrics)) lyrics = extended;
           else break;
         } else break;
+
       } catch (e) {
         console.error("lyrics top-up failed", e);
         break;
