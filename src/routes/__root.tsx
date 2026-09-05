@@ -18,6 +18,7 @@ import { ensureCurrentUserBootstrap } from "@/lib/user-bootstrap.functions";
 import { useSiteContentRealtime } from "@/hooks/use-site-content";
 import { DisplayPrefsBridge } from "@/hooks/use-display-prefs";
 import { AuraBridge } from "@/hooks/use-aura";
+import { SingleAudioBridge } from "@/components/SingleAudioBridge";
 import { UserActivityArchiver } from "@/hooks/use-user-activity-archiver";
 import { ActivityTracker } from "@/hooks/use-activity-tracker";
 
@@ -344,6 +345,7 @@ function RootComponent() {
         <SiteContentRealtimeBridge />
         <DisplayPrefsBridge />
         <AuraBridge />
+        <SingleAudioBridge />
         <UserActivityArchiver />
         <ActivityTracker />
         <Outlet />
