@@ -460,11 +460,11 @@ export function CommunityRoom() {
               submit(e as unknown as React.FormEvent);
             }
           }}
-          placeholder="Say something to the OG Community…"
+          placeholder="Message the community…"
           rows={1}
           maxLength={1000}
           enterKeyHint="send"
-          className="min-h-[52px] max-h-32 resize-none border-0 bg-transparent px-3 text-[17px] leading-relaxed focus-visible:ring-0 sm:min-h-[44px] sm:text-sm"
+          className="min-h-[52px] max-h-32 resize-none overflow-y-auto border-0 bg-transparent px-3 text-base leading-relaxed focus-visible:ring-0 sm:min-h-[44px] sm:text-sm"
           disabled={send.isPending}
         />
         <Button
