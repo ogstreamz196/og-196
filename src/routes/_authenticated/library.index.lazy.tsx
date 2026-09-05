@@ -1416,8 +1416,19 @@ function LibraryPage() {
         </section>
       )}
 
-      {/* Finished track — auto-plays the preview and unlocks the full version inline */}
-      {freshTrack && !pipelineActive && (
+      {/* Masterpiece player — replaces the wizard popup the moment a track lands */}
+      <MasterpieceDialog
+        open={masterpieceOpen && !pipelineActive}
+        onOpenChange={setMasterpieceOpen}
+        song={freshTrack}
+        sampleSeconds={sampleSeconds}
+        unlockCost={unlockCost}
+        balance={profile?.coin_balance ?? 0}
+        autoUnlockPrompt={autoUnlockPrompt}
+      />
+
+      {/* Finished track — stays on the page after the popup is closed */}
+      {freshTrack && !pipelineActive && !masterpieceOpen && (
         <FreshTrackCard
           key={freshTrack.id}
           song={freshTrack}
