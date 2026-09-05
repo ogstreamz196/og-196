@@ -457,6 +457,7 @@ function LibraryPage() {
           lyrics,
           title: title.trim() || null,
           style: style || null,
+          language: selections.language || null,
           target_duration_sec: targetDurationSec,
         },
       });
