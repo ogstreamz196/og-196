@@ -730,6 +730,7 @@ function LibraryPage() {
           lyrics: nextLyrics,
           title: songTitle || null,
           style: songStyle || null,
+          language: songLanguage || null,
           vocal: songVocal || null,
           vocals_only: vocalsOnly,
           beat_path: beatPath || null,
