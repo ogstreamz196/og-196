@@ -337,71 +337,94 @@ export function CommunityRoom() {
   const activeTypers = Object.values(typingUsers);
 
   return (
-    <div className="flex h-full min-h-0 flex-1 flex-col gap-3 p-3 sm:gap-2 sm:p-3">
-      <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-2 rounded-xl border border-primary/30 bg-primary/5 px-2.5 py-1.5 sm:flex-nowrap sm:px-3">
-        <div className="flex min-w-0 items-center gap-2">
-          <Coins className="h-4 w-4 shrink-0 text-primary" aria-hidden />
+    <div className="flex h-full min-h-0 flex-1 flex-col gap-2 p-2 sm:p-2.5">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 rounded-xl border border-primary/30 bg-primary/5 px-2 py-1 sm:flex-nowrap sm:px-2.5">
+        <div className="flex min-w-0 items-center gap-1.5">
+          <Coins className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden />
           <div className="min-w-0 leading-tight">
-            <p className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            <p className="whitespace-nowrap text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
               Battle purse
             </p>
             <p
-              className="truncate text-sm font-black tabular-nums text-foreground"
+              className="truncate text-xs font-black tabular-nums text-foreground sm:text-sm"
               aria-live="polite"
             >
               {pendingCoins} OG
               {lastEarned ? (
-                <span className="ml-1.5 animate-[pop_0.3s_ease-out] text-xs font-bold text-primary">
+                <span className="ml-1 animate-[pop_0.3s_ease-out] text-[10px] font-bold text-primary">
                   +{(lastEarned / 10).toFixed(2)}
                 </span>
               ) : null}
             </p>
           </div>
         </div>
-        <div className="flex shrink-0 items-center gap-1.5 max-sm:w-full">
+        <div className="flex shrink-0 items-center gap-1.5 max-sm:w-full sm:ml-auto">
           <Button
             type="button"
             variant="outline"
             size="sm"
-            className="h-8 gap-1.5 text-[11px] font-black uppercase tracking-wide max-sm:flex-1"
+            className="h-7 gap-1 text-[10px] font-black uppercase tracking-wide max-sm:flex-1"
             aria-expanded={showBoard}
             onClick={() => setShowBoard((v) => !v)}
           >
-            <Trophy className="h-3.5 w-3.5" />
+            <Trophy className="h-3 w-3" />
             Ranks
           </Button>
           <Button
             type="button"
             variant="destructive"
             size="sm"
-            className="h-8 gap-1.5 text-[11px] font-black uppercase tracking-wide max-sm:flex-1"
+            className="h-7 gap-1 text-[10px] font-black uppercase tracking-wide max-sm:flex-1"
             disabled={quit.isPending}
             onClick={() => quit.mutate()}
           >
             {quit.isPending ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              <Loader2 className="h-3 w-3 animate-spin" />
             ) : (
-              <Flag className="h-3.5 w-3.5" />
+              <Flag className="h-3 w-3" />
             )}
-            <span className="sm:hidden">End battle</span>
-            <span className="hidden sm:inline">End battle, I quit</span>
+            <span className="sm:hidden">End</span>
+            <span className="hidden sm:inline">End battle</span>
           </Button>
+          {canClear && (
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              className="h-7 gap-1 text-[10px] font-black uppercase tracking-wide"
+              disabled={clear.isPending}
+              title="Clear live chat"
+              onClick={() => {
+                if (window.confirm("Wipe ALL Battle Zone messages? This cannot be undone.")) {
+                  clear.mutate();
+                }
+              }}
+            >
+              {clear.isPending ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <Trash2 className="h-3 w-3" />
+              )}
+              <span className="sm:hidden">Clear</span>
+              <span className="hidden sm:inline">Clear chat</span>
+            </Button>
+          )}
         </div>
       </div>
 
       {showBoard && (
-        <div className="rounded-xl border border-primary/25 bg-background/70 p-2.5">
-          <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+        <div className="rounded-xl border border-primary/25 bg-background/70 p-2">
+          <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
             Most savage roasters
           </p>
           {boardLoading ? (
-            <p className="py-2 text-xs text-muted-foreground">Counting the bodies…</p>
+            <p className="py-1.5 text-xs text-muted-foreground">Counting the bodies…</p>
           ) : (board?.rows.length ?? 0) === 0 ? (
-            <p className="py-2 text-xs text-muted-foreground">
+            <p className="py-1.5 text-xs text-muted-foreground">
               Nobody has banked a win yet. Be the first.
             </p>
           ) : (
-            <ol className="space-y-1">
+            <ol className="space-y-0.5">
               {board!.rows.slice(0, 10).map((row, i) => (
                 <li
                   key={row.userId}
@@ -420,34 +443,6 @@ export function CommunityRoom() {
               ))}
             </ol>
           )}
-        </div>
-      )}
-
-
-      {canClear && (
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-destructive/30 bg-destructive/5 px-2.5 py-1.5 sm:px-3">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-destructive/80">
-            Dev controls
-          </span>
-          <Button
-            type="button"
-            variant="destructive"
-            size="sm"
-            className="h-7 gap-1.5 text-xs"
-            disabled={clear.isPending}
-            onClick={() => {
-              if (window.confirm("Wipe ALL Battle Zone messages? This cannot be undone.")) {
-                clear.mutate();
-              }
-            }}
-          >
-            {clear.isPending ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <Trash2 className="h-3.5 w-3.5" />
-            )}
-            Clear live chat
-          </Button>
         </div>
       )}
       <div className="relative flex-1 min-h-0">
