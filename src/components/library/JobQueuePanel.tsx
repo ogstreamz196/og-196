@@ -31,6 +31,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { downloadFile } from "@/lib/download-file";
 import { invokeError } from "@/lib/invoke-error";
 import { deleteQueuedSong } from "@/lib/song-queue-actions";
+import { languageFromPrompt } from "@/lib/library-utils";
 import { useSettings } from "@/hooks/use-settings";
 import { useProfile } from "@/hooks/use-profile";
 import type { Song } from "@/components/SongCard";
