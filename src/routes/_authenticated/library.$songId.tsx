@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadFile } from "@/lib/download-file";
 import { useAuth } from "@/hooks/use-auth";
+import { useRole } from "@/hooks/use-role";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { useSettings } from "@/hooks/use-settings";
 import { Button } from "@/components/ui/button";
@@ -122,7 +123,9 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
   const isFailed = song.status === "failed";
   const isPending = song.status === "draft" || song.status === "pending" || song.status === "processing";
   const wasPendingRef = useRef(isPending);
-  const unlocked = !!song.unlocked;
+  // Boss/admin accounts always hear the full track — no unlock needed.
+  const { isBoss } = useRole();
+  const unlocked = !!song.unlocked || isBoss;
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
@@ -143,10 +146,11 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
       setLoadingPreview(true);
       try {
         const { data, error } = await supabase.functions.invoke("song-url", {
-          body: communityMode
+          body: communityMode || unlocked
             ? { song_id: song.id, mode: "full", purpose: "stream" }
             : { song_id: song.id, mode: "preview" },
         });
+
         if (error) throw error;
         if (cancelled) return;
         setPreviewUrl(data.url as string);
@@ -163,7 +167,23 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
     }
     load();
     return () => { cancelled = true; };
-  }, [isReady, song.id, previewUrl, loadingPreview, communityMode]);
+  }, [isReady, song.id, previewUrl, loadingPreview, communityMode, unlocked]);
+
+  // The moment a track becomes paid-for, drop the sample link so the player
+  // reloads with the full-length version.
+  const wasUnlockedRef = useRef(unlocked);
+  useEffect(() => {
+    if (unlocked && !wasUnlockedRef.current) {
+      wasUnlockedRef.current = true;
+      setPreviewUrl(null);
+      setProgress(0);
+      setPlaying(false);
+      const el = audioRef.current;
+      if (el) { el.pause(); el.removeAttribute("src"); }
+    }
+    wasUnlockedRef.current = unlocked;
+  }, [unlocked]);
+
 
   // Once the preview URL is warmed after a pending→ready transition, auto-play
   // it so the user gets an immediate "song is ready" moment.
@@ -184,14 +204,14 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
       });
   }, [isReady, previewUrl]);
 
-  // Enforce sample-seconds cap ONLY for the owner preview. Community viewers
-  // hear the full track for free; the charge is on download.
+  // Enforce the sample cap only when the track hasn't been paid for. Once it's
+  // unlocked (or you're listening to a community track) the whole song plays.
   useEffect(() => {
     const el = audioRef.current;
     if (!el) return;
     const onTime = () => {
       setProgress(el.currentTime);
-      if (!communityMode && el.currentTime >= sampleSeconds) {
+      if (!communityMode && !unlocked && el.currentTime >= sampleSeconds) {
         el.pause();
         el.currentTime = 0;
         setPlaying(false);
@@ -199,7 +219,8 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
     };
     el.addEventListener("timeupdate", onTime);
     return () => el.removeEventListener("timeupdate", onTime);
-  }, [sampleSeconds, communityMode]);
+  }, [sampleSeconds, communityMode, unlocked]);
+
 
 
   async function togglePlay() {
@@ -278,6 +299,15 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
       a.click();
       a.remove();
       setUnlockDialogOpen(false);
+      // Payment done — pull the fresh song + balance so the player instantly
+      // switches from the short sample to the full track.
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ["profile"] }),
+        qc.invalidateQueries({ queryKey: ["song", song.id] }),
+        qc.invalidateQueries({ queryKey: ["songs"] }),
+      ]);
+      onRefresh();
+
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Download failed");
     } finally {
@@ -286,9 +316,10 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
   }
 
 
-  const progressDenom = communityMode
+  const progressDenom = communityMode || unlocked
     ? Math.max(1, song.duration_seconds ?? audioRef.current?.duration ?? sampleSeconds)
     : sampleSeconds;
+
   const progressPct = useMemo(
     () => Math.min(100, (progress / progressDenom) * 100),
     [progress, progressDenom],

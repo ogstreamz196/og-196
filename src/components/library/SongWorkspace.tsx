@@ -32,18 +32,20 @@ import type { WorkspaceSong } from "./song-workspace/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
 import type { TablesUpdate } from "@/integrations/supabase/types";
-import { POOLS } from "@/lib/library-utils";
+import { useRole } from "@/hooks/use-role";
+import { POOLS, orderLanguages } from "@/lib/library-utils";
 import { LENGTH_OPTIONS, MIN_LENGTH, MAX_LENGTH } from "./CreateNowWizard";
 
 
-const LANGUAGES = [
+const LANGUAGES = orderLanguages([
   "English", "Spanish", "French", "Portuguese", "Hindi", "Gujarati",
   "Marathi", "Bengali", "Tamil", "Telugu", "Kannada", "Malayalam",
   "Urdu", "Punjabi", "Arabic", "Swahili", "Patois", "Yoruba", "German",
   "Italian", "Romanian", "Filipino", "Tagalog", "Cebuano", "Mandarin", "Japanese",
   "Korean", "Turkish", "Russian", "Polish", "Dutch", "Greek", "Thai",
   "Vietnamese", "Indonesian", "Malay", "Hebrew",
-];
+]);
+
 
 const LANG_RE = /Language:\s*(?:write the lyrics in\s*)?([A-Za-z][A-Za-z\s+]{1,80})/i;
 
@@ -488,6 +490,11 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       }
       await downloadFile(urlData.url as string, `${song.title || "song"}.mp3`);
       setUnlockDialogOpen(false);
+      // Payment complete — refresh so the preview flips to the full track.
+      refreshCoinBalance();
+      onSaved?.();
+      onRefresh?.();
+
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not unlock");
     } finally {
@@ -892,7 +899,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                   </div>
                 </div>
               )}
-              {isReady && <InlineSamplePlayer songId={song.id} />}
+              {isReady && <InlineSamplePlayer songId={song.id} unlocked={!!song.unlocked} />}
               <div className="flex flex-wrap items-center justify-end gap-2">
                 <Button
                   onClick={generatePreview}
@@ -1411,12 +1418,16 @@ function GeneratingProgress({
  * the user can hear the freshly generated sample without scrolling up.
  * Auto-loads the signed preview URL when the song becomes ready.
  */
-function InlineSamplePlayer({ songId }: { songId: string }) {
+function InlineSamplePlayer({ songId, unlocked = false }: { songId: string; unlocked?: boolean }) {
   const { data: settings } = useSettings();
   const sampleSeconds = settings?.sample_seconds ?? 60;
   const [url, setUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Paid tracks fall back to the sample only if the full file isn't ready yet.
+  const { isBoss } = useRole();
+  const canPlayFull = unlocked || isBoss;
+  const [playingFull, setPlayingFull] = useState(canPlayFull);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
@@ -1426,6 +1437,18 @@ function InlineSamplePlayer({ songId }: { songId: string }) {
     setLoading(true);
     (async () => {
       try {
+        if (canPlayFull) {
+          const full = await supabase.functions.invoke("song-url", {
+            body: { song_id: songId, mode: "full", purpose: "stream" },
+          });
+          if (cancelled) return;
+          if (!full.error && full.data?.url) {
+            setPlayingFull(true);
+            setUrl(full.data.url as string);
+            return;
+          }
+        }
+        setPlayingFull(false);
         const { data, error } = await supabase.functions.invoke("song-url", {
           body: { song_id: songId, mode: "preview" },
         });
@@ -1442,12 +1465,12 @@ function InlineSamplePlayer({ songId }: { songId: string }) {
       }
     })();
     return () => { cancelled = true; };
-  }, [songId]);
+  }, [songId, canPlayFull]);
 
-  // Enforce the sample-seconds cap so the inline player matches the top one.
+  // Cap playback at the sample length — unless the track has been paid for.
   useEffect(() => {
     const el = audioRef.current;
-    if (!el) return;
+    if (!el || playingFull) return;
     const onTime = () => {
       if (el.currentTime >= sampleSeconds) {
         el.pause();
@@ -1456,13 +1479,15 @@ function InlineSamplePlayer({ songId }: { songId: string }) {
     };
     el.addEventListener("timeupdate", onTime);
     return () => el.removeEventListener("timeupdate", onTime);
-  }, [sampleSeconds, url]);
+  }, [sampleSeconds, url, playingFull]);
 
   return (
     <div className="space-y-2 rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-3">
       <div className="flex items-center gap-2 text-sm font-medium text-emerald-200">
-        <Check className="h-4 w-4" /> Preview ready · {sampleSeconds}s sample
+        <Check className="h-4 w-4" />
+        {playingFull ? "Unlocked · full track" : `Preview ready · ${sampleSeconds}s sample`}
       </div>
+
       {loading && (
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading sample…
