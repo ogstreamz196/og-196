@@ -149,83 +149,115 @@ export function FreshTrackCard({
   return (
     <section
       aria-label="Your finished track"
-      className="space-y-4 rounded-3xl border-2 border-emerald-400/50 bg-emerald-500/[0.07] p-5 shadow-[0_24px_70px_-32px_rgba(16,185,129,0.8)] sm:p-6"
+      className="overflow-hidden rounded-3xl border-2 border-emerald-400/50 bg-emerald-500/[0.07] shadow-[0_24px_70px_-32px_rgba(16,185,129,0.8)]"
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-300">
-            Track completed
-          </p>
-          <h3 className="mt-0.5 truncate font-display text-2xl font-black">{title}</h3>
-          <p className="text-xs text-muted-foreground">
-            {sampleSeconds}s preview playing · full version ready to unlock
-          </p>
-        </div>
+      {/* Status strip */}
+      <div className="flex items-center justify-between gap-3 border-b border-emerald-400/20 bg-emerald-500/10 px-4 py-2">
+        <span className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.22em] text-emerald-300">
+          <span className="grid h-2 w-2 place-items-center rounded-full bg-emerald-400 shadow-[0_0_10px_2px_rgba(16,185,129,0.8)]" />
+          Track completed
+        </span>
         <Button
           type="button"
           size="sm"
           variant="ghost"
           onClick={onDismiss}
-          className="h-8 px-2 text-xs"
+          className="-mr-2 h-7 px-2 text-[11px] font-bold uppercase tracking-wider"
         >
           Hide
         </Button>
       </div>
 
-      <div className="flex items-center gap-3">
-        <button
-          type="button"
-          onClick={toggle}
-          aria-label={playing ? `Pause ${title}` : `Play ${title}`}
-          className="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-emerald-400/50 bg-emerald-500/15 text-emerald-200 transition hover:bg-emerald-500/25"
-        >
-          {loading ? (
-            <Loader2 className="h-5 w-5 animate-spin" />
-          ) : playing ? (
-            <Pause className="h-5 w-5" />
-          ) : (
-            <Play className="h-5 w-5 translate-x-[1px]" />
-          )}
-        </button>
-        <div className="min-w-0 flex-1">
-          <div className="h-2 w-full overflow-hidden rounded-full bg-white/10">
-            <div
-              className="h-full rounded-full bg-emerald-400 transition-all duration-200"
-              style={{ width: `${pct}%` }}
-            />
+      <div className="space-y-4 p-4 sm:p-5">
+        {/* Cover + title + transport in one tidy block */}
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl border border-emerald-400/30 bg-gradient-to-br from-emerald-500/30 to-emerald-900/40 sm:h-20 sm:w-20">
+            {song.cover_url ? (
+              <img src={song.cover_url} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <span className="grid h-full w-full place-items-center font-display text-2xl font-black text-white/85">
+                {title.trim().charAt(0) || "♪"}
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={toggle}
+              aria-label={playing ? `Pause ${title}` : `Play ${title}`}
+              className="absolute inset-0 grid place-items-center bg-black/45 text-white transition hover:bg-black/30"
+            >
+              {loading ? (
+                <Loader2 className="h-6 w-6 animate-spin" />
+              ) : playing ? (
+                <Pause className="h-6 w-6" />
+              ) : (
+                <Play className="h-6 w-6 translate-x-[1px]" />
+              )}
+            </button>
           </div>
-          <p className="mt-1 text-[11px] tabular-nums text-muted-foreground">
-            {fmt(progress)} / {fmt(cap)} preview
-          </p>
+
+          <div className="min-w-0 flex-1">
+            <h3 className="truncate font-display text-xl font-black leading-tight sm:text-2xl">
+              {title}
+            </h3>
+            <p className="mt-0.5 truncate text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-300/90">
+              {unlocked ? "Full version unlocked" : `${sampleSeconds}s free preview`}
+            </p>
+            <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/10">
+              <div
+                className="h-full rounded-full bg-emerald-400 transition-all duration-200"
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+            <p className="mt-1 text-[11px] tabular-nums text-muted-foreground">
+              {fmt(progress)} / {fmt(cap)}
+            </p>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="grid gap-2 sm:grid-cols-2">
+          <Button
+            type="button"
+            onClick={() => setUnlockOpen(true)}
+            disabled={busy}
+            className="min-h-12 w-full gap-2 rounded-2xl bg-gradient-brand font-black uppercase tracking-[0.12em] text-primary-foreground shadow-glow sm:col-span-2"
+          >
+            {busy ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : unlocked ? (
+              <Download className="h-4 w-4" />
+            ) : (
+              <Lock className="h-4 w-4" />
+            )}
+            {unlocked ? "Download full track" : `Unlock full version · ${unlockCost} coins`}
+          </Button>
+          {unlocked && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={shareNow}
+              disabled={busy}
+              className="min-h-12 w-full gap-2 rounded-2xl border-emerald-400/40 bg-emerald-500/10 font-bold text-emerald-200"
+            >
+              <Share2 className="h-4 w-4" /> Share track
+            </Button>
+          )}
+          <Link
+            to="/library/$songId"
+            params={{ songId: song.id }}
+            className={cn("w-full", !unlocked && "sm:col-span-2")}
+          >
+            <Button
+              type="button"
+              variant="outline"
+              className="min-h-12 w-full gap-2 rounded-2xl border-white/15 font-bold"
+            >
+              <Sparkles className="h-4 w-4" /> Edit track
+            </Button>
+          </Link>
         </div>
       </div>
 
-      <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
-        <Button
-          type="button"
-          onClick={() => setUnlockOpen(true)}
-          disabled={busy}
-          className="min-h-12 w-full gap-2 rounded-2xl bg-gradient-brand font-black uppercase tracking-[0.12em] text-primary-foreground shadow-glow"
-        >
-          {busy ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : unlocked ? (
-            <Download className="h-4 w-4" />
-          ) : (
-            <Lock className="h-4 w-4" />
-          )}
-          {unlocked ? "Download full track" : `Unlock full version · ${unlockCost} coins`}
-        </Button>
-        <Link to="/library/$songId" params={{ songId: song.id }} className="w-full sm:w-auto">
-          <Button
-            type="button"
-            variant="outline"
-            className="min-h-12 w-full gap-2 rounded-2xl border-white/15 font-bold sm:w-auto"
-          >
-            <Sparkles className="h-4 w-4" /> Edit track
-          </Button>
-        </Link>
-      </div>
 
       <audio ref={audioRef} preload="auto" onEnded={() => setPlaying(false)} className="hidden" />
 
