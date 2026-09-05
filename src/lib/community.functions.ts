@@ -143,7 +143,7 @@ export const postCommunityMessage = createServerFn({ method: "POST" })
           body: JSON.stringify({
             model: "google/gemini-3.7-flash",
             temperature: useFoul ? 1.05 : 0.85,
-            max_tokens: useFoul ? 1600 : 1200,
+            max_tokens: useFoul ? 700 : 500,
             messages: [
               { role: "system", content: useFoul ? FOUL_SYSTEM_PROMPT : SYSTEM_PROMPT },
               ...history.map((m) => ({
