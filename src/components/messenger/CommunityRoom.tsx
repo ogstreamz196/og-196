@@ -37,6 +37,9 @@ function formatTime(iso: string) {
 
 const TYPING_TTL_MS = 4000;
 
+type BattleTally = { pendingTenths: number; rounds: number; totalAwardedCoins: number };
+
+
 export function CommunityRoom() {
   const { user } = useAuth();
   const myId = user?.id ?? null;
