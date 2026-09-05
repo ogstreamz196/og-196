@@ -44,14 +44,17 @@ Deno.serve(async (req) => {
       MIN_TARGET_SEC,
       Number.isFinite(requestedSec) ? Math.round(requestedSec) : MIN_TARGET_SEC,
     );
-    // ~210 sung words per minute of finished audio (verse-heavy styles run hotter).
-    const minWords = Math.max(620, Math.round((targetSec / 60) * 210));
-    const aimLow = Math.round(minWords * 1.12);
-    const aimHigh = Math.round(minWords * 1.35);
-    const minLines = Math.max(90, Math.round(minWords / 7));
-    const aimLines = Math.round(minLines * 1.3);
+    // ~170 sung words per minute of finished audio, measured against delivered
+    // tracks. Bounded on BOTH sides so a 4 minute request does not come back
+    // with 7 minutes of lyrics.
+    const WORDS_PER_MIN = 170;
+    const minWords = Math.round((targetSec / 60) * WORDS_PER_MIN);
+    const aimLow = minWords;
+    const aimHigh = Math.round(minWords * 1.15);
+    const minLines = Math.round(minWords / 7);
+    const aimLines = Math.round(minLines * 1.2);
     const mmss = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
-    const targetLabel = `${mmss(targetSec)}–${mmss(targetSec + 30)}`;
+    const targetLabel = `${mmss(Math.max(0, targetSec - 20))}–${mmss(targetSec + 20)}`;
 
 
     if (!songName && !description) {
