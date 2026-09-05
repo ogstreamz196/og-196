@@ -9,6 +9,7 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadFile } from "@/lib/download-file";
+import { shareTrack } from "@/lib/share-track";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -489,8 +490,10 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
         toast.error("Unlocked, but download link failed — try again in a moment");
         return;
       }
-      await downloadFile(urlData.url as string, `${song.title || "song"}.mp3`);
+      const fileName = `${song.title || "song"}.mp3`;
+      const blob = await downloadFile(urlData.url as string, fileName);
       setUnlockDialogOpen(false);
+      await shareTrack({ title: song.title || "My track", blob, filename: fileName });
       // Payment complete — refresh so the preview flips to the full track.
       refreshCoinBalance();
       onSaved?.();

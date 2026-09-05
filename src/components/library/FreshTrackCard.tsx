@@ -5,6 +5,7 @@ import { Download, Loader2, Lock, Pause, Play, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadFile } from "@/lib/download-file";
+import { shareTrack } from "@/lib/share-track";
 import { Button } from "@/components/ui/button";
 import { UnlockConfirmDialog } from "@/components/library/UnlockConfirmDialog";
 import type { Song } from "@/components/SongCard";
@@ -133,8 +134,9 @@ export function FreshTrackCard({
         body: { song_id: song.id, mode: "full", purpose: "download", filename: `${title}.mp3` },
       });
       if (error) throw new Error(error.message || "Download failed");
-      await downloadFile(data.url as string, `${title}.mp3`);
+      const blob = await downloadFile(data.url as string, `${title}.mp3`);
       setUnlockOpen(false);
+      await shareTrack({ title, blob, filename: `${title}.mp3` });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Unlock failed");
     } finally {
