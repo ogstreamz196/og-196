@@ -10,6 +10,8 @@ import {
   listOlderCommunityMessages,
   postCommunityMessage,
   clearCommunityMessages,
+  getBattleTally,
+  endBattle,
   type CommunityMessage,
 } from "@/lib/community.functions";
 import { supabase } from "@/integrations/supabase/client";
