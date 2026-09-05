@@ -127,8 +127,13 @@ Deno.serve(async (req) => {
   }
 
   const ttl = mode === "full" ? 60 * 5 : 60 * 15;
+  // For downloads, ask storage for a Content-Disposition: attachment link so the
+  // browser saves the file instead of navigating to an inline audio player.
+  const rawName = typeof body?.filename === "string" ? body.filename : "";
+  const safeName = rawName.replace(/[^\w.\- ]+/g, "").slice(0, 120) || "track.mp3";
+  const filename = safeName.toLowerCase().endsWith(".mp3") ? safeName : `${safeName}.mp3`;
   const { data, error } = await admin.storage.from("song-files")
-    .createSignedUrl(path, ttl);
+    .createSignedUrl(path, ttl, purpose === "download" ? { download: filename } : undefined);
   if (error) {
     log("sign_failed", { user_id: user.id, song_id, mode, error: error.message });
     return jsonResponse({ error: error.message, code: "sign_failed" }, 500);
