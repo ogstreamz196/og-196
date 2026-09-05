@@ -291,7 +291,7 @@ export function CommunityRoom() {
             className="h-7 gap-1.5 text-xs"
             disabled={clear.isPending}
             onClick={() => {
-              if (window.confirm("Wipe ALL live community messages? This cannot be undone.")) {
+              if (window.confirm("Wipe ALL Battle Zone messages? This cannot be undone.")) {
                 clear.mutate();
               }
             }}
@@ -315,12 +315,12 @@ export function CommunityRoom() {
 
           {isLoading ? (
             <div className="flex h-full items-center justify-center text-muted-foreground">
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Loading community…
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Entering the Battle Zone…
             </div>
           ) : messages.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center gap-2 text-center text-muted-foreground">
               <Users className="h-8 w-8 opacity-50" />
-              <p className="text-sm">Be the first to say something.</p>
+              <p className="text-sm">Nobody’s stepped up yet. Throw the first shot at OG Bot.</p>
             </div>
           ) : (
             <>
@@ -460,7 +460,7 @@ export function CommunityRoom() {
               submit(e as unknown as React.FormEvent);
             }
           }}
-          placeholder="Message the community…"
+          placeholder="Take your shot at OG Bot…"
           rows={1}
           maxLength={1000}
           enterKeyHint="send"
