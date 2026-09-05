@@ -161,8 +161,8 @@ export const postCommunityMessage = createServerFn({ method: "POST" })
             choices?: { message?: { content?: string } }[];
           };
           let reply = (json.choices?.[0]?.message?.content ?? "").trim();
-          // Hard-cap to keep group-chat vibe (foul mode gets a slightly longer leash).
-          const cap = useFoul ? 420 : 280;
+          // Hard-cap to keep battle-zone vibe (foul mode gets a longer leash).
+          const cap = useFoul ? 560 : 380;
           if (reply.length > cap) reply = reply.slice(0, cap - 3) + "…";
           if (reply) {
             await supabaseAdmin.from("community_messages").insert({
