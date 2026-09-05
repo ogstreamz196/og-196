@@ -76,6 +76,22 @@ export function useSongAudio({ songId, hasAudio, ready, sampleSeconds, mode = "p
     return () => el.removeEventListener("timeupdate", onTime);
   }, [sampleSeconds]);
 
+  // Keep the button in sync when something else pauses us (only one track
+  // may play at a time app-wide) or when the user uses OS media controls.
+  useEffect(() => {
+    const el = audioRef.current;
+    if (!el) return;
+    const onPause = () => setPlaying(false);
+    const onPlayEvt = () => setPlaying(true);
+    el.addEventListener("pause", onPause);
+    el.addEventListener("play", onPlayEvt);
+    return () => {
+      el.removeEventListener("pause", onPause);
+      el.removeEventListener("play", onPlayEvt);
+    };
+  }, []);
+
+
   async function togglePlay() {
     const url = await ensureUrl();
     if (!url) return;

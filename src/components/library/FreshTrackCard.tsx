@@ -277,7 +277,14 @@ export function FreshTrackCard({
       </div>
 
 
-      <audio ref={audioRef} preload="auto" onEnded={() => setPlaying(false)} className="hidden" />
+      <audio
+        ref={audioRef}
+        preload="auto"
+        onEnded={() => setPlaying(false)}
+        onPause={() => setPlaying(false)}
+        onPlay={() => setPlaying(true)}
+        className="hidden"
+      />
 
       <UnlockConfirmDialog
         open={unlockOpen}
