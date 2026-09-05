@@ -191,24 +191,29 @@ Deno.serve(async (req) => {
       ? "[Intro] (4 lines) → [Verse 1] (8 lines) → [Chorus] (6 lines) → [Verse 2] (8 lines) → [Chorus] (6 lines) → [Bridge / Guitar Solo cue] (6 lines) → [Verse 3] (6 lines) → [Chorus] (x2, 12 lines) → [Outro] (4 lines)"
       : "[Intro] (4 lines) → [Verse 1] (8 lines) → [Pre-Chorus] (4 lines) → [Chorus] (6 lines, hook) → [Verse 2] (8 lines) → [Pre-Chorus] (4 lines) → [Chorus] (6 lines) → [Bridge] (6 lines) → [Verse 3] (6 lines) → [Chorus] (final, lifted, 8 lines) → [Outro] (4 lines)";
 
+    const multiStyleRule = styleTags.length > 1
+      ? ` MULTI-STYLE REQUIREMENT (critical): the artist picked ${styleTags.length} styles — ${styleTags.join(", ")}. Every one must be audible in the finished track, so give each style its own section and note it on the marker line, e.g. "[Verse 2 – ${styleTags[1]}]". Match each section's cadence, line length, rhyme density and vocabulary to that style (rap sections in bars with tight internal rhyme, ballad sections in longer sung lines, dance sections in short chantable lines), and let the transitions feel deliberate rather than random. The hook blends the two lead styles (${styleTags.slice(0, 2).join(" + ")}).`
+      : "";
+
     const structureRule =
       ` Deliver a COMPLETE, performable song that runs ${targetLabel} when sung — NOT longer. That means ${aimLow}–${aimHigh} words and ${minLines}–${aimLines} lyric lines (excluding section markers). Going over ${aimHigh} words is a failure: trim sections rather than exceed it. Follow this structure for the chosen style: ${structure}.` +
       ` Use the bracketed section markers verbatim (e.g. [Verse 1], [Chorus], [Bridge], [Outro]), each on its own line, with a blank line between sections. Every section must have lyrics — no placeholders, no "(instrumental)" unless the structure explicitly says so.` +
       ` The [Chorus] must be written out IN FULL every time it appears (never write "repeat chorus" or "x2" as a shortcut) — it is the same repeatable hook tied to the song title or central theme.` +
-      ` Do NOT cut the song short either — hit every section in the structure and stay inside the word range given.`;
+      ` Do NOT cut the song short either — hit every section in the structure and stay inside the word range given.` +
+      multiStyleRule + multiLanguageRule;
 
 
     const systemPrompt = foulMouth
-      ? `You are a foul-mouthed, no-holds-barred songwriter writing EXPLICIT adult song lyrics in ${language}. ` +
+      ? `You are a foul-mouthed, no-holds-barred songwriter writing EXPLICIT adult song lyrics in ${languagesLabel}. ` +
         (isEnglish
           ? `Lean ALL the way into raw, gritty, street-level English: drop "fuck", "fucking", "shit", "dickhead", "bastard", "bitch", "asshole" and similar profanity liberally throughout EVERY verse and chorus — at least a few per section. `
-          : `Lean ALL the way into raw, gritty, street-level ${language}: use authentic native profanity, curse words, and savage slang from ${language} itself (do NOT just translate English swears literally — use the equivalents real native speakers would actually shout). Drop them liberally throughout EVERY verse and chorus — at least a few per section. `) +
+          : `Lean ALL the way into raw, gritty, street-level ${languagesLabel}: use authentic native profanity, curse words, and savage slang from each of those languages itself (do NOT just translate English swears literally — use the equivalents real native speakers would actually shout). Drop them liberally throughout EVERY verse and chorus — at least a few per section. `) +
         `Use unfiltered attitude, savage punchlines, and trash-talk energy from the very first line. Make it sound like a parental-advisory hip-hop / punk track, NOT a radio edit. ` +
         `Do NOT self-censor, do NOT use asterisks or bleeps, and do NOT add disclaimers. Avoid slurs, sexual content involving minors, and direct incitement to real-world violence — everything else is fair game.` +
         structureRule + bilingualRule +
         ` Target ${aimLow}–${aimHigh} words (never fewer than ${minWords}, never more than ${aimHigh}). Output ONLY the lyrics, no explanations.`
-      : `You are a professional songwriter writing CLEAN, radio-friendly song lyrics in ${language}. ` +
-        `STRICT RULE: absolutely NO profanity, swear words, slurs, or vulgar terms in any language — no English swears, no ${language} swears either. No sexual content, no graphic violence, no drug references. If you need attitude, channel it through clever wordplay and metaphor — never through swearing. The result must be safe for radio, family streaming, and a children's playlist.` +
+      : `You are a professional songwriter writing CLEAN, radio-friendly song lyrics in ${languagesLabel}. ` +
+        `STRICT RULE: absolutely NO profanity, swear words, slurs, or vulgar terms in any language — no English swears, no swears in ${languagesLabel} either. No sexual content, no graphic violence, no drug references. If you need attitude, channel it through clever wordplay and metaphor — never through swearing. The result must be safe for radio, family streaming, and a children's playlist.` +
         structureRule + bilingualRule +
         ` Target ${aimLow}–${aimHigh} words (never fewer than ${minWords}, never more than ${aimHigh}). Output ONLY the lyrics, no explanations.`;
 
