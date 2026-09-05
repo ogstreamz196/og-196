@@ -274,9 +274,17 @@ export const postCommunityMessage = createServerFn({ method: "POST" })
         .maybeSingle();
       pendingTenths = tally?.pending_tenths ?? 0;
       rounds = tally?.rounds ?? 0;
-      if (apiKey) earnedTenths = await scoreRoast(apiKey, data.content, botReply);
+      const avgTenths = rounds > 0 ? pendingTenths / rounds : 0;
+      // Repeat-spam guard: the same line twice in a row banks nothing.
+      const isRepeat = history
+        .filter((m) => m.role === "user" && m.display_name === displayName)
+        .slice(-3, -1)
+        .some((m) => m.content.trim().toLowerCase() === data.content.trim().toLowerCase());
+      const raw = apiKey ? await scoreRoast(apiKey, data.content, botReply) : 0;
+      earnedTenths = calibrateAward(raw, data.content, avgTenths, isRepeat);
       pendingTenths += earnedTenths;
       rounds += 1;
+
       await supabaseAdmin.from("battle_tallies").upsert(
         {
           user_id: context.userId,
