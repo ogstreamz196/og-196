@@ -1573,3 +1573,17 @@ button.graffiti-accent:hover {
 @media (prefers-reduced-motion: reduce) {
   .studio-vu-bar, .studio-led { animation: none; }
 }
+
+/* Royalty celebration confetti */
+@keyframes royalty-confetti-fall {
+  0% { top: -10%; opacity: 1; transform: translateX(0) rotate(0deg); }
+  100% { top: 110%; opacity: 0.6; transform: translateX(24px) rotate(720deg); }
+}
+.royalty-confetti-piece {
+  position: absolute;
+  top: -10%;
+  border-radius: 1px;
+  animation-name: royalty-confetti-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
