@@ -221,7 +221,7 @@ export function CreateNowWizard({
         subjectName: subjectName.trim(),
         description: description.trim(),
         style: styles.filter(Boolean).join(", "),
-        language: Array.from(new Set(["English", ...languages])).join(" + "),
+        language: (languages.length ? Array.from(new Set(languages)) : ["English"]).join(" + "),
         vocal: gender,
         vocalsOnly,
         beatPath: vocalsOnly ? beatPath : "",
