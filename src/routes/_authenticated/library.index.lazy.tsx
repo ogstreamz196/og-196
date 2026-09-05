@@ -1770,7 +1770,7 @@ function LibraryPage() {
         extraContext={extraContext}
         foulMouth={foulMouth}
         lyrics={lyrics}
-        previewCost={previewCost}
+        previewCost={audioCost}
         generating={genSong}
         onConfirm={async () => {
           await generateSong();
