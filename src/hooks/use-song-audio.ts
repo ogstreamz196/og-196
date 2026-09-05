@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { downloadFile } from "@/lib/download-file";
 
 interface UseSongAudioOptions {
   songId: string;
@@ -83,10 +84,7 @@ export function useSongAudio({ songId, hasAudio, ready, sampleSeconds }: UseSong
   async function download(filename: string) {
     const url = await ensureUrl();
     if (!url) return;
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    a.click();
+    await downloadFile(url, filename);
   }
 
   function handleEnded() {

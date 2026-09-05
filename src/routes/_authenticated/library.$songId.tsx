@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { downloadFile } from "@/lib/download-file";
 import { useAuth } from "@/hooks/use-auth";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { useSettings } from "@/hooks/use-settings";
