@@ -95,7 +95,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   // Progressive disclosure: each step stays folded unless it's the one to act on.
   const [lyricsOpen, setLyricsOpen] = useState(false);
   const [step1Open, setStep1Open] = useState(!song.lyrics);
-  const [step2Open, setStep2Open] = useState(!!song.lyrics && !song.audio_url);
+  const [step2Open, setStep2Open] = useState(!!song.lyrics && song.status !== "completed");
 
 
   const [saving, setSaving] = useState(false);
