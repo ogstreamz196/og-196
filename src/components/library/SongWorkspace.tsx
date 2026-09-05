@@ -234,9 +234,11 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   async function handleSave() {
     setSaving(true);
     try {
+      const nextBrief = languageChanged ? setBriefLanguage(brief, language) : brief;
+      if (nextBrief !== brief) setBrief(nextBrief);
       await persist({
         title: title.trim() || null,
-        prompt: brief,
+        prompt: nextBrief,
         style: style.trim() || null,
         lyrics: lyrics.trim() || null,
       });
@@ -550,13 +552,8 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label htmlFor="song-language" className="flex items-center gap-2">
-                        Language
-                        {!isVip && (
-                          <span className="rounded-full bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold text-primary">VIP</span>
-                        )}
-                      </Label>
-                      <Select value={language} onValueChange={setLanguage} disabled={!isVip}>
+                      <Label htmlFor="song-language">Language</Label>
+                      <Select value={language} onValueChange={setLanguage}>
                         <SelectTrigger id="song-language">
                           <SelectValue />
                         </SelectTrigger>
@@ -566,11 +563,6 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                           ))}
                         </SelectContent>
                       </Select>
-                      {!isVip && (
-                        <p className="text-[11px] text-muted-foreground">
-                          <Link to="/buy-coins" search={{ flow: "vip" } as never} className="text-primary underline">Get VIP</Link> to write in any language.
-                        </p>
-                      )}
                     </div>
                   </div>
                   <div className="space-y-1.5">
