@@ -12,6 +12,8 @@ import {
   clearCommunityMessages,
   getBattleTally,
   endBattle,
+  getBattleLeaderboard,
+  type BattleLeaderboardRow,
   type CommunityMessage,
 } from "@/lib/community.functions";
 import { supabase } from "@/integrations/supabase/client";
