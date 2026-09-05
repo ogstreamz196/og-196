@@ -583,7 +583,7 @@ async function runChatAI(
       .select("role, content")
       .eq("user_id", profileId)
       .order("created_at", { ascending: false })
-      .limit(20),
+      .limit(30),
   ]);
 
   const personaMap = new Map<string, string>(
@@ -611,6 +611,27 @@ async function runChatAI(
     user: userCtx,
     songIntent: detectSongIntent(userText),
   });
+  const conversation = [
+    { role: "system" as const, content: system },
+    ...history,
+    { role: "user" as const, content: userText },
+  ];
+  const requestReply = (extraInstruction?: string) =>
+    fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "google/gemini-3.1-pro-preview",
+        temperature: foulMouth ? 0.9 : 0.75,
+        max_tokens: 1_600,
+        messages: extraInstruction
+          ? [...conversation, { role: "system" as const, content: extraInstruction }]
+          : conversation,
+      }),
+    });
 
   const history = ((historyRes.data ?? []) as { role: string; content: string }[])
     .reverse()
@@ -627,22 +648,7 @@ async function runChatAI(
   });
 
   try {
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3.7-flash",
-        temperature: foulMouth ? 0.9 : 0.75,
-        messages: [
-          { role: "system", content: system },
-          ...history,
-          { role: "user", content: userText },
-        ],
-      }),
-    });
+    let res = await requestReply();
 
     if (!res.ok) {
       if (!isAdminUser) {
@@ -662,10 +668,24 @@ async function runChatAI(
       return;
     }
 
-    const json = (await res.json().catch(() => ({}))) as {
+    let json = (await res.json().catch(() => ({}))) as {
       choices?: { message?: { content?: string } }[];
     };
-    const replyText = (json.choices?.[0]?.message?.content ?? "").trim() || "…";
+    let replyText = (json.choices?.[0]?.message?.content ?? "").trim();
+    const wordCount = replyText.split(/\s+/).filter(Boolean).length;
+    if (!replyText || wordCount < 18) {
+      res = await requestReply(
+        "Your draft answer was too short. Answer again with at least 3 substantive sentences, useful detail, and natural OG Bot personality. Do not mention this correction.",
+      );
+      if (res.ok) {
+        json = (await res.json().catch(() => ({}))) as {
+          choices?: { message?: { content?: string } }[];
+        };
+        const expandedReply = (json.choices?.[0]?.message?.content ?? "").trim();
+        if (expandedReply) replyText = expandedReply;
+      }
+    }
+    if (!replyText) throw new Error("OG Bot returned an empty answer. Try again.");
 
     await admin.from("og_messages").insert({
       user_id: profileId,
