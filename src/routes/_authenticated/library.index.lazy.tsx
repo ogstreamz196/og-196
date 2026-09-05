@@ -523,7 +523,10 @@ function LibraryPage() {
   }, [freshTrack]);
 
 
-  const totalCost = lyricsCost + previewCost;
+  // 3 minutes is included; each extra minute adds 1 coin (matches the backend).
+  const costForMinutes = (mins: number) =>
+    lyricsCost + previewCost + Math.max(0, Math.round(mins) - MIN_TRACK_MINUTES);
+  const totalCost = costForMinutes(targetMinutes);
   const canRunPipeline =
     !!user && canGenerateLyrics && balance >= totalCost && pipeline.stage === "idle";
 
