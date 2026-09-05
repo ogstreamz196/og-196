@@ -583,24 +583,21 @@ export function CreateNowWizard({
                   className="grid max-h-[220px] grid-cols-2 gap-2 overflow-y-auto pr-1 sm:grid-cols-3"
                 >
                   {POOLS.language.map((l) => {
-                    const locked = l === "English";
-                    const selected = locked || languages.includes(l);
+                    const selected = languages.includes(l);
                     return (
                       <button
                         key={l}
                         type="button"
                         aria-pressed={selected}
-                        onClick={() => !locked && setLanguages((prev) => toggle(prev, l))}
+                        onClick={() => setLanguages((prev) => toggle(prev, l))}
                         className={cn(
                           "min-h-11 rounded-xl border px-3 py-2.5 text-sm font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                           selected
                             ? "border-primary bg-primary/20 text-foreground shadow-glow"
                             : "border-white/10 bg-card/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
-                          locked && "cursor-default opacity-90",
                         )}
                       >
                         {l}
-                        {locked && " ✓"}
                       </button>
                     );
                   })}
