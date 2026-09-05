@@ -19,7 +19,6 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 
 import { useSettings } from "@/hooks/use-settings";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
-import { useRole } from "@/hooks/use-role";
 
 import { useProfile } from "@/hooks/use-profile";
 import { useVariations } from "@/hooks/use-variations";
@@ -97,7 +96,6 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const [detailsOpen, setDetailsOpen] = useState(!song.lyrics);
   const [lyricsOpen, setLyricsOpen] = useState(!song.lyrics);
 
-  const { isVip } = useRole();
   const [saving, setSaving] = useState(false);
   const [genLyrics, setGenLyrics] = useState(false);
   const [genPreview, setGenPreview] = useState(false);
@@ -234,9 +232,11 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   async function handleSave() {
     setSaving(true);
     try {
+      const nextBrief = languageChanged ? setBriefLanguage(brief, language) : brief;
+      if (nextBrief !== brief) setBrief(nextBrief);
       await persist({
         title: title.trim() || null,
-        prompt: brief,
+        prompt: nextBrief,
         style: style.trim() || null,
         lyrics: lyrics.trim() || null,
       });
@@ -550,13 +550,8 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label htmlFor="song-language" className="flex items-center gap-2">
-                        Language
-                        {!isVip && (
-                          <span className="rounded-full bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold text-primary">VIP</span>
-                        )}
-                      </Label>
-                      <Select value={language} onValueChange={setLanguage} disabled={!isVip}>
+                      <Label htmlFor="song-language">Language</Label>
+                      <Select value={language} onValueChange={setLanguage}>
                         <SelectTrigger id="song-language">
                           <SelectValue />
                         </SelectTrigger>
@@ -566,11 +561,6 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                           ))}
                         </SelectContent>
                       </Select>
-                      {!isVip && (
-                        <p className="text-[11px] text-muted-foreground">
-                          <Link to="/buy-coins" search={{ flow: "vip" } as never} className="text-primary underline">Get VIP</Link> to write in any language.
-                        </p>
-                      )}
                     </div>
                   </div>
                   <div className="space-y-1.5">
@@ -1020,20 +1010,21 @@ function getGenerationStatus(elapsed: number, hasTaskId: boolean, hasLivePreview
   detail: string;
   steps: GenerationStep[];
 } {
-  const targetSeconds = hasLivePreview ? 85 : hasTaskId ? 100 : 30;
+  // Honest model: most jobs land in ~2 minutes, but the generator regularly
+  // takes longer. We never promise a hard finish time — past the typical
+  // window the UI stops counting down and says so plainly.
+  const targetSeconds = hasLivePreview ? 120 : hasTaskId ? 150 : 45;
   const progress = !hasTaskId
-    ? Math.min(18, 8 + Math.floor(elapsed * 0.4))
-    : Math.min(96, Math.max(22, Math.round((elapsed / targetSeconds) * 88)));
-  const etaSeconds = !hasTaskId
-    ? Math.max(0, 35 - elapsed)
-    : Math.max(0, targetSeconds - elapsed);
+    ? Math.min(15, 5 + Math.floor(elapsed * 0.25))
+    : Math.min(90, Math.max(18, Math.round((elapsed / targetSeconds) * 80)));
+  const etaSeconds = Math.max(0, targetSeconds - elapsed);
 
   if (!hasTaskId) {
     return {
       progress,
       etaSeconds,
       headline: "Starting the music job with the generator…",
-      detail: elapsed > 45 ? "Still waiting for the generator to accept the job — I won't fake 99%." : "Getting a real task ID before the mix begins.",
+      detail: elapsed > 45 ? "Still waiting for the generator to accept the job — no fake progress here." : "Getting a real task ID before the mix begins. Typically 2-5 minutes in total.",
       steps: [
         { label: "Queued", detail: "Saving your prompt", state: "done" },
         { label: "Accepted", detail: "Waiting for task ID", state: "active" },
@@ -1047,7 +1038,7 @@ function getGenerationStatus(elapsed: number, hasTaskId: boolean, hasLivePreview
       progress: Math.max(progress, 68),
       etaSeconds,
       headline: "Live preview is ready — finishing the downloadable sample…",
-      detail: "You can listen now while the final sample file is being packaged.",
+      detail: "You can listen now. Packaging the final file usually takes another minute or two.",
       steps: [
         { label: "Queued", detail: "Task accepted", state: "done" },
         { label: "Preview", detail: "Streaming now", state: "done" },
@@ -1059,8 +1050,10 @@ function getGenerationStatus(elapsed: number, hasTaskId: boolean, hasLivePreview
   return {
     progress,
     etaSeconds,
-    headline: elapsed < 35 ? "Composing melody and beat…" : elapsed < 75 ? "Rendering vocals and mix…" : "Waiting for the first audio callback…",
-    detail: elapsed > 130 ? "This is taking longer than usual, but the job is still being watched." : "ETA is based on the real job start time, not a fake loading loop.",
+    headline: elapsed < 35 ? "Composing melody and beat…" : elapsed < 90 ? "Rendering vocals and mix…" : "Waiting for the generator to hand back the audio…",
+    detail: elapsed > targetSeconds
+      ? "Past the usual window — it can take a few more minutes. Nothing is stuck, and you keep your coins if it fails."
+      : "Most tracks take 2-5 minutes. We only show real progress, never a fake countdown.",
     steps: [
       { label: "Queued", detail: "Task accepted", state: "done" },
       { label: "Audio", detail: elapsed < 75 ? "Generating track" : "Awaiting callback", state: "active" },
@@ -1130,7 +1123,9 @@ function GeneratingProgress({
 
   const status = getGenerationStatus(elapsed, !!taskId, hasLivePreview);
   const pct = status.progress;
-  const etaLabel = status.etaSeconds > 0 ? formatDuration(status.etaSeconds) : "any moment";
+  // Once the typical window has passed we stop pretending to know a finish
+  // time — the label switches to a plain "still rendering" state.
+  const etaLabel = status.etaSeconds > 0 ? `~${formatDuration(status.etaSeconds)}` : "still rendering";
 
   const mm = String(Math.floor(elapsed / 60)).padStart(2, "0");
   const ss = String(elapsed % 60).padStart(2, "0");
@@ -1172,7 +1167,7 @@ function GeneratingProgress({
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <div className="rounded-full border border-primary/40 bg-background/70 px-3 py-1.5 text-right text-xs font-bold text-foreground shadow-[0_0_18px_-4px_hsl(var(--primary)/0.7)]">
-            <span className="block tabular-nums">ETA {etaLabel}</span>
+            <span className="block tabular-nums">{status.etaSeconds > 0 ? `ETA ${etaLabel}` : etaLabel}</span>
             <span className="block text-[10px] font-medium text-muted-foreground tabular-nums">{mm}:{ss} elapsed</span>
           </div>
           {songId && (

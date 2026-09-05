@@ -9,13 +9,18 @@ interface UseSongAudioOptions {
   ready: boolean;
   /** Cap playback at this many seconds (preview limit). */
   sampleSeconds: number;
+  /**
+   * "preview" streams the short sample; "full" streams the complete master.
+   * Community listeners may stream "full" for free — downloading still costs coins.
+   */
+  mode?: "preview" | "full";
 }
 
 /**
  * Owns the signed-URL fetch, audio element lifecycle, sample cap, and play/pause
  * controls for a song card. Keeps `SongCard` purely presentational.
  */
-export function useSongAudio({ songId, hasAudio, ready, sampleSeconds }: UseSongAudioOptions) {
+export function useSongAudio({ songId, hasAudio, ready, sampleSeconds, mode = "preview" }: UseSongAudioOptions) {
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
   const [loadingUrl, setLoadingUrl] = useState(false);
@@ -28,7 +33,10 @@ export function useSongAudio({ songId, hasAudio, ready, sampleSeconds }: UseSong
     setLoadingUrl(true);
     try {
       const { data, error } = await supabase.functions.invoke("song-url", {
-        body: { song_id: songId, mode: "preview" },
+        body:
+          mode === "full"
+            ? { song_id: songId, mode: "full", purpose: "stream" }
+            : { song_id: songId, mode: "preview" },
       });
       if (error) throw error;
       const url = data.url as string;
@@ -49,7 +57,7 @@ export function useSongAudio({ songId, hasAudio, ready, sampleSeconds }: UseSong
     if (!ready || signedUrl || loadingUrl) return;
     ensureUrl().catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready, songId]);
+  }, [ready, songId, mode]);
 
   // Cap preview playback.
   useEffect(() => {

@@ -225,7 +225,16 @@ export function JobQueuePanel({ songs, onRemoved }: { songs: Song[]; onRemoved?:
                 <Icon className={cn("h-4 w-4", kind === "generating" && "animate-spin")} />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-bold">{song.title || "Untitled"}</p>
+                {/* Every row — including tracks still rendering — opens the
+                    workspace so details, style and language can be reviewed. */}
+                <Link
+                  to="/library/$songId"
+                  params={{ songId: song.id }}
+                  className="block truncate text-sm font-bold hover:text-primary focus:outline-none focus-visible:underline"
+                >
+                  {song.title || "Untitled"}
+                </Link>
+
                 <p
                   className={cn(
                     "truncate text-[11px] uppercase tracking-wider",
@@ -252,6 +261,17 @@ export function JobQueuePanel({ songs, onRemoved }: { songs: Song[]; onRemoved?:
                     <RefreshCw className="h-4 w-4" />
                   )}
                 </Button>
+              )}
+              {kind !== "completed" && (
+                <Link
+                  to="/library/$songId"
+                  params={{ songId: song.id }}
+                  aria-label={`Open details for ${song.title || "track"}`}
+                  title="Open details"
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-white/10 bg-background/60 text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary"
+                >
+                  <Eye className="h-4 w-4" />
+                </Link>
               )}
               {kind === "completed" && (
                 <Button
