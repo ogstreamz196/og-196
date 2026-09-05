@@ -59,6 +59,7 @@ function CommunityTrackRowImpl({
     sampleSeconds: Number.MAX_SAFE_INTEGER,
     // Owners hear the full master once unlocked; otherwise the free sample.
     mode: owned && !song.unlocked ? "preview" : "full",
+    playlistTitle: song.title || "Untitled track",
   });
 
   const [duration, setDuration] = useState<number>(song.duration_seconds ?? 0);
