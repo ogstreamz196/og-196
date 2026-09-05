@@ -24,7 +24,7 @@ Deno.serve(async (req) => {
     const admin = adminClient();
     const { data: song } = await admin
       .from("songs")
-      .select("id, user_id, status, unlocked, audio_path, revealed")
+      .select("id, user_id, status, unlocked, audio_path, revealed, title")
       .eq("id", song_id)
       .maybeSingle();
     if (!song) return jsonResponse({ error: "Not found" }, 404);
@@ -58,6 +58,19 @@ Deno.serve(async (req) => {
         amount: COMMUNITY_ROYALTY,
         type: "royalty",
         reference: `${reference}:from:${user.id}`,
+      });
+
+      // Celebrate with the creator: someone downloaded their track.
+      await admin.from("user_notifications").insert({
+        user_id: song.user_id,
+        kind: "track_download",
+        title: "Your track was downloaded!",
+        body: `Someone just downloaded "${song.title ?? "your track"}" and you earned ${COMMUNITY_ROYALTY} loyalty OG coin.`,
+        metadata: {
+          song_id,
+          coins: COMMUNITY_ROYALTY,
+          downloader: user.id,
+        },
       });
 
       const { error: lErr } = await admin.from("unlocked_songs").insert({
