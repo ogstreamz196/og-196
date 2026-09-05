@@ -1134,7 +1134,7 @@ function LibraryPage() {
       {/* Create — hidden while a generation runs so the status card is the only focus */}
       {!pipelineActive && (
         <section aria-label="Create a track" className="studio-panel px-4 pb-6 pt-4 sm:px-6">
-          <div className="mb-4 flex items-center justify-between gap-3">
+          <div className="mb-3 flex items-center justify-between gap-3">
             <h2 className="text-[11px] font-black uppercase tracking-[0.28em] text-primary">
               Control room
             </h2>
@@ -1147,7 +1147,7 @@ function LibraryPage() {
           </p>
 
           {/* Hazard robotic CREATE button — a big 3D push-button on a base plate */}
-          <div className="mt-6 flex flex-col items-center gap-4">
+          <div className="mt-4 flex flex-col items-center gap-4">
             <div className="hazard-pedestal">
               <span aria-hidden="true" className="hazard-base" />
               <button
