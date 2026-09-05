@@ -489,6 +489,11 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       }
       await downloadFile(urlData.url as string, `${song.title || "song"}.mp3`);
       setUnlockDialogOpen(false);
+      // Payment complete — refresh so the preview flips to the full track.
+      refreshCoinBalance();
+      onSaved?.();
+      onRefresh?.();
+
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not unlock");
     } finally {
