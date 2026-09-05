@@ -254,12 +254,45 @@ export function CommunityRoom() {
 
   const send = useMutation({
     mutationFn: (content: string) => postFn({ data: { content, foulMouth } }),
-    onSuccess: () => {
+    onSuccess: (res) => {
       setText("");
       stickToBottomRef.current = true;
+      const award = (res as { award?: { earnedTenths: number; pendingTenths: number; rounds: number } })
+        .award;
+      if (award) {
+        qc.setQueryData(["battle-tally"], (prev: BattleTally | undefined) => ({
+          pendingTenths: award.pendingTenths,
+          rounds: award.rounds,
+          totalAwardedCoins: prev?.totalAwardedCoins ?? 0,
+        }));
+        if (award.earnedTenths > 0) {
+          setLastEarned(award.earnedTenths);
+          window.setTimeout(() => setLastEarned(null), 2500);
+        }
+      }
     },
     onError: (err: Error) => toast.error(err.message),
   });
+
+  const quit = useMutation({
+    mutationFn: () => endFn(),
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: ["battle-tally"] });
+      qc.invalidateQueries({ queryKey: ["profile"] });
+      qc.invalidateQueries({ queryKey: ["coin-balance"] });
+      if (res.coins > 0) {
+        toast.success(`Battle over — ${res.coins} OG Coin${res.coins === 1 ? "" : "s"} banked!`, {
+          description: `${res.rounds} round${res.rounds === 1 ? "" : "s"} fought. Come back for more.`,
+        });
+      } else {
+        toast("Battle over — nothing banked this time", {
+          description: "Land harder roasts to build up a reward.",
+        });
+      }
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+
 
   const clear = useMutation({
     mutationFn: () => clearFn(),
