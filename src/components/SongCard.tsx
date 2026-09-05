@@ -22,6 +22,7 @@ export interface Song {
   generation_started_at?: string | null;
   suno_task_id?: string | null;
   stream_audio_url?: string | null;
+  unlocked?: boolean | null;
 }
 
 function SongCardImpl({ song }: { song: Song }) {
@@ -29,6 +30,8 @@ function SongCardImpl({ song }: { song: Song }) {
   const sampleSeconds = settings?.sample_seconds ?? 60;
 
   const hasAudio = !!(song.audio_path || song.sample_path);
+  // Already paid to unlock? Stream the complete master with no preview cap.
+  const unlocked = !!song.unlocked && !!song.audio_path;
   const isReady = song.status === "completed" && hasAudio;
   const isFailed = song.status === "failed";
   const isPending = song.status === "pending" || song.status === "processing";
@@ -45,7 +48,8 @@ function SongCardImpl({ song }: { song: Song }) {
     songId: song.id,
     hasAudio,
     ready: isReady,
-    sampleSeconds,
+    sampleSeconds: unlocked ? Number.MAX_SAFE_INTEGER : sampleSeconds,
+    mode: unlocked ? "full" : "preview",
   });
 
   return (
@@ -102,13 +106,19 @@ function SongCardImpl({ song }: { song: Song }) {
         {isReady && (
           <div className="mt-2">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Lock className="h-3 w-3" />
-              <span>Preview limited to {sampleSeconds}s • Download for full track</span>
+              {!unlocked && <Lock className="h-3 w-3" />}
+              <span>
+                {unlocked
+                  ? "Unlocked • full track"
+                  : `Preview limited to ${sampleSeconds}s • Download for full track`}
+              </span>
             </div>
             <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-muted">
               <div
                 className="h-full bg-primary transition-all"
-                style={{ width: `${Math.min(100, (progress / sampleSeconds) * 100)}%` }}
+                style={{
+                  width: `${Math.min(100, (progress / (unlocked ? (song.duration_seconds || 180) : sampleSeconds)) * 100)}%`,
+                }}
               />
             </div>
           </div>

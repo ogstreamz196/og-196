@@ -92,9 +92,11 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
 
   const [lyrics, setLyrics] = useState(song.lyrics ?? "");
   const [language, setLanguage] = useState(() => detectLanguage(song.prompt));
-  // Progressive disclosure: details/lyrics stay folded once the song has lyrics.
-  const [detailsOpen, setDetailsOpen] = useState(!song.lyrics);
-  const [lyricsOpen, setLyricsOpen] = useState(!song.lyrics);
+  // Progressive disclosure: each step stays folded unless it's the one to act on.
+  const [lyricsOpen, setLyricsOpen] = useState(false);
+  const [step1Open, setStep1Open] = useState(!song.lyrics);
+  const [step2Open, setStep2Open] = useState(!!song.lyrics && song.status !== "completed");
+
 
   const [saving, setSaving] = useState(false);
   const [genLyrics, setGenLyrics] = useState(false);
@@ -510,35 +512,21 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       <div className="space-y-4">
           {/* Step 1 — Details & lyrics */}
           <Card className={cn(stage > 1 && !dirty && "border-primary/30")}>
-            <CardHeader>
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <FileText className="h-4 w-4 text-primary" />
+            <Collapsible open={step1Open} onOpenChange={setStep1Open}>
+              <CollapsibleTrigger className="flex w-full items-center justify-between gap-3 p-4 text-left sm:p-5">
+                <div className="min-w-0">
+                  <span className="flex items-center gap-2 text-lg font-semibold">
+                    <FileText className="h-4 w-4 shrink-0 text-primary" />
                     1 · Lyrics
-                  </CardTitle>
-                  <CardDescription>
-                    Edit the details, then generate.
-                  </CardDescription>
-
-                </div>
-                <CostBadge cost={lyricsCost} />
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Collapsible open={detailsOpen} onOpenChange={setDetailsOpen}>
-                <CollapsibleTrigger className="flex w-full items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/20 px-3 py-2 text-left text-sm font-semibold hover:bg-muted/40">
-                  <span className="min-w-0 truncate">
-                    Track details
-                    {!detailsOpen && (
-                      <span className="ml-2 font-normal text-xs text-muted-foreground">
-                        {[title.trim() || "Untitled", language, style.trim()].filter(Boolean).join(" · ")}
-                      </span>
-                    )}
                   </span>
-                  <ChevronDown className={cn("h-4 w-4 shrink-0 transition-transform", detailsOpen && "rotate-180")} />
-                </CollapsibleTrigger>
-                <CollapsibleContent className="space-y-4 pt-4">
+                  <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+                    {hasLyrics ? "Ready — tap to edit" : `Write the lyrics · ${lyricsCost} coins`}
+                  </span>
+                </div>
+                <ChevronDown className={cn("h-5 w-5 shrink-0 transition-transform", step1Open && "rotate-180")} />
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+            <CardContent className="space-y-4">
                   <div className="grid gap-4 sm:grid-cols-[1fr_220px]">
                     <div className="space-y-1.5">
                       <Label htmlFor="song-title">Title</Label>
@@ -582,8 +570,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                       placeholder="Who the song is about, the mood, memories…"
                     />
                   </div>
-                </CollapsibleContent>
-              </Collapsible>
+
 
               {hasLyrics && languageChanged && (
                 <div className="rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-xs text-foreground/80">
@@ -657,25 +644,31 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                 </Button>
               </div>
             </CardContent>
+              </CollapsibleContent>
+            </Collapsible>
           </Card>
 
           {/* Stage 2 — Sample */}
           <Card className={cn(stage === 2 && "border-primary/40 shadow-glow", stage < 2 && "opacity-60")}>
-            <CardHeader>
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Play className="h-4 w-4 text-primary" />
+            <Collapsible open={step2Open} onOpenChange={setStep2Open}>
+              <CollapsibleTrigger className="flex w-full items-center justify-between gap-3 p-4 text-left sm:p-5">
+                <div className="min-w-0">
+                  <span className="flex items-center gap-2 text-lg font-semibold">
+                    <Play className="h-4 w-4 shrink-0 text-primary" />
                     2 · Preview
-                  </CardTitle>
-                  <CardDescription>
-                    Free {settings?.sample_seconds ?? 60}s sample.
-                  </CardDescription>
-
+                  </span>
+                  <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+                    {isReady
+                      ? `Free ${settings?.sample_seconds ?? 60}s sample ready`
+                      : isPending
+                        ? "Generating…"
+                        : `Free ${settings?.sample_seconds ?? 60}s sample · ${previewCost} coins`}
+                  </span>
                 </div>
-                <CostBadge cost={previewCost} />
-              </div>
-            </CardHeader>
+                <ChevronDown className={cn("h-5 w-5 shrink-0 transition-transform", step2Open && "rotate-180")} />
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+
             <CardContent className="space-y-3">
               {!hasLyrics && (
                 <p className="text-sm text-muted-foreground">
@@ -730,6 +723,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                       size="sm"
                       variant="outline"
                       onClick={() => {
+                        setStep1Open(true);
                         setLyricsOpen(true);
                         requestAnimationFrame(() =>
                           lyricsRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }),
@@ -766,7 +760,10 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                 </Button>
               </div>
             </CardContent>
+              </CollapsibleContent>
+            </Collapsible>
           </Card>
+
 
           {/* Stage 3 — Final song */}
           <Card className={cn(stage === 3 && "border-primary/40 shadow-glow", stage < 3 && "opacity-60")}>
