@@ -133,7 +133,7 @@ export function MessengerWelcomeDialog({
                 Community chat
               </span>
               <span className="block text-pretty text-xs text-muted-foreground sm:text-sm">
-                Hang out with everyone in the public OG room.
+                See how others use the bot and join in.
               </span>
             </span>
           </button>
