@@ -1202,19 +1202,31 @@ function GeneratingProgress({
         ))}
       </div>
 
-      {/* Animated waveform skeleton */}
-      <div className="flex h-14 items-end gap-1" aria-hidden="true">
-        {Array.from({ length: 28 }).map((_, i) => (
-          <span
-            key={i}
-            className="flex-1 rounded-sm bg-gradient-to-t from-primary/50 to-primary shadow-[0_0_8px_hsl(var(--primary)/0.55)]"
-            style={{
-              height: `${30 + Math.abs(Math.sin((i + elapsed) * 0.6)) * 70}%`,
-              opacity: 0.45 + (i % 4) * 0.15,
-              transition: "height 320ms ease-in-out",
-            }}
-          />
-        ))}
+      {/* Animated waveform skeleton with the live percentage front and centre */}
+      <div className="relative h-24 overflow-hidden rounded-xl border border-primary/25 bg-background/30 p-2 sm:h-28">
+        <div className="flex h-full items-end gap-1 opacity-60" aria-hidden="true">
+          {Array.from({ length: 28 }).map((_, i) => (
+            <span
+              key={i}
+              className="flex-1 rounded-sm bg-gradient-to-t from-primary/50 to-primary shadow-[0_0_8px_hsl(var(--primary)/0.55)]"
+              style={{
+                height: `${30 + Math.abs(Math.sin((i + elapsed) * 0.6)) * 70}%`,
+                opacity: 0.45 + (i % 4) * 0.15,
+                transition: "height 320ms ease-in-out",
+              }}
+            />
+          ))}
+        </div>
+        <div className="pointer-events-none absolute inset-0 grid place-items-center">
+          <div className="rounded-2xl bg-background/55 px-4 py-1.5 text-center backdrop-blur-sm">
+            <span className="block text-4xl font-black leading-none tabular-nums text-white drop-shadow-[0_0_18px_hsl(var(--primary))] sm:text-5xl">
+              {pct}%
+            </span>
+            <span className="mt-1 block text-[10px] font-semibold uppercase tracking-[0.2em] text-primary/90">
+              {status.etaSeconds > 0 ? `ETA ${etaLabel}` : etaLabel}
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Progress bar — thicker, glowing, with moving shimmer */}
