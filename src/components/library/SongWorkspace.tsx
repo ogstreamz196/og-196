@@ -217,13 +217,15 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const stage: Stage = isReady ? 3 : hasLyrics ? 2 : 1;
 
   const dirty =
-    title !== (song.title ?? "") ||
-    brief !== (song.prompt ?? "") ||
-    style !== (song.style ?? "") ||
-    lyrics !== (song.lyrics ?? "");
+    styleValue !== (song.style ?? "") ||
+    nextBriefValue !== (song.prompt ?? "") ||
+    lyrics !== (song.lyrics ?? "") ||
+    (vocal || "") !== (song.vocal ?? "") ||
+    vocalsOnly !== !!song.vocals_only ||
+    targetMinutes * 60 !== (song.target_duration_sec ?? MIN_LENGTH * 60);
 
   async function persist(
-    patch: Partial<{ title: string | null; prompt: string; style: string | null; lyrics: string | null }>,
+    patch: Record<string, unknown>,
   ) {
     // Community songs aren't editable by the viewer — skip persistence, keep generation working.
     if (!isOwner) return;
@@ -231,17 +233,23 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
     if (error) throw error;
   }
 
+  /** Save every editable selection (everything except name/story) plus lyrics. */
+  async function saveSettingsPatch() {
+    if (nextBriefValue !== brief) setBrief(nextBriefValue);
+    await persist({
+      prompt: nextBriefValue,
+      style: styleValue || null,
+      lyrics: lyrics.trim() || null,
+      vocal: vocal && vocal !== "Any voice" ? vocal : null,
+      vocals_only: vocalsOnly,
+      target_duration_sec: targetMinutes * 60,
+    });
+  }
+
   async function handleSave() {
     setSaving(true);
     try {
-      const nextBrief = languageChanged ? setBriefLanguage(brief, language) : brief;
-      if (nextBrief !== brief) setBrief(nextBrief);
-      await persist({
-        title: title.trim() || null,
-        prompt: nextBrief,
-        style: style.trim() || null,
-        lyrics: lyrics.trim() || null,
-      });
+      await saveSettingsPatch();
       toast.success("Changes saved");
       onSaved?.();
     } catch (e) {
@@ -250,6 +258,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       setSaving(false);
     }
   }
+
 
 
   async function generateLyrics() {
