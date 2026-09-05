@@ -205,7 +205,7 @@ export function CreateNowWizard({
       case 4:
         return "Hang on — your beat is still uploading.";
       default:
-        return "English is included by default — add other languages or continue.";
+        return "Pick a language, or continue for English.";
     }
   }, [step, stepValid]);
 
