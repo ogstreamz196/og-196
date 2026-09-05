@@ -339,23 +339,21 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
     try { localStorage.setItem("welcome.personal_banner.dismissed", "1"); } catch {}
     try { window.dispatchEvent(new CustomEvent("og:generate-start")); } catch {}
     try {
-      if (dirty) {
-        await persist({
-          title: title.trim() || null,
-          prompt: brief,
-          style: style.trim() || null,
-          lyrics: lyrics.trim() || null,
-        });
-      }
+      if (dirty) await saveSettingsPatch();
       const { data, error } = await supabase.functions.invoke("suno-generate", {
         body: {
           song_id: isOwner ? song.id : null,
-          prompt: brief,
+          prompt: nextBriefValue,
           lyrics,
           title: title.trim() || null,
-          style: style.trim() || song.style || null,
+          style: styleValue || song.style || null,
+          vocal: vocal && vocal !== "Any voice" ? vocal : null,
+          vocals_only: vocalsOnly,
+          beat_path: song.beat_path ?? null,
+          target_duration_sec: targetMinutes * 60,
         },
       });
+
 
       if (error) {
         const msg = invokeError(error, "Could not start generation");
