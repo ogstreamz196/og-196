@@ -161,7 +161,7 @@ function LibraryPage() {
   // Track length is chosen in step 1 of the Create now wizard (3 min floor).
   const [targetMinutes, setTargetMinutes] = useState(MIN_TRACK_MINUTES);
   const targetDurationSec = Math.max(MIN_TRACK_MINUTES, targetMinutes) * 60;
-  const expectedRange = `${targetMinutes}:00–${targetMinutes}:30+`;
+  const expectedRange = `${targetMinutes} min`;
   // Actual estimate returned by the lyrics engine once a track is generated.
   const [actualDurationLabel, setActualDurationLabel] = useState<string | null>(null);
 
@@ -749,7 +749,7 @@ function LibraryPage() {
       advanceStage("rendering");
       setTrackedSongId(row.id);
       library.refetch();
-      toast.success(`Cooking your sample · -${totalCost} coins`);
+      toast.success(`Cooking your sample · -${runCost} coins`);
     } catch (e) {
       if (stale()) return;
       const msg = e instanceof Error ? e.message : "Something went wrong";
