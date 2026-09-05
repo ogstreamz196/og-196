@@ -95,7 +95,7 @@ function CommunityTrackRowImpl({
       await qc.invalidateQueries({ queryKey: ["profile"] });
 
       const { data, error } = await supabase.functions.invoke("song-url", {
-        body: { song_id: song.id, mode: "full", purpose: "download" },
+        body: { song_id: song.id, mode: "full", purpose: "download", filename: `${title}.mp3` },
       });
       if (error) {
         throw new Error(
