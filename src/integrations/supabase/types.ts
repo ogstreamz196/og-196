@@ -32,6 +32,30 @@ export type Database = {
         }
         Relationships: []
       }
+      battle_tallies: {
+        Row: {
+          pending_tenths: number
+          rounds: number
+          total_awarded_coins: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          pending_tenths?: number
+          rounds?: number
+          total_awarded_coins?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          pending_tenths?: number
+          rounds?: number
+          total_awarded_coins?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       boss_audit_log: {
         Row: {
           action: string
