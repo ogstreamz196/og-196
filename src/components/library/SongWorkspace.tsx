@@ -893,7 +893,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                   </div>
                 </div>
               )}
-              {isReady && <InlineSamplePlayer songId={song.id} />}
+              {isReady && <InlineSamplePlayer songId={song.id} unlocked={!!song.unlocked} />}
               <div className="flex flex-wrap items-center justify-end gap-2">
                 <Button
                   onClick={generatePreview}
