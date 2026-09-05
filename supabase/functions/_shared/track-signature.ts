@@ -60,6 +60,6 @@ export function injectSignature(lyrics: string | null | undefined): string | nul
 /** Append the signature hint to a free-form prompt (no lyric sheet supplied). */
 export function withSignatureHint(prompt: string): string {
   if (!prompt.trim()) return prompt;
-  if (prompt.toLowerCase().includes("o g bot dot co dot uk")) return prompt;
+  if (prompt.toLowerCase().includes("o g streamz dot co dot uk")) return prompt;
   return `${prompt}\n\n${SIGNATURE_PROMPT_HINT}`;
 }
