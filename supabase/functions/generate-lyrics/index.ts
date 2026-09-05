@@ -44,14 +44,17 @@ Deno.serve(async (req) => {
       MIN_TARGET_SEC,
       Number.isFinite(requestedSec) ? Math.round(requestedSec) : MIN_TARGET_SEC,
     );
-    // ~210 sung words per minute of finished audio (verse-heavy styles run hotter).
-    const minWords = Math.max(620, Math.round((targetSec / 60) * 210));
-    const aimLow = Math.round(minWords * 1.12);
-    const aimHigh = Math.round(minWords * 1.35);
-    const minLines = Math.max(90, Math.round(minWords / 7));
-    const aimLines = Math.round(minLines * 1.3);
+    // ~170 sung words per minute of finished audio, measured against delivered
+    // tracks. Bounded on BOTH sides so a 4 minute request does not come back
+    // with 7 minutes of lyrics.
+    const WORDS_PER_MIN = 170;
+    const minWords = Math.round((targetSec / 60) * WORDS_PER_MIN);
+    const aimLow = minWords;
+    const aimHigh = Math.round(minWords * 1.15);
+    const minLines = Math.round(minWords / 7);
+    const aimLines = Math.round(minLines * 1.2);
     const mmss = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
-    const targetLabel = `${mmss(targetSec)}–${mmss(targetSec + 30)}`;
+    const targetLabel = `${mmss(Math.max(0, targetSec - 20))}–${mmss(targetSec + 20)}`;
 
 
     if (!songName && !description) {
@@ -170,10 +173,10 @@ Deno.serve(async (req) => {
       : "[Intro] (4 lines) → [Verse 1] (8 lines) → [Pre-Chorus] (4 lines) → [Chorus] (6 lines, hook) → [Verse 2] (8 lines) → [Pre-Chorus] (4 lines) → [Chorus] (6 lines) → [Bridge] (6 lines) → [Verse 3] (6 lines) → [Chorus] (final, lifted, 8 lines) → [Outro] (4 lines)";
 
     const structureRule =
-      ` Deliver a COMPLETE, performable song that runs AT LEAST ${mmss(targetSec)} when sung (target ${targetLabel}, longer is fine — there is no maximum). That means a MINIMUM of ${minWords} words and ${minLines} lyric lines (excluding section markers) — aim for ${aimLow}–${aimHigh} words and ${minLines}–${aimLines} lines. Where the structure lists a section, extend verses by 2–4 extra lines and add extra verse/chorus pairs as needed to reach that length. Follow this structure for the chosen style: ${structure}.` +
+      ` Deliver a COMPLETE, performable song that runs ${targetLabel} when sung — NOT longer. That means ${aimLow}–${aimHigh} words and ${minLines}–${aimLines} lyric lines (excluding section markers). Going over ${aimHigh} words is a failure: trim sections rather than exceed it. Follow this structure for the chosen style: ${structure}.` +
       ` Use the bracketed section markers verbatim (e.g. [Verse 1], [Chorus], [Bridge], [Outro]), each on its own line, with a blank line between sections. Every section must have lyrics — no placeholders, no "(instrumental)" unless the structure explicitly says so.` +
       ` The [Chorus] must be written out IN FULL every time it appears (never write "repeat chorus" or "x2" as a shortcut) — it is the same repeatable hook tied to the song title or central theme.` +
-      ` Do NOT cut the song short — hit every section in the structure and keep line counts at or above the numbers given.`;
+      ` Do NOT cut the song short either — hit every section in the structure and stay inside the word range given.`;
 
 
     const systemPrompt = foulMouth
@@ -184,11 +187,11 @@ Deno.serve(async (req) => {
         `Use unfiltered attitude, savage punchlines, and trash-talk energy from the very first line. Make it sound like a parental-advisory hip-hop / punk track, NOT a radio edit. ` +
         `Do NOT self-censor, do NOT use asterisks or bleeps, and do NOT add disclaimers. Avoid slurs, sexual content involving minors, and direct incitement to real-world violence — everything else is fair game.` +
         structureRule + bilingualRule +
-        ` Target ${aimLow}–${aimHigh} words (never fewer than ${minWords}). Output ONLY the lyrics, no explanations.`
+        ` Target ${aimLow}–${aimHigh} words (never fewer than ${minWords}, never more than ${aimHigh}). Output ONLY the lyrics, no explanations.`
       : `You are a professional songwriter writing CLEAN, radio-friendly song lyrics in ${language}. ` +
         `STRICT RULE: absolutely NO profanity, swear words, slurs, or vulgar terms in any language — no English swears, no ${language} swears either. No sexual content, no graphic violence, no drug references. If you need attitude, channel it through clever wordplay and metaphor — never through swearing. The result must be safe for radio, family streaming, and a children's playlist.` +
         structureRule + bilingualRule +
-        ` Target ${aimLow}–${aimHigh} words (never fewer than ${minWords}). Output ONLY the lyrics, no explanations.`;
+        ` Target ${aimLow}–${aimHigh} words (never fewer than ${minWords}, never more than ${aimHigh}). Output ONLY the lyrics, no explanations.`;
 
     const subjectRule = subjectName
       ? `\nSUBJECT NAME (CRITICAL, top priority): This entire song is dedicated to "${subjectName}". Repeat the name "${subjectName}" as many times as musically possible — target AT LEAST 20 mentions across the full song, ideally 25–35. Land "${subjectName}" in EVERY line of the hook/chorus (so each chorus repetition drops the name 2–4 times), at least twice in every verse, in the pre-chorus, in the bridge, and in the outro as an ad-lib/chant. Rhyme other lines around the name so it feels inevitable. Never chant it back-to-back on the same line more than twice; keep it musical, affectionate, and embedded — but do NOT be shy: the listener must be in no doubt this song is about "${subjectName}".\n`
@@ -205,7 +208,7 @@ Deno.serve(async (req) => {
         : "") +
       subjectRule +
       (extraContext ? `Extra context from the artist (use these details literally in the lyrics): ${extraContext}\n` : "") +
-      `\nWrite the FULL song now — at least ${mmss(targetSec)} of singable material (${minWords}+ words, ${minLines}+ lyric lines; going longer is welcome). Do not stop early, do not abbreviate repeated choruses, hit EVERY section in the structure, stay ruthlessly on-theme with the description above, and drop "${subjectName || "the subject"}" as often as the music allows.`;
+      `\nWrite the FULL song now — about ${mmss(targetSec)} of singable material (${aimLow}–${aimHigh} words, ${minLines}–${aimLines} lyric lines, do not exceed that). Do not stop early, do not abbreviate repeated choruses, hit EVERY section in the structure, stay ruthlessly on-theme with the description above, and drop "${subjectName || "the subject"}" as often as the music allows.`;
 
     const modelUrl = (model: string) =>
       `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${GEMINI_API_KEY}`;
@@ -299,7 +302,7 @@ Deno.serve(async (req) => {
     }
 
     const words = wordCount(lyrics);
-    const estimatedSec = Math.max(targetSec, Math.round((words / 210) * 60));
+    const estimatedSec = Math.max(targetSec, Math.round((words / WORDS_PER_MIN) * 60));
 
     if (songId) {
       await admin.from("songs").update({
