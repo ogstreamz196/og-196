@@ -76,6 +76,57 @@ HARD LIMITS — never cross:
 - Nothing sexual about real people. Nothing illegal. No content about minors.
 `.trim();
 
+/**
+ * Judge how hard a user's roast landed. Returns tenths of an OG Coin (0–10),
+ * i.e. a maximum of 1.00 coin per message. The cap is deliberately never
+ * surfaced to the user.
+ */
+async function scoreRoast(
+  apiKey: string,
+  content: string,
+  botReply: string | null,
+): Promise<number> {
+  try {
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({
+        model: "google/gemini-3.7-flash",
+        temperature: 0.2,
+        max_tokens: 8,
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are the judge of a roast battle. Rate how good the CHALLENGER's roast is " +
+              "on an integer scale 0-10. 0 = not a roast at all / empty / spam. " +
+              "1-3 = weak or generic. 4-6 = decent jab. 7-8 = genuinely funny and cutting. " +
+              "9-10 = elite, original, devastating wordplay. Be a strict judge: most " +
+              "messages score 2-5. Reply with ONLY the integer, nothing else.",
+          },
+          {
+            role: "user",
+            content:
+              `CHALLENGER: ${content}` +
+              (botReply ? `\n\nOG BOT CLAPBACK: ${botReply}` : ""),
+          },
+        ],
+      }),
+      signal: AbortSignal.timeout(15_000),
+    });
+    if (!res.ok) return 0;
+    const json = (await res.json().catch(() => ({}))) as {
+      choices?: { message?: { content?: string } }[];
+    };
+    const raw = (json.choices?.[0]?.message?.content ?? "").match(/\d+/)?.[0];
+    const n = Number(raw);
+    if (!Number.isFinite(n)) return 0;
+    return Math.max(0, Math.min(10, Math.round(n)));
+  } catch {
+    return 0;
+  }
+}
+
 
 /** Post a user message to the community + trigger a short OG Bot reply. */
 export const postCommunityMessage = createServerFn({ method: "POST" })
@@ -128,6 +179,7 @@ export const postCommunityMessage = createServerFn({ method: "POST" })
 
     // 3. Call AI gateway for short reply (fire-and-forget; if it fails, just no reply)
     const apiKey = process.env.LOVABLE_API_KEY;
+    let botReply: string | null = null;
     if (apiKey) {
       // Live chat = foul mouth by default for everyone.
       // VIPs still get it (and can toggle off via their preference), but the
@@ -166,6 +218,7 @@ export const postCommunityMessage = createServerFn({ method: "POST" })
           const cap = useFoul ? 320 : 220;
           if (reply.length > cap) reply = reply.slice(0, cap - 3) + "…";
           if (reply) {
+            botReply = reply;
             await supabaseAdmin.from("community_messages").insert({
               user_id: null,
               role: "bot",
@@ -179,8 +232,98 @@ export const postCommunityMessage = createServerFn({ method: "POST" })
       }
     }
 
-    return { message: userRow as CommunityMessage };
+    // 4. Judge the roast and bank the reward (tenths of a coin, max 10 per message)
+    let earnedTenths = 0;
+    let pendingTenths = 0;
+    let rounds = 0;
+    try {
+      const { data: tally } = await supabaseAdmin
+        .from("battle_tallies")
+        .select("pending_tenths, rounds")
+        .eq("user_id", context.userId)
+        .maybeSingle();
+      pendingTenths = tally?.pending_tenths ?? 0;
+      rounds = tally?.rounds ?? 0;
+      if (apiKey) earnedTenths = await scoreRoast(apiKey, data.content, botReply);
+      pendingTenths += earnedTenths;
+      rounds += 1;
+      await supabaseAdmin.from("battle_tallies").upsert(
+        {
+          user_id: context.userId,
+          pending_tenths: pendingTenths,
+          rounds,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "user_id" },
+      );
+    } catch (err) {
+      console.warn("battle scoring failed:", (err as Error).message);
+    }
+
+    return {
+      message: userRow as CommunityMessage,
+      award: { earnedTenths, pendingTenths, rounds },
+    };
   });
+
+/** Current pending battle reward for the signed-in user. */
+export const getBattleTally = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin
+      .from("battle_tallies")
+      .select("pending_tenths, rounds, total_awarded_coins")
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    return {
+      pendingTenths: data?.pending_tenths ?? 0,
+      rounds: data?.rounds ?? 0,
+      totalAwardedCoins: data?.total_awarded_coins ?? 0,
+    };
+  });
+
+/** End the battle: pay out the accumulated reward and reset the tally. */
+export const endBattle = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: tally } = await supabaseAdmin
+      .from("battle_tallies")
+      .select("pending_tenths, rounds, total_awarded_coins")
+      .eq("user_id", context.userId)
+      .maybeSingle();
+
+    const pendingTenths = tally?.pending_tenths ?? 0;
+    const rounds = tally?.rounds ?? 0;
+    // Whole coins only — leftover tenths roll over into the next battle.
+    const coins = Math.floor(pendingTenths / 10);
+    const remainder = pendingTenths - coins * 10;
+
+    if (coins > 0) {
+      const { error } = await supabaseAdmin.rpc("credit_coin_transaction", {
+        _user_id: context.userId,
+        _amount: coins,
+        _type: "battle_reward",
+        _reference: `battle:${new Date().toISOString()}`,
+      });
+      if (error) throw new Error(error.message);
+    }
+
+    await supabaseAdmin.from("battle_tallies").upsert(
+      {
+        user_id: context.userId,
+        pending_tenths: remainder,
+        rounds: 0,
+        total_awarded_coins: (tally?.total_awarded_coins ?? 0) + coins,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id" },
+    );
+
+    return { coins, rounds, pendingTenths, remainderTenths: remainder };
+  });
+
 
 /** Initial fetch of the latest N messages, oldest-first. */
 export const listCommunityMessages = createServerFn({ method: "GET" })

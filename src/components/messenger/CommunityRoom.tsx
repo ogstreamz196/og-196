@@ -2,7 +2,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { ArrowDown, Send, Users, Loader2, Trash2 } from "lucide-react";
+import { ArrowDown, Send, Users, Loader2, Trash2, Coins, Flag } from "lucide-react";
 import { TypingDots } from "@/components/ui/typing-dots";
 import { toast } from "sonner";
 import {
@@ -10,6 +10,8 @@ import {
   listOlderCommunityMessages,
   postCommunityMessage,
   clearCommunityMessages,
+  getBattleTally,
+  endBattle,
   type CommunityMessage,
 } from "@/lib/community.functions";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,6 +37,9 @@ function formatTime(iso: string) {
 
 const TYPING_TTL_MS = 4000;
 
+type BattleTally = { pendingTenths: number; rounds: number; totalAwardedCoins: number };
+
+
 export function CommunityRoom() {
   const { user } = useAuth();
   const myId = user?.id ?? null;
@@ -43,6 +48,8 @@ export function CommunityRoom() {
   const olderFn = useServerFn(listOlderCommunityMessages);
   const postFn = useServerFn(postCommunityMessage);
   const clearFn = useServerFn(clearCommunityMessages);
+  const tallyFn = useServerFn(getBattleTally);
+  const endFn = useServerFn(endBattle);
   const { foulMouth } = useFoulMouth();
   const { isDev, isAdmin } = useRole();
   const canClear = isDev || isAdmin;
@@ -52,7 +59,15 @@ export function CommunityRoom() {
     queryFn: () => listFn(),
     staleTime: 10_000,
   });
+  const { data: tally } = useQuery<BattleTally>({
+    queryKey: ["battle-tally"],
+    queryFn: () => tallyFn(),
+    staleTime: 30_000,
+  });
+  const [lastEarned, setLastEarned] = useState<number | null>(null);
+  const pendingCoins = ((tally?.pendingTenths ?? 0) / 10).toFixed(2);
   const messages: CommunityMessage[] = useMemo(() => data?.messages ?? [], [data?.messages]);
+
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const composerRef = useRef<HTMLTextAreaElement>(null);
@@ -252,12 +267,45 @@ export function CommunityRoom() {
 
   const send = useMutation({
     mutationFn: (content: string) => postFn({ data: { content, foulMouth } }),
-    onSuccess: () => {
+    onSuccess: (res) => {
       setText("");
       stickToBottomRef.current = true;
+      const award = (res as { award?: { earnedTenths: number; pendingTenths: number; rounds: number } })
+        .award;
+      if (award) {
+        qc.setQueryData(["battle-tally"], (prev: BattleTally | undefined) => ({
+          pendingTenths: award.pendingTenths,
+          rounds: award.rounds,
+          totalAwardedCoins: prev?.totalAwardedCoins ?? 0,
+        }));
+        if (award.earnedTenths > 0) {
+          setLastEarned(award.earnedTenths);
+          window.setTimeout(() => setLastEarned(null), 2500);
+        }
+      }
     },
     onError: (err: Error) => toast.error(err.message),
   });
+
+  const quit = useMutation({
+    mutationFn: () => endFn(),
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: ["battle-tally"] });
+      qc.invalidateQueries({ queryKey: ["profile"] });
+      qc.invalidateQueries({ queryKey: ["coin-balance"] });
+      if (res.coins > 0) {
+        toast.success(`Battle over — ${res.coins} OG Coin${res.coins === 1 ? "" : "s"} banked!`, {
+          description: `${res.rounds} round${res.rounds === 1 ? "" : "s"} fought. Come back for more.`,
+        });
+      } else {
+        toast("Battle over — nothing banked this time", {
+          description: "Land harder roasts to build up a reward.",
+        });
+      }
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+
 
   const clear = useMutation({
     mutationFn: () => clearFn(),
@@ -279,6 +327,43 @@ export function CommunityRoom() {
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col gap-3 p-3 sm:gap-2 sm:p-3">
+      <div className="flex items-center justify-between gap-2 rounded-xl border border-primary/30 bg-primary/5 px-2.5 py-1.5 sm:px-3">
+        <div className="flex min-w-0 items-center gap-2">
+          <Coins className="h-4 w-4 shrink-0 text-primary" aria-hidden />
+          <div className="min-w-0 leading-tight">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Battle purse
+            </p>
+            <p
+              className="truncate text-sm font-black tabular-nums text-foreground"
+              aria-live="polite"
+            >
+              {pendingCoins} OG
+              {lastEarned ? (
+                <span className="ml-1.5 animate-[pop_0.3s_ease-out] text-xs font-bold text-primary">
+                  +{(lastEarned / 10).toFixed(2)}
+                </span>
+              ) : null}
+            </p>
+          </div>
+        </div>
+        <Button
+          type="button"
+          variant="destructive"
+          size="sm"
+          className="h-8 shrink-0 gap-1.5 text-[11px] font-black uppercase tracking-wide"
+          disabled={quit.isPending}
+          onClick={() => quit.mutate()}
+        >
+          {quit.isPending ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Flag className="h-3.5 w-3.5" />
+          )}
+          End battle, I quit
+        </Button>
+      </div>
+
       {canClear && (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-destructive/30 bg-destructive/5 px-2.5 py-1.5 sm:px-3">
           <span className="text-[10px] font-bold uppercase tracking-wider text-destructive/80">
