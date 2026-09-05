@@ -35,6 +35,7 @@ export async function retryGeneration(songId: string) {
       lyrics: song.lyrics,
       title: song.title,
       style: song.style,
+      language: languageFromPrompt(song.prompt),
       vocals_only: !!song.vocals_only,
       beat_path: song.beat_path,
       portal_id: song.portal_id,
