@@ -77,8 +77,10 @@ const GENDERS = ["Female vocal", "Male vocal", "Duo", "Any voice"];
 
 const TOTAL_STEPS = 4;
 
-/** Track length options — a 3 minute floor is enforced backend-side. */
-export const LENGTH_OPTIONS = [3, 4, 5, 6, 8];
+/** Track length — 3 minutes included, then 1 coin per extra minute. */
+export const MIN_LENGTH = 3;
+export const MAX_LENGTH = 8;
+export const LENGTH_OPTIONS = [3, 4, 5, 6, 7, 8];
 
 /** Curated styles first, then everything else we already support. */
 const STYLES: string[] = (() => {
@@ -366,29 +368,38 @@ export function CreateNowWizard({
                 <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
                   Track length
                 </p>
-                <div role="group" aria-label="Track length" className="grid grid-cols-5 gap-2">
-                  {LENGTH_OPTIONS.map((m) => {
-                    const selected = targetMinutes === m;
-                    return (
-                      <button
-                        key={m}
-                        type="button"
-                        aria-pressed={selected}
-                        onClick={() => setTargetMinutes(m)}
-                        className={cn(
-                          "min-h-11 rounded-xl border text-sm font-black tabular-nums transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
-                          selected
-                            ? "border-primary bg-primary/20 text-foreground shadow-glow"
-                            : "border-white/10 bg-card/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
-                        )}
-                      >
-                        {m}m
-                      </button>
-                    );
-                  })}
+                <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-card/60 p-2">
+                  <button
+                    type="button"
+                    aria-label="Shorter track"
+                    disabled={targetMinutes <= MIN_LENGTH}
+                    onClick={() => setTargetMinutes((m) => Math.max(MIN_LENGTH, m - 1))}
+                    className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-white/10 bg-background/70 text-xl font-black transition hover:border-primary/50 disabled:opacity-40"
+                  >
+                    −
+                  </button>
+                  <div className="min-w-0 flex-1 text-center">
+                    <p className="text-2xl font-black tabular-nums leading-none">
+                      {targetMinutes} min
+                    </p>
+                    <p className="mt-1 text-[11px] font-semibold text-muted-foreground">
+                      {targetMinutes > MIN_LENGTH
+                        ? `+${targetMinutes - MIN_LENGTH} coin${targetMinutes - MIN_LENGTH === 1 ? "" : "s"}`
+                        : "Included"}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    aria-label="Longer track (1 extra coin)"
+                    disabled={targetMinutes >= MAX_LENGTH}
+                    onClick={() => setTargetMinutes((m) => Math.min(MAX_LENGTH, m + 1))}
+                    className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-primary/40 bg-primary/15 text-xl font-black text-primary transition hover:bg-primary/25 disabled:opacity-40"
+                  >
+                    +
+                  </button>
                 </div>
                 <p className="text-[11px] text-muted-foreground">
-                  We aim for {targetMinutes}:00 or a touch longer — never shorter.
+                  Each extra minute costs 1 coin.
                 </p>
               </div>
             </div>
