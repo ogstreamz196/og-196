@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
   if (pre) return pre;
 
   try {
-    if (!GEMINI_API_KEY) return jsonResponse({ error: "GEMINI_API_KEY not configured" }, 500);
+    if (!GEMINI_API_KEY && !LOVABLE_API_KEY) return jsonResponse({ error: "No lyrics model configured" }, 500);
 
     const auth = await requireUser(req);
     if (auth.error) return auth.error;
