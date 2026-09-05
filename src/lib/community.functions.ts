@@ -98,11 +98,17 @@ async function scoreRoast(
           {
             role: "system",
             content:
-              "You are the judge of a roast battle. Rate how good the CHALLENGER's roast is " +
-              "on an integer scale 0-10. 0 = not a roast at all / empty / spam. " +
-              "1-3 = weak or generic. 4-6 = decent jab. 7-8 = genuinely funny and cutting. " +
-              "9-10 = elite, original, devastating wordplay. Be a strict judge: most " +
-              "messages score 2-5. Reply with ONLY the integer, nothing else.",
+              "You are the judge of a roast battle. Score the CHALLENGER's message 0-10 " +
+              "using this rubric, adding the points for each criterion:\n" +
+              "+0-3 BITE: how hard the burn actually lands on OG Bot.\n" +
+              "+0-3 ORIGINALITY: fresh angle and wordplay; generic insults score 0-1.\n" +
+              "+0-2 TIMING: does it answer or flip OG Bot's last clapback?\n" +
+              "+0-2 CRAFT: rhythm, brevity, a clean punchline.\n" +
+              "Score 0 only for empty text, spam, keyboard mash, or a plain question " +
+              "with no jab. Typical decent effort lands 3-6; 9-10 is reserved for " +
+              "genuinely elite, original, devastating lines. Judge the message on its " +
+              "own merit every time — do not drift high or low over a session. " +
+              "Reply with ONLY the integer, nothing else.",
           },
           {
             role: "user",
@@ -126,6 +132,30 @@ async function scoreRoast(
     return 0;
   }
 }
+
+/**
+ * Keep awards fair over a session: nobody maxes out every round, and anyone
+ * making a real attempt always walks away with something.
+ * `avgTenths` is the user's running average score so far this battle.
+ */
+export function calibrateAward(
+  rawScore: number,
+  content: string,
+  avgTenths: number,
+  isRepeat: boolean,
+): number {
+  const trimmed = content.trim();
+  if (!trimmed || isRepeat) return 0;
+  let score = Math.max(0, Math.min(10, Math.round(rawScore)));
+  // Anti-drought: a real attempt (not a one-word grunt) always banks something.
+  if (trimmed.length >= 12 && score < 1) score = 1;
+  // Anti-farm: the hotter the running average, the harder the ceiling.
+  if (avgTenths >= 7) score = Math.min(score, 6);
+  else if (avgTenths >= 5) score = Math.min(score, 8);
+  return score;
+}
+
+
 
 
 /** Post a user message to the community + trigger a short OG Bot reply. */
