@@ -357,16 +357,17 @@ Deno.serve(async (req) => {
       await admin.from("profiles").update({ coin_balance: ((prof as { coin_balance?: number } | null)?.coin_balance ?? 0) + coinCost }).eq("id", user.id);
       await updateProgress(0, "");
 
-      if (res.status === 429) return jsonResponse({ error: "Gemini rate limit, try again shortly" }, 429);
-      const txt = await res.text();
-      console.error("Gemini API error", res.status, txt);
+      if (res.status === 429) return jsonResponse({ error: "AI is busy right now — try again shortly" }, 429);
+      if (res.status === 402) return jsonResponse({ error: "AI credits exhausted — top up to keep creating" }, 402);
+      const txt = res.detail ?? "";
+      console.error("Lyrics model error", res.status, txt);
       return jsonResponse({ error: "Lyrics generation failed", detail: txt.slice(0, 500) }, 502);
     }
 
     await updateProgress(80, "Polishing bars…");
 
-    const data = await res.json();
-    let lyrics = extractText(data);
+    let lyrics = res.text;
+
 
     // Length guard: enforce the minimum target. If the model came back short,
     // ask it to extend the SAME song (never a new one), up to twice.
