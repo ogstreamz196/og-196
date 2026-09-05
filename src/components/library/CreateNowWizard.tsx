@@ -42,6 +42,8 @@ export type WizardResult = {
   vocalsOnly: boolean;
   /** Storage path of an uploaded beat the vocals should sing over ("" = none). */
   beatPath: string;
+  /** Requested track length in minutes (3 minute floor). */
+  targetMinutes: number;
 };
 
 /** Raw wizard inputs — kept by the parent so a retry never loses them. */
@@ -55,6 +57,7 @@ export type WizardDraft = {
   vocalsOnly: boolean;
   beatPath: string;
   beatName: string;
+  targetMinutes: number;
 };
 
 export const EMPTY_DRAFT: WizardDraft = {
@@ -67,11 +70,15 @@ export const EMPTY_DRAFT: WizardDraft = {
   vocalsOnly: false,
   beatPath: "",
   beatName: "",
+  targetMinutes: 3,
 };
 
 const GENDERS = ["Female vocal", "Male vocal", "Duo", "Any voice"];
 
-const TOTAL_STEPS = 5;
+const TOTAL_STEPS = 4;
+
+/** Track length options — a 3 minute floor is enforced backend-side. */
+export const LENGTH_OPTIONS = [3, 4, 5, 6, 8];
 
 /** Curated styles first, then everything else we already support. */
 const STYLES: string[] = (() => {
@@ -101,6 +108,7 @@ export function CreateNowWizard({
   const [gender, setGender] = useState("");
   const [languages, setLanguages] = useState<string[]>([]);
   const [vocalsOnly, setVocalsOnly] = useState(false);
+  const [targetMinutes, setTargetMinutes] = useState(3);
   const { foulMouth } = useFoulMouth();
   const setFoulMouth = useSetFoulMouth();
   const ratingSaving = setFoulMouth.isPending;
@@ -128,6 +136,7 @@ export function CreateNowWizard({
     setVocalsOnly(d.vocalsOnly ?? false);
     setBeatPath(d.beatPath ?? "");
     setBeatName(d.beatName ?? "");
+    setTargetMinutes(d.targetMinutes || 3);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
@@ -159,6 +168,7 @@ export function CreateNowWizard({
     setVocalsOnly(false);
     setBeatPath("");
     setBeatName("");
+    setTargetMinutes(3);
     setStep(1);
     onOpenChange(false);
   }
@@ -166,14 +176,12 @@ export function CreateNowWizard({
   const stepValid = useMemo(() => {
     switch (step) {
       case 1:
-        return title.trim().length > 0;
+        return title.trim().length > 0 && subjectName.trim().length > 0;
       case 2:
-        return subjectName.trim().length > 0;
-      case 3:
         return description.trim().length >= 12;
-      case 4:
+      case 3:
         return styles.length > 0;
-      case 5:
+      case 4:
         // Beat upload is always optional — skipping gives nasheed-style vocals.
         return !uploadingBeat;
       default:
@@ -187,14 +195,12 @@ export function CreateNowWizard({
     if (stepValid) return null;
     switch (step) {
       case 1:
-        return "Give your track a name to continue.";
+        return "Add a track name and who it's about to continue.";
       case 2:
-        return "Tell us who it's about — a person, a group, a brand, or yourself.";
-      case 3:
         return "Add a few more words about the story or vibe.";
-      case 4:
+      case 3:
         return "Pick at least one style (you can stack a few).";
-      case 5:
+      case 4:
         return "Hang on — your beat is still uploading.";
       default:
         return "English is included by default — add other languages or continue.";
@@ -217,8 +223,20 @@ export function CreateNowWizard({
         vocal: gender,
         vocalsOnly,
         beatPath: vocalsOnly ? beatPath : "",
+        targetMinutes,
       },
-      { title, subjectName, description, styles, gender, languages, vocalsOnly, beatPath, beatName },
+      {
+        title,
+        subjectName,
+        description,
+        styles,
+        gender,
+        languages,
+        vocalsOnly,
+        beatPath,
+        beatName,
+        targetMinutes,
+      },
     );
     onOpenChange(false);
   }
@@ -286,18 +304,16 @@ export function CreateNowWizard({
             />
           </div>
           <DialogTitle className="font-display text-2xl font-black leading-tight sm:text-3xl">
-            {step === 1 && "Give your track a name"}
-            {step === 2 && "Who is this track about?"}
-            {step === 3 && "What will this track be about?"}
-            {step === 4 && "Choose a style"}
-            {step === 5 && "Language & vocals"}
+            {step === 1 && "Your track"}
+            {step === 2 && "What will this track be about?"}
+            {step === 3 && "Choose a style"}
+            {step === 4 && "Language & vocals"}
           </DialogTitle>
           <DialogDescription className="text-sm">
-            {step === 1 && "This becomes the title of your track."}
-            {step === 2 && "A person, a group, a brand — or yourself."}
-            {step === 3 && "A short description, theme or story."}
-            {step === 4 && "Stack as many styles as you like, then pick the voice."}
-            {step === 5 &&
+            {step === 1 && "Name it, tell us who it's for, and pick how long it runs."}
+            {step === 2 && "A short description, theme or story."}
+            {step === 3 && "Stack as many styles as you like, then pick the voice."}
+            {step === 4 &&
               "English is always part of the remix. Flip vocals only to sing over your own beat."}
           </DialogDescription>
 
@@ -308,42 +324,77 @@ export function CreateNowWizard({
           className="min-h-[168px] animate-in fade-in slide-in-from-right-4 py-1 duration-300"
         >
           {step === 1 && (
-            <>
-              <Label htmlFor="wiz-title" className="sr-only">
-                Track name
-              </Label>
-              <Input
-                id="wiz-title"
-                autoFocus
-                value={title}
-                maxLength={120}
-                onChange={(e) => setTitle(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && next()}
-                placeholder="e.g. Late night drive"
-                className="h-12 rounded-xl border-2 border-primary/30 bg-background/80 text-base font-bold sm:h-14 sm:text-lg"
-              />
-            </>
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <Label
+                  htmlFor="wiz-title"
+                  className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground"
+                >
+                  Song title
+                </Label>
+                <Input
+                  id="wiz-title"
+                  autoFocus
+                  value={title}
+                  maxLength={120}
+                  onChange={(e) => setTitle(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && next()}
+                  placeholder="e.g. Late night drive"
+                  className="h-12 rounded-xl border-2 border-primary/30 bg-background/80 text-base font-bold sm:h-13"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label
+                  htmlFor="wiz-subject"
+                  className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground"
+                >
+                  Who is it about?
+                </Label>
+                <Input
+                  id="wiz-subject"
+                  value={subjectName}
+                  maxLength={60}
+                  onChange={(e) => setSubjectName(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && next()}
+                  placeholder="e.g. Aaliyah, the crew, or yourself"
+                  className="h-12 rounded-xl border-2 border-primary/30 bg-background/80 text-base font-bold sm:h-13"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
+                  Track length
+                </p>
+                <div role="group" aria-label="Track length" className="grid grid-cols-5 gap-2">
+                  {LENGTH_OPTIONS.map((m) => {
+                    const selected = targetMinutes === m;
+                    return (
+                      <button
+                        key={m}
+                        type="button"
+                        aria-pressed={selected}
+                        onClick={() => setTargetMinutes(m)}
+                        className={cn(
+                          "min-h-11 rounded-xl border text-sm font-black tabular-nums transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                          selected
+                            ? "border-primary bg-primary/20 text-foreground shadow-glow"
+                            : "border-white/10 bg-card/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
+                        )}
+                      >
+                        {m}m
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  We aim for {targetMinutes}:00 or a touch longer — never shorter.
+                </p>
+              </div>
+            </div>
           )}
 
           {step === 2 && (
-            <>
-              <Label htmlFor="wiz-subject" className="sr-only">
-                Who is this track about?
-              </Label>
-              <Input
-                id="wiz-subject"
-                autoFocus
-                value={subjectName}
-                maxLength={60}
-                onChange={(e) => setSubjectName(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && next()}
-                placeholder="e.g. Aaliyah, the crew, or yourself"
-                className="h-12 rounded-xl border-2 border-primary/30 bg-background/80 text-base font-bold sm:h-14 sm:text-lg"
-              />
-            </>
-          )}
-
-          {step === 3 && (
             <>
               <Label htmlFor="wiz-desc" className="sr-only">
                 Track description
@@ -364,7 +415,7 @@ export function CreateNowWizard({
             </>
           )}
 
-          {step === 4 && (
+          {step === 3 && (
             <div className="space-y-4">
               <div
                 role="group"
@@ -424,7 +475,7 @@ export function CreateNowWizard({
             </div>
           )}
 
-          {step === 5 && (
+          {step === 4 && (
             <div className="space-y-4">
               {/* Vocals-only sits at the very top of the language step. */}
               <button

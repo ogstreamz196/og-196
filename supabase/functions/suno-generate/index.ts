@@ -78,8 +78,20 @@ Deno.serve(async (req) => {
     const vocalsOnlyStyle = vocalsOnly
       ? (beatPath ? VOCALS_OVER_BEAT_STYLE : NASHEED_STYLE)
       : null;
+    // Requested track length. Suno exposes no hard duration field, so the
+    // target is steered through the style prompt (clamped 3-10 minutes).
+    const rawTarget = Number(body.target_duration_sec);
+    const targetDurationSec = Math.min(
+      600,
+      Math.max(180, Number.isFinite(rawTarget) ? Math.round(rawTarget) : 180),
+    );
+    const targetMinutes = Math.round(targetDurationSec / 60);
+    const lengthStyleHint =
+      `full length track, approximately ${targetMinutes} minutes (${targetMinutes}:00 or longer), ` +
+      `complete arrangement with intro, verses, choruses, bridge and outro, no early fade out, ` +
+      `perform every lyric line provided`;
     const style = limitText(
-      [rawStyle, vocalStyle, vocalsOnlyStyle].filter(Boolean).join(", ") || null,
+      [rawStyle, vocalStyle, vocalsOnlyStyle, lengthStyleHint].filter(Boolean).join(", ") || null,
       MAX_STYLE_CHARS,
     );
     const lyrics = limitText((body.lyrics ?? "").toString().trim() || null, MAX_PROMPT_CHARS);

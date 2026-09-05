@@ -128,7 +128,7 @@ export const Route = createLazyFileRoute("/_authenticated/library/")({
 function LibraryPage() {
   const { user } = useAuth();
   const dev = useDevMode();
-  const { isAdmin } = useRole();
+  const { isAdmin, isBoss } = useRole();
   const { data: profile } = useProfile();
   const { data: settings } = useSettings();
   const navigate = useNavigate();
@@ -158,7 +158,7 @@ function LibraryPage() {
   const [wizardDraft, setWizardDraft] = useState<WizardDraft>(EMPTY_DRAFT);
   const statusPanelRef = useRef<HTMLElement | null>(null);
   const libraryRef = useRef<HTMLElement | null>(null);
-  // Track length: a 3-minute floor is enforced backend-side; users may raise it.
+  // Track length is chosen in step 1 of the Create now wizard (3 min floor).
   const [targetMinutes, setTargetMinutes] = useState(MIN_TRACK_MINUTES);
   const targetDurationSec = Math.max(MIN_TRACK_MINUTES, targetMinutes) * 60;
   const expectedRange = `${targetMinutes}:00–${targetMinutes}:30+`;
@@ -455,6 +455,7 @@ function LibraryPage() {
           lyrics,
           title: title.trim() || null,
           style: style || null,
+          target_duration_sec: targetDurationSec,
         },
       });
       if (genErr) {
@@ -601,6 +602,8 @@ function LibraryPage() {
     vocalsOnly?: boolean;
     /** Storage path of the uploaded beat, when one was provided. */
     beatPath?: string;
+    /** Requested track length in minutes, chosen in wizard step 1. */
+    targetMinutes?: number;
   };
 
   // Keeps the exact payload of the last run so "Try again" reuses it verbatim.
@@ -627,6 +630,8 @@ function LibraryPage() {
     const songVocal = (override?.vocal ?? "").trim();
     const vocalsOnly = !!override?.vocalsOnly;
     const beatPath = (override?.beatPath ?? "").trim();
+    const overrideTargetSec =
+      Math.max(MIN_TRACK_MINUTES, override?.targetMinutes ?? targetMinutes) * 60;
     // Vocals-only: either the user's own beat carries the music, or we fall
     // back to a nasheed-style a cappella with humming and no instruments.
     const vocalsOnlyTags = vocalsOnly
@@ -668,7 +673,7 @@ function LibraryPage() {
             personalDetails: songDetails || undefined,
             extraContext: combinedExtra || undefined,
             subjectName: songSubject || undefined,
-            targetDurationSec,
+            targetDurationSec: overrideTargetSec,
           },
         },
       );
@@ -707,6 +712,7 @@ function LibraryPage() {
           status: "draft",
           vocals_only: vocalsOnly,
           beat_path: beatPath || null,
+          target_duration_sec: overrideTargetSec,
           extra_context: extraContext.trim() || null,
         } as never)
         .select("id")
@@ -1128,45 +1134,20 @@ function LibraryPage() {
       {/* Create — hidden while a generation runs so the status card is the only focus */}
       {!pipelineActive && (
         <section aria-label="Create a track" className="studio-panel px-4 pb-6 pt-4 sm:px-6">
-          <div className="mb-4 flex items-center justify-between gap-3">
+          <div className="mb-3 flex items-center justify-between gap-3">
             <h2 className="text-[11px] font-black uppercase tracking-[0.28em] text-primary">
               Control room
             </h2>
             <StudioMeter active={false} bars={5} className="h-4" />
           </div>
 
-          {/* Length + Foul Mouth — centred, equal width columns */}
-          <div className="mx-auto flex max-w-md flex-col items-center gap-3 sm:flex-row sm:justify-center">
-
-            <div className="w-full space-y-1.5 sm:w-44">
-              <Label
-                htmlFor="target-length"
-                className="block text-center text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground"
-              >
-                Track length
-              </Label>
-              <select
-                id="target-length"
-                value={targetMinutes}
-                onChange={(e) => setTargetMinutes(Number(e.target.value))}
-                disabled={pipelineActive}
-                className="min-h-10 w-full rounded-xl border border-white/10 bg-background/60 px-3 text-center text-sm font-semibold disabled:opacity-60"
-              >
-                {[3, 4, 5, 6, 8].map((m) => (
-                  <option key={m} value={m}>
-                    Min {m} min{m === MIN_TRACK_MINUTES ? " · default" : ""}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <p className="mt-3 text-center text-[11px] font-semibold text-muted-foreground">
+          {/* Track length now lives in step 1 of the wizard — keep this clean. */}
+          <p className="text-center text-[11px] font-semibold text-muted-foreground">
             -{totalCost} coins · {expectedRange}
           </p>
 
           {/* Hazard robotic CREATE button — a big 3D push-button on a base plate */}
-          <div className="mt-6 flex flex-col items-center gap-4">
+          <div className="mt-4 flex flex-col items-center gap-4">
             <div className="hazard-pedestal">
               <span aria-hidden="true" className="hazard-base" />
               <button
@@ -1272,6 +1253,7 @@ function LibraryPage() {
           setPersonalDetails(v.description.slice(0, PERSONAL_DETAILS_MAX));
           setStyleText(v.style);
           setSelections({ language: v.language });
+          setTargetMinutes(Math.max(MIN_TRACK_MINUTES, v.targetMinutes || MIN_TRACK_MINUTES));
           // Everything now runs in the backend — set expectations with a
           // celebratory "come back in 5" popup instead of a bare toast.
           setCooking({ open: true, title: v.title });
@@ -1706,7 +1688,11 @@ function LibraryPage() {
                   <div className="space-y-2">
                     <ul className="divide-y divide-border/40 overflow-hidden rounded-2xl border border-border/60 bg-card/30">
                       {filtered.map((s) => (
-                        <CommunityTrackRow key={s.id} song={s} />
+                        <CommunityTrackRow
+                          key={s.id}
+                          song={s}
+                          onDelete={isBoss ? setPendingDelete : undefined}
+                        />
                       ))}
                     </ul>
                     <div ref={communitySentinelRef} className="h-1" aria-hidden />
