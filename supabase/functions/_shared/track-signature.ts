@@ -28,7 +28,7 @@ const MAX_TAGS = 4;
 export function injectSignature(lyrics: string | null | undefined): string | null {
   const text = (lyrics ?? "").trim();
   if (!text) return lyrics ?? null;
-  if (text.toLowerCase().includes("o g bot dot co dot uk")) return text;
+  if (text.toLowerCase().includes("o g streamz dot co dot uk")) return text;
 
   const lines = text.split("\n");
   const contentCount = lines.filter((l) => l.trim() && !/^\s*\[.*\]\s*$/.test(l)).length;
