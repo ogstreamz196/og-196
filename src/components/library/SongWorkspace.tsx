@@ -32,18 +32,19 @@ import type { WorkspaceSong } from "./song-workspace/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
 import type { TablesUpdate } from "@/integrations/supabase/types";
-import { POOLS } from "@/lib/library-utils";
+import { POOLS, orderLanguages } from "@/lib/library-utils";
 import { LENGTH_OPTIONS, MIN_LENGTH, MAX_LENGTH } from "./CreateNowWizard";
 
 
-const LANGUAGES = [
+const LANGUAGES = orderLanguages([
   "English", "Spanish", "French", "Portuguese", "Hindi", "Gujarati",
   "Marathi", "Bengali", "Tamil", "Telugu", "Kannada", "Malayalam",
   "Urdu", "Punjabi", "Arabic", "Swahili", "Patois", "Yoruba", "German",
   "Italian", "Romanian", "Filipino", "Tagalog", "Cebuano", "Mandarin", "Japanese",
   "Korean", "Turkish", "Russian", "Polish", "Dutch", "Greek", "Thai",
   "Vietnamese", "Indonesian", "Malay", "Hebrew",
-];
+]);
+
 
 const LANG_RE = /Language:\s*(?:write the lyrics in\s*)?([A-Za-z][A-Za-z\s+]{1,80})/i;
 
