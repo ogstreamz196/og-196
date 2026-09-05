@@ -5,6 +5,8 @@ import { verifyWebhook } from "@/lib/stripe.server";
 const SECRET = "whsec_test_signature_verification_dummy_value_123";
 
 beforeAll(() => {
+  // BYOK mode reads STRIPE_WEBHOOK_SECRET; managed mode reads the env-specific ones.
+  process.env.STRIPE_WEBHOOK_SECRET = SECRET;
   process.env.PAYMENTS_SANDBOX_WEBHOOK_SECRET = SECRET;
   process.env.PAYMENTS_LIVE_WEBHOOK_SECRET = SECRET;
 });
