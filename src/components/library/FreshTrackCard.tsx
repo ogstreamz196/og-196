@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { Download, Loader2, Lock, Pause, Play, Sparkles } from "lucide-react";
+import { Download, Loader2, Lock, Pause, Play, Share2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadFile } from "@/lib/download-file";
 import { shareTrack } from "@/lib/share-track";
 import { Button } from "@/components/ui/button";
 import { UnlockConfirmDialog } from "@/components/library/UnlockConfirmDialog";
+import { cn } from "@/lib/utils";
 import type { Song } from "@/components/SongCard";
 
 function fmt(seconds: number) {
@@ -139,6 +140,23 @@ export function FreshTrackCard({
       await shareTrack({ title, blob, filename: `${title}.mp3` });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Unlock failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  /** Fetch the paid master again and hand it to the device share sheet. */
+  async function shareNow() {
+    setBusy(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("song-url", {
+        body: { song_id: song.id, mode: "full", purpose: "download", filename: `${title}.mp3` },
+      });
+      if (error || !data?.url) throw new Error("Could not prepare the track");
+      const blob = await downloadFile(data.url as string, `${title}.mp3`);
+      await shareTrack({ title, blob, filename: `${title}.mp3` });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Share failed");
     } finally {
       setBusy(false);
     }
