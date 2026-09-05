@@ -33,21 +33,15 @@ Suno prompt. Otherwise behave like a top-tier general assistant.
 You can also help with OG Coin questions, navigating the site, portals,
 and VIP when asked — same rule: only when asked.
 
-Response length: talk like a real person having a proper conversation.
-Casual chat and quick questions get at least 3 useful sentences with actual
-personality and substance. Never give a bare one-word reply, a single-line
-brush-off, or only a reaction. Answer the question directly, explain enough
-to make the answer useful, then add a relevant observation or natural
-follow-up. For technical, factual, creative, advice, planning, comparison,
-or troubleshooting questions, reason carefully and give a complete answer
-with paragraphs, lists, steps, examples, or code where useful. Infer the
-user's real goal from the full conversation instead of responding only to
-the final sentence. Ask a clarifying question only when the missing detail
-would materially change the answer. Accuracy and usefulness come before the
-banter. Don't pad with preamble, don't recap the question, and don't
-apologise for being an AI. Use markdown when it genuinely improves clarity.
-If you don't know something, say so plainly rather than guessing.
-
+Default response length: KEEP IT SHORT. 1–3 short sentences for casual
+chat, questions, and quick replies — no essays, no preamble, no
+recapping the question. Only expand when the user explicitly asks an
+in-depth / technical question, requests a step-by-step explanation, or
+asks for structured output (lyrics, briefs, prompts, code). If unsure
+whether to go long, stay short and offer to go deeper. Use markdown
+(headings, lists, fenced code blocks) only when it genuinely improves
+clarity. Never apologise for being an AI. Never pad with corporate
+fluff. If you don't know something, say so plainly.
 `.trim();
 
 const SAFE_PERSONA = `
@@ -247,24 +241,6 @@ export function detectSongIntent(text: string | null | undefined): boolean {
   return SONG_INTENT_RE.test(text);
 }
 
-function cleanBossOverride(value: string | null): string | null {
-  const cleaned = value?.trim();
-  if (!cleaned) return null;
-
-  // A historical admin backup accidentally stored an entire source file in
-  // the persona field. Source/code dumps are not behavioural instructions and
-  // overwhelm the real persona, so never feed them to the model.
-  const looksLikeCodeDump =
-    cleaned.includes("# FILE:") ||
-    cleaned.includes("CODE BACKUP") ||
-    cleaned.includes("import {") ||
-    cleaned.includes("createFileRoute(") ||
-    cleaned.includes("function OgBotPage(");
-  if (looksLikeCodeDump) return null;
-
-  return cleaned.slice(0, 2_000);
-}
-
 export function buildSystemPrompt(opts: BuildPromptOpts): string {
   let base: string;
   if (opts.mode === "safe") base = SAFE_PERSONA;
@@ -303,10 +279,6 @@ export function buildSystemPrompt(opts: BuildPromptOpts): string {
           : `Match the tone of ${lang} naturally — don't sound like a literal translation.`
       } If the user writes to you in English, you STILL reply in ${lang}.`;
 
-  const bossScript = cleanBossOverride(opts.bossScript);
-  const bossVoice = cleanBossOverride(opts.bossVoice);
-  const bossDictionary = cleanBossOverride(opts.bossDictionary);
-
   const parts = [
     base,
     SITE_GLOSSARY,
@@ -315,11 +287,10 @@ export function buildSystemPrompt(opts: BuildPromptOpts): string {
     opts.mode === "og" && opts.foulMouth ? LEXICON : null,
     languageBlock,
     learnedBlock,
-    bossScript ? `Boss override — extra behaviour:\n${bossScript}` : null,
-    bossVoice ? `Boss override — voice:\n${bossVoice}` : null,
-    bossDictionary ? `Boss override — dictionary:\n${bossDictionary}` : null,
+    opts.bossScript ? `Boss override — script:\n${opts.bossScript}` : null,
+    opts.bossVoice ? `Boss override — voice:\n${opts.bossVoice}` : null,
+    opts.bossDictionary ? `Boss override — dictionary:\n${opts.bossDictionary}` : null,
     `Context about the signed-in user:\n${greeting}\n${roleLine}\n${balanceLine}\n${pageLine}`.trim(),
-    `FINAL RESPONSE STANDARD — this overrides any conflicting length instruction above. Boss overrides may adjust tone and vocabulary, but never reduce the usefulness or depth of an answer. Give at least 3 substantive sentences for ordinary conversation, and expand naturally for questions that need explanation, analysis, creativity, steps, examples, or code. Never answer with only one word, one sentence, a reaction, or an ellipsis.`,
   ].filter(Boolean);
 
   return parts.join("\n\n");

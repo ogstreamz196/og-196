@@ -161,7 +161,7 @@ function LibraryPage() {
   // Track length is chosen in step 1 of the Create now wizard (3 min floor).
   const [targetMinutes, setTargetMinutes] = useState(MIN_TRACK_MINUTES);
   const targetDurationSec = Math.max(MIN_TRACK_MINUTES, targetMinutes) * 60;
-  const expectedRange = `${targetMinutes} min`;
+  const expectedRange = `${targetMinutes}:00–${targetMinutes}:30+`;
   // Actual estimate returned by the lyrics engine once a track is generated.
   const [actualDurationLabel, setActualDurationLabel] = useState<string | null>(null);
 
@@ -523,10 +523,7 @@ function LibraryPage() {
   }, [freshTrack]);
 
 
-  // 3 minutes is included; each extra minute adds 1 coin (matches the backend).
-  const costForMinutes = (mins: number) =>
-    lyricsCost + previewCost + Math.max(0, Math.round(mins) - MIN_TRACK_MINUTES);
-  const totalCost = costForMinutes(targetMinutes);
+  const totalCost = lyricsCost + previewCost;
   const canRunPipeline =
     !!user && canGenerateLyrics && balance >= totalCost && pipeline.stage === "idle";
 
@@ -615,13 +612,11 @@ function LibraryPage() {
   async function createSong(override?: CreateOverrides) {
     if (pipelineLockRef.current) return;
     if (!user) return;
-    const runCost = costForMinutes(override?.targetMinutes ?? targetMinutes);
     if (override) {
-      if (balance < runCost) {
-        toast.error(`Need ${runCost} coins to create a song`);
+      if (balance < totalCost) {
+        toast.error(`Need ${totalCost} coins to create a song`);
         return;
       }
-
       setLastOverrides(override);
     } else if (!canRunPipeline) {
       return;
@@ -749,7 +744,7 @@ function LibraryPage() {
       advanceStage("rendering");
       setTrackedSongId(row.id);
       library.refetch();
-      toast.success(`Cooking your sample · -${runCost} coins`);
+      toast.success(`Cooking your sample · -${totalCost} coins`);
     } catch (e) {
       if (stale()) return;
       const msg = e instanceof Error ? e.message : "Something went wrong";

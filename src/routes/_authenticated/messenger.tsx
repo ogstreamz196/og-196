@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Swords, MessageCircle, Loader2 } from "lucide-react";
+import { Users, MessageCircle, Loader2 } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { OgChat } from "@/components/messenger/OgChat";
 import { CommunityRoom } from "@/components/messenger/CommunityRoom";
@@ -29,13 +29,6 @@ import {
   markGreeted,
   shouldGreet,
 } from "@/components/messenger/MessengerWelcomeDialog";
-import {
-  modeHeading,
-  modeBadge,
-  modeTagline,
-  toggleActionLabel,
-  toggleAriaLabel,
-} from "@/lib/messenger-mode-labels";
 
 
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
@@ -47,11 +40,11 @@ export const Route = createFileRoute("/_authenticated/messenger")({
   }),
   head: () => ({
     meta: [
-      { title: "OG Bot · Loner Mode & OG Battle Zone" },
+      { title: "OG Bot · Loner Mode & OG Community Mode" },
       {
         name: "description",
         content:
-          "Chat privately in OG Bot Loner Mode, or step into the OG Battle Zone and take on OG Bot in a public roast battle.",
+          "Chat privately in OG Bot Loner Mode, or switch to OG Community Mode to join the public OG Community room.",
       },
     ],
   }),
@@ -71,7 +64,7 @@ function MessengerPage() {
     if (!isReady) return;
     if (initialLive && mode !== "community") {
       setMode.mutate("community");
-      markGreeted(uid);
+      markGreeted(uid, false);
       return;
     }
     if (shouldGreet(uid)) setGreetOpen(true);
@@ -81,8 +74,8 @@ function MessengerPage() {
   const isCommunity = mode === "community";
   const [pendingMode, setPendingMode] = useState<MessengerMode | null>(null);
 
-  function handleGreetChoice(next: MessengerMode) {
-    markGreeted(uid);
+  function handleGreetChoice(next: MessengerMode, remember: boolean) {
+    markGreeted(uid, remember);
     if (next !== mode) {
       setMode.mutate(next, { onSettled: () => setGreetOpen(false) });
     } else {
@@ -91,7 +84,7 @@ function MessengerPage() {
   }
 
   function handleGreetDismiss() {
-    markGreeted(uid);
+    markGreeted(uid, false);
     setGreetOpen(false);
   }
 
@@ -108,7 +101,7 @@ function MessengerPage() {
   const { ref: fillRef, height: fillHeight } = useFillViewport<HTMLDivElement>(0);
 
   return (
-    <DashboardShell title={modeHeading(mode)}>
+    <DashboardShell title={isCommunity ? "OG Community Mode" : "OG Bot Loner Mode"}>
       <div
         ref={fillRef}
         style={fillHeight ? { height: fillHeight } : undefined}
@@ -141,7 +134,7 @@ function MessengerPage() {
             />
             {isCommunity ? (
               <span className="relative grid h-9 w-9 place-items-center rounded-full bg-cyan-500/25 ring-1 ring-cyan-400/60 ring-offset-1 ring-offset-card sm:h-16 sm:w-16 sm:ring-2 sm:ring-offset-2">
-                <Swords className="h-5 w-5 text-cyan-100 sm:h-7 sm:w-7" />
+                <Users className="h-5 w-5 text-cyan-100 sm:h-7 sm:w-7" />
               </span>
             ) : (
               <img
@@ -162,11 +155,11 @@ function MessengerPage() {
               }`}
             >
               <span className="truncate">
-                {modeBadge(mode)}
+                {isCommunity ? "OG Community Mode · public room" : "OG Bot Loner Mode · private"}
               </span>
             </div>
             <h1 className="truncate font-display text-base font-black leading-tight sm:text-3xl">
-              {modeHeading(mode)}
+              {isCommunity ? "OG Community Mode" : "OG Bot Loner Mode"}
             </h1>
 
             <p className="flex items-center gap-1 truncate text-[10px] font-semibold text-emerald-400 sm:gap-1.5 sm:text-sm">
@@ -175,7 +168,9 @@ function MessengerPage() {
                 <span className="relative inline-block h-2 w-2 rounded-full bg-emerald-400" />
               </span>
               <span className="truncate">
-                {modeTagline(mode)}
+                {isCommunity
+                  ? "Everyone can see your messages here"
+                  : "Just you & OG Bot · nobody else sees this"}
               </span>
             </p>
           </div>
@@ -187,7 +182,11 @@ function MessengerPage() {
             disabled={setMode.isPending || !isReady}
             role="switch"
             aria-checked={isCommunity}
-            aria-label={toggleAriaLabel(mode)}
+            aria-label={
+              isCommunity
+                ? "Start Private Mode (leave OG Community)"
+                : "Leave Private Mode (switch to OG Community Mode)"
+            }
             className={`group flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-2.5 text-[9px] font-black uppercase tracking-normal transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 sm:h-auto sm:gap-2 sm:px-3 sm:py-2 sm:text-xs sm:tracking-[0.18em] ${
               isCommunity
                 ? "border-cyan-400/50 bg-cyan-500/15 text-cyan-100 shadow-[0_0_24px_-6px_rgba(34,211,238,0.6)] hover:bg-cyan-500/25"
@@ -195,11 +194,11 @@ function MessengerPage() {
             }`}
           >
             {isCommunity ? (
-              <Swords className="h-4 w-4 text-cyan-300" />
+              <Users className="h-4 w-4 text-cyan-300" />
             ) : (
               <MessageCircle className="h-4 w-4 text-primary" />
             )}
-             <span className="max-w-[74px] whitespace-normal text-center leading-tight sm:max-w-none sm:whitespace-pre-line">{toggleActionLabel(mode, setMode.isPending)}</span>
+             <span className="max-w-[74px] whitespace-normal text-center leading-tight sm:max-w-none sm:whitespace-pre-line">{setMode.isPending ? "Saving…" : isCommunity ? "Go Private" : "Go Global"}</span>
 
           </button>
         </header>
@@ -264,19 +263,19 @@ function MessengerPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>
               {pendingMode === "community"
-                ? "Enter the OG Battle Zone?"
+                ? "Switch to OG Community Mode?"
                 : "Switch to OG Bot Loner Mode?"}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {pendingMode === "community"
-                ? "You'll leave your private chat and step into the public OG Battle Zone — everyone vs OG Bot. Anything you send is visible to the whole room."
-                : "You'll leave the OG Battle Zone and return to a private 1-on-1 chat with OG Bot. Only you can see Loner Mode messages."}
+                ? "You'll leave your private chat with OG Bot and join the public OG Community room. Anything you send here is visible to everyone in the room."
+                : "You'll leave the public OG Community room and return to a private 1-on-1 chat with OG Bot. Only you can see Loner Mode messages."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Stay here</AlertDialogCancel>
             <AlertDialogAction onClick={confirmSwitch}>
-              {pendingMode === "community" ? "Yes, let's battle" : "Yes, back to Loner"}
+              {pendingMode === "community" ? "Yes, go to Community" : "Yes, back to Loner"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

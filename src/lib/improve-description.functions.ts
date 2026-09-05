@@ -37,7 +37,7 @@ export const improveLyricDescription = createServerFn({ method: "POST" })
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "google/gemini-3.7-flash",
+        model: "google/gemini-2.5-flash",
         temperature: 0.6,
         max_tokens: 220,
         messages: [
