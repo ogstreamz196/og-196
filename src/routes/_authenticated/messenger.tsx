@@ -64,7 +64,7 @@ function MessengerPage() {
     if (!isReady) return;
     if (initialLive && mode !== "community") {
       setMode.mutate("community");
-      markGreeted(uid, false);
+      markGreeted(uid);
       return;
     }
     if (shouldGreet(uid)) setGreetOpen(true);
@@ -74,8 +74,8 @@ function MessengerPage() {
   const isCommunity = mode === "community";
   const [pendingMode, setPendingMode] = useState<MessengerMode | null>(null);
 
-  function handleGreetChoice(next: MessengerMode, remember: boolean) {
-    markGreeted(uid, remember);
+  function handleGreetChoice(next: MessengerMode) {
+    markGreeted(uid);
     if (next !== mode) {
       setMode.mutate(next, { onSettled: () => setGreetOpen(false) });
     } else {
@@ -84,7 +84,7 @@ function MessengerPage() {
   }
 
   function handleGreetDismiss() {
-    markGreeted(uid, false);
+    markGreeted(uid);
     setGreetOpen(false);
   }
 
