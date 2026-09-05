@@ -302,7 +302,7 @@ Deno.serve(async (req) => {
     }
 
     const words = wordCount(lyrics);
-    const estimatedSec = Math.max(targetSec, Math.round((words / 210) * 60));
+    const estimatedSec = Math.max(targetSec, Math.round((words / WORDS_PER_MIN) * 60));
 
     if (songId) {
       await admin.from("songs").update({
