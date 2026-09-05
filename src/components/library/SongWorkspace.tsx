@@ -1424,7 +1424,9 @@ function InlineSamplePlayer({ songId, unlocked = false }: { songId: string; unlo
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Paid tracks fall back to the sample only if the full file isn't ready yet.
-  const [playingFull, setPlayingFull] = useState(unlocked);
+  const { isBoss } = useRole();
+  const canPlayFull = unlocked || isBoss;
+  const [playingFull, setPlayingFull] = useState(canPlayFull);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
@@ -1434,7 +1436,7 @@ function InlineSamplePlayer({ songId, unlocked = false }: { songId: string; unlo
     setLoading(true);
     (async () => {
       try {
-        if (unlocked) {
+        if (canPlayFull) {
           const full = await supabase.functions.invoke("song-url", {
             body: { song_id: songId, mode: "full", purpose: "stream" },
           });
@@ -1462,7 +1464,7 @@ function InlineSamplePlayer({ songId, unlocked = false }: { songId: string; unlo
       }
     })();
     return () => { cancelled = true; };
-  }, [songId, unlocked]);
+  }, [songId, canPlayFull]);
 
   // Cap playback at the sample length — unless the track has been paid for.
   useEffect(() => {
