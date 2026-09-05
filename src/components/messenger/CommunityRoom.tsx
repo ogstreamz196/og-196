@@ -2,7 +2,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { ArrowDown, Send, Users, Loader2, Trash2 } from "lucide-react";
+import { ArrowDown, Send, Users, Loader2, Trash2, Coins, Flag } from "lucide-react";
 import { TypingDots } from "@/components/ui/typing-dots";
 import { toast } from "sonner";
 import {
