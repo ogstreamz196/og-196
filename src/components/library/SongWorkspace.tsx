@@ -277,7 +277,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
     targetMinutes * 60 !== (song.target_duration_sec ?? MIN_LENGTH * 60);
 
   async function persist(
-    patch: Record<string, unknown>,
+    patch: Parameters<ReturnType<typeof supabase.from<"songs">>["update"]>[0],
   ) {
     // Community songs aren't editable by the viewer — skip persistence, keep generation working.
     if (!isOwner) return;
@@ -714,7 +714,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
 
               {hasLyrics && languageChanged && (
                 <div className="rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-xs text-foreground/80">
-                  Language changed to <b>{language}</b> — regenerate lyrics to rewrite them.
+                  Language changed to <b>{languageValue}</b> — regenerate lyrics to rewrite them.
                 </div>
               )}
 
