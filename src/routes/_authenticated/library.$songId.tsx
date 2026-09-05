@@ -296,6 +296,15 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
       a.click();
       a.remove();
       setUnlockDialogOpen(false);
+      // Payment done — pull the fresh song + balance so the player instantly
+      // switches from the short sample to the full track.
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ["profile"] }),
+        qc.invalidateQueries({ queryKey: ["song", song.id] }),
+        qc.invalidateQueries({ queryKey: ["songs"] }),
+      ]);
+      onRefresh();
+
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Download failed");
     } finally {
