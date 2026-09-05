@@ -510,35 +510,21 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       <div className="space-y-4">
           {/* Step 1 — Details & lyrics */}
           <Card className={cn(stage > 1 && !dirty && "border-primary/30")}>
-            <CardHeader>
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <FileText className="h-4 w-4 text-primary" />
+            <Collapsible open={step1Open} onOpenChange={setStep1Open}>
+              <CollapsibleTrigger className="flex w-full items-center justify-between gap-3 p-4 text-left sm:p-5">
+                <div className="min-w-0">
+                  <span className="flex items-center gap-2 text-lg font-semibold">
+                    <FileText className="h-4 w-4 shrink-0 text-primary" />
                     1 · Lyrics
-                  </CardTitle>
-                  <CardDescription>
-                    Edit the details, then generate.
-                  </CardDescription>
-
-                </div>
-                <CostBadge cost={lyricsCost} />
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Collapsible open={detailsOpen} onOpenChange={setDetailsOpen}>
-                <CollapsibleTrigger className="flex w-full items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/20 px-3 py-2 text-left text-sm font-semibold hover:bg-muted/40">
-                  <span className="min-w-0 truncate">
-                    Track details
-                    {!detailsOpen && (
-                      <span className="ml-2 font-normal text-xs text-muted-foreground">
-                        {[title.trim() || "Untitled", language, style.trim()].filter(Boolean).join(" · ")}
-                      </span>
-                    )}
                   </span>
-                  <ChevronDown className={cn("h-4 w-4 shrink-0 transition-transform", detailsOpen && "rotate-180")} />
-                </CollapsibleTrigger>
-                <CollapsibleContent className="space-y-4 pt-4">
+                  <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+                    {hasLyrics ? "Ready — tap to edit" : `Write the lyrics · ${lyricsCost} coins`}
+                  </span>
+                </div>
+                <ChevronDown className={cn("h-5 w-5 shrink-0 transition-transform", step1Open && "rotate-180")} />
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+            <CardContent className="space-y-4">
                   <div className="grid gap-4 sm:grid-cols-[1fr_220px]">
                     <div className="space-y-1.5">
                       <Label htmlFor="song-title">Title</Label>
@@ -582,8 +568,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                       placeholder="Who the song is about, the mood, memories…"
                     />
                   </div>
-                </CollapsibleContent>
-              </Collapsible>
+
 
               {hasLyrics && languageChanged && (
                 <div className="rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-xs text-foreground/80">
