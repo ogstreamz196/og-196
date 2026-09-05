@@ -45,6 +45,7 @@ type Props = {
   currentMode: MessengerMode;
   pending?: boolean;
   onChoose: (mode: MessengerMode, remember: boolean) => void;
+  onDismiss: () => void;
 };
 
 export function MessengerWelcomeDialog({
@@ -53,6 +54,7 @@ export function MessengerWelcomeDialog({
   currentMode,
   pending,
   onChoose,
+  onDismiss,
 }: Props) {
   const [remember, setRemember] = useState(true);
   const [picked, setPicked] = useState<MessengerMode | null>(null);
@@ -64,15 +66,11 @@ export function MessengerWelcomeDialog({
   const name = (displayName ?? "").trim().split(/\s+/)[0] || "friend";
 
   return (
-    <Dialog open={open}>
+    <Dialog open={open} onOpenChange={(o) => { if (!o) onDismiss(); }}>
       <DialogContent
-        showCloseButton={false}
-        onEscapeKeyDown={(e) => e.preventDefault()}
-        onPointerDownOutside={(e) => e.preventDefault()}
-        onInteractOutside={(e) => e.preventDefault()}
         className="max-h-[90dvh] w-[calc(100vw-1.5rem)] max-w-md overflow-y-auto p-5 sm:p-6"
       >
-        <DialogHeader className="items-center text-center">
+        <DialogHeader className="items-center !text-center">
           <img
             src={ogBotAsset.url}
             alt="OG Bot"
