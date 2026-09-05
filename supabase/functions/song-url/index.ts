@@ -91,7 +91,14 @@ Deno.serve(async (req) => {
     // songs.unlocked is a denormalised mirror; the unlock ledger is the source of truth.
     // Non-owners streaming the community version don't need an unlock row;
     // downloading does. Owners always need the ledger row from unlock-full-song.
-    const requireUnlock = isOwner || purpose === "download";
+    // Boss/admin accounts run the platform — every track counts as unlocked for them.
+    const { data: privRoles } = await admin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .in("role", ["boss", "admin"]);
+    const isPrivileged = !!privRoles && privRoles.length > 0;
+    const requireUnlock = !isPrivileged && (isOwner || purpose === "download");
     if (requireUnlock) {
       const { data: unlockRow } = await admin
         .from("unlocked_songs")
