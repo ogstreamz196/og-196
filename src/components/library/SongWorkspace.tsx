@@ -269,23 +269,22 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
     }
     setGenLyrics(true);
     try {
-      const nextBrief = languageChanged ? setBriefLanguage(brief, language) : brief;
-      if (nextBrief !== brief) setBrief(nextBrief);
-      if (dirty || nextBrief !== (song.prompt ?? "")) {
-        await persist({ title: title.trim() || null, prompt: nextBrief, style: style.trim() || null });
-      }
+      await saveSettingsPatch();
 
       const { data, error } = await supabase.functions.invoke("generate-lyrics", {
         body: {
           song_id: isOwner ? song.id : null,
           songName: title.trim(),
-          description: nextBrief.trim(),
-          styleTags: style ? style.split("·").map((s) => s.trim()).filter(Boolean) : [],
-
+          description: nextBriefValue.trim(),
+          styleTags: styleTags,
+          vocal: vocal && vocal !== "Any voice" ? vocal : null,
+          vocals_only: vocalsOnly,
+          target_duration_sec: targetMinutes * 60,
           foulMouth,
-          language,
+          language: languageValue,
         },
       });
+
 
       if (error) {
         const msg = invokeError(error, "Lyrics generation failed");
