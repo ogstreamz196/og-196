@@ -31,6 +31,7 @@ import { UnlockConfirmDialog } from "./UnlockConfirmDialog";
 import type { WorkspaceSong } from "./song-workspace/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
+import type { TablesUpdate } from "@/integrations/supabase/types";
 import { POOLS } from "@/lib/library-utils";
 import { LENGTH_OPTIONS, MIN_LENGTH, MAX_LENGTH } from "./CreateNowWizard";
 
@@ -277,7 +278,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
     targetMinutes * 60 !== (song.target_duration_sec ?? MIN_LENGTH * 60);
 
   async function persist(
-    patch: Parameters<ReturnType<typeof supabase.from<"songs">>["update"]>[0],
+    patch: TablesUpdate<"songs">,
   ) {
     // Community songs aren't editable by the viewer — skip persistence, keep generation working.
     if (!isOwner) return;
