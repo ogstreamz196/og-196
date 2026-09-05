@@ -136,7 +136,7 @@ Deno.serve(async (req) => {
   const safeName = rawName.replace(/[^\w.\- ]+/g, "").slice(0, 120) || "track.mp3";
   const filename = safeName.toLowerCase().endsWith(".mp3") ? safeName : `${safeName}.mp3`;
   const { data, error } = await admin.storage.from("song-files")
-    .createSignedUrl(path, ttl, purpose === "download" ? { download: filename } : undefined);
+    .createSignedUrl(path, ttl, forceAttachment ? { download: filename } : undefined);
   if (error) {
     log("sign_failed", { user_id: user.id, song_id, mode, error: error.message });
     return jsonResponse({ error: error.message, code: "sign_failed" }, 500);
