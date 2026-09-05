@@ -2,14 +2,27 @@ import { Disc3, Heart, Languages, Smile } from "lucide-react";
 
 export type Category = "language" | "genre" | "mood" | "theme";
 
+/** Most-picked languages — always shown first in every language selector. */
+export const FAVOURITE_LANGUAGES = [
+  "English", "Turkish", "Romanian", "Hindi", "Urdu", "Gujarati",
+  "Spanish", "Arabic", "Filipino", "Punjabi",
+];
+
+/** Puts the favourites at the top of any language list, keeping the rest in order. */
+export function orderLanguages(list: string[]): string[] {
+  const favs = FAVOURITE_LANGUAGES.filter((l) => list.includes(l));
+  return [...favs, ...list.filter((l) => !favs.includes(l))];
+}
+
 export const POOLS: Record<Category, string[]> = {
-  language: [
+  language: orderLanguages([
     "English", "Albanian", "Spanish", "French", "German", "Italian", "Portuguese",
     "Japanese", "Korean", "Mandarin", "Hindi", "Gujarati", "Marathi",
     "Bengali", "Tamil", "Telugu", "Kannada", "Malayalam", "Punjabi",
     "Urdu", "Arabic", "Swahili", "Yoruba", "Russian", "Turkish",
-    "Romanian", "Dutch", "Greek",
-  ],
+    "Romanian", "Dutch", "Greek", "Filipino", "Tagalog",
+  ]),
+
   genre: [
     "Drill", "Trap", "Afrobeats", "R&B", "Pop", "Dance", "Reggae",
     "Rock", "Indie", "House", "Lo-fi", "Country", "Jazz", "Funk",
