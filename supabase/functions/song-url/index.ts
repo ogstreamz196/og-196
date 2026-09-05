@@ -37,6 +37,9 @@ Deno.serve(async (req) => {
   const song_id: string | undefined = body?.song_id;
   const mode: "preview" | "full" = body?.mode === "full" ? "full" : "preview";
   const purpose: "stream" | "download" = body?.purpose === "stream" ? "stream" : "download";
+  // Only attach a Content-Disposition when the caller explicitly asked to
+  // download; the default "download" purpose above exists for unlock checks.
+  const forceAttachment = body?.purpose === "download";
   if (!song_id) {
     log("missing_song_id", { user_id: user.id, mode });
     return jsonResponse({ error: "Missing song_id", code: "missing_song_id" }, 400);
