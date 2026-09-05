@@ -173,10 +173,17 @@ Deno.serve(async (req) => {
       : "";
 
 
-    // One non-English pick: the WHOLE song is sung in it — English only ever
-    // appears as the parenthesised translation line underneath.
+    // English rides along on every non-English track as a REMIX feature: the
+    // picked language(s) still lead the song, but the intro is English and
+    // English lines/ad-libs pop up throughout.
+    const englishRemixRule = !isEnglish
+      ? ` ENGLISH REMIX REQUIREMENT (critical): English is always part of the remix. The [Intro] MUST be fully in English (a short hype intro naming the song/artist vibe). After that, the picked language(s) LEAD the song — most lines, and the main hook, stay in ${nonEnglish.join(" and ")} — but sprinkle English throughout like a remix feature: at least 2 English lines or ad-libs inside every verse and every chorus, an English line at the end of each hook repeat, and a mostly-English [Outro]. Roughly a quarter of all sung lines should be English, spread across the whole track, not clumped in one section. Never let English take over a full verse or the main chorus melody — it is the feature, not the lead.`
+      : "";
+
+    // One non-English pick: the whole song leads in it, with English only as
+    // the remix feature above (plus the translation lines underneath).
     const singleLanguageRule = (!multiLanguage && !isEnglish)
-      ? ` SINGLE-LANGUAGE REQUIREMENT (critical): the artist picked ${languageList[0]} and ONLY ${languageList[0]}. Every sung line — intro, every verse, every chorus, pre-chorus, bridge, outro and ad-libs — must be written in ${languageList[0]}. Do NOT write the song in English and sprinkle a few ${languageList[0]} words in, and do NOT default to English for the hook. The only English allowed is the bracketed section markers and the parenthesised translation line printed under each ${languageList[0]} line.`
+      ? ` SINGLE-LANGUAGE REQUIREMENT (critical): the artist picked ${languageList[0]}. Apart from the English remix lines required above, every sung line — every verse, every chorus, pre-chorus, bridge and ad-lib — must be written in ${languageList[0]}. Do NOT flip the balance: ${languageList[0]} is the lead language everywhere except the English intro/outro and the sprinkled English feature lines. The hook melody lines stay in ${languageList[0]}.`
       : "";
 
     // Pick a full-song structure driven by the chosen style tags so the
