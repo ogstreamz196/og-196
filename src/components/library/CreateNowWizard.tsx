@@ -366,31 +366,39 @@ export function CreateNowWizard({
                 <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
                   Track length
                 </p>
-                <div role="group" aria-label="Track length" className="grid grid-cols-5 gap-2">
-                  {LENGTH_OPTIONS.map((m) => {
-                    const selected = targetMinutes === m;
-                    return (
-                      <button
-                        key={m}
-                        type="button"
-                        aria-pressed={selected}
-                        onClick={() => setTargetMinutes(m)}
-                        className={cn(
-                          "min-h-11 rounded-xl border text-sm font-black tabular-nums transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
-                          selected
-                            ? "border-primary bg-primary/20 text-foreground shadow-glow"
-                            : "border-white/10 bg-card/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
-                        )}
-                      >
-                        {m}m
-                      </button>
-                    );
-                  })}
+                <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-card/60 p-2">
+                  <button
+                    type="button"
+                    aria-label="Shorter track"
+                    disabled={targetMinutes <= MIN_MINUTES}
+                    onClick={() => setTargetMinutes((m) => Math.max(MIN_MINUTES, m - 1))}
+                    className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-white/10 bg-background/70 text-lg font-black disabled:opacity-30"
+                  >
+                    −
+                  </button>
+                  <div className="flex-1 text-center">
+                    <p className="text-2xl font-black tabular-nums">{targetMinutes} min</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {targetMinutes > MIN_MINUTES
+                        ? `+${targetMinutes - MIN_MINUTES} coin${targetMinutes - MIN_MINUTES === 1 ? "" : "s"}`
+                        : "Included"}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    aria-label="Longer track"
+                    disabled={targetMinutes >= MAX_MINUTES}
+                    onClick={() => setTargetMinutes((m) => Math.min(MAX_MINUTES, m + 1))}
+                    className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-primary/40 bg-primary/20 text-lg font-black disabled:opacity-30"
+                  >
+                    +
+                  </button>
                 </div>
                 <p className="text-[11px] text-muted-foreground">
-                  We aim for {targetMinutes}:00 or a touch longer — never shorter.
+                  Each extra minute costs 1 coin.
                 </p>
               </div>
+
             </div>
           )}
 
