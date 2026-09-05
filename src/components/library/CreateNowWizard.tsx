@@ -205,7 +205,7 @@ export function CreateNowWizard({
       case 4:
         return "Hang on — your beat is still uploading.";
       default:
-        return "English is included by default — add other languages or continue.";
+        return "Pick a language, or continue for English.";
     }
   }, [step, stepValid]);
 
@@ -221,7 +221,7 @@ export function CreateNowWizard({
         subjectName: subjectName.trim(),
         description: description.trim(),
         style: styles.filter(Boolean).join(", "),
-        language: Array.from(new Set(["English", ...languages])).join(" + "),
+        language: (languages.length ? Array.from(new Set(languages)) : ["English"]).join(" + "),
         vocal: gender,
         vocalsOnly,
         beatPath: vocalsOnly ? beatPath : "",
@@ -316,7 +316,7 @@ export function CreateNowWizard({
             {step === 2 && "A short description, theme or story."}
             {step === 3 && "Stack as many styles as you like, then pick the voice."}
             {step === 4 &&
-              "English is always part of the remix. Flip vocals only to sing over your own beat."}
+              "Pick the language it's sung in. Flip vocals only to sing over your own beat."}
           </DialogDescription>
 
         </DialogHeader>
@@ -574,7 +574,8 @@ export function CreateNowWizard({
 
               <div className="space-y-3">
                 <p className="text-xs font-semibold text-primary">
-                  English is always included in the remix.
+                  Pick one or more languages — it's sung in exactly what you pick. Nothing picked
+                  means English.
                 </p>
                 <div
                   role="group"
@@ -582,24 +583,21 @@ export function CreateNowWizard({
                   className="grid max-h-[220px] grid-cols-2 gap-2 overflow-y-auto pr-1 sm:grid-cols-3"
                 >
                   {POOLS.language.map((l) => {
-                    const locked = l === "English";
-                    const selected = locked || languages.includes(l);
+                    const selected = languages.includes(l);
                     return (
                       <button
                         key={l}
                         type="button"
                         aria-pressed={selected}
-                        onClick={() => !locked && setLanguages((prev) => toggle(prev, l))}
+                        onClick={() => setLanguages((prev) => toggle(prev, l))}
                         className={cn(
                           "min-h-11 rounded-xl border px-3 py-2.5 text-sm font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                           selected
                             ? "border-primary bg-primary/20 text-foreground shadow-glow"
                             : "border-white/10 bg-card/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
-                          locked && "cursor-default opacity-90",
                         )}
                       >
                         {l}
-                        {locked && " ✓"}
                       </button>
                     );
                   })}
