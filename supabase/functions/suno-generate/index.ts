@@ -119,7 +119,9 @@ Deno.serve(async (req) => {
       }
     }
 
-    let coinCost = await getSetting(admin, "coins_per_generation", 3);
+    // Base price plus 1 coin for each minute beyond the included 3.
+    const extraMinutes = Math.max(0, targetMinutes - 3);
+    let coinCost = (await getSetting(admin, "coins_per_generation", 3)) + extraMinutes;
 
     // If this generation came from a portal, force the hardcoded language into the Suno prompt
     let portalLanguage: string | null = null;
