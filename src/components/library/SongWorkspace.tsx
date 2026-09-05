@@ -42,13 +42,44 @@ const LANGUAGES = [
   "Vietnamese", "Indonesian", "Malay", "Hebrew",
 ];
 
-const LANG_RE = /Language:\s*(?:write the lyrics in\s*)?([A-Za-z][A-Za-z\s]{1,30})/i;
+const LANG_RE = /Language:\s*(?:write the lyrics in\s*)?([A-Za-z][A-Za-z\s+]{1,80})/i;
 
-function detectLanguage(text: string | null | undefined): string {
+const VOCALS = ["Any voice", "Female vocal", "Male vocal", "Duo"];
+
+/** Styles offered as chips — curated first, then the rest of the pool. */
+const STYLE_OPTIONS: string[] = (() => {
+  const featured = ["Drill", "Hip Hop", "Bass Beats", "Reggae", "Trap"];
+  const rest = POOLS.genre.filter((g) => !featured.includes(g));
+  return [...featured, ...rest];
+})();
+
+function toggleItem(list: string[], v: string) {
+  return list.includes(v) ? list.filter((x) => x !== v) : [...list, v];
+}
+
+/** Split a saved style string into known chips + custom leftovers. */
+function splitStyles(style: string | null | undefined): { known: string[]; extra: string } {
+  const parts = (style ?? "").split(/[,·]/).map((s) => s.trim()).filter(Boolean);
+  const known: string[] = [];
+  const extra: string[] = [];
+  for (const p of parts) {
+    const match = STYLE_OPTIONS.find((s) => s.toLowerCase() === p.toLowerCase());
+    if (match) { if (!known.includes(match)) known.push(match); }
+    else extra.push(p);
+  }
+  return { known, extra: extra.join(", ") };
+}
+
+function detectLanguages(text: string | null | undefined): string[] {
   const m = text?.match(LANG_RE);
   const found = m?.[1]?.trim();
-  if (!found) return "English";
-  return LANGUAGES.find((l) => l.toLowerCase() === found.toLowerCase()) ?? "English";
+  if (!found) return ["English"];
+  const picked = found
+    .split("+")
+    .map((p) => p.trim())
+    .map((p) => LANGUAGES.find((l) => l.toLowerCase() === p.toLowerCase()))
+    .filter((l): l is string => !!l);
+  return picked.length ? Array.from(new Set(picked)) : ["English"];
 }
 
 function setBriefLanguage(brief: string, language: string): string {
