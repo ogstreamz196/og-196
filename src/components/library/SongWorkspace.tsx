@@ -527,49 +527,131 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
               </CollapsibleTrigger>
               <CollapsibleContent>
             <CardContent className="space-y-4">
-                  <div className="grid gap-4 sm:grid-cols-[1fr_220px]">
-                    <div className="space-y-1.5">
-                      <Label htmlFor="song-title">Title</Label>
-                      <Input
-                        id="song-title"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        placeholder="Untitled"
-                      />
+                  {/* Locked identity — the track name and story stay as created */}
+                  <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+                    <p className="text-sm font-semibold">{title.trim() || "Untitled track"}</p>
+                    <p className="mt-1 line-clamp-3 text-xs text-muted-foreground">
+                      {brief.trim() || "No description saved."}
+                    </p>
+                    <p className="mt-2 text-[11px] text-muted-foreground/80">
+                      Name and story can't be changed — everything below can.
+                    </p>
+                  </div>
+
+                  {/* Styles — stack as many as you like */}
+                  <div className="space-y-2">
+                    <Label>Styles <span className="text-xs font-normal text-muted-foreground">(pick one or more)</span></Label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {STYLE_OPTIONS.map((s) => {
+                        const on = styles.includes(s);
+                        return (
+                          <button
+                            key={s}
+                            type="button"
+                            aria-pressed={on}
+                            onClick={() => setStyles((list) => toggleItem(list, s))}
+                            className={cn(
+                              "rounded-full border px-3 py-1.5 text-xs font-semibold transition",
+                              on
+                                ? "border-primary bg-primary/15 text-foreground shadow-[0_0_14px_-6px_hsl(var(--primary))]"
+                                : "border-border bg-background/40 text-muted-foreground hover:border-primary/50",
+                            )}
+                          >
+                            {s}
+                          </button>
+                        );
+                      })}
                     </div>
+                    <Input
+                      id="song-style-extra"
+                      value={styleExtra}
+                      onChange={(e) => setStyleExtra(e.target.value)}
+                      placeholder="Add your own, e.g. dark piano, 90s boom bap"
+                    />
+                  </div>
+
+                  {/* Languages — multi select, English always included */}
+                  <div className="space-y-2">
+                    <Label>Languages <span className="text-xs font-normal text-muted-foreground">(mix as many as you like)</span></Label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {LANGUAGES.map((l) => {
+                        const on = languages.includes(l);
+                        return (
+                          <button
+                            key={l}
+                            type="button"
+                            aria-pressed={on}
+                            onClick={() => setLanguages((list) => {
+                              const next = toggleItem(list, l);
+                              return next.length ? next : ["English"];
+                            })}
+                            className={cn(
+                              "rounded-full border px-3 py-1.5 text-xs font-semibold transition",
+                              on
+                                ? "border-primary bg-primary/15 text-foreground"
+                                : "border-border bg-background/40 text-muted-foreground hover:border-primary/50",
+                            )}
+                          >
+                            {l}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Voice + length */}
+                  <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-1.5">
-                      <Label htmlFor="song-language">Language</Label>
-                      <Select value={language} onValueChange={setLanguage}>
-                        <SelectTrigger id="song-language">
+                      <Label htmlFor="song-vocal">Voice</Label>
+                      <Select value={vocal || "Any voice"} onValueChange={setVocal}>
+                        <SelectTrigger id="song-vocal">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {LANGUAGES.map((l) => (
-                            <SelectItem key={l} value={l}>{l}</SelectItem>
+                          {VOCALS.map((v) => (
+                            <SelectItem key={v} value={v}>{v}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="song-length">Track length</Label>
+                      <Select
+                        value={String(targetMinutes)}
+                        onValueChange={(v) => setTargetMinutes(Number(v))}
+                      >
+                        <SelectTrigger id="song-length">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {LENGTH_OPTIONS.map((m) => (
+                            <SelectItem key={m} value={String(m)}>
+                              {m} min{m > MIN_LENGTH ? ` · +${m - MIN_LENGTH} coin${m - MIN_LENGTH === 1 ? "" : "s"}` : ""}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="song-style">Style</Label>
-                    <Input
-                      id="song-style"
-                      value={style}
-                      onChange={(e) => setStyle(e.target.value)}
-                      placeholder="Drill · dark piano · gritty male vocal"
+
+                  {/* Vocals only */}
+                  <label
+                    htmlFor="vocals-only-toggle"
+                    className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-muted/20 px-3 py-2.5 text-sm font-medium"
+                  >
+                    <span className="min-w-0">
+                      Vocals only {vocalsOnly ? "· ON" : "· OFF"}
+                      <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
+                        A cappella vocals with no generated instrumental.
+                      </span>
+                    </span>
+                    <Switch
+                      id="vocals-only-toggle"
+                      checked={vocalsOnly}
+                      onCheckedChange={setVocalsOnly}
                     />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="song-brief">What it's about</Label>
-                    <Textarea
-                      id="song-brief"
-                      value={brief}
-                      onChange={(e) => setBrief(e.target.value)}
-                      rows={4}
-                      placeholder="Who the song is about, the mood, memories…"
-                    />
-                  </div>
+                  </label>
+
 
 
               {hasLyrics && languageChanged && (
