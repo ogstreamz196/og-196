@@ -288,9 +288,10 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
   }
 
 
-  const progressDenom = communityMode
+  const progressDenom = communityMode || unlocked
     ? Math.max(1, song.duration_seconds ?? audioRef.current?.duration ?? sampleSeconds)
     : sampleSeconds;
+
   const progressPct = useMemo(
     () => Math.min(100, (progress / progressDenom) * 100),
     [progress, progressDenom],
