@@ -86,12 +86,21 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const balance = profile?.coin_balance ?? 0;
   const isOwner = !!profile?.id && song.user_id === profile.id;
 
-  const [title, setTitle] = useState(song.title ?? "");
+  const [title] = useState(song.title ?? "");
   const [brief, setBrief] = useState(song.prompt ?? "");
-  const [style, setStyle] = useState(song.style ?? "");
+  // Styles split into known chips + anything custom the user typed.
+  const initialStyles = useMemo(() => splitStyles(song.style), [song.style]);
+  const [styles, setStyles] = useState<string[]>(() => initialStyles.known);
+  const [styleExtra, setStyleExtra] = useState(() => initialStyles.extra);
+  const [vocal, setVocal] = useState(song.vocal ?? "");
+  const [vocalsOnly, setVocalsOnly] = useState(!!song.vocals_only);
+  const [targetMinutes, setTargetMinutes] = useState(() => {
+    const mins = Math.round((song.target_duration_sec ?? MIN_LENGTH * 60) / 60);
+    return Math.min(MAX_LENGTH, Math.max(MIN_LENGTH, mins || MIN_LENGTH));
+  });
 
   const [lyrics, setLyrics] = useState(song.lyrics ?? "");
-  const [language, setLanguage] = useState(() => detectLanguage(song.prompt));
+  const [languages, setLanguages] = useState<string[]>(() => detectLanguages(song.prompt));
   // Progressive disclosure: each step stays folded unless it's the one to act on.
   const [lyricsOpen, setLyricsOpen] = useState(false);
   const [step1Open, setStep1Open] = useState(!song.lyrics);
