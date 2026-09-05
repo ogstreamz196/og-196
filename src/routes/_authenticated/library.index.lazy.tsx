@@ -733,6 +733,7 @@ function LibraryPage() {
           vocal: songVocal || null,
           vocals_only: vocalsOnly,
           beat_path: beatPath || null,
+          target_duration_sec: overrideTargetSec,
         },
       });
       if (stale()) return;

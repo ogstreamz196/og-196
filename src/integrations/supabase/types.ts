@@ -809,6 +809,7 @@ export type Database = {
           style: string | null
           suno_clip_id: string | null
           suno_task_id: string | null
+          target_duration_sec: number | null
           title: string | null
           unlocked: boolean
           updated_at: string
@@ -848,6 +849,7 @@ export type Database = {
           style?: string | null
           suno_clip_id?: string | null
           suno_task_id?: string | null
+          target_duration_sec?: number | null
           title?: string | null
           unlocked?: boolean
           updated_at?: string
@@ -887,6 +889,7 @@ export type Database = {
           style?: string | null
           suno_clip_id?: string | null
           suno_task_id?: string | null
+          target_duration_sec?: number | null
           title?: string | null
           unlocked?: boolean
           updated_at?: string
