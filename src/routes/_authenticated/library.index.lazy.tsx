@@ -158,8 +158,7 @@ function LibraryPage() {
   const [wizardDraft, setWizardDraft] = useState<WizardDraft>(EMPTY_DRAFT);
   const statusPanelRef = useRef<HTMLElement | null>(null);
   const libraryRef = useRef<HTMLElement | null>(null);
-  // Track length: a 3-minute floor is enforced backend-side; users may raise it.
-  // Track length is chosen in step 1 of the Create now wizard.
+  // Track length is chosen in step 1 of the Create now wizard (3 min floor).
   const [targetMinutes, setTargetMinutes] = useState(MIN_TRACK_MINUTES);
   const targetDurationSec = Math.max(MIN_TRACK_MINUTES, targetMinutes) * 60;
   const expectedRange = `${targetMinutes}:00–${targetMinutes}:30+`;
