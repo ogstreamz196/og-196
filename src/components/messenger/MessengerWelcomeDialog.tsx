@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Lock, Users, Loader2 } from "lucide-react";
+import { Lock, Swords, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -7,8 +7,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
 import type { MessengerMode } from "@/hooks/use-messenger-mode";
+import { modeHeading } from "@/lib/messenger-mode-labels";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
 
 export function greetKey(uid: string | null | undefined) {
@@ -17,12 +17,11 @@ export function greetKey(uid: string | null | undefined) {
 
 /**
  * Decide whether the polite greeting should be shown for this user.
- * Remembered choice (localStorage) wins; otherwise we ask once per browser session.
+ * Asked once per browser session — there is no "remember my choice" option.
  */
 export function shouldGreet(uid: string | null | undefined): boolean {
   if (typeof window === "undefined") return false;
   try {
-    if (window.localStorage.getItem(greetKey(uid)) === "remembered") return false;
     if (window.sessionStorage.getItem(greetKey(uid)) === "asked") return false;
   } catch {
     return false;
@@ -30,10 +29,9 @@ export function shouldGreet(uid: string | null | undefined): boolean {
   return true;
 }
 
-export function markGreeted(uid: string | null | undefined, remember: boolean) {
+export function markGreeted(uid: string | null | undefined) {
   try {
     window.sessionStorage.setItem(greetKey(uid), "asked");
-    if (remember) window.localStorage.setItem(greetKey(uid), "remembered");
   } catch {
     /* storage unavailable — greeting simply shows again */
   }
@@ -44,7 +42,7 @@ type Props = {
   displayName?: string | null;
   currentMode: MessengerMode;
   pending?: boolean;
-  onChoose: (mode: MessengerMode, remember: boolean) => void;
+  onChoose: (mode: MessengerMode) => void;
   onDismiss: () => void;
 };
 
@@ -56,7 +54,6 @@ export function MessengerWelcomeDialog({
   onChoose,
   onDismiss,
 }: Props) {
-  const [remember, setRemember] = useState(true);
   const [picked, setPicked] = useState<MessengerMode | null>(null);
 
   useEffect(() => {
@@ -80,8 +77,8 @@ export function MessengerWelcomeDialog({
             Hey {name} — lovely to see you.
           </DialogTitle>
           <DialogDescription className="text-pretty text-sm leading-relaxed">
-            Before we begin, would you kindly choose where you&apos;d like to chat today? You can
-            change your mind any time with the button up top.
+            Would you kindly choose where you&apos;d like to chat today? You can change your mind
+            any time with the button up top.
           </DialogDescription>
         </DialogHeader>
 
@@ -91,7 +88,7 @@ export function MessengerWelcomeDialog({
             disabled={pending}
             onClick={() => {
               setPicked("loner");
-              onChoose("loner", remember);
+              onChoose("loner");
             }}
             className="group flex w-full items-center gap-3 rounded-2xl border border-primary/40 bg-primary/10 p-3.5 text-left transition-all hover:bg-primary/20 active:scale-[0.99] disabled:opacity-60 sm:p-4"
           >
@@ -117,43 +114,31 @@ export function MessengerWelcomeDialog({
             disabled={pending}
             onClick={() => {
               setPicked("community");
-              onChoose("community", remember);
+              onChoose("community");
             }}
-            className="group flex w-full items-center gap-3 rounded-2xl border border-cyan-400/40 bg-cyan-500/10 p-3.5 text-left transition-all hover:bg-cyan-500/20 active:scale-[0.99] disabled:opacity-60 sm:p-4"
+            className="group flex w-full items-center gap-3 rounded-2xl border border-destructive/50 bg-destructive/10 p-3.5 text-left transition-all hover:bg-destructive/20 active:scale-[0.99] disabled:opacity-60 sm:p-4"
           >
-            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-cyan-500/20 ring-1 ring-cyan-400/50">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-destructive/20 ring-1 ring-destructive/50">
               {pending && picked === "community" ? (
-                <Loader2 className="h-5 w-5 animate-spin text-cyan-200" />
+                <Loader2 className="h-5 w-5 animate-spin text-destructive" />
               ) : (
-                <Users className="h-5 w-5 text-cyan-200" />
+                <Swords className="h-5 w-5 text-destructive" />
               )}
             </span>
             <span className="min-w-0">
               <span className="block text-sm font-black uppercase tracking-wide sm:text-base">
-                Community chat
+                OG Battle Zone
               </span>
               <span className="block text-pretty text-xs text-muted-foreground sm:text-sm">
-                See how others use the bot and join in.
+                Everyone vs OG Bot. Think you can take him in a roast battle?
               </span>
             </span>
           </button>
         </div>
 
-        <label className="mt-1 flex items-center justify-center gap-2 text-xs text-muted-foreground">
-          <Checkbox
-            checked={remember}
-            onCheckedChange={(v) => setRemember(v === true)}
-            aria-label="Remember my choice"
-          />
-          Remember my choice — don&apos;t ask again
-        </label>
-
         <p className="text-center text-[11px] text-muted-foreground/80">
           You&apos;re currently set to{" "}
-          <span className="font-semibold text-foreground">
-            {currentMode === "community" ? "Community chat" : "Private chat"}
-          </span>
-          .
+          <span className="font-semibold text-foreground">{modeHeading(currentMode)}</span>.
         </p>
       </DialogContent>
     </Dialog>
