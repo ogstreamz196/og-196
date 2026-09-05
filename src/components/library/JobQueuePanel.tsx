@@ -262,6 +262,17 @@ export function JobQueuePanel({ songs, onRemoved }: { songs: Song[]; onRemoved?:
                   )}
                 </Button>
               )}
+              {kind !== "completed" && (
+                <Link
+                  to="/library/$songId"
+                  params={{ songId: song.id }}
+                  aria-label={`Open details for ${song.title || "track"}`}
+                  title="Open details"
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-white/10 bg-background/60 text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary"
+                >
+                  <Eye className="h-4 w-4" />
+                </Link>
+              )}
               {kind === "completed" && (
                 <Button
                   size="icon"
