@@ -213,7 +213,7 @@ Deno.serve(async (req) => {
       ` Use the bracketed section markers verbatim (e.g. [Verse 1], [Chorus], [Bridge], [Outro]), each on its own line, with a blank line between sections. Every section must have lyrics — no placeholders, no "(instrumental)" unless the structure explicitly says so.` +
       ` The [Chorus] must be written out IN FULL every time it appears (never write "repeat chorus" or "x2" as a shortcut) — it is the same repeatable hook tied to the song title or central theme.` +
       ` Do NOT cut the song short either — hit every section in the structure and stay inside the word range given.` +
-      multiStyleRule + multiLanguageRule + singleLanguageRule;
+      multiStyleRule + multiLanguageRule + singleLanguageRule + englishRemixRule;
 
 
     const systemPrompt = foulMouth
