@@ -90,8 +90,30 @@ Deno.serve(async (req) => {
       `full length track, approximately ${targetMinutes} minutes (${targetMinutes}:00 or longer), ` +
       `complete arrangement with intro, verses, choruses, bridge and outro, no early fade out, ` +
       `perform every lyric line provided`;
+    // Languages the artist picked. Suno has no language field, so the
+    // requirement is steered through the style prompt: every picked language
+    // must be sung, and section markers in the lyrics say which is which.
+    const languageList = Array.from(
+      new Set(
+        (body.language ?? "").toString().trim().slice(0, 200)
+          .split(/\s*(?:\+|,|\/|&|\band\b)\s*/i)
+          .map((l: string) => l.trim())
+          .filter(Boolean),
+      ),
+    );
+    const languageStyleHint = languageList.length
+      ? (languageList.length > 1
+        ? `multilingual vocals sung in ${languageList.join(" and ")}, switch language per section exactly as the lyric section markers indicate, keep native pronunciation for each language`
+        : `vocals sung in ${languageList[0]} with native pronunciation`)
+      : null;
+    // Multiple styles: make the section-to-section genre changes explicit.
+    const styleCount = rawStyle ? rawStyle.split(/\s*,\s*/).filter(Boolean).length : 0;
+    const multiStyleHint = styleCount > 1
+      ? `multi-genre arrangement blending ${rawStyle}, each section performed in the genre its lyric section marker names, deliberate transitions between sections`
+      : null;
     const style = limitText(
-      [rawStyle, vocalStyle, vocalsOnlyStyle, lengthStyleHint].filter(Boolean).join(", ") || null,
+      [rawStyle, multiStyleHint, languageStyleHint, vocalStyle, vocalsOnlyStyle, lengthStyleHint]
+        .filter(Boolean).join(", ") || null,
       MAX_STYLE_CHARS,
     );
     const lyrics = limitText((body.lyrics ?? "").toString().trim() || null, MAX_PROMPT_CHARS);

@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { languageFromPrompt } from "@/lib/library-utils";
 
 /**
  * Shared actions for the generation queue / history surfaces:
@@ -35,6 +36,7 @@ export async function retryGeneration(songId: string) {
       lyrics: song.lyrics,
       title: song.title,
       style: song.style,
+      language: languageFromPrompt(song.prompt),
       vocals_only: !!song.vocals_only,
       beat_path: song.beat_path,
       portal_id: song.portal_id,

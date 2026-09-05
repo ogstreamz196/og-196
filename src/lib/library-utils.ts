@@ -233,3 +233,14 @@ export function personalDetailsCheck(
 
   return { status, message, pct, tone, barTone, length: len };
 }
+
+/**
+ * Pulls the language list back out of a saved brief/prompt.
+ * Briefs carry a "Language: write the lyrics in English + Turkish" line, so
+ * retries and re-submissions can restore the artist's picks without extra columns.
+ */
+export function languageFromPrompt(text: string | null | undefined): string | null {
+  const m = text?.match(/Language:\s*(?:write the lyrics in\s*)?([^\n]+)/i);
+  const found = m?.[1]?.trim();
+  return found || null;
+}

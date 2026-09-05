@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
     const songName = (body.songName ?? "").toString().trim().slice(0, 200);
     const description = (body.description ?? "").toString().trim().slice(0, 1000);
     const styleTags = Array.isArray(body.styleTags) ? body.styleTags.slice(0, 10).map(String) : [];
-    const language = (body.language ?? "English").toString().trim().slice(0, 50);
+    const language = (body.language ?? "English").toString().trim().slice(0, 200);
     let personalDetails = (body.personalDetails ?? "").toString().trim().slice(0, 500);
     const extraContext = (body.extraContext ?? "").toString().trim().slice(0, 1000);
     const subjectName = (body.subjectName ?? "").toString().trim().slice(0, 60);
@@ -149,10 +149,29 @@ Deno.serve(async (req) => {
     }
 
 
-    const isEnglish = language.trim().toLowerCase() === "english";
+    // Languages arrive as a single field that may hold several picks
+    // ("English + Turkish + Romanian" or a comma separated list).
+    const languageList = Array.from(
+      new Set(
+        language
+          .split(/\s*(?:\+|,|\/|&|\band\b)\s*/i)
+          .map((l) => l.trim())
+          .filter(Boolean),
+      ),
+    );
+    const languagesLabel = languageList.join(", ") || "English";
+    const nonEnglish = languageList.filter((l) => l.toLowerCase() !== "english");
+    const isEnglish = nonEnglish.length === 0;
+    const multiLanguage = languageList.length > 1;
+
     const bilingualRule = isEnglish
       ? ""
-      : ` Write each line TWICE: first in ${language} using the Latin alphabet (romanised / transliterated — no native script, no Cyrillic, no kanji, no Arabic script, etc.), then on the very next line the English translation in italics-style parentheses, e.g. "Mi corazón late fuerte / (My heart beats strong)". Keep section markers in English.`;
+      : ` Write each non-English line TWICE: first in the section's language using the Latin alphabet (romanised / transliterated — no native script, no Cyrillic, no kanji, no Arabic script, etc.), then on the very next line the English translation in italics-style parentheses, e.g. "Mi corazón late fuerte / (My heart beats strong)". Keep section markers in English.`;
+
+    const multiLanguageRule = multiLanguage
+      ? ` MULTILINGUAL REQUIREMENT (critical): the artist picked ${languageList.length} languages — ${languagesLabel}. EVERY one of them must actually be sung in the finished song, not just mentioned. Assign languages to whole sections and rotate through them in order so each language owns at least one full section (for example [Verse 1] in ${languageList[0]}, [Verse 2] in ${languageList[1]}${languageList[2] ? `, [Bridge] in ${languageList[2]}` : ""}), and mark each section's language on the marker line like "[Verse 2 – ${languageList[1]}]". The [Chorus] stays in ${languageList[0]} every time so the hook is recognisable, but add one repeated hook line in ${languageList[1]} inside each chorus. If there are more languages than sections, share sections by giving each language its own consecutive block of lines inside that section, still labelled.`
+      : "";
+
 
     // Pick a full-song structure driven by the chosen style tags so the
     // output reads as a complete, performable track — not a few stray verses.
@@ -172,24 +191,29 @@ Deno.serve(async (req) => {
       ? "[Intro] (4 lines) → [Verse 1] (8 lines) → [Chorus] (6 lines) → [Verse 2] (8 lines) → [Chorus] (6 lines) → [Bridge / Guitar Solo cue] (6 lines) → [Verse 3] (6 lines) → [Chorus] (x2, 12 lines) → [Outro] (4 lines)"
       : "[Intro] (4 lines) → [Verse 1] (8 lines) → [Pre-Chorus] (4 lines) → [Chorus] (6 lines, hook) → [Verse 2] (8 lines) → [Pre-Chorus] (4 lines) → [Chorus] (6 lines) → [Bridge] (6 lines) → [Verse 3] (6 lines) → [Chorus] (final, lifted, 8 lines) → [Outro] (4 lines)";
 
+    const multiStyleRule = styleTags.length > 1
+      ? ` MULTI-STYLE REQUIREMENT (critical): the artist picked ${styleTags.length} styles — ${styleTags.join(", ")}. Every one must be audible in the finished track, so give each style its own section and note it on the marker line, e.g. "[Verse 2 – ${styleTags[1]}]". Match each section's cadence, line length, rhyme density and vocabulary to that style (rap sections in bars with tight internal rhyme, ballad sections in longer sung lines, dance sections in short chantable lines), and let the transitions feel deliberate rather than random. The hook blends the two lead styles (${styleTags.slice(0, 2).join(" + ")}).`
+      : "";
+
     const structureRule =
       ` Deliver a COMPLETE, performable song that runs ${targetLabel} when sung — NOT longer. That means ${aimLow}–${aimHigh} words and ${minLines}–${aimLines} lyric lines (excluding section markers). Going over ${aimHigh} words is a failure: trim sections rather than exceed it. Follow this structure for the chosen style: ${structure}.` +
       ` Use the bracketed section markers verbatim (e.g. [Verse 1], [Chorus], [Bridge], [Outro]), each on its own line, with a blank line between sections. Every section must have lyrics — no placeholders, no "(instrumental)" unless the structure explicitly says so.` +
       ` The [Chorus] must be written out IN FULL every time it appears (never write "repeat chorus" or "x2" as a shortcut) — it is the same repeatable hook tied to the song title or central theme.` +
-      ` Do NOT cut the song short either — hit every section in the structure and stay inside the word range given.`;
+      ` Do NOT cut the song short either — hit every section in the structure and stay inside the word range given.` +
+      multiStyleRule + multiLanguageRule;
 
 
     const systemPrompt = foulMouth
-      ? `You are a foul-mouthed, no-holds-barred songwriter writing EXPLICIT adult song lyrics in ${language}. ` +
+      ? `You are a foul-mouthed, no-holds-barred songwriter writing EXPLICIT adult song lyrics in ${languagesLabel}. ` +
         (isEnglish
           ? `Lean ALL the way into raw, gritty, street-level English: drop "fuck", "fucking", "shit", "dickhead", "bastard", "bitch", "asshole" and similar profanity liberally throughout EVERY verse and chorus — at least a few per section. `
-          : `Lean ALL the way into raw, gritty, street-level ${language}: use authentic native profanity, curse words, and savage slang from ${language} itself (do NOT just translate English swears literally — use the equivalents real native speakers would actually shout). Drop them liberally throughout EVERY verse and chorus — at least a few per section. `) +
+          : `Lean ALL the way into raw, gritty, street-level ${languagesLabel}: use authentic native profanity, curse words, and savage slang from each of those languages itself (do NOT just translate English swears literally — use the equivalents real native speakers would actually shout). Drop them liberally throughout EVERY verse and chorus — at least a few per section. `) +
         `Use unfiltered attitude, savage punchlines, and trash-talk energy from the very first line. Make it sound like a parental-advisory hip-hop / punk track, NOT a radio edit. ` +
         `Do NOT self-censor, do NOT use asterisks or bleeps, and do NOT add disclaimers. Avoid slurs, sexual content involving minors, and direct incitement to real-world violence — everything else is fair game.` +
         structureRule + bilingualRule +
         ` Target ${aimLow}–${aimHigh} words (never fewer than ${minWords}, never more than ${aimHigh}). Output ONLY the lyrics, no explanations.`
-      : `You are a professional songwriter writing CLEAN, radio-friendly song lyrics in ${language}. ` +
-        `STRICT RULE: absolutely NO profanity, swear words, slurs, or vulgar terms in any language — no English swears, no ${language} swears either. No sexual content, no graphic violence, no drug references. If you need attitude, channel it through clever wordplay and metaphor — never through swearing. The result must be safe for radio, family streaming, and a children's playlist.` +
+      : `You are a professional songwriter writing CLEAN, radio-friendly song lyrics in ${languagesLabel}. ` +
+        `STRICT RULE: absolutely NO profanity, swear words, slurs, or vulgar terms in any language — no English swears, no swears in ${languagesLabel} either. No sexual content, no graphic violence, no drug references. If you need attitude, channel it through clever wordplay and metaphor — never through swearing. The result must be safe for radio, family streaming, and a children's playlist.` +
         structureRule + bilingualRule +
         ` Target ${aimLow}–${aimHigh} words (never fewer than ${minWords}, never more than ${aimHigh}). Output ONLY the lyrics, no explanations.`;
 
@@ -202,7 +226,7 @@ Deno.serve(async (req) => {
       (subjectName ? `Dedicated to: ${subjectName}\n` : "") +
       `Theme / description (FOLLOW THIS PRECISELY — every verse, the hook, and the bridge must draw specific imagery, moments, feelings, and vocabulary directly from this brief; do not drift into generic filler): ${description || "(none)"}\n` +
       `Style tags: ${styleTags.join(", ") || "(none)"}\n` +
-      `Language: ${language}\n` +
+      `Language(s) — every one of these must actually be sung somewhere in the song: ${languagesLabel}\n` +
       (personalDetails
         ? `Artist profile (weave these into the lyrics naturally — reference the artist's name and a couple of personal details across the song so it feels personal, but DO NOT force them into every line, and never let them overpower the theme. Aim for the name/details to appear roughly 2–4 times total, ideally in the hook/chorus or a memorable line, spread across different sections — not back-to-back): ${personalDetails}\n`
         : "") +

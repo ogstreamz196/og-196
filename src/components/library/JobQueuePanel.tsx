@@ -31,6 +31,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { downloadFile } from "@/lib/download-file";
 import { invokeError } from "@/lib/invoke-error";
 import { deleteQueuedSong } from "@/lib/song-queue-actions";
+import { languageFromPrompt } from "@/lib/library-utils";
 import { useSettings } from "@/hooks/use-settings";
 import { useProfile } from "@/hooks/use-profile";
 import type { Song } from "@/components/SongCard";
@@ -147,6 +148,7 @@ export function JobQueuePanel({ songs, onRemoved }: { songs: Song[]; onRemoved?:
           lyrics: (song as { lyrics?: string }).lyrics ?? "",
           title: song.title ?? null,
           style: (song as { style?: string }).style ?? null,
+          language: languageFromPrompt(song.prompt ?? null),
         },
       });
       if (error) throw new Error(invokeError(error, "Retry failed"));
