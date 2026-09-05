@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadFile } from "@/lib/download-file";
+import { shareTrack } from "@/lib/share-track";
 import { invokeError } from "@/lib/invoke-error";
 import { deleteQueuedSong } from "@/lib/song-queue-actions";
 import { languageFromPrompt } from "@/lib/library-utils";
@@ -466,7 +467,9 @@ function JobDetailsDrawer({
         url = data.url as string;
         setFullUrl(url);
       }
-      await downloadFile(url!, `${song.title || "song"}.mp3`);
+      const fileName = `${song.title || "song"}.mp3`;
+      const blob = await downloadFile(url!, fileName);
+      await shareTrack({ title: song.title || "My track", blob, filename: fileName });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Download failed");
     } finally {

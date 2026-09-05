@@ -1,12 +1,13 @@
 import { memo, useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { Download, Loader2, Music2, Pause, Pencil, Play, Trash2 } from "lucide-react";
+import { Download, Loader2, Music2, Pause, Pencil, Play, Share2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useSongAudio } from "@/hooks/use-song-audio";
 import { useProfile } from "@/hooks/use-profile";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadFile } from "@/lib/download-file";
+import { shareTrack } from "@/lib/share-track";
 import { UnlockConfirmDialog } from "@/components/library/UnlockConfirmDialog";
 import { cn } from "@/lib/utils";
 import type { Song } from "@/components/SongCard";
@@ -107,14 +108,34 @@ function CommunityTrackRowImpl({
             "Download failed",
         );
       }
-      await downloadFile(data.url as string, `${title}.mp3`);
+      const blob = await downloadFile(data.url as string, `${title}.mp3`);
       setUnlockOpen(false);
+      await shareTrack({ title, blob, filename: `${title}.mp3` });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Download failed");
     } finally {
       setBusy(false);
     }
   }
+
+  /** Re-download an already-paid track and hand it to the share sheet. */
+  async function shareUnlocked() {
+    setBusy(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("song-url", {
+        body: { song_id: song.id, mode: "full", purpose: "download", filename: `${title}.mp3` },
+      });
+      if (error || !data?.url) throw new Error("Could not prepare the track");
+      const blob = await downloadFile(data.url as string, `${title}.mp3`);
+      await shareTrack({ title, blob, filename: `${title}.mp3` });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Share failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const canShare = isReady && !!song.unlocked;
 
   return (
     <li className="group flex items-center gap-2.5 px-2.5 py-2.5 transition-colors hover:bg-primary/[0.06] sm:gap-3 sm:px-3">
@@ -205,6 +226,17 @@ function CommunityTrackRowImpl({
 
       {owned ? (
         <div className="flex shrink-0 items-center gap-1.5">
+          {canShare && (
+            <button
+              type="button"
+              onClick={shareUnlocked}
+              disabled={busy}
+              aria-label={`Share ${title}`}
+              className="grid h-10 w-10 place-items-center rounded-full border border-emerald-400/40 bg-emerald-500/10 text-emerald-300 transition-colors hover:bg-emerald-500/20 disabled:opacity-40"
+            >
+              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />}
+            </button>
+          )}
           <Link
             to="/library/$songId"
             params={{ songId: song.id }}
@@ -227,6 +259,17 @@ function CommunityTrackRowImpl({
         </div>
       ) : (
         <div className="flex shrink-0 items-center gap-1.5">
+        {canShare && (
+          <button
+            type="button"
+            onClick={shareUnlocked}
+            disabled={busy}
+            aria-label={`Share ${title}`}
+            className="grid h-10 w-10 place-items-center rounded-full border border-emerald-400/40 bg-emerald-500/10 text-emerald-300 transition-colors hover:bg-emerald-500/20 disabled:opacity-40"
+          >
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />}
+          </button>
+        )}
         <button
           type="button"
           onClick={() => setUnlockOpen(true)}

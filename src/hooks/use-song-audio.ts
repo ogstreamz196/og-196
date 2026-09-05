@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadFile } from "@/lib/download-file";
+import { shareTrack } from "@/lib/share-track";
 
 interface UseSongAudioOptions {
   songId: string;
@@ -92,8 +93,10 @@ export function useSongAudio({ songId, hasAudio, ready, sampleSeconds, mode = "p
   async function download(filename: string) {
     const url = await ensureUrl();
     if (!url) return;
-    await downloadFile(url, filename);
+    const blob = await downloadFile(url, filename);
+    await shareTrack({ title: filename.replace(/\.mp3$/i, ""), blob, filename });
   }
+
 
   function handleEnded() {
     setPlaying(false);
