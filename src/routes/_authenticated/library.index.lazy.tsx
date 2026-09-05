@@ -79,6 +79,7 @@ import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 
 
 import { FreshTrackCard } from "@/components/library/FreshTrackCard";
+import { MasterpieceDialog } from "@/components/library/MasterpieceDialog";
 import { StudioMeter, StudioLed } from "@/components/library/StudioConsole";
 import { CookingDialog } from "@/components/library/CookingDialog";
 import { BeatLibrary, type SavedBeat } from "@/components/library/BeatLibrary";
