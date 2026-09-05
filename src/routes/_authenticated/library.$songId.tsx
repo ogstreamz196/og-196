@@ -122,7 +122,9 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
   const isFailed = song.status === "failed";
   const isPending = song.status === "draft" || song.status === "pending" || song.status === "processing";
   const wasPendingRef = useRef(isPending);
-  const unlocked = !!song.unlocked;
+  // Boss/admin accounts always hear the full track — no unlock needed.
+  const { isBoss } = useRole();
+  const unlocked = !!song.unlocked || isBoss;
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
