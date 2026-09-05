@@ -23,10 +23,10 @@ describe("messenger mode labels", () => {
     for (const mode of MODES) {
       const isCommunity = mode === "community";
       expect(modeHeading(mode)).toBe(
-        isCommunity ? "OG Community Mode" : "OG Bot Loner Mode",
+        isCommunity ? "OG Battle Zone" : "OG Bot Loner Mode",
       );
       expect(modeBadge(mode)).toContain(
-        isCommunity ? "OG Community Mode" : "OG Bot Loner Mode",
+        isCommunity ? "OG Battle Zone" : "OG Bot Loner Mode",
       );
     }
   });
@@ -68,7 +68,7 @@ describe("messenger mode labels", () => {
     const keepsStrings =
       src.includes("Start Private Mode") &&
       src.includes("Leave Private Mode") &&
-      src.includes("OG Community Mode") &&
+      src.includes("OG Battle Zone") &&
       src.includes("OG Bot Loner Mode");
     expect(usesHelpers || keepsStrings).toBe(true);
   });

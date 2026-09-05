@@ -101,12 +101,12 @@ export function useSetMessengerMode() {
     },
     onSuccess: (next) => {
       toast.success(
-        next === "community" ? "👥 OG Community Mode: ON" : "🤖 OG Bot Loner Mode: ON",
+        next === "community" ? "⚔️ OG Battle Zone: ON" : "🤖 OG Bot Loner Mode: ON",
         {
           id: "messenger-mode-toggle",
           description:
             next === "community"
-              ? "You're now in the public OG Community room. Saved to your profile."
+              ? "You're in the OG Battle Zone — everyone vs OG Bot. Saved to your profile."
               : "Back to private chat with OG Bot. Saved to your profile.",
         },
       );

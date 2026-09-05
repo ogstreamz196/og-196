@@ -391,7 +391,7 @@ export function OgChat({
       setAttachment(null);
       postCommunity({ data: { content: t } })
         .then(() => {
-          toast.success("Posted to OG Community", {
+          toast.success("Posted to the OG Battle Zone", {
             action: { label: "Open", onClick: () => { window.location.href = "/messenger?live=1"; } },
           });
         })
