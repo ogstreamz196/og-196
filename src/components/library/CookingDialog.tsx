@@ -66,11 +66,11 @@ export function CookingDialog({
           <DialogDescription className="text-sm">
             {title ? (
               <>
-                <span className="font-bold text-foreground">{title}</span> is in the booth. Come
-                back in about {etaMinutes} minutes.
+                <span className="font-bold text-foreground">{title}</span> is in the booth. Usually{" "}
+                {etaMinutes} minutes — sometimes longer. We'll tell you the moment it lands.
               </>
             ) : (
-              <>Your track is in the booth. Come back in about {etaMinutes} minutes.</>
+              <>Your track is in the booth. Usually {etaMinutes} minutes — sometimes longer.</>
             )}
           </DialogDescription>
         </DialogHeader>
@@ -103,7 +103,7 @@ export function CookingDialog({
         <ul className="mt-3 grid gap-2 text-sm text-muted-foreground">
           <li className="flex items-start gap-2">
             <Timer className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-            Good things take time — we render a full-length track, not a 20 second demo.
+            Full-length render, not a 20 second demo — so it can run past the estimate.
           </li>
           <li className="flex items-start gap-2">
             <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" />

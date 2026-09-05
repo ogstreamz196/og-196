@@ -39,17 +39,19 @@ function toUiStatus(raw: string | null | undefined): UiStatus {
   }
 }
 
-/** Typical end-to-end render time, used for the countdown. */
+/** Typical end-to-end render time. Past this we stop guessing and show elapsed time. */
 const EXPECTED_SECONDS = 300;
 
 function etaLabel(song: RecentSong, now: number) {
   const started = new Date(song.generation_started_at ?? song.created_at).getTime();
-  if (!Number.isFinite(started)) return "ETA —";
-  const remaining = Math.round((started + EXPECTED_SECONDS * 1000 - now) / 1000);
-  if (remaining <= 0) return "Any moment now";
-  const m = Math.floor(remaining / 60);
-  const s = remaining % 60;
-  return `ETA ${m}:${String(s).padStart(2, "0")}`;
+  if (!Number.isFinite(started)) return "Rendering";
+  const elapsed = Math.max(0, Math.round((now - started) / 1000));
+  const remaining = EXPECTED_SECONDS - elapsed;
+  const clock = (t: number) => `${Math.floor(t / 60)}:${String(t % 60).padStart(2, "0")}`;
+  // Honest: no countdown to zero — after the usual window we just report how
+  // long it has been running, because renders often need a few more minutes.
+  if (remaining <= 0) return `Still rendering · ${clock(elapsed)}`;
+  return `Usually ~${clock(remaining)} more`;
 }
 
 /** Human name for the uploaded beat this track was sung over. */

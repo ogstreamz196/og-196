@@ -53,8 +53,10 @@ function CommunityTrackRowImpl({
     songId: song.id,
     hasAudio,
     ready: isReady,
-    // Full playback in the global library — no preview cap.
+    // Full playback in the global library — no preview cap, and the signed URL
+    // points at the complete master rather than the 60s sample.
     sampleSeconds: Number.MAX_SAFE_INTEGER,
+    mode: owned ? "preview" : "full",
   });
 
   const [duration, setDuration] = useState<number>(song.duration_seconds ?? 0);
