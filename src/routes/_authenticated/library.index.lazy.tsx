@@ -507,6 +507,18 @@ function LibraryPage() {
   // The song we're watching in realtime while its audio renders.
   const [trackedSongId, setTrackedSongId] = useState<string | null>(null);
   const [freshTrack, setFreshTrack] = useState<Song | null>(null);
+  // Finished-track player popup: takes over from the wizard/cooking popup.
+  const [masterpieceOpen, setMasterpieceOpen] = useState(false);
+  const masterpieceShownRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!freshTrack) return;
+    if (masterpieceShownRef.current === freshTrack.id) return;
+    masterpieceShownRef.current = freshTrack.id;
+    setCooking((c) => ({ ...c, open: false }));
+    setWizardOpen(false);
+    setMasterpieceOpen(true);
+  }, [freshTrack]);
+
 
   const totalCost = lyricsCost + previewCost;
   const canRunPipeline =
