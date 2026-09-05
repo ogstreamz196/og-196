@@ -316,7 +316,7 @@ export function CreateNowWizard({
             {step === 2 && "A short description, theme or story."}
             {step === 3 && "Stack as many styles as you like, then pick the voice."}
             {step === 4 &&
-              "English is always part of the remix. Flip vocals only to sing over your own beat."}
+              "Pick the language it's sung in. Flip vocals only to sing over your own beat."}
           </DialogDescription>
 
         </DialogHeader>
