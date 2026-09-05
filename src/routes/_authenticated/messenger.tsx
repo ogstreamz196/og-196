@@ -23,6 +23,12 @@ import {
 } from "@/hooks/use-messenger-mode";
 import { useFoulMouth } from "@/hooks/use-foul-mouth";
 import { useFillViewport } from "@/hooks/use-fill-viewport";
+import { useAuth } from "@/hooks/use-auth";
+import {
+  MessengerWelcomeDialog,
+  markGreeted,
+  shouldGreet,
+} from "@/components/messenger/MessengerWelcomeDialog";
 
 
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
@@ -238,6 +244,19 @@ function MessengerPage() {
       </div>
       </div>
 
+
+      <MessengerWelcomeDialog
+        open={greetOpen}
+        displayName={
+          (user?.user_metadata?.display_name as string | undefined) ??
+          (user?.user_metadata?.username as string | undefined) ??
+          null
+        }
+        currentMode={mode}
+        pending={setMode.isPending}
+        onChoose={handleGreetChoice}
+        onDismiss={handleGreetDismiss}
+      />
 
       <AlertDialog open={pendingMode !== null} onOpenChange={(o) => !o && setPendingMode(null)}>
         <AlertDialogContent>
