@@ -117,7 +117,7 @@ function MessengerPage() {
 
         {/* Header — adapts to current mode */}
         <header
-          className={`relative grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 border-b border-white/10 px-3 py-2 backdrop-blur-xl transition-colors sm:gap-4 sm:px-7 sm:py-5 ${
+          className={`relative flex flex-wrap items-center gap-x-2 gap-y-2 border-b border-white/10 px-3 py-2.5 backdrop-blur-xl transition-colors sm:flex-nowrap sm:gap-4 sm:px-7 sm:py-5 ${
             isCommunity
               ? "bg-gradient-to-r from-cyan-500/20 via-sky-500/10 to-fuchsia-500/15"
               : "bg-gradient-to-r from-primary/15 via-card/90 to-card/80"
@@ -133,20 +133,20 @@ function MessengerPage() {
               }`}
             />
             {isCommunity ? (
-              <span className="relative grid h-9 w-9 place-items-center rounded-full bg-cyan-500/25 ring-1 ring-cyan-400/60 ring-offset-1 ring-offset-card sm:h-16 sm:w-16 sm:ring-2 sm:ring-offset-2">
+              <span className="relative grid h-10 w-10 place-items-center rounded-full bg-cyan-500/25 ring-1 ring-cyan-400/60 ring-offset-1 ring-offset-card sm:h-16 sm:w-16 sm:ring-2 sm:ring-offset-2">
                 <Users className="h-5 w-5 text-cyan-100 sm:h-7 sm:w-7" />
               </span>
             ) : (
               <img
                 src={ogBotAsset.url}
                 alt="OG Bot"
-                className="relative h-9 w-9 rounded-full object-cover ring-1 ring-primary/60 ring-offset-1 ring-offset-card sm:h-16 sm:w-16 sm:ring-2 sm:ring-offset-2"
+                className="relative h-10 w-10 rounded-full object-cover ring-1 ring-primary/60 ring-offset-1 ring-offset-card sm:h-16 sm:w-16 sm:ring-2 sm:ring-offset-2"
               />
             )}
             <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-card bg-emerald-400 shadow-[0_0_10px_-1px_oklch(0.78_0.18_155)] sm:h-3.5 sm:w-3.5" />
           </div>
 
-          <div className="min-w-0 space-y-0.5 sm:space-y-1">
+          <div className="min-w-0 flex-1 basis-0 space-y-0.5 sm:space-y-1">
             <div
               className={`hidden max-w-full items-center gap-1.5 truncate rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] sm:inline-flex sm:text-[10px] sm:tracking-[0.22em] ${
                 isCommunity
@@ -158,7 +158,7 @@ function MessengerPage() {
                 {isCommunity ? "OG Battle Zone · everyone vs OG Bot" : "OG Bot Loner Mode · private"}
               </span>
             </div>
-            <h1 className="truncate font-display text-base font-black leading-tight sm:text-3xl">
+            <h1 className="truncate font-display text-sm font-black leading-tight min-[420px]:text-base sm:text-3xl">
               {isCommunity ? "OG Battle Zone" : "OG Bot Loner Mode"}
             </h1>
 
@@ -184,10 +184,10 @@ function MessengerPage() {
             aria-checked={isCommunity}
             aria-label={
               isCommunity
-                ? "Start Private Mode (leave the OG Battle Zone)"
-                : "Leave Private Mode (enter the OG Battle Zone)"
+                ? "Go Private (leave the OG Battle Zone)"
+                : "Go to Battle Zone (leave Private Mode)"
             }
-            className={`group flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-2.5 text-[9px] font-black uppercase tracking-normal transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 sm:h-auto sm:gap-2 sm:px-3 sm:py-2 sm:text-xs sm:tracking-[0.18em] ${
+            className={`group order-3 flex h-10 w-full shrink-0 items-center justify-center gap-1.5 rounded-full border px-3 text-[10px] font-black uppercase tracking-[0.12em] transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 sm:order-none sm:h-auto sm:w-auto sm:gap-2 sm:px-3 sm:py-2 sm:text-xs sm:tracking-[0.18em] ${
               isCommunity
                 ? "border-cyan-400/50 bg-cyan-500/15 text-cyan-100 shadow-[0_0_24px_-6px_rgba(34,211,238,0.6)] hover:bg-cyan-500/25"
                 : "border-primary/40 bg-primary/10 text-primary shadow-[0_0_24px_-6px_oklch(0.7_0.2_25/0.6)] hover:bg-primary/20"
@@ -198,8 +198,9 @@ function MessengerPage() {
             ) : (
               <MessageCircle className="h-4 w-4 text-primary" />
             )}
-             <span className="max-w-[74px] whitespace-normal text-center leading-tight sm:max-w-none sm:whitespace-pre-line">{setMode.isPending ? "Saving…" : isCommunity ? "Go Private" : "Go Global"}</span>
-
+            <span className="whitespace-nowrap leading-tight">
+              {setMode.isPending ? "Saving…" : isCommunity ? "Go Private" : "Go to Battle Zone"}
+            </span>
           </button>
         </header>
 
