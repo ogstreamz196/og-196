@@ -615,11 +615,13 @@ function LibraryPage() {
   async function createSong(override?: CreateOverrides) {
     if (pipelineLockRef.current) return;
     if (!user) return;
+    const runCost = costForMinutes(override?.targetMinutes ?? targetMinutes);
     if (override) {
-      if (balance < totalCost) {
-        toast.error(`Need ${totalCost} coins to create a song`);
+      if (balance < runCost) {
+        toast.error(`Need ${runCost} coins to create a song`);
         return;
       }
+
       setLastOverrides(override);
     } else if (!canRunPipeline) {
       return;
