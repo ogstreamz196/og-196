@@ -77,8 +77,10 @@ const GENDERS = ["Female vocal", "Male vocal", "Duo", "Any voice"];
 
 const TOTAL_STEPS = 4;
 
-/** Track length options — a 3 minute floor is enforced backend-side. */
-export const LENGTH_OPTIONS = [3, 4, 5, 6, 8];
+/** Track length — 3 minutes included, then 1 coin per extra minute. */
+export const MIN_LENGTH = 3;
+export const MAX_LENGTH = 8;
+export const LENGTH_OPTIONS = [3, 4, 5, 6, 7, 8];
 
 /** Curated styles first, then everything else we already support. */
 const STYLES: string[] = (() => {
