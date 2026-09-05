@@ -611,6 +611,12 @@ async function runChatAI(
     user: userCtx,
     songIntent: detectSongIntent(userText),
   });
+  const history = ((historyRes.data ?? []) as { role: string; content: string }[])
+    .reverse()
+    .map((m) => ({
+      role: m.role === "assistant" ? ("assistant" as const) : ("user" as const),
+      content: m.content,
+    }));
   const conversation = [
     { role: "system" as const, content: system },
     ...history,
@@ -632,13 +638,6 @@ async function runChatAI(
           : conversation,
       }),
     });
-
-  const history = ((historyRes.data ?? []) as { role: string; content: string }[])
-    .reverse()
-    .map((m) => ({
-      role: m.role === "assistant" ? ("assistant" as const) : ("user" as const),
-      content: m.content,
-    }));
 
   // Save user message
   await admin.from("og_messages").insert({
