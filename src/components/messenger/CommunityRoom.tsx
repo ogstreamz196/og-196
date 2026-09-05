@@ -66,6 +66,14 @@ export function CommunityRoom() {
     queryFn: () => tallyFn(),
     staleTime: 30_000,
   });
+  const boardFn = useServerFn(getBattleLeaderboard);
+  const [showBoard, setShowBoard] = useState(false);
+  const { data: board, isLoading: boardLoading } = useQuery<{ rows: BattleLeaderboardRow[] }>({
+    queryKey: ["battle-leaderboard"],
+    queryFn: () => boardFn(),
+    enabled: showBoard,
+    staleTime: 30_000,
+  });
   const [lastEarned, setLastEarned] = useState<number | null>(null);
   const pendingCoins = ((tally?.pendingTenths ?? 0) / 10).toFixed(2);
   const messages: CommunityMessage[] = useMemo(() => data?.messages ?? [], [data?.messages]);
