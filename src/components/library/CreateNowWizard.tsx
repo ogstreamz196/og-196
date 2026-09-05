@@ -574,7 +574,8 @@ export function CreateNowWizard({
 
               <div className="space-y-3">
                 <p className="text-xs font-semibold text-primary">
-                  English is always included in the remix.
+                  Pick one or more languages — it's sung in exactly what you pick. Nothing picked
+                  means English.
                 </p>
                 <div
                   role="group"
