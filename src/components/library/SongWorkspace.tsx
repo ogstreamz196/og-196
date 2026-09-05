@@ -418,6 +418,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
           lyrics,
           title: title.trim() || null,
           style: styleValue || song.style || null,
+          language: languageValue,
           vocal: vocal && vocal !== "Any voice" ? vocal : null,
           vocals_only: vocalsOnly,
           beat_path: song.beat_path ?? null,
