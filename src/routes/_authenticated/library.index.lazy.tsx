@@ -161,7 +161,9 @@ function LibraryPage() {
   // Track length is chosen in step 1 of the Create now wizard (3 min floor).
   const [targetMinutes, setTargetMinutes] = useState(MIN_TRACK_MINUTES);
   const targetDurationSec = Math.max(MIN_TRACK_MINUTES, targetMinutes) * 60;
-  const expectedRange = `${targetMinutes}:00–${targetMinutes}:30+`;
+  const extraMinutes = Math.max(0, targetMinutes - MIN_TRACK_MINUTES);
+  /** 3 minutes are included in the base price; each extra minute costs 1 coin. */
+  const audioCost = previewCost + extraMinutes;
   // Actual estimate returned by the lyrics engine once a track is generated.
   const [actualDurationLabel, setActualDurationLabel] = useState<string | null>(null);
 
@@ -411,8 +413,8 @@ function LibraryPage() {
       toast.error("Generate lyrics first");
       return;
     }
-    if (balance < previewCost) {
-      toast.error(`Need ${previewCost} coins to generate a song`);
+    if (balance < audioCost) {
+      toast.error(`Need ${audioCost} coins to generate a song`);
       return;
     }
     generateLockRef.current = true;
@@ -466,7 +468,7 @@ function LibraryPage() {
         toast.info(genData.error || "Your current generations need to finish first");
         return;
       }
-      toast.success(`Generating your song · -${previewCost} coins`);
+      toast.success(`Generating your song · -${audioCost} coins`);
       navigate({ to: "/library/$songId", params: { songId: row.id } });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not generate song");
@@ -523,7 +525,7 @@ function LibraryPage() {
   }, [freshTrack]);
 
 
-  const totalCost = lyricsCost + previewCost;
+  const totalCost = lyricsCost + audioCost;
   const canRunPipeline =
     !!user && canGenerateLyrics && balance >= totalCost && pipeline.stage === "idle";
 
@@ -1143,7 +1145,7 @@ function LibraryPage() {
 
           {/* Track length now lives in step 1 of the wizard — keep this clean. */}
           <p className="text-center text-[11px] font-semibold text-muted-foreground">
-            -{totalCost} coins · {expectedRange}
+            -{totalCost} coins · {targetMinutes} min
           </p>
 
           {/* Hazard robotic CREATE button — a big 3D push-button on a base plate */}
