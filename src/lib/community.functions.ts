@@ -76,6 +76,57 @@ HARD LIMITS — never cross:
 - Nothing sexual about real people. Nothing illegal. No content about minors.
 `.trim();
 
+/**
+ * Judge how hard a user's roast landed. Returns tenths of an OG Coin (0–10),
+ * i.e. a maximum of 1.00 coin per message. The cap is deliberately never
+ * surfaced to the user.
+ */
+async function scoreRoast(
+  apiKey: string,
+  content: string,
+  botReply: string | null,
+): Promise<number> {
+  try {
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({
+        model: "google/gemini-3.7-flash",
+        temperature: 0.2,
+        max_tokens: 8,
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are the judge of a roast battle. Rate how good the CHALLENGER's roast is " +
+              "on an integer scale 0-10. 0 = not a roast at all / empty / spam. " +
+              "1-3 = weak or generic. 4-6 = decent jab. 7-8 = genuinely funny and cutting. " +
+              "9-10 = elite, original, devastating wordplay. Be a strict judge: most " +
+              "messages score 2-5. Reply with ONLY the integer, nothing else.",
+          },
+          {
+            role: "user",
+            content:
+              `CHALLENGER: ${content}` +
+              (botReply ? `\n\nOG BOT CLAPBACK: ${botReply}` : ""),
+          },
+        ],
+      }),
+      signal: AbortSignal.timeout(15_000),
+    });
+    if (!res.ok) return 0;
+    const json = (await res.json().catch(() => ({}))) as {
+      choices?: { message?: { content?: string } }[];
+    };
+    const raw = (json.choices?.[0]?.message?.content ?? "").match(/\d+/)?.[0];
+    const n = Number(raw);
+    if (!Number.isFinite(n)) return 0;
+    return Math.max(0, Math.min(10, Math.round(n)));
+  } catch {
+    return 0;
+  }
+}
+
 
 /** Post a user message to the community + trigger a short OG Bot reply. */
 export const postCommunityMessage = createServerFn({ method: "POST" })
