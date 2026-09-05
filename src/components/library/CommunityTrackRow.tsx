@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { useSongAudio } from "@/hooks/use-song-audio";
 import { useProfile } from "@/hooks/use-profile";
 import { supabase } from "@/integrations/supabase/client";
+import { downloadFile } from "@/lib/download-file";
 import { UnlockConfirmDialog } from "@/components/library/UnlockConfirmDialog";
 import { cn } from "@/lib/utils";
 import type { Song } from "@/components/SongCard";
@@ -94,7 +95,7 @@ function CommunityTrackRowImpl({
       await qc.invalidateQueries({ queryKey: ["profile"] });
 
       const { data, error } = await supabase.functions.invoke("song-url", {
-        body: { song_id: song.id, mode: "full", purpose: "download" },
+        body: { song_id: song.id, mode: "full", purpose: "download", filename: `${title}.mp3` },
       });
       if (error) {
         throw new Error(
@@ -103,12 +104,7 @@ function CommunityTrackRowImpl({
             "Download failed",
         );
       }
-      const a = document.createElement("a");
-      a.href = data.url as string;
-      a.download = `${title}.mp3`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+      await downloadFile(data.url as string, `${title}.mp3`);
       setUnlockOpen(false);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Download failed");

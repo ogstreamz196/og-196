@@ -37,6 +37,9 @@ Deno.serve(async (req) => {
   const song_id: string | undefined = body?.song_id;
   const mode: "preview" | "full" = body?.mode === "full" ? "full" : "preview";
   const purpose: "stream" | "download" = body?.purpose === "stream" ? "stream" : "download";
+  // Only attach a Content-Disposition when the caller explicitly asked to
+  // download; the default "download" purpose above exists for unlock checks.
+  const forceAttachment = body?.purpose === "download";
   if (!song_id) {
     log("missing_song_id", { user_id: user.id, mode });
     return jsonResponse({ error: "Missing song_id", code: "missing_song_id" }, 400);
@@ -127,8 +130,13 @@ Deno.serve(async (req) => {
   }
 
   const ttl = mode === "full" ? 60 * 5 : 60 * 15;
+  // For downloads, ask storage for a Content-Disposition: attachment link so the
+  // browser saves the file instead of navigating to an inline audio player.
+  const rawName = typeof body?.filename === "string" ? body.filename : "";
+  const safeName = rawName.replace(/[^\w.\- ]+/g, "").slice(0, 120) || "track.mp3";
+  const filename = safeName.toLowerCase().endsWith(".mp3") ? safeName : `${safeName}.mp3`;
   const { data, error } = await admin.storage.from("song-files")
-    .createSignedUrl(path, ttl);
+    .createSignedUrl(path, ttl, forceAttachment ? { download: filename } : undefined);
   if (error) {
     log("sign_failed", { user_id: user.id, song_id, mode, error: error.message });
     return jsonResponse({ error: error.message, code: "sign_failed" }, 500);

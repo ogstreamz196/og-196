@@ -28,6 +28,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
+import { downloadFile } from "@/lib/download-file";
 import { invokeError } from "@/lib/invoke-error";
 import { deleteQueuedSong } from "@/lib/song-queue-actions";
 import { useSettings } from "@/hooks/use-settings";
@@ -432,18 +433,18 @@ function JobDetailsDrawer({
       let url = fullUrl;
       if (!url) {
         const { data, error } = await supabase.functions.invoke("song-url", {
-          body: { song_id: song.id, mode: "full" },
+          body: {
+            song_id: song.id,
+            mode: "full",
+            purpose: "download",
+            filename: `${song.title || "song"}.mp3`,
+          },
         });
         if (error) throw new Error(invokeError(error, "Download failed"));
         url = data.url as string;
         setFullUrl(url);
       }
-      const a = document.createElement("a");
-      a.href = url!;
-      a.download = `${song.title || "song"}.mp3`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+      await downloadFile(url!, `${song.title || "song"}.mp3`);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Download failed");
     } finally {

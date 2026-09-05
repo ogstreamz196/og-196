@@ -79,6 +79,7 @@ import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 
 
 import { FreshTrackCard } from "@/components/library/FreshTrackCard";
+import { MasterpieceDialog } from "@/components/library/MasterpieceDialog";
 import { StudioMeter, StudioLed } from "@/components/library/StudioConsole";
 import { CookingDialog } from "@/components/library/CookingDialog";
 import { BeatLibrary, type SavedBeat } from "@/components/library/BeatLibrary";
@@ -507,6 +508,18 @@ function LibraryPage() {
   // The song we're watching in realtime while its audio renders.
   const [trackedSongId, setTrackedSongId] = useState<string | null>(null);
   const [freshTrack, setFreshTrack] = useState<Song | null>(null);
+  // Finished-track player popup: takes over from the wizard/cooking popup.
+  const [masterpieceOpen, setMasterpieceOpen] = useState(false);
+  const masterpieceShownRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!freshTrack) return;
+    if (masterpieceShownRef.current === freshTrack.id) return;
+    masterpieceShownRef.current = freshTrack.id;
+    setCooking((c) => ({ ...c, open: false }));
+    setWizardOpen(false);
+    setMasterpieceOpen(true);
+  }, [freshTrack]);
+
 
   const totalCost = lyricsCost + previewCost;
   const canRunPipeline =
@@ -1404,8 +1417,19 @@ function LibraryPage() {
         </section>
       )}
 
-      {/* Finished track — auto-plays the preview and unlocks the full version inline */}
-      {freshTrack && !pipelineActive && (
+      {/* Masterpiece player — replaces the wizard popup the moment a track lands */}
+      <MasterpieceDialog
+        open={masterpieceOpen && !pipelineActive}
+        onOpenChange={setMasterpieceOpen}
+        song={freshTrack}
+        sampleSeconds={sampleSeconds}
+        unlockCost={unlockCost}
+        balance={profile?.coin_balance ?? 0}
+        autoUnlockPrompt={autoUnlockPrompt}
+      />
+
+      {/* Finished track — stays on the page after the popup is closed */}
+      {freshTrack && !pipelineActive && !masterpieceOpen && (
         <FreshTrackCard
           key={freshTrack.id}
           song={freshTrack}

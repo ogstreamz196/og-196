@@ -8,6 +8,7 @@ import {
 
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { downloadFile } from "@/lib/download-file";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -410,13 +411,13 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
         onSaved?.();
       }
       const { data: urlData, error: urlErr } = await supabase.functions.invoke("song-url", {
-        body: { song_id: song.id, mode: "full" },
+        body: { song_id: song.id, mode: "full", purpose: "download" },
       });
       if (urlErr || !urlData?.url) {
         toast.error("Unlocked, but download link failed — try again in a moment");
         return;
       }
-      window.open(urlData.url, "_blank", "noopener");
+      await downloadFile(urlData.url as string, `${song.title || "song"}.mp3`);
       setUnlockDialogOpen(false);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not unlock");
