@@ -90,7 +90,7 @@ export const chatOgBot = createServerFn({ method: "POST" })
     const rawProfile = profileRes.data;
     if (!rawProfile) throw new Error("Profile not found");
     const { maskDevIdentity } = await import("@/lib/dev-identity");
-    const profile = maskDevIdentity(rawProfile)!;
+    const profile = maskDevIdentity(rawProfile) ?? rawProfile;
     if ((profile.coin_balance ?? 0) <= 0) {
       throw new Error(
         "Out of OG coins. Top up from Buy OG Coins or grab VIP to keep chatting.",
@@ -231,32 +231,47 @@ export const chatOgBot = createServerFn({ method: "POST" })
 
     // 4. Call the AI gateway.
     try {
-      const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: "google/gemini-3.7-flash",
-          temperature: data.mode === "og" && foulMouth ? 0.9 : data.mode === "og" ? 0.75 : 0.6,
-          messages: [
-            { role: "system", content: system },
-            ...outgoing.slice(0, -1),
-            // Last user message: if an image attachment was sent, build a
-            // multimodal content array so Gemini can actually see the image.
-            data.attachmentDataUrl && outgoing.at(-1)?.role === "user"
-              ? {
-                  role: "user" as const,
-                  content: [
-                    { type: "text", text: outgoing.at(-1)!.content || "What's in this image?" },
-                    { type: "image_url", image_url: { url: data.attachmentDataUrl } },
-                  ],
-                }
-              : outgoing.at(-1)!,
-          ],
-        }),
-      });
+      const lastOutgoing = outgoing.at(-1);
+      if (!lastOutgoing) throw new Error("Empty conversation");
+      const conversation = [
+        { role: "system" as const, content: system },
+        ...outgoing.slice(0, -1),
+        // Last user message: if an image attachment was sent, build a
+        // multimodal content array so Gemini can actually see the image.
+        data.attachmentDataUrl && lastOutgoing.role === "user"
+          ? {
+              role: "user" as const,
+              content: [
+                { type: "text" as const, text: lastOutgoing.content || "What's in this image?" },
+                { type: "image_url" as const, image_url: { url: data.attachmentDataUrl } },
+              ],
+            }
+          : lastOutgoing,
+      ];
+      const requestReply = (extraInstruction?: string) =>
+        fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model: "google/gemini-3.1-pro-preview",
+            temperature: data.mode === "og" && foulMouth ? 0.9 : data.mode === "og" ? 0.75 : 0.7,
+            max_tokens: 1_600,
+            messages: extraInstruction
+              ? [
+                  ...conversation,
+                  {
+                    role: "system" as const,
+                    content: extraInstruction,
+                  },
+                ]
+              : conversation,
+          }),
+        });
+
+      let res = await requestReply();
 
       if (!res.ok) {
         const text = await res.text().catch(() => "");
@@ -266,10 +281,30 @@ export const chatOgBot = createServerFn({ method: "POST" })
         throw new Error(`OG Bot couldn't respond right now (HTTP ${res.status})`);
       }
 
-      const json = (await res.json().catch(() => ({}))) as {
+      let json = (await res.json().catch(() => ({}))) as {
         choices?: { message?: { content?: string } }[];
       };
-      const reply = (json.choices?.[0]?.message?.content ?? "").trim() || "…";
+      let reply = (json.choices?.[0]?.message?.content ?? "").trim();
+
+      // A successful request can still produce an unhelpfully tiny answer.
+      // Give the model one quality-repair pass without charging another coin.
+      const wordCount = reply.split(/\s+/).filter(Boolean).length;
+      if (!reply || wordCount < 18) {
+        const expanded = await requestReply(
+          "Your draft answer was too short. Answer the user's request again with at least 3 substantive sentences, useful detail, and natural OG Bot personality. Do not mention this correction.",
+        );
+        if (expanded.ok) {
+          json = (await expanded.json().catch(() => ({}))) as {
+            choices?: { message?: { content?: string } }[];
+          };
+          const expandedReply = (json.choices?.[0]?.message?.content ?? "").trim();
+          if (expandedReply) reply = expandedReply;
+        }
+      }
+
+      if (!reply) {
+        throw new Error("OG Bot returned an empty answer. Try again.");
+      }
 
       return {
         reply,
