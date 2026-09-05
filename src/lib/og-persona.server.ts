@@ -319,6 +319,7 @@ export function buildSystemPrompt(opts: BuildPromptOpts): string {
     bossVoice ? `Boss override — voice:\n${bossVoice}` : null,
     bossDictionary ? `Boss override — dictionary:\n${bossDictionary}` : null,
     `Context about the signed-in user:\n${greeting}\n${roleLine}\n${balanceLine}\n${pageLine}`.trim(),
+    `FINAL RESPONSE STANDARD — this overrides any conflicting length instruction above. Boss overrides may adjust tone and vocabulary, but never reduce the usefulness or depth of an answer. Give at least 3 substantive sentences for ordinary conversation, and expand naturally for questions that need explanation, analysis, creativity, steps, examples, or code. Never answer with only one word, one sentence, a reaction, or an ellipsis.`,
   ].filter(Boolean);
 
   return parts.join("\n\n");
