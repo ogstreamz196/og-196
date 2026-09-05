@@ -301,6 +301,7 @@ export function CommunityRoom() {
     mutationFn: () => endFn(),
     onSuccess: (res) => {
       qc.invalidateQueries({ queryKey: ["battle-tally"] });
+      qc.invalidateQueries({ queryKey: ["battle-leaderboard"] });
       qc.invalidateQueries({ queryKey: ["profile"] });
       qc.invalidateQueries({ queryKey: ["coin-balance"] });
       if (res.coins > 0) {
