@@ -128,7 +128,7 @@ export const Route = createLazyFileRoute("/_authenticated/library/")({
 function LibraryPage() {
   const { user } = useAuth();
   const dev = useDevMode();
-  const { isAdmin } = useRole();
+  const { isAdmin, isBoss } = useRole();
   const { data: profile } = useProfile();
   const { data: settings } = useSettings();
   const navigate = useNavigate();

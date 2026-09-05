@@ -225,6 +225,7 @@ function CommunityTrackRowImpl({
           )}
         </div>
       ) : (
+        <div className="flex shrink-0 items-center gap-1.5">
         <button
           type="button"
           onClick={() => setUnlockOpen(true)}
@@ -239,6 +240,17 @@ function CommunityTrackRowImpl({
           <span>{COMMUNITY_DOWNLOAD_COST}</span>
           <span className="sr-only">OG coins</span>
         </button>
+        {onDelete && (
+          <button
+            type="button"
+            onClick={() => onDelete(song)}
+            aria-label={`Delete ${title}`}
+            className="grid h-10 w-10 place-items-center rounded-full border border-destructive/40 bg-destructive/10 text-destructive transition-colors hover:bg-destructive/20"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        )}
+        </div>
       )}
 
       <audio
