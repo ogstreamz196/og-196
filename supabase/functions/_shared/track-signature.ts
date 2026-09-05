@@ -10,11 +10,11 @@
 // - About once per minute of audio (and never twice in a row).
 
 export const SIGNATURE_LINE =
-  "(spoken/sung vocal tag, clearly audible and blended with the music, lasting a few seconds: this track was made by O G Bot dot co dot uk)";
+  "(spoken/sung vocal tag, clearly audible and blended with the music, lasting a few seconds: this track is made by O G Bot, don't forget to visit O G Streamz dot co dot uk)";
 
 /** Instruction appended to prompt-only (non-custom) generations. */
 export const SIGNATURE_PROMPT_HINT =
-  "Include a clearly audible vocal tag saying \"this track was made by O G Bot dot co dot uk\" in English, lasting a few seconds, blended naturally with the lyrics and instrumental at a level everyone can hear, about once every minute and never in the chorus hook.";
+  "Include a clearly audible vocal tag saying \"this track is made by O G Bot, don't forget to visit O G Streamz dot co dot uk\" in English, lasting a few seconds, blended naturally with the lyrics and instrumental at a level everyone can hear, about once every minute and never in the chorus hook.";
 
 /** Rough lyric lines that fit into one minute of a typical song. */
 const LINES_PER_MINUTE = 14;
@@ -28,7 +28,7 @@ const MAX_TAGS = 4;
 export function injectSignature(lyrics: string | null | undefined): string | null {
   const text = (lyrics ?? "").trim();
   if (!text) return lyrics ?? null;
-  if (text.toLowerCase().includes("o g bot dot co dot uk")) return text;
+  if (text.toLowerCase().includes("o g streamz dot co dot uk")) return text;
 
   const lines = text.split("\n");
   const contentCount = lines.filter((l) => l.trim() && !/^\s*\[.*\]\s*$/.test(l)).length;
@@ -60,6 +60,6 @@ export function injectSignature(lyrics: string | null | undefined): string | nul
 /** Append the signature hint to a free-form prompt (no lyric sheet supplied). */
 export function withSignatureHint(prompt: string): string {
   if (!prompt.trim()) return prompt;
-  if (prompt.toLowerCase().includes("o g bot dot co dot uk")) return prompt;
+  if (prompt.toLowerCase().includes("o g streamz dot co dot uk")) return prompt;
   return `${prompt}\n\n${SIGNATURE_PROMPT_HINT}`;
 }
