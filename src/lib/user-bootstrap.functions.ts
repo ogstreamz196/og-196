@@ -41,15 +41,20 @@ export const ensureCurrentUserBootstrap = createServerFn({ method: "POST" })
           { device_id: data.deviceId, user_id: userId },
           { onConflict: "device_id,user_id" },
         );
-      const { data: deviceRows, error: deviceError } = await supabaseAdmin
-        .from("device_accounts")
-        .select("user_id")
-        .eq("device_id", data.deviceId)
-        .order("created_at", { ascending: true });
-      if (deviceError) throw deviceError;
-      withinDeviceAllowance = (deviceRows ?? [])
-        .slice(0, MAX_ACCOUNTS_PER_DEVICE)
-        .some((row) => row.user_id === userId);
+      const { isDeviceWhitelisted } = await import("@/lib/device-limit.functions");
+      if (await isDeviceWhitelisted(supabaseAdmin, data.deviceId)) {
+        withinDeviceAllowance = true;
+      } else {
+        const { data: deviceRows, error: deviceError } = await supabaseAdmin
+          .from("device_accounts")
+          .select("user_id")
+          .eq("device_id", data.deviceId)
+          .order("created_at", { ascending: true });
+        if (deviceError) throw deviceError;
+        withinDeviceAllowance = (deviceRows ?? [])
+          .slice(0, MAX_ACCOUNTS_PER_DEVICE)
+          .some((row) => row.user_id === userId);
+      }
     }
 
     const { data: existingProfile, error: profileError } = await supabaseAdmin
