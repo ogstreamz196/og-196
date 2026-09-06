@@ -223,6 +223,27 @@ export type Database = {
         }
         Relationships: []
       }
+      device_accounts: {
+        Row: {
+          created_at: string
+          device_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          device_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          device_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       og_bot_remote_tokens: {
         Row: {
           created_at: string
