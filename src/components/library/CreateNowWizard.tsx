@@ -328,13 +328,13 @@ export function CreateNowWizard({
           className="min-h-[168px] animate-in fade-in slide-in-from-right-4 py-1 duration-300"
         >
           {step === 1 && (
-            <div className="space-y-4">
-              <div className="space-y-1.5">
+            <div className="space-y-5">
+              <div className="space-y-2">
                 <Label
                   htmlFor="wiz-title"
-                  className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground"
+                  className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                 >
-                  Song title
+                  Title of song
                 </Label>
                 <Input
                   id="wiz-title"
@@ -344,16 +344,16 @@ export function CreateNowWizard({
                   onChange={(e) => setTitle(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && next()}
                   placeholder="e.g. Late night drive"
-                  className="h-12 rounded-xl border-2 border-primary/30 bg-background/80 text-base font-bold sm:h-13"
+                  className="h-11 rounded-lg border border-border bg-background text-base font-semibold"
                 />
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <Label
                   htmlFor="wiz-subject"
-                  className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground"
+                  className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                 >
-                  Who is it about?
+                  Name of person
                 </Label>
                 <Input
                   id="wiz-subject"
@@ -362,29 +362,50 @@ export function CreateNowWizard({
                   onChange={(e) => setSubjectName(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && next()}
                   placeholder="e.g. Aaliyah, the crew, or yourself"
-                  className="h-12 rounded-xl border-2 border-primary/30 bg-background/80 text-base font-bold sm:h-13"
+                  className="h-11 rounded-lg border border-border bg-background text-base font-semibold"
                 />
               </div>
 
               <div className="space-y-2">
-                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
-                  Track length
+                <Label
+                  htmlFor="wiz-desc"
+                  className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                >
+                  Short description
+                </Label>
+                <Textarea
+                  id="wiz-desc"
+                  rows={4}
+                  value={description}
+                  maxLength={2000}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Vibes, memories, inside jokes, the moment you want in the lyrics…"
+                  className="min-h-[110px] resize-y rounded-lg border border-border bg-background text-sm leading-relaxed"
+                />
+                <p className="text-[11px] tabular-nums text-muted-foreground">
+                  {description.trim().length}/2000
                 </p>
-                <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-card/60 p-2">
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Length of track
+                </p>
+                <div className="flex items-center gap-3 rounded-lg border border-border bg-card/40 p-2">
                   <button
                     type="button"
                     aria-label="Shorter track"
                     disabled={targetMinutes <= MIN_LENGTH}
                     onClick={() => setTargetMinutes((m) => Math.max(MIN_LENGTH, m - 1))}
-                    className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-white/10 bg-background/70 text-xl font-black transition hover:border-primary/50 disabled:opacity-40"
+                    className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-border bg-background text-lg font-bold transition hover:border-primary/50 disabled:opacity-40"
                   >
                     −
                   </button>
                   <div className="min-w-0 flex-1 text-center">
-                    <p className="text-2xl font-black tabular-nums leading-none">
+                    <p className="text-xl font-bold tabular-nums leading-none">
                       {targetMinutes} min
                     </p>
-                    <p className="mt-1 text-[11px] font-semibold text-muted-foreground">
+                    <p className="mt-1 text-[11px] font-medium text-muted-foreground">
                       {targetMinutes > MIN_LENGTH
                         ? `+${targetMinutes - MIN_LENGTH} coin${targetMinutes - MIN_LENGTH === 1 ? "" : "s"}`
                         : "Included"}
@@ -395,34 +416,13 @@ export function CreateNowWizard({
                     aria-label="Longer track (1 extra coin)"
                     disabled={targetMinutes >= MAX_LENGTH}
                     onClick={() => setTargetMinutes((m) => Math.min(MAX_LENGTH, m + 1))}
-                    className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-primary/40 bg-primary/15 text-xl font-black text-primary transition hover:bg-primary/25 disabled:opacity-40"
+                    className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-primary/40 bg-primary/15 text-lg font-bold text-primary transition hover:bg-primary/25 disabled:opacity-40"
                   >
                     +
                   </button>
                 </div>
                 <p className="text-[11px] text-muted-foreground">
                   Each extra minute costs 1 coin.
-                </p>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label
-                  htmlFor="wiz-desc"
-                  className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground"
-                >
-                  What will this track be about?
-                </Label>
-                <Textarea
-                  id="wiz-desc"
-                  rows={5}
-                  value={description}
-                  maxLength={2000}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Vibes, memories, inside jokes, the moment you want in the lyrics…"
-                  className="min-h-[130px] resize-y rounded-xl border-primary/30 bg-background/60 text-base leading-relaxed"
-                />
-                <p className="text-xs tabular-nums text-muted-foreground">
-                  {description.trim().length}/2000
                 </p>
               </div>
             </div>
