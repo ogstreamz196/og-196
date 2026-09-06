@@ -234,12 +234,10 @@ function CommunityTrackRowImpl({
             <p className="line-clamp-2 text-[15px] font-semibold leading-snug">{title}</p>
           )}
         </div>
-
-        {actions}
       </div>
 
-      {/* Row 2 — transport: play, seek bar, time */}
-      <div className="mt-2 flex items-center gap-2.5 pl-[3.5rem]">
+      {/* Row 2 — transport: play, seek bar, time, quick actions */}
+      <div className="mt-2 flex items-center gap-2 pl-[3.5rem]">
         <button
           type="button"
           onClick={togglePlay}
@@ -280,6 +278,7 @@ function CommunityTrackRowImpl({
           {playing || progress > 0 ? `${fmt(progress)} / ` : ""}
           {fmt(duration)}
         </span>
+        {actions}
       </div>
 
 
