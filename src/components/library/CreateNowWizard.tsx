@@ -310,15 +310,14 @@ export function CreateNowWizard({
           </div>
           <DialogTitle className="font-display text-2xl font-black leading-tight sm:text-3xl">
             {step === 1 && "Your track"}
-            {step === 2 && "What will this track be about?"}
-            {step === 3 && "Choose a style"}
-            {step === 4 && "Language & vocals"}
+            {step === 2 && "Choose a style"}
+            {step === 3 && "Language & vocals"}
           </DialogTitle>
           <DialogDescription className="text-sm">
-            {step === 1 && "Name it, tell us who it's for, and pick how long it runs."}
-            {step === 2 && "A short description, theme or story."}
-            {step === 3 && "Stack as many styles as you like, then pick the voice."}
-            {step === 4 &&
+            {step === 1 &&
+              "Name it, tell us who it's for, how long it runs, and what it's about."}
+            {step === 2 && "Stack as many styles as you like, then pick the voice."}
+            {step === 3 &&
               "Pick the language it's sung in. Flip vocals only to sing over your own beat."}
           </DialogDescription>
 
