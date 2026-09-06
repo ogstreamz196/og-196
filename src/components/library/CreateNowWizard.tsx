@@ -283,7 +283,7 @@ export function CreateNowWizard({
           e.preventDefault();
           requestClose();
         }}
-        className="max-h-[90vh] w-[calc(100vw-1.5rem)] max-w-lg overflow-y-auto rounded-2xl border-border bg-background shadow-2xl"
+        className="max-h-[90vh] w-[calc(100vw-1.5rem)] max-w-lg overflow-y-auto rounded-2xl border border-white/10 bg-card/95 backdrop-blur-2xl shadow-2xl"
       >
         <DialogHeader className="space-y-2 text-left">
           <div className="flex items-center justify-between gap-3">
