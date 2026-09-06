@@ -7,6 +7,30 @@ export const MAX_ACCOUNTS_PER_DEVICE = 2;
 const deviceIdSchema = z.object({ deviceId: z.string().min(8).max(128) });
 
 /**
+ * A device is whitelisted from the 2-account rule once any account with an
+ * admin/boss/dev role has signed in on it.
+ */
+async function isDeviceWhitelisted(
+  supabaseAdmin: Awaited<typeof import("@/integrations/supabase/client.server")>["supabaseAdmin"],
+  deviceId: string,
+): Promise<boolean> {
+  const { data: rows, error } = await supabaseAdmin
+    .from("device_accounts")
+    .select("user_id")
+    .eq("device_id", deviceId);
+  if (error) throw error;
+  const userIds = (rows ?? []).map((r) => r.user_id);
+  if (userIds.length === 0) return false;
+  const { data: roles, error: rolesError } = await supabaseAdmin
+    .from("user_roles")
+    .select("role")
+    .in("user_id", userIds)
+    .in("role", ["admin", "boss", "dev"]);
+  if (rolesError) throw rolesError;
+  return (roles ?? []).length > 0;
+}
+
+/**
  * Public pre-signup check: is this device allowed to create another account?
  * Only returns a boolean/count — no user data — safe to expose.
  */
@@ -14,6 +38,9 @@ export const checkDeviceAccountAllowed = createServerFn({ method: "GET" })
   .inputValidator((data) => deviceIdSchema.parse(data))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (await isDeviceWhitelisted(supabaseAdmin, data.deviceId)) {
+      return { allowed: true, accounts: 0 };
+    }
     const { count, error } = await supabaseAdmin
       .from("device_accounts")
       .select("id", { count: "exact", head: true })
