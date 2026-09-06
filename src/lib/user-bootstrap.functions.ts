@@ -1,5 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { MAX_ACCOUNTS_PER_DEVICE } from "@/lib/device-limit.functions";
 
 type BootstrapResult = {
   ensuredProfile: boolean;
@@ -11,7 +13,10 @@ const BOSS_EMAIL = "ogstreamz196@gmail.com";
 
 export const ensureCurrentUserBootstrap = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }): Promise<BootstrapResult> => {
+  .inputValidator((data) =>
+    z.object({ deviceId: z.string().min(8).max(128).optional() }).parse(data ?? {}),
+  )
+  .handler(async ({ data, context }): Promise<BootstrapResult> => {
     const { userId, claims } = context;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const email = typeof claims.email === "string" ? claims.email : "";
@@ -26,6 +31,27 @@ export const ensureCurrentUserBootstrap = createServerFn({ method: "POST" })
     let ensuredUserRole = false;
     let ensuredBossRole = false;
 
+    // Register this device and enforce the 2-accounts-per-device allowance.
+    // Accounts beyond the allowance get a profile but no welcome coins.
+    let withinDeviceAllowance = true;
+    if (data.deviceId) {
+      await supabaseAdmin
+        .from("device_accounts")
+        .upsert(
+          { device_id: data.deviceId, user_id: userId },
+          { onConflict: "device_id,user_id" },
+        );
+      const { data: deviceRows, error: deviceError } = await supabaseAdmin
+        .from("device_accounts")
+        .select("user_id")
+        .eq("device_id", data.deviceId)
+        .order("created_at", { ascending: true });
+      if (deviceError) throw deviceError;
+      withinDeviceAllowance = (deviceRows ?? [])
+        .slice(0, MAX_ACCOUNTS_PER_DEVICE)
+        .some((row) => row.user_id === userId);
+    }
+
     const { data: existingProfile, error: profileError } = await supabaseAdmin
       .from("profiles")
       .select("id")
@@ -35,21 +61,24 @@ export const ensureCurrentUserBootstrap = createServerFn({ method: "POST" })
     if (profileError) throw profileError;
 
     if (!existingProfile) {
+      const welcomeCoins = withinDeviceAllowance ? 10 : 0;
       const { error } = await supabaseAdmin.from("profiles").insert({
         id: userId,
         email,
         display_name: displayName || "User",
-        coin_balance: 10,
+        coin_balance: welcomeCoins,
       });
       if (error) throw error;
 
-      const { error: txError } = await supabaseAdmin.from("coin_transactions").insert({
-        user_id: userId,
-        amount: 10,
-        type: "bonus",
-        reference: "welcome",
-      });
-      if (txError) throw txError;
+      if (welcomeCoins > 0) {
+        const { error: txError } = await supabaseAdmin.from("coin_transactions").insert({
+          user_id: userId,
+          amount: welcomeCoins,
+          type: "bonus",
+          reference: "welcome",
+        });
+        if (txError) throw txError;
+      }
       ensuredProfile = true;
     }
 
