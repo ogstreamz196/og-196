@@ -488,7 +488,7 @@ export function CreateNowWizard({
             </div>
           )}
 
-          {step === 4 && (
+          {step === 3 && (
             <div className="space-y-4">
               {/* Vocals-only sits at the very top of the language step. */}
               <button
