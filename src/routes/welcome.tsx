@@ -26,6 +26,8 @@ import { Progress } from "@/components/ui/progress";
 
 
 import { lovable } from "@/integrations/lovable";
+import { getDeviceId } from "@/lib/device-id";
+import { checkDeviceAccountAllowed } from "@/lib/device-limit.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
