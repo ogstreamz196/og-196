@@ -416,7 +416,17 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
       const unknownUser = msg.includes("invalid login credentials") || msg.includes("user not found");
       if (!unknownUser) throw signIn.error;
 
-      // 2) Otherwise create it — unless the name exists with another password.
+      // 2) Device limit: max 2 accounts per device (blocks free-coin farming).
+      const deviceId = getDeviceId();
+      if (deviceId) {
+        const check = await checkDeviceAccountAllowed({ data: { deviceId } });
+        if (!check.allowed) {
+          toast.error("This device already has 2 accounts — sign in to one of them.");
+          return;
+        }
+      }
+
+      // 3) Otherwise create it — unless the name exists with another password.
       const signUp = await supabase.auth.signUp({
         email: loginEmail,
         password,
