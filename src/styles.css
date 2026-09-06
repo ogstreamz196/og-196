@@ -27,6 +27,7 @@
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
+  --color-surface: var(--surface);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
@@ -64,6 +65,7 @@
 
   /* Glassy panels: translucent navy ink over the wallpaper */
   --card: oklch(0.12 0.04 265 / 0.88);
+  --surface: oklch(0.11 0.035 265);
   --card-foreground: oklch(0.98 0.008 250);
 
   --popover: oklch(0.14 0.04 265 / 0.92);
@@ -146,6 +148,7 @@
   --background: oklch(0.1 0.04 265 / 0);
   --foreground: oklch(0.98 0.008 250);
   --card: oklch(0.12 0.04 265 / 0.92);
+  --surface: oklch(0.10 0.03 265);
   --card-foreground: oklch(0.98 0.008 250);
   --popover: oklch(0.14 0.04 265 / 0.92);
   --popover-foreground: oklch(0.98 0.008 250);

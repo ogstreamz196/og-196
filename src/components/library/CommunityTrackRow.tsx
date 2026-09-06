@@ -138,165 +138,150 @@ function CommunityTrackRowImpl({
 
   const canShare = isReady && !!song.unlocked;
 
-  return (
-    <li className="group flex items-center gap-2.5 px-2.5 py-2.5 transition-colors hover:bg-primary/[0.06] sm:gap-3 sm:px-3">
-      {/* Fixed-size cover box reserves space up front — no layout shift on load */}
-      <div
-        className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-card"
-        style={{
-          backgroundImage: showCover
-            ? undefined
-            : `linear-gradient(140deg, oklch(0.32 0.13 ${hue}), oklch(0.18 0.06 ${(hue + 40) % 360}))`,
-        }}
-      >
-        {showCover ? (
-          <img
-            src={song.cover_url!}
-            alt=""
-            loading="lazy"
-            decoding="async"
-            width={48}
-            height={48}
-            onError={() => setCoverFailed(true)}
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <div className="grid h-full w-full place-items-center">
-            <span className="font-display text-base font-black uppercase text-white/85">
-              {title.trim().charAt(0) || <Music2 className="h-5 w-5 text-white/70" />}
-            </span>
-          </div>
-        )}
-      </div>
-
-      <button
-        type="button"
-        onClick={togglePlay}
-        disabled={!isReady}
-        aria-label={`${playing ? "Pause" : "Play"} ${title}`}
-        className={cn(
-          "grid h-10 w-10 shrink-0 place-items-center rounded-full border border-primary/40 bg-primary/15 text-primary transition-colors",
-          isReady ? "hover:bg-primary/25" : "opacity-40",
-        )}
-      >
-        {loadingUrl ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : playing ? (
-          <Pause className="h-4 w-4" />
-        ) : (
-          <Play className="h-4 w-4 translate-x-[1px]" />
-        )}
-      </button>
-
-      <div className="min-w-0 flex-1">
-        {owned ? (
-          <Link
-            to="/library/$songId"
-            params={{ songId: song.id }}
-            className="block truncate text-sm font-semibold leading-tight hover:text-primary focus:outline-none focus-visible:underline"
-          >
-            {title}
-          </Link>
-        ) : (
-          <p className="truncate text-sm font-semibold leading-tight">{title}</p>
-        )}
-        <div className="mt-1.5 flex items-center gap-2">
-          <input
-            type="range"
-            min={0}
-            max={Math.max(1, Math.round(duration))}
-            step={1}
-            value={Math.min(Math.round(progress), Math.max(1, Math.round(duration)))}
-            onChange={(e) => {
-              const el = audioRef.current;
-              if (el) el.currentTime = Number(e.target.value);
-            }}
-            disabled={!isReady || duration <= 0}
-            aria-label={`Seek ${title}`}
-            className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-muted accent-primary disabled:cursor-default"
-            style={{
-              background: `linear-gradient(to right, var(--primary) ${pct}%, var(--muted) ${pct}%)`,
-            }}
-          />
-          <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">
-            {playing || progress > 0 ? `${fmt(progress)} / ` : ""}
-            {fmt(duration)}
-          </span>
-        </div>
-      </div>
-
+  const actions = (
+    <div className="flex shrink-0 items-center gap-1.5">
+      {canShare && (
+        <button
+          type="button"
+          onClick={shareUnlocked}
+          disabled={busy}
+          aria-label={`Share ${title}`}
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-emerald-400/40 bg-emerald-500/15 text-emerald-300 transition-colors hover:bg-emerald-500/25 disabled:opacity-40"
+        >
+          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />}
+        </button>
+      )}
       {owned ? (
-        <div className="flex shrink-0 items-center gap-1.5">
-          {canShare && (
-            <button
-              type="button"
-              onClick={shareUnlocked}
-              disabled={busy}
-              aria-label={`Share ${title}`}
-              className="grid h-10 w-10 place-items-center rounded-full border border-emerald-400/40 bg-emerald-500/10 text-emerald-300 transition-colors hover:bg-emerald-500/20 disabled:opacity-40"
-            >
-              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />}
-            </button>
-          )}
-          <Link
-            to="/library/$songId"
-            params={{ songId: song.id }}
-            aria-label={`Edit ${title}`}
-            className="inline-flex h-10 items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 text-xs font-black uppercase tracking-[0.12em] text-primary transition-colors hover:bg-primary/20"
-          >
-            <Pencil className="h-4 w-4" />
-            <span className="hidden sm:inline">Edit</span>
-          </Link>
-          {onDelete && (
-            <button
-              type="button"
-              onClick={() => onDelete(song)}
-              aria-label={`Delete ${title}`}
-              className="grid h-10 w-10 place-items-center rounded-full border border-destructive/40 bg-destructive/10 text-destructive transition-colors hover:bg-destructive/20"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
-          )}
-        </div>
+        <Link
+          to="/library/$songId"
+          params={{ songId: song.id }}
+          aria-label={`Edit ${title}`}
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-primary/40 bg-primary/15 text-primary transition-colors hover:bg-primary/25"
+        >
+          <Pencil className="h-4 w-4" />
+        </Link>
       ) : (
-        <div className="flex shrink-0 items-center gap-1.5">
-        {canShare && (
-          <button
-            type="button"
-            onClick={shareUnlocked}
-            disabled={busy}
-            aria-label={`Share ${title}`}
-            className="grid h-10 w-10 place-items-center rounded-full border border-emerald-400/40 bg-emerald-500/10 text-emerald-300 transition-colors hover:bg-emerald-500/20 disabled:opacity-40"
-          >
-            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />}
-          </button>
-        )}
         <button
           type="button"
           onClick={() => setUnlockOpen(true)}
           disabled={!isReady || busy}
           aria-label={`Download ${title} for ${COMMUNITY_DOWNLOAD_COST} OG coins`}
           className={cn(
-            "inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 text-xs font-black tabular-nums text-primary transition-colors",
-            isReady && !busy ? "hover:bg-primary/20" : "opacity-40",
+            "inline-flex h-9 shrink-0 items-center gap-1 rounded-full border border-primary/40 bg-primary/15 px-2.5 text-xs font-black tabular-nums text-primary transition-colors",
+            isReady && !busy ? "hover:bg-primary/25" : "opacity-40",
           )}
         >
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
           <span>{COMMUNITY_DOWNLOAD_COST}</span>
           <span className="sr-only">OG coins</span>
         </button>
-        {onDelete && (
-          <button
-            type="button"
-            onClick={() => onDelete(song)}
-            aria-label={`Delete ${title}`}
-            className="grid h-10 w-10 place-items-center rounded-full border border-destructive/40 bg-destructive/10 text-destructive transition-colors hover:bg-destructive/20"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
-        )}
-        </div>
       )}
+      {onDelete && (
+        <button
+          type="button"
+          onClick={() => onDelete(song)}
+          aria-label={`Delete ${title}`}
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-destructive/40 bg-destructive/15 text-destructive transition-colors hover:bg-destructive/25"
+        >
+          <Trash2 className="h-4 w-4" />
+        </button>
+      )}
+    </div>
+  );
+
+  return (
+    <li className="group px-3 py-3 transition-colors hover:bg-primary/[0.06]">
+      {/* Row 1 — artwork + full-width title, so long names stay readable */}
+      <div className="flex min-w-0 items-center gap-3">
+        <div
+          className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-card"
+          style={{
+            backgroundImage: showCover
+              ? undefined
+              : `linear-gradient(140deg, oklch(0.32 0.13 ${hue}), oklch(0.18 0.06 ${(hue + 40) % 360}))`,
+          }}
+        >
+          {showCover ? (
+            <img
+              src={song.cover_url!}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              width={44}
+              height={44}
+              onError={() => setCoverFailed(true)}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div className="grid h-full w-full place-items-center">
+              <span className="font-display text-base font-black uppercase text-white/85">
+                {title.trim().charAt(0) || <Music2 className="h-5 w-5 text-white/70" />}
+              </span>
+            </div>
+          )}
+        </div>
+
+        <div className="min-w-0 flex-1">
+          {owned ? (
+            <Link
+              to="/library/$songId"
+              params={{ songId: song.id }}
+              className="line-clamp-2 text-[15px] font-semibold leading-snug hover:text-primary focus:outline-none focus-visible:underline"
+            >
+              {title}
+            </Link>
+          ) : (
+            <p className="line-clamp-2 text-[15px] font-semibold leading-snug">{title}</p>
+          )}
+        </div>
+
+        {actions}
+      </div>
+
+      {/* Row 2 — transport: play, seek bar, time */}
+      <div className="mt-2 flex items-center gap-2.5 pl-[3.5rem]">
+        <button
+          type="button"
+          onClick={togglePlay}
+          disabled={!isReady}
+          aria-label={`${playing ? "Pause" : "Play"} ${title}`}
+          className={cn(
+            "grid h-9 w-9 shrink-0 place-items-center rounded-full border border-primary/40 bg-primary/15 text-primary transition-colors",
+            isReady ? "hover:bg-primary/25" : "opacity-40",
+          )}
+        >
+          {loadingUrl ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : playing ? (
+            <Pause className="h-4 w-4" />
+          ) : (
+            <Play className="h-4 w-4 translate-x-[1px]" />
+          )}
+        </button>
+
+        <input
+          type="range"
+          min={0}
+          max={Math.max(1, Math.round(duration))}
+          step={1}
+          value={Math.min(Math.round(progress), Math.max(1, Math.round(duration)))}
+          onChange={(e) => {
+            const el = audioRef.current;
+            if (el) el.currentTime = Number(e.target.value);
+          }}
+          disabled={!isReady || duration <= 0}
+          aria-label={`Seek ${title}`}
+          className="h-1.5 min-w-0 flex-1 cursor-pointer appearance-none rounded-full bg-muted accent-primary disabled:cursor-default"
+          style={{
+            background: `linear-gradient(to right, var(--primary) ${pct}%, var(--muted) ${pct}%)`,
+          }}
+        />
+        <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">
+          {playing || progress > 0 ? `${fmt(progress)} / ` : ""}
+          {fmt(duration)}
+        </span>
+      </div>
+
 
       <audio
         ref={audioRef}
