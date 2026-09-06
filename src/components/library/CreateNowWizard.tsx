@@ -404,31 +404,31 @@ export function CreateNowWizard({
                   Each extra minute costs 1 coin.
                 </p>
               </div>
+
+              <div className="space-y-1.5">
+                <Label
+                  htmlFor="wiz-desc"
+                  className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground"
+                >
+                  What will this track be about?
+                </Label>
+                <Textarea
+                  id="wiz-desc"
+                  rows={5}
+                  value={description}
+                  maxLength={2000}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Vibes, memories, inside jokes, the moment you want in the lyrics…"
+                  className="min-h-[130px] resize-y rounded-xl border-primary/30 bg-background/60 text-base leading-relaxed"
+                />
+                <p className="text-xs tabular-nums text-muted-foreground">
+                  {description.trim().length}/2000
+                </p>
+              </div>
             </div>
           )}
 
           {step === 2 && (
-            <>
-              <Label htmlFor="wiz-desc" className="sr-only">
-                Track description
-              </Label>
-              <Textarea
-                id="wiz-desc"
-                autoFocus
-                rows={6}
-                value={description}
-                maxLength={2000}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Vibes, memories, inside jokes, the moment you want in the lyrics…"
-                className="min-h-[150px] resize-y rounded-xl border-primary/30 bg-background/60 text-base leading-relaxed"
-              />
-              <p className="mt-2 text-xs tabular-nums text-muted-foreground">
-                {description.trim().length}/2000
-              </p>
-            </>
-          )}
-
-          {step === 3 && (
             <div className="space-y-4">
               <div
                 role="group"
