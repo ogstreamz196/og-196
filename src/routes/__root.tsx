@@ -15,6 +15,7 @@ import { AuthProvider } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
 import { ensureCurrentUserBootstrap } from "@/lib/user-bootstrap.functions";
+import { getDeviceId } from "@/lib/device-id";
 import { useSiteContentRealtime } from "@/hooks/use-site-content";
 import { DisplayPrefsBridge } from "@/hooks/use-display-prefs";
 import { AuraBridge } from "@/hooks/use-aura";
@@ -231,7 +232,7 @@ function RootComponent() {
       const { data } = await supabase.auth.getUser();
       if (!active || !data.user) return;
       try {
-        const result = await bootstrapUser();
+        const result = await bootstrapUser({ data: { deviceId: getDeviceId() ?? undefined } });
         if (result.ensuredBossRole || result.ensuredUserRole || result.ensuredProfile) {
           await Promise.all([
             queryClient.invalidateQueries({ queryKey: ["user-role", data.user.id] }),
