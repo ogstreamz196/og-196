@@ -168,7 +168,7 @@ Deno.serve(async (req) => {
 
     const bilingualRule = isEnglish
       ? ""
-      : ` Write each non-English line TWICE: first in the section's language using the Latin alphabet (romanised / transliterated — no native script, no Cyrillic, no kanji, no Arabic script, etc.), then on the very next line the English translation in italics-style parentheses, e.g. "Mi corazón late fuerte / (My heart beats strong)". Keep section markers in English.`;
+      : ` Write each non-English line in the section's language using the Latin alphabet (romanised / transliterated — no native script, no Cyrillic, no kanji, no Arabic script, etc.). Keep section markers in English.`;
 
     const multiLanguageRule = multiLanguage
       ? ` MULTILINGUAL REQUIREMENT (critical): the artist picked ${languageList.length} languages — ${languagesLabel}. EVERY one of them must actually be sung in the finished song, not just mentioned. Assign languages to whole sections and rotate through them in order so each language owns at least one full section (for example [Verse 1] in ${languageList[0]}, [Verse 2] in ${languageList[1]}${languageList[2] ? `, [Bridge] in ${languageList[2]}` : ""}), and mark each section's language on the marker line like "[Verse 2 – ${languageList[1]}]". The [Chorus] stays in ${languageList[0]} every time so the hook is recognisable, but add one repeated hook line in ${languageList[1]} inside each chorus. If there are more languages than sections, share sections by giving each language its own consecutive block of lines inside that section, still labelled.`
