@@ -175,17 +175,19 @@ Deno.serve(async (req) => {
       : "";
 
 
-    // English rides along on every non-English track as a REMIX feature: the
-    // picked language(s) still lead the song, but the intro is English and
-    // English lines/ad-libs pop up throughout.
-    const englishRemixRule = !isEnglish
-      ? ` ENGLISH REMIX REQUIREMENT (critical): English is always part of the remix. The [Intro] MUST be fully in English (a short hype intro naming the song/artist vibe). After that, the picked language(s) LEAD the song — most lines, and the main hook, stay in ${nonEnglish.join(" and ")} — but sprinkle English throughout like a remix feature: at least 2 English lines or ad-libs inside every verse and every chorus, an English line at the end of each hook repeat, and a mostly-English [Outro]. Roughly a quarter of all sung lines should be English, spread across the whole track, not clumped in one section. Never let English take over a full verse or the main chorus melody — it is the feature, not the lead.`
-      : "";
+    // English rides along as a REMIX feature ONLY when the artist actually
+    // picked English alongside other languages. If English was not selected,
+    // no English is sung anywhere in the track.
+    const englishSelected = languageList.some((l) => l.toLowerCase() === "english");
+    const englishRemixRule = (!isEnglish && englishSelected)
+      ? ` ENGLISH REMIX REQUIREMENT (critical): English was picked alongside ${nonEnglish.join(" and ")}, so it is part of the remix. The [Intro] MUST be fully in English (a short hype intro naming the song/artist vibe). After that, the picked language(s) LEAD the song — most lines, and the main hook, stay in ${nonEnglish.join(" and ")} — but sprinkle English throughout like a remix feature: at least 2 English lines or ad-libs inside every verse and every chorus, an English line at the end of each hook repeat, and a mostly-English [Outro]. Roughly a quarter of all sung lines should be English, spread across the whole track, not clumped in one section. Never let English take over a full verse or the main chorus melody — it is the feature, not the lead.`
+      : (!isEnglish
+        ? ` NO-ENGLISH RULE (critical): English was NOT selected. Do not sing or speak any English anywhere in the song — no English intro, no English ad-libs, no English outro. Every sung line stays in the selected language(s) only. (Section markers stay in English brackets as usual, and any parenthetical translation lines are for reference only.)`
+        : "");
 
-    // One non-English pick: the whole song leads in it, with English only as
-    // the remix feature above (plus the translation lines underneath).
+    // One non-English pick: the whole song leads in it.
     const singleLanguageRule = (!multiLanguage && !isEnglish)
-      ? ` SINGLE-LANGUAGE REQUIREMENT (critical): the artist picked ${languageList[0]}. Apart from the English remix lines required above, every sung line — every verse, every chorus, pre-chorus, bridge and ad-lib — must be written in ${languageList[0]}. Do NOT flip the balance: ${languageList[0]} is the lead language everywhere except the English intro/outro and the sprinkled English feature lines. The hook melody lines stay in ${languageList[0]}.`
+      ? ` SINGLE-LANGUAGE REQUIREMENT (critical): the artist picked ${languageList[0]}. Every sung line — every verse, every chorus, pre-chorus, bridge, intro, outro and ad-lib — must be written in ${languageList[0]}. Do NOT flip the balance: ${languageList[0]} is the lead language everywhere. The hook melody lines stay in ${languageList[0]}.`
       : "";
 
     // Pick a full-song structure driven by the chosen style tags so the
