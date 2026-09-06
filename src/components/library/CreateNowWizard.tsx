@@ -75,7 +75,7 @@ export const EMPTY_DRAFT: WizardDraft = {
 
 const GENDERS = ["Female vocal", "Male vocal", "Duo", "Any voice"];
 
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 3;
 
 /** Track length — 3 minutes included, then 1 coin per extra minute. */
 export const MIN_LENGTH = 3;
@@ -178,12 +178,15 @@ export function CreateNowWizard({
   const stepValid = useMemo(() => {
     switch (step) {
       case 1:
-        return title.trim().length > 0 && subjectName.trim().length > 0;
+        // Name, who it's about and the story now live on one step.
+        return (
+          title.trim().length > 0 &&
+          subjectName.trim().length > 0 &&
+          description.trim().length >= 12
+        );
       case 2:
-        return description.trim().length >= 12;
-      case 3:
         return styles.length > 0;
-      case 4:
+      case 3:
         // Beat upload is always optional — skipping gives nasheed-style vocals.
         return !uploadingBeat;
       default:
@@ -197,17 +200,17 @@ export function CreateNowWizard({
     if (stepValid) return null;
     switch (step) {
       case 1:
-        return "Add a track name and who it's about to continue.";
-      case 2:
+        if (!title.trim() || !subjectName.trim())
+          return "Add a track name and who it's about to continue.";
         return "Add a few more words about the story or vibe.";
-      case 3:
+      case 2:
         return "Pick at least one style (you can stack a few).";
-      case 4:
+      case 3:
         return "Hang on — your beat is still uploading.";
       default:
         return "Pick a language, or continue for English.";
     }
-  }, [step, stepValid]);
+  }, [step, stepValid, title, subjectName]);
 
   function next() {
     if (!stepValid) return;
