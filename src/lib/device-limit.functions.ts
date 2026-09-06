@@ -10,7 +10,7 @@ const deviceIdSchema = z.object({ deviceId: z.string().min(8).max(128) });
  * A device is whitelisted from the 2-account rule once any account with an
  * admin/boss/dev role has signed in on it.
  */
-async function isDeviceWhitelisted(
+export async function isDeviceWhitelisted(
   supabaseAdmin: Awaited<typeof import("@/integrations/supabase/client.server")>["supabaseAdmin"],
   deviceId: string,
 ): Promise<boolean> {
