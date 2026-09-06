@@ -19,6 +19,7 @@ import { useSiteContentRealtime } from "@/hooks/use-site-content";
 import { DisplayPrefsBridge } from "@/hooks/use-display-prefs";
 import { AuraBridge } from "@/hooks/use-aura";
 import { SingleAudioBridge } from "@/components/SingleAudioBridge";
+import { InstallAppPrompt } from "@/components/InstallAppPrompt";
 import { UserActivityArchiver } from "@/hooks/use-user-activity-archiver";
 import { ActivityTracker } from "@/hooks/use-activity-tracker";
 
@@ -110,6 +111,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "stylesheet", href: appCss },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "icon", type: "image/png", href: "/favicon.png" },
+      { rel: "apple-touch-icon", href: "/icons/apple-touch-icon.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       // Warm the image origin used for song cover thumbnails so they decode
@@ -349,6 +353,7 @@ function RootComponent() {
         <UserActivityArchiver />
         <ActivityTracker />
         <Outlet />
+        <InstallAppPrompt />
         <Toaster />
       </AuthProvider>
     </QueryClientProvider>
