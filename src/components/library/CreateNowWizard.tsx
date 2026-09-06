@@ -75,7 +75,7 @@ export const EMPTY_DRAFT: WizardDraft = {
 
 const GENDERS = ["Female vocal", "Male vocal", "Duo", "Any voice"];
 
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 3;
 
 /** Track length — 3 minutes included, then 1 coin per extra minute. */
 export const MIN_LENGTH = 3;
@@ -178,12 +178,15 @@ export function CreateNowWizard({
   const stepValid = useMemo(() => {
     switch (step) {
       case 1:
-        return title.trim().length > 0 && subjectName.trim().length > 0;
+        // Name, who it's about and the story now live on one step.
+        return (
+          title.trim().length > 0 &&
+          subjectName.trim().length > 0 &&
+          description.trim().length >= 12
+        );
       case 2:
-        return description.trim().length >= 12;
-      case 3:
         return styles.length > 0;
-      case 4:
+      case 3:
         // Beat upload is always optional — skipping gives nasheed-style vocals.
         return !uploadingBeat;
       default:
@@ -197,17 +200,17 @@ export function CreateNowWizard({
     if (stepValid) return null;
     switch (step) {
       case 1:
-        return "Add a track name and who it's about to continue.";
-      case 2:
+        if (!title.trim() || !subjectName.trim())
+          return "Add a track name and who it's about to continue.";
         return "Add a few more words about the story or vibe.";
-      case 3:
+      case 2:
         return "Pick at least one style (you can stack a few).";
-      case 4:
+      case 3:
         return "Hang on — your beat is still uploading.";
       default:
         return "Pick a language, or continue for English.";
     }
-  }, [step, stepValid]);
+  }, [step, stepValid, title, subjectName]);
 
   function next() {
     if (!stepValid) return;
@@ -307,15 +310,14 @@ export function CreateNowWizard({
           </div>
           <DialogTitle className="font-display text-2xl font-black leading-tight sm:text-3xl">
             {step === 1 && "Your track"}
-            {step === 2 && "What will this track be about?"}
-            {step === 3 && "Choose a style"}
-            {step === 4 && "Language & vocals"}
+            {step === 2 && "Choose a style"}
+            {step === 3 && "Language & vocals"}
           </DialogTitle>
           <DialogDescription className="text-sm">
-            {step === 1 && "Name it, tell us who it's for, and pick how long it runs."}
-            {step === 2 && "A short description, theme or story."}
-            {step === 3 && "Stack as many styles as you like, then pick the voice."}
-            {step === 4 &&
+            {step === 1 &&
+              "Name it, tell us who it's for, how long it runs, and what it's about."}
+            {step === 2 && "Stack as many styles as you like, then pick the voice."}
+            {step === 3 &&
               "Pick the language it's sung in. Flip vocals only to sing over your own beat."}
           </DialogDescription>
 
@@ -402,31 +404,31 @@ export function CreateNowWizard({
                   Each extra minute costs 1 coin.
                 </p>
               </div>
+
+              <div className="space-y-1.5">
+                <Label
+                  htmlFor="wiz-desc"
+                  className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground"
+                >
+                  What will this track be about?
+                </Label>
+                <Textarea
+                  id="wiz-desc"
+                  rows={5}
+                  value={description}
+                  maxLength={2000}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Vibes, memories, inside jokes, the moment you want in the lyrics…"
+                  className="min-h-[130px] resize-y rounded-xl border-primary/30 bg-background/60 text-base leading-relaxed"
+                />
+                <p className="text-xs tabular-nums text-muted-foreground">
+                  {description.trim().length}/2000
+                </p>
+              </div>
             </div>
           )}
 
           {step === 2 && (
-            <>
-              <Label htmlFor="wiz-desc" className="sr-only">
-                Track description
-              </Label>
-              <Textarea
-                id="wiz-desc"
-                autoFocus
-                rows={6}
-                value={description}
-                maxLength={2000}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Vibes, memories, inside jokes, the moment you want in the lyrics…"
-                className="min-h-[150px] resize-y rounded-xl border-primary/30 bg-background/60 text-base leading-relaxed"
-              />
-              <p className="mt-2 text-xs tabular-nums text-muted-foreground">
-                {description.trim().length}/2000
-              </p>
-            </>
-          )}
-
-          {step === 3 && (
             <div className="space-y-4">
               <div
                 role="group"
@@ -486,7 +488,7 @@ export function CreateNowWizard({
             </div>
           )}
 
-          {step === 4 && (
+          {step === 3 && (
             <div className="space-y-4">
               {/* Vocals-only sits at the very top of the language step. */}
               <button
