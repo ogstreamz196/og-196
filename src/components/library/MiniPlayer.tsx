@@ -68,7 +68,7 @@ export function MiniPlayer() {
   return (
     <div
       data-testid="mini-player"
-      className="sticky top-16 z-20 rounded-2xl border border-primary/25 bg-card/95 p-3 shadow-[0_10px_30px_-18px_var(--primary)] backdrop-blur-md"
+      className="sticky top-16 z-20 rounded-2xl border border-primary/25 bg-surface p-3 shadow-[0_10px_30px_-18px_var(--primary)] backdrop-blur-md"
     >
       <div className="flex items-center gap-3">
         <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-white/10 bg-black/30 text-primary">
