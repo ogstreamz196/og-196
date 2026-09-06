@@ -66,6 +66,14 @@ export const registerDeviceAccount = createServerFn({ method: "POST" })
         { device_id: data.deviceId, user_id: context.userId },
         { onConflict: "device_id,user_id" },
       );
+    // Devices the boss/admin has signed in on are whitelisted from the rule.
+    if (await isDeviceWhitelisted(supabaseAdmin, data.deviceId)) {
+      const { count } = await supabaseAdmin
+        .from("device_accounts")
+        .select("id", { count: "exact", head: true })
+        .eq("device_id", data.deviceId);
+      return { withinAllowance: true, accountsOnDevice: count ?? 0 };
+    }
     const { data: rows, error } = await supabaseAdmin
       .from("device_accounts")
       .select("user_id")
