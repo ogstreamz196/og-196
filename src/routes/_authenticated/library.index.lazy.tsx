@@ -1560,7 +1560,7 @@ function LibraryPage() {
               <ul
                 aria-label="Loading your tracks"
                 aria-busy="true"
-                className="divide-y divide-border/40 overflow-hidden rounded-2xl border border-border/60 bg-card shadow-card"
+                className="divide-y divide-border/40 overflow-hidden rounded-2xl border border-border/60 bg-surface shadow-card"
               >
                 {[0, 1, 2].map((i) => (
                   <li key={i} className="flex items-center gap-3 px-3 py-2.5">
@@ -1597,7 +1597,7 @@ function LibraryPage() {
                     {genSong && <SongCardSkeleton label="Generating" />}
                     <PlaylistOrder ids={filtered.map((s) => s.id)} />
                     <MiniPlayer />
-                    <ul className="divide-y divide-border/40 overflow-hidden rounded-2xl border border-border/60 bg-card shadow-card">
+                    <ul className="divide-y divide-border/40 overflow-hidden rounded-2xl border border-border/60 bg-surface shadow-card">
                       {filtered.map((s) => (
                         <CommunityTrackRow
                           key={s.id}
@@ -1670,7 +1670,7 @@ function LibraryPage() {
               <ul
                 aria-label="Loading community tracks"
                 aria-busy="true"
-                className="divide-y divide-border/40 overflow-hidden rounded-2xl border border-border/60 bg-card shadow-card"
+                className="divide-y divide-border/40 overflow-hidden rounded-2xl border border-border/60 bg-surface shadow-card"
               >
                 {[0, 1, 2, 3].map((i) => (
                   <li key={i} className="flex items-center gap-3 px-3 py-2.5">
@@ -1706,7 +1706,7 @@ function LibraryPage() {
                   <div className="space-y-2">
                     <PlaylistOrder ids={filtered.map((s) => s.id)} />
                     <MiniPlayer />
-                    <ul className="divide-y divide-border/40 overflow-hidden rounded-2xl border border-border/60 bg-card shadow-card">
+                    <ul className="divide-y divide-border/40 overflow-hidden rounded-2xl border border-border/60 bg-surface shadow-card">
                       {filtered.map((s) => (
                         <CommunityTrackRow
                           key={s.id}
