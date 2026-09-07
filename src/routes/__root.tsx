@@ -225,18 +225,8 @@ function RootComponent() {
   const router = useRouter();
   const bootstrapUser = useServerFn(ensureCurrentUserBootstrap);
 
-  // Register the service worker so phones offer "Add to home screen"/install.
-  useEffect(() => {
-    if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
-    if (window.location.hostname === "localhost") return;
-    const register = () => {
-      navigator.serviceWorker
-        .register("/sw.js", { scope: "/" })
-        .catch((e) => console.warn("sw registration failed", e));
-    };
-    if (document.readyState === "complete") register();
-    else window.addEventListener("load", register, { once: true });
-  }, []);
+
+
 
 
   useEffect(() => {
