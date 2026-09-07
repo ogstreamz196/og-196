@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
-import { AlertTriangle, Loader2, Lock, RotateCw } from "lucide-react";
-import { getStripe, getStripeEnvironment } from "@/lib/stripe";
+import { AlertTriangle, Loader2, Lock, RotateCw, CreditCard } from "lucide-react";
+import { arePaymentsEnabled, getStripe, getStripeEnvironment } from "@/lib/stripe";
 import {
   createCoinCheckoutSession,
   createVipCheckoutSession,

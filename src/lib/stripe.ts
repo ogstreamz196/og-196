@@ -4,12 +4,16 @@ type StripeEnv = "sandbox" | "live";
 
 const clientToken = import.meta.env.VITE_PAYMENTS_CLIENT_TOKEN as string | undefined;
 
+/** True when a Stripe publishable key is configured. False = payments disconnected. */
+export function arePaymentsEnabled(): boolean {
+  return !!clientToken;
+}
+
 function paymentsEnvironment(): StripeEnv {
   if (clientToken?.startsWith("pk_test_")) return "sandbox";
   if (clientToken?.startsWith("pk_live_")) return "live";
   throw new Error(
-    "Payments are not configured for this build. " +
-      "Complete payments go-live in your Lovable project to enable production checkout.",
+    "Payments are currently disconnected. Reconnect a payment provider to enable purchases.",
   );
 }
 
