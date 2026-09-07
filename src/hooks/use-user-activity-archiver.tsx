@@ -33,12 +33,14 @@ export function UserActivityArchiver() {
           if (row.is_variation) return; // previews skipped
           if (!row.audio_path) return;
           try {
+            const drive = await import("@/lib/drive-archive.functions");
+            await drive.archiveSongToDrive({ data: { songId: row.id } });
             const m = await import("@/lib/user-log.functions");
-            await m.archiveFinalSong({ data: { songId: row.id } });
             await m.syncUserActivity({ data: {} });
           } catch (e) {
             console.error("song archive failed", e);
           }
+
         },
       )
       .subscribe();
