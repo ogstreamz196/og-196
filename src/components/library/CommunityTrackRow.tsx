@@ -1,7 +1,7 @@
 import { memo, useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { Download, Loader2, Music2, Pause, Pencil, Play, Share2, Trash2 } from "lucide-react";
+import { CloudDownload, Download, Loader2, Music2, Pause, Pencil, Play, Share2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useSongAudio } from "@/hooks/use-song-audio";
 import { useProfile } from "@/hooks/use-profile";
@@ -137,9 +137,22 @@ function CommunityTrackRowImpl({
   }
 
   const canShare = isReady && !!song.unlocked;
+  const driveLink = (song as unknown as { drive_audio_link?: string | null }).drive_audio_link;
 
   const actions = (
     <div className="flex shrink-0 items-center gap-1.5">
+      {owned && driveLink && (
+        <a
+          href={driveLink}
+          target="_blank"
+          rel="noreferrer"
+          aria-label={`Open ${title} backup in Google Drive`}
+          title="Saved to Google Drive"
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-sky-400/40 bg-sky-500/15 text-sky-300 transition-colors hover:bg-sky-500/25"
+        >
+          <CloudDownload className="h-4 w-4" />
+        </a>
+      )}
       {canShare && (
         <button
           type="button"
@@ -151,6 +164,7 @@ function CommunityTrackRowImpl({
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />}
         </button>
       )}
+
       {owned ? (
         <Link
           to="/library/$songId"

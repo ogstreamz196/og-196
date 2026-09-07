@@ -827,6 +827,11 @@ export type Database = {
           completed_at: string | null
           cover_url: string | null
           created_at: string
+          drive_archived_at: string | null
+          drive_audio_id: string | null
+          drive_audio_link: string | null
+          drive_lyrics_id: string | null
+          drive_lyrics_link: string | null
           duration_seconds: number | null
           error_message: string | null
           extra_context: string | null
@@ -867,6 +872,11 @@ export type Database = {
           completed_at?: string | null
           cover_url?: string | null
           created_at?: string
+          drive_archived_at?: string | null
+          drive_audio_id?: string | null
+          drive_audio_link?: string | null
+          drive_lyrics_id?: string | null
+          drive_lyrics_link?: string | null
           duration_seconds?: number | null
           error_message?: string | null
           extra_context?: string | null
@@ -907,6 +917,11 @@ export type Database = {
           completed_at?: string | null
           cover_url?: string | null
           created_at?: string
+          drive_archived_at?: string | null
+          drive_audio_id?: string | null
+          drive_audio_link?: string | null
+          drive_lyrics_id?: string | null
+          drive_lyrics_link?: string | null
           duration_seconds?: number | null
           error_message?: string | null
           extra_context?: string | null
