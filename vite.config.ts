@@ -6,6 +6,12 @@
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/tanstack/vite";
+import { loadEnv } from "vite";
+import path from "node:path";
+
+const serverEnv = loadEnv(process.env.NODE_ENV ?? "development", process.cwd(), "");
+Object.assign(process.env, serverEnv);
+
 
 export default defineConfig({
   tanstackStart: {
@@ -18,7 +24,15 @@ export default defineConfig({
     // prompts, and other server-side strings cannot be traced back to source.
     build: { sourcemap: false, minify: "esbuild" },
     css: { devSourcemap: false },
+    resolve: {
+      alias: {
+        "entities/lib/decode.js": path.resolve(process.cwd(), "node_modules/entities/lib/decode.js"),
+        "entities/lib/encode.js": path.resolve(process.cwd(), "node_modules/entities/lib/encode.js"),
+        entities: path.resolve(process.cwd(), "node_modules/entities"),
+      },
+    },
     plugins: [mcpPlugin()],
   },
+
 });
 
