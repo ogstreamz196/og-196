@@ -24,7 +24,15 @@ export default defineConfig({
     // prompts, and other server-side strings cannot be traced back to source.
     build: { sourcemap: false, minify: "esbuild" },
     css: { devSourcemap: false },
+    resolve: {
+      alias: {
+        "entities/lib/decode.js": path.resolve(process.cwd(), "node_modules/entities/lib/decode.js"),
+        "entities/lib/encode.js": path.resolve(process.cwd(), "node_modules/entities/lib/encode.js"),
+        entities: path.resolve(process.cwd(), "node_modules/entities"),
+      },
+    },
     plugins: [mcpPlugin()],
   },
+
 });
 
