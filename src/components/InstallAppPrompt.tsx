@@ -71,7 +71,9 @@ export function InstallAppPrompt() {
     };
   }, []);
 
-  function dismiss() {
+  function dismiss(e?: { preventDefault?: () => void; stopPropagation?: () => void }) {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
     try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch { /* ignore */ }
     setOpen(false);
     setIosHelp(false);
