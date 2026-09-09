@@ -105,15 +105,18 @@ export function InstallAppPrompt() {
       <div
         role="dialog"
         aria-label="Add OG to your Home Screen"
-        className="fixed inset-x-3 bottom-3 z-[70] mx-auto max-w-xs animate-fade-in sm:left-auto sm:right-4 sm:mx-0"
+        style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 0.75rem)" }}
+        className="fixed inset-x-3 z-[70] mx-auto max-w-xs animate-fade-in sm:left-auto sm:right-4 sm:mx-0"
       >
-        <div className="glass-panel-strong relative overflow-hidden rounded-2xl border border-primary/40 p-3 pr-8 text-xs shadow-glow">
+        <div className="glass-panel-strong relative overflow-hidden rounded-2xl border border-primary/40 p-3 pr-11 text-xs shadow-glow">
           <button
+            type="button"
+            onPointerUp={dismiss}
             onClick={dismiss}
             aria-label="Dismiss"
-            className="absolute right-1.5 top-1.5 grid h-6 w-6 place-items-center rounded-full text-muted-foreground transition hover:bg-white/10 hover:text-foreground"
+            className="absolute right-1 top-1 grid h-10 w-10 touch-manipulation place-items-center rounded-full text-muted-foreground transition hover:bg-white/10 hover:text-foreground"
           >
-            <X className="h-3.5 w-3.5" />
+            <X className="h-4 w-4" />
           </button>
           <div className="font-semibold text-foreground">Do this first 👇</div>
           <ol className="mt-1.5 space-y-1 text-muted-foreground">
