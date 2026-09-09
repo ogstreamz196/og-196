@@ -134,22 +134,26 @@ export function InstallAppPrompt() {
     <div
       role="dialog"
       aria-label="Install OG app"
-      className="fixed inset-x-0 bottom-3 z-[60] mx-auto w-fit max-w-[92vw] animate-fade-in"
+      style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 0.75rem)" }}
+      className="fixed inset-x-0 z-[60] mx-auto w-fit max-w-[92vw] animate-fade-in"
     >
-      <div className="glass-panel-strong relative flex items-center gap-2 rounded-full border border-primary/40 py-1.5 pl-3 pr-1.5 text-xs shadow-glow">
+      <div className="glass-panel-strong relative flex items-center gap-1.5 rounded-full border border-primary/40 py-1 pl-3 pr-1 text-xs shadow-glow">
         <span className="font-semibold text-foreground">Do this first 👇</span>
         <button
+          type="button"
           onClick={install}
-          className="rounded-full bg-gradient-brand px-3 py-1 text-xs font-semibold text-primary-foreground shadow-card transition hover:brightness-110"
+          className="touch-manipulation rounded-full bg-gradient-brand px-3 py-2 text-xs font-semibold text-primary-foreground shadow-card transition hover:brightness-110"
         >
           {ios ? "Install" : "Add app"}
         </button>
         <button
+          type="button"
+          onPointerUp={dismiss}
           onClick={dismiss}
           aria-label="Dismiss"
-          className="grid h-6 w-6 place-items-center rounded-full text-muted-foreground transition hover:bg-white/10 hover:text-foreground"
+          className="grid h-10 w-10 touch-manipulation place-items-center rounded-full text-muted-foreground transition hover:bg-white/10 hover:text-foreground"
         >
-          <X className="h-3.5 w-3.5" />
+          <X className="h-4 w-4" />
         </button>
         <ArrowAnchor />
       </div>
