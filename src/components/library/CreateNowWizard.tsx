@@ -283,7 +283,8 @@ export function CreateNowWizard({
           e.preventDefault();
           requestClose();
         }}
-        className="max-h-[90vh] w-[calc(100vw-1.5rem)] max-w-lg overflow-y-auto rounded-2xl border border-white/10 bg-card/95 backdrop-blur-2xl shadow-2xl"
+        style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
+        className="max-h-[calc(100dvh-1.5rem)] w-[calc(100vw-1.5rem)] max-w-lg overflow-y-auto overscroll-contain rounded-2xl border border-white/10 bg-card/95 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-2xl shadow-2xl"
       >
         <DialogHeader className="space-y-2 text-left">
           <div className="flex items-center justify-between gap-3">
@@ -582,7 +583,8 @@ export function CreateNowWizard({
                 <div
                   role="group"
                   aria-label="Languages"
-                  className="grid max-h-[220px] grid-cols-2 gap-2 overflow-y-auto pr-1 sm:grid-cols-3"
+                  style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
+                  className="grid max-h-[220px] grid-cols-2 gap-2 overflow-y-auto overscroll-contain pr-1 sm:grid-cols-3"
                 >
                   {POOLS.language.map((l) => {
                     const selected = languages.includes(l);
