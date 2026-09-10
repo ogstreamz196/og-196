@@ -78,10 +78,11 @@ Deno.serve(async (req) => {
     const rawStyle = (body.style ?? "").toString().trim();
     const vocalsOnly = !!body.vocals_only;
     const beatPath = body.beat_path ? String(body.beat_path) : null;
-    // Vocals-only: sing over the uploaded beat, or fall back to a nasheed-style
+    // Vocals-only: sing over the uploaded beat, or fall back to a pure
     // a cappella with humming and zero instrumentation.
+    const acappella = vocalsOnly && !beatPath;
     const vocalsOnlyStyle = vocalsOnly
-      ? (beatPath ? VOCALS_OVER_BEAT_STYLE : NASHEED_STYLE)
+      ? (beatPath ? VOCALS_OVER_BEAT_STYLE : ACAPPELLA_STYLE)
       : null;
     // Requested track length. Suno exposes no hard duration field, so the
     // target is steered through the style prompt (clamped 3-10 minutes).
