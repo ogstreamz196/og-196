@@ -339,7 +339,9 @@ Deno.serve(async (req) => {
           ...(beatUrl ? { uploadUrl: beatUrl } : {}),
           ...(vocalGender ? { vocalGender } : {}),
           model: "V5",
-          negativeTags: "low quality, muddy mix, distorted, lo-fi, amateur, bad vocals",
+          negativeTags: acappella
+            ? `low quality, muddy mix, distorted, lo-fi, amateur, bad vocals, ${NO_INSTRUMENT_NEGATIVES}`
+            : "low quality, muddy mix, distorted, lo-fi, amateur, bad vocals",
           callBackUrl: callbackUrl,
         }),
       });
