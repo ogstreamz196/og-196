@@ -647,12 +647,23 @@ function LibraryPage() {
     const overrideTargetSec =
       Math.max(MIN_TRACK_MINUTES, override?.targetMinutes ?? targetMinutes) * 60;
     // Vocals-only: either the user's own beat carries the music, or we fall
-    // back to a nasheed-style a cappella with humming and no instruments.
+    // back to a pure a cappella with humming and zero instrumentation.
     const vocalsOnlyTags = vocalsOnly
       ? beatPath
         ? ["vocals only", "a cappella over the uploaded beat", "no added instruments"]
-        : ["islamic nasheed", "a cappella", "vocals only", "humming", "no instruments", "no percussion"]
+        : [
+          "a cappella",
+          "vocals only",
+          "unaccompanied voice",
+          "humming and vocal harmonies only",
+          "no instruments",
+          "no drums",
+          "no percussion",
+          "no bass",
+          "no synths",
+        ]
       : [];
+
     // Each style is its own tag (the wizard returns them comma-separated), and
     // the chosen voice rides along so the lyrics engine writes for it too.
     const songStyleTags = (

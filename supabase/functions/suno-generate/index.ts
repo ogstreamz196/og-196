@@ -14,10 +14,15 @@ const SUNO_API_KEY = Deno.env.get("SUNO_API_KEY")!;
 const SUNO_API_URL = "https://apibox.erweima.ai/api/v1/generate";
 // Used when the user uploads their own beat — Suno performs vocals over it.
 const SUNO_UPLOAD_COVER_URL = "https://apibox.erweima.ai/api/v1/generate/upload-cover";
-const NASHEED_STYLE =
-  "islamic nasheed, a cappella, vocals only, humming, no instruments, no percussion";
+const ACAPPELLA_STYLE =
+  "a cappella, vocals only, unaccompanied solo voice with layered vocal harmonies and humming, " +
+  "human beatbox-free, absolutely no instruments, no drums, no percussion, no bass, no 808, " +
+  "no synths, no piano, no guitar, no strings, dry close-mic vocal with light natural reverb";
 const VOCALS_OVER_BEAT_STYLE =
   "vocals only, a cappella lead vocal riding the supplied beat, no added instruments";
+const NO_INSTRUMENT_NEGATIVES =
+  "instruments, instrumental, drums, percussion, bass, 808, synth, piano, guitar, strings, " +
+  "brass, orchestra, backing track, beat, band";
 const MAX_PROMPT_CHARS = 4_800;
 const MAX_STYLE_CHARS = 900;
 const MAX_TITLE_CHARS = 80;
@@ -73,10 +78,11 @@ Deno.serve(async (req) => {
     const rawStyle = (body.style ?? "").toString().trim();
     const vocalsOnly = !!body.vocals_only;
     const beatPath = body.beat_path ? String(body.beat_path) : null;
-    // Vocals-only: sing over the uploaded beat, or fall back to a nasheed-style
+    // Vocals-only: sing over the uploaded beat, or fall back to a pure
     // a cappella with humming and zero instrumentation.
+    const acappella = vocalsOnly && !beatPath;
     const vocalsOnlyStyle = vocalsOnly
-      ? (beatPath ? VOCALS_OVER_BEAT_STYLE : NASHEED_STYLE)
+      ? (beatPath ? VOCALS_OVER_BEAT_STYLE : ACAPPELLA_STYLE)
       : null;
     // Requested track length. Suno exposes no hard duration field, so the
     // target is steered through the style prompt (clamped 3-10 minutes).
@@ -111,9 +117,19 @@ Deno.serve(async (req) => {
     const multiStyleHint = styleCount > 1
       ? `multi-genre arrangement blending ${rawStyle}, each section performed in the genre its lyric section marker names, deliberate transitions between sections`
       : null;
+    // For pure a cappella, genre names must only colour the vocal delivery —
+    // naming genres outright makes the engine add backing instrumentation.
+    const styleParts = acappella
+      ? [
+        vocalsOnlyStyle,
+        rawStyle ? `${rawStyle} vocal delivery, cadence and phrasing performed by voice alone` : null,
+        languageStyleHint,
+        vocalStyle,
+        lengthStyleHint,
+      ]
+      : [rawStyle, multiStyleHint, languageStyleHint, vocalStyle, vocalsOnlyStyle, lengthStyleHint];
     const style = limitText(
-      [rawStyle, multiStyleHint, languageStyleHint, vocalStyle, vocalsOnlyStyle, lengthStyleHint]
-        .filter(Boolean).join(", ") || null,
+      styleParts.filter(Boolean).join(", ") || null,
       MAX_STYLE_CHARS,
     );
     const lyrics = limitText((body.lyrics ?? "").toString().trim() || null, MAX_PROMPT_CHARS);
@@ -323,7 +339,9 @@ Deno.serve(async (req) => {
           ...(beatUrl ? { uploadUrl: beatUrl } : {}),
           ...(vocalGender ? { vocalGender } : {}),
           model: "V5",
-          negativeTags: "low quality, muddy mix, distorted, lo-fi, amateur, bad vocals",
+          negativeTags: acappella
+            ? `low quality, muddy mix, distorted, lo-fi, amateur, bad vocals, ${NO_INSTRUMENT_NEGATIVES}`
+            : "low quality, muddy mix, distorted, lo-fi, amateur, bad vocals",
           callBackUrl: callbackUrl,
         }),
       });

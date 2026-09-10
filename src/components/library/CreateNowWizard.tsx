@@ -187,7 +187,7 @@ export function CreateNowWizard({
       case 2:
         return styles.length > 0;
       case 3:
-        // Beat upload is always optional — skipping gives nasheed-style vocals.
+        // Beat upload is always optional — skipping gives a pure a cappella.
         return !uploadingBeat;
       default:
         // English is always included in the remix, so selecting English alone
@@ -490,29 +490,87 @@ export function CreateNowWizard({
           )}
 
           {step === 3 && (
-            <div className="space-y-4">
-              {/* Vocals-only sits at the very top of the language step. */}
-              <button
-                type="button"
-                aria-pressed={vocalsOnly}
-                onClick={() => setVocalsOnly((v) => !v)}
-                className={cn(
-                  "flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
-                  vocalsOnly
-                    ? "border-primary bg-primary/20 shadow-glow"
-                    : "border-white/10 bg-card/60 hover:border-primary/40",
+            <div className="space-y-5">
+              {/* Voice setup: vocals-only and, when on, the beat it rides. */}
+              <div className="space-y-2">
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
+                  Voice setup
+                </p>
+                <button
+                  type="button"
+                  aria-pressed={vocalsOnly}
+                  onClick={() => setVocalsOnly((v) => !v)}
+                  className={cn(
+                    "flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                    vocalsOnly
+                      ? "border-primary bg-primary/15"
+                      : "border-border bg-background hover:border-primary/40",
+                  )}
+                >
+                  <Mic2 className={cn("h-5 w-5 shrink-0", vocalsOnly ? "text-primary" : "text-muted-foreground")} />
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-bold">Vocals only</span>
+                    <span className="block text-xs text-muted-foreground">
+                      Strips every instrument — pure voice, humming at most.
+                    </span>
+                  </span>
+                  <span
+                    className={cn(
+                      "shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wider",
+                      vocalsOnly ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
+                    )}
+                  >
+                    {vocalsOnly ? "On" : "Off"}
+                  </span>
+                </button>
+
+                {vocalsOnly && (
+                  <div className="space-y-3 rounded-xl border border-border bg-background/60 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Upload a beat (optional)
+                    </p>
+                    <p className="text-xs leading-relaxed text-muted-foreground">
+                      Add an MP3 or WAV and the vocals are performed over it. Skip it and you get a
+                      pure a cappella — voice and humming only, no instruments at all.
+                    </p>
+                    <input
+                      id="wiz-beat"
+                      type="file"
+                      accept="audio/*"
+                      disabled={uploadingBeat}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        e.target.value = "";
+                        if (file) void uploadBeat(file);
+                      }}
+                      className="block w-full text-xs file:mr-3 file:min-h-10 file:rounded-lg file:border-0 file:bg-primary/20 file:px-4 file:py-2 file:text-xs file:font-bold file:uppercase file:tracking-wide file:text-primary"
+                    />
+                    {uploadingBeat && (
+                      <p className="text-xs font-semibold text-primary" aria-live="polite">
+                        Uploading beat…
+                      </p>
+                    )}
+                    {beatPath && !uploadingBeat && (
+                      <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
+                        <Music4 className="h-4 w-4 text-primary" />
+                        <span className="min-w-0 flex-1 truncate">{beatName}</span>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 text-muted-foreground hover:text-destructive"
+                          onClick={() => {
+                            setBeatPath("");
+                            setBeatName("");
+                          }}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 )}
-              >
-                <Mic2 className={cn("h-5 w-5 shrink-0", vocalsOnly ? "text-primary" : "text-muted-foreground")} />
-                <span className="min-w-0">
-                  <span className="block text-sm font-black uppercase tracking-wide">
-                    Vocals only {vocalsOnly ? "· ON" : "· OFF"}
-                  </span>
-                  <span className="block text-xs text-muted-foreground">
-                    No generated instruments — just the voice.
-                  </span>
-                </span>
-              </button>
+              </div>
 
               {/* Content rating — replaces the old foul mouth toggle. */}
               <div className="space-y-2">
@@ -526,24 +584,24 @@ export function CreateNowWizard({
                     disabled={ratingSaving}
                     onClick={() => setFoulMouth.mutate(false)}
                     className={cn(
-                      "flex flex-col items-center gap-1.5 rounded-2xl border px-3 py-4 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-60",
+                      "flex flex-col items-center gap-1.5 rounded-xl border px-3 py-3 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-60",
                       !foulMouth
-                        ? "border-emerald-400 bg-emerald-400/15 shadow-glow"
-                        : "border-white/10 bg-card/60 hover:border-emerald-400/40",
+                        ? "border-emerald-400 bg-emerald-400/15"
+                        : "border-border bg-background hover:border-emerald-400/40",
                     )}
                   >
                     <img
                       src={ratingPgImg}
                       alt="PG — Parental Guidance rating certificate"
                       loading="lazy"
-                      width={64}
-                      height={64}
+                      width={56}
+                      height={56}
                       className={cn(
-                        "h-16 w-16 object-contain drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)] transition",
-                        !foulMouth ? "scale-100 opacity-100" : "opacity-50 saturate-50",
+                        "h-14 w-14 object-contain transition",
+                        !foulMouth ? "opacity-100" : "opacity-50 saturate-50",
                       )}
                     />
-                    <span className="text-sm font-black uppercase tracking-wide">PG rated</span>
+                    <span className="text-sm font-bold">PG rated</span>
                     <span className="text-[11px] text-muted-foreground">Clean, family safe</span>
                   </button>
                   <button
@@ -552,39 +610,43 @@ export function CreateNowWizard({
                     disabled={ratingSaving}
                     onClick={() => setFoulMouth.mutate(true)}
                     className={cn(
-                      "flex flex-col items-center gap-1.5 rounded-2xl border px-3 py-4 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-60",
+                      "flex flex-col items-center gap-1.5 rounded-xl border px-3 py-3 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-60",
                       foulMouth
-                        ? "border-destructive bg-destructive/20 shadow-glow"
-                        : "border-white/10 bg-card/60 hover:border-destructive/40",
+                        ? "border-destructive bg-destructive/20"
+                        : "border-border bg-background hover:border-destructive/40",
                     )}
                   >
                     <img
                       src={rating18Img}
                       alt="18 — adults only rating certificate"
                       loading="lazy"
-                      width={64}
-                      height={64}
+                      width={56}
+                      height={56}
                       className={cn(
-                        "h-16 w-16 object-contain drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)] transition",
-                        foulMouth ? "scale-100 opacity-100" : "opacity-50 saturate-50",
+                        "h-14 w-14 object-contain transition",
+                        foulMouth ? "opacity-100" : "opacity-50 saturate-50",
                       )}
                     />
-                    <span className="text-sm font-black uppercase tracking-wide">18+ rated</span>
+                    <span className="text-sm font-bold">18+ rated</span>
                     <span className="text-[11px] text-muted-foreground">Explicit, no filter</span>
                   </button>
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <p className="text-xs font-semibold text-primary">
-                  Pick one or more languages — it's sung in exactly what you pick. Nothing picked
-                  means English.
-                </p>
+              <div className="space-y-2">
+                <div className="flex items-baseline justify-between gap-2">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
+                    Language
+                  </p>
+                  <p className="text-[11px] font-semibold text-muted-foreground">
+                    {languages.length ? `${languages.length} selected` : "English by default"}
+                  </p>
+                </div>
                 <div
                   role="group"
                   aria-label="Languages"
                   style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
-                  className="grid max-h-[220px] grid-cols-2 gap-2 overflow-y-auto overscroll-contain pr-1 sm:grid-cols-3"
+                  className="grid max-h-[200px] grid-cols-2 gap-2 overflow-y-auto overscroll-contain rounded-xl border border-border bg-background/40 p-2 pr-1 sm:grid-cols-3"
                 >
                   {POOLS.language.map((l) => {
                     const selected = languages.includes(l);
@@ -595,10 +657,10 @@ export function CreateNowWizard({
                         aria-pressed={selected}
                         onClick={() => setLanguages((prev) => toggle(prev, l))}
                         className={cn(
-                          "min-h-11 rounded-xl border px-3 py-2.5 text-sm font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                          "min-h-10 rounded-lg border px-3 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                           selected
-                            ? "border-primary bg-primary/20 text-foreground shadow-glow"
-                            : "border-white/10 bg-card/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
+                            ? "border-primary bg-primary/20 text-foreground"
+                            : "border-border bg-card/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
                         )}
                       >
                         {l}
@@ -606,58 +668,29 @@ export function CreateNowWizard({
                     );
                   })}
                 </div>
+                <p className="text-[11px] text-muted-foreground">
+                  It's sung in exactly what you pick — nothing picked means English.
+                </p>
               </div>
 
-              {/* Beat upload lives at the bottom, under the languages. */}
-              {vocalsOnly && (
-                <div className="space-y-3 rounded-2xl border border-white/10 bg-background/50 p-4">
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
-                    Upload a beat (optional)
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Drop in an MP3 or WAV and the vocals are written and performed over it. Skip
-                    this and you get an Islamic nasheed style a cappella with humming — no
-                    instruments at all.
-                  </p>
-                  <input
-                    id="wiz-beat"
-                    type="file"
-                    accept="audio/*"
-                    disabled={uploadingBeat}
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      e.target.value = "";
-                      if (file) void uploadBeat(file);
-                    }}
-                    className="block w-full text-xs file:mr-3 file:min-h-10 file:rounded-xl file:border-0 file:bg-primary/20 file:px-4 file:py-2 file:text-xs file:font-black file:uppercase file:tracking-wide file:text-primary"
-                  />
-                  {uploadingBeat && (
-                    <p className="text-xs font-semibold text-primary" aria-live="polite">
-                      Uploading beat…
-                    </p>
-                  )}
-                  {beatPath && !uploadingBeat && (
-                    <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
-                      <Music4 className="h-4 w-4 text-primary" />
-                      <span className="min-w-0 flex-1 truncate">{beatName}</span>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        className="h-8 text-muted-foreground hover:text-destructive"
-                        onClick={() => {
-                          setBeatPath("");
-                          setBeatName("");
-                        }}
-                      >
-                        Remove
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              )}
+              {/* Final review so nothing is a surprise before spending coins. */}
+              <div className="space-y-1 rounded-xl border border-border bg-background/60 p-3 text-xs">
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
+                  Review
+                </p>
+                <p className="font-semibold text-foreground">{title.trim() || "Untitled"}</p>
+                <p className="text-muted-foreground">
+                  {styles.join(", ") || "No style"} · {targetMinutes} min ·{" "}
+                  {(languages.length ? languages : ["English"]).join(", ")}
+                </p>
+                <p className="text-muted-foreground">
+                  {gender || "Any voice"} · {vocalsOnly ? (beatPath ? "Vocals over your beat" : "A cappella, no instruments") : "Full production"} ·{" "}
+                  {foulMouth ? "18+" : "PG"}
+                </p>
+              </div>
             </div>
           )}
+
 
         </div>
 
@@ -667,7 +700,7 @@ export function CreateNowWizard({
           </p>
         )}
 
-        <div className="flex flex-wrap items-center gap-2 pt-1">
+        <div className="sticky bottom-0 -mx-6 mt-1 flex flex-wrap items-center gap-2 border-t border-white/10 bg-card/95 px-6 pb-1 pt-3 backdrop-blur-xl">
           <Button
             type="button"
             variant="ghost"
