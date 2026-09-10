@@ -448,8 +448,13 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
           toast.error("That username is taken — check your password.");
           return;
         }
+        if (upMsg.includes("disabled")) {
+          toast.error("Username sign-up is switched off right now — use Google or Apple, or try again shortly.");
+          return;
+        }
         throw signUp.error;
       }
+
       if (signUp.data.user?.identities?.length === 0) {
         toast.error("That username is taken — check your password.");
         return;
