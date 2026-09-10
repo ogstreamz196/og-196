@@ -117,9 +117,19 @@ Deno.serve(async (req) => {
     const multiStyleHint = styleCount > 1
       ? `multi-genre arrangement blending ${rawStyle}, each section performed in the genre its lyric section marker names, deliberate transitions between sections`
       : null;
+    // For pure a cappella, genre names must only colour the vocal delivery —
+    // naming genres outright makes the engine add backing instrumentation.
+    const styleParts = acappella
+      ? [
+        vocalsOnlyStyle,
+        rawStyle ? `${rawStyle} vocal delivery, cadence and phrasing performed by voice alone` : null,
+        languageStyleHint,
+        vocalStyle,
+        lengthStyleHint,
+      ]
+      : [rawStyle, multiStyleHint, languageStyleHint, vocalStyle, vocalsOnlyStyle, lengthStyleHint];
     const style = limitText(
-      [rawStyle, multiStyleHint, languageStyleHint, vocalStyle, vocalsOnlyStyle, lengthStyleHint]
-        .filter(Boolean).join(", ") || null,
+      styleParts.filter(Boolean).join(", ") || null,
       MAX_STYLE_CHARS,
     );
     const lyrics = limitText((body.lyrics ?? "").toString().trim() || null, MAX_PROMPT_CHARS);
