@@ -667,7 +667,7 @@ export function CreateNowWizard({
           </p>
         )}
 
-        <div className="flex flex-wrap items-center gap-2 pt-1">
+        <div className="sticky bottom-0 -mx-6 mt-1 flex flex-wrap items-center gap-2 border-t border-white/10 bg-card/95 px-6 pb-1 pt-3 backdrop-blur-xl">
           <Button
             type="button"
             variant="ghost"
