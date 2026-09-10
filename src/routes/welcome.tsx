@@ -415,8 +415,13 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
         return;
       }
       const msg = (signIn.error.message ?? "").toLowerCase();
+      if (msg.includes("disabled")) {
+        toast.error("Username sign-up is switched off right now — use Google or Apple, or try again shortly.");
+        return;
+      }
       const unknownUser = msg.includes("invalid login credentials") || msg.includes("user not found");
       if (!unknownUser) throw signIn.error;
+
 
       // 2) Device limit: max 2 accounts per device (blocks free-coin farming).
       const deviceId = getDeviceId();
