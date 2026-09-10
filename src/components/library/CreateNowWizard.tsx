@@ -187,7 +187,7 @@ export function CreateNowWizard({
       case 2:
         return styles.length > 0;
       case 3:
-        // Beat upload is always optional — skipping gives nasheed-style vocals.
+        // Beat upload is always optional — skipping gives a pure a cappella.
         return !uploadingBeat;
       default:
         // English is always included in the remix, so selecting English alone
