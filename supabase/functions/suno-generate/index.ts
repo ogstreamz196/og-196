@@ -14,10 +14,15 @@ const SUNO_API_KEY = Deno.env.get("SUNO_API_KEY")!;
 const SUNO_API_URL = "https://apibox.erweima.ai/api/v1/generate";
 // Used when the user uploads their own beat — Suno performs vocals over it.
 const SUNO_UPLOAD_COVER_URL = "https://apibox.erweima.ai/api/v1/generate/upload-cover";
-const NASHEED_STYLE =
-  "islamic nasheed, a cappella, vocals only, humming, no instruments, no percussion";
+const ACAPPELLA_STYLE =
+  "a cappella, vocals only, unaccompanied solo voice with layered vocal harmonies and humming, " +
+  "human beatbox-free, absolutely no instruments, no drums, no percussion, no bass, no 808, " +
+  "no synths, no piano, no guitar, no strings, dry close-mic vocal with light natural reverb";
 const VOCALS_OVER_BEAT_STYLE =
   "vocals only, a cappella lead vocal riding the supplied beat, no added instruments";
+const NO_INSTRUMENT_NEGATIVES =
+  "instruments, instrumental, drums, percussion, bass, 808, synth, piano, guitar, strings, " +
+  "brass, orchestra, backing track, beat, band";
 const MAX_PROMPT_CHARS = 4_800;
 const MAX_STYLE_CHARS = 900;
 const MAX_TITLE_CHARS = 80;
