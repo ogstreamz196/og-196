@@ -704,7 +704,8 @@ export function CreateNowWizard({
           )}
         </div>
 
-        <div className="-mx-4 mt-1 flex shrink-0 flex-wrap items-center gap-2 border-t border-white/10 bg-card/95 px-4 pb-1 pt-3 backdrop-blur-xl sm:-mx-6 sm:px-6">
+        <div className="-mx-4 mt-1 flex shrink-0 flex-nowrap items-center gap-2 border-t border-white/10 bg-card/95 px-4 pb-1 pt-3 backdrop-blur-xl sm:-mx-6 sm:px-6">
+
 
           <Button
             type="button"
