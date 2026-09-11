@@ -286,7 +286,7 @@ export function CreateNowWizard({
         className="flex max-h-[calc(100dvh-1.5rem)] w-[calc(100vw-1.5rem)] max-w-lg flex-col gap-3 overflow-hidden rounded-2xl border border-white/10 bg-card/95 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-2xl shadow-2xl"
       >
         <DialogHeader className="shrink-0 space-y-2 text-left">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center justify-between gap-3 pr-8">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/15 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-primary">
               <Sparkles className="h-3 w-3" />
               Create now
