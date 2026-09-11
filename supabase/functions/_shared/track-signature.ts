@@ -29,10 +29,14 @@ const MAX_TAGS = 4;
  * Insert the hidden signature into a lyric sheet at ~one tag per minute.
  * Returns the original text unchanged when there is nothing to tag.
  */
-export function injectSignature(lyrics: string | null | undefined): string | null {
+export function injectSignature(
+  lyrics: string | null | undefined,
+  opts?: { acappella?: boolean },
+): string | null {
   const text = (lyrics ?? "").trim();
   if (!text) return lyrics ?? null;
   if (text.toLowerCase().includes("o g streamz dot co dot uk")) return text;
+  const tagLine = opts?.acappella ? SIGNATURE_LINE_ACAPPELLA : SIGNATURE_LINE;
 
   const lines = text.split("\n");
   const contentCount = lines.filter((l) => l.trim() && !/^\s*\[.*\]\s*$/.test(l)).length;
