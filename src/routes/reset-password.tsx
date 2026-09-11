@@ -151,7 +151,7 @@ function ResetPasswordPage() {
   };
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center gap-6 px-4 py-10">
+    <main className="safe-top safe-bottom safe-x mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center gap-6 px-4 py-10">
       <header className="text-center">
         <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl border-2 border-primary/40 bg-primary/15">
           <KeyRound className="h-7 w-7 text-primary" aria-hidden />

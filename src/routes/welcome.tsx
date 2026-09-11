@@ -613,7 +613,7 @@ function WelcomePage() {
   useRedirectIfSignedIn();
   return (
     <AdminEditModeProvider>
-      <main suppressHydrationWarning className="relative min-h-dvh overflow-x-hidden text-foreground">
+      <main suppressHydrationWarning className="safe-top safe-bottom safe-x relative min-h-dvh overflow-x-hidden text-foreground">
         <WelcomeBackdrop />
         <TopNav />
         <Hero />

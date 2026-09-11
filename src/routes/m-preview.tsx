@@ -36,7 +36,7 @@ function MobilePreview() {
   const target = useMemo(() => (custom.trim() ? custom.trim() : route), [custom, route]);
 
   return (
-    <div className="min-h-dvh bg-background safe-top safe-x">
+    <div className="safe-top safe-bottom safe-x min-h-dvh bg-background">
       <header className="mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 pt-4 sm:flex sm:items-end sm:justify-between sm:px-6">
         <div className="min-w-0">
           <h1 className="truncate text-xl font-bold sm:text-2xl">Mobile preview</h1>
