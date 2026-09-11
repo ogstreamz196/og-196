@@ -319,9 +319,18 @@ Deno.serve(async (req) => {
     // minute. Only the payload sent to Suno carries it — the stored/displayed
     // lyrics stay clean. Instrumental tracks have no vocals, so skip them.
     const isInstrumental = vocalsOnly ? false : instrumental;
+    // Pure a cappella: rewrite any production section markers (drops,
+    // instrumental breaks, beat switches) as voice-only moments so the engine
+    // never hears a word that invites instruments.
+    const voiceOnlyLyrics = acappella && effectiveLyrics
+      ? effectiveLyrics.replace(
+          /\[(?:[^\]]*\b(?:drop|instrumental|break|beat|bass|808|solo|interlude|outro beat|intro beat)\b[^\]]*)\]/gi,
+          "[Humming vocal interlude — voices only, no instruments]",
+        )
+      : effectiveLyrics;
     const signedLyrics = isInstrumental
-      ? effectiveLyrics
-      : limitText(injectSignature(effectiveLyrics), MAX_PROMPT_CHARS);
+      ? voiceOnlyLyrics
+      : limitText(injectSignature(voiceOnlyLyrics, { acappella }), MAX_PROMPT_CHARS);
     const signedPrompt = isInstrumental
       ? effectivePrompt
       : limitText(withSignatureHint(effectivePrompt), MAX_PROMPT_CHARS) ?? effectivePrompt;
