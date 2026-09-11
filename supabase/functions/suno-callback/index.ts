@@ -30,6 +30,9 @@ const AUDIO_HOST_ALLOWLIST = [
   "aiquickdraw.com",
   "musicfile.removeai.ai",
   "removeai.ai",
+  // Live stream host used by the early "first"/"text" callback.
+  "audiostream.api.box",
+  "api.box",
 ];
 
 function hostAllowed(u: string): boolean {
