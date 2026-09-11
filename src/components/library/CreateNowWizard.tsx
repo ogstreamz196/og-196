@@ -283,10 +283,9 @@ export function CreateNowWizard({
           e.preventDefault();
           requestClose();
         }}
-        style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
-        className="max-h-[calc(100dvh-1.5rem)] w-[calc(100vw-1.5rem)] max-w-lg overflow-y-auto overscroll-contain rounded-2xl border border-white/10 bg-card/95 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-2xl shadow-2xl"
+        className="flex max-h-[calc(100dvh-1.5rem)] w-[calc(100vw-1.5rem)] max-w-lg flex-col gap-3 overflow-hidden rounded-2xl border border-white/10 bg-card/95 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-2xl shadow-2xl"
       >
-        <DialogHeader className="space-y-2 text-left">
+        <DialogHeader className="shrink-0 space-y-2 text-left">
           <div className="flex items-center justify-between gap-3">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/15 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-primary">
               <Sparkles className="h-3 w-3" />
@@ -324,6 +323,10 @@ export function CreateNowWizard({
 
         </DialogHeader>
 
+        <div
+          className="-mx-1 min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain px-1"
+          style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
+        >
         <div
           key={step}
           className="min-h-[168px] animate-in fade-in slide-in-from-right-4 py-1 duration-300"
@@ -694,13 +697,15 @@ export function CreateNowWizard({
 
         </div>
 
-        {hint && (
-          <p className="text-xs font-medium text-muted-foreground" aria-live="polite">
-            {hint}
-          </p>
-        )}
+          {hint && (
+            <p className="text-xs font-medium text-muted-foreground" aria-live="polite">
+              {hint}
+            </p>
+          )}
+        </div>
 
-        <div className="sticky bottom-0 -mx-6 mt-1 flex flex-wrap items-center gap-2 border-t border-white/10 bg-card/95 px-6 pb-1 pt-3 backdrop-blur-xl">
+        <div className="-mx-4 mt-1 flex shrink-0 flex-wrap items-center gap-2 border-t border-white/10 bg-card/95 px-4 pb-1 pt-3 backdrop-blur-xl sm:-mx-6 sm:px-6">
+
           <Button
             type="button"
             variant="ghost"
