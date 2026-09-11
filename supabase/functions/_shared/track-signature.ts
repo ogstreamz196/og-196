@@ -56,12 +56,12 @@ export function injectSignature(
     const isContent = !!line.trim() && !/^\s*\[.*\]\s*$/.test(line);
     if (isContent) seen += 1;
     if (isContent && placed < tags && seen >= nextAt) {
-      out.push(SIGNATURE_LINE);
+      out.push(tagLine);
       placed += 1;
       nextAt = seen + step;
     }
   }
-  if (placed === 0) out.push(SIGNATURE_LINE);
+  if (placed === 0) out.push(tagLine);
   return out.join("\n");
 }
 
