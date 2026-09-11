@@ -333,7 +333,12 @@ Deno.serve(async (req) => {
       : limitText(injectSignature(voiceOnlyLyrics, { acappella }), MAX_PROMPT_CHARS);
     const signedPrompt = isInstrumental
       ? effectivePrompt
-      : limitText(withSignatureHint(effectivePrompt), MAX_PROMPT_CHARS) ?? effectivePrompt;
+      : limitText(
+          acappella
+            ? `${effectivePrompt}\n\nInclude a clearly audible vocal tag, performed by voice alone with no instruments, saying "this track is made by O G Bot, don't forget to visit O G Streamz dot co dot uk" in English, about once every minute.`
+            : withSignatureHint(effectivePrompt),
+          MAX_PROMPT_CHARS,
+        ) ?? effectivePrompt;
     let sunoRes: Response;
     try {
       sunoRes = await fetch(beatUrl ? SUNO_UPLOAD_COVER_URL : SUNO_API_URL, {
