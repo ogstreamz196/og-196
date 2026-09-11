@@ -15,14 +15,16 @@ const SUNO_API_URL = "https://apibox.erweima.ai/api/v1/generate";
 // Used when the user uploads their own beat — Suno performs vocals over it.
 const SUNO_UPLOAD_COVER_URL = "https://apibox.erweima.ai/api/v1/generate/upload-cover";
 const ACAPPELLA_STYLE =
-  "a cappella, vocals only, unaccompanied solo voice with layered vocal harmonies and humming, " +
-  "human beatbox-free, absolutely no instruments, no drums, no percussion, no bass, no 808, " +
-  "no synths, no piano, no guitar, no strings, dry close-mic vocal with light natural reverb";
+  "pure a cappella, vocals only, unaccompanied human voice with layered vocal harmonies and humming, " +
+  "every sound made by the human voice and mouth only, absolutely no instruments, no music, no drums, " +
+  "no percussion, no bass, no 808, no synths, no piano, no guitar, no strings, no sound effects, " +
+  "dry close-mic vocal with light natural room reverb";
 const VOCALS_OVER_BEAT_STYLE =
   "vocals only, a cappella lead vocal riding the supplied beat, no added instruments";
 const NO_INSTRUMENT_NEGATIVES =
-  "instruments, instrumental, drums, percussion, bass, 808, synth, piano, guitar, strings, " +
-  "brass, orchestra, backing track, beat, band";
+  "instruments, instrumental, music, backing music, backing track, drums, percussion, bass, 808, " +
+  "synth, synthesizer, piano, keys, guitar, strings, brass, orchestra, band, beat, producer tag beat, " +
+  "sound effects, ambience, dj, scratching, sampler, drum machine";
 const MAX_PROMPT_CHARS = 4_800;
 const MAX_STYLE_CHARS = 900;
 const MAX_TITLE_CHARS = 80;
