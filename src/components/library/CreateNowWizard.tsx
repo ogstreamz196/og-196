@@ -694,13 +694,15 @@ export function CreateNowWizard({
 
         </div>
 
-        {hint && (
-          <p className="text-xs font-medium text-muted-foreground" aria-live="polite">
-            {hint}
-          </p>
-        )}
+          {hint && (
+            <p className="text-xs font-medium text-muted-foreground" aria-live="polite">
+              {hint}
+            </p>
+          )}
+        </div>
 
-        <div className="sticky bottom-0 -mx-6 mt-1 flex flex-wrap items-center gap-2 border-t border-white/10 bg-card/95 px-6 pb-1 pt-3 backdrop-blur-xl">
+        <div className="-mx-4 mt-1 flex shrink-0 flex-wrap items-center gap-2 border-t border-white/10 bg-card/95 px-4 pb-1 pt-3 backdrop-blur-xl sm:-mx-6 sm:px-6">
+
           <Button
             type="button"
             variant="ghost"
