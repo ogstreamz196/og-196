@@ -45,6 +45,8 @@ export function InstallAppPrompt() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (isStandalone() || wasDismissedRecently()) return;
+    // iOS: install prompt removed — never show anything on iPhone/iPad.
+    if (isIOS()) return;
 
     const handler = (e: Event) => {
       e.preventDefault();
