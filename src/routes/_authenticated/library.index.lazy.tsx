@@ -579,11 +579,13 @@ function LibraryPage() {
   /* Watchdog: if a stage hangs (provider outage, lost callback) we surface a
    * clear timeout error instead of spinning forever. Inputs stay in state so
    * the retry button can re-run the exact same request. */
+  // Long / a cappella tracks legitimately take minutes to write and render, so
+  // these are generous — a premature timeout charged the coins and lost the run.
   const STAGE_TIMEOUT_MS: Record<string, number> = {
-    lyrics: 120_000,
-    saving: 30_000,
-    submitting: 60_000,
-    rendering: 360_000,
+    lyrics: 420_000,
+    saving: 60_000,
+    submitting: 120_000,
+    rendering: 900_000,
   };
   useEffect(() => {
     const limit = STAGE_TIMEOUT_MS[pipeline.stage];
