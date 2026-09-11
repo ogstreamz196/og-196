@@ -197,7 +197,7 @@ Deno.serve(async (req) => {
     const isBallad = /(ballad|acoustic|piano|folk|country|singer[- ]songwriter)/.test(tagsLower);
     const isDance = /(dance|edm|house|techno|club|electro|pop)/.test(tagsLower);
     const isRock = /(rock|metal|punk|indie|alt)/.test(tagsLower);
-    const vocalsOnly = body.vocalsOnly === true;
+    const vocalsOnly = body.vocalsOnly === true || body.vocals_only === true;
 
     const structure = vocalsOnly
       ? "[Intro – hummed melody, voices only] (4 lines) → [Verse 1] (8 lines) → [Chorus] (6 lines, layered vocal harmonies) → [Verse 2] (8 lines) → [Chorus] (6 lines) → [Humming Interlude – voices only] (4 lines) → [Bridge] (6 lines, whispered then sung) → [Chorus] (x2, 12 lines) → [Outro – soft humming fades] (4 lines)"
