@@ -55,15 +55,6 @@ export function InstallAppPrompt() {
     };
     window.addEventListener("beforeinstallprompt", handler);
 
-    // iOS Safari never fires beforeinstallprompt — surface manual instructions.
-    if (isIOS()) {
-      const t = window.setTimeout(() => setOpen(true), 4000);
-      return () => {
-        window.removeEventListener("beforeinstallprompt", handler);
-        window.clearTimeout(t);
-      };
-    }
-
     const installedHandler = () => setOpen(false);
     window.addEventListener("appinstalled", installedHandler);
 
