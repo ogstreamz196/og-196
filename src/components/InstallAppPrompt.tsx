@@ -45,6 +45,8 @@ export function InstallAppPrompt() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (isStandalone() || wasDismissedRecently()) return;
+    // iOS: install prompt removed — never show anything on iPhone/iPad.
+    if (isIOS()) return;
 
     const handler = (e: Event) => {
       e.preventDefault();
@@ -52,15 +54,6 @@ export function InstallAppPrompt() {
       setOpen(true);
     };
     window.addEventListener("beforeinstallprompt", handler);
-
-    // iOS Safari never fires beforeinstallprompt — surface manual instructions.
-    if (isIOS()) {
-      const t = window.setTimeout(() => setOpen(true), 4000);
-      return () => {
-        window.removeEventListener("beforeinstallprompt", handler);
-        window.clearTimeout(t);
-      };
-    }
 
     const installedHandler = () => setOpen(false);
     window.addEventListener("appinstalled", installedHandler);
@@ -96,6 +89,7 @@ export function InstallAppPrompt() {
   }
 
   if (!open) return null;
+  if (isIOS()) return null;
 
   const ios = isIOS();
 
