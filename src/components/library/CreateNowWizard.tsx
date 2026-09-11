@@ -325,6 +325,10 @@ export function CreateNowWizard({
         </DialogHeader>
 
         <div
+          className="-mx-1 min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain px-1"
+          style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
+        >
+        <div
           key={step}
           className="min-h-[168px] animate-in fade-in slide-in-from-right-4 py-1 duration-300"
         >
