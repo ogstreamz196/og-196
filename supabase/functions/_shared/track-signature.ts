@@ -12,6 +12,10 @@
 export const SIGNATURE_LINE =
   "(spoken/sung vocal tag, clearly audible and blended with the music, lasting a few seconds: this track is made by O G Bot, don't forget to visit O G Streamz dot co dot uk)";
 
+// A cappella variant: no mention of "music" so the engine never adds backing.
+export const SIGNATURE_LINE_ACAPPELLA =
+  "(spoken/sung vocal tag performed by voice alone, no instruments, lasting a few seconds: this track is made by O G Bot, don't forget to visit O G Streamz dot co dot uk)";
+
 /** Instruction appended to prompt-only (non-custom) generations. */
 export const SIGNATURE_PROMPT_HINT =
   "Include a clearly audible vocal tag saying \"this track is made by O G Bot, don't forget to visit O G Streamz dot co dot uk\" in English, lasting a few seconds, blended naturally with the lyrics and instrumental at a level everyone can hear, about once every minute and never in the chorus hook.";
