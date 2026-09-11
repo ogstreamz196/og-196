@@ -89,6 +89,7 @@ export function InstallAppPrompt() {
   }
 
   if (!open) return null;
+  if (isIOS()) return null;
 
   const ios = isIOS();
 
