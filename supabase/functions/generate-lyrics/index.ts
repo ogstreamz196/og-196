@@ -197,8 +197,11 @@ Deno.serve(async (req) => {
     const isBallad = /(ballad|acoustic|piano|folk|country|singer[- ]songwriter)/.test(tagsLower);
     const isDance = /(dance|edm|house|techno|club|electro|pop)/.test(tagsLower);
     const isRock = /(rock|metal|punk|indie|alt)/.test(tagsLower);
+    const vocalsOnly = body.vocalsOnly === true || body.vocals_only === true;
 
-    const structure = isRap
+    const structure = vocalsOnly
+      ? "[Intro – hummed melody, voices only] (4 lines) → [Verse 1] (8 lines) → [Chorus] (6 lines, layered vocal harmonies) → [Verse 2] (8 lines) → [Chorus] (6 lines) → [Humming Interlude – voices only] (4 lines) → [Bridge] (6 lines, whispered then sung) → [Chorus] (x2, 12 lines) → [Outro – soft humming fades] (4 lines)"
+      : isRap
       ? "[Intro] (4 lines) → [Verse 1] (16 bars) → [Hook] (8 bars, catchy repeatable) → [Verse 2] (16 bars) → [Hook] → [Bridge] (8 bars) → [Verse 3] (12 bars) → [Hook] (x2) → [Outro] (4 lines, ad-libs ok)"
       : isBallad
       ? "[Intro] (4 lines, scene-setting) → [Verse 1] (8 lines) → [Chorus] (6 lines, memorable hook) → [Verse 2] (8 lines) → [Chorus] (6 lines) → [Bridge] (6 lines, emotional turn) → [Final Chorus] (8 lines, lifted, optional key change cue in parentheses) → [Outro] (4 lines)"
@@ -212,12 +215,16 @@ Deno.serve(async (req) => {
       ? ` MULTI-STYLE REQUIREMENT (critical): the artist picked ${styleTags.length} styles — ${styleTags.join(", ")}. Every one must be audible in the finished track, so give each style its own section and note it on the marker line, e.g. "[Verse 2 – ${styleTags[1]}]". Match each section's cadence, line length, rhyme density and vocabulary to that style (rap sections in bars with tight internal rhyme, ballad sections in longer sung lines, dance sections in short chantable lines), and let the transitions feel deliberate rather than random. The hook blends the two lead styles (${styleTags.slice(0, 2).join(" + ")}).`
       : "";
 
+    const vocalsOnlyRule = vocalsOnly
+      ? ` VOCALS-ONLY REQUIREMENT (critical): this is a pure a cappella track — human voice and humming ONLY, zero instruments. Section markers must only ever describe vocal moments (e.g. [Verse], [Chorus], [Humming Interlude], [Whisper], [Ad-libs]). NEVER write [Drop], [Beat Drop], [Instrumental], [Guitar Solo], [Break] or any marker that names an instrument or production element — write "humming", "vocal run" or "layered harmonies" instead.`
+      : "";
+
     const structureRule =
       ` Deliver a COMPLETE, performable song that runs ${targetLabel} when sung — NOT longer. That means ${aimLow}–${aimHigh} words and ${minLines}–${aimLines} lyric lines (excluding section markers). Going over ${aimHigh} words is a failure: trim sections rather than exceed it. Follow this structure for the chosen style: ${structure}.` +
       ` Use the bracketed section markers verbatim (e.g. [Verse 1], [Chorus], [Bridge], [Outro]), each on its own line, with a blank line between sections. Every section must have lyrics — no placeholders, no "(instrumental)" unless the structure explicitly says so.` +
       ` The [Chorus] must be written out IN FULL every time it appears (never write "repeat chorus" or "x2" as a shortcut) — it is the same repeatable hook tied to the song title or central theme.` +
       ` Do NOT cut the song short either — hit every section in the structure and stay inside the word range given.` +
-      multiStyleRule + multiLanguageRule + singleLanguageRule + englishRemixRule;
+      multiStyleRule + multiLanguageRule + singleLanguageRule + englishRemixRule + vocalsOnlyRule;
 
 
     const systemPrompt = foulMouth

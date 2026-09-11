@@ -701,6 +701,7 @@ function LibraryPage() {
             extraContext: combinedExtra || undefined,
             subjectName: songSubject || undefined,
             targetDurationSec: overrideTargetSec,
+            vocalsOnly,
           },
         },
       );

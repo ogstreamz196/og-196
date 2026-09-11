@@ -12,6 +12,10 @@
 export const SIGNATURE_LINE =
   "(spoken/sung vocal tag, clearly audible and blended with the music, lasting a few seconds: this track is made by O G Bot, don't forget to visit O G Streamz dot co dot uk)";
 
+// A cappella variant: no mention of "music" so the engine never adds backing.
+export const SIGNATURE_LINE_ACAPPELLA =
+  "(spoken/sung vocal tag performed by voice alone, no instruments, lasting a few seconds: this track is made by O G Bot, don't forget to visit O G Streamz dot co dot uk)";
+
 /** Instruction appended to prompt-only (non-custom) generations. */
 export const SIGNATURE_PROMPT_HINT =
   "Include a clearly audible vocal tag saying \"this track is made by O G Bot, don't forget to visit O G Streamz dot co dot uk\" in English, lasting a few seconds, blended naturally with the lyrics and instrumental at a level everyone can hear, about once every minute and never in the chorus hook.";
@@ -25,10 +29,14 @@ const MAX_TAGS = 4;
  * Insert the hidden signature into a lyric sheet at ~one tag per minute.
  * Returns the original text unchanged when there is nothing to tag.
  */
-export function injectSignature(lyrics: string | null | undefined): string | null {
+export function injectSignature(
+  lyrics: string | null | undefined,
+  opts?: { acappella?: boolean },
+): string | null {
   const text = (lyrics ?? "").trim();
   if (!text) return lyrics ?? null;
   if (text.toLowerCase().includes("o g streamz dot co dot uk")) return text;
+  const tagLine = opts?.acappella ? SIGNATURE_LINE_ACAPPELLA : SIGNATURE_LINE;
 
   const lines = text.split("\n");
   const contentCount = lines.filter((l) => l.trim() && !/^\s*\[.*\]\s*$/.test(l)).length;
@@ -48,12 +56,12 @@ export function injectSignature(lyrics: string | null | undefined): string | nul
     const isContent = !!line.trim() && !/^\s*\[.*\]\s*$/.test(line);
     if (isContent) seen += 1;
     if (isContent && placed < tags && seen >= nextAt) {
-      out.push(SIGNATURE_LINE);
+      out.push(tagLine);
       placed += 1;
       nextAt = seen + step;
     }
   }
-  if (placed === 0) out.push(SIGNATURE_LINE);
+  if (placed === 0) out.push(tagLine);
   return out.join("\n");
 }
 
