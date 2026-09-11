@@ -712,38 +712,41 @@ export function CreateNowWizard({
             variant="ghost"
             disabled={step === 1}
             onClick={() => setStep((s) => Math.max(1, s - 1))}
-            className="min-h-11 gap-1.5"
+            className="min-h-11 shrink-0 gap-1.5 px-2.5 sm:px-4"
+            aria-label="Back"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back
+            <span className="hidden sm:inline">Back</span>
           </Button>
           <Button
             type="button"
             variant="ghost"
             onClick={requestClose}
-            className="min-h-11 gap-1.5 text-muted-foreground hover:text-destructive"
+            className="min-h-11 shrink-0 gap-1.5 px-2.5 text-muted-foreground hover:text-destructive sm:px-4"
+            aria-label="Cancel"
           >
             <X className="h-4 w-4" />
-            Cancel
+            <span className="hidden sm:inline">Cancel</span>
           </Button>
           <Button
             type="button"
             onClick={next}
             disabled={!stepValid}
-            className="ml-auto min-h-11 flex-1 gap-1.5 bg-gradient-brand font-black uppercase tracking-wide text-primary-foreground shadow-glow sm:flex-none"
+            className="ml-auto min-h-11 min-w-0 flex-1 gap-1.5 whitespace-nowrap bg-gradient-brand font-black uppercase tracking-wide text-primary-foreground shadow-glow sm:flex-none"
           >
             {step === TOTAL_STEPS ? (
               <>
-                <Check className="h-4 w-4" />
-                {submitLabel}
+                <Check className="h-4 w-4 shrink-0" />
+                <span className="truncate">{submitLabel}</span>
               </>
             ) : (
               <>
                 Next
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4 shrink-0" />
               </>
             )}
           </Button>
+
         </div>
       </DialogContent>
 
