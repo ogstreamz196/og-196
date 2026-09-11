@@ -286,7 +286,7 @@ export function CreateNowWizard({
         className="flex max-h-[calc(100dvh-1.5rem)] w-[calc(100vw-1.5rem)] max-w-lg flex-col gap-3 overflow-hidden rounded-2xl border border-white/10 bg-card/95 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-2xl shadow-2xl"
       >
         <DialogHeader className="shrink-0 space-y-2 text-left">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center justify-between gap-3 pr-8">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/15 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-primary">
               <Sparkles className="h-3 w-3" />
               Create now
@@ -704,45 +704,49 @@ export function CreateNowWizard({
           )}
         </div>
 
-        <div className="-mx-4 mt-1 flex shrink-0 flex-wrap items-center gap-2 border-t border-white/10 bg-card/95 px-4 pb-1 pt-3 backdrop-blur-xl sm:-mx-6 sm:px-6">
+        <div className="-mx-4 mt-1 flex shrink-0 flex-nowrap items-center gap-2 border-t border-white/10 bg-card/95 px-4 pb-1 pt-3 backdrop-blur-xl sm:-mx-6 sm:px-6">
+
 
           <Button
             type="button"
             variant="ghost"
             disabled={step === 1}
             onClick={() => setStep((s) => Math.max(1, s - 1))}
-            className="min-h-11 gap-1.5"
+            className="min-h-11 shrink-0 gap-1.5 px-2.5 sm:px-4"
+            aria-label="Back"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back
+            <span className="hidden sm:inline">Back</span>
           </Button>
           <Button
             type="button"
             variant="ghost"
             onClick={requestClose}
-            className="min-h-11 gap-1.5 text-muted-foreground hover:text-destructive"
+            className="min-h-11 shrink-0 gap-1.5 px-2.5 text-muted-foreground hover:text-destructive sm:px-4"
+            aria-label="Cancel"
           >
             <X className="h-4 w-4" />
-            Cancel
+            <span className="hidden sm:inline">Cancel</span>
           </Button>
           <Button
             type="button"
             onClick={next}
             disabled={!stepValid}
-            className="ml-auto min-h-11 flex-1 gap-1.5 bg-gradient-brand font-black uppercase tracking-wide text-primary-foreground shadow-glow sm:flex-none"
+            className="ml-auto min-h-11 min-w-0 flex-1 gap-1.5 whitespace-nowrap bg-gradient-brand font-black uppercase tracking-wide text-primary-foreground shadow-glow sm:flex-none"
           >
             {step === TOTAL_STEPS ? (
               <>
-                <Check className="h-4 w-4" />
-                {submitLabel}
+                <Check className="h-4 w-4 shrink-0" />
+                <span className="truncate">{submitLabel}</span>
               </>
             ) : (
               <>
                 Next
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4 shrink-0" />
               </>
             )}
           </Button>
+
         </div>
       </DialogContent>
 
