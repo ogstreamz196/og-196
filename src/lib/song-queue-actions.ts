@@ -42,7 +42,7 @@ export async function retryGeneration(songId: string) {
       portal_id: song.portal_id,
     },
   });
-  if (genErr) throw new Error(genErr.message || "Could not restart generation");
+  if (genErr) throw new Error(invokeError(genErr, "Could not restart generation"));
   if (data?.accepted === false) throw new Error(data.error || "Studio is busy — try again shortly");
   return data as { song_id?: string } | null;
 }
