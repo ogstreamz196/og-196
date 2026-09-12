@@ -187,7 +187,7 @@ function ChangePasswordPage() {
                 required
                 disabled={busy}
               />
-              <p className="text-xs text-muted-foreground">At least 8 characters.</p>
+              <p className="text-xs text-muted-foreground">At least 5 characters.</p>
             </div>
 
             <div className="space-y-1.5">
