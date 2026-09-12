@@ -21,8 +21,6 @@ export const Route = createFileRoute("/_authenticated/store")({
   }),
 });
 
-const ALL_TAB = "all";
-
 function StorePage() {
   const search = Route.useSearch();
   return <CoinStore editMode={search.edit} />;

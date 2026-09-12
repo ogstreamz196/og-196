@@ -24,7 +24,6 @@ export type StoreItem = {
   description: string | null;
   image_url: string | null;
   price_cents: number;
-  coin_price?: number | null;
   coin_price: number | null;
   currency: string;
   recurring_interval: "month" | "year" | null;
@@ -234,6 +233,7 @@ type UpsertInput = {
   description?: string | null;
   image_url?: string | null;
   price_cents: number;
+  coin_price?: number | null;
   currency: string;
   recurring_interval?: "month" | "year" | null;
   stock?: number | null;

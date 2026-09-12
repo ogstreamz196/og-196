@@ -36,7 +36,7 @@ export function StoreItemsSection() {
   const categories = catalog.data?.categories ?? [];
   const allItems = useMemo(() => categories.flatMap((category) => category.items), [categories]);
   const returnUrl = useMemo(
-    () => `${window.location.origin}/buy-coins/return?session_id={CHECKOUT_SESSION_ID}`,
+    () => `${typeof window === "undefined" ? "" : window.location.origin}/buy-coins/return?session_id={CHECKOUT_SESSION_ID}`,
     [],
   );
 
