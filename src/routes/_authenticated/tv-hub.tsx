@@ -97,6 +97,9 @@ function TvHubPage() {
   const fetchPlaylist = useServerFn(loadTvHubPlaylist);
 
   const [items, setItems] = useState<PlayItem[] | null>(null);
+  const [account, setAccount] = useState<TvAccount | null>(null);
+  const [truncated, setTruncated] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
