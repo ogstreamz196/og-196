@@ -485,11 +485,11 @@ export function PurchaseHistory() {
       </div>
 
       {isLoading ? (
-        <div className="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 px-4 py-6 text-sm text-muted-foreground sm:px-5">
           <Loader2 className="h-4 w-4 animate-spin" /> Loading…
         </div>
       ) : error ? (
-        <p className="mt-6 text-sm text-destructive">Couldn't load your history.</p>
+        <p className="px-4 py-6 text-sm text-destructive sm:px-5">Couldn't load your history.</p>
       ) : (() => {
         const days = RANGE_OPTIONS.find((o) => o.key === range)?.days ?? null;
         const cutoff = days != null ? Date.now() - days * 24 * 60 * 60 * 1000 : null;
@@ -499,8 +499,8 @@ export function PurchaseHistory() {
           .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
         if (rows.length === 0) {
           return (
-            <p className="mt-6 text-sm text-muted-foreground">
-              No coin purchases in this range. Try a wider window.
+            <p className="px-4 py-6 text-sm text-muted-foreground sm:px-5">
+              No purchases in this range. Try a wider window.
             </p>
           );
         }

@@ -451,6 +451,7 @@ export const getCoinPurchaseHistory = createServerFn({ method: "GET" })
     const enriched = await Promise.all(
       stripeRows.map(async (r) => {
         const ref = parseStripeRef(r.reference)!;
+        if (!ref) return [r.id, null] as const;
         const details = await fetchStripeDetails(ref.sessionId, ref.env, userId);
         return [r.id, details] as const;
       }),
