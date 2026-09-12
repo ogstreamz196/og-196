@@ -126,14 +126,18 @@ function TvHubPage() {
     return [...counts.entries()].sort((a, b) => a[0].localeCompare(b[0]));
   }, [sectionItems]);
 
+  const searching = query.trim().length > 0;
+
   const filtered = useMemo(() => {
     const normalized = query.trim().toLowerCase();
-    return sectionItems.filter(
-      (item) =>
-        (group === "All" || item.group === group) &&
-        (!normalized || item.title.toLowerCase().includes(normalized)),
-    );
+    // Master search: with a query, search everything in the section, ignoring category.
+    if (normalized) return sectionItems.filter((item) => item.title.toLowerCase().includes(normalized));
+    if (!group || group === "All") return sectionItems;
+    return sectionItems.filter((item) => item.group === group);
   }, [group, query, sectionItems]);
+
+  // Show the channel list when a category is picked OR a master search is running.
+  const showList = searching || group !== null;
 
   const visible = filtered.slice(0, visibleCount);
   const selected = list.find((item) => item.id === selectedId) ?? null;
@@ -145,7 +149,7 @@ function TvHubPage() {
 
   const openSection = (next: Section) => {
     setSection(next);
-    setGroup("All");
+    setGroup(null);
     setQuery("");
     const first = list.find((item) => item.section === next);
     setSelectedId(first?.id ?? null);
