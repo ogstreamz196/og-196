@@ -87,9 +87,13 @@ export function StoreItemsSection() {
         <div className="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">No Store items are available yet.</div>
       ) : (
         <Tabs defaultValue={ALL_ITEMS}>
-          <TabsList className="flex h-auto w-full max-w-full flex-nowrap justify-start gap-1 overflow-x-auto bg-card p-1">
-            <TabsTrigger value={ALL_ITEMS}>All</TabsTrigger>
-            {categories.map((category) => <TabsTrigger key={category.id} value={category.slug}>{category.label}</TabsTrigger>)}
+          <TabsList className="grid h-auto w-full grid-cols-2 gap-2 bg-transparent p-0 min-[520px]:flex min-[520px]:flex-wrap min-[520px]:justify-start">
+            <TabsTrigger value={ALL_ITEMS} className="min-h-11 w-full whitespace-normal border border-border bg-store-card-muted px-3 py-2 text-center leading-tight data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground min-[520px]:w-auto">All</TabsTrigger>
+            {categories.map((category) => (
+              <TabsTrigger key={category.id} value={category.slug} className="min-h-11 w-full whitespace-normal border border-border bg-store-card-muted px-3 py-2 text-center leading-tight data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground min-[520px]:w-auto">
+                {category.label}
+              </TabsTrigger>
+            ))}
           </TabsList>
           <TabsContent value={ALL_ITEMS} className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{allItems.map(renderItem)}</TabsContent>
           {categories.map((category) => (

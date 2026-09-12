@@ -461,7 +461,7 @@ export function PurchaseHistory() {
         </Button>
       </header>
 
-      <div className="flex max-w-full gap-1 overflow-x-auto px-4 py-3 sm:px-5">
+      <div className="grid max-w-full grid-cols-2 gap-2 px-4 py-3 min-[430px]:flex min-[430px]:flex-wrap sm:px-5">
         {RANGE_OPTIONS.map((opt) => {
           const active = range === opt.key;
           return (
@@ -472,7 +472,7 @@ export function PurchaseHistory() {
               variant="outline"
               size="sm"
               className={
-                "h-9 shrink-0 rounded-md px-3 text-xs " +
+                "h-10 w-full rounded-md px-3 text-xs min-[430px]:w-auto " +
                 (active
                   ? "border-primary bg-primary/15 text-primary"
                   : "text-muted-foreground")
@@ -508,7 +508,7 @@ export function PurchaseHistory() {
           <ul className="divide-y divide-border">
             {rows.map((row) => {
               return (
-                <li key={row.id} className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 px-4 py-3 text-sm sm:px-5">
+                <li key={row.id} className="grid grid-cols-1 gap-2 px-4 py-3 text-sm min-[400px]:grid-cols-[minmax(0,1fr)_auto] min-[400px]:gap-3 sm:px-5">
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="truncate font-semibold">{row.stripe?.description || (row.type === "sports_guide_access" ? "OG Sports Guide Access" : row.type === "store_purchase" ? "Store purchase" : "OG Coin purchase")}</p>
@@ -520,7 +520,7 @@ export function PurchaseHistory() {
                     </div>
                   </div>
 
-                  <div className="flex shrink-0 flex-col items-end gap-1 text-right">
+                  <div className="flex min-w-0 flex-col items-start gap-1 text-left min-[400px]:shrink-0 min-[400px]:items-end min-[400px]:text-right">
                     <div className={`flex items-center gap-1 font-mono font-bold tabular-nums ${row.amount > 0 ? "text-primary" : "text-foreground"}`}>
                       {row.amount > 0 ? "+" : ""}{row.amount}
                       <Coins className="h-4 w-4 text-coin" />

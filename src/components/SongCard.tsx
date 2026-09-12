@@ -124,7 +124,7 @@ function SongCardImpl({ song }: { song: Song }) {
           </div>
         )}
 
-        <div className="mt-2 flex items-center justify-between gap-3">
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
           <span
             className={cn(
               "shrink-0 whitespace-nowrap text-xs font-medium",
@@ -147,7 +147,9 @@ function SongCardImpl({ song }: { song: Song }) {
               variant="ghost"
               onClick={() => download(`${song.title || "song"}.mp3`)}
             >
-              <Download className="mr-2 h-3.5 w-3.5" /> Download (free)
+              <Download className="mr-2 h-3.5 w-3.5" />
+              <span className="min-[400px]:hidden">Download</span>
+              <span className="hidden min-[400px]:inline">Download (free)</span>
             </Button>
           )}
         </div>

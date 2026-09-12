@@ -65,13 +65,13 @@ export function StoreItemCard({
   return (
     <div
       className={cn(
-        "group relative flex h-full min-w-0 flex-col overflow-hidden rounded-lg border bg-card/95 p-3 transition-colors sm:p-4",
+        "group relative flex h-full min-w-0 flex-col overflow-hidden rounded-lg border bg-store-card p-4 shadow-card transition-colors",
         r.ring,
         r.glow,
       )}
     >
       {/* rarity badge */}
-      <div className="mb-3 flex items-center justify-between">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase text-muted-foreground">
           {r.icon}
           {r.label}
@@ -134,7 +134,7 @@ export function StoreItemCard({
       </div>
 
       {/* footer */}
-      <div className="mt-auto grid grid-cols-[minmax(0,1fr)_auto] items-end gap-2 pt-4">
+      <div className="mt-auto flex flex-col gap-3 pt-4 min-[400px]:grid min-[400px]:grid-cols-[minmax(0,1fr)_auto] min-[400px]:items-end">
         <div className="min-w-0 font-mono text-lg font-bold leading-tight text-foreground sm:text-xl">
           {item.coin_price !== null ? `${item.coin_price} OG Coins` : formatPrice(item.price_cents, item.currency)}
         </div>
@@ -149,7 +149,7 @@ export function StoreItemCard({
             onBuy(item.id);
           }}
           disabled={soldOut || buying || (Boolean(ownsSportsGuide) && !sportsGuideInviteUrl)}
-          className="bg-gradient-brand font-bold uppercase tracking-wider"
+          className="w-full bg-gradient-brand font-bold uppercase tracking-wider min-[400px]:w-auto"
         >
           {buying ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : ownsSportsGuide ? <ExternalLink className="mr-1 h-4 w-4" /> : <Coins className="mr-1 h-4 w-4" />}
           {soldOut ? "Sold out" : buying ? "…" : ownsSportsGuide ? "Open group" : "Buy"}

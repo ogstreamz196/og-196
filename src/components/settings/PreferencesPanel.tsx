@@ -104,7 +104,7 @@ export function PreferencesPanel() {
             <RadioGroup
               value={display.density}
               onValueChange={(v) => setDisplay.mutate({ density: v as Density })}
-              className="grid grid-cols-3 gap-2"
+              className="grid grid-cols-1 gap-2 min-[400px]:grid-cols-3"
             >
               <ModeOption value="compact" title="Compact" body="Tighter rows." />
               <ModeOption value="comfortable" title="Comfortable" body="Default rhythm." />
@@ -117,7 +117,7 @@ export function PreferencesPanel() {
             <RadioGroup
               value={aura.level}
               onValueChange={(v) => aura.setLevel(v as AuraLevel)}
-              className="grid grid-cols-4 gap-2"
+              className="grid grid-cols-2 gap-2 sm:grid-cols-4"
             >
               <ModeOption value="off" title="Off" body="No glow." />
               <ModeOption value="low" title="Low" body="Faint hint." />
@@ -212,7 +212,7 @@ export function PreferencesPanel() {
             <RadioGroup
               value={prefs.theme}
               onValueChange={(v) => update("theme", v as "system" | "light" | "dark")}
-              className="grid grid-cols-3 gap-2"
+              className="grid grid-cols-1 gap-2 min-[400px]:grid-cols-3"
             >
               <ModeOption value="system" title="System" body="Match device." />
               <ModeOption value="light" title="Light" body="Bright surfaces." />
