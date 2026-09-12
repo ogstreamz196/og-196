@@ -418,7 +418,7 @@ function TvHubPage() {
 
       {/* guide list */}
       <section className="flex min-w-0 flex-1 flex-col" aria-label={`${activeSection.label} guide`}>
-        <p className="sticky top-0 z-10 border-b border-border bg-card/90 px-3 py-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground backdrop-blur">
+        <p className="border-b border-border bg-card/40 px-3 py-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
           {listLabel}
         </p>
         <div className="mx-auto w-full max-w-4xl p-2 sm:p-3">
