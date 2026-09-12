@@ -309,155 +309,185 @@ function TvHubPage() {
   /* -------------------------------------------------------------- browser */
   const activeSection = SECTIONS.find((entry) => entry.id === section)!;
 
+  const activeGroup = group ?? "All";
+  const listLabel = searching
+    ? `Results · ${filtered.length}`
+    : activeGroup === "All"
+      ? `All ${activeSection.label} · ${filtered.length}`
+      : `${activeGroup} · ${filtered.length}`;
+
   return (
     <main className="flex min-h-[calc(100dvh-7rem)] flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-card sm:rounded-3xl">
-      <header className="flex flex-wrap items-center gap-2 border-b border-border bg-card/90 p-3 backdrop-blur-xl sm:gap-3 sm:p-4">
-        <Button type="button" variant="ghost" size="icon" aria-label="Back to TV HUB menu" onClick={() => setSection(null)}>
+      {/* top bar */}
+      <header className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 border-b border-border bg-card/90 p-2.5 backdrop-blur-xl sm:gap-3 sm:p-3">
+        <Button type="button" variant="ghost" size="icon" className="shrink-0" aria-label="Back to TV HUB menu" onClick={() => setSection(null)}>
           <ArrowLeft />
         </Button>
-        <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-primary">TV HUB</p>
-          <h1 className="truncate font-display text-xl font-black uppercase leading-none">{activeSection.label}</h1>
+        <div className="min-w-0">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">OGSTREAMZ</p>
+          <h1 className="truncate font-display text-lg font-black uppercase leading-none sm:text-xl">{activeSection.label}</h1>
         </div>
-        {expiry && (
-          <span
-            className={cn(
-              "shrink-0 rounded-full border px-3 py-1 text-[11px] font-bold",
-              expiry.expired
-                ? "border-destructive/50 bg-destructive/10 text-foreground"
-                : "border-border bg-background/60 text-muted-foreground",
-            )}
-          >
-            Expires {expiry.label} · {expiry.note}
-          </span>
-        )}
-        <div className="relative order-last w-full sm:order-none sm:w-64">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={`Search ${activeSection.label}`} className="h-10 bg-background/70 pl-9" aria-label={`Search ${activeSection.label}`} />
+        <div className="flex shrink-0 items-center gap-2">
+          {expiry && (
+            <span
+              className={cn(
+                "hidden rounded-full border px-3 py-1 text-[11px] font-bold md:inline",
+                expiry.expired
+                  ? "border-destructive/50 bg-destructive/10 text-foreground"
+                  : "border-border bg-background/60 text-muted-foreground",
+              )}
+            >
+              Expires {expiry.label} · {expiry.note}
+            </span>
+          )}
+          <Button type="button" variant="outline" className="h-9" onClick={signOut}>Sign out</Button>
         </div>
-        <Button type="button" variant="outline" className="h-10 shrink-0" onClick={signOut}>Sign out</Button>
       </header>
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
-        {!showList ? (
-          /* categories first */
-          <section className="min-w-0 p-3 sm:p-4" aria-label="Categories">
-            <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-              Categories · {groups.length}
-            </h2>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4">
-              <button
-                type="button"
-                onClick={() => setGroup("All")}
-                className="group flex min-h-20 flex-col justify-between rounded-xl border border-primary/40 bg-primary/10 p-3 text-left transition hover:border-primary hover:bg-primary/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-24"
-              >
-                <LayoutGrid className="h-5 w-5 text-primary" />
-                <span>
-                  <span className="block truncate text-sm font-black uppercase">All {activeSection.label}</span>
-                  <span className="block text-[11px] text-muted-foreground">{sectionItems.length} items</span>
-                </span>
-              </button>
-              {groups.map(([name, count]) => (
-                <button
-                  key={name}
-                  type="button"
-                  onClick={() => setGroup(name)}
-                  className="group flex min-h-20 flex-col justify-between rounded-xl border border-border bg-card/70 p-3 text-left transition hover:border-primary hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-24"
-                >
-                  <Tv className="h-5 w-5 text-muted-foreground transition group-hover:text-primary" />
-                  <span>
-                    <span className="block truncate text-sm font-bold">{name}</span>
-                    <span className="block text-[11px] text-muted-foreground">{count} items</span>
-                  </span>
-                </button>
-              ))}
-            </div>
-          </section>
-        ) : (
-          /* channel list */
-          <section className="min-w-0 border-b border-border bg-background/30 p-2 sm:p-3" aria-label={`${activeSection.label} list`}>
-            <div className="mb-2 flex items-center gap-2">
-              {!searching && (
-                <Button type="button" variant="outline" className="h-9 gap-2" onClick={() => setGroup(null)}>
-                  <ArrowLeft className="h-4 w-4" /> Back to categories
-                </Button>
-              )}
-              <p className="min-w-0 flex-1 truncate text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                {searching
-                  ? `Search results in ${activeSection.label} · ${filtered.length}`
-                  : group === "All"
-                    ? `All ${activeSection.label} · ${filtered.length}`
-                    : `${group} · ${filtered.length}`}
-              </p>
-            </div>
-            <div className="max-h-[45vh] space-y-1 overflow-y-auto lg:max-h-[55vh]">
-            {visible.map((item) => {
-              const active = item.id === selectedId;
-              const favourite = favourites.includes(item.id);
-              return (
-                <div
-                  key={item.id}
-                  className={cn(
-                    "flex min-w-0 items-center gap-2 rounded-lg border px-2 py-1.5 transition",
-                    active ? "border-primary bg-primary/10" : "border-transparent hover:border-border hover:bg-card",
-                  )}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setSelectedId(item.id)}
-                    className="flex min-w-0 flex-1 items-center gap-2 text-left focus-visible:outline-none"
-                  >
-                    {item.logo ? (
-                      <img src={item.logo} alt="" aria-hidden loading="lazy" className="h-8 w-8 shrink-0 rounded bg-background object-contain" />
-                    ) : (
-                      <span className="grid h-8 w-8 shrink-0 place-items-center rounded bg-background text-muted-foreground"><Tv className="h-4 w-4" /></span>
-                    )}
-                    <span className="min-w-0">
-                      <span className="block truncate text-sm font-bold">{item.title}</span>
-                      <span className="block truncate text-[11px] text-muted-foreground">{item.group}</span>
-                    </span>
-                  </button>
-                  <Button
-                    type="button"
-                    size="icon-sm"
-                    variant="ghost"
-                    className={favourite ? "text-primary" : "text-muted-foreground"}
-                    aria-label={favourite ? `Remove ${item.title} from favourites` : `Add ${item.title} to favourites`}
-                    onClick={() => setFavourites((current) => favourite ? current.filter((id) => id !== item.id) : [...current, item.id])}
-                  >
-                    <Heart className={cn("h-4 w-4", favourite && "fill-current")} />
-                  </Button>
-                </div>
-              );
-            })}
-            {visible.length === 0 && <p className="p-6 text-center text-sm text-muted-foreground">Nothing here matches your search.</p>}
-            {filtered.length > visible.length && (
-              <div className="p-3 text-center">
-                <p className="mb-2 text-xs text-muted-foreground">Showing {visible.length} of {filtered.length}</p>
-                <Button type="button" variant="outline" className="h-9 w-full" onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}>
-                  Show more
-                </Button>
-              </div>
-            )}
-            </div>
-          </section>
-        )}
-
-        {/* player */}
-        <section className="min-w-0 p-3 sm:p-4" aria-label="Player">
+      {/* player always at the top */}
+      <section className="min-w-0 border-b border-border bg-black/40 p-2 sm:p-3" aria-label="Player">
+        <div className="mx-auto w-full max-w-4xl">
           <StreamPlayer
             title={selected?.title ?? "Choose something to watch"}
-            group={selected?.group ?? ""}
+            group={selected?.group ?? activeSection.label}
             source={selected?.source ?? null}
             live={section === "tv"}
             onPrevious={() => step(-1)}
             onNext={() => step(1)}
           />
-          <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-            Streams come directly from your provider account. OG BOT does not host, store or control this content.
-          </p>
-        </section>
+        </div>
+      </section>
+
+      {/* search */}
+      <div className="border-b border-border bg-card/70 p-2 sm:p-3">
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={`Search all ${activeSection.label.toLowerCase()}`}
+            className="h-10 bg-background/70 pl-9"
+            aria-label={`Search all ${activeSection.label}`}
+          />
+        </div>
       </div>
+
+      {/* category tabs */}
+      {!searching && (
+        <div
+          role="tablist"
+          aria-label="Categories"
+          className="flex gap-1.5 overflow-x-auto border-b border-border bg-background/40 px-2 py-2 [scrollbar-width:none] sm:px-3 [&::-webkit-scrollbar]:hidden"
+        >
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeGroup === "All"}
+            onClick={() => setGroup("All")}
+            className={cn(
+              "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide transition",
+              activeGroup === "All"
+                ? "border-primary bg-primary text-primary-foreground shadow-glow"
+                : "border-border bg-card/70 text-muted-foreground hover:border-primary/60 hover:text-foreground",
+            )}
+          >
+            <LayoutGrid className="h-3.5 w-3.5" />All
+            <span className="opacity-70">{sectionItems.length}</span>
+          </button>
+          {groups.map(([name, count]) => (
+            <button
+              key={name}
+              type="button"
+              role="tab"
+              aria-selected={activeGroup === name}
+              onClick={() => setGroup(name)}
+              className={cn(
+                "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide transition",
+                activeGroup === name
+                  ? "border-primary bg-primary text-primary-foreground shadow-glow"
+                  : "border-border bg-card/70 text-muted-foreground hover:border-primary/60 hover:text-foreground",
+              )}
+            >
+              <span className="max-w-[12rem] truncate">{name}</span>
+              <span className="opacity-70">{count}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* guide list */}
+      <section className="flex min-h-0 min-w-0 flex-1 flex-col" aria-label={`${activeSection.label} guide`}>
+        <p className="border-b border-border bg-card/40 px-3 py-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+          {listLabel}
+        </p>
+        <div className="min-h-0 flex-1 overflow-y-auto p-2 sm:p-3">
+          <ul className="space-y-1">
+            {visible.map((item, index) => {
+              const active = item.id === selectedId;
+              const favourite = favourites.includes(item.id);
+              return (
+                <li
+                  key={item.id}
+                  className={cn(
+                    "grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded-lg border px-2 py-2 transition sm:gap-3 sm:px-3",
+                    active
+                      ? "border-primary bg-primary/15 shadow-glow"
+                      : "border-border/60 bg-card/50 hover:border-primary/50 hover:bg-card",
+                  )}
+                >
+                  <span className="hidden w-10 shrink-0 text-center text-xs font-black tabular-nums text-muted-foreground sm:block">
+                    {(index + 1).toString().padStart(3, "0")}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedId(item.id)}
+                    className="col-start-2 flex min-w-0 items-center gap-2.5 text-left focus-visible:outline-none sm:gap-3"
+                  >
+                    {item.logo ? (
+                      <img src={item.logo} alt="" aria-hidden loading="lazy" className="h-9 w-12 shrink-0 rounded bg-background object-contain p-0.5 sm:h-10 sm:w-14" />
+                    ) : (
+                      <span className="grid h-9 w-12 shrink-0 place-items-center rounded bg-background text-muted-foreground sm:h-10 sm:w-14"><Tv className="h-4 w-4" /></span>
+                    )}
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-bold sm:text-[15px]">{item.title}</span>
+                      <span className="block truncate text-[11px] uppercase tracking-wide text-muted-foreground">{item.group}</span>
+                    </span>
+                  </button>
+                  <span className="flex shrink-0 items-center gap-1">
+                    {active && (
+                      <span className="hidden rounded bg-primary/20 px-2 py-0.5 text-[10px] font-black uppercase text-primary sm:inline">
+                        Watching
+                      </span>
+                    )}
+                    <Button
+                      type="button"
+                      size="icon-sm"
+                      variant="ghost"
+                      className={favourite ? "text-primary" : "text-muted-foreground"}
+                      aria-label={favourite ? `Remove ${item.title} from favourites` : `Add ${item.title} to favourites`}
+                      onClick={() => setFavourites((current) => favourite ? current.filter((id) => id !== item.id) : [...current, item.id])}
+                    >
+                      <Heart className={cn("h-4 w-4", favourite && "fill-current")} />
+                    </Button>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+          {visible.length === 0 && <p className="p-8 text-center text-sm text-muted-foreground">Nothing here matches your search.</p>}
+          {filtered.length > visible.length && (
+            <div className="p-3 text-center">
+              <p className="mb-2 text-xs text-muted-foreground">Showing {visible.length} of {filtered.length}</p>
+              <Button type="button" variant="outline" className="h-9 w-full max-w-sm" onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}>
+                Show more
+              </Button>
+            </div>
+          )}
+          <p className="px-1 pb-2 pt-4 text-center text-[11px] leading-relaxed text-muted-foreground">
+            Streams come directly from your provider account. OGSTREAMZ does not host, store or control this content.
+          </p>
+        </div>
+      </section>
     </main>
   );
 }
