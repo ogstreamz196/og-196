@@ -305,17 +305,17 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
     <DashboardShell title="Store">
       <PaymentTestModeBanner />
       <div className="store-clean mx-auto w-full max-w-6xl space-y-6 pb-[max(1rem,env(safe-area-inset-bottom))] sm:space-y-8">
-        <section className="overflow-hidden rounded-xl border border-border bg-card/95 p-4 shadow-card sm:p-6">
-          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4">
+        <section className="overflow-hidden rounded-xl border border-border bg-store-card p-4 shadow-card sm:p-6">
+          <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-[minmax(0,1fr)_auto] min-[360px]:items-center min-[360px]:gap-4">
             <div className="min-w-0">
               <p className="text-xs font-semibold uppercase text-muted-foreground">OG BOT Store</p>
               <h1 className="mt-1 max-w-[13rem] font-display text-xl font-black leading-tight min-[390px]:max-w-none sm:text-3xl">
                 <EditableContent contentKey="buyCoins.heading" defaultValue="Stock up. Power up." />
               </h1>
             </div>
-            <div role="status" aria-label={`Wallet balance ${profile?.coin_balance ?? 0} OG coins`} className="text-right">
+            <div role="status" aria-label={`Wallet balance ${profile?.coin_balance ?? 0} OG coins`} className="text-left min-[360px]:text-right">
               <p className="text-xs font-semibold uppercase text-muted-foreground">Balance</p>
-              <div className="mt-1 flex items-center justify-end gap-2">
+              <div className="mt-1 flex items-center justify-start gap-2 min-[360px]:justify-end">
                 <Coins className="h-5 w-5 text-primary" />
                 <span className="font-mono text-xl font-bold tabular-nums sm:text-2xl">{profile?.coin_balance ?? 0}</span>
                 <span className="hidden text-xs text-muted-foreground min-[360px]:inline">OG</span>
@@ -340,7 +340,7 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
               <Crown className="h-4 w-4 text-primary" />
               <h2 id="section-vip" className="font-display text-lg font-black">VIP membership</h2>
             </div>
-            <div className="flex h-[calc(100%-2.25rem)] min-h-0 flex-col rounded-xl border border-primary/30 bg-card/95 p-4 sm:p-5">
+            <div className="flex h-[calc(100%-2.25rem)] min-h-0 flex-col rounded-xl border border-primary/30 bg-store-card p-4 shadow-card sm:p-5">
               <p className="text-sm leading-relaxed text-muted-foreground">
                 <EditableContent contentKey="buyCoins.vip.subtitle" defaultValue="Unlock exclusive privileges across OG Streamz — billed monthly, cancel anytime." multiline />
               </p>
@@ -363,7 +363,7 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                     <li className="flex items-start gap-2"><Gift className="mt-0.5 h-3.5 w-3.5 shrink-0 text-coin" /> <span className="min-w-0">Daily 10-coin safety net</span></li>
                   </ul>
                 </div>
-                <div className="flex items-end justify-between gap-3 border-t border-border pt-4 sm:flex-col sm:items-end sm:justify-center sm:border-t-0 sm:pt-0">
+                <div className="flex flex-col gap-3 border-t border-border pt-4 min-[400px]:flex-row min-[400px]:items-end min-[400px]:justify-between sm:flex-col sm:items-end sm:justify-center sm:border-t-0 sm:pt-0">
                   <div className="min-w-0">
                     <div className="text-3xl font-black tabular-nums leading-none">
                       {CURRENCY_SYMBOL}{(VIP_PLAN.priceCents / 100).toFixed(0)}
@@ -374,7 +374,7 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                     size="lg"
                     disabled={isVip}
                     onClick={() => pickSelection({ type: "vip" })}
-                    className="h-11 min-w-32 shrink-0 font-bold sm:w-auto"
+                    className="h-11 w-full font-bold min-[400px]:w-auto sm:min-w-32"
                   >
                     {isVip ? "You're VIP" : (<><Crown className="mr-2 h-4 w-4" /> Join VIP</>)}
                   </Button>
@@ -385,7 +385,7 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
         </div>
 
         <section aria-labelledby="section-bundles" className="scroll-mt-24">
-          <div className="mb-3 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <div className="min-w-0">
               <p className="text-xs font-semibold uppercase text-muted-foreground">One-time purchase</p>
               <h2 id="section-bundles" className="font-display text-xl font-black">Coin packs</h2>
@@ -394,8 +394,8 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
               Save up to {Math.round((1 - (COIN_PACKS[COIN_PACKS.length - 1].priceCents / 100 / COIN_PACKS[COIN_PACKS.length - 1].coins) / basePerCoin) * 100)}%
             </span>
           </div>
-          <div className="rounded-xl border border-border bg-card/70 p-3 sm:p-4">
-              <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div className="rounded-xl border border-border bg-store-card-muted p-3 shadow-card sm:p-4">
+              <div className="grid grid-cols-1 gap-3 min-[430px]:grid-cols-2 lg:grid-cols-4">
                 {COIN_PACKS.map((t, i) => (
                   <PackCard
                     key={t.bundleId}
@@ -591,7 +591,7 @@ function PackCard({
   return (
     <div
       className={cn(
-        "relative flex min-w-0 flex-col overflow-hidden rounded-lg border bg-card p-3 transition-colors sm:p-4",
+        "relative flex min-w-0 flex-col overflow-hidden rounded-lg border bg-store-card p-4 shadow-card transition-colors",
         accent ? "border-primary/60" : "border-border",
         canEdit && "ring-primary/40",
       )}
@@ -939,7 +939,7 @@ function CustomPackCard({ onBuy }: { onBuy: (units: number) => void }) {
   const quickPicks = [5, 10, 25, 50].filter((n) => n <= CUSTOM_COIN_UNIT.maxUnits);
 
   return (
-    <div className="relative overflow-hidden rounded-xl border border-border bg-card/95 p-4 sm:p-5">
+    <div className="relative overflow-hidden rounded-xl border border-border bg-store-card p-4 shadow-card sm:p-5">
 
       {/* Header */}
       <div className="relative flex items-start gap-3 sm:gap-4">
@@ -1044,7 +1044,7 @@ function CustomPackCard({ onBuy }: { onBuy: (units: number) => void }) {
       ) : null}
 
       {/* Total + CTA */}
-      <div className="relative mt-4 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3 border-t border-border pt-4">
+      <div className="relative mt-4 flex flex-col gap-3 border-t border-border pt-4 min-[400px]:grid min-[400px]:grid-cols-[minmax(0,1fr)_auto] min-[400px]:items-end">
         <div className="min-w-0">
           <div className="text-xs font-semibold uppercase text-muted-foreground">Total</div>
           <div
@@ -1060,7 +1060,7 @@ function CustomPackCard({ onBuy }: { onBuy: (units: number) => void }) {
         <Button
           size="lg"
           onClick={() => onBuy(units)}
-          className="h-11 shrink-0 rounded-md px-4 font-bold"
+          className="h-11 w-full rounded-md px-4 font-bold min-[400px]:w-auto"
         >
           <Flame className="mr-2 h-4 w-4" /> Buy · {CURRENCY_SYMBOL}{(totalCents / 100).toFixed(2)}
         </Button>

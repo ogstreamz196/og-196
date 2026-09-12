@@ -1531,10 +1531,10 @@ function LibraryPage() {
         )}
 
         <Tabs defaultValue="yours" className="w-full">
-          <TabsList className="mb-5 flex h-auto w-full justify-start gap-6 rounded-none border-0 border-b border-white/[0.07] bg-transparent p-0">
+          <TabsList className="mb-5 grid h-auto w-full grid-cols-2 gap-2 rounded-none border-0 border-b border-white/[0.07] bg-transparent p-0">
             <TabsTrigger
               value="yours"
-              className="group flex items-center gap-2 rounded-none border-b-2 border-transparent bg-transparent px-1 pb-3 pt-0 text-sm font-bold text-muted-foreground shadow-none transition-colors data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none"
+              className="group flex min-w-0 items-center gap-2 rounded-none border-b-2 border-transparent bg-transparent px-1 pb-3 pt-0 text-sm font-bold text-muted-foreground shadow-none transition-colors data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none"
             >
               <Crown className="h-4 w-4 text-primary" />
               <span className="truncate">Mine</span>
@@ -1544,7 +1544,7 @@ function LibraryPage() {
             </TabsTrigger>
             <TabsTrigger
               value="community"
-              className="group flex items-center gap-2 rounded-none border-b-2 border-transparent bg-transparent px-1 pb-3 pt-0 text-sm font-bold text-muted-foreground shadow-none transition-colors data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none"
+              className="group flex min-w-0 items-center gap-2 rounded-none border-b-2 border-transparent bg-transparent px-1 pb-3 pt-0 text-sm font-bold text-muted-foreground shadow-none transition-colors data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none"
             >
               <Users className="h-4 w-4 text-fuchsia-300" />
               <span className="truncate">Global</span>

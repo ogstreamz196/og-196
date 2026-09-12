@@ -117,7 +117,7 @@ function MessengerPage() {
 
         {/* Header — adapts to current mode */}
         <header
-          className={`relative flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-white/10 px-3 py-1.5 backdrop-blur-xl transition-colors sm:flex-nowrap sm:gap-3 sm:px-5 sm:py-2 ${
+          className={`relative grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-2 gap-y-1 border-b border-white/10 px-3 py-1.5 backdrop-blur-xl transition-colors min-[390px]:grid-cols-[auto_minmax(0,1fr)_auto] sm:gap-3 sm:px-5 sm:py-2 ${
             isCommunity
               ? "bg-gradient-to-r from-cyan-500/20 via-sky-500/10 to-fuchsia-500/15"
               : "bg-gradient-to-r from-primary/15 via-card/90 to-card/80"
@@ -187,7 +187,7 @@ function MessengerPage() {
                 ? "Go Private (leave the OG Battle Zone)"
                 : "Go to Battle Zone (leave Private Mode)"
             }
-            className={`group flex h-8 shrink-0 items-center justify-center gap-1 rounded-full border px-2.5 text-[10px] font-black uppercase tracking-[0.12em] transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 sm:h-9 sm:gap-1.5 sm:px-3 sm:text-xs ${
+            className={`group col-span-2 flex min-h-9 w-full items-center justify-center gap-1 rounded-full border px-2.5 text-[10px] font-black uppercase transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 min-[390px]:col-span-1 min-[390px]:w-auto sm:min-h-9 sm:gap-1.5 sm:px-3 sm:text-xs ${
               isCommunity
                 ? "border-cyan-400/50 bg-cyan-500/15 text-cyan-100 shadow-[0_0_24px_-6px_rgba(34,211,238,0.6)] hover:bg-cyan-500/25"
                 : "border-primary/40 bg-primary/10 text-primary shadow-[0_0_24px_-6px_oklch(0.7_0.2_25/0.6)] hover:bg-primary/20"

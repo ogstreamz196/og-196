@@ -104,7 +104,7 @@ export function PreferencesPanel() {
             <RadioGroup
               value={display.density}
               onValueChange={(v) => setDisplay.mutate({ density: v as Density })}
-              className="grid grid-cols-3 gap-2"
+              className="grid grid-cols-1 gap-2 sm:grid-cols-3"
             >
               <ModeOption value="compact" title="Compact" body="Tighter rows." />
               <ModeOption value="comfortable" title="Comfortable" body="Default rhythm." />
@@ -117,7 +117,7 @@ export function PreferencesPanel() {
             <RadioGroup
               value={aura.level}
               onValueChange={(v) => aura.setLevel(v as AuraLevel)}
-              className="grid grid-cols-4 gap-2"
+              className="grid grid-cols-1 gap-2 min-[400px]:grid-cols-2 sm:grid-cols-4"
             >
               <ModeOption value="off" title="Off" body="No glow." />
               <ModeOption value="low" title="Low" body="Faint hint." />
@@ -156,7 +156,7 @@ export function PreferencesPanel() {
             <Link
               to="/buy-coins"
               search={{ flow: "vip" } as never}
-              className="inline-flex items-center gap-2 rounded-md border border-primary/40 bg-primary/10 px-3 py-2 text-xs font-semibold text-primary hover:bg-primary/15"
+              className="inline-flex min-h-11 w-full min-w-0 items-center justify-center gap-2 whitespace-normal rounded-md border border-primary/40 bg-primary/10 px-3 py-2 text-center text-xs font-semibold leading-tight text-primary hover:bg-primary/15 min-[430px]:w-auto"
             >
               <Sparkles className="h-3.5 w-3.5" />
               Upgrade to OG VIP — £5/month
@@ -212,7 +212,7 @@ export function PreferencesPanel() {
             <RadioGroup
               value={prefs.theme}
               onValueChange={(v) => update("theme", v as "system" | "light" | "dark")}
-              className="grid grid-cols-3 gap-2"
+              className="grid grid-cols-1 gap-2 sm:grid-cols-3"
             >
               <ModeOption value="system" title="System" body="Match device." />
               <ModeOption value="light" title="Light" body="Bright surfaces." />

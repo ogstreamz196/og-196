@@ -31,6 +31,8 @@
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-surface: var(--surface);
+  --color-store-card: var(--store-card);
+  --color-store-card-muted: var(--store-card-muted);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
@@ -79,6 +81,8 @@
   /* Glassy panels: translucent navy ink over the wallpaper */
   --card: oklch(0.12 0.04 265 / 0.88);
   --surface: oklch(0.11 0.035 265);
+  --store-card: oklch(0.2 0.045 265 / 0.97);
+  --store-card-muted: oklch(0.16 0.04 265 / 0.98);
   --card-foreground: oklch(0.98 0.008 250);
 
   --popover: oklch(0.14 0.04 265 / 0.92);
@@ -162,6 +166,8 @@
   --foreground: oklch(0.98 0.008 250);
   --card: oklch(0.12 0.04 265 / 0.92);
   --surface: oklch(0.10 0.03 265);
+  --store-card: oklch(0.2 0.045 265 / 0.98);
+  --store-card-muted: oklch(0.16 0.04 265 / 0.99);
   --card-foreground: oklch(0.98 0.008 250);
   --popover: oklch(0.14 0.04 265 / 0.92);
   --popover-foreground: oklch(0.98 0.008 250);
@@ -412,6 +418,21 @@
     /* Inputs at 16px to prevent iOS auto-zoom on focus. */
     input, select, textarea {
       font-size: max(16px, 1rem);
+    }
+
+    /* Shared narrow-screen guardrails: content starts a new row instead of
+       colliding when saved text scaling is increased. */
+    [role="tablist"] {
+      max-width: 100%;
+    }
+    [role="tab"] {
+      min-width: 0;
+      max-width: 100%;
+    }
+    [data-slot="card-header"],
+    [data-slot="card-content"],
+    [data-slot="card-footer"] {
+      min-width: 0;
     }
   }
   /* Centered Radix dialogs/sheets must never escape the safe area on iPhone/Samsung. */
