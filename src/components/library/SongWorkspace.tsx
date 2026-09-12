@@ -860,7 +860,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                     <div className="min-w-0 flex-1">
                       <p className="font-semibold">Generation failed</p>
                       <p className="mt-0.5 text-xs opacity-90">
-                        {song.error_message || "Something went wrong on Suno's side."}
+                        {song.error_message || "Something went wrong on OG Bot's side."}
                         {" "}Your coins were refunded automatically.
                       </p>
                     </div>
