@@ -429,46 +429,76 @@ function StreamPlayer({
     setProgress(0);
     setDuration(0);
 
-    const isHls = /\.m3u8(\?|$)/i.test(source);
-    const nativeHls = video.canPlayType("application/vnd.apple.mpegurl") !== "";
-
-    if (!isHls || nativeHls) {
-      video.src = source;
-      void video.play().catch(() => setPlaying(false));
-      return;
-    }
-
     let destroyed = false;
-    let instance: { destroy: () => void } | null = null;
+    let cleanup: (() => void) | null = null;
 
     void (async () => {
-      const { default: Hls } = await import("hls.js");
-      if (destroyed) return;
-      if (!Hls.isSupported()) {
-        video.src = source;
+      let prepared: { url: string; kind: "hls" | "ts" | "file" };
+      try {
+        prepared = await prepareStream({ data: { url: source } });
+      } catch {
+        if (!destroyed) setStatus("error");
         return;
       }
-      const hls = new Hls({ enableWorker: true, lowLatencyMode: true });
-      instance = hls;
-      hls.loadSource(source);
-      hls.attachMedia(video);
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        setStatus("ready");
-        void video.play().catch(() => setPlaying(false));
-      });
-      hls.on(Hls.Events.ERROR, (_event, data) => {
-        if (!data.fatal) return;
-        if (data.type === Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
-        else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
-        else setStatus("error");
-      });
+      if (destroyed) return;
+
+      const start = () => void video.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
+
+      if (prepared.kind === "hls") {
+        const nativeHls = video.canPlayType("application/vnd.apple.mpegurl") !== "";
+        const { default: Hls } = await import("hls.js");
+        if (destroyed) return;
+        if (Hls.isSupported()) {
+          const hls = new Hls({ enableWorker: true, lowLatencyMode: true });
+          hls.loadSource(prepared.url);
+          hls.attachMedia(video);
+          hls.on(Hls.Events.MANIFEST_PARSED, () => { setStatus("ready"); start(); });
+          hls.on(Hls.Events.ERROR, (_event, data) => {
+            if (!data.fatal) return;
+            if (data.type === Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
+            else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
+            else setStatus("error");
+          });
+          cleanup = () => hls.destroy();
+          return;
+        }
+        if (nativeHls) {
+          video.src = prepared.url;
+          start();
+          return;
+        }
+        setStatus("error");
+        return;
+      }
+
+      if (prepared.kind === "ts") {
+        const mpegts = (await import("mpegts.js")).default;
+        if (destroyed) return;
+        if (mpegts.getFeatureList().mseLivePlayback) {
+          const player = mpegts.createPlayer(
+            { type: "mpegts", isLive: live, url: prepared.url },
+            { enableStashBuffer: false, liveBufferLatencyChasing: true },
+          );
+          player.attachMediaElement(video);
+          player.load();
+          player.on(mpegts.Events.ERROR, () => setStatus("error"));
+          start();
+          cleanup = () => {
+            player.destroy();
+          };
+          return;
+        }
+      }
+
+      video.src = prepared.url;
+      start();
     })();
 
     return () => {
       destroyed = true;
-      instance?.destroy();
+      cleanup?.();
     };
-  }, [source]);
+  }, [live, prepareStream, source]);
 
   const toggle = () => {
     const video = videoRef.current;
