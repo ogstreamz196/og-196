@@ -274,7 +274,10 @@ function AdminUsersPage() {
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
             ) : filtered.length > 0 ? (
-              <div className="-mx-px overflow-x-auto">
+              <div
+                className="-mx-px overflow-x-auto touch-pan-x touch-pan-y"
+                style={{ WebkitOverflowScrolling: "touch", overscrollBehaviorX: "contain" }}
+              >
                 <div className="min-w-[640px]">
               <Table>
                 <TableHeader>
