@@ -319,6 +319,18 @@ function TvHubPage() {
           <p className="text-[10px] font-bold uppercase tracking-widest text-primary">TV HUB</p>
           <h1 className="truncate font-display text-xl font-black uppercase leading-none">{activeSection.label}</h1>
         </div>
+        {expiry && (
+          <span
+            className={cn(
+              "shrink-0 rounded-full border px-3 py-1 text-[11px] font-bold",
+              expiry.expired
+                ? "border-destructive/50 bg-destructive/10 text-foreground"
+                : "border-border bg-background/60 text-muted-foreground",
+            )}
+          >
+            Expires {expiry.label} · {expiry.note}
+          </span>
+        )}
         <div className="relative order-last w-full sm:order-none sm:w-64">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={`Search ${activeSection.label}`} className="h-10 bg-background/70 pl-9" aria-label={`Search ${activeSection.label}`} />
