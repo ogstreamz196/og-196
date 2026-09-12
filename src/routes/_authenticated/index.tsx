@@ -36,6 +36,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
 import musicHubHero from "@/assets/musichub-hero.jpg";
+import tvHubCinematic from "@/assets/tv-hub-cinematic.jpg";
 
 import { useAuth } from "@/hooks/use-auth";
 import { useDevMode } from "@/hooks/use-dev-mode";
@@ -269,6 +270,17 @@ function DashboardHome() {
             variant="accent"
           />
         </div>
+        <PrimaryCard
+          to="/tv-hub"
+          image={tvHubCinematic}
+          imageAlt="Cinematic television screen with blue and red broadcast light"
+          eyebrow="TV HUB"
+          title="Watch TV"
+          body="Live TV · Movies · Series · EPG"
+          cta="Open TV HUB"
+          variant="cinema"
+          wide
+        />
       </section>
 
       {/* Refer to earn — compact CTA to the referrals/earnings page */}
@@ -519,36 +531,44 @@ function PrimaryCard({
   body,
   cta,
   variant = "primary",
+  wide = false,
 }: {
-  to: "/library" | "/messenger";
+  to: "/library" | "/messenger" | "/tv-hub";
   image: string;
   imageAlt: string;
   eyebrow: string;
   title: string;
   body: string;
   cta: string;
-  variant?: "primary" | "accent";
+  variant?: "primary" | "accent" | "cinema";
+  wide?: boolean;
 }) {
   const isAccent = variant === "accent";
+  const isCinema = variant === "cinema";
   return (
     <Link
       to={to}
       preload="intent"
-      className="group relative flex flex-col overflow-hidden rounded-3xl border-2 border-white/15 bg-card/70 shadow-card backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-primary/60 hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+      className={cn(
+        "group relative flex flex-col overflow-hidden rounded-3xl border-2 border-white/15 bg-card/70 shadow-card backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-primary/60 hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        wide && "sm:grid sm:grid-cols-[minmax(0,1.4fr)_minmax(18rem,0.6fr)]",
+      )}
     >
       {/* Ambient gradient */}
       <div
         aria-hidden
         className={
           "pointer-events-none absolute inset-0 opacity-80 " +
-          (isAccent
+           (isAccent
             ? "bg-[radial-gradient(circle_at_top,oklch(0.65_0.18_310/0.32),transparent_65%)]"
-            : "bg-[radial-gradient(circle_at_top,oklch(0.55_0.22_268/0.32),transparent_65%)]")
+             : isCinema
+               ? "bg-[radial-gradient(circle_at_top,oklch(0.62_0.22_25/0.28),transparent_65%)]"
+               : "bg-[radial-gradient(circle_at_top,oklch(0.55_0.22_268/0.32),transparent_65%)]")
         }
       />
 
       {/* HERO IMAGE — large, meaningful, fills the top */}
-      <div className="relative aspect-square w-full overflow-hidden">
+      <div className={cn("relative w-full overflow-hidden", wide ? "aspect-video sm:aspect-auto sm:min-h-72" : "aspect-square")}>
         <img
           src={image}
           alt={imageAlt}
@@ -557,7 +577,7 @@ function PrimaryCard({
           height={768}
           className={
             "h-full w-full object-cover transition-transform duration-700 group-hover:scale-110 " +
-            (isAccent ? "p-4 sm:p-6" : "")
+             (isAccent ? "p-4 sm:p-6" : "")
           }
         />
         <div
@@ -565,7 +585,7 @@ function PrimaryCard({
           className="pointer-events-none absolute inset-0 bg-gradient-to-t from-card via-card/30 to-transparent"
         />
         {/* Equalizer overlay only for music card */}
-        {!isAccent && (
+        {!isAccent && !isCinema && (
           <div className="pointer-events-none absolute bottom-2 left-1/2 flex -translate-x-1/2 items-end gap-1 opacity-90">
             {[0.4, 0.7, 0.5, 0.9, 0.6, 0.8, 0.45, 0.85, 0.55, 0.7].map((h, i) => (
               <span
