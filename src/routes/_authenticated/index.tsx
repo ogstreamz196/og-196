@@ -531,6 +531,7 @@ function PrimaryCard({
   body,
   cta,
   variant = "primary",
+  wide = false,
 }: {
   to: "/library" | "/messenger" | "/tv-hub";
   image: string;

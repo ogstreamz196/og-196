@@ -387,10 +387,10 @@ function TvHubPage() {
                       <Button type="button" size="icon" variant={active ? "default" : "outline"} onClick={() => selectItem(item)} aria-label={`Play ${item.title}`}>
                         {active && playing ? <Pause /> : <Play />}
                       </Button>
-                      <button type="button" className="min-w-0 flex-1 text-left" onClick={() => selectItem(item)}>
+                      <Button type="button" variant="ghost" className="h-auto min-w-0 flex-1 justify-start px-1 py-1 text-left" onClick={() => selectItem(item)}>
                         <span className="block truncate text-sm font-bold">{item.title}</span>
                         <span className="block truncate text-xs text-muted-foreground">{item.subtitle}</span>
-                      </button>
+                      </Button>
                       <Button
                         type="button"
                         size="icon-sm"
