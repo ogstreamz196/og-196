@@ -38,9 +38,7 @@ export function softenForModeration(text: string | null): string | null {
   if (!text) return text;
   let out = text;
   for (const [re, rep] of REPLACEMENTS) {
-    out = typeof rep === "string"
-      ? out.replace(re, rep)
-      : out.replace(re, rep as unknown as string);
+    out = typeof rep === "string" ? out.replace(re, rep) : out.replace(re, rep);
   }
   return out;
 }
