@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { CoinPill } from "@/components/ui/coin-pill";
 import type { StoreItem } from "@/lib/store.functions";
 import { cn } from "@/lib/utils";
+import sportsGuideLogo from "@/assets/og-bot-sports-guide.png.asset.json";
 
 const RARITY: Record<StoreItem["rarity"], { label: string; ring: string; glow: string; icon: ReactNode }> = {
   common: {
@@ -61,6 +62,7 @@ export function StoreItemCard({
   const soldOut = stockRemaining !== null && stockRemaining === 0;
   const isSportsGuide = item.slug === "og-sports-guide-access";
   const ownsSportsGuide = isSportsGuide && sportsGuideState && !["unowned", "revoked"].includes(sportsGuideState);
+  const imageUrl = isSportsGuide ? sportsGuideLogo.url : item.image_url;
 
   return (
     <div
@@ -85,9 +87,9 @@ export function StoreItemCard({
 
       {/* image */}
       <div className="mb-3 aspect-[4/3] w-full overflow-hidden rounded-md border border-border bg-background/50">
-        {item.image_url ? (
+        {imageUrl ? (
           <img
-            src={item.image_url}
+            src={imageUrl}
             alt={item.name}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             loading="lazy"
