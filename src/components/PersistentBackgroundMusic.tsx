@@ -66,6 +66,10 @@ export function PersistentBackgroundMusic() {
         // the visitor declines or the browser still blocks playback.
         const unlock = () => {
           if (!enabledRef.current) return;
+          const otherMediaPlaying = Array.from(
+            document.querySelectorAll<HTMLMediaElement>("audio:not([data-background-music]), video"),
+          ).some((media) => !media.paused && !media.ended);
+          if (otherMediaPlaying) return;
           void start().then((unlocked) => {
             if (unlocked) removeUnlockListeners();
           });
