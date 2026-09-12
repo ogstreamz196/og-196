@@ -29,6 +29,7 @@ import {
   loadTvHubPlaylist,
   prepareTvStream,
   TV_HUB_HOST,
+  type TvAccount,
   type TvChannel,
 } from "@/lib/tv-hub.functions";
 
@@ -64,7 +65,17 @@ const SECTIONS: Array<{ id: Section; label: string; caption: string; icon: typeo
   { id: "series", label: "Series", caption: "Box sets & shows", icon: ListVideo },
 ];
 
-const MAX_VISIBLE = 300;
+const PAGE_SIZE = 300;
+
+function formatExpiry(iso: string | null) {
+  if (!iso) return null;
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return null;
+  const days = Math.ceil((date.getTime() - Date.now()) / 86_400_000);
+  const label = date.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+  if (days < 0) return { label, note: "Expired", expired: true };
+  return { label, note: days === 0 ? "Expires today" : `${days} day${days === 1 ? "" : "s"} left`, expired: false };
+}
 
 function toPlayItem(channel: TvChannel): PlayItem {
   return {
@@ -87,6 +98,9 @@ function TvHubPage() {
   const fetchPlaylist = useServerFn(loadTvHubPlaylist);
 
   const [items, setItems] = useState<PlayItem[] | null>(null);
+  const [account, setAccount] = useState<TvAccount | null>(null);
+  const [truncated, setTruncated] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -120,8 +134,13 @@ function TvHubPage() {
     );
   }, [group, query, sectionItems]);
 
-  const visible = filtered.slice(0, MAX_VISIBLE);
+  const visible = filtered.slice(0, visibleCount);
   const selected = list.find((item) => item.id === selectedId) ?? null;
+  const expiry = formatExpiry(account?.expiresAt ?? null);
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [group, query, section]);
 
   const openSection = (next: Section) => {
     setSection(next);
@@ -149,6 +168,9 @@ function TvHubPage() {
     try {
       const playlist = await fetchPlaylist({ data: { username: username.trim(), password } });
       setItems(playlist.channels.map(toPlayItem));
+      setAccount(playlist.account);
+      setTruncated(playlist.truncated);
+
 
       setPassword("");
       setSection(null);
@@ -225,11 +247,12 @@ function TvHubPage() {
 
   const signOut = () => {
     setItems(null);
+    setAccount(null);
+    setTruncated(false);
     setSection(null);
     setSelectedId(null);
     setQuery("");
     setGroup("All");
-
   };
 
   /* ------------------------------------------------------------ dashboard */
@@ -249,6 +272,10 @@ function TvHubPage() {
             </div>
             <Button type="button" variant="outline" className="h-10" onClick={signOut}>Sign out</Button>
           </header>
+
+          <AccountBar account={account} expiry={expiry} total={list.length} truncated={truncated} />
+
+
 
           <div className="grid flex-1 content-center gap-4 sm:grid-cols-3">
             {SECTIONS.map((entry) => {
@@ -292,6 +319,18 @@ function TvHubPage() {
           <p className="text-[10px] font-bold uppercase tracking-widest text-primary">TV HUB</p>
           <h1 className="truncate font-display text-xl font-black uppercase leading-none">{activeSection.label}</h1>
         </div>
+        {expiry && (
+          <span
+            className={cn(
+              "shrink-0 rounded-full border px-3 py-1 text-[11px] font-bold",
+              expiry.expired
+                ? "border-destructive/50 bg-destructive/10 text-foreground"
+                : "border-border bg-background/60 text-muted-foreground",
+            )}
+          >
+            Expires {expiry.label} · {expiry.note}
+          </span>
+        )}
         <div className="relative order-last w-full sm:order-none sm:w-64">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={`Search ${activeSection.label}`} className="h-10 bg-background/70 pl-9" aria-label={`Search ${activeSection.label}`} />
@@ -371,7 +410,12 @@ function TvHubPage() {
             })}
             {visible.length === 0 && <p className="p-6 text-center text-sm text-muted-foreground">Nothing here matches your search.</p>}
             {filtered.length > visible.length && (
-              <p className="p-3 text-center text-xs text-muted-foreground">Showing {visible.length} of {filtered.length} — search to narrow it down.</p>
+              <div className="p-3 text-center">
+                <p className="mb-2 text-xs text-muted-foreground">Showing {visible.length} of {filtered.length}</p>
+                <Button type="button" variant="outline" className="h-9 w-full" onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}>
+                  Show more
+                </Button>
+              </div>
             )}
           </div>
         </section>
@@ -395,7 +439,59 @@ function TvHubPage() {
   );
 }
 
+/* ------------------------------------------------------------- account ---- */
+
+function AccountBar({
+  account,
+  expiry,
+  total,
+  truncated,
+}: {
+  account: TvAccount | null;
+  expiry: { label: string; note: string; expired: boolean } | null;
+  total: number;
+  truncated: boolean;
+}) {
+  return (
+    <div className="mb-6 flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card/80 p-3 text-xs sm:text-sm">
+      <span className="rounded-full border border-border bg-background/60 px-3 py-1 font-bold">
+        {account?.username ? `Account ${account.username}` : "Account"}
+      </span>
+      {expiry ? (
+        <span
+          className={cn(
+            "rounded-full border px-3 py-1 font-bold",
+            expiry.expired
+              ? "border-destructive/50 bg-destructive/10 text-foreground"
+              : "border-primary/50 bg-primary/10 text-foreground",
+          )}
+        >
+          Expires {expiry.label} · {expiry.note}
+        </span>
+      ) : (
+        <span className="rounded-full border border-border bg-background/60 px-3 py-1 text-muted-foreground">
+          Expiry unavailable
+        </span>
+      )}
+      {account?.status && (
+        <span className="rounded-full border border-border bg-background/60 px-3 py-1 text-muted-foreground">
+          Status {account.status}
+        </span>
+      )}
+      {account?.maxConnections && (
+        <span className="rounded-full border border-border bg-background/60 px-3 py-1 text-muted-foreground">
+          {account.activeConnections ?? 0}/{account.maxConnections} connections
+        </span>
+      )}
+      <span className="rounded-full border border-border bg-background/60 px-3 py-1 text-muted-foreground">
+        {total.toLocaleString()} items{truncated ? " (partial)" : ""}
+      </span>
+    </div>
+  );
+}
+
 /* -------------------------------------------------------------- player ---- */
+
 
 function StreamPlayer({
   title,
