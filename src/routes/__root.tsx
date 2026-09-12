@@ -23,6 +23,7 @@ import { SingleAudioBridge } from "@/components/SingleAudioBridge";
 import { InstallAppPrompt } from "@/components/InstallAppPrompt";
 import { UserActivityArchiver } from "@/hooks/use-user-activity-archiver";
 import { ActivityTracker } from "@/hooks/use-activity-tracker";
+import { PersistentBackgroundMusic } from "@/components/PersistentBackgroundMusic";
 
 function NotFoundComponent() {
   return (
@@ -355,6 +356,7 @@ function RootComponent() {
         <DisplayPrefsBridge />
         <AuraBridge />
         <SingleAudioBridge />
+        <PersistentBackgroundMusic />
         <UserActivityArchiver />
         <ActivityTracker />
         <Outlet />
