@@ -1,4 +1,4 @@
-import { Music2, Pause, Play } from "lucide-react";
+import { Pause, Play } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import backgroundTrack from "@/assets/og-bot-background.mp3.asset.json";
