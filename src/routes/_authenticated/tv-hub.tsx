@@ -1,19 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  CalendarDays,
+  ArrowLeft,
   ChevronLeft,
   ChevronRight,
-  Clock3,
   Expand,
   Film,
   Heart,
+  LayoutGrid,
   ListVideo,
   Loader2,
   LockKeyhole,
   MonitorPlay,
   Pause,
   Play,
+  Radio,
   Search,
   Tv,
   Volume2,
@@ -45,66 +46,57 @@ type Section = "tv" | "movies" | "series";
 type PlayItem = {
   id: string;
   title: string;
-  subtitle: string;
-  category: string;
+  group: string;
   section: Section;
   source: string;
   logo?: string | null;
-  live?: boolean;
-  epg?: Array<{ time: string; title: string; description: string }>;
 };
 
 const DEMO_ITEMS: PlayItem[] = [
   {
-    id: "og-live",
-    title: "OG One",
-    subtitle: "Live showcase",
-    category: "Entertainment",
+    id: "demo-1",
+    title: "OG One HD",
+    group: "Entertainment",
     section: "tv",
-    live: true,
-    source: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-    epg: [
-      { time: "Now", title: "Prime Time", description: "Music, culture and entertainment from the OG studio." },
-      { time: "18:30", title: "Street Sessions", description: "Live performances and behind-the-scenes stories." },
-    ],
+    source: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
   },
   {
-    id: "news-24",
-    title: "City 24",
-    subtitle: "News & weather",
-    category: "News",
+    id: "demo-2",
+    title: "City 24 News",
+    group: "News",
     section: "tv",
-    live: true,
-    source: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
-    epg: [
-      { time: "Now", title: "Evening Briefing", description: "Headlines, weather and the stories shaping the city." },
-    ],
+    source: "https://test-streams.mux.dev/pts_shift/master.m3u8",
   },
   {
-    id: "midnight-run",
-    title: "Midnight Run",
-    subtitle: "1h 42m · Action",
-    category: "Action",
+    id: "demo-3",
+    title: "Big Buck Bunny",
+    group: "Animation",
     section: "movies",
     source: "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
   },
   {
-    id: "after-dark",
-    title: "After Dark",
-    subtitle: "S1 E1 · The Signal",
-    category: "Thriller",
+    id: "demo-4",
+    title: "Sintel",
+    group: "Adventure",
+    section: "movies",
+    source: "https://storage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
+  },
+  {
+    id: "demo-5",
+    title: "After Dark · S1 E1",
+    group: "Thriller",
     section: "series",
     source: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
   },
 ];
 
-const SECTION_OPTIONS: Array<{ id: Section; label: string; icon: typeof Tv }> = [
-  { id: "tv", label: "TV", icon: Tv },
-  { id: "movies", label: "Movies", icon: Film },
-  { id: "series", label: "Series", icon: ListVideo },
+const SECTIONS: Array<{ id: Section; label: string; caption: string; icon: typeof Tv }> = [
+  { id: "tv", label: "Live TV", caption: "Channels & sport", icon: Radio },
+  { id: "movies", label: "Movies", caption: "Films on demand", icon: Film },
+  { id: "series", label: "Series", caption: "Box sets & shows", icon: ListVideo },
 ];
 
-const MAX_VISIBLE = 200;
+const MAX_VISIBLE = 300;
 
 /** Live Xtream URLs end in .ts (not playable in a browser) — prefer the HLS variant. */
 function toPlayableSource(url: string) {
@@ -116,18 +108,20 @@ function toPlayItem(channel: TvChannel): PlayItem {
   return {
     id: channel.id,
     title: channel.title,
-    subtitle: channel.group,
-    category: channel.group,
+    group: channel.group,
     section: channel.section,
     source: toPlayableSource(channel.url),
     logo: channel.logo,
-    live: channel.section === "tv",
   };
 }
 
+function formatTime(seconds: number) {
+  if (!Number.isFinite(seconds) || seconds <= 0) return "0:00";
+  const mins = Math.floor(seconds / 60);
+  return `${mins}:${Math.floor(seconds % 60).toString().padStart(2, "0")}`;
+}
+
 function TvHubPage() {
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const playerRef = useRef<HTMLDivElement | null>(null);
   const fetchPlaylist = useServerFn(loadTvHubPlaylist);
 
   const [items, setItems] = useState<PlayItem[] | null>(null);
@@ -137,105 +131,50 @@ function TvHubPage() {
   const [loading, setLoading] = useState(false);
   const [loginMessage, setLoginMessage] = useState("");
 
-  const [section, setSection] = useState<Section>("tv");
+  const [section, setSection] = useState<Section | null>(null);
+  const [group, setGroup] = useState<string>("All");
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [playing, setPlaying] = useState(false);
-  const [muted, setMuted] = useState(false);
-  const [volume, setVolume] = useState(0.8);
-  const [progress, setProgress] = useState(0);
-  const [duration, setDuration] = useState(0);
   const [favourites, setFavourites] = useState<string[]>([]);
-  const [playbackError, setPlaybackError] = useState("");
 
   const list = items ?? [];
 
-  const sectionItems = useMemo(() => list.filter((item) => item.section === section), [list, section]);
+  const sectionItems = useMemo(
+    () => (section ? list.filter((item) => item.section === section) : []),
+    [list, section],
+  );
 
-  const visibleItems = useMemo(() => {
+  const groups = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const item of sectionItems) counts.set(item.group, (counts.get(item.group) ?? 0) + 1);
+    return [...counts.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+  }, [sectionItems]);
+
+  const filtered = useMemo(() => {
     const normalized = query.trim().toLowerCase();
-    const matched = normalized
-      ? sectionItems.filter((item) => `${item.title} ${item.category}`.toLowerCase().includes(normalized))
-      : sectionItems;
-    return matched.slice(0, MAX_VISIBLE);
-  }, [query, sectionItems]);
+    return sectionItems.filter(
+      (item) =>
+        (group === "All" || item.group === group) &&
+        (!normalized || item.title.toLowerCase().includes(normalized)),
+    );
+  }, [group, query, sectionItems]);
 
+  const visible = filtered.slice(0, MAX_VISIBLE);
   const selected = list.find((item) => item.id === selectedId) ?? null;
 
-  // Attach hls.js for HLS sources that the browser cannot play natively.
-  useEffect(() => {
-    const video = videoRef.current;
-    const source = selected?.source;
-    if (!video || !source) return;
-    setPlaybackError("");
-
-    const isHls = /\.m3u8(\?|$)/i.test(source);
-    const nativeHls = video.canPlayType("application/vnd.apple.mpegurl") !== "";
-
-    if (!isHls || nativeHls) {
-      video.src = source;
-      void video.play().catch(() => setPlaying(false));
-      return;
-    }
-
-    let destroyed = false;
-    let hls: { destroy: () => void } | null = null;
-
-    void (async () => {
-      const { default: Hls } = await import("hls.js");
-      if (destroyed) return;
-      if (!Hls.isSupported()) {
-        video.src = source;
-        return;
-      }
-      const instance = new Hls({ enableWorker: true });
-      hls = instance;
-      instance.loadSource(source);
-      instance.attachMedia(video);
-      instance.on(Hls.Events.MANIFEST_PARSED, () => {
-        void video.play().catch(() => setPlaying(false));
-      });
-      instance.on(Hls.Events.ERROR, (_event, data) => {
-        if (data.fatal) {
-          setPlaybackError("This stream could not be played in the browser. Try another channel.");
-        }
-      });
-    })();
-
-    return () => {
-      destroyed = true;
-      hls?.destroy();
-    };
-  }, [selected?.source]);
-
-  const selectItem = (item: PlayItem) => {
-    setSelectedId(item.id);
-    setPlaying(true);
+  const openSection = (next: Section) => {
+    setSection(next);
+    setGroup("All");
+    setQuery("");
+    const first = list.find((item) => item.section === next);
+    setSelectedId(first?.id ?? null);
   };
 
-  const togglePlayback = () => {
-    const video = videoRef.current;
-    if (!video) return;
-    if (video.paused) {
-      void video.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
-    } else {
-      video.pause();
-      setPlaying(false);
-    }
-  };
-
-  const moveChannel = (direction: -1 | 1) => {
-    if (sectionItems.length === 0) return;
-    const currentIndex = sectionItems.findIndex((item) => item.id === selectedId);
-    const nextIndex = (currentIndex + direction + sectionItems.length) % sectionItems.length;
-    const next = sectionItems[nextIndex];
-    if (next) selectItem(next);
-  };
-
-  const formatTime = (seconds: number) => {
-    if (!Number.isFinite(seconds)) return "0:00";
-    const mins = Math.floor(seconds / 60);
-    return `${mins}:${Math.floor(seconds % 60).toString().padStart(2, "0")}`;
+  const step = (direction: -1 | 1) => {
+    if (filtered.length === 0) return;
+    const index = filtered.findIndex((item) => item.id === selectedId);
+    const next = filtered[(index + direction + filtered.length) % filtered.length];
+    if (next) setSelectedId(next.id);
   };
 
   const handleSignIn = async (event: React.FormEvent) => {
@@ -248,16 +187,10 @@ function TvHubPage() {
     setLoginMessage("");
     try {
       const playlist = await fetchPlaylist({ data: { username: username.trim(), password } });
-      const mapped = playlist.channels.map(toPlayItem);
-      setItems(mapped);
+      setItems(playlist.channels.map(toPlayItem));
       setIsDemo(false);
       setPassword("");
-      const firstSection = (["tv", "movies", "series"] as Section[]).find((s) =>
-        mapped.some((item) => item.section === s),
-      );
-      if (firstSection) setSection(firstSection);
-      const first = mapped.find((item) => item.section === (firstSection ?? "tv"));
-      if (first) setSelectedId(first.id);
+      setSection(null);
     } catch (error) {
       setLoginMessage(error instanceof Error ? error.message : "Sign-in failed. Please try again.");
     } finally {
@@ -265,6 +198,7 @@ function TvHubPage() {
     }
   };
 
+  /* ---------------------------------------------------------------- login */
   if (!items) {
     return (
       <main className="relative isolate min-h-[calc(100dvh-7rem)] overflow-hidden rounded-2xl border border-border bg-surface shadow-card sm:rounded-3xl">
@@ -289,8 +223,8 @@ function TvHubPage() {
             </div>
 
             <p className="mb-6 text-sm leading-relaxed text-muted-foreground sm:text-base">
-              Enter the username and password from your TV provider. Your details are used once to load your own
-              playlist and are never saved. OG BOT does not host, store or supply any of the content you watch.
+              Enter the username and password from your TV provider. Your details load your own playlist and are never
+              saved. OG BOT does not host, store or control any of the content you watch.
             </p>
 
             <form className="space-y-4" onSubmit={handleSignIn}>
@@ -301,30 +235,15 @@ function TvHubPage() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="block space-y-1.5 text-sm">
                   <span>Username</span>
-                  <Input
-                    value={username}
-                    onChange={(event) => setUsername(event.target.value)}
-                    autoComplete="username"
-                    placeholder="Username"
-                    className="h-11 bg-background/70"
-                  />
+                  <Input value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" placeholder="Username" className="h-11 bg-background/70" />
                 </label>
                 <label className="block space-y-1.5 text-sm">
                   <span>Password</span>
-                  <Input
-                    type="password"
-                    value={password}
-                    onChange={(event) => setPassword(event.target.value)}
-                    autoComplete="current-password"
-                    placeholder="Password"
-                    className="h-11 bg-background/70"
-                  />
+                  <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" placeholder="Password" className="h-11 bg-background/70" />
                 </label>
               </div>
               {loginMessage && (
-                <p role="status" className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-foreground">
-                  {loginMessage}
-                </p>
+                <p role="status" className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-foreground">{loginMessage}</p>
               )}
               <div className="grid gap-3 sm:grid-cols-2">
                 <Button type="submit" size="lg" className="h-12" disabled={loading}>
@@ -340,8 +259,7 @@ function TvHubPage() {
                   onClick={() => {
                     setItems(DEMO_ITEMS);
                     setIsDemo(true);
-                    setSection("tv");
-                    setSelectedId(DEMO_ITEMS[0].id);
+                    setSection(null);
                   }}
                 >
                   <Play className="h-4 w-4" /> Temporary demo access
@@ -354,225 +272,374 @@ function TvHubPage() {
     );
   }
 
+  const counts: Record<Section, number> = {
+    tv: list.filter((i) => i.section === "tv").length,
+    movies: list.filter((i) => i.section === "movies").length,
+    series: list.filter((i) => i.section === "series").length,
+  };
+
+  const signOut = () => {
+    setItems(null);
+    setSection(null);
+    setSelectedId(null);
+    setQuery("");
+    setGroup("All");
+    setIsDemo(false);
+  };
+
+  /* ------------------------------------------------------------ dashboard */
+  if (!section) {
+    return (
+      <main className="relative isolate min-h-[calc(100dvh-7rem)] overflow-hidden rounded-2xl border border-border bg-surface shadow-card sm:rounded-3xl">
+        <img src={tvHubCinematic} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover opacity-30" />
+        <div className="absolute inset-0 bg-gradient-to-b from-surface/80 via-surface/95 to-surface" />
+        <div className="relative flex min-h-[calc(100dvh-7rem)] flex-col p-4 sm:p-8">
+          <header className="mb-8 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground shadow-glow"><MonitorPlay className="h-5 w-5" /></span>
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-primary">{isDemo ? "Demo mode" : `${list.length} items loaded`}</p>
+                <h1 className="font-display text-2xl font-black uppercase leading-none sm:text-3xl">TV HUB</h1>
+              </div>
+            </div>
+            <Button type="button" variant="outline" className="h-10" onClick={signOut}>Sign out</Button>
+          </header>
+
+          <div className="grid flex-1 content-center gap-4 sm:grid-cols-3">
+            {SECTIONS.map((entry) => {
+              const Icon = entry.icon;
+              return (
+                <button
+                  key={entry.id}
+                  type="button"
+                  onClick={() => openSection(entry.id)}
+                  className="group relative min-h-40 overflow-hidden rounded-2xl border border-border bg-card/80 p-5 text-left transition hover:border-primary hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-56 sm:p-6"
+                >
+                  <span className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-primary/10 blur-2xl transition group-hover:bg-primary/25" />
+                  <span className="relative grid h-12 w-12 place-items-center rounded-xl bg-primary/15 text-primary"><Icon className="h-6 w-6" /></span>
+                  <span className="relative mt-4 block font-display text-2xl font-black uppercase leading-none sm:mt-8 sm:text-3xl">{entry.label}</span>
+                  <span className="relative mt-2 block text-sm text-muted-foreground">{entry.caption}</span>
+                  <span className="relative mt-3 block text-xs font-bold uppercase tracking-wide text-primary">{counts[entry.id]} available</span>
+                </button>
+              );
+            })}
+          </div>
+
+          <p className="mt-8 text-center text-xs leading-relaxed text-muted-foreground">
+            Everything here streams directly from your own provider account. OG BOT does not host, store or control this
+            content and takes no responsibility for it.
+          </p>
+        </div>
+      </main>
+    );
+  }
+
+  /* -------------------------------------------------------------- browser */
+  const activeSection = SECTIONS.find((entry) => entry.id === section)!;
+
   return (
-    <main className="min-h-[calc(100dvh-7rem)] overflow-hidden rounded-2xl border border-border bg-surface shadow-card sm:rounded-3xl">
-      <header className="flex flex-col gap-4 border-b border-border bg-card/90 p-4 backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:p-5">
-        <div className="flex min-w-0 items-center gap-3">
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground"><MonitorPlay className="h-5 w-5" /></span>
-          <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase text-primary">{isDemo ? "Demo mode" : `${list.length} channels`}</p>
-            <h1 className="font-display text-2xl font-black uppercase leading-none">TV HUB</h1>
-          </div>
+    <main className="flex min-h-[calc(100dvh-7rem)] flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-card sm:rounded-3xl">
+      <header className="flex flex-wrap items-center gap-2 border-b border-border bg-card/90 p-3 backdrop-blur-xl sm:gap-3 sm:p-4">
+        <Button type="button" variant="ghost" size="icon" aria-label="Back to TV HUB menu" onClick={() => setSection(null)}>
+          <ArrowLeft />
+        </Button>
+        <div className="min-w-0 flex-1">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-primary">{isDemo ? "Demo mode" : "TV HUB"}</p>
+          <h1 className="truncate font-display text-xl font-black uppercase leading-none">{activeSection.label}</h1>
         </div>
-        <div className="flex w-full items-center gap-2 sm:w-auto">
-          <div className="relative w-full sm:w-64">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search TV HUB" className="h-10 bg-background/70 pl-9" aria-label="Search TV HUB" />
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            className="h-10 shrink-0"
-            onClick={() => {
-              setItems(null);
-              setSelectedId(null);
-              setQuery("");
-              setIsDemo(false);
-            }}
-          >
-            Sign out
-          </Button>
+        <div className="relative order-last w-full sm:order-none sm:w-64">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={`Search ${activeSection.label}`} className="h-10 bg-background/70 pl-9" aria-label={`Search ${activeSection.label}`} />
         </div>
+        <Button type="button" variant="outline" className="h-10 shrink-0" onClick={signOut}>Sign out</Button>
       </header>
 
-      <div className="grid min-w-0 lg:grid-cols-[minmax(0,1fr)_22rem]">
-        <section className="min-w-0 border-b border-border lg:border-b-0 lg:border-r">
-          <div ref={playerRef} className="group relative aspect-video overflow-hidden bg-background">
-            <video
-              ref={videoRef}
-              poster={tvHubCinematic}
-              playsInline
-              preload="metadata"
-              className="h-full w-full object-contain"
-              onPlay={() => setPlaying(true)}
-              onPause={() => setPlaying(false)}
-              onError={() => setPlaybackError("This stream could not be played in the browser. Try another channel.")}
-              onLoadedMetadata={(event) => setDuration(event.currentTarget.duration || 0)}
-              onTimeUpdate={(event) => setProgress(event.currentTarget.currentTime)}
-            />
-            {playbackError && (
-              <p className="absolute left-1/2 top-4 w-[90%] -translate-x-1/2 rounded-lg border border-destructive/40 bg-background/90 p-3 text-center text-xs text-foreground">
-                {playbackError}
-              </p>
-            )}
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/95 to-transparent p-3 pt-12 sm:p-5 sm:pt-20">
-              <div className="mb-3 flex items-end justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 text-[10px] font-bold uppercase text-primary sm:text-xs">
-                    {selected?.live && <span className="rounded bg-destructive px-2 py-0.5 text-destructive-foreground">Live</span>}
-                    <span className="truncate">{selected?.category ?? ""}</span>
-                  </div>
-                  <h2 className="truncate font-display text-xl font-black sm:text-3xl">{selected?.title ?? "Choose a channel"}</h2>
-                  <p className="truncate text-xs text-muted-foreground sm:text-sm">{selected?.subtitle ?? ""}</p>
-                </div>
-              </div>
-              <input
-                type="range"
-                min={0}
-                max={duration || 0}
-                step={0.1}
-                value={Math.min(progress, duration || 0)}
-                onChange={(event) => {
-                  const nextTime = Number(event.target.value);
-                  if (videoRef.current) videoRef.current.currentTime = nextTime;
-                  setProgress(nextTime);
-                }}
-                className="pointer-events-auto h-5 w-full accent-primary"
-                aria-label="Playback position"
-              />
-              <div className="pointer-events-auto flex min-w-0 items-center gap-1 sm:gap-2">
-                <Button type="button" variant="ghost" size="icon" onClick={() => moveChannel(-1)} aria-label="Previous channel"><ChevronLeft /></Button>
-                <Button type="button" size="icon" onClick={togglePlayback} aria-label={playing ? "Pause" : "Play"}>{playing ? <Pause /> : <Play />}</Button>
-                <Button type="button" variant="ghost" size="icon" onClick={() => moveChannel(1)} aria-label="Next channel"><ChevronRight /></Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  aria-label={muted ? "Unmute" : "Mute"}
-                  onClick={() => {
-                    const nextMuted = !muted;
-                    setMuted(nextMuted);
-                    if (videoRef.current) videoRef.current.muted = nextMuted;
-                  }}
-                >
-                  {muted ? <VolumeX /> : <Volume2 />}
-                </Button>
-                <input
-                  type="range"
-                  min={0}
-                  max={1}
-                  step={0.05}
-                  value={muted ? 0 : volume}
-                  onChange={(event) => {
-                    const nextVolume = Number(event.target.value);
-                    setVolume(nextVolume);
-                    setMuted(nextVolume === 0);
-                    if (videoRef.current) {
-                      videoRef.current.volume = nextVolume;
-                      videoRef.current.muted = nextVolume === 0;
-                    }
-                  }}
-                  className="hidden w-24 accent-primary sm:block"
-                  aria-label="Volume"
-                />
-                <span className="ml-1 text-[10px] tabular-nums text-muted-foreground sm:text-xs">{formatTime(progress)} / {formatTime(duration)}</span>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="ml-auto"
-                  aria-label="Enter fullscreen"
-                  onClick={() => void playerRef.current?.requestFullscreen?.()}
-                >
-                  <Expand />
-                </Button>
-              </div>
-            </div>
+      <div className="grid min-w-0 flex-1 lg:grid-cols-[14rem_18rem_minmax(0,1fr)]">
+        {/* categories */}
+        <nav className="min-w-0 border-b border-border bg-card/60 p-2 lg:border-b-0 lg:border-r" aria-label="Categories">
+          <div className="flex gap-2 overflow-x-auto lg:max-h-[60vh] lg:flex-col lg:overflow-y-auto">
+            <Button
+              type="button"
+              variant={group === "All" ? "default" : "ghost"}
+              className="h-9 shrink-0 justify-start gap-2 px-3"
+              onClick={() => setGroup("All")}
+            >
+              <LayoutGrid className="h-4 w-4" /><span className="truncate">All</span>
+              <span className="ml-auto hidden text-xs opacity-70 lg:inline">{sectionItems.length}</span>
+            </Button>
+            {groups.map(([name, count]) => (
+              <Button
+                key={name}
+                type="button"
+                variant={group === name ? "default" : "ghost"}
+                className="h-9 shrink-0 justify-start px-3"
+                onClick={() => setGroup(name)}
+              >
+                <span className="truncate">{name}</span>
+                <span className="ml-auto hidden text-xs opacity-70 lg:inline">{count}</span>
+              </Button>
+            ))}
           </div>
+        </nav>
 
-          <div className="p-4 sm:p-5">
-            <div className="mb-4 grid grid-cols-3 gap-2 rounded-lg border border-border bg-card p-1">
-              {SECTION_OPTIONS.map((option) => {
-                const Icon = option.icon;
-                return (
-                  <Button
-                    key={option.id}
+        {/* channel list */}
+        <section className="min-w-0 border-b border-border bg-background/30 p-2 lg:border-b-0 lg:border-r" aria-label={`${activeSection.label} list`}>
+          <div className="max-h-[45vh] space-y-1 overflow-y-auto lg:max-h-[60vh]">
+            {visible.map((item) => {
+              const active = item.id === selectedId;
+              const favourite = favourites.includes(item.id);
+              return (
+                <div
+                  key={item.id}
+                  className={cn(
+                    "flex min-w-0 items-center gap-2 rounded-lg border px-2 py-1.5 transition",
+                    active ? "border-primary bg-primary/10" : "border-transparent hover:border-border hover:bg-card",
+                  )}
+                >
+                  <button
                     type="button"
-                    variant={section === option.id ? "default" : "ghost"}
-                    className="min-w-0 px-2"
-                    onClick={() => setSection(option.id)}
+                    onClick={() => setSelectedId(item.id)}
+                    className="flex min-w-0 flex-1 items-center gap-2 text-left focus-visible:outline-none"
                   >
-                    <Icon className="h-4 w-4" /><span className="truncate">{option.label}</span>
+                    {item.logo ? (
+                      <img src={item.logo} alt="" aria-hidden loading="lazy" className="h-8 w-8 shrink-0 rounded bg-background object-contain" />
+                    ) : (
+                      <span className="grid h-8 w-8 shrink-0 place-items-center rounded bg-background text-muted-foreground"><Tv className="h-4 w-4" /></span>
+                    )}
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-bold">{item.title}</span>
+                      <span className="block truncate text-[11px] text-muted-foreground">{item.group}</span>
+                    </span>
+                  </button>
+                  <Button
+                    type="button"
+                    size="icon-sm"
+                    variant="ghost"
+                    className={favourite ? "text-primary" : "text-muted-foreground"}
+                    aria-label={favourite ? `Remove ${item.title} from favourites` : `Add ${item.title} to favourites`}
+                    onClick={() => setFavourites((current) => favourite ? current.filter((id) => id !== item.id) : [...current, item.id])}
+                  >
+                    <Heart className={cn("h-4 w-4", favourite && "fill-current")} />
                   </Button>
-                );
-              })}
-            </div>
-
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3" aria-label={`${section} selection`}>
-              {visibleItems.map((item) => {
-                const active = item.id === selectedId;
-                const favourite = favourites.includes(item.id);
-                return (
-                  <article key={item.id} className={cn("min-w-0 rounded-lg border bg-card p-3 transition", active ? "border-primary shadow-glow" : "border-border hover:border-primary/50")}>
-                    <div className="flex min-w-0 items-center gap-3">
-                      <Button type="button" size="icon" variant={active ? "default" : "outline"} onClick={() => selectItem(item)} aria-label={`Play ${item.title}`}>
-                        {active && playing ? <Pause /> : <Play />}
-                      </Button>
-                      <Button type="button" variant="ghost" className="h-auto min-w-0 flex-1 justify-start px-1 py-1 text-left" onClick={() => selectItem(item)}>
-                        <span className="min-w-0">
-                          <span className="block truncate text-sm font-bold">{item.title}</span>
-                          <span className="block truncate text-xs text-muted-foreground">{item.subtitle}</span>
-                        </span>
-                      </Button>
-                      <Button
-                        type="button"
-                        size="icon-sm"
-                        variant="ghost"
-                        className={favourite ? "text-primary" : "text-muted-foreground"}
-                        aria-label={favourite ? `Remove ${item.title} from favourites` : `Add ${item.title} to favourites`}
-                        onClick={() => setFavourites((current) => favourite ? current.filter((id) => id !== item.id) : [...current, item.id])}
-                      >
-                        <Heart className={cn("h-4 w-4", favourite && "fill-current")} />
-                      </Button>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-            {visibleItems.length === 0 && <p className="py-10 text-center text-sm text-muted-foreground">Nothing here matches your search.</p>}
-            {sectionItems.length > visibleItems.length && (
-              <p className="pt-4 text-center text-xs text-muted-foreground">
-                Showing {visibleItems.length} of {sectionItems.length} — search to narrow it down.
-              </p>
+                </div>
+              );
+            })}
+            {visible.length === 0 && <p className="p-6 text-center text-sm text-muted-foreground">Nothing here matches your search.</p>}
+            {filtered.length > visible.length && (
+              <p className="p-3 text-center text-xs text-muted-foreground">Showing {visible.length} of {filtered.length} — search to narrow it down.</p>
             )}
           </div>
         </section>
 
-        <aside className="min-w-0 bg-card/60 p-4 sm:p-5" aria-labelledby="guide-title">
-          <div className="mb-5 flex items-center justify-between gap-3">
-            <div>
-              <p className="text-[10px] font-bold uppercase text-primary">Programme guide</p>
-              <h2 id="guide-title" className="font-display text-xl font-black uppercase">Now & next</h2>
-            </div>
-            <CalendarDays className="h-5 w-5 text-muted-foreground" />
-          </div>
-          {selected?.epg?.length ? (
-            <ol className="space-y-2">
-              {selected.epg.map((programme, index) => (
-                <li key={`${programme.time}-${programme.title}`} className={cn("rounded-lg border p-3", index === 0 ? "border-primary bg-primary/10" : "border-border bg-background/30")}>
-                  <div className="flex gap-3">
-                    <span className="flex w-14 shrink-0 items-center gap-1 text-xs font-bold text-primary"><Clock3 className="h-3.5 w-3.5" />{programme.time}</span>
-                    <div className="min-w-0">
-                      <p className="text-sm font-bold">{programme.title}</p>
-                      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{programme.description}</p>
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          ) : (
-            <div className="rounded-lg border border-dashed border-border bg-background/30 p-6 text-center">
-              <Clock3 className="mx-auto mb-3 h-6 w-6 text-muted-foreground" />
-              <p className="text-sm font-bold">Guide unavailable</p>
-              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Your provider has not supplied programme data for this channel.</p>
-            </div>
-          )}
-          <div className="mt-5 rounded-lg border border-border bg-background/40 p-3 text-xs leading-relaxed text-muted-foreground">
-            Channels, categories and streams come directly from your own provider account. OG BOT does not host, store
-            or control any of this content and takes no responsibility for it.
-          </div>
-        </aside>
+        {/* player */}
+        <section className="min-w-0 p-3 sm:p-4" aria-label="Player">
+          <StreamPlayer
+            title={selected?.title ?? "Choose something to watch"}
+            group={selected?.group ?? ""}
+            source={selected?.source ?? null}
+            live={section === "tv"}
+            onPrevious={() => step(-1)}
+            onNext={() => step(1)}
+          />
+          <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+            Streams come directly from your provider account. OG BOT does not host, store or control this content.
+          </p>
+        </section>
       </div>
     </main>
+  );
+}
+
+/* -------------------------------------------------------------- player ---- */
+
+function StreamPlayer({
+  title,
+  group,
+  source,
+  live,
+  onPrevious,
+  onNext,
+}: {
+  title: string;
+  group: string;
+  source: string | null;
+  live: boolean;
+  onPrevious: () => void;
+  onNext: () => void;
+}) {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const shellRef = useRef<HTMLDivElement | null>(null);
+  const [playing, setPlaying] = useState(false);
+  const [muted, setMuted] = useState(false);
+  const [volume, setVolume] = useState(0.8);
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [status, setStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (!source) {
+      video.removeAttribute("src");
+      setStatus("idle");
+      return;
+    }
+
+    setStatus("loading");
+    setProgress(0);
+    setDuration(0);
+
+    const isHls = /\.m3u8(\?|$)/i.test(source);
+    const nativeHls = video.canPlayType("application/vnd.apple.mpegurl") !== "";
+
+    if (!isHls || nativeHls) {
+      video.src = source;
+      void video.play().catch(() => setPlaying(false));
+      return;
+    }
+
+    let destroyed = false;
+    let instance: { destroy: () => void } | null = null;
+
+    void (async () => {
+      const { default: Hls } = await import("hls.js");
+      if (destroyed) return;
+      if (!Hls.isSupported()) {
+        video.src = source;
+        return;
+      }
+      const hls = new Hls({ enableWorker: true, lowLatencyMode: true });
+      instance = hls;
+      hls.loadSource(source);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        setStatus("ready");
+        void video.play().catch(() => setPlaying(false));
+      });
+      hls.on(Hls.Events.ERROR, (_event, data) => {
+        if (!data.fatal) return;
+        if (data.type === Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
+        else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
+        else setStatus("error");
+      });
+    })();
+
+    return () => {
+      destroyed = true;
+      instance?.destroy();
+    };
+  }, [source]);
+
+  const toggle = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) void video.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
+    else {
+      video.pause();
+      setPlaying(false);
+    }
+  };
+
+  return (
+    <div ref={shellRef} className="overflow-hidden rounded-xl border border-border bg-background">
+      <div className="relative aspect-video bg-black">
+        <video
+          ref={videoRef}
+          poster={tvHubCinematic}
+          playsInline
+          preload="metadata"
+          className="h-full w-full object-contain"
+          onPlay={() => { setPlaying(true); setStatus("ready"); }}
+          onPause={() => setPlaying(false)}
+          onWaiting={() => setStatus("loading")}
+          onPlaying={() => setStatus("ready")}
+          onError={() => setStatus("error")}
+          onLoadedMetadata={(e) => setDuration(e.currentTarget.duration || 0)}
+          onTimeUpdate={(e) => setProgress(e.currentTarget.currentTime)}
+        />
+        {status === "loading" && (
+          <span className="pointer-events-none absolute inset-0 grid place-items-center bg-black/40">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </span>
+        )}
+        {status === "error" && (
+          <p className="pointer-events-none absolute inset-x-4 top-4 rounded-lg border border-destructive/40 bg-background/90 p-3 text-center text-xs text-foreground">
+            This stream would not play in the browser. Try another channel.
+          </p>
+        )}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/95 to-transparent p-3 pt-14 sm:p-4 sm:pt-20">
+          <div className="mb-2 flex items-center gap-2 text-[10px] font-bold uppercase text-primary sm:text-xs">
+            {live && <span className="rounded bg-destructive px-2 py-0.5 text-destructive-foreground">Live</span>}
+            <span className="truncate">{group}</span>
+          </div>
+          <h2 className="mb-2 truncate font-display text-lg font-black text-white sm:text-2xl">{title}</h2>
+          {!live && (
+            <input
+              type="range"
+              min={0}
+              max={duration || 0}
+              step={0.1}
+              value={Math.min(progress, duration || 0)}
+              onChange={(e) => {
+                const next = Number(e.target.value);
+                if (videoRef.current) videoRef.current.currentTime = next;
+                setProgress(next);
+              }}
+              className="pointer-events-auto h-5 w-full accent-primary"
+              aria-label="Playback position"
+            />
+          )}
+          <div className="pointer-events-auto flex min-w-0 items-center gap-1 sm:gap-2">
+            <Button type="button" variant="ghost" size="icon" onClick={onPrevious} aria-label="Previous"><ChevronLeft /></Button>
+            <Button type="button" size="icon" onClick={toggle} aria-label={playing ? "Pause" : "Play"}>{playing ? <Pause /> : <Play />}</Button>
+            <Button type="button" variant="ghost" size="icon" onClick={onNext} aria-label="Next"><ChevronRight /></Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label={muted ? "Unmute" : "Mute"}
+              onClick={() => {
+                const next = !muted;
+                setMuted(next);
+                if (videoRef.current) videoRef.current.muted = next;
+              }}
+            >
+              {muted ? <VolumeX /> : <Volume2 />}
+            </Button>
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.05}
+              value={muted ? 0 : volume}
+              onChange={(e) => {
+                const next = Number(e.target.value);
+                setVolume(next);
+                setMuted(next === 0);
+                if (videoRef.current) {
+                  videoRef.current.volume = next;
+                  videoRef.current.muted = next === 0;
+                }
+              }}
+              className="hidden w-24 accent-primary sm:block"
+              aria-label="Volume"
+            />
+            {!live && (
+              <span className="ml-1 text-[10px] tabular-nums text-white/70 sm:text-xs">{formatTime(progress)} / {formatTime(duration)}</span>
+            )}
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="ml-auto"
+              aria-label="Enter fullscreen"
+              onClick={() => void shellRef.current?.requestFullscreen?.()}
+            >
+              <Expand />
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
