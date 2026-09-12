@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Coins, Package, Sparkles, Crown, Gem, ShoppingBag, Repeat } from "lucide-react";
+import { Coins, Package, Sparkles, Crown, Gem, ShoppingBag, Repeat, Send, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CoinPill } from "@/components/ui/coin-pill";
 import type { StoreItem } from "@/lib/store.functions";
@@ -47,14 +47,20 @@ export function StoreItemCard({
   item,
   onBuy,
   buying,
+  sportsGuideState,
+  onClaimInvite,
 }: {
   item: StoreItem;
   onBuy: (id: string) => void;
   buying?: boolean;
+  sportsGuideState?: "unowned" | "owned" | "invite_sent" | "joined" | "revoked";
+  onClaimInvite?: () => void;
 }) {
   const r = RARITY[item.rarity];
   const stockRemaining = item.stock === null ? null : Math.max(0, item.stock - item.stock_sold);
   const soldOut = stockRemaining !== null && stockRemaining === 0;
+  const isSportsGuide = item.slug === "og-sports-guide-access";
+  const ownsSportsGuide = isSportsGuide && sportsGuideState && !["unowned", "revoked"].includes(sportsGuideState);
 
   return (
     <div
@@ -130,18 +136,23 @@ export function StoreItemCard({
       {/* footer */}
       <div className="mt-auto flex items-end justify-between pt-4">
         <div className="flame-heading text-2xl font-display font-black leading-none">
-          {formatPrice(item.price_cents, item.currency)}
+          {item.coin_price !== null ? `${item.coin_price} OG Coins` : formatPrice(item.price_cents, item.currency)}
         </div>
         <Button
           size="sm"
-          onClick={() => onBuy(item.id)}
+          onClick={() => ownsSportsGuide ? onClaimInvite?.() : onBuy(item.id)}
           disabled={soldOut || buying}
           className="bg-gradient-brand font-bold uppercase tracking-wider"
         >
-          <Coins className="mr-1 h-4 w-4" />
-          {soldOut ? "Sold out" : buying ? "…" : "Buy"}
+          {buying ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : ownsSportsGuide ? <Send className="mr-1 h-4 w-4" /> : <Coins className="mr-1 h-4 w-4" />}
+          {soldOut ? "Sold out" : buying ? "…" : sportsGuideState === "invite_sent" ? "Send fresh invite" : ownsSportsGuide ? "Claim invite" : "Buy"}
         </Button>
       </div>
+      {ownsSportsGuide ? (
+        <div className="mt-3 flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/10 px-3 py-2 text-xs font-semibold text-primary">
+          <Check className="h-4 w-4" /> Access owned
+        </div>
+      ) : null}
     </div>
   );
 }

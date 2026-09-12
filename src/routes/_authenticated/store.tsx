@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
 
 import { ShoppingBag, Coins, Crown, Loader2, X, Sparkles } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
@@ -13,7 +15,7 @@ import { CustomCoinAmountCard } from "@/components/store/CustomCoinAmountCard";
 import { StripeEmbeddedCheckoutInline } from "@/components/StripeEmbeddedCheckout";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { CoinBalance } from "@/components/dashboard/CoinBalance";
-import { listStoreCatalog } from "@/lib/store.functions";
+import { claimSportsGuideInvite, getSportsGuideAccessStatus, listStoreCatalog, purchaseSportsGuideAccess } from "@/lib/store.functions";
 import { CoinStore } from "./buy-coins.index";
 
 export const Route = createFileRoute("/_authenticated/store")({
@@ -42,12 +44,31 @@ const ALL_TAB = "all";
 function StorePage() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
+  const queryClient = useQueryClient();
+  const getAccessStatus = useServerFn(getSportsGuideAccessStatus);
+  const purchaseAccess = useServerFn(purchaseSportsGuideAccess);
+  const claimInvite = useServerFn(claimSportsGuideInvite);
   const catalog = useQuery({
     queryKey: ["store-catalog"],
     queryFn: () => listStoreCatalog(),
   });
   const [buyItemId, setBuyItemId] = useState<string | null>(null);
   const [customUnits, setCustomUnits] = useState<number | null>(null);
+  const access = useQuery({
+    queryKey: ["sports-guide-access"],
+    queryFn: () => getAccessStatus(),
+  });
+  const sportsGuide = useMutation({
+    mutationFn: async (action: "buy" | "claim") => action === "buy" ? purchaseAccess() : claimInvite(),
+    onSuccess: async (_result, action) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["sports-guide-access"] }),
+        queryClient.invalidateQueries({ queryKey: ["profile"] }),
+      ]);
+      toast.success(action === "buy" ? "Sports Guide access unlocked" : "Private invite sent to Telegram");
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
 
   const returnUrl = useMemo(
     () => `${window.location.origin}/buy-coins/return?session_id={CHECKOUT_SESSION_ID}`,
@@ -63,6 +84,31 @@ function StorePage() {
   );
 
   const activeView = search.view === "coins" ? "coins" : "items";
+  const handleStoreItem = (itemId: string) => {
+    const item = allItems.find((candidate) => candidate.id === itemId);
+    if (item?.slug === "og-sports-guide-access") {
+      sportsGuide.mutate("buy");
+      return;
+    }
+    setBuyItemId(itemId);
+  };
+  const renderStoreItem = (item: (typeof allItems)[number]) => (
+    <StoreItemCard
+      key={item.id}
+      item={item}
+      onBuy={handleStoreItem}
+      buying={item.slug === "og-sports-guide-access" && sportsGuide.isPending}
+      sportsGuideState={item.slug === "og-sports-guide-access" ? access.data?.status : undefined}
+      onClaimInvite={() => {
+        if (!access.data?.telegramLinked) {
+          toast.info("Connect Telegram in Settings before claiming your invite");
+          navigate({ to: "/settings" });
+          return;
+        }
+        sportsGuide.mutate("claim");
+      }}
+    />
+  );
 
   if (activeView === "coins") {
     return (
@@ -202,9 +248,7 @@ function StorePage() {
                 </div>
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {allItems.map((item) => (
-                    <StoreItemCard key={item.id} item={item} onBuy={setBuyItemId} />
-                  ))}
+                    {allItems.map(renderStoreItem)}
                 </div>
               )}
             </TabsContent>
@@ -220,9 +264,7 @@ function StorePage() {
                   </div>
                 ) : (
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {c.items.map((item) => (
-                      <StoreItemCard key={item.id} item={item} onBuy={setBuyItemId} />
-                    ))}
+                    {c.items.map(renderStoreItem)}
                   </div>
                 )}
               </TabsContent>

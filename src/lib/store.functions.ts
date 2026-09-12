@@ -24,6 +24,7 @@ export type StoreItem = {
   description: string | null;
   image_url: string | null;
   price_cents: number;
+  coin_price: number | null;
   currency: string;
   recurring_interval: "month" | "year" | null;
   stock: number | null;
@@ -33,6 +34,14 @@ export type StoreItem = {
   rarity: "common" | "rare" | "epic" | "legendary";
   sort_order: number;
   active: boolean;
+};
+
+export type SportsGuideAccessStatus = {
+  owned: boolean;
+  status: "unowned" | "owned" | "invite_sent" | "joined" | "revoked";
+  telegramLinked: boolean;
+  groupConfigured: boolean;
+  inviteExpiresAt: string | null;
 };
 
 export type StoreCatalog = {
@@ -73,6 +82,118 @@ export const listStoreCatalog = createServerFn({ method: "GET" })
         items: byCat.get(c.id) ?? [],
       })),
     };
+  });
+
+export const getSportsGuideAccessStatus = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<SportsGuideAccessStatus> => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const [access, profile, setting] = await Promise.all([
+      supabaseAdmin
+        .from("sports_guide_access")
+        .select("status, invite_expires_at")
+        .eq("user_id", context.userId)
+        .maybeSingle(),
+      supabaseAdmin
+        .from("profiles")
+        .select("telegram_chat_id")
+        .eq("id", context.userId)
+        .maybeSingle(),
+      supabaseAdmin
+        .from("app_settings")
+        .select("value")
+        .eq("key", "telegram.sports_guide_group_id")
+        .maybeSingle(),
+    ]);
+    if (access.error) throw new Error(access.error.message);
+    if (profile.error) throw new Error(profile.error.message);
+    if (setting.error) throw new Error(setting.error.message);
+    const status = access.data?.status as SportsGuideAccessStatus["status"] | undefined;
+    return {
+      owned: !!status && status !== "revoked",
+      status: status ?? "unowned",
+      telegramLinked: !!profile.data?.telegram_chat_id,
+      groupConfigured: setting.data?.value !== null && setting.data?.value !== undefined,
+      inviteExpiresAt: access.data?.invite_expires_at ?? null,
+    };
+  });
+
+export const purchaseSportsGuideAccess = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin.rpc("purchase_sports_guide_access_for_user", {
+      p_user: context.userId,
+    });
+    if (error) throw new Error(error.message);
+    return data as { ok: boolean; already_owned: boolean; status: string; coin_balance?: number };
+  });
+
+export const claimSportsGuideInvite = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const lovableKey = process.env.LOVABLE_API_KEY;
+    const telegramKey = process.env.TELEGRAM_API_KEY;
+    if (!lovableKey || !telegramKey) throw new Error("Telegram is not configured");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const [access, profile, setting] = await Promise.all([
+      supabaseAdmin.from("sports_guide_access").select("status").eq("user_id", context.userId).maybeSingle(),
+      supabaseAdmin.from("profiles").select("telegram_chat_id").eq("id", context.userId).maybeSingle(),
+      supabaseAdmin.from("app_settings").select("value").eq("key", "telegram.sports_guide_group_id").maybeSingle(),
+    ]);
+    if (!access.data || access.data.status === "revoked") throw new Error("Buy Sports Guide access first");
+    if (!profile.data?.telegram_chat_id) throw new Error("Connect Telegram in Settings first");
+    const groupId = setting.data?.value;
+    if (typeof groupId !== "number" && typeof groupId !== "string") {
+      throw new Error("The private Sports Guide group is not ready yet");
+    }
+    const expiresAt = Math.floor(Date.now() / 1000) + 60 * 60 * 24;
+    const headers = {
+      Authorization: `Bearer ${lovableKey}`,
+      "X-Connection-Api-Key": telegramKey,
+      "Content-Type": "application/json",
+    };
+    const inviteResponse = await fetch("https://connector-gateway.lovable.dev/telegram/createChatInviteLink", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        chat_id: groupId,
+        name: `OG Sports Guide · ${context.userId.slice(0, 8)}`,
+        expire_date: expiresAt,
+        member_limit: 1,
+      }),
+    });
+    const inviteBody = await inviteResponse.json().catch(() => null) as { ok?: boolean; description?: string; result?: { invite_link?: string } } | null;
+    const inviteLink = inviteBody?.result?.invite_link;
+    if (!inviteResponse.ok || inviteBody?.ok !== true || !inviteLink) {
+      throw new Error(inviteBody?.description ?? "Could not create the Telegram invite");
+    }
+    const messageResponse = await fetch("https://connector-gateway.lovable.dev/telegram/sendMessage", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        chat_id: profile.data.telegram_chat_id,
+        text: `🏆 <b>OG SPORTS GUIDE ACCESS</b>\n\nYour private one-use invite is ready. It expires in 24 hours.\n\n${inviteLink}\n\nDo not share this link — only one person can use it.`,
+        parse_mode: "HTML",
+        disable_web_page_preview: true,
+      }),
+    });
+    const messageBody = await messageResponse.json().catch(() => null) as { ok?: boolean; description?: string } | null;
+    if (!messageResponse.ok || messageBody?.ok !== true) {
+      throw new Error(messageBody?.description ?? "Invite created, but Telegram delivery failed");
+    }
+    const now = new Date().toISOString();
+    const { error: updateError } = await supabaseAdmin
+      .from("sports_guide_access")
+      .update({
+        status: "invite_sent",
+        telegram_invite_link: inviteLink,
+        invite_expires_at: new Date(expiresAt * 1000).toISOString(),
+        invite_sent_at: now,
+      })
+      .eq("user_id", context.userId);
+    if (updateError) throw new Error(updateError.message);
+    return { ok: true as const, expiresAt: new Date(expiresAt * 1000).toISOString() };
   });
 
 // ─── admin: list everything (incl. inactive) ─────────────────────────────
