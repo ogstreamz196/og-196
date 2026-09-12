@@ -84,6 +84,9 @@ export function parseM3u(text: string): { channels: TvChannel[]; total: number; 
   return { channels, total, truncated: total > channels.length };
 }
 
+/** The provider answers on both the bare host and the explicit :80 host — try both. */
+export const TV_HUB_HOSTS = [`${TV_HUB_HOST}:80`, TV_HUB_HOST];
+
 export const loadTvHubPlaylist = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) =>
@@ -95,30 +98,46 @@ export const loadTvHubPlaylist = createServerFn({ method: "POST" })
       .parse(data),
   )
   .handler(async ({ data }): Promise<TvPlaylist> => {
-    const url =
-      `${TV_HUB_HOST}/get.php?username=${encodeURIComponent(data.username)}` +
+    const query =
+      `get.php?username=${encodeURIComponent(data.username)}` +
       `&password=${encodeURIComponent(data.password)}&type=m3u_plus&output=ts`;
 
-    let response: Response;
-    try {
-      response = await fetch(url, {
-        headers: { "User-Agent": "VLC/3.0.20 LibVLC/3.0.20", Accept: "*/*" },
-        signal: AbortSignal.timeout(45_000),
-      });
-    } catch {
+    let text: string | null = null;
+    let rejected = false;
+    let lastStatus: number | null = null;
+    let reachable = false;
+
+    for (const host of TV_HUB_HOSTS) {
+      let response: Response;
+      try {
+        response = await fetch(`${host}/${query}`, {
+          headers: { "User-Agent": "VLC/3.0.20 LibVLC/3.0.20", Accept: "*/*" },
+          signal: AbortSignal.timeout(45_000),
+        });
+      } catch {
+        continue;
+      }
+      reachable = true;
+      lastStatus = response.status;
+      if (response.status === 401 || response.status === 403) {
+        rejected = true;
+        continue;
+      }
+      if (!response.ok) continue;
+      const body = await response.text();
+      if (body.includes("#EXTM3U")) {
+        text = body;
+        break;
+      }
+      rejected = true;
+    }
+
+    if (!reachable) {
       throw new Error("Could not reach the TV provider. Try again in a moment.");
     }
-
-    if (response.status === 401 || response.status === 403) {
-      throw new Error("Those details were rejected by the TV provider.");
-    }
-    if (!response.ok) {
-      throw new Error(`The TV provider responded with an error (${response.status}).`);
-    }
-
-    const text = await response.text();
-    if (!text.includes("#EXTM3U")) {
-      throw new Error("Sign-in failed — check your username and password.");
+    if (!text) {
+      if (rejected) throw new Error("Sign-in failed — check your username and password.");
+      throw new Error(`The TV provider responded with an error (${lastStatus ?? "unknown"}).`);
     }
 
     const parsed = parseM3u(text);
