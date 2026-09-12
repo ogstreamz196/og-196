@@ -133,8 +133,13 @@ function TvHubPage() {
     );
   }, [group, query, sectionItems]);
 
-  const visible = filtered.slice(0, MAX_VISIBLE);
+  const visible = filtered.slice(0, visibleCount);
   const selected = list.find((item) => item.id === selectedId) ?? null;
+  const expiry = formatExpiry(account?.expiresAt ?? null);
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [group, query, section]);
 
   const openSection = (next: Section) => {
     setSection(next);
