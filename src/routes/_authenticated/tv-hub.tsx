@@ -315,9 +315,9 @@ function TvHubPage() {
       : `${activeGroup} · ${filtered.length}`;
 
   return (
-    <main className="flex min-h-[calc(100dvh-7rem)] flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-card sm:rounded-3xl">
+    <main className="flex min-h-[calc(100dvh-7rem)] flex-col rounded-2xl border border-border bg-surface shadow-card sm:rounded-3xl">
       {/* top bar */}
-      <header className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 border-b border-border bg-card/90 p-2.5 backdrop-blur-xl sm:gap-3 sm:p-3">
+      <header className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded-t-2xl border-b border-border bg-card/90 p-2.5 backdrop-blur-xl sm:gap-3 sm:rounded-t-3xl sm:p-3">
         <Button type="button" variant="ghost" size="icon" className="shrink-0" aria-label="Back to TV HUB menu" onClick={() => setSection(null)}>
           <ArrowLeft />
         </Button>
@@ -342,8 +342,11 @@ function TvHubPage() {
         </div>
       </header>
 
-      {/* player always at the top */}
-      <section className="min-w-0 border-b border-border bg-black/40 p-2 sm:p-3" aria-label="Player">
+      {/* player stays pinned while the guide scrolls with the page */}
+      <section
+        className="sticky top-0 z-30 min-w-0 border-b border-border bg-background/95 p-2 backdrop-blur-xl sm:p-3"
+        aria-label="Player"
+      >
         <div className="mx-auto w-full max-w-4xl">
           <StreamPlayer
             title={selected?.title ?? "Choose something to watch"}
@@ -358,7 +361,7 @@ function TvHubPage() {
 
       {/* search */}
       <div className="border-b border-border bg-card/70 p-2 sm:p-3">
-        <div className="relative">
+        <div className="relative mx-auto w-full max-w-4xl">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={query}
@@ -375,7 +378,7 @@ function TvHubPage() {
         <div
           role="tablist"
           aria-label="Categories"
-          className="flex gap-1.5 overflow-x-auto border-b border-border bg-background/40 px-2 py-2 [scrollbar-width:none] sm:px-3 [&::-webkit-scrollbar]:hidden"
+          className="flex snap-x snap-mandatory gap-1.5 overflow-x-auto overflow-y-hidden overscroll-x-contain border-b border-border bg-background/40 px-2 py-2 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [touch-action:pan-x_pan-y] sm:px-3 [&::-webkit-scrollbar]:hidden"
         >
           <button
             type="button"
@@ -383,7 +386,7 @@ function TvHubPage() {
             aria-selected={activeGroup === "All"}
             onClick={() => setGroup("All")}
             className={cn(
-              "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide transition",
+              "inline-flex shrink-0 snap-start items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-bold uppercase tracking-wide transition",
               activeGroup === "All"
                 ? "border-primary bg-primary text-primary-foreground shadow-glow"
                 : "border-border bg-card/70 text-muted-foreground hover:border-primary/60 hover:text-foreground",
@@ -400,7 +403,7 @@ function TvHubPage() {
               aria-selected={activeGroup === name}
               onClick={() => setGroup(name)}
               className={cn(
-                "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide transition",
+                "inline-flex shrink-0 snap-start items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-bold uppercase tracking-wide transition",
                 activeGroup === name
                   ? "border-primary bg-primary text-primary-foreground shadow-glow"
                   : "border-border bg-card/70 text-muted-foreground hover:border-primary/60 hover:text-foreground",
@@ -414,11 +417,11 @@ function TvHubPage() {
       )}
 
       {/* guide list */}
-      <section className="flex min-h-0 min-w-0 flex-1 flex-col" aria-label={`${activeSection.label} guide`}>
-        <p className="border-b border-border bg-card/40 px-3 py-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+      <section className="flex min-w-0 flex-1 flex-col" aria-label={`${activeSection.label} guide`}>
+        <p className="sticky top-0 z-10 border-b border-border bg-card/90 px-3 py-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground backdrop-blur">
           {listLabel}
         </p>
-        <div className="min-h-0 flex-1 overflow-y-auto p-2 sm:p-3">
+        <div className="mx-auto w-full max-w-4xl p-2 sm:p-3">
           <ul className="space-y-1">
             {visible.map((item, index) => {
               const active = item.id === selectedId;
