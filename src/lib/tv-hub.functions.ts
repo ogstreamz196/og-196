@@ -24,14 +24,24 @@ export type TvChannel = {
   section: TvSection;
 };
 
+export type TvAccount = {
+  username: string | null;
+  status: string | null;
+  /** ISO date string, or null when the provider does not report one. */
+  expiresAt: string | null;
+  maxConnections: string | null;
+  activeConnections: string | null;
+};
+
 export type TvPlaylist = {
   fetchedAt: string;
   total: number;
   channels: TvChannel[];
   truncated: boolean;
+  account: TvAccount | null;
 };
 
-const MAX_ITEMS = 6000;
+const MAX_ITEMS = 60000;
 
 function classify(group: string, url: string): TvSection {
   const g = group.toLowerCase();
