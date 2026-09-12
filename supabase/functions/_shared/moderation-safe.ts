@@ -56,4 +56,4 @@ export function isModerationRejection(msg: string | null | undefined): boolean {
 
 /** User-facing explanation shown in the app when moderation blocks a track. */
 export const MODERATION_MESSAGE =
-  "The music engine blocked these lyrics as too explicit. We toned the strongest words down and tried again — edit the lyrics or turn Foul Mouth down a notch if it keeps happening.";
+  "The music engine blocked these lyrics as too explicit, even after we toned the strongest words down. Edit the lyrics (or turn Foul Mouth off) and try again — your coins were refunded.";
