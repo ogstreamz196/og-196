@@ -21,6 +21,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as RCodeRouteImport } from './routes/r.$code'
 import { Route as PortalSlugRouteImport } from './routes/portal.$slug'
+import { Route as AuthenticatedTvHubRouteImport } from './routes/_authenticated/tv-hub'
 import { Route as AuthenticatedStoreRouteImport } from './routes/_authenticated/store'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedReferralsRouteImport } from './routes/_authenticated/referrals'
@@ -111,6 +112,11 @@ const PortalSlugRoute = PortalSlugRouteImport.update({
   id: '/portal/$slug',
   path: '/portal/$slug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedTvHubRoute = AuthenticatedTvHubRouteImport.update({
+  id: '/tv-hub',
+  path: '/tv-hub',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedStoreRoute = AuthenticatedStoreRouteImport.update({
   id: '/store',
@@ -348,6 +354,7 @@ export interface FileRoutesByFullPath {
   '/referrals': typeof AuthenticatedReferralsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/store': typeof AuthenticatedStoreRoute
+  '/tv-hub': typeof AuthenticatedTvHubRoute
   '/portal/$slug': typeof PortalSlugRoute
   '/r/$code': typeof RCodeRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -396,6 +403,7 @@ export interface FileRoutesByTo {
   '/referrals': typeof AuthenticatedReferralsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/store': typeof AuthenticatedStoreRoute
+  '/tv-hub': typeof AuthenticatedTvHubRoute
   '/portal/$slug': typeof PortalSlugRoute
   '/r/$code': typeof RCodeRoute
   '/': typeof AuthenticatedIndexRoute
@@ -447,6 +455,7 @@ export interface FileRoutesById {
   '/_authenticated/referrals': typeof AuthenticatedReferralsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/store': typeof AuthenticatedStoreRoute
+  '/_authenticated/tv-hub': typeof AuthenticatedTvHubRoute
   '/portal/$slug': typeof PortalSlugRoute
   '/r/$code': typeof RCodeRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
@@ -499,6 +508,7 @@ export interface FileRouteTypes {
     | '/referrals'
     | '/settings'
     | '/store'
+    | '/tv-hub'
     | '/portal/$slug'
     | '/r/$code'
     | '/.lovable/oauth/consent'
@@ -547,6 +557,7 @@ export interface FileRouteTypes {
     | '/referrals'
     | '/settings'
     | '/store'
+    | '/tv-hub'
     | '/portal/$slug'
     | '/r/$code'
     | '/'
@@ -597,6 +608,7 @@ export interface FileRouteTypes {
     | '/_authenticated/referrals'
     | '/_authenticated/settings'
     | '/_authenticated/store'
+    | '/_authenticated/tv-hub'
     | '/portal/$slug'
     | '/r/$code'
     | '/_authenticated/'
@@ -720,6 +732,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/portal/$slug'
       preLoaderRoute: typeof PortalSlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/tv-hub': {
+      id: '/_authenticated/tv-hub'
+      path: '/tv-hub'
+      fullPath: '/tv-hub'
+      preLoaderRoute: typeof AuthenticatedTvHubRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/store': {
       id: '/_authenticated/store'
@@ -1014,6 +1033,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedReferralsRoute: typeof AuthenticatedReferralsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedStoreRoute: typeof AuthenticatedStoreRoute
+  AuthenticatedTvHubRoute: typeof AuthenticatedTvHubRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedAdminApiKeysRoute: typeof AuthenticatedAdminApiKeysRoute
   AuthenticatedAdminAuditRoute: typeof AuthenticatedAdminAuditRoute
@@ -1047,6 +1067,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedReferralsRoute: AuthenticatedReferralsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedStoreRoute: AuthenticatedStoreRoute,
+  AuthenticatedTvHubRoute: AuthenticatedTvHubRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedAdminApiKeysRoute: AuthenticatedAdminApiKeysRoute,
   AuthenticatedAdminAuditRoute: AuthenticatedAdminAuditRoute,
