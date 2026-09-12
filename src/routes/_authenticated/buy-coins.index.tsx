@@ -27,7 +27,6 @@ import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { toast } from "sonner";
 import { PurchaseHistory } from "@/components/PurchaseHistory";
 import { ReferralReminder } from "@/components/referrals/ReferralReminder";
-import { SectionDivider } from "@/components/buy-coins/SectionDivider";
 import { StoreItemsSection } from "@/components/store/StoreItemsSection";
 
 export const Route = createFileRoute("/_authenticated/buy-coins/")({
@@ -303,100 +302,52 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
 
 
   return (
-    <DashboardShell title="OG Coin Vault">
+    <DashboardShell title="Store">
       <PaymentTestModeBanner />
-      {/* Sticky wallet bar — keeps balance in view while scrolling bundles */}
-      <div className="sticky top-0 z-30 -mx-4 mb-4 border-b border-coin/30 bg-background/85 px-4 py-2 backdrop-blur-md sm:-mx-6 sm:px-6">
-        <div
-          role="status"
-          aria-label={`Wallet balance ${profile?.coin_balance ?? 0} OG coins`}
-          className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3"
-        >
-          <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.25em] text-coin">
-            <Wallet className="h-3 w-3" /> Wallet
-          </span>
-          <span className="inline-flex items-baseline gap-1.5 whitespace-nowrap">
-            <Coins className="h-4 w-4 self-center text-coin" />
-            <span className="font-black tabular-nums leading-none text-foreground [font-size:clamp(1rem,4vw,1.25rem)]">
-              {profile?.coin_balance ?? 0}
-            </span>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              OG&nbsp;coins
-            </span>
-          </span>
-        </div>
-      </div>
-      <div className="mx-auto w-full max-w-6xl space-y-10 sm:space-y-12">
-        {/* Arcade-style hero */}
-        <section className="relative overflow-hidden rounded-3xl border-2 border-coin/40 bg-gradient-to-br from-background via-card to-background shadow-glow">
-          {/* scanline + glow fx */}
-          <div className="pointer-events-none absolute inset-0 opacity-[0.07]" style={{ backgroundImage: "repeating-linear-gradient(0deg, currentColor 0 1px, transparent 1px 4px)" }} />
-          <div className="pointer-events-none absolute -left-16 -top-20 h-64 w-64 rounded-full bg-coin/25 blur-3xl" />
-          <div className="pointer-events-none absolute -right-20 -bottom-24 h-72 w-72 rounded-full bg-primary/25 blur-3xl" />
-
-          <div className="relative flex flex-col gap-5 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
-            <div className="flex items-start gap-4 min-w-0">
-              <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-coin/40 to-coin/10 text-coin shadow-glow ring-2 ring-coin/40">
-                <Coins className="h-7 w-7 drop-shadow" />
-              </div>
-              <div className="min-w-0">
-                <p className="inline-flex items-center gap-1.5 rounded-full bg-coin/15 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.25em] text-coin ring-1 ring-coin/40">
-                  <Flame className="h-3 w-3" /> The Coin Vault
-                </p>
-                <h1 className="mt-2 font-display text-3xl font-black tracking-tight sm:text-4xl">
-                  <EditableContent contentKey="buyCoins.heading" defaultValue="Stock up. Power up." />
-                </h1>
-              </div>
+      <div className="store-clean mx-auto w-full max-w-6xl space-y-6 pb-[max(1rem,env(safe-area-inset-bottom))] sm:space-y-8">
+        <section className="overflow-hidden rounded-xl border border-border bg-card/95 p-4 shadow-card sm:p-6">
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4">
+            <div className="min-w-0">
+              <p className="text-xs font-semibold uppercase text-muted-foreground">OG BOT Store</p>
+              <h1 className="mt-1 truncate font-display text-2xl font-black sm:text-3xl">
+                <EditableContent contentKey="buyCoins.heading" defaultValue="Stock up. Power up." />
+              </h1>
             </div>
-
-            {/* HUD wallet — single line balance */}
-            <div className="flex w-full flex-col gap-3 sm:w-auto sm:items-end">
-              <div className="w-full rounded-2xl border-2 border-coin/50 bg-background/60 px-4 py-3 backdrop-blur-md shadow-glow sm:w-auto">
-                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] text-coin">
-                  <Wallet className="h-3 w-3" /> Wallet balance
-                </div>
-                <div className="mt-1 flex items-baseline gap-2 whitespace-nowrap">
-                  <Coins className="h-5 w-5 shrink-0 self-center text-coin" />
-                  <span className="font-black tabular-nums leading-none [font-size:clamp(1.5rem,6vw,2rem)]">
-                    {profile?.coin_balance ?? 0}
-                  </span>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                    OG&nbsp;coins
-                  </span>
-                </div>
-              </div>
-              <div className="self-end">
-                <AdminEditModeToggle />
+            <div role="status" aria-label={`Wallet balance ${profile?.coin_balance ?? 0} OG coins`} className="text-right">
+              <p className="text-xs font-semibold uppercase text-muted-foreground">Balance</p>
+              <div className="mt-1 flex items-center justify-end gap-2">
+                <Coins className="h-5 w-5 text-primary" />
+                <span className="font-mono text-2xl font-bold tabular-nums">{profile?.coin_balance ?? 0}</span>
+                <span className="hidden text-xs text-muted-foreground min-[360px]:inline">OG</span>
               </div>
             </div>
           </div>
+          <ReferralReminder className="mt-4 border-border bg-background/45 shadow-none" />
+          {isDev ? <div className="mt-3 flex justify-end"><AdminEditModeToggle /></div> : null}
         </section>
 
-        {/* Your OG sharing code first — earn while others spend */}
-        <ReferralReminder />
-
-        {/* Custom pack — build your own stack first */}
-        <section aria-labelledby="section-custom" className="scroll-mt-24">
-          <SectionDivider id="section-custom" eyebrow="Step 1" title="Build your custom stack" icon={<SlidersHorizontal className="h-3.5 w-3.5" />} />
-          <SectionCard>
-            <div className="p-3 sm:p-4">
-              <CustomPackCard onBuy={(units) => pickSelection({ type: "custom", units })} />
+        <div className="grid gap-4 lg:grid-cols-2">
+          <section aria-labelledby="section-custom" className="scroll-mt-24">
+            <div className="mb-3 flex items-center gap-2">
+              <SlidersHorizontal className="h-4 w-4 text-primary" />
+              <h2 id="section-custom" className="font-display text-lg font-black">Custom coin pack</h2>
             </div>
-          </SectionCard>
-        </section>
+            <CustomPackCard onBuy={(units) => pickSelection({ type: "custom", units })} />
+          </section>
 
-        {/* VIP monthly subscription — placed right below custom for max visibility */}
-        <section aria-labelledby="section-vip" className="scroll-mt-24">
-          <SectionDivider id="section-vip" eyebrow="Or upgrade" title="Go VIP for the full pass" icon={<Crown className="h-3.5 w-3.5" />} tone="coin" />
-          <SectionCard className="border-coin/40">
-            <div className="p-3 sm:p-6">
-              <p className="mb-3 text-xs leading-snug text-muted-foreground sm:text-sm">
+          <section aria-labelledby="section-vip" className="scroll-mt-24">
+            <div className="mb-3 flex items-center gap-2">
+              <Crown className="h-4 w-4 text-primary" />
+              <h2 id="section-vip" className="font-display text-lg font-black">VIP membership</h2>
+            </div>
+            <div className="flex h-[calc(100%-2.25rem)] min-h-0 flex-col rounded-xl border border-primary/30 bg-card/95 p-4 sm:p-5">
+              <p className="text-sm leading-relaxed text-muted-foreground">
                 <EditableContent contentKey="buyCoins.vip.subtitle" defaultValue="Unlock exclusive privileges across OG Streamz — billed monthly, cancel anytime." multiline />
               </p>
-              <div className="relative grid gap-4 rounded-2xl border border-coin/30 bg-gradient-to-br from-coin/10 via-card to-card p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-6 sm:p-6">
+              <div className="mt-4 grid flex-1 gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="text-lg font-bold">
+                    <h3 className="font-display text-lg font-black">
                       <EditableContent contentKey="buyCoins.vip.heading" defaultValue="OG VIP Pass" />
                     </h3>
                     {isVip && (
@@ -405,14 +356,14 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                       </span>
                     )}
                   </div>
-                  <ul className="mt-3 grid gap-1.5 text-sm text-muted-foreground sm:grid-cols-2">
+                  <ul className="mt-3 grid gap-2 text-sm text-muted-foreground min-[440px]:grid-cols-2">
                     <li className="flex items-start gap-2"><Star className="mt-0.5 h-3.5 w-3.5 shrink-0 text-coin" /> <span className="min-w-0">Foul-mouth OG Bot unlocked</span></li>
                     <li className="flex items-start gap-2"><Star className="mt-0.5 h-3.5 w-3.5 shrink-0 text-coin" /> <span className="min-w-0">Priority OG Bot replies</span></li>
                     <li className="flex items-start gap-2"><Star className="mt-0.5 h-3.5 w-3.5 shrink-0 text-coin" /> <span className="min-w-0">VIP badge across the hub</span></li>
                     <li className="flex items-start gap-2"><Gift className="mt-0.5 h-3.5 w-3.5 shrink-0 text-coin" /> <span className="min-w-0">Daily 10-coin safety net</span></li>
                   </ul>
                 </div>
-                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-coin/20 pt-3 sm:flex-col sm:items-end sm:justify-center sm:border-t-0 sm:pt-0">
+                <div className="flex items-end justify-between gap-3 border-t border-border pt-4 sm:flex-col sm:items-end sm:justify-center sm:border-t-0 sm:pt-0">
                   <div className="min-w-0">
                     <div className="text-3xl font-black tabular-nums leading-none">
                       {CURRENCY_SYMBOL}{(VIP_PLAN.priceCents / 100).toFixed(0)}
@@ -423,32 +374,28 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                     size="lg"
                     disabled={isVip}
                     onClick={() => pickSelection({ type: "vip" })}
-                    className="h-12 min-h-11 w-full shrink-0 bg-gradient-brand font-bold text-primary-foreground shadow-glow transition-transform hover:-translate-y-0.5 hover:opacity-90 active:translate-y-0 sm:w-auto"
+                    className="h-11 min-w-32 shrink-0 font-bold sm:w-auto"
                   >
                     {isVip ? "You're VIP" : (<><Crown className="mr-2 h-4 w-4" /> Join VIP</>)}
                   </Button>
                 </div>
               </div>
             </div>
-          </SectionCard>
         </section>
+        </div>
 
-        {/* Coin bundles grid */}
         <section aria-labelledby="section-bundles" className="scroll-mt-24">
-          <SectionDivider
-            id="section-bundles"
-            eyebrow="Or grab a preset"
-            title="Coin bundles"
-            icon={<Gem className="h-3.5 w-3.5" />}
-            action={
-              <span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full bg-emerald-500/15 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-emerald-400 ring-1 ring-emerald-500/30">
-                <TrendingDown className="h-3 w-3" /> Save up to {Math.round((1 - (COIN_PACKS[COIN_PACKS.length - 1].priceCents / 100 / COIN_PACKS[COIN_PACKS.length - 1].coins) / basePerCoin) * 100)}%
-              </span>
-            }
-          />
-          <SectionCard>
-            <div className="p-3 sm:p-6">
-              <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="mb-3 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+            <div className="min-w-0">
+              <p className="text-xs font-semibold uppercase text-muted-foreground">One-time purchase</p>
+              <h2 id="section-bundles" className="font-display text-xl font-black">Coin packs</h2>
+            </div>
+            <span className="shrink-0 rounded-md bg-primary/10 px-2 py-1 text-xs font-bold text-primary">
+              Save up to {Math.round((1 - (COIN_PACKS[COIN_PACKS.length - 1].priceCents / 100 / COIN_PACKS[COIN_PACKS.length - 1].coins) / basePerCoin) * 100)}%
+            </span>
+          </div>
+          <div className="rounded-xl border border-border bg-card/70 p-3 sm:p-4">
+              <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
                 {COIN_PACKS.map((t, i) => (
                   <PackCard
                     key={t.bundleId}
@@ -463,30 +410,11 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
 
 
 
-              <p className="mt-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center text-[10px] font-medium uppercase tracking-wider text-muted-foreground sm:text-[11px]">
+              <p className="mt-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center text-xs text-muted-foreground">
                 <Lock className="h-3 w-3" /> Secure checkout · Apple Pay · Google Pay · Card
               </p>
-            </div>
-          </SectionCard>
-        </section>
-
-        {/* Trust strip */}
-        <SectionCard>
-          <div className="grid gap-3 p-5 sm:grid-cols-3 sm:p-6">
-            <TrustItem icon={<ShieldCheck className="h-5 w-5 text-emerald-400" />} title="Secure by Stripe" body="PCI-compliant checkout, your card never touches our servers." />
-            <TrustItem icon={<InfinityIcon className="h-5 w-5 text-coin" />} title="Coins never expire" body="Top up once, use whenever — no monthly resets." />
-            <TrustItem icon={<Check className="h-5 w-5 text-primary" />} title="Instant credit" body="Coins land in your balance the moment payment clears." />
           </div>
-        </SectionCard>
-
-
-        <p className="text-center text-xs text-muted-foreground">
-          <EditableContent
-            contentKey="buyCoins.footer"
-            defaultValue="Questions? Tap OG Bot and we'll sort it. VAT included where applicable."
-            multiline
-          />
-        </p>
+        </section>
         <StoreItemsSection />
         <PurchaseHistory />
       </div>
@@ -663,36 +591,30 @@ function PackCard({
   return (
     <div
       className={cn(
-        "relative flex flex-col overflow-hidden rounded-2xl border-2 bg-card p-5 transition-all ring-1 hover:-translate-y-0.5",
-        tier.ring,
-        tier.glow || "shadow-card",
-        accent ? "border-coin/60" : "border-border",
+        "relative flex min-w-0 flex-col overflow-hidden rounded-lg border bg-card p-3 transition-colors sm:p-4",
+        accent ? "border-primary/60" : "border-border",
         canEdit && "ring-primary/40",
       )}
     >
-      {/* Holographic top stripe */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-coin/60 to-transparent opacity-60" />
-
       {/* Rarity tier pill */}
       <div className={cn(
-        "absolute left-3 top-3 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.18em] ring-1",
-        tier.pill,
+        "absolute left-3 top-3 inline-flex items-center gap-1 text-[10px] font-bold uppercase text-muted-foreground",
       )}>
         <TierIcon className="h-3 w-3" /> {tier.name}
       </div>
 
       {pack.popular && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-gradient-brand px-3 py-1 text-[11px] font-black uppercase tracking-wider text-primary-foreground shadow whitespace-nowrap">
+        <div className="absolute right-3 top-3 inline-flex items-center gap-1 rounded bg-primary px-2 py-1 text-[10px] font-bold uppercase text-primary-foreground whitespace-nowrap">
           <Sparkles className="h-3 w-3" /> Most popular
         </div>
       )}
       {pack.bestValue && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-coin px-3 py-1 text-[11px] font-black uppercase tracking-wider text-background shadow whitespace-nowrap">
+        <div className="absolute right-3 top-3 inline-flex items-center gap-1 rounded bg-primary px-2 py-1 text-[10px] font-bold uppercase text-primary-foreground whitespace-nowrap">
           <Crown className="h-3 w-3" /> Best value
         </div>
       )}
       {savingsPct > 0 && !canEdit && (
-        <div className="absolute right-3 top-3 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-emerald-400 ring-1 ring-emerald-500/30">
+        <div className="absolute right-3 top-3 rounded bg-primary/10 px-2 py-1 text-[10px] font-bold text-primary">
           −{savingsPct}%
         </div>
       )}
@@ -744,7 +666,7 @@ function PackCard({
                     {Math.round(effective.coins / 2)}
                   </span>
                 )}
-                <span className={cn("text-2xl font-black tabular-nums sm:text-3xl", showBonus && "flash-gold")}>
+                <span className="text-xl font-black tabular-nums sm:text-2xl">
                   {effective.coins}
                 </span>
                 <span className="text-[11px] font-bold text-coin">Coins</span>
@@ -833,9 +755,9 @@ function PackCard({
         disabled={field !== null}
         aria-label={`Buy ${effective.coins} OG Coins for ${CURRENCY_SYMBOL}${(effective.priceCents / 100).toFixed(2)}`}
         className={cn(
-          "mt-5 inline-flex h-10 w-full items-center justify-center rounded-md px-3 text-sm font-bold transition-all disabled:opacity-50",
+          "mt-4 inline-flex h-11 w-full items-center justify-center rounded-md px-3 text-sm font-bold transition-all disabled:opacity-50",
           accent
-            ? "bg-gradient-brand text-primary-foreground shadow-glow hover:opacity-90"
+            ? "bg-primary text-primary-foreground hover:bg-primary/90"
             : "border border-border bg-background/50 text-foreground hover:border-primary hover:bg-primary hover:text-primary-foreground",
         )}
       >
@@ -1017,35 +939,27 @@ function CustomPackCard({ onBuy }: { onBuy: (units: number) => void }) {
   const quickPicks = [5, 10, 25, 50].filter((n) => n <= CUSTOM_COIN_UNIT.maxUnits);
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border-2 border-red-500/40 bg-gradient-to-br from-[#1a0505] via-[#0b0202] to-[#170303] p-4 shadow-[0_0_60px_-15px_rgba(220,38,38,0.55)] sm:p-6">
-      {/* Ambient flame background — non-interactive, behind everything */}
-      <div className="pointer-events-none absolute inset-0 opacity-80">
-        <div className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-red-500/30 blur-3xl animate-pulse" />
-        <div className="absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-orange-600/20 blur-3xl" />
-        <div className="absolute left-1/2 top-1/3 h-40 w-40 -translate-x-1/2 rounded-full bg-red-600/15 blur-3xl" />
-      </div>
+    <div className="relative overflow-hidden rounded-xl border border-border bg-card/95 p-4 sm:p-5">
 
       {/* Header */}
       <div className="relative flex items-start gap-3 sm:gap-4">
-        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border border-red-500/50 bg-red-500/15 text-red-300 shadow-[0_0_20px_-4px_rgba(239,68,68,0.7)] sm:h-14 sm:w-14">
-          <Flame className="h-6 w-6 sm:h-7 sm:w-7" />
+        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
+          <Coins className="h-5 w-5" />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="text-[10px] font-black uppercase tracking-[0.25em] text-red-400/90">
+          <div className="text-xs font-semibold uppercase text-muted-foreground">Choose any amount</div>
+          <h3 className="font-display text-lg font-black sm:text-xl">
             Build your stack
-          </div>
-          <h3 className="font-display text-xl font-black tracking-tight text-white sm:text-2xl">
-            Custom OG Loot
           </h3>
           <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-            <span className="inline-flex items-center gap-1 rounded-full border border-red-500/50 bg-red-500/15 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-white">
+            <span className="inline-flex items-center gap-1 rounded bg-primary/10 px-2 py-1 text-xs font-bold text-primary">
               {CURRENCY_SYMBOL}{(CUSTOM_COIN_UNIT.priceCents / 100).toFixed(2)} → {CUSTOM_COIN_UNIT.coins} OG
             </span>
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-white/60">
+            <span className="text-xs text-muted-foreground">
               ≈ {CURRENCY_SYMBOL}{perCoin.toFixed(3)} / coin
             </span>
           </div>
-          <p className="mt-1 text-[12px] leading-snug text-white/70 sm:text-sm">
+          <p className="mt-1 text-xs leading-snug text-muted-foreground sm:text-sm">
             Tap + or − to size your crate. Min {minCoins} · max {maxCoins} coins.
           </p>
         </div>
@@ -1056,7 +970,7 @@ function CustomPackCard({ onBuy }: { onBuy: (units: number) => void }) {
         <Button
           type="button"
           variant="outline"
-          className="h-16 w-14 shrink-0 rounded-2xl border-red-500/40 bg-black/40 p-0 text-white hover:bg-red-500/20 hover:border-red-400 disabled:opacity-30 sm:h-20 sm:w-16"
+          className="h-14 w-12 shrink-0 rounded-lg p-0 sm:h-16 sm:w-14"
           onClick={() => bump(-1)}
           disabled={atMin}
           aria-label={`Remove ${CUSTOM_COIN_UNIT.coins} coins`}
@@ -1065,26 +979,24 @@ function CustomPackCard({ onBuy }: { onBuy: (units: number) => void }) {
           <Minus className="h-7 w-7" />
         </Button>
 
-        <div className="relative flex min-w-0 flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-red-500/40 bg-black/60 px-3 py-3 shadow-inner">
-          {/* inner glow */}
-          <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[radial-gradient(ellipse_at_center,rgba(239,68,68,0.18),transparent_70%)]" />
-          <div className="relative text-[10px] font-black uppercase tracking-[0.28em] text-red-300/90">
+        <div className="relative flex min-w-0 flex-col items-center justify-center overflow-hidden rounded-lg border border-primary/30 bg-background/60 px-3 py-3">
+          <div className="relative text-xs font-semibold uppercase text-muted-foreground">
             You get
           </div>
           <div className="relative mt-1 flex items-baseline justify-center gap-2 leading-none">
             <Coins className="h-6 w-6 shrink-0 text-coin drop-shadow-[0_0_8px_rgba(251,191,36,0.7)]" />
             <span
               key={coins}
-              className="qty-flame qty-pop text-[clamp(2.5rem,12vw,4rem)] tabular-nums"
+              className="font-mono text-[clamp(2rem,10vw,3rem)] font-bold tabular-nums"
               aria-live="polite"
             >
               {coins}
             </span>
-            <span className="text-xs font-black text-coin drop-shadow-[0_0_6px_rgba(251,191,36,0.7)]">
+            <span className="text-xs font-bold text-primary">
               OG
             </span>
           </div>
-          <div className="relative mt-1.5 text-[10px] font-black uppercase tracking-wider text-white/70 tabular-nums">
+          <div className="relative mt-1 text-xs text-muted-foreground tabular-nums">
             {units} × {CURRENCY_SYMBOL}{(CUSTOM_COIN_UNIT.priceCents / 100).toFixed(2)}
           </div>
         </div>
@@ -1092,7 +1004,7 @@ function CustomPackCard({ onBuy }: { onBuy: (units: number) => void }) {
         <Button
           type="button"
           variant="outline"
-          className="h-16 w-14 shrink-0 rounded-2xl border-red-500/40 bg-black/40 p-0 text-white hover:bg-red-500/20 hover:border-red-400 disabled:opacity-30 sm:h-20 sm:w-16"
+          className="h-14 w-12 shrink-0 rounded-lg p-0 sm:h-16 sm:w-14"
           onClick={() => bump(1)}
           disabled={atMax}
           aria-label={`Add ${CUSTOM_COIN_UNIT.coins} coins`}
@@ -1110,10 +1022,10 @@ function CustomPackCard({ onBuy }: { onBuy: (units: number) => void }) {
             type="button"
             onClick={() => { setBumpError(null); setUnits(q); }}
             className={cn(
-              "rounded-full border px-3 py-1.5 text-[11px] font-black uppercase tracking-wider transition",
+               "min-h-9 rounded-md border px-2.5 py-1 text-xs font-bold transition",
               units === q
-                ? "border-red-400 bg-red-500/25 text-white shadow-[0_0_16px_-2px_rgba(239,68,68,0.7)]"
-                : "border-white/15 bg-black/40 text-white/70 hover:border-red-400/60 hover:text-white",
+                 ? "border-primary bg-primary text-primary-foreground"
+                 : "border-border bg-background/50 text-muted-foreground hover:border-primary hover:text-foreground",
             )}
           >
             +{q * CUSTOM_COIN_UNIT.coins} · {CURRENCY_SYMBOL}{((q * CUSTOM_COIN_UNIT.priceCents) / 100).toFixed(2)}
@@ -1132,23 +1044,23 @@ function CustomPackCard({ onBuy }: { onBuy: (units: number) => void }) {
       ) : null}
 
       {/* Total + CTA */}
-      <div className="relative mt-5 flex flex-col gap-3 border-t border-red-500/25 pt-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="relative mt-4 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3 border-t border-border pt-4">
         <div className="min-w-0">
-          <div className="text-[10px] font-black uppercase tracking-[0.28em] text-red-300/90">Total</div>
+          <div className="text-xs font-semibold uppercase text-muted-foreground">Total</div>
           <div
             key={totalCents}
-            className="qty-flame qty-pop text-[clamp(2rem,8vw,2.75rem)] tabular-nums leading-none"
+            className="font-mono text-2xl font-bold tabular-nums leading-none sm:text-3xl"
           >
             {CURRENCY_SYMBOL}{(totalCents / 100).toFixed(2)}
           </div>
-          <div className="mt-1 text-[10px] font-black uppercase tracking-wider text-white/70">
+          <div className="mt-1 text-xs text-muted-foreground">
             one-time · {coins} OG coins
           </div>
         </div>
         <Button
           size="lg"
           onClick={() => onBuy(units)}
-          className="w-full shrink-0 rounded-2xl bg-gradient-to-r from-red-600 via-red-500 to-orange-500 font-black uppercase tracking-wide text-white shadow-[0_0_30px_-4px_rgba(239,68,68,0.8)] transition-transform hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 sm:w-auto"
+          className="h-11 shrink-0 rounded-md px-4 font-bold"
         >
           <Flame className="mr-2 h-4 w-4" /> Buy · {CURRENCY_SYMBOL}{(totalCents / 100).toFixed(2)}
         </Button>

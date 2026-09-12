@@ -82,12 +82,10 @@ export function StoreItemsSection() {
 
   return (
     <section aria-labelledby="store-items-heading" className="scroll-mt-24">
-      <div className="mb-4 flex items-center gap-3">
-        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
-          <PackageOpen className="h-5 w-5" />
-        </div>
+      <div className="mb-3 flex items-center gap-2">
+        <PackageOpen className="h-4 w-4 shrink-0 text-primary" />
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Member access & extras</p>
+          <p className="text-xs font-semibold uppercase text-muted-foreground">Member access & extras</p>
           <h2 id="store-items-heading" className="font-display text-xl font-black">Store items</h2>
         </div>
       </div>
@@ -100,7 +98,7 @@ export function StoreItemsSection() {
         <div className="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">No Store items are available yet.</div>
       ) : (
         <Tabs defaultValue={ALL_ITEMS}>
-          <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 bg-card p-1">
+          <TabsList className="flex h-auto w-full max-w-full flex-nowrap justify-start gap-1 overflow-x-auto bg-card p-1">
             <TabsTrigger value={ALL_ITEMS}>All</TabsTrigger>
             {categories.map((category) => <TabsTrigger key={category.id} value={category.slug}>{category.label}</TabsTrigger>)}
           </TabsList>
