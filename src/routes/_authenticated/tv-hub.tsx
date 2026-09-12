@@ -444,8 +444,9 @@ function TvHubPage() {
                 </Button>
               </div>
             )}
-          </div>
-        </section>
+            </div>
+          </section>
+        )}
 
         {/* player */}
         <section className="min-w-0 p-3 sm:p-4" aria-label="Player">
