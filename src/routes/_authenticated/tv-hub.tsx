@@ -344,7 +344,7 @@ function TvHubPage() {
 
       {/* player stays pinned while the guide scrolls with the page */}
       <section
-        className="sticky top-0 z-30 min-w-0 border-b border-border bg-background/95 p-2 backdrop-blur-xl sm:p-3"
+        className="sticky top-14 z-20 min-w-0 border-b border-border bg-background/95 p-2 backdrop-blur-xl sm:top-16 sm:p-3"
         aria-label="Player"
       >
         <div className="mx-auto w-full max-w-4xl">
