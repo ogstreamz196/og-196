@@ -343,37 +343,59 @@ function TvHubPage() {
         <Button type="button" variant="outline" className="h-10 shrink-0" onClick={signOut}>Sign out</Button>
       </header>
 
-      <div className="grid min-w-0 flex-1 lg:grid-cols-[14rem_18rem_minmax(0,1fr)]">
-        {/* categories */}
-        <nav className="min-w-0 border-b border-border bg-card/60 p-2 lg:border-b-0 lg:border-r" aria-label="Categories">
-          <div className="flex gap-2 overflow-x-auto lg:max-h-[60vh] lg:flex-col lg:overflow-y-auto">
-            <Button
-              type="button"
-              variant={group === "All" ? "default" : "ghost"}
-              className="h-9 shrink-0 justify-start gap-2 px-3"
-              onClick={() => setGroup("All")}
-            >
-              <LayoutGrid className="h-4 w-4" /><span className="truncate">All</span>
-              <span className="ml-auto hidden text-xs opacity-70 lg:inline">{sectionItems.length}</span>
-            </Button>
-            {groups.map(([name, count]) => (
-              <Button
-                key={name}
+      <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
+        {!showList ? (
+          /* categories first */
+          <section className="min-w-0 p-3 sm:p-4" aria-label="Categories">
+            <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+              Categories · {groups.length}
+            </h2>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4">
+              <button
                 type="button"
-                variant={group === name ? "default" : "ghost"}
-                className="h-9 shrink-0 justify-start px-3"
-                onClick={() => setGroup(name)}
+                onClick={() => setGroup("All")}
+                className="group flex min-h-20 flex-col justify-between rounded-xl border border-primary/40 bg-primary/10 p-3 text-left transition hover:border-primary hover:bg-primary/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-24"
               >
-                <span className="truncate">{name}</span>
-                <span className="ml-auto hidden text-xs opacity-70 lg:inline">{count}</span>
-              </Button>
-            ))}
-          </div>
-        </nav>
-
-        {/* channel list */}
-        <section className="min-w-0 border-b border-border bg-background/30 p-2 lg:border-b-0 lg:border-r" aria-label={`${activeSection.label} list`}>
-          <div className="max-h-[45vh] space-y-1 overflow-y-auto lg:max-h-[60vh]">
+                <LayoutGrid className="h-5 w-5 text-primary" />
+                <span>
+                  <span className="block truncate text-sm font-black uppercase">All {activeSection.label}</span>
+                  <span className="block text-[11px] text-muted-foreground">{sectionItems.length} items</span>
+                </span>
+              </button>
+              {groups.map(([name, count]) => (
+                <button
+                  key={name}
+                  type="button"
+                  onClick={() => setGroup(name)}
+                  className="group flex min-h-20 flex-col justify-between rounded-xl border border-border bg-card/70 p-3 text-left transition hover:border-primary hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-24"
+                >
+                  <Tv className="h-5 w-5 text-muted-foreground transition group-hover:text-primary" />
+                  <span>
+                    <span className="block truncate text-sm font-bold">{name}</span>
+                    <span className="block text-[11px] text-muted-foreground">{count} items</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          </section>
+        ) : (
+          /* channel list */
+          <section className="min-w-0 border-b border-border bg-background/30 p-2 sm:p-3" aria-label={`${activeSection.label} list`}>
+            <div className="mb-2 flex items-center gap-2">
+              {!searching && (
+                <Button type="button" variant="outline" className="h-9 gap-2" onClick={() => setGroup(null)}>
+                  <ArrowLeft className="h-4 w-4" /> Back to categories
+                </Button>
+              )}
+              <p className="min-w-0 flex-1 truncate text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                {searching
+                  ? `Search results in ${activeSection.label} · ${filtered.length}`
+                  : group === "All"
+                    ? `All ${activeSection.label} · ${filtered.length}`
+                    : `${group} · ${filtered.length}`}
+              </p>
+            </div>
+            <div className="max-h-[45vh] space-y-1 overflow-y-auto lg:max-h-[55vh]">
             {visible.map((item) => {
               const active = item.id === selectedId;
               const favourite = favourites.includes(item.id);
