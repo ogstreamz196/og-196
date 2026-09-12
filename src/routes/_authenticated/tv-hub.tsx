@@ -398,7 +398,12 @@ function TvHubPage() {
             })}
             {visible.length === 0 && <p className="p-6 text-center text-sm text-muted-foreground">Nothing here matches your search.</p>}
             {filtered.length > visible.length && (
-              <p className="p-3 text-center text-xs text-muted-foreground">Showing {visible.length} of {filtered.length} — search to narrow it down.</p>
+              <div className="p-3 text-center">
+                <p className="mb-2 text-xs text-muted-foreground">Showing {visible.length} of {filtered.length}</p>
+                <Button type="button" variant="outline" className="h-9 w-full" onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}>
+                  Show more
+                </Button>
+              </div>
             )}
           </div>
         </section>
