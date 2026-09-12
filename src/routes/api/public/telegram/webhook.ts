@@ -168,19 +168,10 @@ async function isAdmin(admin: Awaited<ReturnType<typeof loadAdmin>>, userId: str
 }
 
 async function verifyTelegramChat(chat_id: number): Promise<boolean> {
-  const verifyRes = await tg("getChat", { chat_id });
-  const verifyJson = verifyRes
-    ? ((await verifyRes.json().catch(() => null)) as {
-        ok?: boolean;
-        result?: { id?: number };
-      } | null)
-    : null;
-  return (
-    !!verifyRes &&
-    verifyRes.ok &&
-    verifyJson?.ok === true &&
-    Number(verifyJson?.result?.id) === Number(chat_id)
-  );
+  const verifyJson = await tg("getChat", { chat_id }) as
+    | { ok?: boolean; result?: { id?: number } }
+    | null;
+  return verifyJson?.ok === true && Number(verifyJson.result?.id) === Number(chat_id);
 }
 
 async function maybeBootstrapBossTelegram(
