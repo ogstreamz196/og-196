@@ -64,8 +64,11 @@ export function PersistentBackgroundMusic() {
         // iOS and most mobile browsers require one genuine interaction before
         // starting audible media. The persistent control remains available if
         // the visitor declines or the browser still blocks playback.
-        const unlock = () => {
+        const unlock = (event: Event) => {
           if (!enabledRef.current) return;
+          if (event.target instanceof Element && event.target.closest("[data-background-music-control]")) {
+            return;
+          }
           const otherMediaPlaying = Array.from(
             document.querySelectorAll<HTMLMediaElement>("audio:not([data-background-music]), video"),
           ).some((media) => !media.paused && !media.ended);
@@ -120,7 +123,10 @@ export function PersistentBackgroundMusic() {
         data-background-music
       />
       {ready ? (
-        <div className="fixed right-3 z-50 flex items-center gap-1.5 rounded-full border border-border bg-popover/95 p-1.5 pr-2.5 text-popover-foreground shadow-lg backdrop-blur-md bottom-[calc(5.25rem+env(safe-area-inset-bottom))] sm:bottom-4 sm:right-4">
+        <div
+          data-background-music-control
+          className="fixed right-3 z-50 flex items-center gap-1.5 rounded-full border border-border bg-popover/95 p-1.5 pr-2.5 text-popover-foreground shadow-lg backdrop-blur-md bottom-[calc(5.25rem+env(safe-area-inset-bottom))] sm:bottom-4 sm:right-4"
+        >
           <Button
             type="button"
             variant="ghost"
