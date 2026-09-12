@@ -28,7 +28,6 @@ import tvHubCinematic from "@/assets/tv-hub-cinematic.jpg";
 import {
   loadTvHubPlaylist,
   prepareTvStream,
-  TV_HUB_HOST,
   type TvAccount,
   type TvChannel,
 } from "@/lib/tv-hub.functions";
@@ -663,12 +662,16 @@ function StreamPlayer({
             This stream would not play in the browser. Try another channel.
           </p>
         )}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/95 to-transparent p-3 pt-14 sm:p-4 sm:pt-20">
-          <div className="mb-2 flex items-center gap-2 text-[10px] font-bold uppercase text-primary sm:text-xs">
-            {live && <span className="rounded bg-destructive px-2 py-0.5 text-destructive-foreground">Live</span>}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/95 via-black/70 to-transparent p-3 pt-16 sm:p-4 sm:pt-24">
+          <div className="mb-1.5 flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-primary sm:text-xs">
+            {live && (
+              <span className="inline-flex items-center gap-1.5 rounded bg-destructive px-2 py-0.5 text-destructive-foreground">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-current" />Live
+              </span>
+            )}
             <span className="truncate">{group}</span>
           </div>
-          <h2 className="mb-2 truncate font-display text-lg font-black text-white sm:text-2xl">{title}</h2>
+          <h2 className="mb-2.5 truncate font-display text-lg font-black text-white sm:mb-3 sm:text-2xl">{title}</h2>
           {!live && (
             <input
               type="range"
@@ -681,18 +684,27 @@ function StreamPlayer({
                 if (videoRef.current) videoRef.current.currentTime = next;
                 setProgress(next);
               }}
-              className="pointer-events-auto h-5 w-full accent-primary"
+              className="pointer-events-auto mb-1 h-6 w-full accent-primary"
               aria-label="Playback position"
             />
           )}
-          <div className="pointer-events-auto flex min-w-0 items-center gap-1 sm:gap-2">
-            <Button type="button" variant="ghost" size="icon" onClick={onPrevious} aria-label="Previous"><ChevronLeft /></Button>
-            <Button type="button" size="icon" onClick={toggle} aria-label={playing ? "Pause" : "Play"}>{playing ? <Pause /> : <Play />}</Button>
-            <Button type="button" variant="ghost" size="icon" onClick={onNext} aria-label="Next"><ChevronRight /></Button>
+          <div className="pointer-events-auto flex min-w-0 items-center gap-0.5 sm:gap-2">
+            <Button type="button" variant="ghost" size="icon" className="h-9 w-9 text-white hover:bg-white/10 hover:text-white sm:h-10 sm:w-10" onClick={onPrevious} aria-label="Previous"><ChevronLeft className="h-5 w-5" /></Button>
+            <Button
+              type="button"
+              size="icon"
+              onClick={toggle}
+              aria-label={playing ? "Pause" : "Play"}
+              className="h-11 w-11 rounded-full bg-primary text-primary-foreground shadow-glow hover:bg-primary/90 sm:h-12 sm:w-12"
+            >
+              {playing ? <Pause className="h-5 w-5" /> : <Play className="ml-0.5 h-5 w-5" />}
+            </Button>
+            <Button type="button" variant="ghost" size="icon" className="h-9 w-9 text-white hover:bg-white/10 hover:text-white sm:h-10 sm:w-10" onClick={onNext} aria-label="Next"><ChevronRight className="h-5 w-5" /></Button>
             <Button
               type="button"
               variant="ghost"
               size="icon"
+              className="h-9 w-9 text-white hover:bg-white/10 hover:text-white sm:h-10 sm:w-10"
               aria-label={muted ? "Unmute" : "Mute"}
               onClick={() => {
                 const next = !muted;
@@ -700,7 +712,7 @@ function StreamPlayer({
                 if (videoRef.current) videoRef.current.muted = next;
               }}
             >
-              {muted ? <VolumeX /> : <Volume2 />}
+              {muted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
             </Button>
             <input
               type="range"
@@ -721,17 +733,17 @@ function StreamPlayer({
               aria-label="Volume"
             />
             {!live && (
-              <span className="ml-1 text-[10px] tabular-nums text-white/70 sm:text-xs">{formatTime(progress)} / {formatTime(duration)}</span>
+              <span className="ml-1 shrink-0 text-[10px] tabular-nums text-white/70 sm:text-xs">{formatTime(progress)} / {formatTime(duration)}</span>
             )}
             <Button
               type="button"
               variant="ghost"
               size="icon"
-              className="ml-auto"
+              className="ml-auto h-9 w-9 text-white hover:bg-white/10 hover:text-white sm:h-10 sm:w-10"
               aria-label="Enter fullscreen"
               onClick={() => void shellRef.current?.requestFullscreen?.()}
             >
-              <Expand />
+              <Expand className="h-5 w-5" />
             </Button>
           </div>
         </div>
