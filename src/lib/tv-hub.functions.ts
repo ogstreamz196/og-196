@@ -97,6 +97,39 @@ export function parseM3u(text: string): { channels: TvChannel[]; total: number; 
 /** The provider answers on both the bare host and the explicit :80 host — try both. */
 export const TV_HUB_HOSTS = [`${TV_HUB_HOST}:80`, TV_HUB_HOST];
 
+/** Xtream player_api.php reports subscription status and expiry for the account. */
+async function fetchAccountInfo(username: string, password: string): Promise<TvAccount | null> {
+  const query =
+    `player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
+  for (const host of TV_HUB_HOSTS) {
+    try {
+      const response = await fetch(`${host}/${query}`, {
+        headers: { "User-Agent": "VLC/3.0.20 LibVLC/3.0.20", Accept: "*/*" },
+        signal: AbortSignal.timeout(20_000),
+      });
+      if (!response.ok) continue;
+      const json = (await response.json()) as { user_info?: Record<string, unknown> };
+      const info = json?.user_info;
+      if (!info) continue;
+      const rawExp = info["exp_date"];
+      const seconds = typeof rawExp === "string" ? Number(rawExp) : typeof rawExp === "number" ? rawExp : NaN;
+      const str = (value: unknown) =>
+        value === null || value === undefined || value === "" ? null : String(value);
+      return {
+        username: str(info["username"]) ?? username,
+        status: str(info["status"]),
+        expiresAt: Number.isFinite(seconds) && seconds > 0 ? new Date(seconds * 1000).toISOString() : null,
+        maxConnections: str(info["max_connections"]),
+        activeConnections: str(info["active_cons"]),
+      };
+    } catch {
+      continue;
+    }
+  }
+  return null;
+}
+
+
 export const loadTvHubPlaylist = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) =>
