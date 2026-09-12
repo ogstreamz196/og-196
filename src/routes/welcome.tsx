@@ -400,8 +400,9 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
       toast.error("Pick a username with at least 3 letters or numbers");
       return;
     }
-    if (password.length < 6) {
-      toast.error("Password must be at least 6 characters");
+    if (password.length < 5) {
+      toast.error("Password must be at least 5 characters");
+
       return;
     }
     const loginEmail = toLoginEmail(handle);
@@ -521,7 +522,7 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
               id="wc-password"
               type="password"
               autoComplete="current-password"
-              placeholder="At least 6 characters"
+              placeholder="At least 5 characters"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="h-14 border-white/15 bg-background/50 text-lg focus-visible:border-primary/60"
