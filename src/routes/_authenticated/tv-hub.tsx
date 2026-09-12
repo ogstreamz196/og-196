@@ -272,6 +272,10 @@ function TvHubPage() {
             <Button type="button" variant="outline" className="h-10" onClick={signOut}>Sign out</Button>
           </header>
 
+          <AccountBar account={account} expiry={expiry} total={list.length} truncated={truncated} />
+
+
+
           <div className="grid flex-1 content-center gap-4 sm:grid-cols-3">
             {SECTIONS.map((entry) => {
               const Icon = entry.icon;
