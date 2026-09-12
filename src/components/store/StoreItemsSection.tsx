@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, PackageOpen, X } from "lucide-react";
 import { toast } from "sonner";
@@ -10,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  claimSportsGuideInvite,
   getSportsGuideAccessStatus,
   listStoreCatalog,
   purchaseSportsGuideAccess,
@@ -19,11 +17,9 @@ import {
 const ALL_ITEMS = "all";
 
 export function StoreItemsSection() {
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const getAccessStatus = useServerFn(getSportsGuideAccessStatus);
   const purchaseAccess = useServerFn(purchaseSportsGuideAccess);
-  const claimInvite = useServerFn(claimSportsGuideInvite);
   const [checkoutItemId, setCheckoutItemId] = useState<string | null>(null);
   const catalog = useQuery({
     queryKey: ["store-catalog"],
@@ -41,14 +37,14 @@ export function StoreItemsSection() {
   );
 
   const sportsGuide = useMutation({
-    mutationFn: async (action: "buy" | "claim") => action === "buy" ? purchaseAccess() : claimInvite(),
-    onSuccess: async (_result, action) => {
+    mutationFn: () => purchaseAccess(),
+    onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["sports-guide-access"] }),
         queryClient.invalidateQueries({ queryKey: ["profile"] }),
         queryClient.invalidateQueries({ queryKey: ["coin-transactions"] }),
       ]);
-      toast.success(action === "buy" ? "Sports Guide access unlocked" : "Private invite sent to Telegram");
+      toast.success("Sports Guide access unlocked — your private link is ready");
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -56,7 +52,7 @@ export function StoreItemsSection() {
   const buy = (itemId: string) => {
     const item = allItems.find((candidate) => candidate.id === itemId);
     if (item?.slug === "og-sports-guide-access") {
-      sportsGuide.mutate("buy");
+      sportsGuide.mutate();
       return;
     }
     setCheckoutItemId(itemId);
@@ -69,14 +65,7 @@ export function StoreItemsSection() {
       onBuy={buy}
       buying={item.slug === "og-sports-guide-access" && sportsGuide.isPending}
       sportsGuideState={item.slug === "og-sports-guide-access" ? access.data?.status : undefined}
-      onClaimInvite={() => {
-        if (!access.data?.telegramLinked) {
-          toast.info("Connect Telegram in Settings before claiming your invite");
-          navigate({ to: "/settings" });
-          return;
-        }
-        sportsGuide.mutate("claim");
-      }}
+      sportsGuideInviteUrl={item.slug === "og-sports-guide-access" ? access.data?.inviteUrl ?? undefined : undefined}
     />
   );
 
