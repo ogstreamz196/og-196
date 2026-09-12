@@ -112,7 +112,7 @@ export function StoreItemCard({
         {item.coin_reward ? (
           <CoinPill size="sm">+{item.coin_reward} coins</CoinPill>
         ) : null}
-        {item.perk_slug && (
+        {item.perk_slug && !isSportsGuide && (
           <span className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold uppercase text-primary">
             <Sparkles className="h-3 w-3" /> {item.perk_slug.replace("role:", "")}
           </span>
@@ -142,7 +142,8 @@ export function StoreItemCard({
           size="sm"
           onClick={() => {
             if (ownsSportsGuide && sportsGuideInviteUrl) {
-              window.open(sportsGuideInviteUrl, "_blank", "noopener,noreferrer");
+              const opened = window.open(sportsGuideInviteUrl, "_blank", "noopener,noreferrer");
+              if (!opened) window.location.assign(sportsGuideInviteUrl);
               return;
             }
             onBuy(item.id);
