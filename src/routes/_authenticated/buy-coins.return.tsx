@@ -183,7 +183,7 @@ function CheckoutReturn() {
     if (!next) {
       // Always refresh on close so balance shown elsewhere is fresh.
       qc.invalidateQueries({ queryKey: ["profile"] });
-      navigate({ to: "/buy-coins", search: {} });
+      navigate({ to: "/store", search: { view: "coins" } });
     }
   }
 
@@ -286,7 +286,7 @@ function CheckoutReturn() {
           <p className="mt-2 text-sm text-muted-foreground">
             We couldn't find your checkout session.
           </p>
-          <Button className="mt-6" onClick={() => navigate({ to: "/buy-coins", search: {} })}>
+          <Button className="mt-6" onClick={() => navigate({ to: "/store", search: { view: "coins" } })}>
             Back to Buy Coins
           </Button>
         </div>

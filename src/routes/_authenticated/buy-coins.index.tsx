@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { Coins, Check, ArrowLeft, Crown, Star, Zap, ShieldCheck, Lock, Sparkles, Infinity as InfinityIcon, TrendingDown, Gift, Pencil, X, Loader2, CreditCard, Plus, Minus, SlidersHorizontal, Store, Tag, ToggleLeft, ToggleRight, Gem, Trophy, Flame, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,10 +32,27 @@ import { SectionDivider } from "@/components/buy-coins/SectionDivider";
 export const Route = createFileRoute("/_authenticated/buy-coins/")({
   validateSearch: (s: Record<string, unknown>): { edit?: 1 } =>
     s.edit === "1" || s.edit === 1 || s.edit === true ? { edit: 1 } : {},
+  beforeLoad: ({ search }) => {
+    throw redirect({ to: "/store", search: { view: "coins", edit: search.edit } });
+  },
+  head: () => ({
+    meta: [
+      { title: "OG Coins & VIP — OG BOT Store" },
+      { name: "description", content: "Buy OG Coins, unlock VIP perks, and review purchases in the OG BOT Store." },
+      { property: "og:title", content: "OG Coins & VIP — OG BOT Store" },
+      { property: "og:description", content: "Buy OG Coins, unlock VIP perks, and review purchases in the OG BOT Store." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: BuyCoinsPage,
 });
 
 function BuyCoinsPage() {
+  return <CoinStore />;
+}
+
+export function CoinStore() {
   const { data: profile } = useProfile();
   const { isVip, isDev, isLoading: roleLoading } = useRole();
   const search = Route.useSearch();
@@ -54,7 +71,7 @@ function BuyCoinsPage() {
     toast.info("Edit mode is for the OG Studio team only — showing you the normal store view.", {
       duration: 4500,
     });
-    navigate({ to: "/buy-coins", search: {}, replace: true });
+    navigate({ to: "/store", search: { view: "coins" }, replace: true });
   }, [search.edit, isDev, roleLoading, navigate]);
 
 

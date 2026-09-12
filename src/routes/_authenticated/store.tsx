@@ -14,16 +14,25 @@ import { StripeEmbeddedCheckoutInline } from "@/components/StripeEmbeddedCheckou
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { CoinBalance } from "@/components/dashboard/CoinBalance";
 import { listStoreCatalog } from "@/lib/store.functions";
+import { CoinStore } from "./buy-coins.index";
 
 export const Route = createFileRoute("/_authenticated/store")({
+  validateSearch: (search: Record<string, unknown>): { view?: "items" | "coins"; edit?: 1 } => ({
+    view: search.view === "coins" ? "coins" : undefined,
+    edit: search.edit === "1" || search.edit === 1 || search.edit === true ? 1 : undefined,
+  }),
   component: StorePage,
   head: () => ({
     meta: [
       { title: "OG Store — Coins, VIP & Loot" },
       {
         name: "description",
-        content: "Top up OG Coins, unlock VIP perks, and grab limited items from the OG Store.",
+        content: "Shop limited items, buy OG Coins, unlock VIP perks, and review purchases in the OG BOT Store.",
       },
+      { property: "og:title", content: "OG Store — Items, Coins & VIP" },
+      { property: "og:description", content: "Shop limited items, buy OG Coins, unlock VIP perks, and review purchases in the OG BOT Store." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
 });
@@ -31,6 +40,8 @@ export const Route = createFileRoute("/_authenticated/store")({
 const ALL_TAB = "all";
 
 function StorePage() {
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
   const catalog = useQuery({
     queryKey: ["store-catalog"],
     queryFn: () => listStoreCatalog(),
@@ -51,10 +62,46 @@ function StorePage() {
     [categories],
   );
 
+  const activeView = search.view === "coins" ? "coins" : "items";
+
+  if (activeView === "coins") {
+    return (
+      <div>
+        <div className="sticky top-0 z-40 border-b border-border bg-background/90 px-4 py-2 backdrop-blur-xl">
+          <Tabs
+            value={activeView}
+            onValueChange={(view) => navigate({
+              search: { view: view === "coins" ? "coins" : undefined },
+              replace: true,
+            })}
+          >
+            <TabsList className="mx-auto grid w-full max-w-md grid-cols-2">
+              <TabsTrigger value="items">Items</TabsTrigger>
+              <TabsTrigger value="coins">OG Coins & VIP</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+        <CoinStore />
+      </div>
+    );
+  }
+
   return (
     <DashboardShell title="OG Store">
       <PaymentTestModeBanner />
       <div className="mx-auto w-full max-w-6xl space-y-8 px-4 py-8">
+        <Tabs
+          value={activeView}
+          onValueChange={(view) => navigate({
+            search: { view: view === "coins" ? "coins" : undefined },
+            replace: true,
+          })}
+        >
+          <TabsList className="mx-auto grid w-full max-w-md grid-cols-2">
+            <TabsTrigger value="items">Items</TabsTrigger>
+            <TabsTrigger value="coins">OG Coins & VIP</TabsTrigger>
+          </TabsList>
+        </Tabs>
         {/* header */}
         <header className="text-center">
           <div className="mx-auto mb-3 grid h-14 w-14 place-items-center rounded-2xl bg-gradient-brand shadow-glow">
@@ -75,7 +122,8 @@ function StorePage() {
         {/* quick CTAs */}
         <div className="grid gap-3 sm:grid-cols-2">
           <Link
-            to="/buy-coins"
+            to="/store"
+            search={{ view: "coins" }}
             className="group rounded-2xl border border-coin/30 bg-coin/5 p-4 transition hover:bg-coin/10"
           >
             <div className="flex items-center gap-3">
@@ -87,7 +135,8 @@ function StorePage() {
             </div>
           </Link>
           <Link
-            to="/buy-coins"
+            to="/store"
+            search={{ view: "coins" }}
             className="group rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4 transition hover:bg-amber-500/10"
           >
             <div className="flex items-center gap-3">
