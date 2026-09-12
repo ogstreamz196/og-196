@@ -442,7 +442,7 @@ export function PurchaseHistory() {
 
   return (
     <>
-    <section className="w-full overflow-hidden rounded-xl border border-border bg-card/95 shadow-card">
+    <section className="w-full overflow-hidden rounded-xl border border-border bg-store-card shadow-card">
 
       <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-border px-4 py-3 sm:px-5">
         <div className="flex items-center gap-2">

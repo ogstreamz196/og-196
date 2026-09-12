@@ -306,16 +306,16 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
       <PaymentTestModeBanner />
       <div className="store-clean mx-auto w-full max-w-6xl space-y-6 pb-[max(1rem,env(safe-area-inset-bottom))] sm:space-y-8">
         <section className="overflow-hidden rounded-xl border border-border bg-store-card p-4 shadow-card sm:p-6">
-          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4">
+          <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-[minmax(0,1fr)_auto] min-[360px]:items-center min-[360px]:gap-4">
             <div className="min-w-0">
               <p className="text-xs font-semibold uppercase text-muted-foreground">OG BOT Store</p>
               <h1 className="mt-1 max-w-[13rem] font-display text-xl font-black leading-tight min-[390px]:max-w-none sm:text-3xl">
                 <EditableContent contentKey="buyCoins.heading" defaultValue="Stock up. Power up." />
               </h1>
             </div>
-            <div role="status" aria-label={`Wallet balance ${profile?.coin_balance ?? 0} OG coins`} className="text-right">
+            <div role="status" aria-label={`Wallet balance ${profile?.coin_balance ?? 0} OG coins`} className="text-left min-[360px]:text-right">
               <p className="text-xs font-semibold uppercase text-muted-foreground">Balance</p>
-              <div className="mt-1 flex items-center justify-end gap-2">
+              <div className="mt-1 flex items-center justify-start gap-2 min-[360px]:justify-end">
                 <Coins className="h-5 w-5 text-primary" />
                 <span className="font-mono text-xl font-bold tabular-nums sm:text-2xl">{profile?.coin_balance ?? 0}</span>
                 <span className="hidden text-xs text-muted-foreground min-[360px]:inline">OG</span>
@@ -385,7 +385,7 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
         </div>
 
         <section aria-labelledby="section-bundles" className="scroll-mt-24">
-          <div className="mb-3 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <div className="min-w-0">
               <p className="text-xs font-semibold uppercase text-muted-foreground">One-time purchase</p>
               <h2 id="section-bundles" className="font-display text-xl font-black">Coin packs</h2>
@@ -939,7 +939,7 @@ function CustomPackCard({ onBuy }: { onBuy: (units: number) => void }) {
   const quickPicks = [5, 10, 25, 50].filter((n) => n <= CUSTOM_COIN_UNIT.maxUnits);
 
   return (
-    <div className="relative overflow-hidden rounded-xl border border-border bg-card/95 p-4 sm:p-5">
+    <div className="relative overflow-hidden rounded-xl border border-border bg-store-card p-4 shadow-card sm:p-5">
 
       {/* Header */}
       <div className="relative flex items-start gap-3 sm:gap-4">
