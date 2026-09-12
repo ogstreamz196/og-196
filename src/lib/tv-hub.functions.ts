@@ -199,7 +199,49 @@ export const loadTvHubPlaylist = createServerFn({ method: "POST" })
     };
   });
 
-export type TvStreamSource = { url: string; kind: "hls" | "ts" | "file" };
+export type TvStreamKind = "hls" | "ts" | "file";
+export type TvStreamSource = {
+  url: string;
+  kind: TvStreamKind;
+  /** Alternative relay links the player can fall back to when the first fails. */
+  fallbacks: Array<{ url: string; kind: TvStreamKind }>;
+};
+
+const PROBE_HEADERS = { "User-Agent": "VLC/3.0.20 LibVLC/3.0.20", Accept: "*/*" } as const;
+
+/**
+ * Inspect the first bytes of a stream so we pick the right player engine even
+ * when the URL has no file extension (common on Xtream live links).
+ */
+async function sniffKind(url: string): Promise<TvStreamKind | null> {
+  try {
+    const response = await fetch(url, {
+      headers: { ...PROBE_HEADERS, Range: "bytes=0-2047" },
+      redirect: "follow",
+      signal: AbortSignal.timeout(12_000),
+    });
+    if (!response.ok && response.status !== 206) return null;
+
+    const type = (response.headers.get("content-type") ?? "").toLowerCase();
+    if (type.includes("mpegurl")) return "hls";
+    if (type.includes("mp2t") || type.includes("video/mp2t")) return "ts";
+    if (type.includes("mp4") || type.includes("matroska") || type.includes("webm")) return "file";
+
+    const buffer = new Uint8Array(await response.arrayBuffer());
+    if (buffer.length === 0) return null;
+    const head = new TextDecoder().decode(buffer.slice(0, 64));
+    if (head.includes("#EXTM3U")) return "hls";
+    // ISO base media (mp4/mov): "ftyp" at offset 4
+    if (head.slice(4, 8) === "ftyp" || head.slice(4, 8) === "styp") return "file";
+    // Matroska / WebM EBML header
+    if (buffer[0] === 0x1a && buffer[1] === 0x45 && buffer[2] === 0xdf && buffer[3] === 0xa3) return "file";
+    // MPEG-TS sync byte every 188 bytes
+    if (buffer[0] === 0x47 && (buffer[188] === 0x47 || buffer.length < 189)) return "ts";
+    return null;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Turn a provider URL into a same-origin, signed, short-lived relay link.
