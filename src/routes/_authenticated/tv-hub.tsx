@@ -199,27 +199,23 @@ function TvHubPage() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/90 to-surface/40" />
         <div className="relative mx-auto flex min-h-[calc(100dvh-7rem)] max-w-6xl items-end px-4 py-8 sm:items-center sm:px-8 lg:px-12">
-          <section className="w-full max-w-xl rounded-xl border border-border bg-card/95 p-5 shadow-card backdrop-blur-xl sm:p-8" aria-labelledby="tv-login-title">
-            <div className="mb-6 flex items-center gap-3">
-              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground shadow-glow">
-                <MonitorPlay className="h-6 w-6" />
+          <section className="w-full max-w-xl rounded-2xl border border-border bg-card/95 p-5 shadow-card backdrop-blur-xl sm:p-8" aria-labelledby="tv-login-title">
+            <div className="mb-6 flex items-center gap-3 sm:gap-4">
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground shadow-glow sm:h-14 sm:w-14">
+                <MonitorPlay className="h-6 w-6 sm:h-7 sm:w-7" />
               </span>
               <div className="min-w-0">
-                <p className="text-xs font-bold uppercase text-primary">OG BOT Entertainment</p>
-                <h1 id="tv-login-title" className="font-display text-3xl font-black uppercase leading-none sm:text-5xl">TV HUB</h1>
+                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-primary">Entertainment Portal</p>
+                <h1 id="tv-login-title" className="font-display text-3xl font-black uppercase leading-none tracking-tight sm:text-5xl">OGSTREAMZ</h1>
               </div>
             </div>
 
             <p className="mb-6 text-sm leading-relaxed text-muted-foreground sm:text-base">
-              Enter the username and password from your TV provider. Your details load your own playlist and are never
-              saved. OG BOT does not host, store or control any of the content you watch.
+              Sign in with the username and password from your TV provider. Your details load your own playlist and are
+              never saved. OGSTREAMZ does not host, store or control any of the content you watch.
             </p>
 
             <form className="space-y-4" onSubmit={handleSignIn}>
-              <div className="rounded-lg border border-border bg-background/50 p-3 text-xs text-muted-foreground">
-                <span className="font-bold text-foreground">Server</span>
-                <span className="ml-2 break-all">{TV_HUB_HOST.replace(/^https?:\/\//, "")}</span>
-              </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="block space-y-1.5 text-sm">
                   <span>Username</span>
@@ -257,7 +253,7 @@ function TvHubPage() {
     setSection(null);
     setSelectedId(null);
     setQuery("");
-    setGroup("All");
+    setGroup(null);
   };
 
   /* ------------------------------------------------------------ dashboard */
