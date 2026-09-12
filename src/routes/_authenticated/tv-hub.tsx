@@ -25,7 +25,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import tvHubCinematic from "@/assets/tv-hub-cinematic.jpg";
-import { loadTvHubPlaylist, TV_HUB_HOST, type TvChannel } from "@/lib/tv-hub.functions";
+import {
+  loadTvHubPlaylist,
+  prepareTvStream,
+  TV_HUB_HOST,
+  type TvChannel,
+} from "@/lib/tv-hub.functions";
 
 export const Route = createFileRoute("/_authenticated/tv-hub")({
   head: () => ({
@@ -407,6 +412,7 @@ function StreamPlayer({
   onPrevious: () => void;
   onNext: () => void;
 }) {
+  const prepareStream = useServerFn(prepareTvStream);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const shellRef = useRef<HTMLDivElement | null>(null);
   const [playing, setPlaying] = useState(false);
