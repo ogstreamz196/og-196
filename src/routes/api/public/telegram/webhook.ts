@@ -111,7 +111,6 @@ const HELP_ADMIN = `${HELP_USER}
 /whois &lt;email|uuid&gt; — quick profile
 /addcoins &lt;who&gt; &lt;amount&gt; [reason]
 /setcoins &lt;who&gt; &lt;amount&gt; [reason]
-/setsportsgroup — register this private group for Sports Guide invites
 /stats — platform snapshot
 /broadcast &lt;msg&gt; — DM every linked user`;
 
@@ -281,38 +280,6 @@ async function runAdminCommand(
 ): Promise<boolean> {
   const [cmd, ...rest] = text.trim().split(/\s+/);
   const arg = rest.join(" ");
-
-  if (cmd === "/setsportsgroup") {
-    const chat = await tg("getChat", { chat_id });
-    const chatType = (chat as { result?: { type?: string; title?: string } })?.result?.type;
-    if (chatType !== "group" && chatType !== "supergroup") {
-      await reply(chat_id, "Run /setsportsgroup inside the private Telegram group you want members to join.");
-      return true;
-    }
-    const bot = await tg("getMe", {});
-    const botId = (bot as { result?: { id?: number } })?.result?.id;
-    if (!botId) {
-      await reply(chat_id, "❌ Could not verify OG Bot's group permissions.");
-      return true;
-    }
-    const member = await tg("getChatMember", { chat_id, user_id: botId });
-    const memberResult = (member as { result?: { status?: string; can_invite_users?: boolean } })?.result;
-    if (!memberResult || !["administrator", "creator"].includes(memberResult.status ?? "") || memberResult.can_invite_users === false) {
-      await reply(chat_id, "❌ Make OG Bot an administrator with permission to invite users, then run /setsportsgroup again.");
-      return true;
-    }
-    const { error } = await admin.from("app_settings").upsert({
-      key: "telegram.sports_guide_group_id",
-      value: chat_id,
-      updated_at: new Date().toISOString(),
-    }, { onConflict: "key" });
-    if (error) {
-      await reply(chat_id, `❌ ${error.message}`);
-      return true;
-    }
-    await reply(chat_id, "✅ <b>OG Sports Guide group registered.</b> Paid members can now claim one-use 24-hour invites from the Store.");
-    return true;
-  }
 
   if (cmd === "/online") {
     const mins = Math.max(1, Math.min(1440, parseInt(rest[0] ?? "5", 10) || 5));

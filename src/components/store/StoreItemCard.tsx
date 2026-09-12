@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Coins, Package, Sparkles, Crown, Gem, ShoppingBag, Repeat, Send, Check, Loader2 } from "lucide-react";
+import { Coins, Package, Sparkles, Crown, Gem, ShoppingBag, Repeat, ExternalLink, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CoinPill } from "@/components/ui/coin-pill";
 import type { StoreItem } from "@/lib/store.functions";
@@ -48,13 +48,13 @@ export function StoreItemCard({
   onBuy,
   buying,
   sportsGuideState,
-  onClaimInvite,
+  sportsGuideInviteUrl,
 }: {
   item: StoreItem;
   onBuy: (id: string) => void;
   buying?: boolean;
   sportsGuideState?: "unowned" | "owned" | "invite_sent" | "joined" | "revoked";
-  onClaimInvite?: () => void;
+  sportsGuideInviteUrl?: string;
 }) {
   const r = RARITY[item.rarity];
   const stockRemaining = item.stock === null ? null : Math.max(0, item.stock - item.stock_sold);
@@ -112,7 +112,7 @@ export function StoreItemCard({
         {item.coin_reward ? (
           <CoinPill size="sm">+{item.coin_reward} coins</CoinPill>
         ) : null}
-        {item.perk_slug && (
+        {item.perk_slug && !isSportsGuide && (
           <span className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold uppercase text-primary">
             <Sparkles className="h-3 w-3" /> {item.perk_slug.replace("role:", "")}
           </span>
@@ -140,17 +140,24 @@ export function StoreItemCard({
         </div>
         <Button
           size="sm"
-          onClick={() => ownsSportsGuide ? onClaimInvite?.() : onBuy(item.id)}
-          disabled={soldOut || buying}
+          onClick={() => {
+            if (ownsSportsGuide && sportsGuideInviteUrl) {
+              const opened = window.open(sportsGuideInviteUrl, "_blank", "noopener,noreferrer");
+              if (!opened) window.location.assign(sportsGuideInviteUrl);
+              return;
+            }
+            onBuy(item.id);
+          }}
+          disabled={soldOut || buying || (Boolean(ownsSportsGuide) && !sportsGuideInviteUrl)}
           className="bg-gradient-brand font-bold uppercase tracking-wider"
         >
-          {buying ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : ownsSportsGuide ? <Send className="mr-1 h-4 w-4" /> : <Coins className="mr-1 h-4 w-4" />}
-          {soldOut ? "Sold out" : buying ? "…" : sportsGuideState === "invite_sent" ? "Send fresh invite" : ownsSportsGuide ? "Claim invite" : "Buy"}
+          {buying ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : ownsSportsGuide ? <ExternalLink className="mr-1 h-4 w-4" /> : <Coins className="mr-1 h-4 w-4" />}
+          {soldOut ? "Sold out" : buying ? "…" : ownsSportsGuide ? "Open group" : "Buy"}
         </Button>
       </div>
       {ownsSportsGuide ? (
         <div className="mt-3 flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/10 px-3 py-2 text-xs font-semibold text-primary">
-          <Check className="h-4 w-4" /> Access owned
+          <Check className="h-4 w-4" /> Access owned · link unlocked
         </div>
       ) : null}
     </div>
