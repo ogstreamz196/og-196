@@ -135,8 +135,6 @@ function TvHubPage() {
     return sectionItems.filter((item) => item.group === group);
   }, [group, query, sectionItems]);
 
-  // Show the channel list when a category is picked OR a master search is running.
-  const showList = searching || group !== null;
 
   const visible = filtered.slice(0, visibleCount);
   const selected = list.find((item) => item.id === selectedId) ?? null;
