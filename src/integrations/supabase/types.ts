@@ -1735,6 +1735,10 @@ export type Database = {
         }[]
       }
       purchase_sports_guide_access: { Args: never; Returns: Json }
+      purchase_sports_guide_access_for_user: {
+        Args: { p_user: string }
+        Returns: Json
+      }
       purchase_vip: { Args: never; Returns: number }
       redeem_og_bot_invite: { Args: { p_code: string }; Returns: string }
       refund_generation_charge: {
