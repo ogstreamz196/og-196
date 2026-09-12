@@ -259,27 +259,53 @@ export const prepareTvStream = createServerFn({ method: "POST" })
 
     const { signStreamUrl } = await import("./tv-stream.server");
     const raw = target.toString();
-    const isLiveTs = /\.ts$/i.test(target.pathname);
-    const isFile = /\.(mp4|mkv|avi|mov|m4v)$/i.test(target.pathname);
+    const path = target.pathname;
 
-    if (isLiveTs) {
-      // Most Xtream servers also expose an HLS variant — prefer it when it answers.
-      const hlsUrl = raw.replace(/\.ts$/i, ".m3u8");
-      try {
-        const probe = await fetch(hlsUrl, {
-          headers: { "User-Agent": "VLC/3.0.20 LibVLC/3.0.20", Accept: "*/*" },
-          signal: AbortSignal.timeout(12_000),
-        });
-        const body = probe.ok ? await probe.text() : "";
-        if (probe.ok && body.includes("#EXTM3U")) {
-          return { url: signStreamUrl(hlsUrl), kind: "hls" };
-        }
-      } catch {
-        /* fall through to raw transport stream */
-      }
-      return { url: signStreamUrl(raw), kind: "ts" };
+    const hasTs = /\.ts$/i.test(path);
+    const hasM3u8 = /\.m3u8(\?|$)/i.test(raw);
+    const hasFileExt = /\.(mp4|mkv|avi|mov|m4v|webm)$/i.test(path);
+    const bare = !hasTs && !hasM3u8 && !hasFileExt;
+
+    // Candidate URLs in preference order; each is probed and the first that
+    // actually answers becomes the primary, the rest stay as fallbacks.
+    const candidates: Array<{ url: string; kind: TvStreamKind }> = [];
+
+    if (hasM3u8) {
+      candidates.push({ url: raw, kind: "hls" });
+    } else if (hasFileExt) {
+      candidates.push({ url: raw, kind: "file" });
+      candidates.push({ url: raw, kind: "ts" });
+    } else if (hasTs) {
+      // Most Xtream servers expose an HLS variant of the same live stream.
+      candidates.push({ url: raw.replace(/\.ts$/i, ".m3u8"), kind: "hls" });
+      candidates.push({ url: raw, kind: "ts" });
+    } else {
+      // Extension-less Xtream link: sniff it, then try every engine.
+      candidates.push({ url: `${raw}.m3u8`, kind: "hls" });
+      candidates.push({ url: raw, kind: "ts" });
+      candidates.push({ url: `${raw}.ts`, kind: "ts" });
     }
 
-    if (/\.m3u8(\?|$)/i.test(raw)) return { url: signStreamUrl(raw), kind: "hls" };
-    return { url: signStreamUrl(raw), kind: isFile ? "file" : "ts" };
+    // Verify candidates so the player does not burn a retry on a dead variant.
+    const verified: Array<{ url: string; kind: TvStreamKind }> = [];
+    for (const candidate of candidates.slice(0, 3)) {
+      const sniffed = await sniffKind(candidate.url);
+      if (!sniffed) continue;
+      verified.push({ url: candidate.url, kind: sniffed });
+    }
+
+    if (bare && verified.length === 0) {
+      // Nothing answered a range probe — still hand the raw link over.
+      verified.push({ url: raw, kind: "ts" });
+    }
+
+    const ordered = verified.length > 0 ? verified : candidates;
+    const primary = ordered[0]!;
+    const rest = ordered.slice(1);
+
+    return {
+      url: signStreamUrl(primary.url),
+      kind: primary.kind,
+      fallbacks: rest.map((entry) => ({ url: signStreamUrl(entry.url), kind: entry.kind })),
+    };
   });
