@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 /**
  * Compact, share-first reminder: shows the user's OG referral code and the
@@ -70,8 +71,7 @@ export function ReferralReminder({ className }: { className?: string }) {
       className={cn(
         // Consistent responsive padding via clamp keeps spacing identical
         // looking across phone → tablet → desktop.
-        "relative overflow-hidden rounded-2xl border border-coin/40 bg-gradient-to-r from-coin/10 via-coin/5 to-transparent shadow-card",
-        "[padding:clamp(0.875rem,2.5vw,1.25rem)]",
+        "relative overflow-hidden rounded-lg border border-border bg-background/50 p-3",
         className,
       )}
     >
@@ -80,11 +80,11 @@ export function ReferralReminder({ className }: { className?: string }) {
           and the buttons never get clipped. */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-4">
         <div className="flex min-w-0 items-start gap-3">
-          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-coin/20 text-coin">
-            <Sparkles className="h-5 w-5" />
+          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-primary/10 text-primary">
+            <Sparkles className="h-4 w-4" />
           </div>
           <div className="min-w-0 flex-1">
-            <div className="text-[11px] font-black uppercase tracking-[0.18em] text-coin">
+            <div className="text-xs font-semibold uppercase text-muted-foreground">
               Earn 10% cashback
             </div>
             <p
@@ -100,34 +100,37 @@ export function ReferralReminder({ className }: { className?: string }) {
               >
                 {code}
               </code>
-              <button
+              <Button
                 type="button"
                 onClick={copy}
                 aria-label={copied ? "Referral link copied" : "Copy referral link"}
                 aria-live="polite"
-                className="inline-flex min-h-11 min-w-11 items-center gap-1.5 whitespace-nowrap rounded-md px-2 text-xs font-semibold text-foreground/85 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coin/60 sm:min-h-9 sm:min-w-0 sm:text-[11px]"
+                variant="ghost"
+                size="sm"
+                className="h-9 px-2 text-xs"
               >
                 {copied ? <Check className="h-4 w-4 sm:h-3 sm:w-3" aria-hidden /> : <Copy className="h-4 w-4 sm:h-3 sm:w-3" aria-hidden />}
                 {copied ? "Copied" : "Copy link"}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
         {/* Action cluster: full width on mobile so buttons are tappable;
             auto width on sm+ so it never crowds the text. */}
         <div className="flex w-full items-center gap-2 sm:w-auto sm:justify-end">
-          <button
+          <Button
             type="button"
             onClick={share}
             aria-label="Share your referral link"
-            className="inline-flex h-11 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-coin px-4 text-sm font-bold text-background shadow hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coin/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:h-9 sm:flex-none sm:px-3 sm:text-xs"
+            size="sm"
+            className="h-10 flex-1 font-bold sm:h-9 sm:flex-none"
           >
             <Share2 className="h-4 w-4 sm:h-3.5 sm:w-3.5" aria-hidden /> Share
-          </button>
+          </Button>
           <Link
             to="/referrals"
             aria-label="See referral earnings details"
-            className="inline-flex h-11 min-w-11 shrink-0 items-center justify-center whitespace-nowrap rounded-md px-3 text-xs font-semibold text-foreground/85 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coin/60 sm:h-9 sm:min-w-0 sm:px-2 sm:text-[11px]"
+            className="inline-flex h-10 min-w-20 shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-border px-3 text-xs font-semibold text-foreground hover:bg-accent sm:h-9"
           >
             Details →
           </Link>

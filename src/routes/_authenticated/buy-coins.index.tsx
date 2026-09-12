@@ -309,7 +309,7 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
           <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4">
             <div className="min-w-0">
               <p className="text-xs font-semibold uppercase text-muted-foreground">OG BOT Store</p>
-              <h1 className="mt-1 truncate font-display text-2xl font-black sm:text-3xl">
+              <h1 className="mt-1 max-w-[13rem] font-display text-xl font-black leading-tight min-[390px]:max-w-none sm:text-3xl">
                 <EditableContent contentKey="buyCoins.heading" defaultValue="Stock up. Power up." />
               </h1>
             </div>
@@ -317,7 +317,7 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
               <p className="text-xs font-semibold uppercase text-muted-foreground">Balance</p>
               <div className="mt-1 flex items-center justify-end gap-2">
                 <Coins className="h-5 w-5 text-primary" />
-                <span className="font-mono text-2xl font-bold tabular-nums">{profile?.coin_balance ?? 0}</span>
+                <span className="font-mono text-xl font-bold tabular-nums sm:text-2xl">{profile?.coin_balance ?? 0}</span>
                 <span className="hidden text-xs text-muted-foreground min-[360px]:inline">OG</span>
               </div>
             </div>
