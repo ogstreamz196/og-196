@@ -36,6 +36,7 @@ import heartbreakCoverAsset from "@/assets/album-heartbreak.jpg.asset.json";
 import drillCoverAsset from "@/assets/album-drill.jpg.asset.json";
 import afrobeatsCoverAsset from "@/assets/album-afrobeats.jpg.asset.json";
 import { WelcomeBackdrop } from "@/components/layout/WelcomeBackdrop";
+import { BackgroundMusicHeaderControl } from "@/components/PersistentBackgroundMusic";
 
 
 function OgBotLogo({ className = "h-8 w-8" }: { className?: string }) {
@@ -668,6 +669,7 @@ function TopNav() {
             </p>
           </div>
         </Link>
+        <BackgroundMusicHeaderControl />
 
       </nav>
     </header>
