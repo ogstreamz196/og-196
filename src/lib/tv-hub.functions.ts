@@ -84,6 +84,9 @@ export function parseM3u(text: string): { channels: TvChannel[]; total: number; 
   return { channels, total, truncated: total > channels.length };
 }
 
+/** The provider answers on both the bare host and the explicit :80 host — try both. */
+export const TV_HUB_HOSTS = [`${TV_HUB_HOST}:80`, TV_HUB_HOST];
+
 export const loadTvHubPlaylist = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) =>
