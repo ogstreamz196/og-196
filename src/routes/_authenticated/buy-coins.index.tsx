@@ -28,12 +28,13 @@ import { toast } from "sonner";
 import { PurchaseHistory } from "@/components/PurchaseHistory";
 import { ReferralReminder } from "@/components/referrals/ReferralReminder";
 import { SectionDivider } from "@/components/buy-coins/SectionDivider";
+import { StoreItemsSection } from "@/components/store/StoreItemsSection";
 
 export const Route = createFileRoute("/_authenticated/buy-coins/")({
   validateSearch: (s: Record<string, unknown>): { edit?: 1 } =>
     s.edit === "1" || s.edit === 1 || s.edit === true ? { edit: 1 } : {},
   beforeLoad: ({ search }) => {
-    throw redirect({ to: "/store", search: { view: "coins", edit: search.edit } });
+    throw redirect({ to: "/store", search: { edit: search.edit } });
   },
   head: () => ({
     meta: [
@@ -71,7 +72,7 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
     toast.info("Edit mode is for the OG Studio team only — showing you the normal store view.", {
       duration: 4500,
     });
-    navigate({ to: "/store", search: { view: "coins" }, replace: true });
+    navigate({ to: "/store", search: {}, replace: true });
   }, [editMode, isDev, roleLoading, navigate]);
 
 
@@ -486,6 +487,7 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
             multiline
           />
         </p>
+        <StoreItemsSection />
         <PurchaseHistory />
       </div>
     </DashboardShell>

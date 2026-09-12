@@ -56,6 +56,7 @@ type FormState = {
   description: string;
   image_url: string;
   price_amount: string; // major units
+  coin_price: string;
   currency: string;
   recurring_interval: "" | "month" | "year";
   stock: string;
@@ -73,6 +74,7 @@ const EMPTY: FormState = {
   description: "",
   image_url: "",
   price_amount: "",
+  coin_price: "",
   currency: "gbp",
   recurring_interval: "",
   stock: "",
@@ -107,6 +109,7 @@ function AdminStorePage() {
           description: data.description || null,
           image_url: data.image_url || null,
           price_cents: Math.round(Number(data.price_amount) * 100),
+          coin_price: data.coin_price === "" ? null : Number(data.coin_price),
           currency: data.currency,
           recurring_interval: data.recurring_interval || null,
           stock: data.stock === "" ? null : Number(data.stock),
@@ -219,6 +222,7 @@ function AdminStorePage() {
       description: it.description ?? "",
       image_url: it.image_url ?? "",
       price_amount: (it.price_cents / 100).toFixed(2),
+      coin_price: it.coin_price == null ? "" : String(it.coin_price),
       currency: it.currency,
       recurring_interval: (it.recurring_interval as "" | "month" | "year") ?? "",
       stock: it.stock == null ? "" : String(it.stock),
@@ -335,7 +339,7 @@ function AdminStorePage() {
                             <div className="text-xs text-muted-foreground">{it.slug}</div>
                           </TableCell>
                           <TableCell className="text-sm">
-                            {(it.price_cents / 100).toFixed(2)} {it.currency.toUpperCase()}
+                            {it.coin_price != null ? `${it.coin_price} OG Coins` : `${(it.price_cents / 100).toFixed(2)} ${it.currency.toUpperCase()}`}
                             {it.recurring_interval && (
                               <span className="ml-1 text-xs text-muted-foreground">/ {it.recurring_interval}</span>
                             )}
@@ -462,6 +466,10 @@ function AdminStorePage() {
               <div>
                 <Label>Currency</Label>
                 <Input value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value.toLowerCase() })} maxLength={3} />
+              </div>
+              <div>
+                <Label>OG Coin price (optional)</Label>
+                <Input type="number" min="1" step="1" value={form.coin_price} onChange={(e) => setForm({ ...form, coin_price: e.target.value })} placeholder="Leave blank for card checkout" />
               </div>
               <div>
                 <Label>Recurring</Label>

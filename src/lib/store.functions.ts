@@ -233,6 +233,7 @@ type UpsertInput = {
   description?: string | null;
   image_url?: string | null;
   price_cents: number;
+  coin_price?: number | null;
   currency: string;
   recurring_interval?: "month" | "year" | null;
   stock?: number | null;
@@ -250,6 +251,7 @@ export const upsertStoreItem = createServerFn({ method: "POST" })
     if (!SLUG_RE.test(data.slug)) throw new Error("Slug must be lowercase letters/digits/-/_");
     if (!data.name?.trim()) throw new Error("Name required");
     if (!Number.isInteger(data.price_cents) || data.price_cents < 0) throw new Error("Invalid price");
+    if (data.coin_price != null && (!Number.isInteger(data.coin_price) || data.coin_price < 1)) throw new Error("OG Coin price must be a positive whole number");
     if (!CURRENCY_RE.test(data.currency)) throw new Error("Invalid currency");
     if (data.recurring_interval && data.recurring_interval !== "month" && data.recurring_interval !== "year") {
       throw new Error("Invalid interval");
@@ -272,6 +274,7 @@ export const upsertStoreItem = createServerFn({ method: "POST" })
       description: data.description?.trim() || null,
       image_url: data.image_url?.trim() || null,
       price_cents: data.price_cents,
+      coin_price: data.coin_price ?? null,
       currency: data.currency.toLowerCase(),
       recurring_interval: data.recurring_interval ?? null,
       stock: data.stock ?? null,
