@@ -167,6 +167,9 @@ function TvHubPage() {
     try {
       const playlist = await fetchPlaylist({ data: { username: username.trim(), password } });
       setItems(playlist.channels.map(toPlayItem));
+      setAccount(playlist.account);
+      setTruncated(playlist.truncated);
+
 
       setPassword("");
       setSection(null);
