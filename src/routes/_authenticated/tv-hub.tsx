@@ -61,19 +61,13 @@ const SECTIONS: Array<{ id: Section; label: string; caption: string; icon: typeo
 
 const MAX_VISIBLE = 300;
 
-/** Live Xtream URLs end in .ts (not playable in a browser) — prefer the HLS variant. */
-function toPlayableSource(url: string) {
-  if (/\/live\/[^/]+\/[^/]+\/\d+\.ts$/i.test(url)) return url.replace(/\.ts$/i, ".m3u8");
-  return url;
-}
-
 function toPlayItem(channel: TvChannel): PlayItem {
   return {
     id: channel.id,
     title: channel.title,
     group: channel.group,
     section: channel.section,
-    source: toPlayableSource(channel.url),
+    source: channel.url,
     logo: channel.logo,
   };
 }
