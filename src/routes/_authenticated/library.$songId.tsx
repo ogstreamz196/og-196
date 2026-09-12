@@ -485,7 +485,7 @@ function GeneratingStatus({ song }: { song: FullSong }) {
     },
     {
       label: "Generating audio",
-      hint: "Suno is rendering vocals + instruments",
+      hint: "OG Bot is rendering vocals + instruments",
       state: hasAudio ? "done" : song.status === "processing" ? "active" : "pending",
     },
     {
