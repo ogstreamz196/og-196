@@ -208,26 +208,10 @@ function TvHubPage() {
               {loginMessage && (
                 <p role="status" className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-foreground">{loginMessage}</p>
               )}
-              <div className="grid gap-3 sm:grid-cols-2">
-                <Button type="submit" size="lg" className="h-12" disabled={loading}>
-                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <LockKeyhole className="h-4 w-4" />}
-                  {loading ? "Loading playlist" : "Sign in"}
-                </Button>
-                <Button
-                  type="button"
-                  size="lg"
-                  variant="outline"
-                  className="h-12"
-                  disabled={loading}
-                  onClick={() => {
-                    setItems(DEMO_ITEMS);
-                    setIsDemo(true);
-                    setSection(null);
-                  }}
-                >
-                  <Play className="h-4 w-4" /> Temporary demo access
-                </Button>
-              </div>
+              <Button type="submit" size="lg" className="h-12 w-full" disabled={loading}>
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <LockKeyhole className="h-4 w-4" />}
+                {loading ? "Loading your channels" : "Sign in"}
+              </Button>
             </form>
           </section>
         </div>
