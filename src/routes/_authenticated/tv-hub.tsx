@@ -107,7 +107,8 @@ function TvHubPage() {
   const [loginMessage, setLoginMessage] = useState("");
 
   const [section, setSection] = useState<Section | null>(null);
-  const [group, setGroup] = useState<string>("All");
+  // null = categories stage, "All" or a name = channel-list stage
+  const [group, setGroup] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [favourites, setFavourites] = useState<string[]>([]);
