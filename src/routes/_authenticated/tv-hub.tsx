@@ -574,6 +574,7 @@ function StreamPlayer({
     if (!video) return;
     if (!source) {
       video.removeAttribute("src");
+      video.load();
       setStatus("idle");
       return;
     }
@@ -585,8 +586,19 @@ function StreamPlayer({
     let destroyed = false;
     let cleanup: (() => void) | null = null;
 
+    const detach = () => {
+      cleanup?.();
+      cleanup = null;
+      video.removeAttribute("src");
+      try {
+        video.load();
+      } catch {
+        /* ignore */
+      }
+    };
+
     void (async () => {
-      let prepared: { url: string; kind: "hls" | "ts" | "file" };
+      let prepared: Awaited<ReturnType<typeof prepareStream>>;
       try {
         prepared = await prepareStream({ data: { url: source } });
       } catch {
@@ -595,61 +607,150 @@ function StreamPlayer({
       }
       if (destroyed) return;
 
+      const attempts: Array<{ url: string; kind: "hls" | "ts" | "file" }> = [
+        { url: prepared.url, kind: prepared.kind },
+        ...(prepared.fallbacks ?? []),
+      ];
+
       const start = () => void video.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
 
-      if (prepared.kind === "hls") {
-        const nativeHls = video.canPlayType("application/vnd.apple.mpegurl") !== "";
-        const { default: Hls } = await import("hls.js");
-        if (destroyed) return;
-        if (Hls.isSupported()) {
-          const hls = new Hls({ enableWorker: true, lowLatencyMode: true });
-          hls.loadSource(prepared.url);
-          hls.attachMedia(video);
-          hls.on(Hls.Events.MANIFEST_PARSED, () => { setStatus("ready"); start(); });
-          hls.on(Hls.Events.ERROR, (_event, data) => {
-            if (!data.fatal) return;
-            if (data.type === Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
-            else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
-            else setStatus("error");
-          });
-          cleanup = () => hls.destroy();
-          return;
-        }
-        if (nativeHls) {
-          video.src = prepared.url;
-          start();
-          return;
-        }
-        setStatus("error");
-        return;
-      }
-
-      if (prepared.kind === "ts") {
-        const mpegts = (await import("mpegts.js")).default;
-        if (destroyed) return;
-        if (mpegts.getFeatureList().mseLivePlayback) {
-          const player = mpegts.createPlayer(
-            { type: "mpegts", isLive: live, url: prepared.url },
-            { enableStashBuffer: false, liveBufferLatencyChasing: true },
-          );
-          player.attachMediaElement(video);
-          player.load();
-          player.on(mpegts.Events.ERROR, () => setStatus("error"));
-          start();
-          cleanup = () => {
-            player.destroy();
+      /** Try one engine. Resolves false when it fails so the next can run. */
+      const attempt = (entry: { url: string; kind: "hls" | "ts" | "file" }) =>
+        new Promise<boolean>((resolve) => {
+          let settled = false;
+          const done = (ok: boolean) => {
+            if (settled) return;
+            settled = true;
+            resolve(ok);
           };
-          return;
-        }
+
+          void (async () => {
+            if (entry.kind === "hls") {
+              const { default: Hls } = await import("hls.js");
+              if (destroyed) return done(false);
+              if (Hls.isSupported()) {
+                const hls = new Hls({
+                  enableWorker: true,
+                  lowLatencyMode: false,
+                  backBufferLength: 60,
+                  maxBufferLength: 30,
+                  manifestLoadingTimeOut: 20_000,
+                  manifestLoadingMaxRetry: 3,
+                  levelLoadingMaxRetry: 4,
+                  fragLoadingMaxRetry: 6,
+                });
+                let recovered = 0;
+                hls.loadSource(entry.url);
+                hls.attachMedia(video);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                  setStatus("ready");
+                  start();
+                  done(true);
+                });
+                hls.on(Hls.Events.ERROR, (_event, data) => {
+                  if (!data.fatal) return;
+                  if (data.type === Hls.ErrorTypes.NETWORK_ERROR && recovered < 3) {
+                    recovered += 1;
+                    hls.startLoad();
+                    return;
+                  }
+                  if (data.type === Hls.ErrorTypes.MEDIA_ERROR && recovered < 3) {
+                    recovered += 1;
+                    hls.recoverMediaError();
+                    return;
+                  }
+                  hls.destroy();
+                  done(false);
+                });
+                cleanup = () => hls.destroy();
+                return;
+              }
+              if (video.canPlayType("application/vnd.apple.mpegurl") !== "") {
+                video.src = entry.url;
+                video.onerror = () => done(false);
+                video.onloadeddata = () => { setStatus("ready"); done(true); };
+                start();
+                return;
+              }
+              return done(false);
+            }
+
+            if (entry.kind === "ts") {
+              const mpegts = (await import("mpegts.js")).default;
+              if (destroyed) return done(false);
+              const features = mpegts.getFeatureList();
+              if (features.mseLivePlayback) {
+                const player = mpegts.createPlayer(
+                  {
+                    type: "mpegts",
+                    isLive: live,
+                    url: entry.url,
+                    cors: true,
+                    hasAudio: true,
+                    hasVideo: true,
+                  },
+                  {
+                    enableWorker: false,
+                    enableStashBuffer: !live,
+                    stashInitialSize: live ? 128 : 384,
+                    liveBufferLatencyChasing: live,
+                    lazyLoad: !live,
+                    autoCleanupSourceBuffer: true,
+                    fixAudioTimestampGap: true,
+                    reuseRedirectedURL: true,
+                  },
+                );
+                player.attachMediaElement(video);
+                player.on(mpegts.Events.ERROR, () => {
+                  try {
+                    player.destroy();
+                  } catch {
+                    /* ignore */
+                  }
+                  done(false);
+                });
+                player.on(mpegts.Events.MEDIA_INFO, () => { setStatus("ready"); done(true); });
+                player.load();
+                start();
+                cleanup = () => {
+                  try {
+                    player.destroy();
+                  } catch {
+                    /* ignore */
+                  }
+                };
+                return;
+              }
+              return done(false);
+            }
+
+            // Progressive file (mp4/mkv/webm) — let the browser handle it.
+            video.src = entry.url;
+            video.onerror = () => done(false);
+            video.onloadeddata = () => { setStatus("ready"); done(true); };
+            start();
+          })();
+
+          // Give each engine a fair window before moving on.
+          window.setTimeout(() => done(false), 18_000);
+        });
+
+      for (const entry of attempts) {
+        if (destroyed) return;
+        const ok = await attempt(entry);
+        if (destroyed) return;
+        if (ok) return;
+        detach();
       }
 
-      video.src = prepared.url;
-      start();
+      if (!destroyed) setStatus("error");
     })();
 
     return () => {
       destroyed = true;
       cleanup?.();
+      video.onerror = null;
+      video.onloadeddata = null;
     };
   }, [live, prepareStream, source]);
 
