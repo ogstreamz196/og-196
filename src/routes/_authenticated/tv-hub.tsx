@@ -439,7 +439,59 @@ function TvHubPage() {
   );
 }
 
+/* ------------------------------------------------------------- account ---- */
+
+function AccountBar({
+  account,
+  expiry,
+  total,
+  truncated,
+}: {
+  account: TvAccount | null;
+  expiry: { label: string; note: string; expired: boolean } | null;
+  total: number;
+  truncated: boolean;
+}) {
+  return (
+    <div className="mb-6 flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card/80 p-3 text-xs sm:text-sm">
+      <span className="rounded-full border border-border bg-background/60 px-3 py-1 font-bold">
+        {account?.username ? `Account ${account.username}` : "Account"}
+      </span>
+      {expiry ? (
+        <span
+          className={cn(
+            "rounded-full border px-3 py-1 font-bold",
+            expiry.expired
+              ? "border-destructive/50 bg-destructive/10 text-foreground"
+              : "border-primary/50 bg-primary/10 text-foreground",
+          )}
+        >
+          Expires {expiry.label} · {expiry.note}
+        </span>
+      ) : (
+        <span className="rounded-full border border-border bg-background/60 px-3 py-1 text-muted-foreground">
+          Expiry unavailable
+        </span>
+      )}
+      {account?.status && (
+        <span className="rounded-full border border-border bg-background/60 px-3 py-1 text-muted-foreground">
+          Status {account.status}
+        </span>
+      )}
+      {account?.maxConnections && (
+        <span className="rounded-full border border-border bg-background/60 px-3 py-1 text-muted-foreground">
+          {account.activeConnections ?? 0}/{account.maxConnections} connections
+        </span>
+      )}
+      <span className="rounded-full border border-border bg-background/60 px-3 py-1 text-muted-foreground">
+        {total.toLocaleString()} items{truncated ? " (partial)" : ""}
+      </span>
+    </div>
+  );
+}
+
 /* -------------------------------------------------------------- player ---- */
+
 
 function StreamPlayer({
   title,
