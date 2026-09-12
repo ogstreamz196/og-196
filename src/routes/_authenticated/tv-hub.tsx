@@ -247,11 +247,12 @@ function TvHubPage() {
 
   const signOut = () => {
     setItems(null);
+    setAccount(null);
+    setTruncated(false);
     setSection(null);
     setSelectedId(null);
     setQuery("");
     setGroup("All");
-
   };
 
   /* ------------------------------------------------------------ dashboard */
