@@ -52,43 +52,6 @@ type PlayItem = {
   logo?: string | null;
 };
 
-const DEMO_ITEMS: PlayItem[] = [
-  {
-    id: "demo-1",
-    title: "OG One HD",
-    group: "Entertainment",
-    section: "tv",
-    source: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
-  },
-  {
-    id: "demo-2",
-    title: "City 24 News",
-    group: "News",
-    section: "tv",
-    source: "https://test-streams.mux.dev/pts_shift/master.m3u8",
-  },
-  {
-    id: "demo-3",
-    title: "Big Buck Bunny",
-    group: "Animation",
-    section: "movies",
-    source: "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-  },
-  {
-    id: "demo-4",
-    title: "Sintel",
-    group: "Adventure",
-    section: "movies",
-    source: "https://storage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
-  },
-  {
-    id: "demo-5",
-    title: "After Dark · S1 E1",
-    group: "Thriller",
-    section: "series",
-    source: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
-  },
-];
 
 const SECTIONS: Array<{ id: Section; label: string; caption: string; icon: typeof Tv }> = [
   { id: "tv", label: "Live TV", caption: "Channels & sport", icon: Radio },
