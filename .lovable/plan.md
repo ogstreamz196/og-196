@@ -1,45 +1,22 @@
 ## Goal
-Rename `/buy-coins` → `/store`, polish into an arcade storefront, and give the boss a full CMS to add unlimited items across three categories: **Coins**, **Subscriptions**, and **Random Items** — each item auto-syncs to Stripe and checks out through the existing embedded flow.
+Create a new approximately 60-second vertical OG BOT promotional video using the uploaded `OG_PROMO.mp3` soundtrack, without showing the global playlist.
 
-## Database (one migration)
-- `store_categories` — `slug` (coins|subscriptions|items|custom), `label`, `sort_order`, `active`
-- `store_items` — `id`, `category_id`, `name`, `description`, `image_url`, `price_cents`, `currency`, `recurring_interval` (null|month|year), `stripe_price_id` (lookup key), `stock` (nullable = unlimited), `stock_sold`, `coin_reward` (nullable), `perk_slug` (nullable, e.g. `vip_badge`, `role:og_bot`), `rarity` (common|rare|epic|legendary), `sort_order`, `active`, timestamps
-- RLS: `SELECT` for `authenticated` on `active=true`; `ALL` for boss/admin via `has_role`; `service_role` full
-- Seed existing coin packs + VIP into rows so nothing breaks
+## Creative direction
+- **Style:** kinetic, app-authentic, high-energy OG BOT promo in the existing navy, royal-blue, silver, red accent palette.
+- **Typography:** Lilita One for bold display copy and Unbounded for supporting text.
+- **Motion:** fast layered entrances, smooth phone-screen movement, rhythmic waveform accents, and consistent wipe/fade transitions.
+- **Focus:** Music creation tool, multilingual tracks, OG Battle Zone, Foul Mouth mode, and the `ogbot.co.uk` brand.
 
-## Server functions (`src/lib/store.functions.ts`)
-- `listStoreCatalog()` — public read, grouped by category
-- `upsertStoreItem({ ... })` — boss-only, calls `stripe.products.create/update` + `stripe.prices.create` with `lookup_key = <item slug>`, stores id
-- `deleteStoreItem(id)` — boss-only, archives Stripe price + soft-deletes row
-- `purchaseStoreItem({ itemId })` — extends `createCheckoutSession` with stock check + item metadata (`item_id`, `coin_reward`, `perk_slug`)
+## Storyboard
+1. Immediate OG BOT logo/name hook and music-led opening.
+2. Music creation tool: title, person, description, track length, styles, and vocal controls.
+3. Languages: clearly show multilingual selection and call out English, Urdu, Punjabi, Gujarati, Turkish, Spanish, Arabic, and more.
+4. OG Battle Zone: private/community choice, battle energy, rankings, reactions, and rewards without displaying the global playlist.
+5. Finished-track experience: creation progress, playback, download, and sharing shown as a private library/result view only.
+6. Strong closing card with “OG BOT”, pronunciation-friendly “O G BOT”, and `ogbot.co.uk`.
 
-## Webhook update
-Extend `payments/webhook.ts` `checkout.session.completed` handler:
-1. Decrement `stock_sold`
-2. If `coin_reward` → mint coins via existing RPC
-3. If `perk_slug` starts `role:` → grant user_role
-4. Existing VIP/coin-pack logic preserved
-
-## UI
-### Storefront `/store` (rename route)
-- Sticky wallet balance bar (existing)
-- Category tabs (Coins • Subscriptions • Random Items)
-- Arcade card grid: rarity-colored border + flame aura, price pill, coin-reward pill, stock badge ("3 left" / "Sold out"), Buy button opens existing embedded Stripe modal
-- Keep Custom Amount + Go VIP CTAs at top
-
-### Admin `/admin/store` (new route)
-- Boss-gated (existing `useRole().isBoss`)
-- CRUD table + drawer form:
-  - Category picker, name, description, image upload, price, currency, one-time/monthly/yearly toggle, stock, coin_reward, perk_slug, rarity, sort_order, active
-- "Sync to Stripe" status pill per row
-- Category manager (add/rename/reorder)
-- Link from admin index
-
-## Files touched
-- New: migration, `src/lib/store.functions.ts`, `src/routes/_authenticated/store.index.tsx`, `src/routes/_authenticated/admin.store.tsx`, `src/components/store/StoreItemCard.tsx`, `src/components/admin/StoreItemForm.tsx`
-- Edit: `buy-coins.index.tsx` → thin redirect to `/store`; `payments/webhook.ts` (item handler); `AppSidebar`/`MobileBottomNav` label "Store"; admin index link
-
-## Out of scope
-- Physical shipping / addresses
-- Refund UI (hidden per prior memory)
-- Multi-currency conversion (uses row's currency verbatim)
+## Production
+- Capture fresh authenticated app screens where needed, avoiding global playlist content.
+- Rework the existing Remotion source into about 60 seconds at 1080×1920 and 30fps.
+- Use a suitable excerpt from the uploaded audio, preserving its original sound.
+- Spot-check key frames, render the final H.264/AAC MP4 to `/mnt/documents/`, then verify duration, audio, dimensions, and file size.
