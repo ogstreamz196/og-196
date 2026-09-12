@@ -123,8 +123,9 @@ function ResetPasswordPage() {
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
-    if (password.length < 6) {
-      toast.error("Password must be at least 6 characters");
+    if (password.length < 5) {
+      toast.error("Password must be at least 5 characters");
+
       return;
     }
     if (password !== confirm) {
@@ -198,7 +199,7 @@ function ResetPasswordPage() {
                   id="rp-password"
                   type="password"
                   autoComplete="new-password"
-                  placeholder="At least 6 characters"
+                  placeholder="At least 5 characters"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="h-12 text-base"
