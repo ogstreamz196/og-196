@@ -152,3 +152,46 @@ export const loadTvHubPlaylist = createServerFn({ method: "POST" })
       truncated: parsed.truncated,
     };
   });
+
+export type TvStreamSource = { url: string; kind: "hls" | "ts" | "file" };
+
+/**
+ * Turn a provider URL into a same-origin, signed, short-lived relay link.
+ * Browsers cannot play the provider's plain-HTTP CORS-less streams directly.
+ * Nothing is stored or hosted: bytes stream through and are discarded.
+ */
+export const prepareTvStream = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) => z.object({ url: z.string().url().max(2048) }).parse(data))
+  .handler(async ({ data }): Promise<TvStreamSource> => {
+    const target = new URL(data.url);
+    if (!TV_HUB_HOSTS.some((host) => new URL(host).hostname === target.hostname)) {
+      throw new Error("That stream is not from the TV HUB provider.");
+    }
+
+    const { signStreamUrl } = await import("./tv-stream.server");
+    const raw = target.toString();
+    const isLiveTs = /\.ts$/i.test(target.pathname);
+    const isFile = /\.(mp4|mkv|avi|mov|m4v)$/i.test(target.pathname);
+
+    if (isLiveTs) {
+      // Most Xtream servers also expose an HLS variant — prefer it when it answers.
+      const hlsUrl = raw.replace(/\.ts$/i, ".m3u8");
+      try {
+        const probe = await fetch(hlsUrl, {
+          headers: { "User-Agent": "VLC/3.0.20 LibVLC/3.0.20", Accept: "*/*" },
+          signal: AbortSignal.timeout(12_000),
+        });
+        const body = probe.ok ? await probe.text() : "";
+        if (probe.ok && body.includes("#EXTM3U")) {
+          return { url: signStreamUrl(hlsUrl), kind: "hls" };
+        }
+      } catch {
+        /* fall through to raw transport stream */
+      }
+      return { url: signStreamUrl(raw), kind: "ts" };
+    }
+
+    if (/\.m3u8(\?|$)/i.test(raw)) return { url: signStreamUrl(raw), kind: "hls" };
+    return { url: signStreamUrl(raw), kind: isFile ? "file" : "ts" };
+  });
