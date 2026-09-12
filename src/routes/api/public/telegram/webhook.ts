@@ -48,7 +48,15 @@ async function tg(method: string, body: Record<string, unknown>) {
     },
     body: JSON.stringify(body),
   }).catch(() => null);
-  return r;
+  if (!r) return null;
+  const payload = await r.json().catch(() => null) as
+    | { ok?: boolean; description?: string; result?: unknown }
+    | null;
+  if (!r.ok || payload?.ok === false) {
+    console.error(`Telegram ${method} failed [${r.status}]: ${payload?.description ?? "unknown error"}`);
+    return null;
+  }
+  return payload;
 }
 
 async function reply(chat_id: number, text: string, extra?: Record<string, unknown>) {
