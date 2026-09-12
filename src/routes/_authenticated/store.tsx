@@ -81,7 +81,7 @@ function StorePage() {
             </TabsList>
           </Tabs>
         </div>
-        <CoinStore />
+        <CoinStore editMode={search.edit} />
       </div>
     );
   }

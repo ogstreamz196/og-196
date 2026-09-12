@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { Coins, Check, ArrowLeft, Crown, Star, Zap, ShieldCheck, Lock, Sparkles, Infinity as InfinityIcon, TrendingDown, Gift, Pencil, X, Loader2, CreditCard, Plus, Minus, SlidersHorizontal, Store, Tag, ToggleLeft, ToggleRight, Gem, Trophy, Flame, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,14 +49,14 @@ export const Route = createFileRoute("/_authenticated/buy-coins/")({
 });
 
 function BuyCoinsPage() {
-  return <CoinStore />;
+  const search = Route.useSearch();
+  return <CoinStore editMode={search.edit} />;
 }
 
-export function CoinStore() {
+export function CoinStore({ editMode }: { editMode?: 1 }) {
   const { data: profile } = useProfile();
   const { isVip, isDev, isLoading: roleLoading } = useRole();
-  const search = Route.useSearch();
-  const navigate = Route.useNavigate();
+  const navigate = useNavigate();
   const [selected, setSelected] = useState<Selection | null>(null);
   const [stage, setStage] = useState<"confirm" | "pay">("confirm");
 
@@ -65,14 +65,14 @@ export function CoinStore() {
   // server-side and in <AdminEditModeProvider>; this just gives the
   // user a clear message instead of a silently inert UI.
   useEffect(() => {
-    if (search.edit !== 1) return;
+    if (editMode !== 1) return;
     if (roleLoading) return; // wait for role resolution before deciding
     if (isDev) return; // dev/admin: leave them in edit mode
     toast.info("Edit mode is for the OG Studio team only — showing you the normal store view.", {
       duration: 4500,
     });
     navigate({ to: "/store", search: { view: "coins" }, replace: true });
-  }, [search.edit, isDev, roleLoading, navigate]);
+  }, [editMode, isDev, roleLoading, navigate]);
 
 
 
