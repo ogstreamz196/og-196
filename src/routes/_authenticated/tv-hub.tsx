@@ -64,7 +64,17 @@ const SECTIONS: Array<{ id: Section; label: string; caption: string; icon: typeo
   { id: "series", label: "Series", caption: "Box sets & shows", icon: ListVideo },
 ];
 
-const MAX_VISIBLE = 300;
+const PAGE_SIZE = 300;
+
+function formatExpiry(iso: string | null) {
+  if (!iso) return null;
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return null;
+  const days = Math.ceil((date.getTime() - Date.now()) / 86_400_000);
+  const label = date.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+  if (days < 0) return { label, note: "Expired", expired: true };
+  return { label, note: days === 0 ? "Expires today" : `${days} day${days === 1 ? "" : "s"} left`, expired: false };
+}
 
 function toPlayItem(channel: TvChannel): PlayItem {
   return {
