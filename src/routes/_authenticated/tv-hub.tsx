@@ -88,7 +88,6 @@ function TvHubPage() {
   const fetchPlaylist = useServerFn(loadTvHubPlaylist);
 
   const [items, setItems] = useState<PlayItem[] | null>(null);
-  const [isDemo, setIsDemo] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -151,7 +150,7 @@ function TvHubPage() {
     try {
       const playlist = await fetchPlaylist({ data: { username: username.trim(), password } });
       setItems(playlist.channels.map(toPlayItem));
-      setIsDemo(false);
+
       setPassword("");
       setSection(null);
     } catch (error) {
@@ -231,7 +230,7 @@ function TvHubPage() {
     setSelectedId(null);
     setQuery("");
     setGroup("All");
-    setIsDemo(false);
+
   };
 
   /* ------------------------------------------------------------ dashboard */
@@ -245,7 +244,7 @@ function TvHubPage() {
             <div className="flex min-w-0 items-center gap-3">
               <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground shadow-glow"><MonitorPlay className="h-5 w-5" /></span>
               <div className="min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-primary">{isDemo ? "Demo mode" : `${list.length} items loaded`}</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-primary">{`${list.length} items loaded`}</p>
                 <h1 className="font-display text-2xl font-black uppercase leading-none sm:text-3xl">TV HUB</h1>
               </div>
             </div>
@@ -291,7 +290,7 @@ function TvHubPage() {
           <ArrowLeft />
         </Button>
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-primary">{isDemo ? "Demo mode" : "TV HUB"}</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-primary">TV HUB</p>
           <h1 className="truncate font-display text-xl font-black uppercase leading-none">{activeSection.label}</h1>
         </div>
         <div className="relative order-last w-full sm:order-none sm:w-64">
