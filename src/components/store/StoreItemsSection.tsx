@@ -1,0 +1,132 @@
+import { useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { Loader2, PackageOpen, X } from "lucide-react";
+import { toast } from "sonner";
+import { StripeEmbeddedCheckoutInline } from "@/components/StripeEmbeddedCheckout";
+import { StoreItemCard } from "@/components/store/StoreItemCard";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  claimSportsGuideInvite,
+  getSportsGuideAccessStatus,
+  listStoreCatalog,
+  purchaseSportsGuideAccess,
+} from "@/lib/store.functions";
+
+const ALL_ITEMS = "all";
+
+export function StoreItemsSection() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const getAccessStatus = useServerFn(getSportsGuideAccessStatus);
+  const purchaseAccess = useServerFn(purchaseSportsGuideAccess);
+  const claimInvite = useServerFn(claimSportsGuideInvite);
+  const [checkoutItemId, setCheckoutItemId] = useState<string | null>(null);
+  const catalog = useQuery({
+    queryKey: ["store-catalog"],
+    queryFn: () => listStoreCatalog(),
+  });
+  const access = useQuery({
+    queryKey: ["sports-guide-access"],
+    queryFn: () => getAccessStatus(),
+  });
+  const categories = catalog.data?.categories ?? [];
+  const allItems = useMemo(() => categories.flatMap((category) => category.items), [categories]);
+  const returnUrl = useMemo(
+    () => `${window.location.origin}/buy-coins/return?session_id={CHECKOUT_SESSION_ID}`,
+    [],
+  );
+
+  const sportsGuide = useMutation({
+    mutationFn: async (action: "buy" | "claim") => action === "buy" ? purchaseAccess() : claimInvite(),
+    onSuccess: async (_result, action) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["sports-guide-access"] }),
+        queryClient.invalidateQueries({ queryKey: ["profile"] }),
+        queryClient.invalidateQueries({ queryKey: ["coin-transactions"] }),
+      ]);
+      toast.success(action === "buy" ? "Sports Guide access unlocked" : "Private invite sent to Telegram");
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const buy = (itemId: string) => {
+    const item = allItems.find((candidate) => candidate.id === itemId);
+    if (item?.slug === "og-sports-guide-access") {
+      sportsGuide.mutate("buy");
+      return;
+    }
+    setCheckoutItemId(itemId);
+  };
+
+  const renderItem = (item: (typeof allItems)[number]) => (
+    <StoreItemCard
+      key={item.id}
+      item={item}
+      onBuy={buy}
+      buying={item.slug === "og-sports-guide-access" && sportsGuide.isPending}
+      sportsGuideState={item.slug === "og-sports-guide-access" ? access.data?.status : undefined}
+      onClaimInvite={() => {
+        if (!access.data?.telegramLinked) {
+          toast.info("Connect Telegram in Settings before claiming your invite");
+          navigate({ to: "/settings" });
+          return;
+        }
+        sportsGuide.mutate("claim");
+      }}
+    />
+  );
+
+  return (
+    <section aria-labelledby="store-items-heading" className="scroll-mt-24">
+      <div className="mb-4 flex items-center gap-3">
+        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+          <PackageOpen className="h-5 w-5" />
+        </div>
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Member access & extras</p>
+          <h2 id="store-items-heading" className="font-display text-xl font-black">Store items</h2>
+        </div>
+      </div>
+
+      {catalog.isLoading ? (
+        <div className="grid place-items-center rounded-2xl border border-border py-12"><Loader2 className="h-7 w-7 animate-spin text-primary" /></div>
+      ) : catalog.error ? (
+        <div className="rounded-2xl border border-destructive/40 bg-destructive/10 p-5 text-center text-sm text-destructive">Couldn’t load Store items. Try refreshing.</div>
+      ) : allItems.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">No Store items are available yet.</div>
+      ) : (
+        <Tabs defaultValue={ALL_ITEMS}>
+          <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 bg-card p-1">
+            <TabsTrigger value={ALL_ITEMS}>All</TabsTrigger>
+            {categories.map((category) => <TabsTrigger key={category.id} value={category.slug}>{category.label}</TabsTrigger>)}
+          </TabsList>
+          <TabsContent value={ALL_ITEMS} className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{allItems.map(renderItem)}</TabsContent>
+          {categories.map((category) => (
+            <TabsContent key={category.id} value={category.slug} className="mt-4">
+              {category.description ? <p className="mb-3 text-sm text-muted-foreground">{category.description}</p> : null}
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{category.items.map(renderItem)}</div>
+            </TabsContent>
+          ))}
+        </Tabs>
+      )}
+
+      <Dialog open={!!checkoutItemId} onOpenChange={(open) => !open && setCheckoutItemId(null)}>
+        <DialogContent className="max-w-lg p-0">
+          <DialogHeader className="border-b border-border p-4">
+            <DialogTitle className="flex items-center justify-between">
+              <span>Secure checkout</span>
+              <Button variant="ghost" size="icon" onClick={() => setCheckoutItemId(null)} aria-label="Close checkout"><X className="h-4 w-4" /></Button>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="p-4">
+            {checkoutItemId ? <StripeEmbeddedCheckoutInline type="store_item" storeItemId={checkoutItemId} returnUrl={returnUrl} /> : null}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </section>
+  );
+}
