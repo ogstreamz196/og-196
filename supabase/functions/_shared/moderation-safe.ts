@@ -5,7 +5,9 @@
 // and resubmit: strong profanity and slurs are swapped for milder stand-ins
 // that keep the cadence and attitude of the line.
 
-const REPLACEMENTS: Array<[RegExp, string]> = [
+type Rep = string | ((m: string) => string);
+
+const REPLACEMENTS: Array<[RegExp, Rep]> = [
   [/\bmother\s*f+u+c+k+\w*/gi, "mother trucker"],
   [/\bf+u+c+k+(ing|ed|er|ers|in['’]?)?\b/gi, (m: string) =>
     /ing|in['’]?$/i.test(m) ? "freaking" : "heck"],
