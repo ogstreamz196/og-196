@@ -1,4 +1,4 @@
-import { Music2, Pause, Play } from "lucide-react";
+import { Pause, Play } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import backgroundTrack from "@/assets/og-bot-background.mp3.asset.json";
@@ -6,6 +6,43 @@ import { Button } from "@/components/ui/button";
 
 const ENABLED_KEY = "og:background-music-enabled";
 const POSITION_KEY = "og:background-music-position";
+const TOGGLE_EVENT = "og:background-music-toggle";
+const STATUS_EVENT = "og:background-music-status";
+const STATUS_REQUEST_EVENT = "og:background-music-status-request";
+
+function announceStatus(playing: boolean) {
+  window.dispatchEvent(new CustomEvent(STATUS_EVENT, { detail: { playing } }));
+}
+
+export function BackgroundMusicHeaderControl({ className = "" }: { className?: string }) {
+  const [playing, setPlaying] = useState(false);
+
+  useEffect(() => {
+    const update = (event: Event) => {
+      const detail = (event as CustomEvent<{ playing?: boolean }>).detail;
+      setPlaying(Boolean(detail?.playing));
+    };
+    window.addEventListener(STATUS_EVENT, update);
+    window.dispatchEvent(new Event(STATUS_REQUEST_EVENT));
+    return () => window.removeEventListener(STATUS_EVENT, update);
+  }, []);
+
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon"
+      className={`h-9 w-9 shrink-0 rounded-full hover:bg-white/5 ${className}`}
+      onClick={() => window.dispatchEvent(new Event(TOGGLE_EVENT))}
+      aria-label={playing ? "Pause background music" : "Play background music"}
+      title={playing ? "Pause background music" : "Play background music"}
+      data-background-music-control
+    >
+      {playing ? <Pause className="h-4 w-4" aria-hidden /> : <Play className="h-4 w-4" aria-hidden />}
+      <span className="sr-only">{playing ? "Pause background music" : "Play background music"}</span>
+    </Button>
+  );
+}
 
 /**
  * One audio element mounted above the router outlet, so client-side page
@@ -42,8 +79,14 @@ export function PersistentBackgroundMusic() {
       audio.currentTime = storedPosition;
     }
 
-    const onPlay = () => setPlaying(true);
-    const onPause = () => setPlaying(false);
+    const onPlay = () => {
+      setPlaying(true);
+      announceStatus(true);
+    };
+    const onPause = () => {
+      setPlaying(false);
+      announceStatus(false);
+    };
     const savePosition = () => {
       if (Number.isFinite(audio.currentTime)) {
         window.localStorage.setItem(POSITION_KEY, String(audio.currentTime));
@@ -112,6 +155,19 @@ export function PersistentBackgroundMusic() {
     await start();
   };
 
+  useEffect(() => {
+    if (!ready) return;
+    const handleToggle = () => void toggle();
+    const reportStatus = () => announceStatus(playing);
+    window.addEventListener(TOGGLE_EVENT, handleToggle);
+    window.addEventListener(STATUS_REQUEST_EVENT, reportStatus);
+    announceStatus(playing);
+    return () => {
+      window.removeEventListener(TOGGLE_EVENT, handleToggle);
+      window.removeEventListener(STATUS_REQUEST_EVENT, reportStatus);
+    };
+  }, [playing, ready]);
+
   return (
     <>
       <audio
@@ -122,26 +178,6 @@ export function PersistentBackgroundMusic() {
         className="hidden"
         data-background-music
       />
-      {ready ? (
-        <div
-          data-background-music-control
-          className="fixed right-3 z-50 flex items-center gap-1.5 rounded-full border border-border bg-popover/95 p-1.5 pr-2.5 text-popover-foreground shadow-lg backdrop-blur-md bottom-[calc(5.25rem+env(safe-area-inset-bottom))] sm:bottom-4 sm:right-4"
-        >
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            className="rounded-full"
-            onClick={() => void toggle()}
-            aria-label={playing ? "Pause background music" : "Play background music"}
-            title={playing ? "Pause background music" : "Play background music"}
-          >
-            {playing ? <Pause aria-hidden /> : <Play aria-hidden />}
-          </Button>
-          <Music2 className="size-3.5 text-primary" aria-hidden />
-          <span className="max-w-24 truncate text-[10px] font-semibold">OG BOT</span>
-        </div>
-      ) : null}
     </>
   );
 }

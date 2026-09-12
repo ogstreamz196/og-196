@@ -29,6 +29,7 @@ import { AppSidebar } from "./AppSidebar";
 import { HighContrastToggle } from "./HighContrastToggle";
 import { WelcomeBackdrop } from "./WelcomeBackdrop";
 import { MobileBottomNav } from "./MobileBottomNav";
+import { BackgroundMusicHeaderControl } from "@/components/PersistentBackgroundMusic";
 
 import ogStreamzLogo from "@/assets/ogstreamz-logo.jpg.asset.json";
 import ogBotLogo from "@/assets/ogbot.png.asset.json";
@@ -148,6 +149,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               </div>
 
               <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+                <BackgroundMusicHeaderControl />
                 {!roleLoading && isAdmin && (
                   <div className="hidden items-center gap-1.5 rounded-full border border-primary/40 bg-gradient-brand px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow-glow md:flex">
                     <ShieldCheck className="h-3 w-3" />
