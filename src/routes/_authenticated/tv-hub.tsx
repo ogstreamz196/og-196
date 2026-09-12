@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   CalendarDays,
   ChevronLeft,
@@ -9,6 +9,7 @@ import {
   Film,
   Heart,
   ListVideo,
+  Loader2,
   LockKeyhole,
   MonitorPlay,
   Pause,
@@ -18,10 +19,12 @@ import {
   Volume2,
   VolumeX,
 } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import tvHubCinematic from "@/assets/tv-hub-cinematic.jpg";
+import { loadTvHubPlaylist, TV_HUB_HOST, type TvChannel } from "@/lib/tv-hub.functions";
 
 export const Route = createFileRoute("/_authenticated/tv-hub")({
   head: () => ({
@@ -39,18 +42,19 @@ export const Route = createFileRoute("/_authenticated/tv-hub")({
 
 type Section = "tv" | "movies" | "series";
 
-type DemoItem = {
+type PlayItem = {
   id: string;
   title: string;
   subtitle: string;
   category: string;
   section: Section;
   source: string;
+  logo?: string | null;
   live?: boolean;
   epg?: Array<{ time: string; title: string; description: string }>;
 };
 
-const DEMO_ITEMS: DemoItem[] = [
+const DEMO_ITEMS: PlayItem[] = [
   {
     id: "og-live",
     title: "OG One",
@@ -62,7 +66,6 @@ const DEMO_ITEMS: DemoItem[] = [
     epg: [
       { time: "Now", title: "Prime Time", description: "Music, culture and entertainment from the OG studio." },
       { time: "18:30", title: "Street Sessions", description: "Live performances and behind-the-scenes stories." },
-      { time: "19:15", title: "Night Shift", description: "Late-night sounds and guest conversations." },
     ],
   },
   {
@@ -75,17 +78,7 @@ const DEMO_ITEMS: DemoItem[] = [
     source: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
     epg: [
       { time: "Now", title: "Evening Briefing", description: "Headlines, weather and the stories shaping the city." },
-      { time: "18:45", title: "The Interview", description: "A focused conversation with today's newsmaker." },
     ],
-  },
-  {
-    id: "sports-live",
-    title: "Arena Live",
-    subtitle: "Sport highlights",
-    category: "Sports",
-    section: "tv",
-    live: true,
-    source: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
   },
   {
     id: "midnight-run",
@@ -96,28 +89,12 @@ const DEMO_ITEMS: DemoItem[] = [
     source: "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
   },
   {
-    id: "blue-hour",
-    title: "The Blue Hour",
-    subtitle: "1h 28m · Drama",
-    category: "Drama",
-    section: "movies",
-    source: "https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-  },
-  {
     id: "after-dark",
     title: "After Dark",
     subtitle: "S1 E1 · The Signal",
     category: "Thriller",
     section: "series",
     source: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
-  },
-  {
-    id: "inside-studio",
-    title: "Inside the Studio",
-    subtitle: "S2 E4 · Bass Science",
-    category: "Documentary",
-    section: "series",
-    source: "https://storage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4",
   },
 ];
 
@@ -127,38 +104,113 @@ const SECTION_OPTIONS: Array<{ id: Section; label: string; icon: typeof Tv }> = 
   { id: "series", label: "Series", icon: ListVideo },
 ];
 
+const MAX_VISIBLE = 200;
+
+/** Live Xtream URLs end in .ts (not playable in a browser) — prefer the HLS variant. */
+function toPlayableSource(url: string) {
+  if (/\/live\/[^/]+\/[^/]+\/\d+\.ts$/i.test(url)) return url.replace(/\.ts$/i, ".m3u8");
+  return url;
+}
+
+function toPlayItem(channel: TvChannel): PlayItem {
+  return {
+    id: channel.id,
+    title: channel.title,
+    subtitle: channel.group,
+    category: channel.group,
+    section: channel.section,
+    source: toPlayableSource(channel.url),
+    logo: channel.logo,
+    live: channel.section === "tv",
+  };
+}
+
 function TvHubPage() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const playerRef = useRef<HTMLDivElement | null>(null);
-  const [demoOpen, setDemoOpen] = useState(false);
+  const fetchPlaylist = useServerFn(loadTvHubPlaylist);
+
+  const [items, setItems] = useState<PlayItem[] | null>(null);
+  const [isDemo, setIsDemo] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const [loginMessage, setLoginMessage] = useState("");
+
   const [section, setSection] = useState<Section>("tv");
   const [query, setQuery] = useState("");
-  const [selectedId, setSelectedId] = useState(DEMO_ITEMS[0].id);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(false);
   const [volume, setVolume] = useState(0.8);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [favourites, setFavourites] = useState<string[]>([]);
+  const [playbackError, setPlaybackError] = useState("");
+
+  const list = items ?? [];
+
+  const sectionItems = useMemo(() => list.filter((item) => item.section === section), [list, section]);
 
   const visibleItems = useMemo(() => {
     const normalized = query.trim().toLowerCase();
-    return DEMO_ITEMS.filter(
-      (item) =>
-        item.section === section &&
-        (!normalized || `${item.title} ${item.subtitle} ${item.category}`.toLowerCase().includes(normalized)),
-    );
-  }, [query, section]);
+    const matched = normalized
+      ? sectionItems.filter((item) => `${item.title} ${item.category}`.toLowerCase().includes(normalized))
+      : sectionItems;
+    return matched.slice(0, MAX_VISIBLE);
+  }, [query, sectionItems]);
 
-  const selected = DEMO_ITEMS.find((item) => item.id === selectedId) ?? DEMO_ITEMS[0];
+  const selected = list.find((item) => item.id === selectedId) ?? null;
 
-  const selectItem = (item: DemoItem) => {
+  // Attach hls.js for HLS sources that the browser cannot play natively.
+  useEffect(() => {
+    const video = videoRef.current;
+    const source = selected?.source;
+    if (!video || !source) return;
+    setPlaybackError("");
+
+    const isHls = /\.m3u8(\?|$)/i.test(source);
+    const nativeHls = video.canPlayType("application/vnd.apple.mpegurl") !== "";
+
+    if (!isHls || nativeHls) {
+      video.src = source;
+      void video.play().catch(() => setPlaying(false));
+      return;
+    }
+
+    let destroyed = false;
+    let hls: { destroy: () => void } | null = null;
+
+    void (async () => {
+      const { default: Hls } = await import("hls.js");
+      if (destroyed) return;
+      if (!Hls.isSupported()) {
+        video.src = source;
+        return;
+      }
+      const instance = new Hls({ enableWorker: true });
+      hls = instance;
+      instance.loadSource(source);
+      instance.attachMedia(video);
+      instance.on(Hls.Events.MANIFEST_PARSED, () => {
+        void video.play().catch(() => setPlaying(false));
+      });
+      instance.on(Hls.Events.ERROR, (_event, data) => {
+        if (data.fatal) {
+          setPlaybackError("This stream could not be played in the browser. Try another channel.");
+        }
+      });
+    })();
+
+    return () => {
+      destroyed = true;
+      hls?.destroy();
+    };
+  }, [selected?.source]);
+
+  const selectItem = (item: PlayItem) => {
     setSelectedId(item.id);
     setPlaying(true);
-    window.setTimeout(() => {
-      void videoRef.current?.play().catch(() => setPlaying(false));
-    }, 0);
   };
 
   const togglePlayback = () => {
@@ -173,12 +225,11 @@ function TvHubPage() {
   };
 
   const moveChannel = (direction: -1 | 1) => {
-    const currentIndex = DEMO_ITEMS.findIndex((item) => item.id === selected.id);
-    const nextIndex = (currentIndex + direction + DEMO_ITEMS.length) % DEMO_ITEMS.length;
-    const next = DEMO_ITEMS[nextIndex];
-    if (!next) return;
-    setSection(next.section);
-    selectItem(next);
+    if (sectionItems.length === 0) return;
+    const currentIndex = sectionItems.findIndex((item) => item.id === selectedId);
+    const nextIndex = (currentIndex + direction + sectionItems.length) % sectionItems.length;
+    const next = sectionItems[nextIndex];
+    if (next) selectItem(next);
   };
 
   const formatTime = (seconds: number) => {
@@ -187,7 +238,34 @@ function TvHubPage() {
     return `${mins}:${Math.floor(seconds % 60).toString().padStart(2, "0")}`;
   };
 
-  if (!demoOpen) {
+  const handleSignIn = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!username.trim() || !password) {
+      setLoginMessage("Enter your username and password.");
+      return;
+    }
+    setLoading(true);
+    setLoginMessage("");
+    try {
+      const playlist = await fetchPlaylist({ data: { username: username.trim(), password } });
+      const mapped = playlist.channels.map(toPlayItem);
+      setItems(mapped);
+      setIsDemo(false);
+      setPassword("");
+      const firstSection = (["tv", "movies", "series"] as Section[]).find((s) =>
+        mapped.some((item) => item.section === s),
+      );
+      if (firstSection) setSection(firstSection);
+      const first = mapped.find((item) => item.section === (firstSection ?? "tv"));
+      if (first) setSelectedId(first.id);
+    } catch (error) {
+      setLoginMessage(error instanceof Error ? error.message : "Sign-in failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!items) {
     return (
       <main className="relative isolate min-h-[calc(100dvh-7rem)] overflow-hidden rounded-2xl border border-border bg-surface shadow-card sm:rounded-3xl">
         <img
@@ -211,36 +289,61 @@ function TvHubPage() {
             </div>
 
             <p className="mb-6 text-sm leading-relaxed text-muted-foreground sm:text-base">
-              Sign in with your TV provider details. Real account checking will be connected later; credentials are not saved or sent anywhere yet.
+              Enter the username and password from your TV provider. Your details are used once to load your own
+              playlist and are never saved. OG BOT does not host, store or supply any of the content you watch.
             </p>
 
-            <form
-              className="space-y-4"
-              onSubmit={(event) => {
-                event.preventDefault();
-                setLoginMessage("Provider sign-in is coming soon. Use Temporary demo access to test TV HUB now.");
-              }}
-            >
-              <label className="block space-y-1.5 text-sm">
-                <span>Portal or server URL</span>
-                <Input type="url" inputMode="url" placeholder="https://provider.example" autoComplete="url" className="h-11 bg-background/70" />
-              </label>
+            <form className="space-y-4" onSubmit={handleSignIn}>
+              <div className="rounded-lg border border-border bg-background/50 p-3 text-xs text-muted-foreground">
+                <span className="font-bold text-foreground">Server</span>
+                <span className="ml-2 break-all">{TV_HUB_HOST.replace(/^https?:\/\//, "")}</span>
+              </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="block space-y-1.5 text-sm">
                   <span>Username</span>
-                  <Input autoComplete="username" placeholder="Username" className="h-11 bg-background/70" />
+                  <Input
+                    value={username}
+                    onChange={(event) => setUsername(event.target.value)}
+                    autoComplete="username"
+                    placeholder="Username"
+                    className="h-11 bg-background/70"
+                  />
                 </label>
                 <label className="block space-y-1.5 text-sm">
                   <span>Password</span>
-                  <Input type="password" autoComplete="current-password" placeholder="Password" className="h-11 bg-background/70" />
+                  <Input
+                    type="password"
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    autoComplete="current-password"
+                    placeholder="Password"
+                    className="h-11 bg-background/70"
+                  />
                 </label>
               </div>
-              {loginMessage && <p role="status" className="rounded-lg border border-primary/30 bg-primary/10 p-3 text-sm text-foreground">{loginMessage}</p>}
+              {loginMessage && (
+                <p role="status" className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-foreground">
+                  {loginMessage}
+                </p>
+              )}
               <div className="grid gap-3 sm:grid-cols-2">
-                <Button type="submit" size="lg" className="h-12">
-                  <LockKeyhole className="h-4 w-4" /> Sign in
+                <Button type="submit" size="lg" className="h-12" disabled={loading}>
+                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <LockKeyhole className="h-4 w-4" />}
+                  {loading ? "Loading playlist" : "Sign in"}
                 </Button>
-                <Button type="button" size="lg" variant="outline" className="h-12" onClick={() => setDemoOpen(true)}>
+                <Button
+                  type="button"
+                  size="lg"
+                  variant="outline"
+                  className="h-12"
+                  disabled={loading}
+                  onClick={() => {
+                    setItems(DEMO_ITEMS);
+                    setIsDemo(true);
+                    setSection("tv");
+                    setSelectedId(DEMO_ITEMS[0].id);
+                  }}
+                >
                   <Play className="h-4 w-4" /> Temporary demo access
                 </Button>
               </div>
@@ -254,16 +357,31 @@ function TvHubPage() {
   return (
     <main className="min-h-[calc(100dvh-7rem)] overflow-hidden rounded-2xl border border-border bg-surface shadow-card sm:rounded-3xl">
       <header className="flex flex-col gap-4 border-b border-border bg-card/90 p-4 backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:p-5">
-        <div className="flex items-center gap-3">
-          <span className="grid h-10 w-10 place-items-center rounded-lg bg-primary text-primary-foreground"><MonitorPlay className="h-5 w-5" /></span>
-          <div>
-            <p className="text-[10px] font-bold uppercase text-primary">Demo mode</p>
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground"><MonitorPlay className="h-5 w-5" /></span>
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold uppercase text-primary">{isDemo ? "Demo mode" : `${list.length} channels`}</p>
             <h1 className="font-display text-2xl font-black uppercase leading-none">TV HUB</h1>
           </div>
         </div>
-        <div className="relative w-full sm:max-w-xs">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search TV HUB" className="h-10 bg-background/70 pl-9" aria-label="Search TV HUB" />
+        <div className="flex w-full items-center gap-2 sm:w-auto">
+          <div className="relative w-full sm:w-64">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search TV HUB" className="h-10 bg-background/70 pl-9" aria-label="Search TV HUB" />
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            className="h-10 shrink-0"
+            onClick={() => {
+              setItems(null);
+              setSelectedId(null);
+              setQuery("");
+              setIsDemo(false);
+            }}
+          >
+            Sign out
+          </Button>
         </div>
       </header>
 
@@ -272,27 +390,30 @@ function TvHubPage() {
           <div ref={playerRef} className="group relative aspect-video overflow-hidden bg-background">
             <video
               ref={videoRef}
-              key={selected.source}
-              src={selected.source}
               poster={tvHubCinematic}
               playsInline
               preload="metadata"
               className="h-full w-full object-contain"
               onPlay={() => setPlaying(true)}
               onPause={() => setPlaying(false)}
-              onEnded={() => moveChannel(1)}
+              onError={() => setPlaybackError("This stream could not be played in the browser. Try another channel.")}
               onLoadedMetadata={(event) => setDuration(event.currentTarget.duration || 0)}
               onTimeUpdate={(event) => setProgress(event.currentTarget.currentTime)}
             />
+            {playbackError && (
+              <p className="absolute left-1/2 top-4 w-[90%] -translate-x-1/2 rounded-lg border border-destructive/40 bg-background/90 p-3 text-center text-xs text-foreground">
+                {playbackError}
+              </p>
+            )}
             <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/95 to-transparent p-3 pt-12 sm:p-5 sm:pt-20">
               <div className="mb-3 flex items-end justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 text-[10px] font-bold uppercase text-primary sm:text-xs">
-                    {selected.live && <span className="rounded bg-destructive px-2 py-0.5 text-destructive-foreground">Live</span>}
-                    <span>{selected.category}</span>
+                    {selected?.live && <span className="rounded bg-destructive px-2 py-0.5 text-destructive-foreground">Live</span>}
+                    <span className="truncate">{selected?.category ?? ""}</span>
                   </div>
-                  <h2 className="truncate font-display text-xl font-black sm:text-3xl">{selected.title}</h2>
-                  <p className="truncate text-xs text-muted-foreground sm:text-sm">{selected.subtitle}</p>
+                  <h2 className="truncate font-display text-xl font-black sm:text-3xl">{selected?.title ?? "Choose a channel"}</h2>
+                  <p className="truncate text-xs text-muted-foreground sm:text-sm">{selected?.subtitle ?? ""}</p>
                 </div>
               </div>
               <input
@@ -379,7 +500,7 @@ function TvHubPage() {
 
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3" aria-label={`${section} selection`}>
               {visibleItems.map((item) => {
-                const active = item.id === selected.id;
+                const active = item.id === selectedId;
                 const favourite = favourites.includes(item.id);
                 return (
                   <article key={item.id} className={cn("min-w-0 rounded-lg border bg-card p-3 transition", active ? "border-primary shadow-glow" : "border-border hover:border-primary/50")}>
@@ -408,7 +529,12 @@ function TvHubPage() {
                 );
               })}
             </div>
-            {visibleItems.length === 0 && <p className="py-10 text-center text-sm text-muted-foreground">No programmes match your search.</p>}
+            {visibleItems.length === 0 && <p className="py-10 text-center text-sm text-muted-foreground">Nothing here matches your search.</p>}
+            {sectionItems.length > visibleItems.length && (
+              <p className="pt-4 text-center text-xs text-muted-foreground">
+                Showing {visibleItems.length} of {sectionItems.length} — search to narrow it down.
+              </p>
+            )}
           </div>
         </section>
 
@@ -420,7 +546,7 @@ function TvHubPage() {
             </div>
             <CalendarDays className="h-5 w-5 text-muted-foreground" />
           </div>
-          {selected.epg?.length ? (
+          {selected?.epg?.length ? (
             <ol className="space-y-2">
               {selected.epg.map((programme, index) => (
                 <li key={`${programme.time}-${programme.title}`} className={cn("rounded-lg border p-3", index === 0 ? "border-primary bg-primary/10" : "border-border bg-background/30")}>
@@ -431,7 +557,6 @@ function TvHubPage() {
                       <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{programme.description}</p>
                     </div>
                   </div>
-                  {index === 0 && <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full w-[62%] rounded-full bg-primary" /></div>}
                 </li>
               ))}
             </ol>
@@ -439,11 +564,12 @@ function TvHubPage() {
             <div className="rounded-lg border border-dashed border-border bg-background/30 p-6 text-center">
               <Clock3 className="mx-auto mb-3 h-6 w-6 text-muted-foreground" />
               <p className="text-sm font-bold">Guide unavailable</p>
-              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">This channel has not supplied programme data.</p>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Your provider has not supplied programme data for this channel.</p>
             </div>
           )}
           <div className="mt-5 rounded-lg border border-border bg-background/40 p-3 text-xs leading-relaxed text-muted-foreground">
-            Demo streams and schedules are for testing. Your provider channels, categories and EPG will appear here after backend connection.
+            Channels, categories and streams come directly from your own provider account. OG BOT does not host, store
+            or control any of this content and takes no responsibility for it.
           </div>
         </aside>
       </div>
