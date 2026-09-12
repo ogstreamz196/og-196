@@ -102,9 +102,10 @@ Deno.serve(async (req) => {
         .from("app_settings").select("value").eq("key", "coins_per_generation").maybeSingle();
       if (typeof setting?.value === "number") refundAmt = setting.value;
     }
+    const rawReason = payload?.msg || payload?.message || "Suno reported failure";
     await admin.from("songs").update({
       status: "failed",
-      error_message: payload?.msg || payload?.message || "Suno reported failure",
+      error_message: isModerationRejection(rawReason) ? MODERATION_MESSAGE : rawReason,
     }).eq("id", songId);
     await admin.from("coin_transactions").insert({
       user_id: parentSong.user_id, amount: refundAmt, type: "refund", reference: songId,
