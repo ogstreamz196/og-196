@@ -29,6 +29,7 @@ import {
   loadTvHubPlaylist,
   prepareTvStream,
   TV_HUB_HOST,
+  type TvAccount,
   type TvChannel,
 } from "@/lib/tv-hub.functions";
 
