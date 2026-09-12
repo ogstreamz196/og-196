@@ -966,6 +966,59 @@ export type Database = {
           },
         ]
       }
+      sports_guide_access: {
+        Row: {
+          coin_cost: number
+          created_at: string
+          id: string
+          invite_expires_at: string | null
+          invite_sent_at: string | null
+          joined_at: string | null
+          revoked_at: string | null
+          status: string
+          store_item_id: string
+          telegram_invite_link: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          coin_cost: number
+          created_at?: string
+          id?: string
+          invite_expires_at?: string | null
+          invite_sent_at?: string | null
+          joined_at?: string | null
+          revoked_at?: string | null
+          status?: string
+          store_item_id: string
+          telegram_invite_link?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          coin_cost?: number
+          created_at?: string
+          id?: string
+          invite_expires_at?: string | null
+          invite_sent_at?: string | null
+          joined_at?: string | null
+          revoked_at?: string | null
+          status?: string
+          store_item_id?: string
+          telegram_invite_link?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sports_guide_access_store_item_id_fkey"
+            columns: ["store_item_id"]
+            isOneToOne: false
+            referencedRelation: "store_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       store_categories: {
         Row: {
           active: boolean
@@ -1003,6 +1056,7 @@ export type Database = {
         Row: {
           active: boolean
           category_id: string
+          coin_price: number | null
           coin_reward: number | null
           created_at: string
           currency: string
@@ -1025,6 +1079,7 @@ export type Database = {
         Insert: {
           active?: boolean
           category_id: string
+          coin_price?: number | null
           coin_reward?: number | null
           created_at?: string
           currency?: string
@@ -1047,6 +1102,7 @@ export type Database = {
         Update: {
           active?: boolean
           category_id?: string
+          coin_price?: number | null
           coin_reward?: number | null
           created_at?: string
           currency?: string
@@ -1678,6 +1734,7 @@ export type Database = {
           token_string: string
         }[]
       }
+      purchase_sports_guide_access: { Args: never; Returns: Json }
       purchase_vip: { Args: never; Returns: number }
       redeem_og_bot_invite: { Args: { p_code: string }; Returns: string }
       refund_generation_charge: {
