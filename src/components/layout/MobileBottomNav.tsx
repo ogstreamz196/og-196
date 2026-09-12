@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Library, MessageCircle, Coins, Sparkles } from "lucide-react";
+import { Home, Library, MessageCircle, ShoppingBag, Sparkles } from "lucide-react";
 import type { ComponentType } from "react";
 
 type Tab = {
@@ -13,7 +13,7 @@ const TABS: Tab[] = [
   { to: "/", label: "Home", icon: Home, match: (p) => p === "/" },
   { to: "/library", label: "Music", icon: Library, match: (p) => p.startsWith("/library") },
   { to: "/messenger", label: "OG Bot", icon: MessageCircle, match: (p) => p.startsWith("/messenger") },
-  { to: "/buy-coins", label: "Coins", icon: Coins, match: (p) => p.startsWith("/buy-coins") },
+  { to: "/store", label: "Store", icon: ShoppingBag, match: (p) => p.startsWith("/store") || p.startsWith("/buy-coins") },
   { to: "/referrals", label: "Earn", icon: Sparkles, match: (p) => p.startsWith("/referrals") },
 ];
 
