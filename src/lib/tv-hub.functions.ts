@@ -188,11 +188,14 @@ export const loadTvHubPlaylist = createServerFn({ method: "POST" })
       throw new Error("This account has no channels available right now.");
     }
 
+    const account = await fetchAccountInfo(data.username, data.password);
+
     return {
       fetchedAt: new Date().toISOString(),
       total: parsed.total,
       channels: parsed.channels,
       truncated: parsed.truncated,
+      account,
     };
   });
 
