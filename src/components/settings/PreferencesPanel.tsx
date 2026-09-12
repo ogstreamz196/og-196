@@ -156,7 +156,7 @@ export function PreferencesPanel() {
             <Link
               to="/buy-coins"
               search={{ flow: "vip" } as never}
-              className="inline-flex items-center gap-2 rounded-md border border-primary/40 bg-primary/10 px-3 py-2 text-xs font-semibold text-primary hover:bg-primary/15"
+              className="inline-flex min-h-11 w-full min-w-0 items-center justify-center gap-2 whitespace-normal rounded-md border border-primary/40 bg-primary/10 px-3 py-2 text-center text-xs font-semibold leading-tight text-primary hover:bg-primary/15 min-[430px]:w-auto"
             >
               <Sparkles className="h-3.5 w-3.5" />
               Upgrade to OG VIP — £5/month

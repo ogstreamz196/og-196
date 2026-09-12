@@ -345,14 +345,14 @@ function SettingsPage() {
 
 
         {/* Security */}
-        <section className="rounded-2xl border border-border bg-card p-6 shadow-card flex items-center justify-between gap-4">
-          <div>
+        <section className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-4 shadow-card min-[430px]:flex-row min-[430px]:items-center min-[430px]:justify-between sm:p-6">
+          <div className="min-w-0">
             <h2 className="font-semibold">Password</h2>
             <p className="text-xs text-muted-foreground">
               Change your password — current password required.
             </p>
           </div>
-          <Button asChild variant="outline">
+          <Button asChild variant="outline" className="w-full min-[430px]:w-auto">
             <Link to="/change-password">
               <KeyRound className="mr-2 h-4 w-4" /> Change password
             </Link>
@@ -361,12 +361,12 @@ function SettingsPage() {
 
         {/* Session */}
 
-        <section className="rounded-2xl border border-border bg-card p-6 shadow-card flex items-center justify-between">
-          <div>
+        <section className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-4 shadow-card min-[430px]:flex-row min-[430px]:items-center min-[430px]:justify-between sm:p-6">
+          <div className="min-w-0">
             <h2 className="font-semibold">Session</h2>
             <p className="text-xs text-muted-foreground">Sign out of this device.</p>
           </div>
-          <Button variant="outline" onClick={signOut}>
+          <Button variant="outline" onClick={signOut} className="w-full min-[430px]:w-auto">
             <LogOut className="mr-2 h-4 w-4" /> Sign out
           </Button>
         </section>

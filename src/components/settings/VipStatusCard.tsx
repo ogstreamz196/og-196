@@ -86,14 +86,14 @@ export function VipStatusCard() {
           </div>
         )}
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex min-w-0 flex-wrap gap-2">
           {isVip ? (
             <Button onClick={handleManage} disabled={busy} variant="outline">
               {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ExternalLink className="mr-2 h-4 w-4" />}
               Manage my subscription
             </Button>
           ) : (
-            <Button asChild className="bg-gradient-brand text-primary-foreground shadow-glow">
+            <Button asChild className="h-auto min-h-11 w-full whitespace-normal bg-gradient-brand py-2 text-center leading-tight text-primary-foreground shadow-glow min-[430px]:w-auto">
               <Link to="/buy-coins" search={{ flow: "vip" } as never}>
                 <Crown className="mr-2 h-4 w-4" /> Upgrade to OG VIP — £5/month
               </Link>
