@@ -372,6 +372,7 @@ export type StripePurchaseDetails = {
   refundedAmount: number;
   refunded: boolean;
   partiallyRefunded: boolean;
+  description?: string | null;
 };
 
 export type PurchaseRow = {
@@ -394,7 +395,7 @@ function toMajorUnit(amount: number, currency: string) {
 
 function parseStripeRef(ref: string | null): { env: StripeEnv; sessionId: string } | null {
   if (!ref) return null;
-  const m = /^stripe:(sandbox|live):(cs_(?:test|live)_[A-Za-z0-9]+)$/.exec(ref);
+  const m = /^stripe:(sandbox|live):(?:store:)?(cs_(?:test|live)_[A-Za-z0-9]+)$/.exec(ref);
   return m ? { env: m[1] as StripeEnv, sessionId: m[2] } : null;
 }
 
@@ -422,6 +423,7 @@ async function fetchStripeDetails(
       refundedAmount,
       refunded,
       partiallyRefunded: refundedRaw > 0 && !refunded,
+      description: charge.description ?? null,
     };
   } catch (e) {
     console.error("fetchStripeDetails failed", e);
@@ -443,12 +445,13 @@ export const getCoinPurchaseHistory = createServerFn({ method: "GET" })
     const rows = (data ?? []) as PurchaseRow[];
 
     const stripeRows = rows
-      .filter((r) => r.type === "stripe_purchase" && r.amount > 0 && parseStripeRef(r.reference))
+      .filter((r) => ["stripe_purchase", "store_purchase"].includes(r.type) && parseStripeRef(r.reference))
       .slice(0, 30);
 
     const enriched = await Promise.all(
       stripeRows.map(async (r) => {
         const ref = parseStripeRef(r.reference)!;
+        if (!ref) return [r.id, null] as const;
         const details = await fetchStripeDetails(ref.sessionId, ref.env, userId);
         return [r.id, details] as const;
       }),

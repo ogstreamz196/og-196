@@ -13,6 +13,7 @@ import {
   type StripePurchaseDetails,
 } from "@/lib/payments.functions";
 import { getStripeEnvironment } from "@/lib/stripe";
+import { Button } from "@/components/ui/button";
 
 
 
@@ -433,77 +434,84 @@ export function PurchaseHistory() {
     queryKey: ["coin-transactions", "me"],
     queryFn: () => fetcher(),
     staleTime: 30_000,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
   });
 
   const [range, setRange] = useState<RangeKey>("30d");
 
   return (
     <>
-    <section className="mx-auto mt-10 w-full max-w-3xl rounded-2xl border border-border bg-card p-6 shadow-card">
+    <section className="w-full overflow-hidden rounded-xl border border-border bg-card/95 shadow-card">
 
-      <header className="flex items-center justify-between gap-3">
+      <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-border px-4 py-3 sm:px-5">
         <div className="flex items-center gap-2">
           <Receipt className="h-5 w-5 text-primary" />
-          <h3 className="text-lg font-bold">Purchase history</h3>
+          <div><p className="text-xs font-semibold uppercase text-muted-foreground">Account activity</p><h3 className="font-display text-lg font-black">Purchase history</h3></div>
         </div>
-        <button
+        <Button
           type="button"
           onClick={() => refetch()}
-          className="text-xs text-muted-foreground underline hover:text-foreground"
+          variant="ghost"
+          size="sm"
+          aria-label="Refresh purchase history"
         >
-          {isFetching ? "Refreshing…" : "Refresh"}
-        </button>
+          <RefreshCw className={isFetching ? "animate-spin" : ""} />
+          <span className="hidden sm:inline">{isFetching ? "Refreshing…" : "Refresh"}</span>
+        </Button>
       </header>
 
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="flex max-w-full gap-1 overflow-x-auto px-4 py-3 sm:px-5">
         {RANGE_OPTIONS.map((opt) => {
           const active = range === opt.key;
           return (
-            <button
+            <Button
               key={opt.key}
               type="button"
               onClick={() => setRange(opt.key)}
+              variant="outline"
+              size="sm"
               className={
-                "rounded-full border px-3 py-1 text-xs font-semibold transition " +
+                "h-9 shrink-0 rounded-md px-3 text-xs " +
                 (active
                   ? "border-primary bg-primary/15 text-primary"
-                  : "border-border bg-background text-muted-foreground hover:text-foreground")
+                  : "text-muted-foreground")
               }
             >
               {opt.label}
-            </button>
+            </Button>
           );
         })}
       </div>
 
       {isLoading ? (
-        <div className="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 px-4 py-6 text-sm text-muted-foreground sm:px-5">
           <Loader2 className="h-4 w-4 animate-spin" /> Loading…
         </div>
       ) : error ? (
-        <p className="mt-6 text-sm text-destructive">Couldn't load your history.</p>
+        <p className="px-4 py-6 text-sm text-destructive sm:px-5">Couldn't load your history.</p>
       ) : (() => {
         const days = RANGE_OPTIONS.find((o) => o.key === range)?.days ?? null;
         const cutoff = days != null ? Date.now() - days * 24 * 60 * 60 * 1000 : null;
         const rows = (data ?? [])
-          .filter((row) => row.type === "stripe_purchase" && row.amount > 0)
+          .filter((row) => ["stripe_purchase", "store_purchase", "sports_guide_access"].includes(row.type))
           .filter((row) => cutoff == null || new Date(row.created_at).getTime() >= cutoff)
           .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
         if (rows.length === 0) {
           return (
-            <p className="mt-6 text-sm text-muted-foreground">
-              No coin purchases in this range. Try a wider window.
+            <p className="px-4 py-6 text-sm text-muted-foreground sm:px-5">
+              No purchases in this range. Try a wider window.
             </p>
           );
         }
         return (
-          <ul className="mt-4 divide-y divide-border">
+          <ul className="divide-y divide-border">
             {rows.map((row) => {
               return (
-                <li key={row.id} className="flex flex-col gap-2 py-3 text-sm sm:flex-row sm:items-start sm:justify-between sm:gap-3">
+                <li key={row.id} className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 px-4 py-3 text-sm sm:px-5">
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-medium">Coin purchase</p>
+                      <p className="truncate font-semibold">{row.stripe?.description || (row.type === "sports_guide_access" ? "OG Sports Guide Access" : row.type === "store_purchase" ? "Store purchase" : "OG Coin purchase")}</p>
                     </div>
 
                     <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
@@ -512,15 +520,15 @@ export function PurchaseHistory() {
                     </div>
                   </div>
 
-                  <div className="flex shrink-0 flex-col items-start gap-1 sm:items-end">
-                    <div className="flex items-center gap-1.5 font-bold tabular-nums text-emerald-500">
-                      +{row.amount}
+                  <div className="flex shrink-0 flex-col items-end gap-1 text-right">
+                    <div className={`flex items-center gap-1 font-mono font-bold tabular-nums ${row.amount > 0 ? "text-primary" : "text-foreground"}`}>
+                      {row.amount > 0 ? "+" : ""}{row.amount}
                       <Coins className="h-4 w-4 text-coin" />
                       <span className="text-[11px] font-medium text-muted-foreground">coins</span>
                     </div>
                     {row.stripe ? (
                       <div className="text-xs tabular-nums text-muted-foreground">
-                        Paid <span className="font-semibold text-foreground">{formatMoney(row.stripe.amountPaid, row.stripe.currency)}</span>
+                        <span className="font-semibold text-foreground">{formatMoney(row.stripe.amountPaid, row.stripe.currency)}</span>
                         {row.stripe.amountPaid > 0 && row.amount > 0 && (
                           <span className="ml-1 text-[10px] opacity-70">
                             ({formatMoney(row.stripe.amountPaid / row.amount, row.stripe.currency)}/coin)

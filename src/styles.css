@@ -17,6 +17,9 @@
   --font-graffiti: "Luckiest Guy", "Lilita One", "Bangers", "Arial Black", "Impact", system-ui, sans-serif;
   --font-sketch: "Cabin Sketch", "Comic Sans MS", "Marker Felt", "Lilita One", cursive, system-ui, sans-serif;
   --font-cartoon: "Bowlby One", "Lilita One", "Arial Black", "Impact", system-ui, sans-serif;
+  --font-store-heading: "Archivo Black", "Arial Black", system-ui, sans-serif;
+  --font-store-body: "Hind", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -54,6 +57,16 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --color-coin: var(--coin);
   --color-coin-foreground: var(--coin-foreground);
+}
+
+.store-clean {
+  font-family: var(--font-store-body);
+  letter-spacing: 0;
+}
+
+.store-clean .font-display {
+  font-family: var(--font-store-heading);
+  letter-spacing: 0;
 }
 
 :root {

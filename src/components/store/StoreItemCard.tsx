@@ -65,14 +65,14 @@ export function StoreItemCard({
   return (
     <div
       className={cn(
-        "group relative flex h-full flex-col overflow-hidden rounded-3xl border-2 bg-card/60 p-4 backdrop-blur transition hover:-translate-y-1",
+        "group relative flex h-full min-w-0 flex-col overflow-hidden rounded-lg border bg-card/95 p-3 transition-colors sm:p-4",
         r.ring,
         r.glow,
       )}
     >
       {/* rarity badge */}
       <div className="mb-3 flex items-center justify-between">
-        <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-black/40 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest">
+        <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase text-muted-foreground">
           {r.icon}
           {r.label}
         </span>
@@ -84,7 +84,7 @@ export function StoreItemCard({
       </div>
 
       {/* image */}
-      <div className="mb-3 aspect-square w-full overflow-hidden rounded-2xl border border-white/5 bg-gradient-to-br from-primary/10 to-black/40">
+      <div className="mb-3 aspect-[4/3] w-full overflow-hidden rounded-md border border-border bg-background/50">
         {item.image_url ? (
           <img
             src={item.image_url}
@@ -100,7 +100,7 @@ export function StoreItemCard({
       </div>
 
       {/* name + desc */}
-      <h3 className="line-clamp-2 font-display text-lg font-bold uppercase tracking-tight text-white">
+      <h3 className="line-clamp-2 font-display text-base font-black uppercase">
         {item.name}
       </h3>
       {item.description && (
@@ -134,8 +134,8 @@ export function StoreItemCard({
       </div>
 
       {/* footer */}
-      <div className="mt-auto flex items-end justify-between pt-4">
-        <div className="flame-heading text-2xl font-display font-black leading-none">
+      <div className="mt-auto grid grid-cols-[minmax(0,1fr)_auto] items-end gap-2 pt-4">
+        <div className="min-w-0 font-mono text-lg font-bold leading-tight text-foreground sm:text-xl">
           {item.coin_price !== null ? `${item.coin_price} OG Coins` : formatPrice(item.price_cents, item.currency)}
         </div>
         <Button
