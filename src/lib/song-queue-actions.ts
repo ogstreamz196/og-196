@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { languageFromPrompt } from "@/lib/library-utils";
+import { invokeError } from "@/lib/invoke-error";
 
 /**
  * Shared actions for the generation queue / history surfaces:
