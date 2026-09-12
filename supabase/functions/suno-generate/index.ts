@@ -7,6 +7,11 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { injectSignature, withSignatureHint } from "../_shared/track-signature.ts";
+import {
+  isModerationRejection,
+  MODERATION_MESSAGE,
+  softenForModeration,
+} from "../_shared/moderation-safe.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -341,14 +346,15 @@ Deno.serve(async (req) => {
             : withSignatureHint(effectivePrompt),
           MAX_PROMPT_CHARS,
         ) ?? effectivePrompt;
-    let sunoRes: Response;
-    try {
-      sunoRes = await fetch(beatUrl ? SUNO_UPLOAD_COVER_URL : SUNO_API_URL, {
+    // Submit to Suno. If the engine's moderation blocks the explicit lyrics we
+    // soften the strongest words once and resubmit, instead of burning the job.
+    const submit = async (lyricsText: string | null, promptText: string | null, styleText: string | null) =>
+      await fetch(beatUrl ? SUNO_UPLOAD_COVER_URL : SUNO_API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${SUNO_API_KEY}` },
         body: JSON.stringify({
-          prompt: signedLyrics || signedPrompt,
-          style: style || undefined,
+          prompt: lyricsText || promptText,
+          style: styleText || undefined,
           title: customMode ? sunoTitle : undefined,
           customMode,
           instrumental: vocalsOnly ? false : instrumental,
@@ -361,32 +367,50 @@ Deno.serve(async (req) => {
           callBackUrl: callbackUrl,
         }),
       });
-    } catch (e) {
-      await refund(admin, user.id, songId, "Suno API unreachable", coinCost);
-      return json({ error: "Suno API unreachable" }, 502);
+
+    let attemptLyrics = signedLyrics;
+    let attemptPrompt = signedPrompt;
+    let attemptStyle = style;
+    let softened = false;
+    let taskId: string | null = null;
+
+    for (let attempt = 0; attempt < 2; attempt++) {
+      let sunoRes: Response;
+      try {
+        sunoRes = await submit(attemptLyrics, attemptPrompt, attemptStyle);
+      } catch (_e) {
+        await refund(admin, user.id, songId, "Suno API unreachable", coinCost);
+        return json({ accepted: false, error: "The music engine is unreachable right now. Try again in a moment." });
+      }
+
+      const sunoText = await sunoRes.text();
+      let sunoBody: any = {};
+      try { sunoBody = JSON.parse(sunoText); } catch { /* keep empty */ }
+
+      const codeNum = typeof sunoBody?.code === "number" ? sunoBody.code : (sunoRes.ok ? 200 : sunoRes.status);
+      const reason = sunoBody?.msg || sunoBody?.message || `Suno API ${codeNum}`;
+      taskId = sunoBody?.data?.taskId ?? sunoBody?.taskId ?? sunoBody?.task_id ?? null;
+
+      if (sunoRes.ok && codeNum === 200 && taskId) break;
+
+      console.error("Suno rejected task", codeNum, reason);
+
+      if (!softened && isModerationRejection(reason)) {
+        softened = true;
+        attemptLyrics = softenForModeration(attemptLyrics);
+        attemptPrompt = softenForModeration(attemptPrompt);
+        attemptStyle = softenForModeration(attemptStyle);
+        continue;
+      }
+
+      const friendly = isModerationRejection(reason) ? MODERATION_MESSAGE : reason;
+      await refund(admin, user.id, songId, friendly, coinCost);
+      return json({ accepted: false, error: friendly, code: codeNum });
     }
 
-    const sunoText = await sunoRes.text();
-    if (!sunoRes.ok) {
-      console.error("Suno API error", sunoRes.status, sunoText);
-      await refund(admin, user.id, songId, `Suno API ${sunoRes.status}: ${sunoText.slice(0, 200)}`, coinCost);
-      return json({ error: "Suno API rejected the request", details: sunoText.slice(0, 300) }, 502);
-    }
-
-    let sunoBody: any = {};
-    try { sunoBody = JSON.parse(sunoText); } catch { /* keep empty */ }
-    if (typeof sunoBody?.code === "number" && sunoBody.code !== 200) {
-      const reason = sunoBody?.msg || sunoBody?.message || `Suno API code ${sunoBody.code}`;
-      console.error("Suno API rejected task", sunoBody.code, reason);
-      await refund(admin, user.id, songId, reason, coinCost);
-      return json({ error: reason, code: sunoBody.code }, sunoBody.code === 429 ? 402 : 502);
-    }
-    const taskId = sunoBody?.data?.taskId ?? sunoBody?.taskId ?? sunoBody?.task_id ?? null;
     if (!taskId) {
-      const reason = sunoBody?.msg || sunoBody?.message || "Suno did not return a task ID";
-      console.error("Suno missing task id", JSON.stringify(sunoBody).slice(0, 500));
-      await refund(admin, user.id, songId, reason, coinCost);
-      return json({ error: reason, code: "missing_task_id" }, 502);
+      await refund(admin, user.id, songId, "Suno did not return a task ID", coinCost);
+      return json({ accepted: false, error: "The music engine didn't accept the job. Your coins were refunded." });
     }
 
     await admin.from("songs").update({ status: "processing", suno_task_id: taskId }).eq("id", songId);
