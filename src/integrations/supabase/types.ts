@@ -1577,6 +1577,35 @@ export type Database = {
         }
         Relationships: []
       }
+      vip_pass_purchases: {
+        Row: {
+          created_at: string
+          credential_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credential_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credential_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vip_pass_purchases_credential_id_fkey"
+            columns: ["credential_id"]
+            isOneToOne: false
+            referencedRelation: "vip_pass_credentials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
