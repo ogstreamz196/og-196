@@ -36,7 +36,6 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
 import musicHubHero from "@/assets/musichub-hero.jpg";
-import tvHubCinematic from "@/assets/tv-hub-cinematic.jpg";
 
 import { useAuth } from "@/hooks/use-auth";
 import { useDevMode } from "@/hooks/use-dev-mode";
@@ -270,17 +269,6 @@ function DashboardHome() {
             variant="accent"
           />
         </div>
-        <PrimaryCard
-          to="/tv-hub"
-          image={tvHubCinematic}
-          imageAlt="Cinematic television screen with blue and red broadcast light"
-          eyebrow="TV HUB"
-          title="Watch TV"
-          body="Live TV · Movies · Series · EPG"
-          cta="Open TV HUB"
-          variant="cinema"
-          wide
-        />
       </section>
 
       {/* Refer to earn — compact CTA to the referrals/earnings page */}
@@ -533,7 +521,7 @@ function PrimaryCard({
   variant = "primary",
   wide = false,
 }: {
-  to: "/library" | "/messenger" | "/tv-hub";
+  to: "/library" | "/messenger";
   image: string;
   imageAlt: string;
   eyebrow: string;
