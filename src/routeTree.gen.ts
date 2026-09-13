@@ -21,7 +21,6 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as RCodeRouteImport } from './routes/r.$code'
 import { Route as PortalSlugRouteImport } from './routes/portal.$slug'
-import { Route as AuthenticatedTvHubRouteImport } from './routes/_authenticated/tv-hub'
 import { Route as AuthenticatedStoreRouteImport } from './routes/_authenticated/store'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedReferralsRouteImport } from './routes/_authenticated/referrals'
@@ -56,7 +55,6 @@ import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
-import { Route as ApiPublicTvStreamRouteImport } from './routes/api/public/tv/stream'
 import { Route as ApiPublicTelegramWebhookRouteImport } from './routes/api/public/telegram/webhook'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as AuthenticatedAdminUsersUserIdRouteImport } from './routes/_authenticated/admin.users.$userId'
@@ -113,11 +111,6 @@ const PortalSlugRoute = PortalSlugRouteImport.update({
   id: '/portal/$slug',
   path: '/portal/$slug',
   getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedTvHubRoute = AuthenticatedTvHubRouteImport.update({
-  id: '/tv-hub',
-  path: '/tv-hub',
-  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedStoreRoute = AuthenticatedStoreRouteImport.update({
   id: '/store',
@@ -317,11 +310,6 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   path: '/lovable/email/auth/preview',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicTvStreamRoute = ApiPublicTvStreamRouteImport.update({
-  id: '/api/public/tv/stream',
-  path: '/api/public/tv/stream',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiPublicTelegramWebhookRoute =
   ApiPublicTelegramWebhookRouteImport.update({
     id: '/api/public/telegram/webhook',
@@ -360,7 +348,6 @@ export interface FileRoutesByFullPath {
   '/referrals': typeof AuthenticatedReferralsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/store': typeof AuthenticatedStoreRoute
-  '/tv-hub': typeof AuthenticatedTvHubRoute
   '/portal/$slug': typeof PortalSlugRoute
   '/r/$code': typeof RCodeRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -388,7 +375,6 @@ export interface FileRoutesByFullPath {
   '/admin/users/$userId': typeof AuthenticatedAdminUsersUserIdRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
-  '/api/public/tv/stream': typeof ApiPublicTvStreamRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
@@ -410,7 +396,6 @@ export interface FileRoutesByTo {
   '/referrals': typeof AuthenticatedReferralsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/store': typeof AuthenticatedStoreRoute
-  '/tv-hub': typeof AuthenticatedTvHubRoute
   '/portal/$slug': typeof PortalSlugRoute
   '/r/$code': typeof RCodeRoute
   '/': typeof AuthenticatedIndexRoute
@@ -439,7 +424,6 @@ export interface FileRoutesByTo {
   '/admin/users/$userId': typeof AuthenticatedAdminUsersUserIdRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
-  '/api/public/tv/stream': typeof ApiPublicTvStreamRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
@@ -463,7 +447,6 @@ export interface FileRoutesById {
   '/_authenticated/referrals': typeof AuthenticatedReferralsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/store': typeof AuthenticatedStoreRoute
-  '/_authenticated/tv-hub': typeof AuthenticatedTvHubRoute
   '/portal/$slug': typeof PortalSlugRoute
   '/r/$code': typeof RCodeRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
@@ -492,7 +475,6 @@ export interface FileRoutesById {
   '/_authenticated/admin/users/$userId': typeof AuthenticatedAdminUsersUserIdRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
-  '/api/public/tv/stream': typeof ApiPublicTvStreamRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
@@ -517,7 +499,6 @@ export interface FileRouteTypes {
     | '/referrals'
     | '/settings'
     | '/store'
-    | '/tv-hub'
     | '/portal/$slug'
     | '/r/$code'
     | '/.lovable/oauth/consent'
@@ -545,7 +526,6 @@ export interface FileRouteTypes {
     | '/admin/users/$userId'
     | '/api/public/payments/webhook'
     | '/api/public/telegram/webhook'
-    | '/api/public/tv/stream'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -567,7 +547,6 @@ export interface FileRouteTypes {
     | '/referrals'
     | '/settings'
     | '/store'
-    | '/tv-hub'
     | '/portal/$slug'
     | '/r/$code'
     | '/'
@@ -596,7 +575,6 @@ export interface FileRouteTypes {
     | '/admin/users/$userId'
     | '/api/public/payments/webhook'
     | '/api/public/telegram/webhook'
-    | '/api/public/tv/stream'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
   id:
@@ -619,7 +597,6 @@ export interface FileRouteTypes {
     | '/_authenticated/referrals'
     | '/_authenticated/settings'
     | '/_authenticated/store'
-    | '/_authenticated/tv-hub'
     | '/portal/$slug'
     | '/r/$code'
     | '/_authenticated/'
@@ -648,7 +625,6 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/users/$userId'
     | '/api/public/payments/webhook'
     | '/api/public/telegram/webhook'
-    | '/api/public/tv/stream'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
   fileRoutesById: FileRoutesById
@@ -669,7 +645,6 @@ export interface RootRouteChildren {
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   ApiPublicTelegramWebhookRoute: typeof ApiPublicTelegramWebhookRoute
-  ApiPublicTvStreamRoute: typeof ApiPublicTvStreamRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
 }
@@ -745,13 +720,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/portal/$slug'
       preLoaderRoute: typeof PortalSlugRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/tv-hub': {
-      id: '/_authenticated/tv-hub'
-      path: '/tv-hub'
-      fullPath: '/tv-hub'
-      preLoaderRoute: typeof AuthenticatedTvHubRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/store': {
       id: '/_authenticated/store'
@@ -998,13 +966,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/tv/stream': {
-      id: '/api/public/tv/stream'
-      path: '/api/public/tv/stream'
-      fullPath: '/api/public/tv/stream'
-      preLoaderRoute: typeof ApiPublicTvStreamRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/telegram/webhook': {
       id: '/api/public/telegram/webhook'
       path: '/api/public/telegram/webhook'
@@ -1053,7 +1014,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedReferralsRoute: typeof AuthenticatedReferralsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedStoreRoute: typeof AuthenticatedStoreRoute
-  AuthenticatedTvHubRoute: typeof AuthenticatedTvHubRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedAdminApiKeysRoute: typeof AuthenticatedAdminApiKeysRoute
   AuthenticatedAdminAuditRoute: typeof AuthenticatedAdminAuditRoute
@@ -1087,7 +1047,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedReferralsRoute: AuthenticatedReferralsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedStoreRoute: AuthenticatedStoreRoute,
-  AuthenticatedTvHubRoute: AuthenticatedTvHubRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedAdminApiKeysRoute: AuthenticatedAdminApiKeysRoute,
   AuthenticatedAdminAuditRoute: AuthenticatedAdminAuditRoute,
@@ -1131,7 +1090,6 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   ApiPublicTelegramWebhookRoute: ApiPublicTelegramWebhookRoute,
-  ApiPublicTvStreamRoute: ApiPublicTvStreamRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
 }
