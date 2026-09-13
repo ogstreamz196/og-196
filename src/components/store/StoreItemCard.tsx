@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { Coins, Package, Sparkles, Crown, Gem, ShoppingBag, Repeat, ExternalLink, Check, Loader2 } from "lucide-react";
+import { Coins, Package, Sparkles, Crown, Gem, ShoppingBag, Repeat, ExternalLink, Check, Loader2, Copy, KeyRound } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { CoinPill } from "@/components/ui/coin-pill";
 import type { StoreItem } from "@/lib/store.functions";
@@ -50,19 +51,26 @@ export function StoreItemCard({
   buying,
   sportsGuideState,
   sportsGuideInviteUrl,
+  vipPass,
 }: {
   item: StoreItem;
   onBuy: (id: string) => void;
   buying?: boolean;
   sportsGuideState?: "unowned" | "owned" | "invite_sent" | "joined" | "revoked";
   sportsGuideInviteUrl?: string;
+  vipPass?: { owned: boolean; username: string | null; password: string | null; available: number };
 }) {
   const r = RARITY[item.rarity];
   const stockRemaining = item.stock === null ? null : Math.max(0, item.stock - item.stock_sold);
-  const soldOut = stockRemaining !== null && stockRemaining === 0;
+  const stockSoldOut = stockRemaining !== null && stockRemaining === 0;
   const isSportsGuide = item.slug === "og-sports-guide-access";
   const ownsSportsGuide = isSportsGuide && sportsGuideState && !["unowned", "revoked"].includes(sportsGuideState);
   const imageUrl = isSportsGuide ? sportsGuideLogo.url : item.image_url;
+  const isVipPass = item.slug === "og-vip-pass";
+  const ownsVipPass = isVipPass && !!vipPass?.owned;
+  const vipSoldOut = isVipPass && !ownsVipPass && (vipPass?.available ?? 0) === 0;
+
+  const soldOut = stockSoldOut || vipSoldOut;
 
   return (
     <div
@@ -150,13 +158,45 @@ export function StoreItemCard({
             }
             onBuy(item.id);
           }}
-          disabled={soldOut || buying || (Boolean(ownsSportsGuide) && !sportsGuideInviteUrl)}
+          disabled={(soldOut && !ownsVipPass) || buying || ownsVipPass || (Boolean(ownsSportsGuide) && !sportsGuideInviteUrl)}
           className="w-full bg-gradient-brand font-bold uppercase tracking-wider min-[400px]:w-auto"
         >
-          {buying ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : ownsSportsGuide ? <ExternalLink className="mr-1 h-4 w-4" /> : <Coins className="mr-1 h-4 w-4" />}
-          {soldOut ? "Sold out" : buying ? "…" : ownsSportsGuide ? "Open group" : "Buy"}
+          {buying ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : ownsSportsGuide ? <ExternalLink className="mr-1 h-4 w-4" /> : ownsVipPass ? <Check className="mr-1 h-4 w-4" /> : <Coins className="mr-1 h-4 w-4" />}
+          {ownsVipPass ? "Unlocked" : soldOut ? "Sold out" : buying ? "…" : ownsSportsGuide ? "Open group" : "Buy"}
         </Button>
       </div>
+      {ownsVipPass && vipPass?.username ? (
+        <div className="mt-3 space-y-2 rounded-lg border border-primary/30 bg-primary/10 p-3">
+          <p className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wide text-primary">
+            <KeyRound className="h-3.5 w-3.5" /> Your VIP login
+          </p>
+          {([["Username", vipPass.username], ["Password", vipPass.password ?? ""]] as const).map(([label, value]) => (
+            <div key={label} className="flex items-center gap-2">
+              <span className="w-20 shrink-0 text-[11px] uppercase text-muted-foreground">{label}</span>
+              <code className="min-w-0 flex-1 truncate rounded bg-background/70 px-2 py-1 font-mono text-xs">{value}</code>
+              <Button
+                type="button"
+                size="icon-sm"
+                variant="ghost"
+                aria-label={`Copy ${label.toLowerCase()}`}
+                onClick={() => {
+                  navigator.clipboard?.writeText(value).then(
+                    () => toast.success(`${label} copied`),
+                    () => toast.error("Couldn’t copy — select it manually"),
+                  );
+                }}
+              >
+                <Copy className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          ))}
+        </div>
+      ) : null}
+      {isVipPass && !ownsVipPass ? (
+        <p className="mt-3 text-[11px] text-muted-foreground">
+          {vipSoldOut ? "All passes are currently claimed — check back soon." : `${vipPass?.available ?? 0} passes left`}
+        </p>
+      ) : null}
       {ownsSportsGuide ? (
         <div className="mt-3 flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/10 px-3 py-2 text-xs font-semibold text-primary">
           <Check className="h-4 w-4" /> Access owned · link unlocked
