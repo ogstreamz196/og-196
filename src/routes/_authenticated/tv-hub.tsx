@@ -15,6 +15,7 @@ import {
   Pause,
   Play,
   Radio,
+  RefreshCw,
   Search,
   Tv,
   Volume2,
@@ -632,13 +633,11 @@ function TvHubPage() {
 function AccountBar({
   account,
   expiry,
-  total,
-  truncated,
+  catalog,
 }: {
   account: TvAccount | null;
   expiry: { label: string; note: string; expired: boolean } | null;
-  total: number;
-  truncated: boolean;
+  catalog: TvCatalogStatus | null;
 }) {
   return (
     <div className="mb-6 flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card/80 p-3 text-xs sm:text-sm">
@@ -672,7 +671,10 @@ function AccountBar({
         </span>
       )}
       <span className="rounded-full border border-border bg-background/60 px-3 py-1 text-muted-foreground">
-        {total.toLocaleString()} items{truncated ? " (partial)" : ""}
+        {(catalog?.total ?? 0).toLocaleString()} items
+        {catalog?.refreshedAt
+          ? ` · updated ${new Date(catalog.refreshedAt).toLocaleDateString(undefined, { day: "numeric", month: "short" })}`
+          : ""}
       </span>
     </div>
   );
@@ -685,6 +687,7 @@ function StreamPlayer({
   title,
   group,
   source,
+  credentials,
   live,
   onPrevious,
   onNext,
@@ -692,6 +695,7 @@ function StreamPlayer({
   title: string;
   group: string;
   source: string | null;
+  credentials: Creds;
   live: boolean;
   onPrevious: () => void;
   onNext: () => void;
