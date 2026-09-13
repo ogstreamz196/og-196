@@ -494,7 +494,7 @@ export function PurchaseHistory() {
         const days = RANGE_OPTIONS.find((o) => o.key === range)?.days ?? null;
         const cutoff = days != null ? Date.now() - days * 24 * 60 * 60 * 1000 : null;
         const rows = (data ?? [])
-          .filter((row) => ["stripe_purchase", "store_purchase", "sports_guide_access"].includes(row.type))
+          .filter((row) => ["stripe_purchase", "store_purchase", "sports_guide_access", "vip_pass"].includes(row.type))
           .filter((row) => cutoff == null || new Date(row.created_at).getTime() >= cutoff)
           .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
         if (rows.length === 0) {
@@ -511,7 +511,7 @@ export function PurchaseHistory() {
                 <li key={row.id} className="grid grid-cols-1 gap-2 px-4 py-3 text-sm min-[400px]:grid-cols-[minmax(0,1fr)_auto] min-[400px]:gap-3 sm:px-5">
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="truncate font-semibold">{row.stripe?.description || (row.type === "sports_guide_access" ? "OG Sports Guide Access" : row.type === "store_purchase" ? "Store purchase" : "OG Coin purchase")}</p>
+                      <p className="truncate font-semibold">{row.stripe?.description || (row.type === "sports_guide_access" ? "OG Sports Guide Access" : row.type === "vip_pass" ? "OG VIP Pass" : row.type === "store_purchase" ? "Store purchase" : "OG Coin purchase")}</p>
                     </div>
 
                     <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
