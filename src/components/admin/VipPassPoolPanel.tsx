@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { KeyRound, Loader2, Plus, Trash2, Eye, EyeOff } from "lucide-react";
+import { KeyRound, Loader2, Plus, Trash2, Eye, EyeOff, Pencil, Check, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
   addVipPassCredentials,
@@ -13,8 +14,9 @@ import {
 } from "@/lib/vip-pass.functions";
 
 /**
- * Boss Controls → Store settings: the pool of OG VIP PASS logins.
- * Buyers are assigned one unused login at random when they purchase.
+ * Boss Controls → Store settings: the pool of reusable OG VIP PASS logins.
+ * Each buyer is shown one random active login; the same login can be shared
+ * by many members and edited/rotated here anytime.
  */
 export function VipPassPoolPanel() {
   const qc = useQueryClient();
@@ -24,10 +26,13 @@ export function VipPassPoolPanel() {
   const remove = useServerFn(deleteVipPassCredential);
   const [text, setText] = useState("");
   const [reveal, setReveal] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editUser, setEditUser] = useState("");
+  const [editPass, setEditPass] = useState("");
 
   const query = useQuery({ queryKey: ["vip-pass-pool"], queryFn: () => list() });
   const rows = query.data ?? [];
-  const available = rows.filter((r) => !r.assigned_user_id && r.active).length;
+  const available = rows.filter((r) => r.active).length;
 
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["vip-pass-pool"] });
@@ -48,9 +53,14 @@ export function VipPassPoolPanel() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const toggleMut = useMutation({
-    mutationFn: (v: { id: string; active: boolean }) => update({ data: v }),
-    onSuccess: invalidate,
+  const saveMut = useMutation({
+    mutationFn: (v: { id: string; active?: boolean; username?: string; password?: string }) =>
+      update({ data: v }),
+    onSuccess: () => {
+      setEditingId(null);
+      invalidate();
+      toast.success("Login updated — buyers see the new details straight away");
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -60,6 +70,12 @@ export function VipPassPoolPanel() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const startEdit = (id: string, username: string, password: string) => {
+    setEditingId(id);
+    setEditUser(username);
+    setEditPass(password);
+  };
+
   return (
     <section className="rounded-2xl border border-border bg-card/60 p-4">
       <header className="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -68,7 +84,7 @@ export function VipPassPoolPanel() {
           <div>
             <h2 className="font-display text-lg font-bold uppercase tracking-wider">OG VIP Pass logins</h2>
             <p className="text-xs text-muted-foreground">
-              {available} available · {rows.length} total. Buyers get one at random.
+              {available} active · {rows.length} total. Reusable — each buyer gets one at random.
             </p>
           </div>
         </div>
@@ -100,7 +116,7 @@ export function VipPassPoolPanel() {
         <div className="grid place-items-center py-8"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
       ) : rows.length === 0 ? (
         <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-          No VIP logins yet. Paste some above so members can buy the pass.
+          No VIP logins yet. Paste a few above — members each get one at random.
         </p>
       ) : (
         <ul className="space-y-2">
@@ -109,37 +125,66 @@ export function VipPassPoolPanel() {
               key={row.id}
               className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-lg border border-border/70 bg-background/40 px-3 py-2"
             >
-              <div className="min-w-0">
-                <p className="truncate font-mono text-sm">
-                  {row.username}
-                  <span className="text-muted-foreground"> / {reveal ? row.password : "••••••••"}</span>
-                </p>
-                <p className="truncate text-[11px] text-muted-foreground">
-                  {row.assigned_user_id
-                    ? `Claimed by ${row.assigned_email ?? row.assigned_user_id}`
-                    : row.active ? "Available" : "Disabled"}
-                </p>
-              </div>
+              {editingId === row.id ? (
+                <div className="min-w-0 space-y-2">
+                  <Input value={editUser} onChange={(e) => setEditUser(e.target.value)} aria-label="Username" className="h-8 font-mono text-xs" />
+                  <Input value={editPass} onChange={(e) => setEditPass(e.target.value)} aria-label="Password" className="h-8 font-mono text-xs" />
+                </div>
+              ) : (
+                <div className="min-w-0">
+                  <p className="truncate font-mono text-sm">
+                    {row.username}
+                    <span className="text-muted-foreground"> / {reveal ? row.password : "••••••••"}</span>
+                  </p>
+                  <p className="truncate text-[11px] text-muted-foreground">
+                    {row.claims} member{row.claims === 1 ? "" : "s"} hold this login · {row.active ? "Active" : "Disabled"}
+                  </p>
+                </div>
+              )}
               <div className="flex shrink-0 items-center gap-1">
-                {!row.assigned_user_id && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={toggleMut.isPending}
-                    onClick={() => toggleMut.mutate({ id: row.id, active: !row.active })}
-                  >
-                    {row.active ? "Disable" : "Enable"}
-                  </Button>
+                {editingId === row.id ? (
+                  <>
+                    <Button
+                      size="icon-sm"
+                      aria-label="Save login"
+                      disabled={saveMut.isPending || !editUser.trim() || !editPass.trim()}
+                      onClick={() => saveMut.mutate({ id: row.id, username: editUser, password: editPass })}
+                    >
+                      <Check className="h-4 w-4" />
+                    </Button>
+                    <Button size="icon-sm" variant="ghost" aria-label="Cancel editing" onClick={() => setEditingId(null)}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button
+                      size="icon-sm"
+                      variant="ghost"
+                      aria-label={`Edit ${row.username}`}
+                      onClick={() => startEdit(row.id, row.username, row.password)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={saveMut.isPending}
+                      onClick={() => saveMut.mutate({ id: row.id, active: !row.active })}
+                    >
+                      {row.active ? "Disable" : "Enable"}
+                    </Button>
+                    <Button
+                      size="icon-sm"
+                      variant="ghost"
+                      aria-label={`Remove ${row.username}`}
+                      disabled={row.claims > 0 || delMut.isPending}
+                      onClick={() => delMut.mutate(row.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </>
                 )}
-                <Button
-                  size="icon-sm"
-                  variant="ghost"
-                  aria-label={`Remove ${row.username}`}
-                  disabled={!!row.assigned_user_id || delMut.isPending}
-                  onClick={() => delMut.mutate(row.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
               </div>
             </li>
           ))}
