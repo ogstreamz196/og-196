@@ -145,8 +145,8 @@ export const getTvItems = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<TvChannel[]> => {
     const { data: rows, error } = await context.supabase.rpc("tv_items", {
       _section: data.section,
-      _category: data.category ?? null,
-      _search: data.search ?? null,
+      _category: (data.category ?? null) as string,
+      _search: (data.search ?? null) as string,
       _limit: data.limit ?? 200,
       _offset: data.offset ?? 0,
     });

@@ -78,7 +78,8 @@ export async function syncTvCatalog(
   }
   if (!body) throw new Error("Could not download the playlist from the provider.");
 
-  const reader = body.pipeThrough(new TextDecoderStream()).getReader();
+  const reader = body.getReader();
+  const decoder = new TextDecoder();
   let buffer = "";
   let pending: { title: string; group: string; logo: string | null } | null = null;
   let rows: Row[] = [];
