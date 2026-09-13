@@ -42,6 +42,7 @@ import {
   type StoreItem,
   type StoreCategory,
 } from "@/lib/store.functions";
+import { VipPassPoolPanel } from "@/components/admin/VipPassPoolPanel";
 
 
 export const Route = createFileRoute("/_authenticated/admin/store")({
@@ -273,6 +274,8 @@ function AdminStorePage() {
             </Button>
           </div>
         </div>
+
+        <VipPassPoolPanel />
 
         {categories.map((cat, catIdx) => {
           const catItems = items.filter((i) => i.category_id === cat.id);
