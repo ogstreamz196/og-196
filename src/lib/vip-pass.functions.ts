@@ -152,9 +152,9 @@ export const updateVipPassCredential = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const patch: Record<string, unknown> = {};
-    if (typeof data.active === "boolean") patch["active"] = data.active;
-    if (data.note !== undefined) patch["note"] = data.note;
+    const patch: { active?: boolean; note?: string | null } = {};
+    if (typeof data.active === "boolean") patch.active = data.active;
+    if (data.note !== undefined) patch.note = data.note;
     const { error } = await supabaseAdmin
       .from("vip_pass_credentials")
       .update(patch)
