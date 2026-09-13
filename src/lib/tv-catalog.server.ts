@@ -124,7 +124,7 @@ export async function syncTvCatalog(
   for (;;) {
     const { done, value } = await reader.read();
     if (done) break;
-    buffer += value;
+    buffer += decoder.decode(value, { stream: true });
     let newline = buffer.indexOf("\n");
     while (newline >= 0) {
       await handle(buffer.slice(0, newline));
