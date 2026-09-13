@@ -1308,93 +1308,6 @@ export type Database = {
         }
         Relationships: []
       }
-      tv_catalog_categories: {
-        Row: {
-          category: string
-          generation: string
-          id: number
-          item_count: number
-          section: string
-        }
-        Insert: {
-          category: string
-          generation: string
-          id?: never
-          item_count?: number
-          section: string
-        }
-        Update: {
-          category?: string
-          generation?: string
-          id?: never
-          item_count?: number
-          section?: string
-        }
-        Relationships: []
-      }
-      tv_catalog_items: {
-        Row: {
-          category: string
-          generation: string
-          id: number
-          idx: number
-          logo: string | null
-          section: string
-          title: string
-          url_template: string
-        }
-        Insert: {
-          category: string
-          generation: string
-          id?: never
-          idx: number
-          logo?: string | null
-          section: string
-          title: string
-          url_template: string
-        }
-        Update: {
-          category?: string
-          generation?: string
-          id?: never
-          idx?: number
-          logo?: string | null
-          section?: string
-          title?: string
-          url_template?: string
-        }
-        Relationships: []
-      }
-      tv_catalog_meta: {
-        Row: {
-          error: string | null
-          generation: string | null
-          id: number
-          refreshed_at: string | null
-          started_at: string | null
-          status: string
-          total: number
-        }
-        Insert: {
-          error?: string | null
-          generation?: string | null
-          id?: number
-          refreshed_at?: string | null
-          started_at?: string | null
-          status?: string
-          total?: number
-        }
-        Update: {
-          error?: string | null
-          generation?: string | null
-          id?: number
-          refreshed_at?: string | null
-          started_at?: string | null
-          status?: string
-          total?: number
-        }
-        Relationships: []
-      }
       unlocked_songs: {
         Row: {
           cost_coins: number | null
@@ -1622,6 +1535,48 @@ export type Database = {
         }
         Relationships: []
       }
+      vip_pass_credentials: {
+        Row: {
+          active: boolean
+          assigned_at: string | null
+          assigned_user_id: string | null
+          coin_cost: number | null
+          created_at: string
+          created_by: string | null
+          id: string
+          note: string | null
+          password: string
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          active?: boolean
+          assigned_at?: string | null
+          assigned_user_id?: string | null
+          coin_cost?: number | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          password: string
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          active?: boolean
+          assigned_at?: string | null
+          assigned_user_id?: string | null
+          coin_cost?: number | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          password?: string
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -1827,6 +1782,7 @@ export type Database = {
         Returns: Json
       }
       purchase_vip: { Args: never; Returns: number }
+      purchase_vip_pass_for_user: { Args: { p_user: string }; Returns: Json }
       redeem_og_bot_invite: { Args: { p_code: string }; Returns: string }
       refund_generation_charge: {
         Args: { p_amount: number; p_reference: string; p_user: string }
@@ -1888,33 +1844,6 @@ export type Database = {
           target_user_id: string
         }
         Returns: boolean
-      }
-      tv_catalog_finish: {
-        Args: { _generation: string; _total: number }
-        Returns: undefined
-      }
-      tv_categories: {
-        Args: { _section: string }
-        Returns: {
-          category: string
-          item_count: number
-        }[]
-      }
-      tv_items: {
-        Args: {
-          _category: string
-          _limit: number
-          _offset: number
-          _search: string
-          _section: string
-        }
-        Returns: {
-          category: string
-          id: number
-          logo: string
-          title: string
-          url_template: string
-        }[]
       }
       unrevoke_og_bot_token: {
         Args: { admin_notes?: string; target_user_id: string }

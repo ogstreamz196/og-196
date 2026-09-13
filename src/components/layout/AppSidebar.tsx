@@ -8,7 +8,6 @@ import {
   LogOut,
   Gift,
   Sparkles,
-  Tv,
   type LucideIcon,
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -34,7 +33,7 @@ import { useDevMode } from "@/hooks/use-dev-mode";
 import ogStreamzLogo from "@/assets/ogstreamz-logo.jpg.asset.json";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
 
-type AppRoute = "/" | "/library" | "/tv-hub" | "/messenger" | "/store" | "/buy-coins" | "/settings" | "/developer" | "/admin" | "/referrals";
+type AppRoute = "/" | "/library" | "/messenger" | "/store" | "/buy-coins" | "/settings" | "/developer" | "/admin" | "/referrals";
 type NavItem = {
   title: string;
   url: AppRoute;
@@ -49,7 +48,6 @@ type NavItem = {
 const primaryNav: NavItem[] = [
   { title: "Home", url: "/", icon: Home, accent: "from-sky-400/30 to-indigo-500/30" },
   { title: "Music", url: "/library", icon: Disc3, badge: "Studio", accent: "from-fuchsia-500/40 to-amber-400/40", spin: true },
-  { title: "TV HUB", url: "/tv-hub", icon: Tv, badge: "Demo", accent: "from-sky-400/40 to-rose-500/30" },
   { title: "OG Bot", url: "/messenger", image: ogBotAsset.url, badge: "Live", accent: "from-primary/40 to-cyan-400/40" },
 
 ];

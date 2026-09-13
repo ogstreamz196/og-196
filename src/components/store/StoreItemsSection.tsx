@@ -13,6 +13,7 @@ import {
   listStoreCatalog,
   purchaseSportsGuideAccess,
 } from "@/lib/store.functions";
+import { getVipPassStatus, purchaseVipPass } from "@/lib/vip-pass.functions";
 
 const ALL_ITEMS = "all";
 
@@ -20,6 +21,8 @@ export function StoreItemsSection() {
   const queryClient = useQueryClient();
   const getAccessStatus = useServerFn(getSportsGuideAccessStatus);
   const purchaseAccess = useServerFn(purchaseSportsGuideAccess);
+  const getVipPass = useServerFn(getVipPassStatus);
+  const buyVipPass = useServerFn(purchaseVipPass);
   const [checkoutItemId, setCheckoutItemId] = useState<string | null>(null);
   const catalog = useQuery({
     queryKey: ["store-catalog"],
@@ -28,6 +31,10 @@ export function StoreItemsSection() {
   const access = useQuery({
     queryKey: ["sports-guide-access"],
     queryFn: () => getAccessStatus(),
+  });
+  const vipPass = useQuery({
+    queryKey: ["vip-pass-status"],
+    queryFn: () => getVipPass(),
   });
   const categories = catalog.data?.categories ?? [];
   const allItems = useMemo(() => categories.flatMap((category) => category.items), [categories]);
@@ -49,10 +56,28 @@ export function StoreItemsSection() {
     onError: (error: Error) => toast.error(error.message),
   });
 
+  const vipPassPurchase = useMutation({
+    mutationFn: () => buyVipPass(),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["vip-pass-status"] }),
+        queryClient.invalidateQueries({ queryKey: ["profile"] }),
+        queryClient.invalidateQueries({ queryKey: ["coin-transactions"] }),
+        queryClient.invalidateQueries({ queryKey: ["store-catalog"] }),
+      ]);
+      toast.success("OG VIP Pass unlocked — your login details are on the card");
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
   const buy = (itemId: string) => {
     const item = allItems.find((candidate) => candidate.id === itemId);
     if (item?.slug === "og-sports-guide-access") {
       sportsGuide.mutate();
+      return;
+    }
+    if (item?.slug === "og-vip-pass") {
+      vipPassPurchase.mutate();
       return;
     }
     setCheckoutItemId(itemId);
@@ -63,7 +88,11 @@ export function StoreItemsSection() {
       key={item.id}
       item={item}
       onBuy={buy}
-      buying={item.slug === "og-sports-guide-access" && sportsGuide.isPending}
+      buying={
+        (item.slug === "og-sports-guide-access" && sportsGuide.isPending) ||
+        (item.slug === "og-vip-pass" && vipPassPurchase.isPending)
+      }
+      vipPass={item.slug === "og-vip-pass" ? vipPass.data : undefined}
       sportsGuideState={item.slug === "og-sports-guide-access" ? access.data?.status : undefined}
       sportsGuideInviteUrl={item.slug === "og-sports-guide-access" ? access.data?.inviteUrl ?? undefined : undefined}
     />
