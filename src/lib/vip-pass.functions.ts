@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 /**
- * OG VIP PASS — a Boss-managed pool of reusable username/password logins.
+ * OG Vault VIP Pass — a Boss-managed pool of reusable username/password logins.
  * A buyer is shown one random pass from the pool; the same login can be
  * shared by many members, and the Boss can rotate/edit the pool anytime.
  * Credentials are readable only through these trusted server functions.
