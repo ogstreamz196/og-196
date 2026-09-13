@@ -1308,6 +1308,93 @@ export type Database = {
         }
         Relationships: []
       }
+      tv_catalog_categories: {
+        Row: {
+          category: string
+          generation: string
+          id: number
+          item_count: number
+          section: string
+        }
+        Insert: {
+          category: string
+          generation: string
+          id?: never
+          item_count?: number
+          section: string
+        }
+        Update: {
+          category?: string
+          generation?: string
+          id?: never
+          item_count?: number
+          section?: string
+        }
+        Relationships: []
+      }
+      tv_catalog_items: {
+        Row: {
+          category: string
+          generation: string
+          id: number
+          idx: number
+          logo: string | null
+          section: string
+          title: string
+          url_template: string
+        }
+        Insert: {
+          category: string
+          generation: string
+          id?: never
+          idx: number
+          logo?: string | null
+          section: string
+          title: string
+          url_template: string
+        }
+        Update: {
+          category?: string
+          generation?: string
+          id?: never
+          idx?: number
+          logo?: string | null
+          section?: string
+          title?: string
+          url_template?: string
+        }
+        Relationships: []
+      }
+      tv_catalog_meta: {
+        Row: {
+          error: string | null
+          generation: string | null
+          id: number
+          refreshed_at: string | null
+          started_at: string | null
+          status: string
+          total: number
+        }
+        Insert: {
+          error?: string | null
+          generation?: string | null
+          id?: number
+          refreshed_at?: string | null
+          started_at?: string | null
+          status?: string
+          total?: number
+        }
+        Update: {
+          error?: string | null
+          generation?: string | null
+          id?: number
+          refreshed_at?: string | null
+          started_at?: string | null
+          status?: string
+          total?: number
+        }
+        Relationships: []
+      }
       unlocked_songs: {
         Row: {
           cost_coins: number | null
@@ -1801,6 +1888,33 @@ export type Database = {
           target_user_id: string
         }
         Returns: boolean
+      }
+      tv_catalog_finish: {
+        Args: { _generation: string; _total: number }
+        Returns: undefined
+      }
+      tv_categories: {
+        Args: { _section: string }
+        Returns: {
+          category: string
+          item_count: number
+        }[]
+      }
+      tv_items: {
+        Args: {
+          _category: string
+          _limit: number
+          _offset: number
+          _search: string
+          _section: string
+        }
+        Returns: {
+          category: string
+          id: number
+          logo: string
+          title: string
+          url_template: string
+        }[]
       }
       unrevoke_og_bot_token: {
         Args: { admin_notes?: string; target_user_id: string }

@@ -15,6 +15,7 @@ import {
   Pause,
   Play,
   Radio,
+  RefreshCw,
   Search,
   Tv,
   Volume2,
@@ -26,9 +27,15 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import tvHubCinematic from "@/assets/tv-hub-cinematic.jpg";
 import {
-  loadTvHubPlaylist,
+  getTvCatalogStatus,
+  getTvCategories,
+  getTvItems,
   prepareTvStream,
+  refreshTvCatalog,
+  signInTvHub,
   type TvAccount,
+  type TvCatalogStatus,
+  type TvCategory,
   type TvChannel,
 } from "@/lib/tv-hub.functions";
 
@@ -48,15 +55,7 @@ export const Route = createFileRoute("/_authenticated/tv-hub")({
 
 type Section = "tv" | "movies" | "series";
 
-type PlayItem = {
-  id: string;
-  title: string;
-  group: string;
-  section: Section;
-  source: string;
-  logo?: string | null;
-};
-
+type Creds = { username: string; password: string };
 
 const SECTIONS: Array<{ id: Section; label: string; caption: string; icon: typeof Tv }> = [
   { id: "tv", label: "Live TV", caption: "Channels & sport", icon: Radio },
@@ -64,7 +63,7 @@ const SECTIONS: Array<{ id: Section; label: string; caption: string; icon: typeo
   { id: "series", label: "Series", caption: "Box sets & shows", icon: ListVideo },
 ];
 
-const PAGE_SIZE = 300;
+const PAGE_SIZE = 200;
 
 function formatExpiry(iso: string | null) {
   if (!iso) return null;
@@ -76,17 +75,6 @@ function formatExpiry(iso: string | null) {
   return { label, note: days === 0 ? "Expires today" : `${days} day${days === 1 ? "" : "s"} left`, expired: false };
 }
 
-function toPlayItem(channel: TvChannel): PlayItem {
-  return {
-    id: channel.id,
-    title: channel.title,
-    group: channel.group,
-    section: channel.section,
-    source: channel.url,
-    logo: channel.logo,
-  };
-}
-
 function formatTime(seconds: number) {
   if (!Number.isFinite(seconds) || seconds <= 0) return "0:00";
   const mins = Math.floor(seconds / 60);
@@ -94,69 +82,165 @@ function formatTime(seconds: number) {
 }
 
 function TvHubPage() {
-  const fetchPlaylist = useServerFn(loadTvHubPlaylist);
+  const signIn = useServerFn(signInTvHub);
+  const loadCategories = useServerFn(getTvCategories);
+  const loadItems = useServerFn(getTvItems);
+  const runRefresh = useServerFn(refreshTvCatalog);
+  const loadStatus = useServerFn(getTvCatalogStatus);
 
-  const [items, setItems] = useState<PlayItem[] | null>(null);
+  const [creds, setCreds] = useState<Creds | null>(null);
   const [account, setAccount] = useState<TvAccount | null>(null);
-  const [truncated, setTruncated] = useState(false);
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [catalog, setCatalog] = useState<TvCatalogStatus | null>(null);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [loginMessage, setLoginMessage] = useState("");
 
+  const [categories, setCategories] = useState<Record<Section, TvCategory[]>>({ tv: [], movies: [], series: [] });
   const [section, setSection] = useState<Section | null>(null);
-  // null = categories stage, "All" or a name = channel-list stage
-  const [group, setGroup] = useState<string | null>(null);
+  const [group, setGroup] = useState<string>("All");
   const [query, setQuery] = useState("");
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [items, setItems] = useState<TvChannel[]>([]);
+  const [itemsLoading, setItemsLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const [selected, setSelected] = useState<TvChannel | null>(null);
   const [favourites, setFavourites] = useState<string[]>([]);
 
-  const list = items ?? [];
-
-  const sectionItems = useMemo(
-    () => (section ? list.filter((item) => item.section === section) : []),
-    [list, section],
-  );
-
-  const groups = useMemo(() => {
-    const counts = new Map<string, number>();
-    for (const item of sectionItems) counts.set(item.group, (counts.get(item.group) ?? 0) + 1);
-    return [...counts.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-  }, [sectionItems]);
-
-  const searching = query.trim().length > 0;
-
-  const filtered = useMemo(() => {
-    const normalized = query.trim().toLowerCase();
-    // Master search: with a query, search everything in the section, ignoring category.
-    if (normalized) return sectionItems.filter((item) => item.title.toLowerCase().includes(normalized));
-    if (!group || group === "All") return sectionItems;
-    return sectionItems.filter((item) => item.group === group);
-  }, [group, query, sectionItems]);
-
-
-  const visible = filtered.slice(0, visibleCount);
-  const selected = list.find((item) => item.id === selectedId) ?? null;
   const expiry = formatExpiry(account?.expiresAt ?? null);
+  const ready = catalog?.status === "ready";
+  const searching = search.length > 0;
 
+  /* master search is typed-through, so debounce before hitting the catalogue */
   useEffect(() => {
-    setVisibleCount(PAGE_SIZE);
-  }, [group, query, section]);
+    const timer = window.setTimeout(() => setSearch(query.trim()), 350);
+    return () => window.clearTimeout(timer);
+  }, [query]);
+
+  /* cached categories — instant for every user, no provider download */
+  useEffect(() => {
+    if (!creds || !ready) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const [tv, movies, series] = await Promise.all([
+          loadCategories({ data: { section: "tv" } }),
+          loadCategories({ data: { section: "movies" } }),
+          loadCategories({ data: { section: "series" } }),
+        ]);
+        if (!cancelled) setCategories({ tv, movies, series });
+      } catch {
+        /* categories stay empty; the guide still works via search */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [catalog?.refreshedAt, creds, loadCategories, ready]);
+
+  /* the visible page of the guide */
+  useEffect(() => {
+    if (!creds || !section || !ready) return;
+    let cancelled = false;
+    setItemsLoading(true);
+    void (async () => {
+      try {
+        const rows = await loadItems({
+          data: {
+            section,
+            category: searching || group === "All" ? null : group,
+            search: searching ? search : null,
+            limit: PAGE_SIZE,
+            offset: 0,
+          },
+        });
+        if (cancelled) return;
+        setItems(rows);
+        setHasMore(rows.length === PAGE_SIZE);
+        setSelected((current) => current ?? rows[0] ?? null);
+      } catch {
+        if (!cancelled) {
+          setItems([]);
+          setHasMore(false);
+        }
+      } finally {
+        if (!cancelled) setItemsLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [creds, group, loadItems, ready, search, searching, section]);
+
+  /* while a refresh runs, keep the status fresh for everyone watching it */
+  useEffect(() => {
+    if (!refreshing) return;
+    const timer = window.setInterval(() => {
+      void loadStatus().then(setCatalog).catch(() => undefined);
+    }, 10_000);
+    return () => window.clearInterval(timer);
+  }, [loadStatus, refreshing]);
+
+  const showMore = async () => {
+    if (!section) return;
+    setItemsLoading(true);
+    try {
+      const rows = await loadItems({
+        data: {
+          section,
+          category: searching || group === "All" ? null : group,
+          search: searching ? search : null,
+          limit: PAGE_SIZE,
+          offset: items.length,
+        },
+      });
+      setItems((current) => [...current, ...rows]);
+      setHasMore(rows.length === PAGE_SIZE);
+    } catch {
+      setHasMore(false);
+    } finally {
+      setItemsLoading(false);
+    }
+  };
 
   const openSection = (next: Section) => {
     setSection(next);
-    setGroup(null);
+    setGroup("All");
     setQuery("");
-    const first = list.find((item) => item.section === next);
-    setSelectedId(first?.id ?? null);
+    setSearch("");
+    setItems([]);
+    setSelected(null);
   };
 
   const step = (direction: -1 | 1) => {
-    if (filtered.length === 0) return;
-    const index = filtered.findIndex((item) => item.id === selectedId);
-    const next = filtered[(index + direction + filtered.length) % filtered.length];
-    if (next) setSelectedId(next.id);
+    if (items.length === 0) return;
+    const index = items.findIndex((item) => item.id === selected?.id);
+    const next = items[(index + direction + items.length) % items.length];
+    if (next) setSelected(next);
+  };
+
+  const startRefresh = async (withCreds: Creds) => {
+    setRefreshing(true);
+    setCatalog((current) => ({
+      status: "running",
+      total: current?.total ?? 0,
+      refreshedAt: current?.refreshedAt ?? null,
+      error: null,
+    }));
+    try {
+      await runRefresh({ data: withCreds });
+      setCatalog(await loadStatus());
+    } catch (error) {
+      setCatalog({
+        status: "error",
+        total: 0,
+        refreshedAt: null,
+        error: error instanceof Error ? error.message : "Refresh failed.",
+      });
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   const handleSignIn = async (event: React.FormEvent) => {
@@ -167,15 +251,17 @@ function TvHubPage() {
     }
     setLoading(true);
     setLoginMessage("");
+    const next: Creds = { username: username.trim(), password };
     try {
-      const playlist = await fetchPlaylist({ data: { username: username.trim(), password } });
-      setItems(playlist.channels.map(toPlayItem));
-      setAccount(playlist.account);
-      setTruncated(playlist.truncated);
-
-
+      const result = await signIn({ data: next });
+      setCreds(next);
+      setAccount(result.account);
+      setCatalog(result.catalog);
       setPassword("");
       setSection(null);
+      if (result.catalog.status !== "ready" && result.catalog.status !== "running") {
+        void startRefresh(next);
+      }
     } catch (error) {
       setLoginMessage(error instanceof Error ? error.message : "Sign-in failed. Please try again.");
     } finally {
@@ -184,7 +270,7 @@ function TvHubPage() {
   };
 
   /* ---------------------------------------------------------------- login */
-  if (!items) {
+  if (!creds) {
     return (
       <main className="relative isolate min-h-[calc(100dvh-7rem)] overflow-hidden rounded-2xl border border-border bg-surface shadow-card sm:rounded-3xl">
         <img
@@ -208,8 +294,8 @@ function TvHubPage() {
             </div>
 
             <p className="mb-6 text-sm leading-relaxed text-muted-foreground sm:text-base">
-              Sign in with the username and password from your TV provider. Your details load your own playlist and are
-              never saved. OGSTREAMZ does not host, store or control any of the content you watch.
+              Sign in with the username and password from your TV provider. Your details are never saved and are only
+              used to play your own streams. OGSTREAMZ does not host, store or control any of the content you watch.
             </p>
 
             <form className="space-y-4" onSubmit={handleSignIn}>
@@ -228,7 +314,7 @@ function TvHubPage() {
               )}
               <Button type="submit" size="lg" className="h-12 w-full" disabled={loading}>
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <LockKeyhole className="h-4 w-4" />}
-                {loading ? "Loading your channels" : "Sign in"}
+                {loading ? "Signing you in" : "Sign in"}
               </Button>
             </form>
           </section>
@@ -238,20 +324,38 @@ function TvHubPage() {
   }
 
   const counts: Record<Section, number> = {
-    tv: list.filter((i) => i.section === "tv").length,
-    movies: list.filter((i) => i.section === "movies").length,
-    series: list.filter((i) => i.section === "series").length,
+    tv: categories.tv.reduce((sum, entry) => sum + entry.count, 0),
+    movies: categories.movies.reduce((sum, entry) => sum + entry.count, 0),
+    series: categories.series.reduce((sum, entry) => sum + entry.count, 0),
   };
 
   const signOut = () => {
-    setItems(null);
+    setCreds(null);
     setAccount(null);
-    setTruncated(false);
     setSection(null);
-    setSelectedId(null);
+    setSelected(null);
+    setItems([]);
     setQuery("");
-    setGroup(null);
+    setSearch("");
+    setGroup("All");
   };
+
+  const refreshButton = (
+    <Button
+      type="button"
+      variant="outline"
+      className="h-10"
+      disabled={refreshing || catalog?.status === "running"}
+      onClick={() => void startRefresh(creds)}
+    >
+      {refreshing || catalog?.status === "running" ? (
+        <Loader2 className="h-4 w-4 animate-spin" />
+      ) : (
+        <RefreshCw className="h-4 w-4" />
+      )}
+      {refreshing || catalog?.status === "running" ? "Refreshing" : "Refresh"}
+    </Button>
+  );
 
   /* ------------------------------------------------------------ dashboard */
   if (!section) {
@@ -260,20 +364,40 @@ function TvHubPage() {
         <img src={tvHubCinematic} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover opacity-30" />
         <div className="absolute inset-0 bg-gradient-to-b from-surface/80 via-surface/95 to-surface" />
         <div className="relative flex min-h-[calc(100dvh-7rem)] flex-col p-4 sm:p-8">
-          <header className="mb-8 flex flex-wrap items-center justify-between gap-3">
+          <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3">
               <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground shadow-glow"><MonitorPlay className="h-5 w-5" /></span>
               <div className="min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-primary">{`${list.length} items loaded`}</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-primary">
+                  {(catalog?.total ?? 0).toLocaleString()} items ready
+                </p>
                 <h1 className="font-display text-2xl font-black uppercase leading-none sm:text-3xl">TV HUB</h1>
               </div>
             </div>
-            <Button type="button" variant="outline" className="h-10" onClick={signOut}>Sign out</Button>
+            <div className="flex items-center gap-2">
+              {refreshButton}
+              <Button type="button" variant="outline" className="h-10" onClick={signOut}>Sign out</Button>
+            </div>
           </header>
 
-          <AccountBar account={account} expiry={expiry} total={list.length} truncated={truncated} />
+          <AccountBar account={account} expiry={expiry} catalog={catalog} />
 
-
+          {catalog?.status === "running" && (
+            <p className="mb-4 rounded-xl border border-primary/40 bg-primary/10 p-3 text-sm text-foreground">
+              Updating the channel list from your provider. This takes a few minutes — you can keep browsing the
+              current list while it finishes.
+            </p>
+          )}
+          {catalog?.status === "error" && (
+            <p className="mb-4 rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm text-foreground">
+              {catalog.error ?? "The last update failed."} Try Refresh again.
+            </p>
+          )}
+          {catalog?.status === "idle" && (
+            <p className="mb-4 rounded-xl border border-border bg-card/80 p-3 text-sm text-muted-foreground">
+              No channel list yet — press Refresh to load it for everyone.
+            </p>
+          )}
 
           <div className="grid flex-1 content-center gap-4 sm:grid-cols-3">
             {SECTIONS.map((entry) => {
@@ -282,14 +406,17 @@ function TvHubPage() {
                 <button
                   key={entry.id}
                   type="button"
+                  disabled={!ready}
                   onClick={() => openSection(entry.id)}
-                  className="group relative min-h-40 overflow-hidden rounded-2xl border border-border bg-card/80 p-5 text-left transition hover:border-primary hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-56 sm:p-6"
+                  className="group relative min-h-40 overflow-hidden rounded-2xl border border-border bg-card/80 p-5 text-left transition hover:border-primary hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-56 sm:p-6"
                 >
                   <span className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-primary/10 blur-2xl transition group-hover:bg-primary/25" />
                   <span className="relative grid h-12 w-12 place-items-center rounded-xl bg-primary/15 text-primary"><Icon className="h-6 w-6" /></span>
                   <span className="relative mt-4 block font-display text-2xl font-black uppercase leading-none sm:mt-8 sm:text-3xl">{entry.label}</span>
                   <span className="relative mt-2 block text-sm text-muted-foreground">{entry.caption}</span>
-                  <span className="relative mt-3 block text-xs font-bold uppercase tracking-wide text-primary">{counts[entry.id]} available</span>
+                  <span className="relative mt-3 block text-xs font-bold uppercase tracking-wide text-primary">
+                    {counts[entry.id].toLocaleString()} available
+                  </span>
                 </button>
               );
             })}
@@ -306,13 +433,13 @@ function TvHubPage() {
 
   /* -------------------------------------------------------------- browser */
   const activeSection = SECTIONS.find((entry) => entry.id === section)!;
+  const sectionCategories = categories[section];
 
-  const activeGroup = group ?? "All";
   const listLabel = searching
-    ? `Results · ${filtered.length}`
-    : activeGroup === "All"
-      ? `All ${activeSection.label} · ${filtered.length}`
-      : `${activeGroup} · ${filtered.length}`;
+    ? `Results · ${items.length}${hasMore ? "+" : ""}`
+    : group === "All"
+      ? `All ${activeSection.label} · ${counts[section].toLocaleString()}`
+      : `${group} · ${(sectionCategories.find((entry) => entry.name === group)?.count ?? items.length).toLocaleString()}`;
 
   return (
     <main className="flex min-h-[calc(100dvh-7rem)] flex-col rounded-2xl border border-border bg-surface shadow-card sm:rounded-3xl">
@@ -351,7 +478,8 @@ function TvHubPage() {
           <StreamPlayer
             title={selected?.title ?? "Choose something to watch"}
             group={selected?.group ?? activeSection.label}
-            source={selected?.source ?? null}
+            source={selected?.url ?? null}
+            credentials={creds}
             live={section === "tv"}
             onPrevious={() => step(-1)}
             onNext={() => step(1)}
@@ -383,34 +511,34 @@ function TvHubPage() {
           <button
             type="button"
             role="tab"
-            aria-selected={activeGroup === "All"}
+            aria-selected={group === "All"}
             onClick={() => setGroup("All")}
             className={cn(
               "inline-flex shrink-0 snap-start items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-bold uppercase tracking-wide transition",
-              activeGroup === "All"
+              group === "All"
                 ? "border-primary bg-primary text-primary-foreground shadow-glow"
                 : "border-border bg-card/70 text-muted-foreground hover:border-primary/60 hover:text-foreground",
             )}
           >
             <LayoutGrid className="h-3.5 w-3.5" />All
-            <span className="opacity-70">{sectionItems.length}</span>
+            <span className="opacity-70">{counts[section].toLocaleString()}</span>
           </button>
-          {groups.map(([name, count]) => (
+          {sectionCategories.map((entry) => (
             <button
-              key={name}
+              key={entry.name}
               type="button"
               role="tab"
-              aria-selected={activeGroup === name}
-              onClick={() => setGroup(name)}
+              aria-selected={group === entry.name}
+              onClick={() => setGroup(entry.name)}
               className={cn(
                 "inline-flex shrink-0 snap-start items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-bold uppercase tracking-wide transition",
-                activeGroup === name
+                group === entry.name
                   ? "border-primary bg-primary text-primary-foreground shadow-glow"
                   : "border-border bg-card/70 text-muted-foreground hover:border-primary/60 hover:text-foreground",
               )}
             >
-              <span className="max-w-[12rem] truncate">{name}</span>
-              <span className="opacity-70">{count}</span>
+              <span className="max-w-[12rem] truncate">{entry.name}</span>
+              <span className="opacity-70">{entry.count}</span>
             </button>
           ))}
         </div>
@@ -423,8 +551,8 @@ function TvHubPage() {
         </p>
         <div className="mx-auto w-full max-w-4xl p-2 sm:p-3">
           <ul className="space-y-1">
-            {visible.map((item, index) => {
-              const active = item.id === selectedId;
+            {items.map((item, index) => {
+              const active = item.id === selected?.id;
               const favourite = favourites.includes(item.id);
               return (
                 <li
@@ -441,7 +569,7 @@ function TvHubPage() {
                   </span>
                   <button
                     type="button"
-                    onClick={() => setSelectedId(item.id)}
+                    onClick={() => setSelected(item)}
                     className="col-start-2 flex min-w-0 items-center gap-2.5 text-left focus-visible:outline-none sm:gap-3"
                   >
                     {item.logo ? (
@@ -475,11 +603,18 @@ function TvHubPage() {
               );
             })}
           </ul>
-          {visible.length === 0 && <p className="p-8 text-center text-sm text-muted-foreground">Nothing here matches your search.</p>}
-          {filtered.length > visible.length && (
+          {itemsLoading && (
+            <p className="flex items-center justify-center gap-2 p-6 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" /> Loading
+            </p>
+          )}
+          {!itemsLoading && items.length === 0 && (
+            <p className="p-8 text-center text-sm text-muted-foreground">Nothing here matches your search.</p>
+          )}
+          {hasMore && !itemsLoading && (
             <div className="p-3 text-center">
-              <p className="mb-2 text-xs text-muted-foreground">Showing {visible.length} of {filtered.length}</p>
-              <Button type="button" variant="outline" className="h-9 w-full max-w-sm" onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}>
+              <p className="mb-2 text-xs text-muted-foreground">Showing {items.length}</p>
+              <Button type="button" variant="outline" className="h-9 w-full max-w-sm" onClick={() => void showMore()}>
                 Show more
               </Button>
             </div>
@@ -498,13 +633,11 @@ function TvHubPage() {
 function AccountBar({
   account,
   expiry,
-  total,
-  truncated,
+  catalog,
 }: {
   account: TvAccount | null;
   expiry: { label: string; note: string; expired: boolean } | null;
-  total: number;
-  truncated: boolean;
+  catalog: TvCatalogStatus | null;
 }) {
   return (
     <div className="mb-6 flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card/80 p-3 text-xs sm:text-sm">
@@ -538,7 +671,10 @@ function AccountBar({
         </span>
       )}
       <span className="rounded-full border border-border bg-background/60 px-3 py-1 text-muted-foreground">
-        {total.toLocaleString()} items{truncated ? " (partial)" : ""}
+        {(catalog?.total ?? 0).toLocaleString()} items
+        {catalog?.refreshedAt
+          ? ` · updated ${new Date(catalog.refreshedAt).toLocaleDateString(undefined, { day: "numeric", month: "short" })}`
+          : ""}
       </span>
     </div>
   );
@@ -551,6 +687,7 @@ function StreamPlayer({
   title,
   group,
   source,
+  credentials,
   live,
   onPrevious,
   onNext,
@@ -558,6 +695,7 @@ function StreamPlayer({
   title: string;
   group: string;
   source: string | null;
+  credentials: Creds;
   live: boolean;
   onPrevious: () => void;
   onNext: () => void;
@@ -603,7 +741,9 @@ function StreamPlayer({
     void (async () => {
       let prepared: Awaited<ReturnType<typeof prepareStream>>;
       try {
-        prepared = await prepareStream({ data: { url: source } });
+        prepared = await prepareStream({
+          data: { url: source, username: credentials.username, password: credentials.password },
+        });
       } catch {
         if (!destroyed) setStatus("error");
         return;
@@ -755,7 +895,7 @@ function StreamPlayer({
       video.onerror = null;
       video.onloadeddata = null;
     };
-  }, [live, prepareStream, source]);
+  }, [credentials.password, credentials.username, live, prepareStream, source]);
 
   const toggle = () => {
     const video = videoRef.current;
