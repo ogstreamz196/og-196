@@ -1,0 +1,1 @@
+UPDATE public.store_items SET name = 'OG Vault VIP Pass' WHERE slug = 'og-vip-pass';

@@ -348,7 +348,7 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="font-display text-lg font-black">
-                      <EditableContent contentKey="buyCoins.vip.heading" defaultValue="OG VIP Pass" />
+                      <EditableContent contentKey="buyCoins.vip.heading" defaultValue="OG Vault VIP Pass" />
                     </h3>
                     {isVip && (
                       <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400 ring-1 ring-emerald-500/30">

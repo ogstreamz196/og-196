@@ -82,7 +82,7 @@ export function VipPassPoolPanel() {
         <div className="flex items-center gap-2">
           <KeyRound className="h-4 w-4 text-primary" />
           <div>
-            <h2 className="font-display text-lg font-bold uppercase tracking-wider">OG VIP Pass logins</h2>
+            <h2 className="font-display text-lg font-bold uppercase tracking-wider">OG Vault VIP Pass logins</h2>
             <p className="text-xs text-muted-foreground">
               {available} active · {rows.length} total. Reusable — each buyer gets one at random.
             </p>

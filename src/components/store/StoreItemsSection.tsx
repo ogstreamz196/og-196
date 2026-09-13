@@ -65,7 +65,7 @@ export function StoreItemsSection() {
         queryClient.invalidateQueries({ queryKey: ["coin-transactions"] }),
         queryClient.invalidateQueries({ queryKey: ["store-catalog"] }),
       ]);
-      toast.success("OG VIP Pass unlocked — your login details are on the card");
+      toast.success("OG Vault VIP Pass unlocked — your login details are on the card");
     },
     onError: (error: Error) => toast.error(error.message),
   });

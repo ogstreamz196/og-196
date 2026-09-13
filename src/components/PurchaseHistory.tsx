@@ -511,7 +511,7 @@ export function PurchaseHistory() {
                 <li key={row.id} className="grid grid-cols-1 gap-2 px-4 py-3 text-sm min-[400px]:grid-cols-[minmax(0,1fr)_auto] min-[400px]:gap-3 sm:px-5">
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="truncate font-semibold">{row.stripe?.description || (row.type === "sports_guide_access" ? "OG Sports Guide Access" : row.type === "vip_pass" ? "OG VIP Pass" : row.type === "store_purchase" ? "Store purchase" : "OG Coin purchase")}</p>
+                      <p className="truncate font-semibold">{row.stripe?.description || (row.type === "sports_guide_access" ? "OG Sports Guide Access" : row.type === "vip_pass" ? "OG Vault VIP Pass" : row.type === "store_purchase" ? "Store purchase" : "OG Coin purchase")}</p>
                     </div>
 
                     <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
