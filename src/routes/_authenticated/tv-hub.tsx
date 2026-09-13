@@ -26,9 +26,15 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import tvHubCinematic from "@/assets/tv-hub-cinematic.jpg";
 import {
-  loadTvHubPlaylist,
+  getTvCatalogStatus,
+  getTvCategories,
+  getTvItems,
   prepareTvStream,
+  refreshTvCatalog,
+  signInTvHub,
   type TvAccount,
+  type TvCatalogStatus,
+  type TvCategory,
   type TvChannel,
 } from "@/lib/tv-hub.functions";
 
