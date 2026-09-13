@@ -741,7 +741,9 @@ function StreamPlayer({
     void (async () => {
       let prepared: Awaited<ReturnType<typeof prepareStream>>;
       try {
-        prepared = await prepareStream({ data: { url: source } });
+        prepared = await prepareStream({
+          data: { url: source, username: credentials.username, password: credentials.password },
+        });
       } catch {
         if (!destroyed) setStatus("error");
         return;
@@ -893,7 +895,7 @@ function StreamPlayer({
       video.onerror = null;
       video.onloadeddata = null;
     };
-  }, [live, prepareStream, source]);
+  }, [credentials.password, credentials.username, live, prepareStream, source]);
 
   const toggle = () => {
     const video = videoRef.current;
