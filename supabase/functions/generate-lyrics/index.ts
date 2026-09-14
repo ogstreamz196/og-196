@@ -362,12 +362,7 @@ Deno.serve(async (req) => {
 
 
     if (!res.ok) {
-      // Refund on failure
-      await admin.from("coin_transactions").insert({
-        user_id: user.id, amount: coinCost, type: "refund", reference,
-      });
-      const { data: prof } = await admin.from("profiles").select("coin_balance").eq("id", user.id).single();
-      await admin.from("profiles").update({ coin_balance: ((prof as { coin_balance?: number } | null)?.coin_balance ?? 0) + coinCost }).eq("id", user.id);
+      // Creation is free, so there is no balance movement to reverse.
       await updateProgress(0, "");
 
       if (res.status === 429) return jsonResponse({ error: "AI is busy right now — try again shortly" }, 429);
