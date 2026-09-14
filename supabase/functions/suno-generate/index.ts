@@ -233,12 +233,43 @@ Deno.serve(async (req) => {
       p_amount: coinCost,
       p_reference: chargeReference,
     });
+    let gifted = false;
     if (deductErr) {
-      // Roll the row back so a retry can charge cleanly.
+      // Gift rule: if the user already paid something towards THIS job (e.g.
+      // lyrics were generated and charged for this song) and then ran out of
+      // coins midway, we finish the job for free rather than stranding them.
+      let alreadyInvested = false;
       if (existing) {
-        await admin.from("songs").update({ status: existing.status }).eq("id", existing.id);
+        const { data: priorCharge } = await admin
+          .from("coin_transactions")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("reference", existing.id)
+          .limit(1)
+          .maybeSingle();
+        alreadyInvested = !!priorCharge;
       }
-      return json({ error: "Insufficient coins", code: "insufficient_coins" }, 402);
+      if (!alreadyInvested) {
+        // Roll the row back so a retry can charge cleanly.
+        if (existing) {
+          await admin.from("songs").update({ status: existing.status }).eq("id", existing.id);
+        }
+        return json({ error: "Insufficient coins", code: "insufficient_coins" }, 402);
+      }
+      gifted = true;
+      await admin.from("coin_transactions").insert({
+        user_id: user.id,
+        amount: 0,
+        type: "gift",
+        reference: `gift:midjob:${chargeReference}`,
+      });
+      await admin.from("user_notifications").insert({
+        user_id: user.id,
+        kind: "gift",
+        title: "On the house 🎁",
+        body: "You ran out of coins midway, so OG Bot finished this track for free.",
+        metadata: { song_id: existing?.id ?? null },
+      });
     }
 
     // Create or reuse the song row now that the charge has succeeded.
