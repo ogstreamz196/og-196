@@ -363,6 +363,117 @@ export const reconcileCoinSession = createServerFn({ method: "POST" })
   });
 
 // -------------------------------------------------------------------------
+// One-off card unlock: pay 99p for a single track instead of spending coins.
+// -------------------------------------------------------------------------
+
+const UUID_RE = /^[0-9a-fA-F-]{36}$/;
+
+export const createTrackUnlockCheckoutSession = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: { songId: string; returnUrl: string; environment: StripeEnv }) => {
+    if (!UUID_RE.test(data.songId)) throw new Error("Invalid songId");
+    if (data.environment !== "sandbox" && data.environment !== "live") {
+      throw new Error("Invalid environment");
+    }
+    if (!/^https?:\/\//.test(data.returnUrl)) throw new Error("Invalid returnUrl");
+    return data;
+  })
+  .handler(async ({ data, context }): Promise<CheckoutSessionResult> => {
+    const { userId, supabase } = context;
+    try {
+      const { TRACK_UNLOCK_PENCE, TRACK_UNLOCK_CURRENCY } = await import("@/lib/track-unlock.server");
+      const stripe = createStripeClient(data.environment);
+
+      const { data: song } = await supabase
+        .from("songs")
+        .select("id, title, status")
+        .eq("id", data.songId)
+        .maybeSingle();
+      if (!song) return { error: "Track not found" };
+      if (song.status !== "completed") return { error: "Track is not ready yet" };
+
+      let email: string | undefined;
+      try {
+        const { data: prof } = await supabase
+          .from("profiles").select("email").eq("id", userId).maybeSingle();
+        email = (prof?.email as string | undefined) ?? undefined;
+      } catch { /* email is optional */ }
+
+      const customerId = await resolveOrCreateCustomer(stripe, { email, userId });
+      const description = `Full track unlock — ${song.title || "OG Bot track"}`;
+
+      const session = await stripe.checkout.sessions.create({
+        line_items: [{
+          price_data: {
+            currency: TRACK_UNLOCK_CURRENCY,
+            unit_amount: TRACK_UNLOCK_PENCE,
+            product_data: { name: "Full track unlock" },
+          },
+          quantity: 1,
+        }],
+        mode: "payment",
+        ui_mode: "embedded_page",
+        return_url: data.returnUrl,
+        customer: customerId,
+        payment_intent_data: {
+          description,
+          metadata: { userId, kind: "track_unlock", songId: data.songId },
+        },
+        metadata: {
+          userId,
+          kind: "track_unlock",
+          songId: data.songId,
+          environment: data.environment,
+        },
+      });
+
+      return { clientSecret: session.client_secret ?? "" };
+    } catch (error) {
+      console.error("createTrackUnlockCheckoutSession failed", error);
+      return { error: getStripeErrorMessage(error) };
+    }
+  });
+
+export const reconcileTrackUnlock = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: { sessionId: string; environment: StripeEnv }) => {
+    if (!/^cs_(test|live)_[A-Za-z0-9]+$/.test(data.sessionId)) throw new Error("Invalid sessionId");
+    if (data.environment !== "sandbox" && data.environment !== "live") throw new Error("Invalid environment");
+    return data;
+  })
+  .handler(async ({ data, context }): Promise<
+    { status: "unlocked"; songId: string } | { status: "pending"; reason: string } | { error: string }
+  > => {
+    const { userId } = context;
+    try {
+      const stripe = createStripeClient(data.environment);
+      const session = await stripe.checkout.sessions.retrieve(data.sessionId);
+      const meta = (session.metadata ?? {}) as Record<string, string | undefined>;
+      if (meta.userId !== userId) return { error: "Session does not belong to this user" };
+      if (meta.kind !== "track_unlock" || !meta.songId) return { error: "Not a track unlock session" };
+      if (
+        session.status !== "complete" ||
+        (session.payment_status && session.payment_status !== "paid" && session.payment_status !== "no_payment_required")
+      ) {
+        return { status: "pending", reason: session.payment_status ?? session.status ?? "unknown" };
+      }
+
+      const { grantTrackUnlock } = await import("@/lib/track-unlock.server");
+      const result = await grantTrackUnlock(
+        userId,
+        meta.songId,
+        `stripe:${data.environment}:${session.id}`,
+      );
+      if (!result.ok) return { error: result.error };
+      return { status: "unlocked", songId: meta.songId };
+    } catch (error) {
+      console.error("reconcileTrackUnlock failed", error);
+      return { error: getStripeErrorMessage(error) };
+    }
+  });
+
+
+// -------------------------------------------------------------------------
 // Purchase history: any user can see their own coin/VIP transactions.
 // -------------------------------------------------------------------------
 
