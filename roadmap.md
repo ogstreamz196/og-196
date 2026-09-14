@@ -1,0 +1,4 @@
+- [ ] Verify and fix refer-to-earn end to end
+- [ ] Show the full global playlist in the global player
+- [ ] Offer 3 credits or 99p for global-track downloads
+- [ ] Verify relevant tests and preview
