@@ -916,7 +916,7 @@ function LibraryPage() {
     };
   }, [activeJobs]);
 
-  const COMMUNITY_PAGE_SIZE = 12;
+  const COMMUNITY_PAGE_SIZE = 50;
   const community = useInfiniteQuery({
     queryKey: ["library-community", user?.id],
     enabled: !!user,
@@ -930,10 +930,22 @@ function LibraryPage() {
         p_limit: COMMUNITY_PAGE_SIZE,
       });
       if (error) throw error;
-      // Fill missing required Song fields with safe defaults so the card renders.
-      return (data ?? []).map((s: Record<string, unknown>) => ({
+      const rows = (data ?? []) as Record<string, unknown>[];
+      const ids = rows.map((s) => String(s.id));
+      const unlockedIds = new Set<string>();
+      if (ids.length > 0) {
+        const { data: unlocks, error: unlockError } = await supabase
+          .from("unlocked_songs")
+          .select("song_id")
+          .in("song_id", ids);
+        if (unlockError) throw unlockError;
+        for (const unlock of unlocks ?? []) unlockedIds.add(unlock.song_id);
+      }
+      // Merge the listener's unlock ledger into the safe public track fields.
+      return rows.map((s) => ({
         prompt: "",
         ...s,
+        unlocked: unlockedIds.has(String(s.id)),
       })) as unknown as Song[];
     },
     getNextPageParam: (lastPage, allPages) =>
@@ -946,6 +958,13 @@ function LibraryPage() {
     onHit: () => community.fetchNextPage(),
     deps: [community.hasNextPage, community.isFetchingNextPage, communityTracks.length],
   });
+
+  // The global player is a complete queue, not only the first visible page.
+  useEffect(() => {
+    if (community.hasNextPage && !community.isFetchingNextPage) {
+      void community.fetchNextPage();
+    }
+  }, [community.hasNextPage, community.isFetchingNextPage, community.data?.pages.length]);
 
   useEffect(() => {
     if (!user) return;
@@ -1687,7 +1706,7 @@ function LibraryPage() {
               <span aria-hidden className="text-primary/60">
                 •
               </span>
-              <span className="text-primary">3 OG coins to download</span>
+              <span className="text-primary">Download · 3 OG coins or 99p</span>
             </p>
 
             {community.isLoading ? (

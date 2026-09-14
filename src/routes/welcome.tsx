@@ -119,11 +119,19 @@ function safeRelativeNext(): string | null {
 function useRedirectIfSignedIn() {
   const navigate = useNavigate();
   useEffect(() => {
-    // Capture ?ref=<uuid> from URL and stash for post-signup claim
+    // Capture a referral UUID or OG Leader code for the post-signup claim.
     if (typeof window !== "undefined") {
       const ref = new URLSearchParams(window.location.search).get("ref");
-      if (ref && /^[0-9a-f-]{36}$/i.test(ref)) {
-        try { localStorage.setItem(PENDING_REF_KEY, ref); } catch { /* ignore */ }
+      const normalizedRef = ref?.trim().toUpperCase();
+      const validUuid = !!ref && /^[0-9a-f-]{36}$/i.test(ref);
+      const validCode = !!normalizedRef && /^(?:OG-)?[A-Z0-9]{6}$/.test(normalizedRef);
+      if (validUuid || validCode) {
+        const stored = validUuid
+          ? ref!.toLowerCase()
+          : normalizedRef!.startsWith("OG-")
+            ? normalizedRef!
+            : `OG-${normalizedRef}`;
+        try { localStorage.setItem(PENDING_REF_KEY, stored); } catch { /* ignore */ }
       }
     }
     let cancelled = false;

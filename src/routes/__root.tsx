@@ -258,17 +258,44 @@ function RootComponent() {
           }
         } catch { /* non-blocking */ }
 
-        // Claim pending referral (set on /welcome?ref=<uuid> before sign-in)
+        // Claim a pending referral UUID or OG Leader code captured before sign-in.
         try {
           const pending = typeof window !== "undefined" ? localStorage.getItem("og_pending_ref") : null;
-          if (pending && pending !== data.user.id) {
-            const { data: claimed, error } = await supabase.rpc("claim_referral", { p_referrer: pending });
+          if (pending) {
+            let referrerId = pending;
+            if (!/^[0-9a-f-]{36}$/i.test(pending)) {
+              const { data: r } = await supabase.rpc("lookup_referrer_by_code", { p_code: pending });
+              const res = r as { found: boolean; referrer_id?: string } | null;
+              if (res?.found && res.referrer_id) referrerId = res.referrer_id;
+            }
+            if (/^[0-9a-f-]{36}$/i.test(referrerId)) {
+              const { data: claimed, error } = await supabase.rpc("claim_referral", { p_referrer: referrerId });
+              if (!error && claimed === true) {
+                queryClient.invalidateQueries({ queryKey: ["referral-summary"] });
+              }
+            }
+                { p_code: pending.toUpperCase() },
+              );
+              if (lookupError) throw lookupError;
+              const result = lookup as { found?: boolean; referrer_id?: string } | null;
+              if (!result?.found || !result.referrer_id) throw new Error("Referral code not found");
+              referrerId = result.referrer_id;
+            }
+            if (referrerId === data.user.id) {
+              localStorage.removeItem("og_pending_ref");
+              return;
+            }
+            const { data: claimed, error } = await supabase.rpc("claim_referral", { p_referrer: referrerId });
+            if (error) throw error;
             if (!error && claimed === true) {
               queryClient.invalidateQueries({ queryKey: ["referral-summary"] });
             }
+            localStorage.removeItem("og_pending_ref");
           }
-          if (typeof window !== "undefined") localStorage.removeItem("og_pending_ref");
-        } catch { /* non-blocking */ }
+        } catch (error) {
+          // Keep the pending referral so a temporary network failure can retry.
+          console.warn("pending referral claim failed", error);
+        }
       } catch (error) {
         console.error("user bootstrap failed", error);
       }
