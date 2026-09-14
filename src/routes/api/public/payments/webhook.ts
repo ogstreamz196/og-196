@@ -193,6 +193,25 @@ async function grantVipFromCheckout(session: any, env: StripeEnv) {
   await grantVipRole(userId, { sessionId: session.id, env, source: "checkout" });
 }
 
+// ─── one-off card unlock of a single track (99p) ───────────────────────────
+async function fulfilTrackUnlock(session: any, env: StripeEnv) {
+  const meta = (session?.metadata ?? {}) as Record<string, string | undefined>;
+  const userId = meta.userId;
+  const songId = meta.songId;
+  if (!userId || !songId) {
+    log("warn", "track unlock missing metadata", { sessionId: session?.id });
+    return;
+  }
+  if (session?.payment_status && session.payment_status !== "paid" && session.payment_status !== "no_payment_required") {
+    log("info", "ignoring unpaid track unlock", { sessionId: session.id });
+    return;
+  }
+  const { grantTrackUnlock } = await import("@/lib/track-unlock.server");
+  const result = await grantTrackUnlock(userId, songId, `stripe:${env}:${session.id}`);
+  if (!result.ok) log("error", "track unlock failed", { userId, songId, err: result.error });
+  else log("info", "track unlocked via card", { userId, songId, already: result.already });
+}
+
 // ─── refunds ───────────────────────────────────────────────────────────────
 // Given a Stripe refund (or charge.refunded charge), resolve the user_id and
 // upsert a row in payment_refunds keyed by refund id (idempotent).
@@ -438,7 +457,9 @@ export async function handleEvent(event: { id: string; type: string; data: { obj
     case "transaction.completed": {
       const session = event.data.object;
       const bundleId = session?.metadata?.bundleId as string | undefined;
-      if (bundleId?.startsWith("store:")) await fulfilStoreItemCheckout(session, env);
+      const kind = session?.metadata?.kind as string | undefined;
+      if (kind === "track_unlock") await fulfilTrackUnlock(session, env);
+      else if (bundleId?.startsWith("store:")) await fulfilStoreItemCheckout(session, env);
       else if (isVipBundle(bundleId)) await grantVipFromCheckout(session, env);
       else await creditCoinsForSession(session, env);
       break;

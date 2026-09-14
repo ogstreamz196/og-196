@@ -7,19 +7,22 @@ import {
   createVipCheckoutSession,
   createCustomCoinCheckoutSession,
 } from "@/lib/payments.functions";
+import { createTrackUnlockCheckoutSession } from "@/lib/payments.functions";
 import { createStoreItemCheckoutSession } from "@/lib/store.functions";
 import { Button } from "@/components/ui/button";
 
 interface Props {
   priceId?: string;
   returnUrl: string;
-  type?: "coins" | "vip" | "custom" | "store_item";
+  type?: "coins" | "vip" | "custom" | "store_item" | "track_unlock";
   customUnits?: number;
   storeItemId?: string;
+  /** Track being unlocked with a one-off card payment (type "track_unlock"). */
+  songId?: string;
 }
 
 export function StripeEmbeddedCheckoutInline({
-  priceId, returnUrl, type = "coins", customUnits, storeItemId,
+  priceId, returnUrl, type = "coins", customUnits, storeItemId, songId,
 }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
@@ -35,6 +38,10 @@ export function StripeEmbeddedCheckoutInline({
           : type === "custom"
           ? await createCustomCoinCheckoutSession({
               data: { units: customUnits!, returnUrl, environment: getStripeEnvironment() },
+            })
+          : type === "track_unlock"
+          ? await createTrackUnlockCheckoutSession({
+              data: { songId: songId!, returnUrl, environment: getStripeEnvironment() },
             })
           : type === "store_item"
           ? await createStoreItemCheckoutSession({
@@ -52,7 +59,7 @@ export function StripeEmbeddedCheckoutInline({
       setError(msg);
       throw e;
     }
-  }, [priceId, returnUrl, type, customUnits, storeItemId, attempt]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [priceId, returnUrl, type, customUnits, storeItemId, songId, attempt]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (error) {
     return (
