@@ -446,7 +446,7 @@ Deno.serve(async (req) => {
 
     await admin.from("songs").update({ status: "processing", suno_task_id: taskId }).eq("id", songId);
 
-    return json({ accepted: true, song_id: songId, task_id: taskId, coin_balance: balance });
+    return json({ accepted: true, song_id: songId, task_id: taskId, coin_balance: balance, gifted });
   } catch (e) {
     console.error("Unhandled error", e);
     return json({ error: (e as Error).message }, 500);
