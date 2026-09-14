@@ -438,7 +438,9 @@ export async function handleEvent(event: { id: string; type: string; data: { obj
     case "transaction.completed": {
       const session = event.data.object;
       const bundleId = session?.metadata?.bundleId as string | undefined;
-      if (bundleId?.startsWith("store:")) await fulfilStoreItemCheckout(session, env);
+      const kind = session?.metadata?.kind as string | undefined;
+      if (kind === "track_unlock") await fulfilTrackUnlock(session, env);
+      else if (bundleId?.startsWith("store:")) await fulfilStoreItemCheckout(session, env);
       else if (isVipBundle(bundleId)) await grantVipFromCheckout(session, env);
       else await creditCoinsForSession(session, env);
       break;
