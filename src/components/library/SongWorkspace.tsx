@@ -1018,6 +1018,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
         royalty={0}
         balance={balance}
         songTitle={song.title ?? title}
+        songId={song.id}
       />
     </div>
   );

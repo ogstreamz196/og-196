@@ -295,6 +295,7 @@ export function FreshTrackCard({
         royalty={0}
         balance={balance}
         songTitle={title}
+        songId={song.id}
       />
     </section>
   );

@@ -316,6 +316,7 @@ function CommunityTrackRowImpl({
         royalty={COMMUNITY_DOWNLOAD_ROYALTY}
         balance={balance}
         songTitle={song.title}
+        songId={song.id}
       />
     </li>
   );
