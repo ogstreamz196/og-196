@@ -1,5 +1,5 @@
 import React from "react";
-import { AbsoluteFill, Sequence } from "remotion";
+import { AbsoluteFill, Audio, Sequence, staticFile } from "remotion";
 import { Backdrop, useFade } from "./components/Backdrop";
 import { PromoIntro } from "./scenes/PromoIntro";
 import { CreationTool } from "./scenes/CreationTool";
@@ -29,6 +29,7 @@ const beats: Beat[] = [
 export const MainVideo: React.FC = () => (
   <AbsoluteFill>
     <Backdrop />
+    <Audio src={staticFile("OG_PROMO.mp3")} startFrom={90} volume={0.88} />
     {beats.map((b, i) => (
       <Sequence key={i} from={b.from} durationInFrames={b.len}>
         <Fade len={b.len}>{b.node}</Fade>
