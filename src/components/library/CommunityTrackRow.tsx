@@ -179,7 +179,7 @@ function CommunityTrackRowImpl({
           type="button"
           onClick={() => setUnlockOpen(true)}
           disabled={!isReady || busy}
-          aria-label={`Download ${title} for ${COMMUNITY_DOWNLOAD_COST} OG coins`}
+          aria-label={`Download ${title} for ${COMMUNITY_DOWNLOAD_COST} OG coins or 99p`}
           className={cn(
             "inline-flex h-9 shrink-0 items-center gap-1 rounded-full border border-primary/40 bg-primary/15 px-2.5 text-xs font-black tabular-nums text-primary transition-colors",
             isReady && !busy ? "hover:bg-primary/25" : "opacity-40",
@@ -187,7 +187,7 @@ function CommunityTrackRowImpl({
         >
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
           <span>{COMMUNITY_DOWNLOAD_COST}</span>
-          <span className="sr-only">OG coins</span>
+          <span className="sr-only">OG coins or 99p</span>
         </button>
       )}
       {onDelete && (
