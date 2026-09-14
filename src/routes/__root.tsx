@@ -263,17 +263,9 @@ function RootComponent() {
           const pending = typeof window !== "undefined" ? localStorage.getItem("og_pending_ref") : null;
           if (pending) {
             let referrerId = pending;
-            if (!/^[0-9a-f-]{36}$/i.test(pending)) {
-              const { data: r } = await supabase.rpc("lookup_referrer_by_code", { p_code: pending });
-              const res = r as { found: boolean; referrer_id?: string } | null;
-              if (res?.found && res.referrer_id) referrerId = res.referrer_id;
-            }
-            if (/^[0-9a-f-]{36}$/i.test(referrerId)) {
-              const { data: claimed, error } = await supabase.rpc("claim_referral", { p_referrer: referrerId });
-              if (!error && claimed === true) {
-                queryClient.invalidateQueries({ queryKey: ["referral-summary"] });
-              }
-            }
+            if (/^OG-[A-Z0-9]{6}$/i.test(pending)) {
+              const { data: lookup, error: lookupError } = await supabase.rpc(
+                "lookup_referrer_by_code",
                 { p_code: pending.toUpperCase() },
               );
               if (lookupError) throw lookupError;
@@ -287,7 +279,7 @@ function RootComponent() {
             }
             const { data: claimed, error } = await supabase.rpc("claim_referral", { p_referrer: referrerId });
             if (error) throw error;
-            if (!error && claimed === true) {
+            if (claimed === true) {
               queryClient.invalidateQueries({ queryKey: ["referral-summary"] });
             }
             localStorage.removeItem("og_pending_ref");

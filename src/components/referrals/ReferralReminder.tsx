@@ -71,7 +71,7 @@ export function ReferralReminder({ className }: { className?: string }) {
       className={cn(
         // Consistent responsive padding via clamp keeps spacing identical
         // looking across phone → tablet → desktop.
-        "relative overflow-hidden rounded-lg border border-border bg-background/50 p-3",
+        "relative overflow-hidden rounded-lg border border-border bg-background/50 [padding:clamp(0.75rem,2.5vw,1rem)]",
         className,
       )}
     >
@@ -84,7 +84,7 @@ export function ReferralReminder({ className }: { className?: string }) {
             <Sparkles className="h-4 w-4" />
           </div>
           <div className="min-w-0 flex-1">
-            <div className="text-xs font-semibold uppercase text-muted-foreground">
+            <div className="text-xs font-semibold uppercase text-foreground/85">
               Earn 10% cashback
             </div>
             <p
@@ -107,7 +107,7 @@ export function ReferralReminder({ className }: { className?: string }) {
                 aria-live="polite"
                 variant="ghost"
                 size="sm"
-                className="h-9 px-2 text-xs"
+                className="min-h-11 min-w-11 px-2 text-xs text-foreground/85 focus-visible:ring-2 sm:min-h-9"
               >
                 {copied ? <Check className="h-4 w-4 sm:h-3 sm:w-3" aria-hidden /> : <Copy className="h-4 w-4 sm:h-3 sm:w-3" aria-hidden />}
                 {copied ? "Copied" : "Copy link"}
@@ -123,14 +123,14 @@ export function ReferralReminder({ className }: { className?: string }) {
             onClick={share}
             aria-label="Share your referral link"
             size="sm"
-            className="h-10 flex-1 font-bold sm:h-9 sm:flex-none"
+            className="h-11 flex-1 font-bold focus-visible:ring-2 sm:h-9 sm:flex-none"
           >
             <Share2 className="h-4 w-4 sm:h-3.5 sm:w-3.5" aria-hidden /> Share
           </Button>
           <Link
             to="/referrals"
             aria-label="See referral earnings details"
-            className="inline-flex h-10 min-w-20 shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-border px-3 text-xs font-semibold text-foreground hover:bg-accent sm:h-9"
+            className="inline-flex h-11 min-w-20 shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-border px-3 text-xs font-semibold text-foreground hover:bg-accent focus-visible:ring-2 sm:h-9"
           >
             Details →
           </Link>
