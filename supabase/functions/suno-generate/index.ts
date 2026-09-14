@@ -164,9 +164,8 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Base price covers a 3 minute track; every extra minute costs 1 more coin.
-    let coinCost = (await getSetting(admin, "coins_per_generation", 3)) +
-      Math.max(0, targetMinutes - 3);
+    // Creation and rendering are free. Users pay only at final full-track download.
+    let coinCost = 0;
 
     // If this generation came from a portal, force the hardcoded language into the Suno prompt
     let portalLanguage: string | null = null;
@@ -179,7 +178,7 @@ Deno.serve(async (req) => {
       if (!p) return json({ error: "Portal not found" }, 404);
       if (p.status === "maintenance") return json({ error: "Portal is in maintenance mode" }, 423);
       portalLanguage = p.language ?? null;
-      if (typeof p.coin_cost_per_generation === "number") coinCost = p.coin_cost_per_generation;
+      // Portal generations follow the same free-until-download rule.
     }
     const effectiveLyrics = lyrics && portalLanguage
       ? `[Language: ${portalLanguage}]\n${lyrics}`
@@ -228,11 +227,13 @@ Deno.serve(async (req) => {
     // as the charge reference makes the coin_transactions row idempotent per
     // generation attempt.
     const chargeReference = existing?.id ?? crypto.randomUUID();
-    const { data: balance, error: deductErr } = await admin.rpc("deduct_coins", {
-      p_user: user.id,
-      p_amount: coinCost,
-      p_reference: chargeReference,
-    });
+    const { data: currentProfile } = await admin
+      .from("profiles")
+      .select("coin_balance")
+      .eq("id", user.id)
+      .single();
+    const balance = currentProfile?.coin_balance ?? 0;
+    const deductErr = null;
     let gifted = false;
     if (deductErr) {
       // Gift rule: if the user already paid something towards THIS job (e.g.

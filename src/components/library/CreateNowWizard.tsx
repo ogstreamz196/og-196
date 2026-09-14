@@ -77,7 +77,7 @@ const GENDERS = ["Female vocal", "Male vocal", "Duo", "Any voice"];
 
 const TOTAL_STEPS = 3;
 
-/** Track length — 3 minutes included, then 1 coin per extra minute. */
+/** Track length options. Creation and rendering are free. */
 export const MIN_LENGTH = 3;
 export const MAX_LENGTH = 8;
 export const LENGTH_OPTIONS = [3, 4, 5, 6, 7, 8];
@@ -426,7 +426,7 @@ export function CreateNowWizard({
                   </button>
                 </div>
                 <p className="text-[11px] text-muted-foreground">
-                  Each extra minute costs 1 coin.
+                  Every length is free to create. Pay only when you download the full track.
                 </p>
               </div>
             </div>
@@ -676,7 +676,7 @@ export function CreateNowWizard({
                 </p>
               </div>
 
-              {/* Final review so nothing is a surprise before spending coins. */}
+              {/* Final review so nothing is a surprise before creating. */}
               <div className="space-y-1 rounded-xl border border-border bg-background/60 p-3 text-xs">
                 <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
                   Review

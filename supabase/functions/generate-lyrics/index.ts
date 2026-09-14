@@ -87,7 +87,7 @@ Deno.serve(async (req) => {
     const songId = body.song_id ? String(body.song_id) : null;
 
     const admin = adminClient();
-    const coinCost = await getSetting(admin, "coins_per_lyrics_generation", 1);
+    const coinCost = 0;
 
     // Helper to broadcast live progress via the songs row (Realtime).
     const updateProgress = async (progress: number, stage: string) => {
@@ -109,11 +109,13 @@ Deno.serve(async (req) => {
     }
 
     const reference = songId ?? `lyrics:${crypto.randomUUID()}`;
-    const { data: balance, error: deductErr } = await admin.rpc("deduct_coins", {
-      p_user: user.id,
-      p_amount: coinCost,
-      p_reference: reference,
-    });
+    const { data: currentProfile } = await admin
+      .from("profiles")
+      .select("coin_balance")
+      .eq("id", user.id)
+      .single();
+    const balance = currentProfile?.coin_balance ?? 0;
+    const deductErr = null;
     if (deductErr) {
       await updateProgress(0, "");
       return jsonResponse({ error: "Insufficient coins", code: "insufficient_coins" }, 402);
