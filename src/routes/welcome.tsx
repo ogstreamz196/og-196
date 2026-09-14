@@ -125,11 +125,11 @@ function useRedirectIfSignedIn() {
       const normalizedRef = ref?.trim().toUpperCase();
       const validUuid = !!ref && /^[0-9a-f-]{36}$/i.test(ref);
       const validCode = !!normalizedRef && /^(?:OG-)?[A-Z0-9]{6}$/.test(normalizedRef);
-      if (validUuid || validCode) {
+      if ((validUuid || validCode) && ref && normalizedRef) {
         const stored = validUuid
-          ? ref!.toLowerCase()
-          : normalizedRef!.startsWith("OG-")
-            ? normalizedRef!
+          ? ref.toLowerCase()
+          : normalizedRef.startsWith("OG-")
+            ? normalizedRef
             : `OG-${normalizedRef}`;
         try { localStorage.setItem(PENDING_REF_KEY, stored); } catch { /* ignore */ }
       }
