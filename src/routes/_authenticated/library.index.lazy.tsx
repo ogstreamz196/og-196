@@ -76,7 +76,7 @@ import {
 } from "@/components/library/CreateNowWizard";
 import { CommunityTrackRow } from "@/components/library/CommunityTrackRow";
 import { MiniPlayer } from "@/components/library/MiniPlayer";
-import { PlaylistProvider, PlaylistOrder } from "@/hooks/use-playlist";
+import { PlaylistProvider, PlaylistOrder, usePlaylist } from "@/hooks/use-playlist";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 
 
@@ -137,6 +137,7 @@ function LibraryRoute() {
 }
 
 function LibraryPage() {
+  const playlist = usePlaylist();
   const { user } = useAuth();
   const dev = useDevMode();
   const { isAdmin, isBoss } = useRole();
@@ -144,8 +145,8 @@ function LibraryPage() {
   const { data: settings } = useSettings();
   const navigate = useNavigate();
 
-  const lyricsCost = settings?.coins_per_lyrics_generation ?? 1;
-  const previewCost = settings?.coins_per_generation ?? 3;
+  const lyricsCost = settings?.coins_per_lyrics_generation ?? 0;
+  const previewCost = settings?.coins_per_generation ?? 0;
   const unlockCost = settings?.coins_per_full_unlock ?? 5;
   const sampleSeconds = settings?.sample_seconds ?? 60;
   /** Set from the toast CTA so the finished-track card opens its unlock sheet. */
@@ -172,9 +173,8 @@ function LibraryPage() {
   // Track length is chosen in step 1 of the Create now wizard (3 min floor).
   const [targetMinutes, setTargetMinutes] = useState(MIN_TRACK_MINUTES);
   const targetDurationSec = Math.max(MIN_TRACK_MINUTES, targetMinutes) * 60;
-  const extraMinutes = Math.max(0, targetMinutes - MIN_TRACK_MINUTES);
-  /** 3 minutes are included in the base price; each extra minute costs 1 coin. */
-  const audioCost = previewCost + extraMinutes;
+  /** Creating, writing and rendering are free; payment starts at the final download. */
+  const audioCost = 0;
   // Actual estimate returned by the lyrics engine once a track is generated.
   const [actualDurationLabel, setActualDurationLabel] = useState<string | null>(null);
 
@@ -408,7 +408,7 @@ function LibraryPage() {
         return;
       }
       setLyrics(next);
-      toast.success(`Lyrics ready · -${data?.coin_cost ?? lyricsCost} coins`);
+      toast.success("Lyrics ready · free");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Lyrics generation failed");
     } finally {
@@ -480,7 +480,7 @@ function LibraryPage() {
         toast.info(genData.error || "Your current generations need to finish first");
         return;
       }
-      toast.success(`Generating your song · -${audioCost} coins`);
+      toast.success("OG Bot is creating your song — no credits charged");
       navigate({ to: "/library/$songId", params: { songId: row.id } });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not generate song");
@@ -774,7 +774,7 @@ function LibraryPage() {
       advanceStage("rendering");
       setTrackedSongId(row.id);
       library.refetch();
-      toast.success(`Cooking your sample · -${totalCost} coins`);
+      toast.success("OG Bot is creating your track — no credits charged");
     } catch (e) {
       if (stale()) return;
       const msg = e instanceof Error ? e.message : "Something went wrong";
@@ -985,14 +985,19 @@ function LibraryPage() {
           () => statusPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }),
           200,
         );
-        toast.success(`🎧 Track completed · ${row.title || "Your song"}`, {
-          id: `song-ready-${row.id}`,
-          duration: 14000,
+        const toastId = `song-listen-${row.id}`;
+        toast.success("Your track is still downloading, but you can start listening now.", {
+          id: toastId,
+          duration: 20000,
           action: {
-            label: `Unlock full · ${unlockCost}`,
-            onClick: () => setAutoUnlockPrompt(true),
+            label: "Play",
+            onClick: () => {
+              playlist?.playId(row.id);
+              toast.dismiss(toastId);
+            },
           },
         });
+        window.setTimeout(() => playlist?.playId(row.id), 500);
       } else if (row.status === "failed") {
         setPipeline((p) => ({
           ...p,
@@ -1045,14 +1050,19 @@ function LibraryPage() {
       const title = song.title || "Your song";
       setFreshTrack(song);
       setAutoUnlockPrompt(false);
-      toast.success(`🎧 Track completed · ${title}`, {
-        id: `song-ready-${song.id}`,
-        duration: 14000,
+      const toastId = `song-listen-${song.id}`;
+      toast.success("Your track is still downloading, but you can start listening now.", {
+        id: toastId,
+        duration: 20000,
         action: {
-          label: `Unlock full · ${unlockCost}`,
-          onClick: () => setAutoUnlockPrompt(true),
+          label: "Play",
+          onClick: () => {
+            playlist?.playId(song.id);
+            toast.dismiss(toastId);
+          },
         },
       });
+      window.setTimeout(() => playlist?.playId(song.id), 500);
     }
     previouslyActiveRef.current = activeIds;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1173,7 +1183,7 @@ function LibraryPage() {
 
           {/* Track length now lives in step 1 of the wizard — keep this clean. */}
           <p className="text-center text-[11px] font-semibold text-muted-foreground">
-            -{totalCost} coins · {targetMinutes} min
+            Free to create · {targetMinutes} min
           </p>
 
           {/* Hazard robotic CREATE button — a big 3D push-button on a base plate */}
@@ -1275,7 +1285,7 @@ function LibraryPage() {
         open={wizardOpen}
         onOpenChange={setWizardOpen}
         initialDraft={wizardDraft}
-        submitLabel={`Create · -${totalCost}`}
+        submitLabel="Create for free"
         onComplete={(v, draft) => {
           setWizardDraft(draft);
           setTitle(v.title);

@@ -14,14 +14,14 @@ export type AppSettings = {
 };
 
 const DEFAULTS: AppSettings = {
-  coins_per_generation: 3,
-  coins_per_lyrics_generation: 3,
+  coins_per_generation: 0,
+  coins_per_lyrics_generation: 0,
   coins_per_full_unlock: 5,
   coins_per_lyric_video: 5,
   coins_per_variation_divisor: 2,
   songs_per_generation: 2,
   sample_seconds: 60,
-  signup_credits: 5,
+  signup_credits: 25,
 };
 
 const SETTINGS_QUERY_KEY = ["app-settings"] as const;

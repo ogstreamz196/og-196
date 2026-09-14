@@ -87,7 +87,7 @@ Deno.serve(async (req) => {
     const songId = body.song_id ? String(body.song_id) : null;
 
     const admin = adminClient();
-    const coinCost = await getSetting(admin, "coins_per_lyrics_generation", 1);
+    const coinCost = 0;
 
     // Helper to broadcast live progress via the songs row (Realtime).
     const updateProgress = async (progress: number, stage: string) => {
@@ -109,11 +109,13 @@ Deno.serve(async (req) => {
     }
 
     const reference = songId ?? `lyrics:${crypto.randomUUID()}`;
-    const { data: balance, error: deductErr } = await admin.rpc("deduct_coins", {
-      p_user: user.id,
-      p_amount: coinCost,
-      p_reference: reference,
-    });
+    const { data: currentProfile } = await admin
+      .from("profiles")
+      .select("coin_balance")
+      .eq("id", user.id)
+      .single();
+    const balance = currentProfile?.coin_balance ?? 0;
+    const deductErr = null;
     if (deductErr) {
       await updateProgress(0, "");
       return jsonResponse({ error: "Insufficient coins", code: "insufficient_coins" }, 402);
@@ -360,12 +362,7 @@ Deno.serve(async (req) => {
 
 
     if (!res.ok) {
-      // Refund on failure
-      await admin.from("coin_transactions").insert({
-        user_id: user.id, amount: coinCost, type: "refund", reference,
-      });
-      const { data: prof } = await admin.from("profiles").select("coin_balance").eq("id", user.id).single();
-      await admin.from("profiles").update({ coin_balance: ((prof as { coin_balance?: number } | null)?.coin_balance ?? 0) + coinCost }).eq("id", user.id);
+      // Creation is free, so there is no balance movement to reverse.
       await updateProgress(0, "");
 
       if (res.status === 429) return jsonResponse({ error: "AI is busy right now — try again shortly" }, 429);

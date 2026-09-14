@@ -66,7 +66,7 @@ export const ensureCurrentUserBootstrap = createServerFn({ method: "POST" })
     if (profileError) throw profileError;
 
     if (!existingProfile) {
-      const welcomeCoins = withinDeviceAllowance ? 10 : 0;
+      const welcomeCoins = withinDeviceAllowance ? 25 : 0;
       const { error } = await supabaseAdmin.from("profiles").insert({
         id: userId,
         email,

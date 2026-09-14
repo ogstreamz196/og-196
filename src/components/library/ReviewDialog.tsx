@@ -51,7 +51,7 @@ export function ReviewDialog({
             Review your brief
           </DialogTitle>
           <DialogDescription>
-            Final check before OG Bot drops the track. Cost: {previewCost} coins.
+            Final check before OG Bot creates the track. Creation and rendering are free.
           </DialogDescription>
         </DialogHeader>
 
@@ -155,7 +155,7 @@ export function ReviewDialog({
             ) : (
               <Wand2 className="h-4 w-4" />
             )}
-            Confirm & generate · -{previewCost}
+            Confirm &amp; generate · Free
           </Button>
         </DialogFooter>
       </DialogContent>

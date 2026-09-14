@@ -1,6 +1,6 @@
 // Suno generation edge function.
 // - Verifies the calling user
-// - Reads dynamic pricing from app_settings (coins_per_generation)
+// - Creates and renders tracks free; charging happens only at final download
 // - Deducts coins atomically (refunds on Suno API failure)
 // - Calls the Suno API; one task typically produces 2 clips
 // - Inserts a 'pending' songs row; suno-callback fills it in + adds extra rows for sibling clips
@@ -164,9 +164,8 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Base price covers a 3 minute track; every extra minute costs 1 more coin.
-    let coinCost = (await getSetting(admin, "coins_per_generation", 3)) +
-      Math.max(0, targetMinutes - 3);
+    // Creation and rendering are free. Users pay only at final full-track download.
+    let coinCost = 0;
 
     // If this generation came from a portal, force the hardcoded language into the Suno prompt
     let portalLanguage: string | null = null;
@@ -179,7 +178,7 @@ Deno.serve(async (req) => {
       if (!p) return json({ error: "Portal not found" }, 404);
       if (p.status === "maintenance") return json({ error: "Portal is in maintenance mode" }, 423);
       portalLanguage = p.language ?? null;
-      if (typeof p.coin_cost_per_generation === "number") coinCost = p.coin_cost_per_generation;
+      // Portal generations follow the same free-until-download rule.
     }
     const effectiveLyrics = lyrics && portalLanguage
       ? `[Language: ${portalLanguage}]\n${lyrics}`
@@ -223,54 +222,15 @@ Deno.serve(async (req) => {
       existing = row;
     }
 
-    // Deduct coins FIRST so a rejected charge does not litter the library
-    // with an orphan "failed – insufficient coins" song row. Using the song id
-    // as the charge reference makes the coin_transactions row idempotent per
-    // generation attempt.
+    // Read the current balance for the response without charging creation.
     const chargeReference = existing?.id ?? crypto.randomUUID();
-    const { data: balance, error: deductErr } = await admin.rpc("deduct_coins", {
-      p_user: user.id,
-      p_amount: coinCost,
-      p_reference: chargeReference,
-    });
-    let gifted = false;
-    if (deductErr) {
-      // Gift rule: if the user already paid something towards THIS job (e.g.
-      // lyrics were generated and charged for this song) and then ran out of
-      // coins midway, we finish the job for free rather than stranding them.
-      let alreadyInvested = false;
-      if (existing) {
-        const { data: priorCharge } = await admin
-          .from("coin_transactions")
-          .select("id")
-          .eq("user_id", user.id)
-          .eq("reference", existing.id)
-          .limit(1)
-          .maybeSingle();
-        alreadyInvested = !!priorCharge;
-      }
-      if (!alreadyInvested) {
-        // Roll the row back so a retry can charge cleanly.
-        if (existing) {
-          await admin.from("songs").update({ status: existing.status }).eq("id", existing.id);
-        }
-        return json({ error: "Insufficient coins", code: "insufficient_coins" }, 402);
-      }
-      gifted = true;
-      await admin.from("coin_transactions").insert({
-        user_id: user.id,
-        amount: 0,
-        type: "gift",
-        reference: `gift:midjob:${chargeReference}`,
-      });
-      await admin.from("user_notifications").insert({
-        user_id: user.id,
-        kind: "gift",
-        title: "On the house 🎁",
-        body: "You ran out of coins midway, so OG Bot finished this track for free.",
-        metadata: { song_id: existing?.id ?? null },
-      });
-    }
+    const { data: currentProfile } = await admin
+      .from("profiles")
+      .select("coin_balance")
+      .eq("id", user.id)
+      .single();
+    const balance = currentProfile?.coin_balance ?? 0;
+    const gifted = false;
 
     // Create or reuse the song row now that the charge has succeeded.
     let song: { id: string } | null = null;
