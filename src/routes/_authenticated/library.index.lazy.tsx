@@ -408,7 +408,7 @@ function LibraryPage() {
         return;
       }
       setLyrics(next);
-      toast.success(`Lyrics ready · -${data?.coin_cost ?? lyricsCost} coins`);
+      toast.success("Lyrics ready · free");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Lyrics generation failed");
     } finally {
@@ -1183,7 +1183,7 @@ function LibraryPage() {
 
           {/* Track length now lives in step 1 of the wizard — keep this clean. */}
           <p className="text-center text-[11px] font-semibold text-muted-foreground">
-            -{totalCost} coins · {targetMinutes} min
+            Free to create · {targetMinutes} min
           </p>
 
           {/* Hazard robotic CREATE button — a big 3D push-button on a base plate */}
@@ -1285,7 +1285,7 @@ function LibraryPage() {
         open={wizardOpen}
         onOpenChange={setWizardOpen}
         initialDraft={wizardDraft}
-        submitLabel={`Create · -${totalCost}`}
+        submitLabel="Create for free"
         onComplete={(v, draft) => {
           setWizardDraft(draft);
           setTitle(v.title);

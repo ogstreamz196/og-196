@@ -111,10 +111,9 @@ interface Props {
 
 /**
  * 3-stage music creation workflow:
- *   1. Lyrics       — user crafts a brief and generates lyrics (charged)
- *   2. Sample       — generate a short preview of the full song (charged)
- *   3. Final song   — full track ready to play / download (uses preview unlock)
- * Edits at any stage can be re-sent and re-cost coins, same as every other AI message.
+ *   1. Lyrics       — user crafts a brief and generates lyrics for free
+ *   2. Sample       — generate and listen while the full file finishes downloading
+ *   3. Final song   — unlock the full download with coins or a one-off card payment
  */
 export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const { data: settings } = useSettings();
@@ -126,8 +125,8 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const { foulMouth } = useFoulMouth();
   const setFoulMouth = useSetFoulMouth();
 
-  const lyricsCost = settings?.coins_per_lyrics_generation ?? 1;
-  const previewCost = settings?.coins_per_generation ?? 3;
+  const lyricsCost = settings?.coins_per_lyrics_generation ?? 0;
+  const previewCost = settings?.coins_per_generation ?? 0;
   const fullUnlockCost = settings?.coins_per_full_unlock ?? 5;
   const balance = profile?.coin_balance ?? 0;
   const isOwner = !!profile?.id && song.user_id === profile.id;
@@ -369,7 +368,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       const next = (data?.lyrics ?? "").toString();
       if (!next) { toast.error("No lyrics returned"); return; }
       setLyrics(next);
-      toast.success(`Lyrics ready · -${data?.coin_cost ?? lyricsCost} coins`, {
+      toast.success("Lyrics ready · free", {
         description: "Scroll down to review your new lyrics.",
       });
       // Scroll into view + focus the editor so the user immediately sees the result
@@ -442,9 +441,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
         toast.info(data.error || "Your current generations need to finish first");
         return;
       }
-      toast.success(`Generating · -${previewCost} coins`);
-      // Refresh coin balance immediately after the deduction on the server.
-      refreshCoinBalance();
+      toast.success("OG Bot is creating your track — no credits charged");
       onSaved?.();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not start generation");
@@ -574,7 +571,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold">{title.trim() || "Untitled track"}</p>
           <p className="truncate text-xs text-muted-foreground">
-            Lyrics {lyricsCost} · Sample {previewCost} · Full {fullUnlockCost} coins
+            Create free · Full download {fullUnlockCost} credits or 99p
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
@@ -598,7 +595,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                     1 · Lyrics
                   </span>
                   <span className="mt-0.5 block truncate text-xs text-muted-foreground">
-                    {hasLyrics ? "Ready — tap to edit" : `Write the lyrics · ${lyricsCost} coins`}
+                    {hasLyrics ? "Ready — tap to edit" : "Write the lyrics · Free"}
                   </span>
                 </div>
                 <ChevronDown className={cn("h-5 w-5 shrink-0 transition-transform", step1Open && "rotate-180")} />
@@ -797,10 +794,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
 
                 <Button onClick={generateLyrics} disabled={genLyrics || missing} className="min-w-0 gap-1.5 sm:gap-2">
                   {genLyrics ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                  {hasLyrics ? "Regenerate lyrics" : "Generate lyrics"}
-                  <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-background/30 px-1.5 py-0.5 text-[10px] font-semibold">
-                    <Coins className="h-3 w-3" /> {lyricsCost}
-                  </span>
+                  {hasLyrics ? "Regenerate lyrics · Free" : "Generate lyrics · Free"}
                 </Button>
               </div>
             </CardContent>
@@ -822,7 +816,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                       ? `Free ${settings?.sample_seconds ?? 60}s sample ready`
                       : isPending
                         ? "Generating…"
-                        : `Free ${settings?.sample_seconds ?? 60}s sample · ${previewCost} coins`}
+                        : `Free ${settings?.sample_seconds ?? 60}s sample`}
                   </span>
                 </div>
                 <ChevronDown className={cn("h-5 w-5 shrink-0 transition-transform", step2Open && "rotate-180")} />
@@ -875,9 +869,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                     >
                       {genPreview ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
                       Try again
-                      <span className="ml-0.5 inline-flex items-center gap-1 rounded-full bg-background/30 px-1.5 py-0.5 text-[10px] font-semibold">
-                        <Coins className="h-3 w-3" /> {previewCost}
-                      </span>
+                      <span className="ml-0.5 rounded-full bg-background/30 px-1.5 py-0.5 text-[10px] font-semibold">Free</span>
                     </Button>
                     <Button
                       size="sm"
@@ -914,9 +906,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                   {genPreview || isPending ? <Loader2 className="h-4 w-4 animate-spin" /> :
                     isReady ? <RefreshCw className="h-4 w-4" /> : <Play className="h-4 w-4" />}
                   {genPreview ? "Starting…" : isPending ? `Generating… ${elapsed}s` : isReady ? "Regenerate sample" : "Generate preview"}
-                  <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-background/30 px-1.5 py-0.5 text-[10px] font-semibold">
-                    <Coins className="h-3 w-3" /> {previewCost}
-                  </span>
+                  <span className="ml-1 rounded-full bg-background/30 px-1.5 py-0.5 text-[10px] font-semibold">Free</span>
                 </Button>
               </div>
             </CardContent>
@@ -933,7 +923,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                 3 · Full HQ
               </CardTitle>
               <CardDescription>
-                {fullUnlockCost} coins · unlock & download.
+                Choose {fullUnlockCost} credits or a one-off 99p payment to unlock and download.
               </CardDescription>
 
             </CardHeader>

@@ -93,26 +93,19 @@ Deno.serve(async (req) => {
       console.log("Skipping refund — song already terminal:", parentSong.status);
       return new Response("ok", { status: 200 });
     }
-    let refundAmt = 3;
-    if (parentSong.portal_id) {
-      const { data: portal } = await admin
-        .from("portals").select("coin_cost_per_generation").eq("id", parentSong.portal_id).maybeSingle();
-      if (typeof portal?.coin_cost_per_generation === "number") refundAmt = portal.coin_cost_per_generation;
-    } else {
-      const { data: setting } = await admin
-        .from("app_settings").select("value").eq("key", "coins_per_generation").maybeSingle();
-      if (typeof setting?.value === "number") refundAmt = setting.value;
-    }
+    const refundAmt = 0;
     const rawReason = payload?.msg || payload?.message || "Suno reported failure";
     await admin.from("songs").update({
       status: "failed",
       error_message: isModerationRejection(rawReason) ? MODERATION_MESSAGE : rawReason,
     }).eq("id", songId);
-    await admin.from("coin_transactions").insert({
-      user_id: parentSong.user_id, amount: refundAmt, type: "refund", reference: songId,
-    });
-    const { data: prof } = await admin.from("profiles").select("coin_balance").eq("id", parentSong.user_id).single();
-    await admin.from("profiles").update({ coin_balance: (prof?.coin_balance ?? 0) + refundAmt }).eq("id", parentSong.user_id);
+    if (refundAmt > 0) {
+      await admin.from("coin_transactions").insert({
+        user_id: parentSong.user_id, amount: refundAmt, type: "refund", reference: songId,
+      });
+      const { data: prof } = await admin.from("profiles").select("coin_balance").eq("id", parentSong.user_id).single();
+      await admin.from("profiles").update({ coin_balance: (prof?.coin_balance ?? 0) + refundAmt }).eq("id", parentSong.user_id);
+    }
     return new Response("ok", { status: 200 });
   }
 
