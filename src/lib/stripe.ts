@@ -2,7 +2,9 @@ import { loadStripe, type Stripe } from "@stripe/stripe-js";
 
 type StripeEnv = "sandbox" | "live";
 
-const clientToken = import.meta.env.VITE_PAYMENTS_CLIENT_TOKEN as string | undefined;
+// Own-account (hard-wired) Stripe key takes priority over any managed/workspace token.
+const clientToken = (import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ??
+  import.meta.env.VITE_PAYMENTS_CLIENT_TOKEN) as string | undefined;
 
 /** True when a Stripe publishable key is configured. False = payments disconnected. */
 export function arePaymentsEnabled(): boolean {
