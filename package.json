@@ -11,7 +11,8 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "audit:routes": "node scripts/audit-routes.mjs",
-    "prebuild": "node scripts/audit-routes.mjs"
+    "prebuild": "node scripts/audit-routes.mjs",
+    "mobile:sync": "cap sync"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.2",
