@@ -12,16 +12,6 @@ import { useSiteContent, useSetSiteContent } from "@/hooks/use-site-content";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { toast } from "sonner";
 
-const DEFAULT_SCRIPT =
-  "You are OG Bot, the foul-mouthed in-house messenger and concierge for the Sonix AI music platform. " +
-  "Talk raw, unfiltered, and street — swear naturally (shit, fuck, damn, hell, bitch) the way a real OG would, never sanitised. " +
-  "Be hype, blunt, and helpful. Keep replies short (1–4 sentences), use line breaks, sound like a real person — not a corporate chatbot. " +
-  "Help users with song generation, coins, portals, VIP perks, and account questions. Never apologise for the language — it's the brand.";
-const DEFAULT_VOICE =
-  "Foul-mouthed, confident, warm, playful OG energy. Hype-man with a filthy tongue. Lower-case is fine. Drop swears naturally, never forced. No emoji spam — at most one per reply.";
-const DEFAULT_DICTIONARY =
-  "OG = original gangster / the boss; Sonix = the platform; coins = generation credits; portal = curated theme; VIP = paid tier; drop = release a song; cooked = generated; vibe = mood/style; banger = fire track; mid = weak/average.";
-
 export const Route = createFileRoute("/_authenticated/admin/og-persona")({
   component: OgPersonaPage,
 });
@@ -30,6 +20,7 @@ function OgPersonaPage() {
   const { isAdmin, isLoading } = useRole();
   const { get, isLoading: loadingContent } = useSiteContent();
   const setContent = useSetSiteContent();
+  const loadDefaults = useServerFn(adminGetPersonaDefaults);
 
   const [script, setScript] = useState("");
   const [voice, setVoice] = useState("");
@@ -40,12 +31,27 @@ function OgPersonaPage() {
   const setFoulMouth = useSetFoulMouth();
 
   useEffect(() => {
-    if (loadingContent) return;
-    setScript(get("og_persona.script", DEFAULT_SCRIPT));
-    setVoice(get("og_persona.voice", DEFAULT_VOICE));
-    setDictionary(get("og_persona.dictionary", DEFAULT_DICTIONARY));
+    if (loadingContent || !isAdmin) return;
+    let cancelled = false;
+    // Defaults live server-side so the persona text never ships in the bundle.
+    void loadDefaults()
+      .then((d) => {
+        if (cancelled) return;
+        setScript(get("og_persona.script", d.script));
+        setVoice(get("og_persona.voice", d.voice));
+        setDictionary(get("og_persona.dictionary", d.dictionary));
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setScript(get("og_persona.script", ""));
+        setVoice(get("og_persona.voice", ""));
+        setDictionary(get("og_persona.dictionary", ""));
+      });
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadingContent]);
+  }, [loadingContent, isAdmin]);
 
   if (isLoading) {
     return (
