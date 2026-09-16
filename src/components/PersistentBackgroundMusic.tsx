@@ -163,8 +163,19 @@ export function PersistentBackgroundMusic() {
       window.removeEventListener("pagehide", savePosition);
       audio.removeEventListener("play", onPlay);
       audio.removeEventListener("pause", onPause);
+      audio.removeEventListener("ended", onEnded);
     };
   }, [start]);
+
+  // When the rotation moves on, load the new track and keep playing.
+  useEffect(() => {
+    if (!advancedRef.current) return;
+    advancedRef.current = false;
+    const audio = audioRef.current;
+    if (!audio || !enabledRef.current) return;
+    audio.currentTime = 0;
+    void start();
+  }, [trackIndex, start]);
 
   const toggle = async () => {
     const audio = audioRef.current;
