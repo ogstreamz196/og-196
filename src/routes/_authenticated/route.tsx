@@ -1,33 +1,12 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/layout/AppShell";
 import { PresenceTracker } from "@/hooks/use-presence";
 import { SignInTracker } from "@/components/auth/SignInTracker";
-import { PermissionsGate } from "@/components/auth/PermissionsGate";
 import { RoyaltyCelebration } from "@/components/celebration/RoyaltyCelebration";
 
 // Floating OG Bot widget removed site-wide. The full chat lives on /messenger.
-
-
-function TrackerLoader({ userId }: { userId: string }) {
-  const [consent, setConsent] = useState(false);
-  useEffect(() => {
-    let cancel = false;
-    supabase
-      .from("profiles")
-      .select("gps_consent")
-      .eq("id", userId)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (!cancel) setConsent(Boolean(data?.gps_consent));
-      });
-    return () => {
-      cancel = true;
-    };
-  }, [userId]);
-  return <SignInTracker userId={userId} gpsConsent={consent} />;
-}
+// Location is never requested at sign-in — it stays opt-in from Settings → Privacy.
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -41,11 +20,9 @@ export const Route = createFileRoute("/_authenticated")({
     return (
       <AppShell>
         <PresenceTracker />
-        <TrackerLoader userId={user.id} />
-        <PermissionsGate userId={user.id} />
+        <SignInTracker userId={user.id} />
         <RoyaltyCelebration userId={user.id} />
         <Outlet />
-
       </AppShell>
     );
   },
