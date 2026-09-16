@@ -153,3 +153,18 @@ export const adminDeleteLexiconPhrase = createServerFn({ method: "POST" })
     if (error) safeError(error);
     return { deleted: Boolean(ok) };
   });
+
+/* ── Persona defaults (server-only text, admin/boss gated) ───────────────── */
+
+export const adminGetPersonaDefaults = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const ctx = context as unknown as Ctx;
+    await assertBoss(ctx);
+    const { PERSONA_DEFAULTS } = await import("@/lib/og-persona.server");
+    return {
+      script: PERSONA_DEFAULTS.script,
+      voice: PERSONA_DEFAULTS.voice,
+      dictionary: PERSONA_DEFAULTS.dictionary,
+    };
+  });
