@@ -2,10 +2,15 @@ import { Pause, Play } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import backgroundTrack from "@/assets/og-bot-background.mp3.asset.json";
+import anthemTrack from "@/assets/og-bot-anthem.mp3.asset.json";
 import { Button } from "@/components/ui/button";
+
+/** Background rotation: plays in order, then cycles back to the first track. */
+const PLAYLIST = [backgroundTrack.url, anthemTrack.url];
 
 const ENABLED_KEY = "og:background-music-enabled";
 const POSITION_KEY = "og:background-music-position";
+const TRACK_KEY = "og:background-music-track";
 const TOGGLE_EVENT = "og:background-music-toggle";
 const STATUS_EVENT = "og:background-music-status";
 const STATUS_REQUEST_EVENT = "og:background-music-status-request";
