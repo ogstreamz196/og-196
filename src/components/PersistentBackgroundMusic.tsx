@@ -83,10 +83,16 @@ export function PersistentBackgroundMusic() {
     const storedEnabled = window.localStorage.getItem(ENABLED_KEY);
     enabledRef.current = storedEnabled !== "0";
 
+    const storedTrack = Number(window.localStorage.getItem(TRACK_KEY));
+    if (Number.isInteger(storedTrack) && storedTrack > 0 && storedTrack < PLAYLIST.length) {
+      setTrackIndex(storedTrack);
+    }
+
     const storedPosition = Number(window.localStorage.getItem(POSITION_KEY));
     if (Number.isFinite(storedPosition) && storedPosition > 0) {
       audio.currentTime = storedPosition;
     }
+
 
     const onPlay = () => {
       setPlaying(true);
