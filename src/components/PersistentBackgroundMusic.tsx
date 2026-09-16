@@ -2,10 +2,15 @@ import { Pause, Play } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import backgroundTrack from "@/assets/og-bot-background.mp3.asset.json";
+import anthemTrack from "@/assets/og-bot-anthem.mp3.asset.json";
 import { Button } from "@/components/ui/button";
+
+/** Background rotation: plays in order, then cycles back to the first track. */
+const PLAYLIST = [backgroundTrack.url, anthemTrack.url];
 
 const ENABLED_KEY = "og:background-music-enabled";
 const POSITION_KEY = "og:background-music-position";
+const TRACK_KEY = "og:background-music-track";
 const TOGGLE_EVENT = "og:background-music-toggle";
 const STATUS_EVENT = "og:background-music-status";
 const STATUS_REQUEST_EVENT = "og:background-music-status-request";
@@ -53,6 +58,10 @@ export function PersistentBackgroundMusic() {
   const enabledRef = useRef(true);
   const [playing, setPlaying] = useState(false);
   const [ready, setReady] = useState(false);
+  const [trackIndex, setTrackIndex] = useState(0);
+  // Skip the very first src change (initial mount) so the stored position sticks.
+  const advancedRef = useRef(false);
+
 
   const start = useCallback(async () => {
     const audio = audioRef.current;
@@ -74,10 +83,16 @@ export function PersistentBackgroundMusic() {
     const storedEnabled = window.localStorage.getItem(ENABLED_KEY);
     enabledRef.current = storedEnabled !== "0";
 
+    const storedTrack = Number(window.localStorage.getItem(TRACK_KEY));
+    if (Number.isInteger(storedTrack) && storedTrack > 0 && storedTrack < PLAYLIST.length) {
+      setTrackIndex(storedTrack);
+    }
+
     const storedPosition = Number(window.localStorage.getItem(POSITION_KEY));
     if (Number.isFinite(storedPosition) && storedPosition > 0) {
       audio.currentTime = storedPosition;
     }
+
 
     const onPlay = () => {
       setPlaying(true);
@@ -93,8 +108,20 @@ export function PersistentBackgroundMusic() {
       }
     };
 
+    // Roll onto the next track, cycling back to the first one after the last.
+    const onEnded = () => {
+      advancedRef.current = true;
+      window.localStorage.setItem(POSITION_KEY, "0");
+      setTrackIndex((i) => {
+        const nextIndex = (i + 1) % PLAYLIST.length;
+        window.localStorage.setItem(TRACK_KEY, String(nextIndex));
+        return nextIndex;
+      });
+    };
+
     audio.addEventListener("play", onPlay);
     audio.addEventListener("pause", onPause);
+    audio.addEventListener("ended", onEnded);
     window.addEventListener("pagehide", savePosition);
     const saveTimer = window.setInterval(savePosition, 5_000);
     setReady(true);
@@ -136,8 +163,19 @@ export function PersistentBackgroundMusic() {
       window.removeEventListener("pagehide", savePosition);
       audio.removeEventListener("play", onPlay);
       audio.removeEventListener("pause", onPause);
+      audio.removeEventListener("ended", onEnded);
     };
   }, [start]);
+
+  // When the rotation moves on, load the new track and keep playing.
+  useEffect(() => {
+    if (!advancedRef.current) return;
+    advancedRef.current = false;
+    const audio = audioRef.current;
+    if (!audio || !enabledRef.current) return;
+    audio.currentTime = 0;
+    void start();
+  }, [trackIndex, start]);
 
   const toggle = async () => {
     const audio = audioRef.current;
@@ -172,8 +210,7 @@ export function PersistentBackgroundMusic() {
     <>
       <audio
         ref={audioRef}
-        src={backgroundTrack.url}
-        loop
+        src={PLAYLIST[trackIndex]}
         preload="auto"
         className="hidden"
         data-background-music
