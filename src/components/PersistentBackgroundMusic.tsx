@@ -210,8 +210,7 @@ export function PersistentBackgroundMusic() {
     <>
       <audio
         ref={audioRef}
-        src={backgroundTrack.url}
-        loop
+        src={PLAYLIST[trackIndex]}
         preload="auto"
         className="hidden"
         data-background-music
