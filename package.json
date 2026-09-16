@@ -14,6 +14,9 @@
     "prebuild": "node scripts/audit-routes.mjs"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/core": "^8.5.2",
+    "@capacitor/ios": "^8.5.2",
     "@fontsource/fredoka": "^5.2.10",
     "@hookform/resolvers": "^5.2.2",
     "@lovable.dev/cloud-auth-js": "^1.1.2",
@@ -94,6 +97,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",
+    "@capacitor/cli": "^8.5.2",
     "@eslint/js": "^9.32.0",
     "@lovable.dev/vite-tanstack-config": "2.13.1",
     "@types/node": "^22.16.5",
