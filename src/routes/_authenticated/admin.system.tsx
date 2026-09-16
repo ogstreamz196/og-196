@@ -1,5 +1,6 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
-import { Activity, KeyRound, Webhook, Map, Bug } from "lucide-react";
+import { Activity, KeyRound, Webhook, Map, Bug, Clapperboard } from "lucide-react";
+import { TikTokBatchPanel } from "@/components/admin/TikTokBatchPanel";
 import { useRole } from "@/hooks/use-role";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { BossNav } from "@/components/admin/BossNav";
@@ -20,6 +21,7 @@ const TABS = [
   { value: "webhooks", label: "Webhooks", Icon: Webhook, Panel: WebhooksAdminPage },
   { value: "routes", label: "Route map", Icon: Map, Panel: RouteMapPage },
   { value: "debug", label: "Lyric debug", Icon: Bug, Panel: DebugContextPage },
+  { value: "tiktok", label: "TikTok", Icon: Clapperboard, Panel: TikTokBatchPanel },
 ] as const;
 
 function AdminSystemHub() {
