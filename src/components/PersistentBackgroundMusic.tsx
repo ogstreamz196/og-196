@@ -58,6 +58,10 @@ export function PersistentBackgroundMusic() {
   const enabledRef = useRef(true);
   const [playing, setPlaying] = useState(false);
   const [ready, setReady] = useState(false);
+  const [trackIndex, setTrackIndex] = useState(0);
+  // Skip the very first src change (initial mount) so the stored position sticks.
+  const advancedRef = useRef(false);
+
 
   const start = useCallback(async () => {
     const audio = audioRef.current;
