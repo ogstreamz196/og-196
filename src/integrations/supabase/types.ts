@@ -1308,6 +1308,39 @@ export type Database = {
         }
         Relationships: []
       }
+      tiktok_renders: {
+        Row: {
+          created_at: string
+          drive_file_id: string | null
+          drive_url: string | null
+          error: string | null
+          id: string
+          song_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          drive_file_id?: string | null
+          drive_url?: string | null
+          error?: string | null
+          id?: string
+          song_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          drive_file_id?: string | null
+          drive_url?: string | null
+          error?: string | null
+          id?: string
+          song_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       unlocked_songs: {
         Row: {
           cost_coins: number | null
