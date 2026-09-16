@@ -108,8 +108,20 @@ export function PersistentBackgroundMusic() {
       }
     };
 
+    // Roll onto the next track, cycling back to the first one after the last.
+    const onEnded = () => {
+      advancedRef.current = true;
+      window.localStorage.setItem(POSITION_KEY, "0");
+      setTrackIndex((i) => {
+        const nextIndex = (i + 1) % PLAYLIST.length;
+        window.localStorage.setItem(TRACK_KEY, String(nextIndex));
+        return nextIndex;
+      });
+    };
+
     audio.addEventListener("play", onPlay);
     audio.addEventListener("pause", onPause);
+    audio.addEventListener("ended", onEnded);
     window.addEventListener("pagehide", savePosition);
     const saveTimer = window.setInterval(savePosition, 5_000);
     setReady(true);
