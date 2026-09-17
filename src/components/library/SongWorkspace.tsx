@@ -567,18 +567,18 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       <StageStepper current={stage} sampleSeconds={settings?.sample_seconds ?? 60} />
 
       {/* Compact summary bar — replaces the old side rail */}
-      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-border bg-card/70 px-4 py-3">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-border bg-card/70 px-3 py-3 sm:px-4">
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold">{title.trim() || "Untitled track"}</p>
-          <p className="truncate text-xs text-muted-foreground">
-            Create free · Full download {fullUnlockCost} credits or 99p
+          <p className="line-clamp-2 break-words text-sm font-semibold leading-snug">{title.trim() || "Untitled track"}</p>
+          <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-muted-foreground sm:text-xs">
+            Create free · Download {fullUnlockCost} credits or 99p
           </p>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/60 px-3 py-1 text-sm font-bold tabular-nums">
+        <div className="grid shrink-0 gap-1.5 min-[380px]:grid-cols-2 min-[380px]:items-center">
+          <span className="inline-flex min-h-8 items-center justify-center gap-1.5 rounded-full border border-border bg-background/60 px-2.5 py-1 text-sm font-bold tabular-nums">
             <Coins className="h-4 w-4 text-coin" /> {balance.toLocaleString()}
           </span>
-          <Button asChild variant="outline" size="sm">
+          <Button asChild variant="outline" size="sm" className="px-2.5">
             <Link to="/buy-coins">Top up</Link>
           </Button>
         </div>

@@ -42,18 +42,20 @@ export function PublishToggle({ songId, isPublic, onChanged }: Props) {
   return (
     <label
       htmlFor={`publish-${songId}`}
-      className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-card px-4 py-3 text-sm font-medium shadow-card"
+      className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 overflow-hidden rounded-2xl border border-border bg-card px-4 py-3 text-sm font-medium shadow-card"
     >
-      <span className="flex min-w-0 items-start gap-3">
+      <span className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-start gap-3">
         <span aria-hidden className="mt-0.5 text-primary">
           {value ? <Globe className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
         </span>
-        <span className="min-w-0">
-          {value ? "Shared in the global player" : "Private to your library"}
-          <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
+        <span className="min-w-0 break-words leading-snug">
+          <span className="block font-semibold">
+            {value ? "Shared in the global player" : "Private to your library"}
+          </span>
+          <span className="mt-1 block text-xs font-normal leading-relaxed text-muted-foreground">
             {value
-              ? "Anyone can listen. Switch off to keep it to yourself."
-              : "Only you can hear this track. Switch on to share it with everyone."}
+              ? "Anyone can listen. Turn off to keep it private."
+              : "Only you can listen. Turn on to share it."}
           </span>
         </span>
       </span>
@@ -64,6 +66,8 @@ export function PublishToggle({ songId, isPublic, onChanged }: Props) {
           checked={value}
           disabled={saving}
           onCheckedChange={update}
+          aria-label={value ? "Turn off global sharing" : "Turn on global sharing"}
+          className="w-20"
         />
       </span>
     </label>
