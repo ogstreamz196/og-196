@@ -27,7 +27,13 @@ import { POOLS } from "@/lib/library-utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
+import {
+  useFoulMouth,
+  useSetFoulMouth,
+  useFoulIntensity,
+  useSetFoulIntensity,
+} from "@/hooks/use-foul-mouth";
+import { Slider } from "@/components/ui/slider";
 
 export type WizardResult = {
   title: string;
