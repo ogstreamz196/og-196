@@ -30,7 +30,7 @@ export const Route = createFileRoute("/_authenticated/library/$songId")({
   component: SongDetailPage,
 });
 
-type FullSong = Song & { unlocked?: boolean | null };
+type FullSong = Song & { unlocked?: boolean | null; is_public?: boolean | null };
 
 function SongDetailPage() {
   const { songId } = Route.useParams();
