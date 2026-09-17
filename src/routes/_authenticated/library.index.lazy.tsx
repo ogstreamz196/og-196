@@ -620,6 +620,8 @@ function LibraryPage() {
     beatPath?: string;
     /** Requested track length in minutes, chosen in wizard step 1. */
     targetMinutes?: number;
+    /** Publish directly to the global player instead of keeping it private. */
+    isPublic?: boolean;
   };
 
   // Keeps the exact payload of the last run so "Try again" reuses it verbatim.
@@ -742,6 +744,7 @@ function LibraryPage() {
           beat_path: beatPath || null,
           target_duration_sec: overrideTargetSec,
           extra_context: extraContext.trim() || null,
+          is_public: override?.isPublic ?? false,
         } as never)
         .select("id")
         .single();
@@ -1304,7 +1307,7 @@ function LibraryPage() {
         open={wizardOpen}
         onOpenChange={setWizardOpen}
         initialDraft={wizardDraft}
-        submitLabel="Create for free"
+        submitLabel="Create now"
         onComplete={(v, draft) => {
           setWizardDraft(draft);
           setTitle(v.title);

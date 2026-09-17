@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, Check, Mic2, Music4, Sparkles, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Globe2, Lock, Mic2, Music4, Sparkles, X } from "lucide-react";
 import ratingPgImg from "@/assets/rating-pg.png";
 import rating18Img from "@/assets/rating-18.png";
 import {
@@ -50,6 +50,8 @@ export type WizardResult = {
   beatPath: string;
   /** Requested track length in minutes (3 minute floor). */
   targetMinutes: number;
+  /** Whether the finished track should appear in the global player. */
+  isPublic: boolean;
 };
 
 /** Raw wizard inputs — kept by the parent so a retry never loses them. */
@@ -64,6 +66,7 @@ export type WizardDraft = {
   beatPath: string;
   beatName: string;
   targetMinutes: number;
+  isPublic: boolean;
 };
 
 export const EMPTY_DRAFT: WizardDraft = {
@@ -77,6 +80,7 @@ export const EMPTY_DRAFT: WizardDraft = {
   beatPath: "",
   beatName: "",
   targetMinutes: 3,
+  isPublic: false,
 };
 
 const GENDERS = ["Female vocal", "Male vocal", "Duo", "Any voice"];
@@ -120,6 +124,7 @@ export function CreateNowWizard({
   const [languages, setLanguages] = useState<string[]>([]);
   const [vocalsOnly, setVocalsOnly] = useState(false);
   const [targetMinutes, setTargetMinutes] = useState(3);
+  const [isPublic, setIsPublic] = useState(false);
   const { foulMouth } = useFoulMouth();
   const setFoulMouth = useSetFoulMouth();
   const ratingSaving = setFoulMouth.isPending;
@@ -152,6 +157,7 @@ export function CreateNowWizard({
     setBeatPath(d.beatPath ?? "");
     setBeatName(d.beatName ?? "");
     setTargetMinutes(d.targetMinutes || 3);
+    setIsPublic(d.isPublic ?? false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
@@ -184,6 +190,7 @@ export function CreateNowWizard({
     setBeatPath("");
     setBeatName("");
     setTargetMinutes(3);
+    setIsPublic(false);
     setStep(1);
     onOpenChange(false);
   }
@@ -242,6 +249,7 @@ export function CreateNowWizard({
         vocalsOnly,
         beatPath: vocalsOnly ? beatPath : "",
         targetMinutes,
+        isPublic,
       },
       {
         title,
@@ -254,6 +262,7 @@ export function CreateNowWizard({
         beatPath,
         beatName,
         targetMinutes,
+        isPublic,
       },
     );
     onOpenChange(false);
@@ -346,7 +355,7 @@ export function CreateNowWizard({
         >
           {step === 1 && (
             <div className="space-y-5">
-              <div className="space-y-2">
+              <div className="space-y-3 rounded-xl border border-border bg-background/40 p-3">
                 <Label
                   htmlFor="wiz-title"
                   className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
@@ -365,7 +374,7 @@ export function CreateNowWizard({
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-3 rounded-xl border border-border bg-background/40 p-3">
                 <Label
                   htmlFor="wiz-subject"
                   className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
@@ -383,7 +392,7 @@ export function CreateNowWizard({
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-3 rounded-xl border border-border bg-background/40 p-3">
                 <Label
                   htmlFor="wiz-desc"
                   className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
@@ -734,6 +743,10 @@ export function CreateNowWizard({
                   {gender || "Any voice"} · {vocalsOnly ? (beatPath ? "Vocals over your beat" : "A cappella, no instruments") : "Full production"} ·{" "}
                   {foulMouth ? "18+" : "PG"}
                 </p>
+                <p className="flex items-center gap-1.5 font-semibold text-foreground">
+                  {isPublic ? <Globe2 className="h-3.5 w-3.5 text-primary" /> : <Lock className="h-3.5 w-3.5 text-primary" />}
+                  {isPublic ? "Global player" : "Private library"}
+                </p>
               </div>
             </div>
           )}
@@ -748,49 +761,74 @@ export function CreateNowWizard({
           )}
         </div>
 
-        <div className="-mx-4 mt-1 flex shrink-0 flex-nowrap items-center gap-2 border-t border-white/10 bg-card/95 px-4 pb-1 pt-3 backdrop-blur-xl sm:-mx-6 sm:px-6">
-
-
-          <Button
-            type="button"
-            variant="ghost"
-            disabled={step === 1}
-            onClick={() => setStep((s) => Math.max(1, s - 1))}
-            className="min-h-11 shrink-0 gap-1.5 px-2.5 sm:px-4"
-            aria-label="Back"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span className="hidden sm:inline">Back</span>
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={requestClose}
-            className="min-h-11 shrink-0 gap-1.5 px-2.5 text-muted-foreground hover:text-destructive sm:px-4"
-            aria-label="Cancel"
-          >
-            <X className="h-4 w-4" />
-            <span className="hidden sm:inline">Cancel</span>
-          </Button>
-          <Button
-            type="button"
-            onClick={next}
-            disabled={!stepValid}
-            className="ml-auto min-h-11 min-w-0 flex-1 gap-1.5 whitespace-nowrap bg-gradient-brand font-black uppercase tracking-wide text-primary-foreground shadow-glow sm:flex-none"
-          >
-            {step === TOTAL_STEPS ? (
-              <>
-                <Check className="h-4 w-4 shrink-0" />
-                <span className="truncate">{submitLabel}</span>
-              </>
-            ) : (
-              <>
+        <div className="-mx-4 mt-1 shrink-0 border-t border-white/10 bg-card/95 px-4 pb-1 pt-3 backdrop-blur-xl sm:-mx-6 sm:px-6">
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              disabled={step === 1}
+              onClick={() => setStep((s) => Math.max(1, s - 1))}
+              className="min-h-11 shrink-0 gap-1.5 px-2.5 sm:px-4"
+              aria-label="Back"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span className="hidden sm:inline">Back</span>
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={requestClose}
+              className="min-h-11 shrink-0 gap-1.5 px-2.5 text-muted-foreground hover:text-destructive sm:px-4"
+              aria-label="Cancel"
+            >
+              <X className="h-4 w-4" />
+              <span className="hidden sm:inline">Cancel</span>
+            </Button>
+            {step < TOTAL_STEPS && (
+              <Button
+                type="button"
+                onClick={next}
+                disabled={!stepValid}
+                className="ml-auto min-h-11 min-w-0 flex-1 gap-1.5 whitespace-nowrap bg-gradient-brand font-black uppercase tracking-wide text-primary-foreground shadow-glow sm:flex-none"
+              >
                 Next
                 <ArrowRight className="h-4 w-4 shrink-0" />
-              </>
+              </Button>
             )}
-          </Button>
+          </div>
 
+          {step === TOTAL_STEPS && (
+            <div className="mt-2 grid grid-cols-[minmax(0,1fr)_7.25rem] gap-2">
+              <Button
+                type="button"
+                onClick={next}
+                disabled={!stepValid}
+                className="min-h-12 min-w-0 gap-2 bg-gradient-brand font-black uppercase tracking-wide text-primary-foreground shadow-glow"
+              >
+                <Check className="h-4 w-4 shrink-0" />
+                <span className="truncate">{submitLabel}</span>
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                aria-pressed={isPublic}
+                aria-label={isPublic ? "Global player. Tap to make private" : "Private library. Tap to make global"}
+                onClick={() => setIsPublic((value) => !value)}
+                className={cn(
+                  "min-h-12 min-w-0 flex-col gap-0.5 px-2",
+                  isPublic && "border-primary bg-primary/15 text-primary",
+                )}
+              >
+                <span className="flex items-center gap-1.5 text-xs font-black uppercase">
+                  {isPublic ? <Globe2 className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+                  {isPublic ? "Global" : "Private"}
+                </span>
+                <span className="text-[9px] font-semibold normal-case text-muted-foreground">
+                  Tap to change
+                </span>
+              </Button>
+            </div>
+          )}
         </div>
       </DialogContent>
 
