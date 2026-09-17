@@ -83,6 +83,9 @@ const GENDERS = ["Female vocal", "Male vocal", "Duo", "Any voice"];
 
 const TOTAL_STEPS = 3;
 
+/** 1–5 swearing intensity labels for the 18+ slider. */
+const INTENSITY_LABELS = ["Mild", "Cheeky", "Gritty", "Filthy", "Savage"] as const;
+
 /** Track length options. Creation and rendering are free. */
 export const MIN_LENGTH = 3;
 export const MAX_LENGTH = 8;
