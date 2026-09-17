@@ -199,8 +199,8 @@ Deno.serve(async (req) => {
     // output reads as a complete, performable track — not a few stray verses.
     const tagsLower = styleTags.map((t) => t.toLowerCase()).join(" ");
     const isRap = /(rap|hip[- ]?hop|drill|trap|grime|afro\s*drill)/.test(tagsLower);
-    const isBallad = /(ballad|acoustic|piano|folk|country|singer[- ]songwriter)/.test(tagsLower);
-    const isDance = /(dance|edm|house|techno|club|electro|pop)/.test(tagsLower);
+    const isBallad = /(ballad|acoustic|piano|folk|country|singer[- ]songwriter|slow jam)/.test(tagsLower);
+    const isDance = /(dance|edm|house|techno|club|electro|pop|k-pop|bhangra)/.test(tagsLower);
     const isRock = /(rock|metal|punk|indie|alt)/.test(tagsLower);
     const vocalsOnly = body.vocalsOnly === true || body.vocals_only === true;
 

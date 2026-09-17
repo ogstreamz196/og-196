@@ -34,6 +34,22 @@ const MAX_PROMPT_CHARS = 4_800;
 const MAX_STYLE_CHARS = 900;
 const MAX_TITLE_CHARS = 80;
 
+const GENRE_STYLE_DETAILS: Record<string, string> = {
+  pop: "polished modern chart pop, bright melodic topline, immediate singalong chorus, crisp radio-ready production, strong verse-pre-chorus-chorus lift",
+  "k-pop": "high-energy polished K-pop, dynamic section changes, glossy synth production, tight dance rhythm, layered group vocals, addictive hook and dramatic bridge",
+  "slow jam": "silky slow jam, warm R&B chords, unhurried groove, intimate expressive vocals, lush harmonies and a sensual late-night atmosphere",
+  bhangra: "high-energy Punjabi bhangra, driving dhol rhythm, bright tumbi phrases, celebratory call-and-response vocals and a huge dancefloor chorus",
+  "nursery rhyme": "simple playful nursery-rhyme melody, clear repetitive words, gentle rhythm, memorable singalong refrain and child-friendly musical phrasing",
+  trap: "modern trap production, deep 808 bass, crisp rolling hi-hats, punchy kick, spacious dark melody and confident rhythmic vocal delivery",
+};
+
+function expandGenreStyles(raw: string): string {
+  return raw
+    .split(/\s*,\s*/)
+    .map((name) => GENRE_STYLE_DETAILS[name.toLowerCase()] ?? name)
+    .join(", ");
+}
+
 const cors = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -83,6 +99,7 @@ Deno.serve(async (req) => {
       ? "duet, male and female vocals trading lines"
       : null;
     const rawStyle = (body.style ?? "").toString().trim();
+    const detailedStyle = expandGenreStyles(rawStyle);
     const vocalsOnly = !!body.vocals_only;
     const beatPath = body.beat_path ? String(body.beat_path) : null;
     // Vocals-only: sing over the uploaded beat, or fall back to a pure
@@ -129,12 +146,12 @@ Deno.serve(async (req) => {
     const styleParts = acappella
       ? [
         vocalsOnlyStyle,
-        rawStyle ? `${rawStyle} vocal delivery, cadence and phrasing performed by voice alone` : null,
+        detailedStyle ? `${detailedStyle} vocal delivery, cadence and phrasing performed by voice alone` : null,
         languageStyleHint,
         vocalStyle,
         lengthStyleHint,
       ]
-      : [rawStyle, multiStyleHint, languageStyleHint, vocalStyle, vocalsOnlyStyle, lengthStyleHint];
+      : [detailedStyle, multiStyleHint, languageStyleHint, vocalStyle, vocalsOnlyStyle, lengthStyleHint];
     const style = limitText(
       styleParts.filter(Boolean).join(", ") || null,
       MAX_STYLE_CHARS,
