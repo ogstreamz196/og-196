@@ -124,17 +124,20 @@ Deno.serve(async (req) => {
 
 
     // Per-request override wins; otherwise fall back to the user's saved preference.
-    let foulMouth: boolean;
-    if (typeof body.foulMouth === "boolean") {
-      foulMouth = body.foulMouth;
-    } else {
-      const { data: pref } = await admin
-        .from("user_preferences")
-        .select("foul_mouth")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      foulMouth = (pref as { foul_mouth?: boolean } | null)?.foul_mouth ?? false;
-    }
+    const { data: pref } = await admin
+      .from("user_preferences")
+      .select("foul_mouth, foul_intensity")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    const prefRow = pref as { foul_mouth?: boolean; foul_intensity?: number } | null;
+    const foulMouth =
+      typeof body.foulMouth === "boolean" ? body.foulMouth : (prefRow?.foul_mouth ?? false);
+    const rawIntensity =
+      typeof body.foulIntensity === "number" ? body.foulIntensity : prefRow?.foul_intensity;
+    const foulIntensity = Math.max(
+      1,
+      Math.min(5, Math.round(typeof rawIntensity === "number" ? rawIntensity : 3)),
+    );
 
     // Default personal context: weave the user's display_name + artist_bio from
     // their profile so lyrics feel personal without the user having to retype
