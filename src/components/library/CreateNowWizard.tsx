@@ -120,6 +120,10 @@ export function CreateNowWizard({
   const { foulMouth } = useFoulMouth();
   const setFoulMouth = useSetFoulMouth();
   const ratingSaving = setFoulMouth.isPending;
+  const { intensity: savedIntensity } = useFoulIntensity();
+  const setFoulIntensity = useSetFoulIntensity();
+  const [intensityLocal, setIntensityLocal] = useState<number | null>(null);
+  const intensity = intensityLocal ?? savedIntensity;
   const [beatPath, setBeatPath] = useState("");
   const [beatName, setBeatName] = useState("");
   const [uploadingBeat, setUploadingBeat] = useState(false);
