@@ -14,6 +14,7 @@ const TRACK_KEY = "og:background-music-track";
 const TOGGLE_EVENT = "og:background-music-toggle";
 const STATUS_EVENT = "og:background-music-status";
 const STATUS_REQUEST_EVENT = "og:background-music-status-request";
+const BACKGROUND_VOLUME = 0.5;
 
 function announceStatus(playing: boolean) {
   window.dispatchEvent(new CustomEvent(STATUS_EVENT, { detail: { playing } }));
@@ -79,6 +80,7 @@ export function PersistentBackgroundMusic() {
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
+    audio.volume = BACKGROUND_VOLUME;
 
     const storedEnabled = window.localStorage.getItem(ENABLED_KEY);
     enabledRef.current = storedEnabled !== "0";

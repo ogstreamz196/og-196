@@ -97,7 +97,7 @@ export const LENGTH_OPTIONS = [3, 4, 5, 6, 7, 8];
 
 /** Curated styles first, then everything else we already support. */
 const STYLES: string[] = (() => {
-  const featured = ["Drill", "Hip Hop", "Bass Beats", "Reggae", "Trap"];
+  const featured = ["Drill", "Trap", "Pop", "K-Pop", "Slow Jam", "Bhangra", "Nursery Rhyme"];
   const rest = POOLS.genre.filter((g) => !featured.includes(g));
   return [...featured, ...rest];
 })();
