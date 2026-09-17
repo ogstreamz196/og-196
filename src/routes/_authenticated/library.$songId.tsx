@@ -22,6 +22,7 @@ import { useSettings } from "@/hooks/use-settings";
 import { Button } from "@/components/ui/button";
 import type { Song } from "@/components/SongCard";
 import { SongWorkspace } from "@/components/library/SongWorkspace";
+import { PublishToggle } from "@/components/library/PublishToggle";
 import { UnlockConfirmDialog } from "@/components/library/UnlockConfirmDialog";
 import { useProfile } from "@/hooks/use-profile";
 import { ensureFullUrlAllowed } from "@/lib/ensure-full-url-allowed";
