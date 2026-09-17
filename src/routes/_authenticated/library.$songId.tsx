@@ -92,6 +92,7 @@ function SongDetailPage() {
         ) : (
           <>
             <PlayerCard song={data} onRefresh={refetch} />
+            <OwnerPublishToggle song={data} onChanged={refetch} />
             <SongWorkspace song={data} onSaved={refetch} onRefresh={refetch} />
           </>
         )}
