@@ -640,7 +640,38 @@ export function CreateNowWizard({
                     <span className="text-[11px] text-muted-foreground">Explicit, no filter</span>
                   </button>
                 </div>
+
+                {foulMouth && (
+                  <div className="space-y-2 rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-3">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <label
+                        htmlFor="foul-intensity"
+                        className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground"
+                      >
+                        Swearing intensity
+                      </label>
+                      <span className="text-[11px] font-bold text-destructive">
+                        {INTENSITY_LABELS[intensity - 1]}
+                      </span>
+                    </div>
+                    <Slider
+                      id="foul-intensity"
+                      aria-label="Swearing intensity"
+                      min={1}
+                      max={5}
+                      step={1}
+                      value={[intensity]}
+                      onValueChange={(v) => setIntensityLocal(v[0] ?? 3)}
+                      onValueCommit={(v) => setFoulIntensity.mutate(v[0] ?? 3)}
+                    />
+                    <div className="flex justify-between text-[10px] text-muted-foreground">
+                      <span>Mild</span>
+                      <span>Savage</span>
+                    </div>
+                  </div>
+                )}
               </div>
+
 
               <div className="space-y-2">
                 <div className="flex items-baseline justify-between gap-2">
