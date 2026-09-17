@@ -232,6 +232,15 @@ Deno.serve(async (req) => {
       multiStyleRule + multiLanguageRule + singleLanguageRule + englishRemixRule + vocalsOnlyRule;
 
 
+    // 18+ swearing intensity dial (1 mild → 5 savage).
+    const intensityRule = [
+      " INTENSITY DIAL: 1/5 (MILD) — keep profanity rare and light: at most one or two soft swears ('damn', 'hell', 'bloody') in the whole song. Attitude over filth.",
+      " INTENSITY DIAL: 2/5 (CHEEKY) — light profanity: roughly one swear per section, mostly mild ones, an occasional 'shit'. Keep it playful.",
+      " INTENSITY DIAL: 3/5 (GRITTY) — moderate profanity: one to two swears per section, mixing mild and strong. Street energy without being wall-to-wall.",
+      " INTENSITY DIAL: 4/5 (FILTHY) — heavy profanity: two to four strong swears per section, unapologetic and raw.",
+      " INTENSITY DIAL: 5/5 (SAVAGE) — maximum profanity: strong swearing in nearly every line, relentless trash-talk energy, no restraint (within the hard limits below).",
+    ][foulIntensity - 1];
+
     const systemPrompt = foulMouth
       ? `You are a foul-mouthed, no-holds-barred songwriter writing EXPLICIT adult song lyrics in ${languagesLabel}. ` +
         (isEnglish
