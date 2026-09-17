@@ -346,7 +346,7 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
   );
 
   return (
-    <article id="song-player" tabIndex={-1} aria-label="Song player" className="scroll-mt-20 rounded-2xl border border-border bg-card p-6 shadow-card focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+    <article id="song-player" tabIndex={-1} aria-label="Song player" className="scroll-mt-20 overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-card focus:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:p-6">
 
       <div className="flex flex-col gap-6 sm:flex-row">
         <div className="relative h-48 w-48 shrink-0 self-center overflow-hidden rounded-xl bg-gradient-brand-soft">
@@ -366,12 +366,12 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
 
         <div className="flex min-w-0 flex-1 flex-col">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">
+            <h2 className="break-words text-xl font-bold leading-tight sm:text-2xl">
               {song.title || (isPending ? "Generating…" : "Untitled")}
             </h2>
-            <p className="mt-2 text-sm text-muted-foreground line-clamp-3">{song.prompt}</p>
+            <p className="mt-2 line-clamp-3 break-words text-sm leading-relaxed text-muted-foreground">{song.prompt}</p>
             {song.style && (
-              <span className="mt-3 inline-block rounded-full bg-secondary px-2.5 py-0.5 text-xs text-secondary-foreground">
+              <span className="mt-3 inline-block max-w-full break-words rounded-lg bg-secondary px-2.5 py-1 text-xs leading-relaxed text-secondary-foreground">
                 {song.style}
               </span>
             )}
@@ -397,12 +397,12 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
 
           {isReady && (
             <div className="mt-4 space-y-3">
-              <div className="flex items-center gap-3">
+              <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:gap-3">
                 <Button
                   onClick={togglePlay}
                   disabled={!previewUrl || loadingPreview}
                   size="lg"
-                  className="rounded-full"
+                  className="h-auto min-h-11 min-w-0 whitespace-normal rounded-lg px-3 py-2 text-center leading-tight sm:rounded-full sm:px-8"
                 >
                   {loadingPreview ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
@@ -420,6 +420,7 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
                   disabled={downloading || (!communityMode && !unlocked)}
                   variant={communityMode || unlocked ? "default" : "outline"}
                   size="lg"
+                  className="h-auto min-h-11 min-w-0 whitespace-normal px-3 py-2 text-center leading-tight sm:px-8"
                 >
                   {downloading ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
@@ -435,8 +436,8 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
               </div>
 
               <div>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Lock className="h-3 w-3" />
+                <div className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-2 text-xs leading-relaxed text-muted-foreground">
+                  <Lock className="mt-0.5 h-3 w-3 shrink-0" />
                   {communityMode
                     ? "Full community track plays free. Downloading costs 3 OG coins — 2 burnt, 1 royalty to the creator."
                     : `Preview limited to ${sampleSeconds}s. ${unlocked ? "Full track download available." : "Unlock to download the full track."}`}
