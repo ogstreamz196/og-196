@@ -22,6 +22,7 @@ import { useSettings } from "@/hooks/use-settings";
 import { Button } from "@/components/ui/button";
 import type { Song } from "@/components/SongCard";
 import { SongWorkspace } from "@/components/library/SongWorkspace";
+import { PublishToggle } from "@/components/library/PublishToggle";
 import { UnlockConfirmDialog } from "@/components/library/UnlockConfirmDialog";
 import { useProfile } from "@/hooks/use-profile";
 import { ensureFullUrlAllowed } from "@/lib/ensure-full-url-allowed";
@@ -30,7 +31,7 @@ export const Route = createFileRoute("/_authenticated/library/$songId")({
   component: SongDetailPage,
 });
 
-type FullSong = Song & { unlocked?: boolean | null };
+type FullSong = Song & { unlocked?: boolean | null; is_public?: boolean | null };
 
 function SongDetailPage() {
   const { songId } = Route.useParams();
@@ -92,11 +93,30 @@ function SongDetailPage() {
         ) : (
           <>
             <PlayerCard song={data} onRefresh={refetch} />
+            <OwnerPublishToggle song={data} onChanged={refetch} />
             <SongWorkspace song={data} onSaved={refetch} onRefresh={refetch} />
           </>
         )}
       </div>
     </DashboardShell>
+  );
+}
+
+function OwnerPublishToggle({
+  song,
+  onChanged,
+}: {
+  song: FullSong;
+  onChanged: () => void;
+}) {
+  const { user } = useAuth();
+  if (!user || song.user_id !== user.id) return null;
+  return (
+    <PublishToggle
+      songId={song.id}
+      isPublic={!!song.is_public}
+      onChanged={onChanged}
+    />
   );
 }
 

@@ -837,6 +837,7 @@ export type Database = {
           extra_context: string | null
           generation_started_at: string | null
           id: string
+          is_public: boolean
           is_variation: boolean
           lyric_video_error: string | null
           lyric_video_full_path: string | null
@@ -882,6 +883,7 @@ export type Database = {
           extra_context?: string | null
           generation_started_at?: string | null
           id?: string
+          is_public?: boolean
           is_variation?: boolean
           lyric_video_error?: string | null
           lyric_video_full_path?: string | null
@@ -927,6 +929,7 @@ export type Database = {
           extra_context?: string | null
           generation_started_at?: string | null
           id?: string
+          is_public?: boolean
           is_variation?: boolean
           lyric_video_error?: string | null
           lyric_video_full_path?: string | null
