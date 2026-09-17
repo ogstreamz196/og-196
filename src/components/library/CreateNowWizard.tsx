@@ -27,7 +27,13 @@ import { POOLS } from "@/lib/library-utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
+import {
+  useFoulMouth,
+  useSetFoulMouth,
+  useFoulIntensity,
+  useSetFoulIntensity,
+} from "@/hooks/use-foul-mouth";
+import { Slider } from "@/components/ui/slider";
 
 export type WizardResult = {
   title: string;
@@ -77,6 +83,9 @@ const GENDERS = ["Female vocal", "Male vocal", "Duo", "Any voice"];
 
 const TOTAL_STEPS = 3;
 
+/** 1–5 swearing intensity labels for the 18+ slider. */
+const INTENSITY_LABELS = ["Mild", "Cheeky", "Gritty", "Filthy", "Savage"] as const;
+
 /** Track length options. Creation and rendering are free. */
 export const MIN_LENGTH = 3;
 export const MAX_LENGTH = 8;
@@ -114,6 +123,10 @@ export function CreateNowWizard({
   const { foulMouth } = useFoulMouth();
   const setFoulMouth = useSetFoulMouth();
   const ratingSaving = setFoulMouth.isPending;
+  const { intensity: savedIntensity } = useFoulIntensity();
+  const setFoulIntensity = useSetFoulIntensity();
+  const [intensityLocal, setIntensityLocal] = useState<number | null>(null);
+  const intensity = intensityLocal ?? savedIntensity;
   const [beatPath, setBeatPath] = useState("");
   const [beatName, setBeatName] = useState("");
   const [uploadingBeat, setUploadingBeat] = useState(false);
@@ -634,7 +647,38 @@ export function CreateNowWizard({
                     <span className="text-[11px] text-muted-foreground">Explicit, no filter</span>
                   </button>
                 </div>
+
+                {foulMouth && (
+                  <div className="space-y-2 rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-3">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <label
+                        htmlFor="foul-intensity"
+                        className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground"
+                      >
+                        Swearing intensity
+                      </label>
+                      <span className="text-[11px] font-bold text-destructive">
+                        {INTENSITY_LABELS[intensity - 1]}
+                      </span>
+                    </div>
+                    <Slider
+                      id="foul-intensity"
+                      aria-label="Swearing intensity"
+                      min={1}
+                      max={5}
+                      step={1}
+                      value={[intensity]}
+                      onValueChange={(v) => setIntensityLocal(v[0] ?? 3)}
+                      onValueCommit={(v) => setFoulIntensity.mutate(v[0] ?? 3)}
+                    />
+                    <div className="flex justify-between text-[10px] text-muted-foreground">
+                      <span>Mild</span>
+                      <span>Savage</span>
+                    </div>
+                  </div>
+                )}
               </div>
+
 
               <div className="space-y-2">
                 <div className="flex items-baseline justify-between gap-2">

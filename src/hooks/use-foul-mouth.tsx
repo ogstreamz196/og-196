@@ -103,3 +103,61 @@ export function useSetFoulMouth() {
     },
   });
 }
+
+/** 1 (mild) – 5 (savage) swearing intensity, only used when Foul Mouth is ON. */
+export function foulIntensityQueryKey(userId: string | null | undefined) {
+  return ["user-preferences", "foul_intensity", userId ?? "anon"] as const;
+}
+
+export function useFoulIntensity() {
+  const { user } = useAuth();
+  const uid = user?.id ?? null;
+
+  const query = useQuery({
+    queryKey: foulIntensityQueryKey(uid),
+    enabled: !!uid,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("user_preferences")
+        .select("foul_intensity")
+        .eq("user_id", uid!)
+        .maybeSingle();
+      if (error) throw new Error(error.message);
+      const v = (data as { foul_intensity?: number } | null)?.foul_intensity;
+      return typeof v === "number" ? v : 3;
+    },
+  });
+
+  return { intensity: query.data ?? 3, isLoading: query.isLoading };
+}
+
+export function useSetFoulIntensity() {
+  const { user } = useAuth();
+  const uid = user?.id ?? null;
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (next: number) => {
+      if (!uid) throw new Error("Sign in required");
+      const value = Math.max(1, Math.min(5, Math.round(next)));
+      const { error } = await supabase
+        .from("user_preferences")
+        .upsert({ user_id: uid, foul_intensity: value } as never, { onConflict: "user_id" });
+      if (error) throw new Error(error.message);
+      return value;
+    },
+    onMutate: async (next) => {
+      const key = foulIntensityQueryKey(uid);
+      await qc.cancelQueries({ queryKey: key });
+      const prev = qc.getQueryData<number>(key);
+      qc.setQueryData(key, Math.max(1, Math.min(5, Math.round(next))));
+      return { prev };
+    },
+    onError: (_e, _next, ctx) => {
+      if (ctx) qc.setQueryData(foulIntensityQueryKey(uid), ctx.prev);
+    },
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: foulIntensityQueryKey(uid) });
+    },
+  });
+}

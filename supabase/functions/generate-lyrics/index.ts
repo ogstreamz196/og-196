@@ -124,17 +124,20 @@ Deno.serve(async (req) => {
 
 
     // Per-request override wins; otherwise fall back to the user's saved preference.
-    let foulMouth: boolean;
-    if (typeof body.foulMouth === "boolean") {
-      foulMouth = body.foulMouth;
-    } else {
-      const { data: pref } = await admin
-        .from("user_preferences")
-        .select("foul_mouth")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      foulMouth = (pref as { foul_mouth?: boolean } | null)?.foul_mouth ?? false;
-    }
+    const { data: pref } = await admin
+      .from("user_preferences")
+      .select("foul_mouth, foul_intensity")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    const prefRow = pref as { foul_mouth?: boolean; foul_intensity?: number } | null;
+    const foulMouth =
+      typeof body.foulMouth === "boolean" ? body.foulMouth : (prefRow?.foul_mouth ?? false);
+    const rawIntensity =
+      typeof body.foulIntensity === "number" ? body.foulIntensity : prefRow?.foul_intensity;
+    const foulIntensity = Math.max(
+      1,
+      Math.min(5, Math.round(typeof rawIntensity === "number" ? rawIntensity : 3)),
+    );
 
     // Default personal context: weave the user's display_name + artist_bio from
     // their profile so lyrics feel personal without the user having to retype
@@ -229,6 +232,15 @@ Deno.serve(async (req) => {
       multiStyleRule + multiLanguageRule + singleLanguageRule + englishRemixRule + vocalsOnlyRule;
 
 
+    // 18+ swearing intensity dial (1 mild → 5 savage).
+    const intensityRule = [
+      " INTENSITY DIAL: 1/5 (MILD) — keep profanity rare and light: at most one or two soft swears ('damn', 'hell', 'bloody') in the whole song. Attitude over filth.",
+      " INTENSITY DIAL: 2/5 (CHEEKY) — light profanity: roughly one swear per section, mostly mild ones, an occasional 'shit'. Keep it playful.",
+      " INTENSITY DIAL: 3/5 (GRITTY) — moderate profanity: one to two swears per section, mixing mild and strong. Street energy without being wall-to-wall.",
+      " INTENSITY DIAL: 4/5 (FILTHY) — heavy profanity: two to four strong swears per section, unapologetic and raw.",
+      " INTENSITY DIAL: 5/5 (SAVAGE) — maximum profanity: strong swearing in nearly every line, relentless trash-talk energy, no restraint (within the hard limits below).",
+    ][foulIntensity - 1];
+
     const systemPrompt = foulMouth
       ? `You are a foul-mouthed, no-holds-barred songwriter writing EXPLICIT adult song lyrics in ${languagesLabel}. ` +
         (isEnglish
@@ -236,6 +248,8 @@ Deno.serve(async (req) => {
           : `Lean ALL the way into raw, gritty, street-level ${languagesLabel}: use authentic native profanity, curse words, and savage slang from each of those languages itself (do NOT just translate English swears literally — use the equivalents real native speakers would actually shout). Drop them liberally throughout EVERY verse and chorus — at least a few per section. `) +
         `Use unfiltered attitude, savage punchlines, and trash-talk energy from the very first line. Make it sound like a parental-advisory hip-hop / punk track, NOT a radio edit. ` +
         `Do NOT self-censor, do NOT use asterisks or bleeps, and do NOT add disclaimers. Avoid slurs, sexual content involving minors, and direct incitement to real-world violence — everything else is fair game.` +
+        intensityRule +
+        ` The INTENSITY DIAL overrides the general "liberally" guidance above — follow the dial exactly.` +
         structureRule + bilingualRule +
         ` Target ${aimLow}–${aimHigh} words (never fewer than ${minWords}, never more than ${aimHigh}). Output ONLY the lyrics, no explanations.`
       : `You are a professional songwriter writing CLEAN, radio-friendly song lyrics in ${languagesLabel}. ` +

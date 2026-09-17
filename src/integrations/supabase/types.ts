@@ -1524,6 +1524,7 @@ export type Database = {
         Row: {
           created_at: string
           density: string
+          foul_intensity: number
           foul_mouth: boolean
           messenger_mode: string
           text_scale: number
@@ -1533,6 +1534,7 @@ export type Database = {
         Insert: {
           created_at?: string
           density?: string
+          foul_intensity?: number
           foul_mouth?: boolean
           messenger_mode?: string
           text_scale?: number
@@ -1542,6 +1544,7 @@ export type Database = {
         Update: {
           created_at?: string
           density?: string
+          foul_intensity?: number
           foul_mouth?: boolean
           messenger_mode?: string
           text_scale?: number
