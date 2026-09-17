@@ -101,6 +101,24 @@ function SongDetailPage() {
   );
 }
 
+function OwnerPublishToggle({
+  song,
+  onChanged,
+}: {
+  song: FullSong;
+  onChanged: () => void;
+}) {
+  const { user } = useAuth();
+  if (!user || song.user_id !== user.id) return null;
+  return (
+    <PublishToggle
+      songId={song.id}
+      isPublic={!!song.is_public}
+      onChanged={onChanged}
+    />
+  );
+}
+
 function SkeletonState({ message }: { message: string }) {
   return (
     <div className="grid place-items-center gap-3 rounded-2xl border border-border bg-card py-16 text-muted-foreground">
