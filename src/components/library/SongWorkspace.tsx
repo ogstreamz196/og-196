@@ -19,7 +19,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 import { useSettings } from "@/hooks/use-settings";
-import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
+import { useFoulIntensity, useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 
 import { useProfile } from "@/hooks/use-profile";
 import { useVariations } from "@/hooks/use-variations";
@@ -54,7 +54,7 @@ const VOCALS = ["Any voice", "Female vocal", "Male vocal", "Duo"];
 
 /** Styles offered as chips — curated first, then the rest of the pool. */
 const STYLE_OPTIONS: string[] = (() => {
-  const featured = ["Drill", "Trap", "Pop", "K-Pop", "Slow Jam", "Bhangra", "Nursery Rhyme"];
+  const featured = ["Drill", "Trap", "Drum & Bass", "Pop", "K-Pop", "Slow Jam", "Bhangra", "Nasheed", "Nursery Rhyme"];
   const rest = POOLS.genre.filter((g) => !featured.includes(g));
   return [...featured, ...rest];
 })();
@@ -123,6 +123,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
     queryClient.invalidateQueries({ queryKey: ["profile"] });
   };
   const { foulMouth } = useFoulMouth();
+  const { intensity: foulIntensity } = useFoulIntensity();
   const setFoulMouth = useSetFoulMouth();
 
   const lyricsCost = settings?.coins_per_lyrics_generation ?? 0;
@@ -197,6 +198,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
     [styles, styleExtra],
   );
   const styleValue = styleTags.join(", ");
+  const isNasheed = styleTags.some((style) => style.toLowerCase() === "nasheed");
   const languageValue = useMemo(
     () => Array.from(new Set(languages.length ? languages : ["English"])).join(" + "),
     [languages],
@@ -352,7 +354,8 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
           vocal: vocal && vocal !== "Any voice" ? vocal : null,
           vocals_only: vocalsOnly,
           target_duration_sec: targetMinutes * 60,
-          foulMouth,
+          foulMouth: isNasheed ? false : foulMouth,
+          foulIntensity,
           language: languageValue,
         },
       });
@@ -624,7 +627,16 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                             key={s}
                             type="button"
                             aria-pressed={on}
-                            onClick={() => setStyles((list) => toggleItem(list, s))}
+                            onClick={() => {
+                              if (s === "Nasheed") {
+                                setStyles(on ? [] : ["Nasheed"]);
+                                setStyleExtra("");
+                                setVocalsOnly(!on);
+                                if (!on && foulMouth) setFoulMouth.mutate(false);
+                                return;
+                              }
+                              setStyles((list) => toggleItem(list.filter((style) => style !== "Nasheed"), s));
+                            }}
                             className={cn(
                               "rounded-full border px-3 py-1.5 text-xs font-semibold transition",
                               on
@@ -715,15 +727,16 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                     className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-muted/20 px-3 py-2.5 text-sm font-medium"
                   >
                     <span className="min-w-0">
-                      Vocals only {vocalsOnly ? "· ON" : "· OFF"}
+                      Vocals only {isNasheed ? "· REQUIRED" : vocalsOnly ? "· ON" : "· OFF"}
                       <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
-                        A cappella vocals with no generated instrumental.
+                        {isNasheed ? "Nasheed stays strictly voice-only with no music or instruments." : "A cappella vocals with no generated instrumental."}
                       </span>
                     </span>
                     <Switch
                       id="vocals-only-toggle"
                       checked={vocalsOnly}
                       onCheckedChange={setVocalsOnly}
+                      disabled={isNasheed}
                     />
                   </label>
 
@@ -785,7 +798,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                     id="foul-mouth-toggle"
                     checked={foulMouth}
                     onCheckedChange={(v) => setFoulMouth.mutate(v)}
-                    disabled={setFoulMouth.isPending}
+                    disabled={setFoulMouth.isPending || isNasheed}
                   />
                 </label>
                 <Button variant="ghost" onClick={handleSave} disabled={!dirty || saving} className="min-w-0">

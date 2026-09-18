@@ -97,7 +97,7 @@ export const LENGTH_OPTIONS = [3, 4, 5, 6, 7, 8];
 
 /** Curated styles first, then everything else we already support. */
 const STYLES: string[] = (() => {
-  const featured = ["Drill", "Trap", "Pop", "K-Pop", "Slow Jam", "Bhangra", "Nursery Rhyme"];
+  const featured = ["Drill", "Trap", "Drum & Bass", "Pop", "K-Pop", "Slow Jam", "Bhangra", "Nasheed", "Nursery Rhyme"];
   const rest = POOLS.genre.filter((g) => !featured.includes(g));
   return [...featured, ...rest];
 })();
@@ -132,6 +132,7 @@ export function CreateNowWizard({
   const setFoulIntensity = useSetFoulIntensity();
   const [intensityLocal, setIntensityLocal] = useState<number | null>(null);
   const intensity = intensityLocal ?? savedIntensity;
+  const isNasheed = styles.includes("Nasheed");
   const [beatPath, setBeatPath] = useState("");
   const [beatName, setBeatName] = useState("");
   const [uploadingBeat, setUploadingBeat] = useState(false);
@@ -468,7 +469,17 @@ export function CreateNowWizard({
                       key={s}
                       type="button"
                       aria-pressed={selected}
-                      onClick={() => setStyles((prev) => toggle(prev, s))}
+                        onClick={() => {
+                          if (s === "Nasheed") {
+                            setStyles(selected ? [] : ["Nasheed"]);
+                            setVocalsOnly(!selected);
+                            setBeatPath("");
+                            setBeatName("");
+                            if (!selected && foulMouth) setFoulMouth.mutate(false);
+                            return;
+                          }
+                          setStyles((prev) => toggle(prev.filter((style) => style !== "Nasheed"), s));
+                        }}
                       className={cn(
                         "min-h-11 rounded-xl border px-3 py-2.5 text-sm font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                         selected
@@ -524,7 +535,9 @@ export function CreateNowWizard({
                 <button
                   type="button"
                   aria-pressed={vocalsOnly}
-                  onClick={() => setVocalsOnly((v) => !v)}
+                  onClick={() => {
+                    if (!isNasheed) setVocalsOnly((v) => !v);
+                  }}
                   className={cn(
                     "flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                     vocalsOnly
@@ -545,9 +558,15 @@ export function CreateNowWizard({
                       vocalsOnly ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
                     )}
                   >
-                    {vocalsOnly ? "On" : "Off"}
+                      {isNasheed ? "Required" : vocalsOnly ? "On" : "Off"}
                   </span>
                 </button>
+
+                {isNasheed && (
+                  <p className="rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-3 py-2 text-xs font-medium text-emerald-300">
+                    Nasheed is always clean and voice-only: no instruments, beats, or foul language.
+                  </p>
+                )}
 
                 {vocalsOnly && (
                   <div className="space-y-3 rounded-xl border border-border bg-background/60 p-4">
@@ -632,7 +651,7 @@ export function CreateNowWizard({
                   <button
                     type="button"
                     aria-pressed={foulMouth}
-                    disabled={ratingSaving}
+                    disabled={ratingSaving || isNasheed}
                     onClick={() => setFoulMouth.mutate(true)}
                     className={cn(
                       "flex flex-col items-center gap-1.5 rounded-xl border px-3 py-3 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-60",
@@ -657,7 +676,7 @@ export function CreateNowWizard({
                   </button>
                 </div>
 
-                {foulMouth && (
+                {foulMouth && !isNasheed && (
                   <div className="space-y-2 rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-3">
                     <div className="flex items-baseline justify-between gap-2">
                       <label
@@ -740,8 +759,8 @@ export function CreateNowWizard({
                   {(languages.length ? languages : ["English"]).join(", ")}
                 </p>
                 <p className="text-muted-foreground">
-                  {gender || "Any voice"} · {vocalsOnly ? (beatPath ? "Vocals over your beat" : "A cappella, no instruments") : "Full production"} ·{" "}
-                  {foulMouth ? "18+" : "PG"}
+                  {gender || "Any voice"} · {isNasheed ? "Nasheed, voice-only" : vocalsOnly ? (beatPath ? "Vocals over your beat" : "A cappella, no instruments") : "Full production"} ·{" "}
+                  {isNasheed ? "Strictly clean" : foulMouth ? "18+" : "PG"}
                 </p>
                 <p className="flex items-center gap-1.5 font-semibold text-foreground">
                   {isPublic ? <Globe2 className="h-3.5 w-3.5 text-primary" /> : <Lock className="h-3.5 w-3.5 text-primary" />}

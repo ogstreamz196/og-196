@@ -24,8 +24,8 @@ export const POOLS: Record<Category, string[]> = {
   ]),
 
   genre: [
-    "Drill", "Trap", "Afrobeats", "R&B", "Pop", "K-Pop", "Slow Jam", "Bhangra",
-    "Nursery Rhyme", "Dance", "Reggae",
+    "Drill", "Trap", "Drum & Bass", "Afrobeats", "R&B", "Pop", "K-Pop", "Slow Jam", "Bhangra",
+    "Nasheed", "Nursery Rhyme", "Dance", "Reggae",
     "Rock", "Indie", "House", "Lo-fi", "Country", "Jazz", "Funk",
     "Hyperpop", "Amapiano", "Dancehall", "Garage", "Bossa Nova",
   ],
@@ -107,12 +107,14 @@ export const META: Record<Category, CategoryMeta> = {
 export const GENRE_MOOD_BIAS: Record<string, string[]> = {
   Drill: ["Dark", "Angry", "Confident", "Rebellious"],
   Trap: ["Hype", "Confident", "Dark", "Triumphant"],
+  "Drum & Bass": ["Hype", "Rebellious", "Confident", "Triumphant"],
   Afrobeats: ["Happy", "Hype", "Romantic", "Playful"],
   "R&B": ["Romantic", "Heartbroken", "Bittersweet", "Dreamy"],
   Pop: ["Happy", "Hopeful", "Playful", "Triumphant"],
   "K-Pop": ["Happy", "Hype", "Playful", "Confident"],
   "Slow Jam": ["Romantic", "Dreamy", "Heartbroken", "Chill"],
   Bhangra: ["Happy", "Hype", "Confident", "Triumphant"],
+  Nasheed: ["Hopeful", "Triumphant", "Nostalgic"],
   "Nursery Rhyme": ["Happy", "Playful", "Hopeful"],
   Dance: ["Hype", "Happy", "Triumphant"],
   "Lo-fi": ["Chill", "Nostalgic", "Dreamy", "Melancholy"],
