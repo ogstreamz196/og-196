@@ -38,6 +38,7 @@ export function useSongAudio({
   const [loadingUrl, setLoadingUrl] = useState(false);
   const [progress, setProgress] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const lastPlayLogRef = useRef(0);
 
   async function ensureUrl(): Promise<string | null> {
     if (signedUrl) return signedUrl;
@@ -96,6 +97,15 @@ export function useSongAudio({
     const onPlayEvt = () => {
       setPlaying(true);
       if (playlistTitle) playlist?.markCurrent(songId);
+      if (Date.now() - lastPlayLogRef.current > 10_000) {
+        lastPlayLogRef.current = Date.now();
+        void supabase.rpc("log_user_activity", {
+          p_action: "player_play",
+          p_path: "/library",
+          p_label: playlistTitle || "Track playback",
+          p_metadata: { song_id: songId, mode },
+        });
+      }
     };
     el.addEventListener("pause", onPause);
     el.addEventListener("play", onPlayEvt);
@@ -103,7 +113,7 @@ export function useSongAudio({
       el.removeEventListener("pause", onPause);
       el.removeEventListener("play", onPlayEvt);
     };
-  }, []);
+  }, [mode, playlist, playlistTitle, songId]);
 
 
   const playRef = useRef<() => Promise<void>>(async () => {});
@@ -139,7 +149,8 @@ export function useSongAudio({
   async function togglePlay() {
     const url = await ensureUrl();
     if (!url) return;
-    const el = audioRef.current!;
+    const el = audioRef.current;
+    if (!el) return;
     if (playing) {
       el.pause();
       setPlaying(false);
