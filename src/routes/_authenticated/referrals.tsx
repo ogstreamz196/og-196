@@ -104,10 +104,11 @@ function ReferralsPage() {
     queryKey: ["my-referral-code", user?.id],
     enabled: !!user,
     queryFn: async () => {
+      if (!user) return null;
       const { data, error } = await supabase
         .from("profiles")
         .select("referral_code")
-        .eq("id", user!.id)
+        .eq("id", user.id)
         .maybeSingle();
       if (error) throw error;
       return (data?.referral_code as string | null) ?? null;
@@ -135,17 +136,17 @@ function ReferralsPage() {
     queryKey: ["earn-player-activity", user?.id],
     enabled: !!user,
     refetchInterval: 30_000,
-    queryFn: async (): Promise<PlayerActivity[]> => {
-      if (!user) return [];
-      const { data, error } = await supabase
+    queryFn: async (): Promise<{ rows: PlayerActivity[]; total: number }> => {
+      if (!user) return { rows: [], total: 0 };
+      const { data, count, error } = await supabase
         .from("user_activity_log")
-        .select("id,label,created_at,metadata")
+        .select("id,label,created_at,metadata", { count: "exact" })
         .eq("user_id", user.id)
         .eq("action", "player_play")
         .order("created_at", { ascending: false })
         .limit(8);
       if (error) throw error;
-      return (data ?? []) as PlayerActivity[];
+      return { rows: (data ?? []) as PlayerActivity[], total: count ?? 0 };
     },
   });
 
@@ -338,8 +339,8 @@ function ReferralsPage() {
           <DashboardMetric
             icon={<PlayCircle className="h-4 w-4" />}
             label="Player starts"
-            value={playerActivityQ.isLoading ? "—" : (playerActivityQ.data?.length ?? 0).toLocaleString()}
-            note="Recent activity"
+            value={playerActivityQ.isLoading ? "—" : (playerActivityQ.data?.total ?? 0).toLocaleString()}
+            note="All player starts"
             tone="amber"
           />
         </section>
@@ -356,12 +357,12 @@ function ReferralsPage() {
             {playerActivityQ.isLoading && (
               <p className="px-4 py-6 text-center text-sm text-muted-foreground">Loading plays…</p>
             )}
-            {!playerActivityQ.isLoading && playerActivityQ.data?.length === 0 && (
+            {!playerActivityQ.isLoading && playerActivityQ.data?.rows.length === 0 && (
               <p className="px-4 py-6 text-center text-sm text-muted-foreground">
                 Play a track in Music and your activity will appear here.
               </p>
             )}
-            {playerActivityQ.data?.map((activity) => (
+            {playerActivityQ.data?.rows.map((activity) => (
               <div key={activity.id} className="flex min-w-0 items-center gap-3 px-4 py-3 sm:px-5">
                 <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/15 text-primary">
                   <PlayCircle className="h-4 w-4" />
