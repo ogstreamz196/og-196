@@ -359,7 +359,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
           vocals_only: vocalsOnly,
           target_duration_sec: targetMinutes * 60,
           foulMouth: isNasheed ? false : foulMouth,
-          foulIntensity,
+          foulIntensity: displayedFoulIntensity,
           language: languageValue,
         },
       });
