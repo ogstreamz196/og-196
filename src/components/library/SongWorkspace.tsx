@@ -15,11 +15,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 import { useSettings } from "@/hooks/use-settings";
-import { useFoulIntensity, useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
+import { useFoulIntensity, useFoulMouth, useSetFoulIntensity, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 
 import { useProfile } from "@/hooks/use-profile";
 import { useVariations } from "@/hooks/use-variations";
@@ -125,6 +126,9 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const { foulMouth } = useFoulMouth();
   const { intensity: foulIntensity } = useFoulIntensity();
   const setFoulMouth = useSetFoulMouth();
+  const setFoulIntensity = useSetFoulIntensity();
+  const [foulIntensityLocal, setFoulIntensityLocal] = useState<number | null>(null);
+  const displayedFoulIntensity = foulIntensityLocal ?? foulIntensity;
 
   const lyricsCost = settings?.coins_per_lyrics_generation ?? 0;
   const previewCost = settings?.coins_per_generation ?? 0;
@@ -355,7 +359,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
           vocals_only: vocalsOnly,
           target_duration_sec: targetMinutes * 60,
           foulMouth: isNasheed ? false : foulMouth,
-          foulIntensity,
+          foulIntensity: displayedFoulIntensity,
           language: languageValue,
         },
       });
@@ -632,7 +636,11 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                                 setStyles(on ? [] : ["Nasheed"]);
                                 setStyleExtra("");
                                 setVocalsOnly(!on);
-                                if (!on && foulMouth) setFoulMouth.mutate(false);
+                                if (!on) {
+                                  setFoulIntensityLocal(0);
+                                  setFoulIntensity.mutate(0);
+                                  if (foulMouth) setFoulMouth.mutate(false);
+                                }
                                 return;
                               }
                               setStyles((list) => toggleItem(list.filter((style) => style !== "Nasheed"), s));
@@ -797,10 +805,37 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                   <Switch
                     id="foul-mouth-toggle"
                     checked={foulMouth}
-                    onCheckedChange={(v) => setFoulMouth.mutate(v)}
-                    disabled={setFoulMouth.isPending || isNasheed}
+                    onCheckedChange={(explicit) => {
+                      const value = explicit ? 3 : 0;
+                      setFoulIntensityLocal(value);
+                      setFoulIntensity.mutate(value);
+                      setFoulMouth.mutate(explicit);
+                    }}
+                    disabled={setFoulMouth.isPending || setFoulIntensity.isPending || isNasheed}
                   />
                 </label>
+                {!isNasheed && (
+                  <div className="col-span-2 grid w-full grid-cols-[auto_minmax(7rem,1fr)_auto] items-center gap-2 rounded-md border border-border/60 bg-muted/30 px-3 py-2 sm:col-span-1 sm:w-64">
+                    <span className="text-[10px] font-semibold text-muted-foreground">Clean</span>
+                    <Slider
+                      aria-label="Swearing intensity"
+                      min={0}
+                      max={3}
+                      step={1}
+                      value={[displayedFoulIntensity]}
+                      onValueChange={(values) => setFoulIntensityLocal(
+                        Math.max(0, Math.min(3, Math.round(values[0] ?? 3))),
+                      )}
+                      onValueCommit={(values) => {
+                        const value = Math.max(0, Math.min(3, Math.round(values[0] ?? 3)));
+                        setFoulIntensityLocal(value);
+                        setFoulIntensity.mutate(value);
+                        if ((value > 0) !== foulMouth) setFoulMouth.mutate(value > 0);
+                      }}
+                    />
+                    <span className="text-[10px] font-semibold text-destructive">Savage</span>
+                  </div>
+                )}
                 <Button variant="ghost" onClick={handleSave} disabled={!dirty || saving} className="min-w-0">
                   {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
                 </Button>

@@ -104,7 +104,7 @@ export function useSetFoulMouth() {
   });
 }
 
-/** 1 (mild) – 5 (savage) swearing intensity, only used when Foul Mouth is ON. */
+/** 0 (clean) – 3 (savage) swearing intensity. */
 export function foulIntensityQueryKey(userId: string | null | undefined) {
   return ["user-preferences", "foul_intensity", userId ?? "anon"] as const;
 }
@@ -124,7 +124,7 @@ export function useFoulIntensity() {
         .maybeSingle();
       if (error) throw new Error(error.message);
       const v = (data as { foul_intensity?: number } | null)?.foul_intensity;
-      return typeof v === "number" ? v : 3;
+      return typeof v === "number" ? Math.max(0, Math.min(3, Math.round(v))) : 3;
     },
   });
 
@@ -139,7 +139,7 @@ export function useSetFoulIntensity() {
   return useMutation({
     mutationFn: async (next: number) => {
       if (!uid) throw new Error("Sign in required");
-      const value = Math.max(1, Math.min(5, Math.round(next)));
+      const value = Math.max(0, Math.min(3, Math.round(next)));
       const { error } = await supabase
         .from("user_preferences")
         .upsert({ user_id: uid, foul_intensity: value } as never, { onConflict: "user_id" });
@@ -150,7 +150,7 @@ export function useSetFoulIntensity() {
       const key = foulIntensityQueryKey(uid);
       await qc.cancelQueries({ queryKey: key });
       const prev = qc.getQueryData<number>(key);
-      qc.setQueryData(key, Math.max(1, Math.min(5, Math.round(next))));
+      qc.setQueryData(key, Math.max(0, Math.min(3, Math.round(next))));
       return { prev };
     },
     onError: (_e, _next, ctx) => {

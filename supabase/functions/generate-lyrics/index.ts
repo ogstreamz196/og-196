@@ -135,11 +135,11 @@ Deno.serve(async (req) => {
     const rawIntensity =
       typeof body.foulIntensity === "number" ? body.foulIntensity : prefRow?.foul_intensity;
     const foulIntensity = Math.max(
-      1,
-      Math.min(5, Math.round(typeof rawIntensity === "number" ? rawIntensity : 3)),
+      0,
+      Math.min(3, Math.round(typeof rawIntensity === "number" ? rawIntensity : 3)),
     );
     const isNasheed = styleTags.some((tag) => /^nasheed$/i.test(tag.trim()));
-    const foulMouth = isNasheed ? false : requestedFoulMouth;
+    const foulMouth = !isNasheed && requestedFoulMouth && foulIntensity > 0;
 
     // Default personal context: weave the user's display_name + artist_bio from
     // their profile so lyrics feel personal without the user having to retype
@@ -237,14 +237,13 @@ Deno.serve(async (req) => {
       multiStyleRule + multiLanguageRule + singleLanguageRule + englishRemixRule + vocalsOnlyRule + nasheedRule;
 
 
-    // 18+ swearing intensity dial (1 mild → 5 savage).
+    // Four exact levels. Level zero always follows the clean PG prompt below.
     const intensityRule = [
-      " INTENSITY DIAL: 1/5 (MILD) — keep profanity rare and light: at most one or two soft swears ('damn', 'hell', 'bloody') in the whole song. Attitude over filth.",
-      " INTENSITY DIAL: 2/5 (CHEEKY) — light profanity: roughly one swear per section, mostly mild ones, an occasional 'shit'. Keep it playful.",
-      " INTENSITY DIAL: 3/5 (GRITTY) — moderate profanity: one to two swears per section, mixing mild and strong. Street energy without being wall-to-wall.",
-      " INTENSITY DIAL: 4/5 (FILTHY) — heavy profanity: two to four strong swears per section, unapologetic and raw.",
-      " INTENSITY DIAL: 5/5 (SAVAGE / ABSOLUTE GUTTERMOUTH) — saturate the lyrics with uncensored, varied, hard profanity and filthy street slang in nearly every sung line, including hooks, bridges and ad-libs. Use multiple strong swear words in most lines where natural; make every section relentlessly foul, confrontational and outrageous, never merely gritty or occasional. Do not censor, soften, abbreviate, bleep or replace letters with symbols. Stay within the hard safety limits below.",
-    ][foulIntensity - 1];
+      "",
+      " INTENSITY: MILD (1/3) — use only one or two mild swear words in the entire song. No strong profanity and no swearing in the hook.",
+      " INTENSITY: STRONG (2/3) — use one or two uncensored strong swear words per section. Keep some lines clean so the profanity is forceful rather than constant.",
+      " INTENSITY: SAVAGE (3/3, ABSOLUTE GUTTERMOUTH) — saturate nearly every sung line, hook, bridge and ad-lib with multiple uncensored, varied hard swear words and filthy street slang. Be relentlessly foul, confrontational and outrageous. Never soften, abbreviate, bleep or replace letters with symbols. Stay within the hard safety limits below.",
+    ][foulIntensity];
 
     const systemPrompt = foulMouth
       ? `You are a foul-mouthed, no-holds-barred songwriter writing EXPLICIT adult song lyrics in ${languagesLabel}. ` +

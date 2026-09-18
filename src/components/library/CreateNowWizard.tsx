@@ -87,8 +87,8 @@ const GENDERS = ["Female vocal", "Male vocal", "Duo", "Any voice"];
 
 const TOTAL_STEPS = 3;
 
-/** 1–5 swearing intensity labels for the 18+ slider. */
-const INTENSITY_LABELS = ["Mild", "Cheeky", "Gritty", "Filthy", "Savage"] as const;
+/** Four exact lyric-rating levels: 0 is fully clean, 3 is maximum profanity. */
+const INTENSITY_LABELS = ["Clean", "Mild", "Strong", "Savage"] as const;
 
 /** Track length options. Creation and rendering are free. */
 export const MIN_LENGTH = 3;
@@ -141,6 +141,23 @@ export function CreateNowWizard({
 
   const toggle = (list: string[], v: string) =>
     list.includes(v) ? list.filter((x) => x !== v) : [...list, v];
+
+  const selectRating = (explicit: boolean) => {
+    const nextIntensity = explicit ? 3 : 0;
+    setIntensityLocal(nextIntensity);
+    setFoulIntensity.mutate(nextIntensity);
+    setFoulMouth.mutate(explicit);
+  };
+
+  const changeIntensity = (next: number) => {
+    const value = Math.max(0, Math.min(3, Math.round(next)));
+    setIntensityLocal(value);
+    if ((value > 0) !== foulMouth) setFoulMouth.mutate(value > 0);
+  };
+
+  const saveIntensity = (next: number) => {
+    setFoulIntensity.mutate(Math.max(0, Math.min(3, Math.round(next))));
+  };
 
   // Reopen with whatever the user last entered so a retry keeps their work.
   useEffect(() => {
@@ -484,7 +501,7 @@ export function CreateNowWizard({
                             setVocalsOnly(!selected);
                             setBeatPath("");
                             setBeatName("");
-                            if (!selected && foulMouth) setFoulMouth.mutate(false);
+                            if (!selected) selectRating(false);
                             return;
                           }
                           setStyles((prev) => toggle(prev.filter((style) => style !== "Nasheed"), s));
@@ -635,7 +652,7 @@ export function CreateNowWizard({
                     type="button"
                     aria-pressed={!foulMouth}
                     disabled={ratingSaving}
-                    onClick={() => setFoulMouth.mutate(false)}
+                    onClick={() => selectRating(false)}
                     className={cn(
                       "flex flex-col items-center gap-1.5 rounded-xl border px-3 py-3 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-60",
                       !foulMouth
@@ -661,7 +678,7 @@ export function CreateNowWizard({
                     type="button"
                     aria-pressed={foulMouth}
                     disabled={ratingSaving || isNasheed}
-                    onClick={() => setFoulMouth.mutate(true)}
+                    onClick={() => selectRating(true)}
                     className={cn(
                       "flex flex-col items-center gap-1.5 rounded-xl border px-3 py-3 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-60",
                       foulMouth
@@ -685,7 +702,7 @@ export function CreateNowWizard({
                   </button>
                 </div>
 
-                {foulMouth && !isNasheed && (
+                {!isNasheed && (
                   <div className="space-y-2 rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-3">
                     <div className="flex items-baseline justify-between gap-2">
                       <label
@@ -695,21 +712,23 @@ export function CreateNowWizard({
                         Swearing intensity
                       </label>
                       <span className="text-[11px] font-bold text-destructive">
-                        {INTENSITY_LABELS[intensity - 1]}
+                        {INTENSITY_LABELS[intensity]}
                       </span>
                     </div>
                     <Slider
                       id="foul-intensity"
                       aria-label="Swearing intensity"
-                      min={1}
-                      max={5}
+                      min={0}
+                      max={3}
                       step={1}
                       value={[intensity]}
-                      onValueChange={(v) => setIntensityLocal(v[0] ?? 3)}
-                      onValueCommit={(v) => setFoulIntensity.mutate(v[0] ?? 3)}
+                      onValueChange={(v) => changeIntensity(v[0] ?? 3)}
+                      onValueCommit={(v) => saveIntensity(v[0] ?? 3)}
                     />
                     <div className="flex justify-between text-[10px] text-muted-foreground">
+                      <span>Clean</span>
                       <span>Mild</span>
+                      <span>Strong</span>
                       <span>Savage</span>
                     </div>
                   </div>
