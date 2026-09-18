@@ -58,7 +58,7 @@ const OG_LANGUAGES = [
   "Punjabi", "Arabic", "Swahili", "Patois", "Yoruba", "German",
   "Italian", "Romanian", "Filipino", "Tagalog", "Cebuano", "Mandarin", "Japanese",
   "Korean", "Turkish", "Russian", "Polish", "Dutch", "Greek", "Thai",
-  "Vietnamese", "Indonesian", "Malay", "Bengali", "Tamil", "Hebrew",
+  "Vietnamese", "Indonesian", "Malay", "Bengali", "Tamil", "Hebrew", "Lithuanian",
 ];
 
 function storageKey(userId: string | null | undefined) {
