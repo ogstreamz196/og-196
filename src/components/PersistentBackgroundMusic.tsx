@@ -1,4 +1,4 @@
-import { Pause, Play } from "lucide-react";
+import { Pause, Play, SkipForward } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import backgroundTrack from "@/assets/og-bot-background.mp3.asset.json";
@@ -12,9 +12,11 @@ const ENABLED_KEY = "og:background-music-enabled";
 const POSITION_KEY = "og:background-music-position";
 const TRACK_KEY = "og:background-music-track";
 const TOGGLE_EVENT = "og:background-music-toggle";
+const NEXT_EVENT = "og:background-music-next";
 const STATUS_EVENT = "og:background-music-status";
 const STATUS_REQUEST_EVENT = "og:background-music-status-request";
 const BACKGROUND_VOLUME = 0.5;
+const FADE_DURATION_MS = 2_000;
 
 function announceStatus(playing: boolean) {
   window.dispatchEvent(new CustomEvent(STATUS_EVENT, { detail: { playing } }));
@@ -34,19 +36,34 @@ export function BackgroundMusicHeaderControl({ className = "" }: { className?: s
   }, []);
 
   return (
-    <Button
-      type="button"
-      variant="ghost"
-      size="icon"
-      className={`h-9 w-9 shrink-0 rounded-full hover:bg-white/5 ${className}`}
-      onClick={() => window.dispatchEvent(new Event(TOGGLE_EVENT))}
-      aria-label={playing ? "Pause background music" : "Play background music"}
-      title={playing ? "Pause background music" : "Play background music"}
-      data-background-music-control
-    >
-      {playing ? <Pause className="h-4 w-4" aria-hidden /> : <Play className="h-4 w-4" aria-hidden />}
-      <span className="sr-only">{playing ? "Pause background music" : "Play background music"}</span>
-    </Button>
+    <div className={`flex shrink-0 items-center gap-0.5 ${className}`}>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="h-9 w-9 shrink-0 rounded-full hover:bg-white/5"
+        onClick={() => window.dispatchEvent(new Event(TOGGLE_EVENT))}
+        aria-label={playing ? "Pause background music" : "Play background music"}
+        title={playing ? "Pause background music" : "Play background music"}
+        data-background-music-control
+      >
+        {playing ? <Pause className="h-4 w-4" aria-hidden /> : <Play className="h-4 w-4" aria-hidden />}
+        <span className="sr-only">{playing ? "Pause background music" : "Play background music"}</span>
+      </Button>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="h-9 w-9 shrink-0 rounded-full hover:bg-white/5"
+        onClick={() => window.dispatchEvent(new Event(NEXT_EVENT))}
+        aria-label="Play next background track"
+        title="Next background track"
+        data-background-music-control
+      >
+        <SkipForward className="h-4 w-4" aria-hidden />
+        <span className="sr-only">Play next background track</span>
+      </Button>
+    </div>
   );
 }
 
@@ -60,27 +77,66 @@ export function PersistentBackgroundMusic() {
   const [playing, setPlaying] = useState(false);
   const [ready, setReady] = useState(false);
   const [trackIndex, setTrackIndex] = useState(0);
+  const fadeFrameRef = useRef<number | null>(null);
   // Skip the very first src change (initial mount) so the stored position sticks.
   const advancedRef = useRef(false);
 
+  const stopFade = useCallback(() => {
+    if (fadeFrameRef.current !== null) {
+      window.cancelAnimationFrame(fadeFrameRef.current);
+      fadeFrameRef.current = null;
+    }
+  }, []);
+
+  const fadeIn = useCallback((audio: HTMLAudioElement) => {
+    stopFade();
+    audio.volume = 0;
+    const startedAt = performance.now();
+    const tick = (now: number) => {
+      const progress = Math.min((now - startedAt) / FADE_DURATION_MS, 1);
+      audio.volume = BACKGROUND_VOLUME * progress;
+      if (progress < 1 && !audio.paused) {
+        fadeFrameRef.current = window.requestAnimationFrame(tick);
+      } else {
+        fadeFrameRef.current = null;
+      }
+    };
+    fadeFrameRef.current = window.requestAnimationFrame(tick);
+  }, [stopFade]);
 
   const start = useCallback(async () => {
     const audio = audioRef.current;
     if (!audio) return false;
+    stopFade();
+    audio.volume = 0;
     try {
       await audio.play();
+      fadeIn(audio);
       setPlaying(true);
       return true;
     } catch {
+      audio.volume = BACKGROUND_VOLUME;
       setPlaying(false);
       return false;
     }
+  }, [fadeIn, stopFade]);
+
+  const advanceToRandomTrack = useCallback(() => {
+    advancedRef.current = true;
+    window.localStorage.setItem(POSITION_KEY, "0");
+    setTrackIndex((currentIndex) => {
+      if (PLAYLIST.length < 2) return currentIndex;
+      const choices = PLAYLIST.map((_, index) => index).filter((index) => index !== currentIndex);
+      const nextIndex = choices[Math.floor(Math.random() * choices.length)] ?? currentIndex;
+      window.localStorage.setItem(TRACK_KEY, String(nextIndex));
+      return nextIndex;
+    });
   }, []);
 
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
-    audio.volume = BACKGROUND_VOLUME;
+    audio.volume = 0;
 
     const storedEnabled = window.localStorage.getItem(ENABLED_KEY);
     enabledRef.current = storedEnabled !== "0";
@@ -110,16 +166,7 @@ export function PersistentBackgroundMusic() {
       }
     };
 
-    // Roll onto the next track, cycling back to the first one after the last.
-    const onEnded = () => {
-      advancedRef.current = true;
-      window.localStorage.setItem(POSITION_KEY, "0");
-      setTrackIndex((i) => {
-        const nextIndex = (i + 1) % PLAYLIST.length;
-        window.localStorage.setItem(TRACK_KEY, String(nextIndex));
-        return nextIndex;
-      });
-    };
+    const onEnded = () => advanceToRandomTrack();
 
     audio.addEventListener("play", onPlay);
     audio.addEventListener("pause", onPause);
@@ -160,6 +207,7 @@ export function PersistentBackgroundMusic() {
 
     return () => {
       savePosition();
+      stopFade();
       removeUnlockListeners();
       window.clearInterval(saveTimer);
       window.removeEventListener("pagehide", savePosition);
@@ -167,7 +215,7 @@ export function PersistentBackgroundMusic() {
       audio.removeEventListener("pause", onPause);
       audio.removeEventListener("ended", onEnded);
     };
-  }, [start]);
+  }, [advanceToRandomTrack, start, stopFade]);
 
   // When the rotation moves on, load the new track and keep playing.
   useEffect(() => {
@@ -186,6 +234,7 @@ export function PersistentBackgroundMusic() {
     if (!audio.paused) {
       enabledRef.current = false;
       window.localStorage.setItem(ENABLED_KEY, "0");
+      stopFade();
       audio.pause();
       return;
     }
@@ -195,18 +244,27 @@ export function PersistentBackgroundMusic() {
     await start();
   };
 
+  const playNext = useCallback(() => {
+    enabledRef.current = true;
+    window.localStorage.setItem(ENABLED_KEY, "1");
+    advanceToRandomTrack();
+  }, [advanceToRandomTrack]);
+
   useEffect(() => {
     if (!ready) return;
     const handleToggle = () => void toggle();
+    const handleNext = () => playNext();
     const reportStatus = () => announceStatus(playing);
     window.addEventListener(TOGGLE_EVENT, handleToggle);
+    window.addEventListener(NEXT_EVENT, handleNext);
     window.addEventListener(STATUS_REQUEST_EVENT, reportStatus);
     announceStatus(playing);
     return () => {
       window.removeEventListener(TOGGLE_EVENT, handleToggle);
+      window.removeEventListener(NEXT_EVENT, handleNext);
       window.removeEventListener(STATUS_REQUEST_EVENT, reportStatus);
     };
-  }, [playing, ready]);
+  }, [playNext, playing, ready]);
 
   return (
     <>
