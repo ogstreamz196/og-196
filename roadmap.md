@@ -1,7 +1,7 @@
 - [x] Verify and fix refer-to-earn end to end
 - [x] Show the full global playlist in the global player
 - [x] Offer 3 credits or 99p for global-track downloads
-- [ ] Verify relevant tests and preview
+- [x] Verify relevant tests and preview
 - [x] Default fresh tracks to Global while preserving per-track choice
 - [x] Add referral, published-track, and player-activity dashboard to Earn
-- [ ] Sync Android live URL and publish ogbot.co.uk
+- [x] Sync Android live URL and publish ogbot.co.uk
