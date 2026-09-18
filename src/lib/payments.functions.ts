@@ -353,6 +353,15 @@ export const reconcileCoinSession = createServerFn({ method: "POST" })
 
       const balance = Number((result as { balance?: number } | null)?.balance ?? 0);
       const credited = Boolean((result as { credited?: boolean } | null)?.credited);
+      if (credited) {
+        const rewardCoins = Math.max(1, Math.floor(coins / 10));
+        const { error: referralError } = await (supabaseAdmin as any).rpc("credit_payment_referral", {
+          _referee_id: userId,
+          _reward_coins: rewardCoins,
+          _payment_reference: reference,
+        });
+        if (referralError) console.error("payment referral reward failed", referralError);
+      }
       return credited
         ? { status: "credited", coins, balance }
         : { status: "already_credited", coins, balance };
@@ -465,6 +474,15 @@ export const reconcileTrackUnlock = createServerFn({ method: "POST" })
         `stripe:${data.environment}:${session.id}`,
       );
       if (!result.ok) return { error: result.error };
+      if (!result.already) {
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { error: referralError } = await (supabaseAdmin as any).rpc("credit_payment_referral", {
+          _referee_id: userId,
+          _reward_coins: 1,
+          _payment_reference: `stripe:${data.environment}:track:${session.id}`,
+        });
+        if (referralError) console.error("payment referral reward failed", referralError);
+      }
       return { status: "unlocked", songId: meta.songId };
     } catch (error) {
       console.error("reconcileTrackUnlock failed", error);

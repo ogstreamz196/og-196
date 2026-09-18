@@ -52,6 +52,9 @@ export type WizardResult = {
   targetMinutes: number;
   /** Whether the finished track should appear in the global player. */
   isPublic: boolean;
+  /** Exact per-track lyric rating selected in this wizard run. */
+  foulMouth: boolean;
+  foulIntensity: number;
 };
 
 /** Raw wizard inputs — kept by the parent so a retry never loses them. */
@@ -276,6 +279,8 @@ export function CreateNowWizard({
         beatPath: isNasheed ? "" : vocalsOnly ? beatPath : "",
         targetMinutes,
         isPublic,
+        foulMouth: !isNasheed && intensity > 0,
+        foulIntensity: isNasheed ? 0 : intensity,
       },
       {
         title,

@@ -51,6 +51,31 @@ async function alreadyProcessed(
   return false;
 }
 
+async function creditPaymentReferral(
+  userId: string,
+  rewardCoins: number,
+  paymentReference: string,
+) {
+  if (rewardCoins <= 0) return;
+  const supabase = await getAdminClient();
+  const { data, error } = await (supabase as any).rpc("credit_payment_referral", {
+    _referee_id: userId,
+    _reward_coins: rewardCoins,
+    _payment_reference: paymentReference,
+  });
+  if (error) {
+    log("error", "payment referral reward failed", { userId, paymentReference, err: error.message });
+    return;
+  }
+  const result = data as { credited?: boolean; reason?: string; reward_coins?: number } | null;
+  log("info", result?.credited ? "payment referral rewarded" : "payment referral skipped", {
+    userId,
+    paymentReference,
+    rewardCoins: result?.reward_coins ?? rewardCoins,
+    reason: result?.reason,
+  });
+}
+
 // ─── coin crediting (one-off purchases) ────────────────────────────────────
 async function creditCoinsForSession(session: any, env: StripeEnv) {
   const meta = (session?.metadata ?? {}) as Record<string, string | undefined>;
@@ -100,6 +125,9 @@ async function creditCoinsForSession(session: any, env: StripeEnv) {
   const newBalance = Number((result as { balance?: number } | null)?.balance ?? 0);
   if (credited) log("info", "coins credited", { userId, coins, reference, newBalance });
   else log("info", "coins already credited", { userId, coins, reference, newBalance });
+  if (credited) {
+    await creditPaymentReferral(userId, Math.max(1, Math.floor(coins / 10)), reference);
+  }
 }
 
 // ─── VIP role + subscription mirror ────────────────────────────────────────
@@ -191,6 +219,11 @@ async function grantVipFromCheckout(session: any, env: StripeEnv) {
     return;
   }
   await grantVipRole(userId, { sessionId: session.id, env, source: "checkout" });
+  await creditPaymentReferral(
+    userId,
+    Math.max(1, Math.floor(Number(session?.amount_total ?? 0) / 100)),
+    `stripe:${env}:vip:${session.id}`,
+  );
 }
 
 // ─── one-off card unlock of a single track (99p) ───────────────────────────
@@ -209,7 +242,12 @@ async function fulfilTrackUnlock(session: any, env: StripeEnv) {
   const { grantTrackUnlock } = await import("@/lib/track-unlock.server");
   const result = await grantTrackUnlock(userId, songId, `stripe:${env}:${session.id}`);
   if (!result.ok) log("error", "track unlock failed", { userId, songId, err: result.error });
-  else log("info", "track unlocked via card", { userId, songId, already: result.already });
+  else {
+    log("info", "track unlocked via card", { userId, songId, already: result.already });
+    if (!result.already) {
+      await creditPaymentReferral(userId, 1, `stripe:${env}:track:${session.id}`);
+    }
+  }
 }
 
 // ─── refunds ───────────────────────────────────────────────────────────────
@@ -447,6 +485,11 @@ async function fulfilStoreItemCheckout(session: any, env: StripeEnv) {
   }
 
   log("info", "store item fulfilled", { itemId, userId, coinReward, perk });
+  await creditPaymentReferral(
+    userId,
+    Math.max(1, Math.floor(Number(session?.amount_total ?? 0) / 100)),
+    `stripe:${env}:store:${session.id}`,
+  );
 }
 
 // ─── dispatch ──────────────────────────────────────────────────────────────
