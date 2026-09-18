@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, Check, Globe2, Lock, Mic2, Music4, Sparkles, X } from "lucide-react";
 import ratingPgImg from "@/assets/rating-pg.png";
 import rating18Img from "@/assets/rating-18.png";
@@ -137,6 +137,7 @@ export function CreateNowWizard({
   const [beatName, setBeatName] = useState("");
   const [uploadingBeat, setUploadingBeat] = useState(false);
   const [confirmClose, setConfirmClose] = useState(false);
+  const wizardScrollRef = useRef<HTMLDivElement | null>(null);
 
   const toggle = (list: string[], v: string) =>
     list.includes(v) ? list.filter((x) => x !== v) : [...list, v];
@@ -161,6 +162,13 @@ export function CreateNowWizard({
     setIsPublic(d.isPublic ?? true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
+
+  // Each stage starts at the top. On phones the dialog itself is the single
+  // page scroller; desktop keeps the compact inner-panel behaviour.
+  useEffect(() => {
+    if (!open) return;
+    wizardScrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  }, [open, step]);
 
   const dirty =
     title.trim().length > 0 ||
@@ -302,13 +310,14 @@ export function CreateNowWizard({
   return (
     <Dialog open={open} onOpenChange={(v) => (v ? onOpenChange(true) : requestClose())}>
       <DialogContent
+        ref={wizardScrollRef}
         onEscapeKeyDown={(e) => {
           e.preventDefault();
           requestClose();
         }}
-        className="flex max-h-[calc(100dvh-1.5rem)] w-[calc(100vw-1.5rem)] max-w-lg flex-col gap-3 overflow-hidden rounded-2xl border border-white/10 bg-card/95 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-2xl shadow-2xl"
+        className="block h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom))] w-full max-w-none overflow-y-auto overscroll-y-contain rounded-none border-x-0 border-white/10 bg-card/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-4 backdrop-blur-2xl shadow-2xl sm:flex sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:w-[calc(100vw-1.5rem)] sm:max-w-lg sm:flex-col sm:gap-3 sm:overflow-hidden sm:rounded-2xl sm:border-x sm:px-6 sm:py-6"
       >
-        <DialogHeader className="shrink-0 space-y-2 text-left">
+        <DialogHeader className="shrink-0 space-y-2 pb-3 text-left sm:pb-0">
           <div className="flex items-center justify-between gap-3 pr-8">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/15 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-primary">
               <Sparkles className="h-3 w-3" />
@@ -347,7 +356,7 @@ export function CreateNowWizard({
         </DialogHeader>
 
         <div
-          className="-mx-1 min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain px-1"
+          className="-mx-1 min-h-0 space-y-3 px-1 sm:flex-1 sm:overflow-y-auto sm:overscroll-contain"
           style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
         >
         <div
@@ -721,7 +730,7 @@ export function CreateNowWizard({
                   role="group"
                   aria-label="Languages"
                   style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
-                  className="grid max-h-[200px] grid-cols-2 gap-2 overflow-y-auto overscroll-contain rounded-xl border border-border bg-background/40 p-2 pr-1 sm:grid-cols-3"
+                  className="grid grid-cols-2 gap-2 rounded-xl border border-border bg-background/40 p-2 sm:max-h-[200px] sm:grid-cols-3 sm:overflow-y-auto sm:overscroll-contain sm:pr-1"
                 >
                   {POOLS.language.map((l) => {
                     const selected = languages.includes(l);
@@ -780,7 +789,7 @@ export function CreateNowWizard({
           )}
         </div>
 
-        <div className="-mx-4 mt-1 shrink-0 border-t border-white/10 bg-card/95 px-4 pb-1 pt-3 backdrop-blur-xl sm:-mx-6 sm:px-6">
+        <div className="sticky bottom-0 z-10 -mx-4 mt-3 shrink-0 border-t border-white/10 bg-card/95 px-4 pb-[max(0.25rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-xl sm:static sm:-mx-6 sm:mt-1 sm:px-6 sm:pb-1">
           <div className="flex items-center gap-2">
             <Button
               type="button"
