@@ -127,6 +127,8 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const { intensity: foulIntensity } = useFoulIntensity();
   const setFoulMouth = useSetFoulMouth();
   const setFoulIntensity = useSetFoulIntensity();
+  const [foulIntensityLocal, setFoulIntensityLocal] = useState<number | null>(null);
+  const displayedFoulIntensity = foulIntensityLocal ?? foulIntensity;
 
   const lyricsCost = settings?.coins_per_lyrics_generation ?? 0;
   const previewCost = settings?.coins_per_generation ?? 0;
@@ -634,7 +636,11 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                                 setStyles(on ? [] : ["Nasheed"]);
                                 setStyleExtra("");
                                 setVocalsOnly(!on);
-                                if (!on && foulMouth) setFoulMouth.mutate(false);
+                                if (!on) {
+                                  setFoulIntensityLocal(0);
+                                  setFoulIntensity.mutate(0);
+                                  if (foulMouth) setFoulMouth.mutate(false);
+                                }
                                 return;
                               }
                               setStyles((list) => toggleItem(list.filter((style) => style !== "Nasheed"), s));
@@ -800,7 +806,9 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                     id="foul-mouth-toggle"
                     checked={foulMouth}
                     onCheckedChange={(explicit) => {
-                      setFoulIntensity.mutate(explicit ? 3 : 0);
+                      const value = explicit ? 3 : 0;
+                      setFoulIntensityLocal(value);
+                      setFoulIntensity.mutate(value);
                       setFoulMouth.mutate(explicit);
                     }}
                     disabled={setFoulMouth.isPending || setFoulIntensity.isPending || isNasheed}
@@ -814,9 +822,13 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                       min={0}
                       max={3}
                       step={1}
-                      value={[foulIntensity]}
+                      value={[displayedFoulIntensity]}
+                      onValueChange={(values) => setFoulIntensityLocal(
+                        Math.max(0, Math.min(3, Math.round(values[0] ?? 3))),
+                      )}
                       onValueCommit={(values) => {
                         const value = Math.max(0, Math.min(3, Math.round(values[0] ?? 3)));
+                        setFoulIntensityLocal(value);
                         setFoulIntensity.mutate(value);
                         if ((value > 0) !== foulMouth) setFoulMouth.mutate(value > 0);
                       }}
