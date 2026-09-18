@@ -5,7 +5,7 @@
 - [x] Default fresh tracks to Global while preserving per-track choice
 - [x] Add referral, published-track, and player-activity dashboard to Earn
 - [x] Sync Android live URL and publish ogbot.co.uk
-- [ ] Generate and verify four Global profanity-level tracks: Clean, Mild, Strong, Savage
-- [ ] Credit referral earnings from successful real payments exactly once
-- [ ] Update Earn balances and payment earnings live
-- [ ] Run end-to-end referral/payment and track-generation checks
+- [x] Generate and verify four Global profanity-level tracks: Clean, Mild, Strong, Savage
+- [x] Credit referral earnings from successful real payments exactly once
+- [x] Update Earn balances and payment earnings live
+- [x] Run end-to-end referral/payment and track-generation checks
