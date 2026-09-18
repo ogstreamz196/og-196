@@ -80,7 +80,7 @@ export const EMPTY_DRAFT: WizardDraft = {
   beatPath: "",
   beatName: "",
   targetMinutes: 3,
-  isPublic: false,
+  isPublic: true,
 };
 
 const GENDERS = ["Female vocal", "Male vocal", "Duo", "Any voice"];
@@ -124,7 +124,7 @@ export function CreateNowWizard({
   const [languages, setLanguages] = useState<string[]>([]);
   const [vocalsOnly, setVocalsOnly] = useState(false);
   const [targetMinutes, setTargetMinutes] = useState(3);
-  const [isPublic, setIsPublic] = useState(false);
+  const [isPublic, setIsPublic] = useState(true);
   const { foulMouth } = useFoulMouth();
   const setFoulMouth = useSetFoulMouth();
   const ratingSaving = setFoulMouth.isPending;
@@ -158,7 +158,7 @@ export function CreateNowWizard({
     setBeatPath(d.beatPath ?? "");
     setBeatName(d.beatName ?? "");
     setTargetMinutes(d.targetMinutes || 3);
-    setIsPublic(d.isPublic ?? false);
+    setIsPublic(d.isPublic ?? true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
@@ -191,7 +191,7 @@ export function CreateNowWizard({
     setBeatPath("");
     setBeatName("");
     setTargetMinutes(3);
-    setIsPublic(false);
+    setIsPublic(true);
     setStep(1);
     onOpenChange(false);
   }

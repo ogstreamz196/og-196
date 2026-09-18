@@ -20,6 +20,9 @@ import {
   QrCode,
   Download,
   KeyRound,
+  Music2,
+  PlayCircle,
+  Radio,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,6 +37,16 @@ import { Lock, ShieldAlert } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/referrals")({
   component: ReferralsPage,
+  head: () => ({
+    meta: [
+      { title: "Earn Dashboard | OG BOT" },
+      { name: "description", content: "Track referral earnings, Global releases, and listening activity in OG BOT." },
+      { property: "og:title", content: "Earn Dashboard | OG BOT" },
+      { property: "og:description", content: "Track referral earnings, Global releases, and listening activity in OG BOT." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
 });
 
 type Summary = {
@@ -47,6 +60,13 @@ type Summary = {
     referee_id: string | null;
     referee_name: string | null;
   }[];
+};
+
+type PlayerActivity = {
+  id: string;
+  label: string | null;
+  created_at: string;
+  metadata: { song_id?: string; mode?: string } | null;
 };
 
 async function copyTextWithFallback(text: string): Promise<boolean> {
@@ -94,6 +114,40 @@ function ReferralsPage() {
     },
   });
   const myCode = codeQ.data ?? null;
+
+  const publishedQ = useQuery({
+    queryKey: ["earn-published-tracks", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      if (!user) return 0;
+      const { count, error } = await supabase
+        .from("songs")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("status", "completed")
+        .eq("is_public", true);
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
+
+  const playerActivityQ = useQuery({
+    queryKey: ["earn-player-activity", user?.id],
+    enabled: !!user,
+    refetchInterval: 30_000,
+    queryFn: async (): Promise<PlayerActivity[]> => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from("user_activity_log")
+        .select("id,label,created_at,metadata")
+        .eq("user_id", user.id)
+        .eq("action", "player_play")
+        .order("created_at", { ascending: false })
+        .limit(8);
+      if (error) throw error;
+      return (data ?? []) as PlayerActivity[];
+    },
+  });
 
   const link = useMemo(() => {
     if (!user) return "";
@@ -258,6 +312,75 @@ function ReferralsPage() {
             </button>
           )}
         </div>
+
+        <section aria-label="Earn dashboard" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <DashboardMetric
+            icon={<Coins className="h-4 w-4" />}
+            label="Referral earnings"
+            value={`${summary.total_earned.toLocaleString()} OG`}
+            note="Lifetime cashback"
+            tone="primary"
+          />
+          <DashboardMetric
+            icon={<Users className="h-4 w-4" />}
+            label="Your network"
+            value={summary.total_referred.toLocaleString()}
+            note="Referred members"
+            tone="emerald"
+          />
+          <DashboardMetric
+            icon={<Radio className="h-4 w-4" />}
+            label="Published tracks"
+            value={publishedQ.isLoading ? "—" : (publishedQ.data ?? 0).toLocaleString()}
+            note="Live in Global"
+            tone="sky"
+          />
+          <DashboardMetric
+            icon={<PlayCircle className="h-4 w-4" />}
+            label="Player starts"
+            value={playerActivityQ.isLoading ? "—" : (playerActivityQ.data?.length ?? 0).toLocaleString()}
+            note="Recent activity"
+            tone="amber"
+          />
+        </section>
+
+        <section className="overflow-hidden rounded-2xl border border-white/10 bg-card/70 backdrop-blur-xl">
+          <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3 sm:px-5">
+            <div className="min-w-0">
+              <h2 className="font-bungee text-base sm:text-lg">Player activity</h2>
+              <p className="text-xs text-muted-foreground">Your latest track starts</p>
+            </div>
+            <Music2 className="h-5 w-5 shrink-0 text-primary" />
+          </div>
+          <div className="divide-y divide-white/5">
+            {playerActivityQ.isLoading && (
+              <p className="px-4 py-6 text-center text-sm text-muted-foreground">Loading plays…</p>
+            )}
+            {!playerActivityQ.isLoading && playerActivityQ.data?.length === 0 && (
+              <p className="px-4 py-6 text-center text-sm text-muted-foreground">
+                Play a track in Music and your activity will appear here.
+              </p>
+            )}
+            {playerActivityQ.data?.map((activity) => (
+              <div key={activity.id} className="flex min-w-0 items-center gap-3 px-4 py-3 sm:px-5">
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/15 text-primary">
+                  <PlayCircle className="h-4 w-4" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-bold">{activity.label || "Track playback"}</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {activity.metadata?.mode === "full" ? "Full track" : "Preview"}
+                  </p>
+                </div>
+                <time className="shrink-0 text-right text-[10px] leading-tight text-muted-foreground" dateTime={activity.created_at}>
+                  {new Date(activity.created_at).toLocaleDateString([], { day: "2-digit", month: "short" })}
+                  <br />
+                  {new Date(activity.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                </time>
+              </div>
+            ))}
+          </div>
+        </section>
 
         {/* HERO — oversized wallet counter */}
         <section
@@ -546,6 +669,35 @@ function StatTile({
       </div>
       <div className="relative mt-3 font-bungee text-4xl tabular-nums">{value}</div>
       <div className="relative mt-1 text-xs text-muted-foreground">{sub}</div>
+    </div>
+  );
+}
+
+function DashboardMetric({
+  icon,
+  label,
+  value,
+  note,
+  tone,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  note: string;
+  tone: "primary" | "emerald" | "sky" | "amber";
+}) {
+  const tones = {
+    primary: "bg-primary/15 text-primary",
+    emerald: "bg-emerald-500/15 text-emerald-300",
+    sky: "bg-sky-500/15 text-sky-300",
+    amber: "bg-amber-500/15 text-amber-300",
+  }[tone];
+  return (
+    <div className="min-w-0 rounded-2xl border border-white/10 bg-card/70 p-3.5 backdrop-blur-xl sm:p-4">
+      <div className={`grid h-9 w-9 place-items-center rounded-lg ${tones}`}>{icon}</div>
+      <p className="mt-3 break-words text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
+      <p className="mt-1 break-words font-bungee text-2xl tabular-nums leading-tight sm:text-3xl">{value}</p>
+      <p className="mt-1 text-[11px] text-muted-foreground">{note}</p>
     </div>
   );
 }

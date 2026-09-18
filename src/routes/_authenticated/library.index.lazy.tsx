@@ -747,7 +747,7 @@ function LibraryPage() {
           beat_path: beatPath || null,
           target_duration_sec: overrideTargetSec,
           extra_context: extraContext.trim() || null,
-          is_public: override?.isPublic ?? false,
+          is_public: override?.isPublic ?? true,
         } as never)
         .select("id")
         .single();
