@@ -14,7 +14,7 @@ export const Route = createFileRoute("/r/$code")({
       { property: "og:title", content: TITLE },
       { property: "og:description", content: DESC },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: `https://ogstreamz.co.uk/r/${params.code}` },
+      { property: "og:url", content: `https://ogbot.co.uk/r/${params.code}` },
       { property: "og:image", content: OG_IMAGE },
       { property: "og:image:alt", content: "OG Streamz bot" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -22,7 +22,7 @@ export const Route = createFileRoute("/r/$code")({
       { name: "twitter:description", content: DESC },
       { name: "twitter:image", content: OG_IMAGE },
     ],
-    links: [{ rel: "canonical", href: `https://ogstreamz.co.uk/r/${params.code}` }],
+    links: [{ rel: "canonical", href: `https://ogbot.co.uk/r/${params.code}` }],
   }),
   component: ReferralRedirect,
 });

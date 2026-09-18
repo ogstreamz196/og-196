@@ -153,7 +153,7 @@ function ReferralsPage() {
 
   const link = useMemo(() => {
     if (!user) return "";
-    return `https://ogstreamz.co.uk/r/${myCode ?? user.id}`;
+    return `https://ogbot.co.uk/r/${myCode ?? user.id}`;
   }, [user, myCode]);
 
   const summaryQ = useQuery({
