@@ -835,6 +835,8 @@ export type Database = {
           duration_seconds: number | null
           error_message: string | null
           extra_context: string | null
+          foul_intensity: number
+          foul_mouth: boolean
           generation_started_at: string | null
           id: string
           is_public: boolean
@@ -881,6 +883,8 @@ export type Database = {
           duration_seconds?: number | null
           error_message?: string | null
           extra_context?: string | null
+          foul_intensity?: number
+          foul_mouth?: boolean
           generation_started_at?: string | null
           id?: string
           is_public?: boolean
@@ -927,6 +931,8 @@ export type Database = {
           duration_seconds?: number | null
           error_message?: string | null
           extra_context?: string | null
+          foul_intensity?: number
+          foul_mouth?: boolean
           generation_started_at?: string | null
           id?: string
           is_public?: boolean
