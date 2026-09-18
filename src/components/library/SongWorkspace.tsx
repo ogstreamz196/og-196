@@ -45,7 +45,7 @@ const LANGUAGES = orderLanguages([
   "Urdu", "Punjabi", "Arabic", "Swahili", "Patois", "Yoruba", "German",
   "Italian", "Romanian", "Filipino", "Tagalog", "Cebuano", "Mandarin", "Japanese",
   "Korean", "Turkish", "Russian", "Polish", "Dutch", "Greek", "Thai",
-  "Vietnamese", "Indonesian", "Malay", "Hebrew",
+  "Vietnamese", "Indonesian", "Malay", "Hebrew", "Lithuanian",
 ]);
 
 
