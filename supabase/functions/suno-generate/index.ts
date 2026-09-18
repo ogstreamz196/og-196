@@ -41,6 +41,8 @@ const GENRE_STYLE_DETAILS: Record<string, string> = {
   bhangra: "high-energy Punjabi bhangra, driving dhol rhythm, bright tumbi phrases, celebratory call-and-response vocals and a huge dancefloor chorus",
   "nursery rhyme": "simple playful nursery-rhyme melody, clear repetitive words, gentle rhythm, memorable singalong refrain and child-friendly musical phrasing",
   trap: "modern trap production, deep 808 bass, crisp rolling hi-hats, punchy kick, spacious dark melody and confident rhythmic vocal delivery",
+  "drum & bass": "high-energy drum and bass, rapid chopped breakbeats around 174 BPM, deep rolling sub-bass, sharp syncopation, rave momentum and fast precise vocal cadence",
+  nasheed: "strictly vocal-only nasheed, reverent unaccompanied lead voice, layered group responses and gentle human humming, every sound made only by human voices and mouths, absolutely no music or instruments",
 };
 
 function expandGenreStyles(raw: string): string {
@@ -99,9 +101,10 @@ Deno.serve(async (req) => {
       ? "duet, male and female vocals trading lines"
       : null;
     const rawStyle = (body.style ?? "").toString().trim();
+    const isNasheed = rawStyle.split(/\s*,\s*/).some((name: string) => /^nasheed$/i.test(name.trim()));
     const detailedStyle = expandGenreStyles(rawStyle);
-    const vocalsOnly = !!body.vocals_only;
-    const beatPath = body.beat_path ? String(body.beat_path) : null;
+    const vocalsOnly = isNasheed || !!body.vocals_only;
+    const beatPath = isNasheed ? null : (body.beat_path ? String(body.beat_path) : null);
     // Vocals-only: sing over the uploaded beat, or fall back to a pure
     // a cappella with humming and zero instrumentation.
     const acappella = vocalsOnly && !beatPath;

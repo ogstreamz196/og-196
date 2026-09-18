@@ -130,7 +130,7 @@ Deno.serve(async (req) => {
       .eq("user_id", user.id)
       .maybeSingle();
     const prefRow = pref as { foul_mouth?: boolean; foul_intensity?: number } | null;
-    const foulMouth =
+    const requestedFoulMouth =
       typeof body.foulMouth === "boolean" ? body.foulMouth : (prefRow?.foul_mouth ?? false);
     const rawIntensity =
       typeof body.foulIntensity === "number" ? body.foulIntensity : prefRow?.foul_intensity;
@@ -138,6 +138,8 @@ Deno.serve(async (req) => {
       1,
       Math.min(5, Math.round(typeof rawIntensity === "number" ? rawIntensity : 3)),
     );
+    const isNasheed = styleTags.some((tag) => /^nasheed$/i.test(tag.trim()));
+    const foulMouth = isNasheed ? false : requestedFoulMouth;
 
     // Default personal context: weave the user's display_name + artist_bio from
     // their profile so lyrics feel personal without the user having to retype
@@ -202,7 +204,7 @@ Deno.serve(async (req) => {
     const isBallad = /(ballad|acoustic|piano|folk|country|singer[- ]songwriter|slow jam)/.test(tagsLower);
     const isDance = /(dance|edm|house|techno|club|electro|pop|k-pop|bhangra)/.test(tagsLower);
     const isRock = /(rock|metal|punk|indie|alt)/.test(tagsLower);
-    const vocalsOnly = body.vocalsOnly === true || body.vocals_only === true;
+    const vocalsOnly = isNasheed || body.vocalsOnly === true || body.vocals_only === true;
 
     const structure = vocalsOnly
       ? "[Intro – hummed melody, voices only] (4 lines) → [Verse 1] (8 lines) → [Chorus] (6 lines, layered vocal harmonies) → [Verse 2] (8 lines) → [Chorus] (6 lines) → [Humming Interlude – voices only] (4 lines) → [Bridge] (6 lines, whispered then sung) → [Chorus] (x2, 12 lines) → [Outro – soft humming fades] (4 lines)"
@@ -223,13 +225,16 @@ Deno.serve(async (req) => {
     const vocalsOnlyRule = vocalsOnly
       ? ` VOCALS-ONLY REQUIREMENT (critical): this is a pure a cappella track — human voice and humming ONLY, zero instruments. Section markers must only ever describe vocal moments (e.g. [Verse], [Chorus], [Humming Interlude], [Whisper], [Ad-libs]). NEVER write [Drop], [Beat Drop], [Instrumental], [Guitar Solo], [Break] or any marker that names an instrument or production element — write "humming", "vocal run" or "layered harmonies" instead.`
       : "";
+    const nasheedRule = isNasheed
+      ? ` NASHEED REQUIREMENT (absolute): write a reverent, strictly clean vocal-only nasheed. Use human lead voice, group responses, humming and natural mouth-made vocal texture only. No instruments, drums, percussion, beat, bass, clapping, sound effects or musical production cues. No profanity, vulgar slang, sexual content, drug references or graphic violence in any language. Never include section markers that request instruments or a beat.`
+      : "";
 
     const structureRule =
       ` Deliver a COMPLETE, performable song that runs ${targetLabel} when sung — NOT longer. That means ${aimLow}–${aimHigh} words and ${minLines}–${aimLines} lyric lines (excluding section markers). Going over ${aimHigh} words is a failure: trim sections rather than exceed it. Follow this structure for the chosen style: ${structure}.` +
       ` Use the bracketed section markers verbatim (e.g. [Verse 1], [Chorus], [Bridge], [Outro]), each on its own line, with a blank line between sections. Every section must have lyrics — no placeholders, no "(instrumental)" unless the structure explicitly says so.` +
       ` The [Chorus] must be written out IN FULL every time it appears (never write "repeat chorus" or "x2" as a shortcut) — it is the same repeatable hook tied to the song title or central theme.` +
       ` Do NOT cut the song short either — hit every section in the structure and stay inside the word range given.` +
-      multiStyleRule + multiLanguageRule + singleLanguageRule + englishRemixRule + vocalsOnlyRule;
+      multiStyleRule + multiLanguageRule + singleLanguageRule + englishRemixRule + vocalsOnlyRule + nasheedRule;
 
 
     // 18+ swearing intensity dial (1 mild → 5 savage).
@@ -238,7 +243,7 @@ Deno.serve(async (req) => {
       " INTENSITY DIAL: 2/5 (CHEEKY) — light profanity: roughly one swear per section, mostly mild ones, an occasional 'shit'. Keep it playful.",
       " INTENSITY DIAL: 3/5 (GRITTY) — moderate profanity: one to two swears per section, mixing mild and strong. Street energy without being wall-to-wall.",
       " INTENSITY DIAL: 4/5 (FILTHY) — heavy profanity: two to four strong swears per section, unapologetic and raw.",
-      " INTENSITY DIAL: 5/5 (SAVAGE) — maximum profanity: strong swearing in nearly every line, relentless trash-talk energy, no restraint (within the hard limits below).",
+      " INTENSITY DIAL: 5/5 (SAVAGE / ABSOLUTE GUTTERMOUTH) — saturate the lyrics with uncensored, varied, hard profanity and filthy street slang in nearly every sung line, including hooks, bridges and ad-libs. Use multiple strong swear words in most lines where natural; make every section relentlessly foul, confrontational and outrageous, never merely gritty or occasional. Do not censor, soften, abbreviate, bleep or replace letters with symbols. Stay within the hard safety limits below.",
     ][foulIntensity - 1];
 
     const systemPrompt = foulMouth

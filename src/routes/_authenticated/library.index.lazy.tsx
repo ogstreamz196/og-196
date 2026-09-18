@@ -77,7 +77,7 @@ import {
 import { CommunityTrackRow } from "@/components/library/CommunityTrackRow";
 import { MiniPlayer } from "@/components/library/MiniPlayer";
 import { PlaylistProvider, PlaylistOrder, usePlaylist } from "@/hooks/use-playlist";
-import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
+import { useFoulIntensity, useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 
 
 import { FreshTrackCard } from "@/components/library/FreshTrackCard";
@@ -190,6 +190,7 @@ function LibraryPage() {
   const [lyrics, setLyrics] = useState("");
   const [genLyrics, setGenLyrics] = useState(false);
   const { foulMouth } = useFoulMouth();
+  const { intensity: foulIntensity } = useFoulIntensity();
   const setFoulMouthMutation = useSetFoulMouth();
   const setFoulMouth = (updater: boolean | ((v: boolean) => boolean)) => {
     const next = typeof updater === "function" ? updater(foulMouth) : updater;
@@ -388,6 +389,7 @@ function LibraryPage() {
           language: selections.language,
           targetDurationSec,
           foulMouth,
+          foulIntensity,
           personalDetails: personalDetails.trim() || undefined,
           extraContext: combinedExtra || undefined,
           subjectName: subjectName.trim() || undefined,
@@ -699,6 +701,7 @@ function LibraryPage() {
             styleTags: songStyleTags,
             language: songLanguage,
             foulMouth,
+            foulIntensity,
             personalDetails: songDetails || undefined,
             extraContext: combinedExtra || undefined,
             subjectName: songSubject || undefined,
