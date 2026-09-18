@@ -76,6 +76,13 @@ async function creditPaymentReferral(
   });
 }
 
+function paidAmountReward(session: any): number {
+  const amountMinor = Number(session?.amount_total ?? session?.amount?.value ?? 0);
+  return Number.isFinite(amountMinor) && amountMinor >= 100
+    ? Math.max(1, Math.floor(amountMinor / 100))
+    : 0;
+}
+
 // ─── coin crediting (one-off purchases) ────────────────────────────────────
 async function creditCoinsForSession(session: any, env: StripeEnv) {
   const meta = (session?.metadata ?? {}) as Record<string, string | undefined>;
@@ -221,7 +228,7 @@ async function grantVipFromCheckout(session: any, env: StripeEnv) {
   await grantVipRole(userId, { sessionId: session.id, env, source: "checkout" });
   await creditPaymentReferral(
     userId,
-    Math.max(1, Math.floor(Number(session?.amount_total ?? 0) / 100)),
+    paidAmountReward(session),
     `stripe:${env}:vip:${session.id}`,
   );
 }
@@ -487,7 +494,7 @@ async function fulfilStoreItemCheckout(session: any, env: StripeEnv) {
   log("info", "store item fulfilled", { itemId, userId, coinReward, perk });
   await creditPaymentReferral(
     userId,
-    Math.max(1, Math.floor(Number(session?.amount_total ?? 0) / 100)),
+    paidAmountReward(session),
     `stripe:${env}:store:${session.id}`,
   );
 }
