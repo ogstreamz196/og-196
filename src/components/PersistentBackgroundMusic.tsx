@@ -93,7 +93,10 @@ export function PersistentBackgroundMusic() {
     audio.volume = 0;
     const startedAt = performance.now();
     const tick = (now: number) => {
-      const progress = Math.min((now - startedAt) / FADE_DURATION_MS, 1);
+      // Some browsers can deliver a frame timestamp fractionally before
+      // performance.now(); clamp both ends so HTMLMediaElement never receives
+      // an out-of-range volume during the first fade frame.
+      const progress = Math.max(0, Math.min((now - startedAt) / FADE_DURATION_MS, 1));
       audio.volume = BACKGROUND_VOLUME * progress;
       if (progress < 1 && !audio.paused) {
         fadeFrameRef.current = window.requestAnimationFrame(tick);
