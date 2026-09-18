@@ -624,6 +624,9 @@ function LibraryPage() {
     targetMinutes?: number;
     /** Publish directly to the global player instead of keeping it private. */
     isPublic?: boolean;
+    /** Exact lyric rating captured when this track was submitted. */
+    foulMouth?: boolean;
+    foulIntensity?: number;
   };
 
   // Keeps the exact payload of the last run so "Try again" reuses it verbatim.
@@ -650,6 +653,11 @@ function LibraryPage() {
     const songVocal = (override?.vocal ?? "").trim();
     const vocalsOnly = !!override?.vocalsOnly;
     const beatPath = (override?.beatPath ?? "").trim();
+    const trackFoulIntensity = Math.max(
+      0,
+      Math.min(3, Math.round(override?.foulIntensity ?? foulIntensity)),
+    );
+    const trackFoulMouth = (override?.foulMouth ?? foulMouth) && trackFoulIntensity > 0;
     const overrideTargetSec =
       Math.max(MIN_TRACK_MINUTES, override?.targetMinutes ?? targetMinutes) * 60;
     // Vocals-only: either the user's own beat carries the music, or we fall
@@ -700,8 +708,8 @@ function LibraryPage() {
             description,
             styleTags: songStyleTags,
             language: songLanguage,
-            foulMouth,
-            foulIntensity,
+            foulMouth: trackFoulMouth,
+            foulIntensity: trackFoulIntensity,
             personalDetails: songDetails || undefined,
             extraContext: combinedExtra || undefined,
             subjectName: songSubject || undefined,
@@ -748,6 +756,8 @@ function LibraryPage() {
           target_duration_sec: overrideTargetSec,
           extra_context: extraContext.trim() || null,
           is_public: override?.isPublic ?? true,
+          foul_mouth: trackFoulMouth,
+          foul_intensity: trackFoulIntensity,
         } as never)
         .select("id")
         .single();

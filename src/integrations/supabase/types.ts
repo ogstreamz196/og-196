@@ -835,6 +835,8 @@ export type Database = {
           duration_seconds: number | null
           error_message: string | null
           extra_context: string | null
+          foul_intensity: number
+          foul_mouth: boolean
           generation_started_at: string | null
           id: string
           is_public: boolean
@@ -881,6 +883,8 @@ export type Database = {
           duration_seconds?: number | null
           error_message?: string | null
           extra_context?: string | null
+          foul_intensity?: number
+          foul_mouth?: boolean
           generation_started_at?: string | null
           id?: string
           is_public?: boolean
@@ -927,6 +931,8 @@ export type Database = {
           duration_seconds?: number | null
           error_message?: string | null
           extra_context?: string | null
+          foul_intensity?: number
+          foul_mouth?: boolean
           generation_started_at?: string | null
           id?: string
           is_public?: boolean
@@ -1738,6 +1744,14 @@ export type Database = {
           _reference: string
           _type: string
           _user_id: string
+        }
+        Returns: Json
+      }
+      credit_payment_referral: {
+        Args: {
+          _payment_reference: string
+          _referee_id: string
+          _reward_coins: number
         }
         Returns: Json
       }

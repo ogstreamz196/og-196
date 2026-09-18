@@ -55,6 +55,7 @@ type Summary = {
   recent: {
     id: string;
     amount: number;
+    type?: "referral_cashback" | "referral_payment";
     reference: string | null;
     created_at: string;
     referee_id: string | null;
@@ -152,7 +153,7 @@ function ReferralsPage() {
 
   const link = useMemo(() => {
     if (!user) return "";
-    return `https://ogstreamz.co.uk/r/${myCode ?? user.id}`;
+    return `https://ogbot.co.uk/r/${myCode ?? user.id}`;
   }, [user, myCode]);
 
   const summaryQ = useQuery({
@@ -191,11 +192,14 @@ function ReferralsPage() {
         },
         (payload) => {
           const row = payload.new as { type?: string; amount?: number } | null;
-          if (row?.type === "referral_cashback") {
+          if (row?.type === "referral_cashback" || row?.type === "referral_payment") {
             qc.invalidateQueries({ queryKey: ["referral-summary", user.id] });
+            qc.invalidateQueries({ queryKey: ["profile", user.id] });
             if (typeof row.amount === "number" && row.amount > 0) {
-              toast.success(`+${row.amount} OG Coins cashback`, {
-                description: "A referee just burned coins — your share is in.",
+              toast.success(`+${row.amount} OG Coins referral reward`, {
+                description: row.type === "referral_payment"
+                  ? "A referred member paid — your reward is in."
+                  : "A referred member used coins — your share is in.",
               });
             }
           }
@@ -256,9 +260,7 @@ function ReferralsPage() {
   const shortLink = link.replace(/^https?:\/\//, "");
 
   // Paid vs pending breakdown.
-  // Cashback rows are credited the moment a referee burns (>=10 coins),
-  // so every referral_cashback row is "Paid". Pending = referees who
-  // signed up but haven't earned us a cashback row yet.
+  // Reward rows are credited after a referred member pays or uses coins.
   const paidCoins = summary.total_earned;
   const paidEvents = summary.recent.length;
   const paidRefereeIds = new Set(
@@ -319,7 +321,7 @@ function ReferralsPage() {
             icon={<Coins className="h-4 w-4" />}
             label="Referral earnings"
             value={`${summary.total_earned.toLocaleString()} OG`}
-            note="Lifetime cashback"
+            note="Paid referrals + coin use"
             tone="primary"
           />
           <DashboardMetric
@@ -408,7 +410,7 @@ function ReferralsPage() {
               <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 font-semibold text-emerald-300">
                 <TrendingUp className="h-3 w-3" /> {summary.total_referred} {summary.total_referred === 1 ? "referral" : "referrals"} · auto-paid
               </span>
-              <span className="text-muted-foreground">10% of every coin your crew burns</span>
+               <span className="text-muted-foreground">Rewards from their payments and coin use</span>
             </div>
 
             <div className="mt-5 flex flex-col gap-2 sm:mt-6 sm:flex-row sm:flex-wrap sm:justify-center">
@@ -565,7 +567,7 @@ function ReferralsPage() {
             n={3}
             icon={<Flame className="h-5 w-5" />}
             title="You bank 10% forever"
-            body="Every burn → 10% lands in your wallet, automatically."
+            body="Their successful payments and coin use reward your wallet automatically."
           />
         </section>
 
@@ -603,6 +605,7 @@ function ReferralsPage() {
             )}
             {summary.recent.map((tx) => {
               const burned = Number(tx.reference?.match(/burn:(\d+)/)?.[1] ?? 0);
+              const isPayment = tx.type === "referral_payment";
               const when = new Date(tx.created_at);
               return (
                 <div key={tx.id} className="flex items-center justify-between gap-3 py-2.5">
@@ -618,7 +621,7 @@ function ReferralsPage() {
                         </span>
                       </div>
                       <div className="mt-0.5 font-mono text-[11px] text-muted-foreground">
-                        {burned > 0 ? <>{burned} burned × 10% = </> : <>Cashback = </>}
+                        {isPayment ? <>Successful payment reward = </> : burned > 0 ? <>{burned} used × 10% = </> : <>Cashback = </>}
                         <span className="font-bold text-primary">+{tx.amount} OG</span>
                       </div>
                     </div>

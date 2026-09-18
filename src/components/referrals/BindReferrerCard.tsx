@@ -159,7 +159,7 @@ export function BindReferrerCard() {
                   variant="secondary"
                   className="h-8 gap-1.5"
                   onClick={() => {
-                    const url = `https://ogstreamz.co.uk/r/${code}`;
+                    const url = `https://ogbot.co.uk/r/${code}`;
                     navigator.clipboard?.writeText(url);
                     toast.success("Referrer link copied");
                   }}

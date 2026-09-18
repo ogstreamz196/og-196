@@ -22,6 +22,7 @@ interface Tables {
   user_roles: Row[];
   subscriptions: Row[];
   payment_refunds: Row[];
+  referrals: Row[];
 }
 const tables: Tables = {
   stripe_webhook_events: [],
@@ -30,6 +31,7 @@ const tables: Tables = {
   user_roles: [],
   subscriptions: [],
   payment_refunds: [],
+  referrals: [],
 };
 
 function makeQuery(name: keyof Tables) {
@@ -97,6 +99,20 @@ function makeQuery(name: keyof Tables) {
 const fakeAdmin = {
   from(name: keyof Tables) { return makeQuery(name); },
   rpc(name: string, args: any) {
+    if (name === "credit_payment_referral") {
+      const referral = tables.referrals.find((r) => r.referee_id === args._referee_id);
+      if (!referral) return Promise.resolve({ data: { credited: false, reason: "no_referrer" }, error: null });
+      const reference = `payment:referee:${args._referee_id}|ref:${args._payment_reference}`;
+      const existing = tables.coin_transactions.find(
+        (r) => r.type === "referral_payment" && r.reference === reference,
+      );
+      if (existing) return Promise.resolve({ data: { credited: false, reason: "already_credited" }, error: null });
+      const profile = tables.profiles.find((r) => r.id === referral.referrer_id);
+      if (!profile) return Promise.resolve({ data: null, error: { message: "referrer_profile_not_found" } });
+      tables.coin_transactions.push({ user_id: referral.referrer_id, amount: args._reward_coins, type: "referral_payment", reference });
+      profile.coin_balance = (profile.coin_balance ?? 0) + args._reward_coins;
+      return Promise.resolve({ data: { credited: true, reward_coins: args._reward_coins }, error: null });
+    }
     if (name !== "credit_coin_transaction") {
       return Promise.resolve({ data: null, error: { message: `unknown rpc ${name}` } });
     }
@@ -196,6 +212,23 @@ describe("payments webhook → coin credit", () => {
     );
     expect(tables.profiles[0].coin_balance).toBe(5);
     expect(tables.coin_transactions).toHaveLength(0);
+  });
+
+  it("credits the referrer once after a successful real coin payment", async () => {
+    const referrer = "22222222-2222-2222-2222-222222222222";
+    seedProfile(10);
+    tables.profiles.push({ id: referrer, coin_balance: 4 });
+    tables.referrals.push({ referee_id: USER, referrer_id: referrer });
+    const event = {
+      id: "evt_referral_payment",
+      type: "checkout.session.completed",
+      data: { object: { id: "cs_referral_payment", payment_status: "paid",
+        metadata: { userId: USER, bundleId: "coins_50", coins: "100" } } },
+    };
+    await handleEvent(event, "live");
+    await handleEvent({ ...event, id: "evt_referral_payment_retry" }, "live");
+    expect(tables.profiles.find((p) => p.id === referrer)?.coin_balance).toBe(14);
+    expect(tables.coin_transactions.filter((t) => t.type === "referral_payment")).toHaveLength(1);
   });
 });
 
