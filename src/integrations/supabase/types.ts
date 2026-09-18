@@ -1741,6 +1741,14 @@ export type Database = {
         }
         Returns: Json
       }
+      credit_payment_referral: {
+        Args: {
+          _payment_reference: string
+          _referee_id: string
+          _reward_coins: number
+        }
+        Returns: Json
+      }
       daily_coin_floor: { Args: never; Returns: number }
       deduct_coins: {
         Args: { p_amount: number; p_reference: string; p_user: string }
