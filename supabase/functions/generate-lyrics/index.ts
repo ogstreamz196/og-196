@@ -368,12 +368,14 @@ Deno.serve(async (req) => {
       return last;
     };
 
+    // Boss's own Gemini key first (zero Lovable credits); gateway only as a
+    // last-resort safety net if Gemini is missing or hard-failing.
     const generate = async (contents: unknown[]): Promise<Gen> => {
-      const viaGateway = await callGateway(contents);
-      if (viaGateway?.ok) return viaGateway;
       const viaGemini = await callGemini(contents);
       if (viaGemini.ok) return viaGemini;
-      return viaGateway ?? viaGemini;
+      const viaGateway = await callGateway(contents);
+      if (viaGateway?.ok) return viaGateway;
+      return viaGemini ?? viaGateway;
     };
 
     const res = await generate([{ role: "user", parts: [{ text: userPrompt }] }]);
