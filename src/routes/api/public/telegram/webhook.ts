@@ -540,9 +540,10 @@ async function runChatAI(
   userText: string,
   roles: string[],
 ) {
-  const apiKey = process.env.LOVABLE_API_KEY;
-  if (!apiKey) {
-    await reply(chat_id, "AI gateway not configured.");
+  const { aiChatTarget } = await import("@/lib/ai-endpoint.server");
+  const ai = aiChatTarget();
+  if (!ai) {
+    await reply(chat_id, "AI not configured.");
     return;
   }
 
