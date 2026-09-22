@@ -1,5 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { calibrateAward } from "./community.functions";
+import { calibrateAward, estimateRoastFloor } from "./community.functions";
+
+describe("estimateRoastFloor", () => {
+  it("recognises clear insults even if the external judge returns zero", () => {
+    expect(estimateRoastFloor("Ok go fuck ur mum")).toBeGreaterThanOrEqual(3);
+    expect(estimateRoastFloor("Suck her left testical")).toBeGreaterThanOrEqual(3);
+    expect(estimateRoastFloor("Dese nuts on ur mums chin")).toBeGreaterThanOrEqual(3);
+    expect(estimateRoastFloor("I will put two O and a big 1 in ur mums bum")).toBeGreaterThanOrEqual(3);
+  });
+
+  it("does not reward normal messages, diagnostics, or profanity without a target", () => {
+    expect(estimateRoastFloor("hello everyone")).toBe(0);
+    expect(estimateRoastFloor("why did you run out of room again")).toBe(0);
+    expect(estimateRoastFloor("this is fucking brilliant")).toBe(0);
+  });
+});
 
 describe("calibrateAward", () => {
   it("gives nothing for empty or repeated messages", () => {

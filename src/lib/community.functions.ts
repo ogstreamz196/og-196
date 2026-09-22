@@ -138,6 +138,30 @@ async function scoreRoast(
 }
 
 /**
+ * Keep Battle Zone rewards working when the external judge times out, is
+ * unavailable, or underrates an obvious roast. This deliberately only detects
+ * messages aimed at somebody: profanity on its own and ordinary chat stay at
+ * zero. The AI judge can still lift an original line into the higher bands.
+ */
+export function estimateRoastFloor(content: string): number {
+  const text = content.trim().toLowerCase();
+  if (!text || text.length < 6) return 0;
+
+  const words = text.match(/[a-z0-9']+/g) ?? [];
+  const isMostlyQuestion = /^(why|what|when|where|who|how|can|could|would|did|do|does|is|are)\b/.test(text);
+  const targetHits = text.match(/\b(you|your|youre|you're|ur|u|he|him|his|she|her|hers|they|them|their|bot|mum|mom|dad|face|head|brain|mouth|chin|arse|ass)\b/g)?.length ?? 0;
+  const insultHits = text.match(/\b(fuck(?:ing|er|ed)?|shit(?:head)?|dick(?:head)?|twat|wanker|prick|muppet|idiot|imbecile|bellend|bell-end|knob(?:head)?|gobshite|plonker|tosser|git|prat|melt|clown|stupid|dumb|ugly|useless|rubbish|testic(?:le|al)|nuts?|bum|arse|ass|suck|bitch|bastard|pussyhole)\b/g)?.length ?? 0;
+  const hasRoastShape = targetHits > 0 && insultHits > 0;
+  if (!hasRoastShape || (isMostlyQuestion && insultHits < 2)) return 0;
+
+  const uniqueRatio = new Set(words).size / Math.max(words.length, 1);
+  let floor = 3;
+  if (insultHits >= 2 || targetHits >= 2 || words.length >= 9) floor = 4;
+  if (insultHits >= 3 && words.length >= 10 && uniqueRatio >= 0.7) floor = 5;
+  return floor;
+}
+
+/**
  * Convert roast quality into a varied fractional coin drop. Ordinary chat,
  * generic abuse and repeats never earn. Better writing unlocks higher bands.
  */
@@ -283,7 +307,8 @@ export const postCommunityMessage = createServerFn({ method: "POST" })
         .filter((m) => m.role === "user" && m.display_name === displayName)
         .slice(-3, -1)
         .some((m) => m.content.trim().toLowerCase() === data.content.trim().toLowerCase());
-      const raw = apiKey ? await scoreRoast(apiKey, data.content, botReply) : 0;
+      const judgedScore = apiKey ? await scoreRoast(apiKey, data.content, botReply) : 0;
+      const raw = Math.max(judgedScore, estimateRoastFloor(data.content));
       earnedTenths = calibrateAward(raw, data.content, avgTenths, isRepeat);
       pendingTenths += earnedTenths;
       rounds += 1;
