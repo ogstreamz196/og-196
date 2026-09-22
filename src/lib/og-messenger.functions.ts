@@ -48,8 +48,9 @@ export const chatOgBot = createServerFn({ method: "POST" })
     return { messages, pageContext, mode, attachmentDataUrl, language };
   })
   .handler(async ({ data, context }): Promise<ChatReply> => {
-    const apiKey = process.env.LOVABLE_API_KEY;
-    if (!apiKey) throw new Error("AI gateway not configured");
+    const { aiChatTarget } = await import("@/lib/ai-endpoint.server");
+    const ai = aiChatTarget();
+    if (!ai) throw new Error("AI not configured");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
