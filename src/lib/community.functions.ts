@@ -249,10 +249,7 @@ export const postCommunityMessage = createServerFn({ method: "POST" })
           const json = (await res.json().catch(() => ({}))) as {
             choices?: { message?: { content?: string } }[];
           };
-          let reply = (json.choices?.[0]?.message?.content ?? "").trim();
-          // Hard-cap to keep battle-zone vibe (foul mode gets a longer leash).
-          const cap = useFoul ? 320 : 220;
-          if (reply.length > cap) reply = reply.slice(0, cap - 3) + "…";
+          const reply = (json.choices?.[0]?.message?.content ?? "").trim();
           if (reply) {
             botReply = reply;
             await supabaseAdmin.from("community_messages").insert({
