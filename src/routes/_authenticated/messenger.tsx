@@ -133,7 +133,7 @@ function MessengerPage() {
               }`}
             />
             {isCommunity ? (
-               className="relative grid h-8 w-8 place-items-center rounded-full bg-cyan-500/25 ring-1 ring-cyan-400/60 sm:h-9 sm:w-9">
+              <span className="relative grid h-8 w-8 place-items-center rounded-full bg-cyan-500/25 ring-1 ring-cyan-400/60 sm:h-9 sm:w-9">
                 <Users className="h-4 w-4 text-cyan-100 sm:h-5 sm:w-5" />
               </span>
             ) : (

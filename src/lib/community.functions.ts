@@ -77,7 +77,7 @@ HARD LIMITS — never cross:
 `.trim();
 
 /**
- * Judge how hard a user's roast landed. Returns tenths of an OG Coin (0–10),
+ * Judge how hard a user's roast landed. Returns a quality score (0–10),
  * i.e. a maximum of 1.00 coin per message. The cap is deliberately never
  * surfaced to the user.
  */
@@ -96,7 +96,6 @@ async function scoreRoast(
       body: JSON.stringify({
         model: ai.model,
         temperature: 0.2,
-        max_tokens: 8,
         messages: [
           {
             role: "system",
@@ -107,8 +106,10 @@ async function scoreRoast(
               "+0-3 ORIGINALITY: fresh angle and wordplay; generic insults score 0-1.\n" +
               "+0-2 TIMING: does it answer or flip OG Bot's last clapback?\n" +
               "+0-2 CRAFT: rhythm, brevity, a clean punchline.\n" +
-              "Score 0 only for empty text, spam, keyboard mash, or a plain question " +
-              "with no jab. Typical decent effort lands 3-6; 9-10 is reserved for " +
+               "Score 0 for ordinary conversation, random messages, empty text, spam, " +
+               "keyboard mash, a plain question, or anything with no actual insult. " +
+               "Generic insults score 1-2 and still do not win coins. Typical decent " +
+               "effort lands 3-6; 9-10 is reserved for " +
               "genuinely elite, original, devastating lines. Judge the message on its " +
               "own merit every time — do not drift high or low over a session. " +
               "Reply with ONLY the integer, nothing else.",
@@ -137,25 +138,29 @@ async function scoreRoast(
 }
 
 /**
- * Keep awards fair over a session: nobody maxes out every round, and anyone
- * making a real attempt always walks away with something.
- * `avgTenths` is the user's running average score so far this battle.
+ * Convert roast quality into a varied fractional coin drop. Ordinary chat,
+ * generic abuse and repeats never earn. Better writing unlocks higher bands.
  */
 export function calibrateAward(
   rawScore: number,
   content: string,
-  avgTenths: number,
+  _avgTenths: number,
   isRepeat: boolean,
+  random: () => number = Math.random,
 ): number {
   const trimmed = content.trim();
   if (!trimmed || isRepeat) return 0;
-  let score = Math.max(0, Math.min(10, Math.round(rawScore)));
-  // Anti-drought: a real attempt (not a one-word grunt) always banks something.
-  if (trimmed.length >= 12 && score < 1) score = 1;
-  // Anti-farm: the hotter the running average, the harder the ceiling.
-  if (avgTenths >= 7) score = Math.min(score, 6);
-  else if (avgTenths >= 5) score = Math.min(score, 8);
-  return score;
+  const score = Math.max(0, Math.min(10, Math.round(rawScore)));
+  if (score < 3) return 0;
+  const drops = score <= 4
+    ? [1, 2]
+    : score <= 6
+      ? [2, 3, 4]
+      : score <= 8
+        ? [4, 5, 6, 7]
+        : [7, 8, 9, 10];
+  const index = Math.min(drops.length - 1, Math.floor(random() * drops.length));
+  return drops[index] ?? 0;
 }
 
 
@@ -227,7 +232,6 @@ export const postCommunityMessage = createServerFn({ method: "POST" })
           body: JSON.stringify({
             model: ai.model,
             temperature: useFoul ? 1.05 : 0.85,
-            max_tokens: useFoul ? 700 : 500,
             messages: [
               { role: "system", content: useFoul ? FOUL_SYSTEM_PROMPT : SYSTEM_PROMPT },
               ...history.map((m) => ({
@@ -336,33 +340,21 @@ export const endBattle = createServerFn({ method: "POST" })
 
     const pendingTenths = tally?.pending_tenths ?? 0;
     const rounds = tally?.rounds ?? 0;
-    // Pay out everything earned, decimals included: fractions round to the
-    // nearest coin and any earned fraction is always worth at least 1 coin.
-    const coins = pendingTenths > 0 ? Math.max(1, Math.round(pendingTenths / 10)) : 0;
-    const remainder = 0;
-
-    if (coins > 0) {
-      const { error } = await supabaseAdmin.rpc("credit_coin_transaction", {
-        _user_id: context.userId,
-        _amount: coins,
-        _type: "battle_reward",
-        _reference: `battle:${new Date().toISOString()}`,
-      });
-      if (error) throw new Error(error.message);
+    const coins = pendingTenths / 10;
+    if (coins <= 0) {
+      await supabaseAdmin.from("battle_tallies").upsert(
+        { user_id: context.userId, pending_tenths: 0, rounds: 0, updated_at: new Date().toISOString() },
+        { onConflict: "user_id" },
+      );
+      return { coins: 0, rounds, pendingTenths, remainderTenths: 0 };
     }
 
-    await supabaseAdmin.from("battle_tallies").upsert(
-      {
-        user_id: context.userId,
-        pending_tenths: remainder,
-        rounds: 0,
-        total_awarded_coins: (tally?.total_awarded_coins ?? 0) + coins,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "user_id" },
-    );
-
-    return { coins, rounds, pendingTenths, remainderTenths: remainder };
+    const { data: payout, error } = await supabaseAdmin.rpc("payout_battle_reward", {
+      _user_id: context.userId,
+    });
+    if (error) throw new Error(error.message);
+    const paid = Number((payout as { coins?: number } | null)?.coins ?? coins);
+    return { coins: paid, rounds, pendingTenths, remainderTenths: 0 };
   });
 
 export type BattleLeaderboardRow = {
