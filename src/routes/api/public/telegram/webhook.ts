@@ -36,16 +36,25 @@ function tokenToUuidRange(token: string): { min: string; max: string } {
 }
 
 async function tg(method: string, body: Record<string, unknown>) {
+  // Prefer the Boss's own bot token (direct Telegram API, no Lovable involved).
+  const botToken = process.env.OG_BOT_TOKEN;
   const tgKey = process.env.TELEGRAM_API_KEY;
   const lovableKey = process.env.LOVABLE_API_KEY;
-  if (!tgKey || !lovableKey) return null;
-  const r = await fetch(`https://connector-gateway.lovable.dev/telegram/${method}`, {
+  const direct = Boolean(botToken);
+  if (!direct && (!tgKey || !lovableKey)) return null;
+  const url = direct
+    ? `https://api.telegram.org/bot${botToken}/${method}`
+    : `https://connector-gateway.lovable.dev/telegram/${method}`;
+  const headers: Record<string, string> = direct
+    ? { "Content-Type": "application/json" }
+    : {
+        Authorization: `Bearer ${lovableKey}`,
+        "X-Connection-Api-Key": tgKey as string,
+        "Content-Type": "application/json",
+      };
+  const r = await fetch(url, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${lovableKey}`,
-      "X-Connection-Api-Key": tgKey,
-      "Content-Type": "application/json",
-    },
+    headers,
     body: JSON.stringify(body),
   }).catch(() => null);
   if (!r) return null;
