@@ -1851,6 +1851,7 @@ export type Database = {
         Args: { p_phrase: string; p_user_id: string }
         Returns: undefined
       }
+      payout_battle_reward: { Args: { _user_id: string }; Returns: Json }
       purchase_bot_token: {
         Args: { p_allowed_domain?: string }
         Returns: {
