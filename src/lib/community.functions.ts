@@ -82,16 +82,19 @@ HARD LIMITS — never cross:
  * surfaced to the user.
  */
 async function scoreRoast(
-  apiKey: string,
+  _apiKey: string,
   content: string,
   botReply: string | null,
 ): Promise<number> {
   try {
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const { aiChatTarget } = await import("@/lib/ai-endpoint.server");
+    const ai = aiChatTarget();
+    if (!ai) return 0;
+    const res = await fetch(ai.url, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+      headers: ai.headers,
       body: JSON.stringify({
-        model: "google/gemini-3.7-flash",
+        model: ai.model,
         temperature: 0.2,
         max_tokens: 8,
         messages: [
