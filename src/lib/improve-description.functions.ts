@@ -16,8 +16,9 @@ export const improveLyricDescription = createServerFn({ method: "POST" })
     return { text, subjectName };
   })
   .handler(async ({ data, context }): Promise<{ improved: string; draftId: string | null }> => {
-    const apiKey = process.env.LOVABLE_API_KEY;
-    if (!apiKey) throw new Error("AI gateway not configured");
+    const { aiChatTarget } = await import("@/lib/ai-endpoint.server");
+    const ai = aiChatTarget();
+    if (!ai) throw new Error("AI not configured");
 
     const system = [
       "You rewrite rough songwriter notes into a SHORT, punchy brief for a lyrics AI.",
