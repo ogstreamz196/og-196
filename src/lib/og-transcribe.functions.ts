@@ -20,48 +20,13 @@ export const transcribeOgAudio = createServerFn({ method: "POST" })
     return { audioBase64: data.audioBase64, mime };
   })
   .handler(async ({ data }): Promise<{ text: string }> => {
-    const apiKey = process.env.LOVABLE_API_KEY;
-    if (!apiKey) throw new Error("AI gateway not configured");
-
-    // Derive a filename extension OpenAI accepts from the recorded MIME.
-    const extMap: Record<string, string> = {
-      "audio/webm": "webm",
-      "audio/mp4": "mp4",
-      "audio/mpeg": "mp3",
-      "audio/mp3": "mp3",
-      "audio/wav": "wav",
-      "audio/wave": "wav",
-      "audio/ogg": "ogg",
-      "audio/m4a": "m4a",
-    };
     const baseMime = data.mime.split(";")[0].trim();
-    const ext = extMap[baseMime] ?? "webm";
-
-    // Decode base64 → bytes → Blob for multipart upload.
-    const bin = Buffer.from(data.audioBase64, "base64");
-    const blob = new Blob([bin], { type: baseMime });
-    if (blob.size < 512) {
+    const bytes = Buffer.from(data.audioBase64, "base64");
+    if (bytes.length < 512) {
       throw new Error("Recording was empty — try again.");
     }
 
-    const form = new FormData();
-    form.append("model", "openai/gpt-4o-mini-transcribe");
-    form.append("file", blob, `recording.${ext}`);
-
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/audio/transcriptions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}` },
-      body: form,
-    });
-
-    if (!res.ok) {
-      const body = await res.text().catch(() => "");
-      console.error("STT gateway error", res.status, body);
-      if (res.status === 429) throw new Error("Rate-limited — try again in a moment.");
-      if (res.status === 402) throw new Error("AI credits exhausted.");
-      throw new Error(`Transcription failed (HTTP ${res.status})`);
-    }
-
-    const json = (await res.json().catch(() => ({}))) as { text?: string };
-    return { text: (json.text ?? "").trim() };
+    const { transcribeWithGemini } = await import("@/lib/ai-endpoint.server");
+    const text = await transcribeWithGemini(data.audioBase64, baseMime);
+    return { text };
   });
