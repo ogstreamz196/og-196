@@ -179,7 +179,7 @@ export function CommunityRoom() {
   const rowVirtualizer = useVirtualizer({
     count: messages.length,
     getScrollElement: () => scrollRef.current,
-    estimateSize: () => 72,
+    estimateSize: () => 58,
     overscan: 8,
     getItemKey: (i) => messages[i]?.id ?? i,
   });
@@ -337,8 +337,8 @@ export function CommunityRoom() {
   const activeTypers = Object.values(typingUsers);
 
   return (
-    <div className="flex h-full min-h-0 flex-1 flex-col gap-2 p-2 sm:p-2.5">
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 rounded-xl border border-primary/30 bg-primary/5 px-2 py-1 sm:flex-nowrap sm:px-2.5">
+    <div className="flex h-full min-h-0 flex-1 flex-col gap-1.5 p-1.5 font-sans sm:p-2">
+      <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-2 py-1">
         <div className="flex min-w-0 items-center gap-1.5">
           <Coins className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden />
           <div className="min-w-0 leading-tight">
@@ -358,12 +358,12 @@ export function CommunityRoom() {
             </p>
           </div>
         </div>
-        <div className="flex shrink-0 items-center gap-1.5 max-sm:w-full sm:ml-auto">
+        <div className="ml-auto flex shrink-0 items-center gap-1">
           <Button
             type="button"
             variant="outline"
             size="sm"
-            className="h-7 gap-1 text-[10px] font-black uppercase tracking-wide max-sm:flex-1"
+            className="h-7 gap-1 px-2 text-[9px] font-bold uppercase"
             aria-expanded={showBoard}
             onClick={() => setShowBoard((v) => !v)}
           >
@@ -374,7 +374,7 @@ export function CommunityRoom() {
             type="button"
             variant="destructive"
             size="sm"
-            className="h-7 gap-1 text-[10px] font-black uppercase tracking-wide max-sm:flex-1"
+            className="h-7 gap-1 px-2 text-[9px] font-bold uppercase"
             disabled={quit.isPending}
             onClick={() => quit.mutate()}
           >
@@ -383,15 +383,14 @@ export function CommunityRoom() {
             ) : (
               <Flag className="h-3 w-3" />
             )}
-            <span className="sm:hidden">End</span>
-            <span className="hidden sm:inline">End battle</span>
+              <span>Bank</span>
           </Button>
           {canClear && (
             <Button
               type="button"
               variant="destructive"
               size="sm"
-              className="h-7 gap-1 text-[10px] font-black uppercase tracking-wide"
+              className="h-7 w-7 p-0"
               disabled={clear.isPending}
               title="Clear live chat"
               onClick={() => {
@@ -405,8 +404,7 @@ export function CommunityRoom() {
               ) : (
                 <Trash2 className="h-3 w-3" />
               )}
-              <span className="sm:hidden">Clear</span>
-              <span className="hidden sm:inline">Clear chat</span>
+              <span className="sr-only">Clear chat</span>
             </Button>
           )}
         </div>
@@ -449,7 +447,7 @@ export function CommunityRoom() {
         <div
           ref={scrollRef}
           onScroll={onScroll}
-          className="absolute inset-0 overflow-y-auto overscroll-contain rounded-2xl border border-border/40 bg-background/75 p-2 backdrop-blur-md sm:p-3 [-webkit-overflow-scrolling:touch]"
+          className="absolute inset-0 overflow-y-auto overscroll-contain rounded-xl border border-border/40 bg-background/75 p-1.5 backdrop-blur-md sm:p-2.5 [-webkit-overflow-scrolling:touch]"
           style={{ touchAction: "pan-y" }}
         >
 
@@ -496,10 +494,10 @@ export function CommunityRoom() {
                       }}
                     >
                       <div
-                        className={`flex items-end gap-2 py-1.5 ${mine ? "flex-row-reverse" : "flex-row"}`}
+                        className={`flex items-end gap-1.5 py-1 motion-safe:animate-[pop_0.2s_ease-out] ${mine ? "flex-row-reverse" : "flex-row"}`}
                       >
                         <span
-                          className={`grid h-8 w-8 shrink-0 place-items-center overflow-hidden rounded-full text-[10px] font-bold uppercase ${
+                           className={`grid h-6 w-6 shrink-0 place-items-center overflow-hidden rounded-full text-[8px] font-bold uppercase sm:h-7 sm:w-7 ${
                             isBot
                               ? "bg-primary/20 ring-1 ring-primary/40"
                               : mine
@@ -514,7 +512,7 @@ export function CommunityRoom() {
                           )}
                         </span>
                         <div
-                          className={`min-w-0 max-w-[94%] rounded-2xl px-3 py-2 text-sm shadow-sm sm:max-w-[88%] lg:max-w-[78%] xl:max-w-[70%] ${
+                           className={`min-w-0 max-w-[88%] rounded-xl px-2.5 py-1.5 text-[12px] leading-[1.35] shadow-sm sm:max-w-[82%] sm:text-[13px] lg:max-w-[74%] ${
                             isBot
                               ? "border border-primary/30 bg-primary/10 text-foreground"
                               : mine
@@ -523,7 +521,7 @@ export function CommunityRoom() {
                           }`}
                         >
                           <p
-                            className={`mb-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                             className={`mb-0.5 text-[8px] font-bold uppercase ${
                               mine ? "text-primary-foreground/80" : "text-muted-foreground"
                             }`}
                           >
@@ -580,9 +578,9 @@ export function CommunityRoom() {
         </div>
       )}
 
-      <form
+       <form
         onSubmit={submit}
-        className="sticky bottom-0 flex items-end gap-2.5 rounded-2xl border border-border/40 bg-card/95 shadow-lg shadow-black/40 p-2.5 pb-[max(0.875rem,env(safe-area-inset-bottom))] backdrop-blur-md sm:gap-2 sm:p-2 sm:pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+         className="sticky bottom-0 flex items-end gap-1.5 rounded-xl border border-border/40 bg-card/95 p-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-lg backdrop-blur-md sm:p-2"
       >
         <Textarea
           ref={composerRef}
@@ -604,14 +602,14 @@ export function CommunityRoom() {
           rows={1}
           maxLength={1000}
           enterKeyHint="send"
-          className="min-h-[52px] max-h-32 resize-none overflow-y-auto border-0 bg-transparent px-3 text-base leading-relaxed focus-visible:ring-0 sm:min-h-[44px] sm:text-sm"
+           className="min-h-10 max-h-24 resize-none overflow-y-auto border-0 bg-transparent px-2 py-2 text-sm leading-snug focus-visible:ring-0"
           disabled={send.isPending}
         />
         <Button
           type="submit"
           size="icon"
           disabled={!text.trim() || send.isPending}
-          className="h-12 w-12 shrink-0 rounded-2xl sm:h-11 sm:w-11 sm:rounded-xl"
+           className="h-10 w-10 shrink-0 rounded-xl"
           aria-label="Send message"
         >
           {send.isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}

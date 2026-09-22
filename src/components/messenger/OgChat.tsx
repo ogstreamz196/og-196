@@ -28,7 +28,7 @@ const TELEGRAM_FONT_STACK =
 const TELEGRAM_FONT_STYLE: React.CSSProperties = {
   fontFamily: TELEGRAM_FONT_STACK,
   fontFeatureSettings: '"ss01", "cv11", "kern"',
-  letterSpacing: "-0.01em",
+  letterSpacing: "0",
   WebkitFontSmoothing: "antialiased",
   MozOsxFontSmoothing: "grayscale",
 };
@@ -524,14 +524,14 @@ export function OgChat({
     <div
       style={TELEGRAM_FONT_STYLE}
       className={cn(
-        "flex h-full flex-col text-[15px] antialiased",
+        "flex h-full flex-col text-[13px] antialiased sm:text-sm",
         compact ? "" : "rounded-xl border border-border bg-card",
       )}
     >
       {showHeader && (
         <div
           data-testid="ogchat-header"
-          className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b border-border/60 bg-muted/30 px-2.5 py-2 sm:flex sm:gap-3 sm:px-3 sm:py-3"
+           className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-1.5 border-b border-border/60 bg-muted/20 px-2 py-1.5 sm:flex sm:px-3 sm:py-2"
         >
 
 
@@ -545,7 +545,7 @@ export function OgChat({
             data-testid="ogchat-foulmouth-hero"
 
             className={cn(
-              "group relative flex min-w-0 items-center justify-between gap-2 overflow-hidden rounded-xl border px-2.5 py-1.5 text-left shadow-sm transition-all active:scale-[0.99] disabled:opacity-50 sm:w-full sm:flex-1 sm:rounded-2xl sm:border-2 sm:px-4 sm:py-3",
+               "group relative flex min-w-0 items-center justify-between gap-1.5 overflow-hidden rounded-lg border px-2 py-1 text-left shadow-sm transition-all active:scale-[0.99] disabled:opacity-50 sm:w-full sm:flex-1 sm:px-3 sm:py-1.5",
               foulActive
                 ? "border-destructive bg-gradient-to-br from-destructive/25 via-destructive/15 to-destructive/10 shadow-[0_6px_24px_-8px_hsl(var(--destructive)/0.6)] hover:shadow-[0_8px_28px_-6px_hsl(var(--destructive)/0.7)]"
                 : "border-border bg-card hover:border-destructive/60 hover:bg-destructive/5",
@@ -554,7 +554,7 @@ export function OgChat({
             <span className="flex min-w-0 items-center gap-2 sm:gap-3">
               <span
                 className={cn(
-                  "grid h-8 w-8 shrink-0 place-items-center rounded-lg text-base transition-transform group-hover:scale-110 sm:h-11 sm:w-11 sm:rounded-xl sm:text-2xl",
+                   "grid h-7 w-7 shrink-0 place-items-center rounded-md text-sm transition-transform group-hover:scale-105 sm:h-8 sm:w-8 sm:text-base",
                   foulActive
                     ? "bg-destructive text-destructive-foreground shadow-[0_0_18px_-2px_hsl(var(--destructive)/0.8)]"
                     : "bg-muted text-muted-foreground",
@@ -565,7 +565,7 @@ export function OgChat({
               </span>
               <span className="flex min-w-0 flex-col leading-tight">
                 <span className={cn(
-                  "truncate text-[11px] font-black uppercase tracking-normal sm:text-[15px] sm:tracking-wide",
+                   "truncate text-[10px] font-bold uppercase sm:text-xs",
                   foulActive ? "text-destructive" : "text-foreground",
                 )}>
                   {foulActive ? "Foul mouth on" : "Foul mouth off"}
@@ -576,7 +576,7 @@ export function OgChat({
             {/* Big visual switch */}
             <span
               className={cn(
-                "relative h-6 w-10 shrink-0 rounded-full border transition-colors sm:h-7 sm:w-12 sm:border-2",
+                 "relative h-5 w-9 shrink-0 rounded-full border transition-colors sm:h-6 sm:w-10",
                 foulActive
                   ? "border-destructive bg-destructive"
                   : "border-border bg-muted",
@@ -585,8 +585,8 @@ export function OgChat({
             >
               <span
                 className={cn(
-                  "absolute top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-background shadow-md transition-all sm:h-5 sm:w-5",
-                  foulActive ? "left-[calc(100%-1.15rem)] sm:left-[calc(100%-1.4rem)]" : "left-0.5",
+                   "absolute top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full bg-background shadow-md transition-all sm:h-4 sm:w-4",
+                   foulActive ? "left-[calc(100%-1rem)] sm:left-[calc(100%-1.15rem)]" : "left-0.5",
                 )}
               />
             </span>
@@ -595,7 +595,7 @@ export function OgChat({
           {/* Secondary controls row */}
           <div
             data-testid="ogchat-controls"
-            className="flex shrink-0 items-center justify-end gap-1.5 text-xs sm:flex-col sm:items-stretch sm:flex-nowrap sm:w-[180px] sm:shrink-0 sm:justify-center"
+             className="flex shrink-0 items-center justify-end gap-1 text-xs sm:w-[150px] sm:flex-col sm:items-stretch sm:justify-center"
           >
 
             <span className="hidden items-center gap-1.5 text-muted-foreground sm:mr-auto sm:inline-flex">
@@ -642,14 +642,14 @@ export function OgChat({
       <div className="relative flex min-h-0 flex-1 flex-col">
       <div
         ref={scrollRef}
-        className="flex-1 space-y-3 overflow-y-auto overscroll-contain px-2.5 pb-4 pt-3 sm:space-y-5 sm:px-4 sm:pb-8 sm:pt-5 scroll-smooth [-webkit-overflow-scrolling:touch]"
+         className="flex-1 space-y-1.5 overflow-y-auto overscroll-contain px-2 pb-2 pt-2 scroll-smooth [-webkit-overflow-scrolling:touch] sm:space-y-2.5 sm:px-3 sm:pb-4 sm:pt-3"
         style={{ touchAction: "pan-y" }}
       >
 
         {messages.length === 0 && (
           <div className="grid h-full place-items-center text-center">
-            <div className="w-full max-w-md space-y-3 sm:space-y-6">
-              <div className="relative mx-auto h-24 w-24 sm:h-64 sm:w-64">
+             <div className="w-full max-w-md space-y-2 sm:space-y-4">
+               <div className="relative mx-auto h-20 w-20 sm:h-32 sm:w-32">
                 <div className="absolute inset-0 rounded-full bg-primary/40 blur-[60px] animate-pulse" />
                 <div
                   aria-hidden="true"
@@ -667,7 +667,7 @@ export function OgChat({
                 />
               </div>
               <div className="space-y-2">
-                <h2 className="font-display text-xl font-black tracking-tight sm:text-4xl">
+                 <h2 className="text-lg font-extrabold sm:text-2xl">
                   Message <span className="text-gradient-brand">OG Bot</span>
                 </h2>
                 <p className="text-xs text-muted-foreground sm:text-base">Ask anything. Replies cost 1 coin.</p>
@@ -711,14 +711,14 @@ export function OgChat({
             <div
               key={i}
               className={cn(
-                    "flex items-end gap-2 animate-[pop_0.25s_ease-out] sm:gap-3",
+                     "flex items-end gap-1.5 motion-safe:animate-[pop_0.2s_ease-out] sm:gap-2",
                 isUser ? "flex-row-reverse" : "flex-row",
               )}
             >
               {isUser ? (
                 <div
                   className={cn(
-                    "relative grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-brand text-sm font-black text-primary-foreground shadow-glow",
+                     "relative grid h-7 w-7 shrink-0 place-items-center rounded-full bg-gradient-brand text-[10px] font-black text-primary-foreground shadow-glow sm:h-8 sm:w-8",
                     isVip && "ring-2 ring-amber-300 ring-offset-2 ring-offset-background shadow-[0_0_18px_rgba(251,191,36,0.55)]",
                   )}
                 >
@@ -731,12 +731,12 @@ export function OgChat({
                   )}
                 </div>
               ) : (
-                  <OgAvatar size={32} className="shrink-0 sm:h-10 sm:w-10" />
+                   <OgAvatar size={28} className="shrink-0 sm:h-8 sm:w-8" />
               )}
-              <Message from={msg.role} className={cn("min-w-0 flex-1 max-w-[calc(100%-2.5rem)] gap-1 sm:max-w-[85%] lg:max-w-[78%] xl:max-w-[70%]", isUser ? "items-end" : "items-start")}>
+               <Message from={msg.role} className={cn("min-w-0 flex-1 max-w-[calc(100%-2rem)] gap-0.5 sm:max-w-[82%] lg:max-w-[74%]", isUser ? "items-end" : "items-start")}>
                 <span
                   className={cn(
-                    "inline-flex items-center gap-1 px-2 text-[10px] font-black uppercase tracking-[0.18em]",
+                     "inline-flex items-center gap-1 px-1.5 text-[8px] font-bold uppercase",
                     isUser ? (isVip ? "text-amber-400" : "text-primary") : "text-foreground/70",
                   )}
                 >
@@ -750,16 +750,16 @@ export function OgChat({
                 </span>
                 <MessageContent
                   className={cn(
-                    "break-words text-[15px] leading-[1.45]",
+                     "break-words text-[13px] leading-[1.38] sm:text-sm",
                     isUser
                       ? isVip
-                        ? "rounded-3xl rounded-br-md whitespace-pre-wrap font-medium text-amber-50 bg-gradient-to-br from-amber-500 via-amber-600 to-yellow-700 shadow-[0_14px_36px_-12px_rgba(217,119,6,0.65)] ring-1 ring-amber-300/60"
-                        : "rounded-3xl rounded-br-md bg-primary text-primary-foreground whitespace-pre-wrap font-medium shadow-[0_14px_36px_-12px_hsl(var(--primary)/0.55)]"
+                         ? "rounded-2xl rounded-br-sm whitespace-pre-wrap px-3 py-2 font-medium text-amber-50 bg-gradient-to-br from-amber-500 via-amber-600 to-yellow-700 ring-1 ring-amber-300/60"
+                         : "rounded-2xl rounded-br-sm bg-primary px-3 py-2 text-primary-foreground whitespace-pre-wrap font-medium"
                         : "w-full bg-transparent p-0 text-foreground shadow-none",
                   )}
                 >
                   {msg.role === "assistant" ? (
-                    <MessageResponse className="prose-sm max-w-none prose-p:my-1 prose-p:leading-snug prose-ul:my-1 prose-ol:my-1 prose-headings:my-1 prose-code:text-primary">{msg.content}</MessageResponse>
+                     <MessageResponse className="prose-sm max-w-none prose-p:my-0.5 prose-p:leading-snug prose-ul:my-0.5 prose-ol:my-0.5 prose-headings:my-0.5 prose-code:text-primary">{msg.content}</MessageResponse>
 
                   ) : (
                     msg.content
@@ -841,7 +841,7 @@ export function OgChat({
           e.preventDefault();
           sendText(input);
         }}
-        className="sticky bottom-0 z-20 border-t border-border/80 bg-card/95 px-2.5 pb-2 pt-2 shadow-[0_-12px_28px_-16px_rgba(0,0,0,0.55)] backdrop-blur transition-transform duration-150 supports-[backdrop-filter]:bg-card/75 sm:px-5 sm:pt-4 sm:pb-[max(1rem,env(safe-area-inset-bottom))]"
+         className="sticky bottom-0 z-20 border-t border-border/80 bg-card/95 px-2 pb-[max(0.4rem,env(safe-area-inset-bottom))] pt-1.5 shadow-lg backdrop-blur transition-transform duration-150 supports-[backdrop-filter]:bg-card/75 sm:px-3 sm:py-2"
       >
 
         {attachment && (
@@ -872,7 +872,7 @@ export function OgChat({
         {/* Unified composer pill — attachment | mic | textarea | send (Telegram/WhatsApp pattern) */}
         <div
           className={cn(
-            "flex items-end gap-0.5 rounded-2xl border border-primary/40 bg-background/80 px-1.5 py-1.5 shadow-[0_14px_36px_-18px_rgba(0,0,0,0.55)] ring-1 ring-primary/20 backdrop-blur-xl transition focus-within:border-primary/70 focus-within:ring-2 focus-within:ring-primary/30 sm:gap-2 sm:rounded-full sm:px-4 sm:py-2.5",
+             "flex items-end gap-0.5 rounded-xl border border-primary/40 bg-background/80 px-1 py-1 ring-1 ring-primary/20 backdrop-blur-xl transition focus-within:border-primary/70 focus-within:ring-2 focus-within:ring-primary/30 sm:rounded-2xl sm:px-2 sm:py-1.5",
             (isOut || !user) && "opacity-70",
           )}
         >
@@ -945,7 +945,7 @@ export function OgChat({
               setTimeout(() => e.currentTarget?.scrollIntoView({ block: "end", behavior: "smooth" }), 250);
             }}
             onBlur={handleComposerBlur}
-            className="min-h-9 max-h-28 flex-1 resize-none bg-transparent px-1.5 py-1.5 text-base leading-normal placeholder:text-muted-foreground/70 focus:outline-none disabled:cursor-not-allowed sm:min-h-[40px] sm:max-h-[180px] sm:px-3 sm:py-2 sm:text-lg"
+             className="min-h-9 max-h-24 flex-1 resize-none bg-transparent px-1.5 py-1.5 text-sm leading-snug placeholder:text-muted-foreground/70 focus:outline-none disabled:cursor-not-allowed sm:max-h-32 sm:px-2 sm:text-[15px]"
 
           />
           <button

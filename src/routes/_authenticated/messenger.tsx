@@ -105,7 +105,7 @@ function MessengerPage() {
       <div
         ref={fillRef}
         style={fillHeight ? { height: fillHeight } : undefined}
-        className={`relative -mx-4 -mt-5 -mb-[calc(env(safe-area-inset-bottom)+72px+1.25rem)] flex flex-col overflow-hidden sm:-mx-6 sm:-mt-8 sm:-mb-[calc(env(safe-area-inset-bottom)+72px+2rem)] md:-mb-8 lg:-mx-8 lg:-mt-10 lg:-mb-10 ${foulMouth ? "hell-aura" : ""}`}
+        className={`relative -mx-4 -mt-5 -mb-[calc(env(safe-area-inset-bottom)+72px+1.25rem)] flex flex-col overflow-hidden font-sans sm:-mx-6 sm:-mt-8 sm:-mb-[calc(env(safe-area-inset-bottom)+72px+2rem)] md:-mb-8 lg:-mx-8 lg:-mt-10 lg:-mb-10 ${foulMouth ? "hell-aura" : ""}`}
       >
         {foulMouth && (
           <>
@@ -117,7 +117,7 @@ function MessengerPage() {
 
         {/* Header — adapts to current mode */}
         <header
-          className={`relative grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-2 gap-y-1 border-b border-white/10 px-3 py-1.5 backdrop-blur-xl transition-colors min-[390px]:grid-cols-[auto_minmax(0,1fr)_auto] sm:gap-3 sm:px-5 sm:py-2 ${
+          className={`relative grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 border-b border-border/60 px-2.5 py-1.5 backdrop-blur-xl transition-colors sm:gap-3 sm:px-4 sm:py-2 ${
             isCommunity
               ? "bg-gradient-to-r from-cyan-500/20 via-sky-500/10 to-fuchsia-500/15"
               : "bg-gradient-to-r from-primary/15 via-card/90 to-card/80"
@@ -133,44 +133,31 @@ function MessengerPage() {
               }`}
             />
             {isCommunity ? (
-              <span className="relative grid h-8 w-8 place-items-center rounded-full bg-cyan-500/25 ring-1 ring-cyan-400/60 sm:h-10 sm:w-10">
+               className="relative grid h-8 w-8 place-items-center rounded-full bg-cyan-500/25 ring-1 ring-cyan-400/60 sm:h-9 sm:w-9">
                 <Users className="h-4 w-4 text-cyan-100 sm:h-5 sm:w-5" />
               </span>
             ) : (
               <img
                 src={ogBotAsset.url}
                 alt="OG Bot"
-                className="relative h-8 w-8 rounded-full object-cover ring-1 ring-primary/60 sm:h-10 sm:w-10"
+                 className="relative h-8 w-8 rounded-full object-cover ring-1 ring-primary/60 sm:h-9 sm:w-9"
               />
             )}
             <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-card bg-emerald-400 sm:h-3 sm:w-3" />
           </div>
 
           <div className="min-w-0 flex-1 basis-0">
-            <div
-              className={`hidden max-w-full items-center gap-1.5 truncate rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] sm:inline-flex sm:text-[10px] sm:tracking-[0.22em] ${
-                isCommunity
-                  ? "border-cyan-400/40 bg-cyan-500/10 text-cyan-200"
-                  : "border-primary/30 bg-primary/10 text-primary"
-              }`}
-            >
-              <span className="truncate">
-                {isCommunity ? "OG Battle Zone · everyone vs OG Bot" : "OG Bot Loner Mode · private"}
-              </span>
-            </div>
-            <h1 className="truncate font-display text-sm font-black leading-tight min-[420px]:text-base sm:text-lg">
+            <h1 className="truncate text-[13px] font-extrabold leading-tight sm:text-base">
               {isCommunity ? "OG Battle Zone" : "OG Bot Loner Mode"}
             </h1>
 
-            <p className="flex items-center gap-1 truncate text-[10px] font-semibold text-emerald-400 sm:gap-1.5 sm:text-xs">
+            <p className="flex items-center gap-1 truncate text-[9px] font-medium text-emerald-400 sm:text-[11px]">
               <span className="relative inline-flex h-2 w-2 shrink-0">
                 <span className="absolute inset-0 animate-ping rounded-full bg-emerald-400/70" />
                 <span className="relative inline-block h-2 w-2 rounded-full bg-emerald-400" />
               </span>
               <span className="truncate">
-                {isCommunity
-                  ? "Everyone vs OG Bot · take him on"
-                  : "Just you & OG Bot · nobody else sees this"}
+                 {isCommunity ? "Live battle · everyone can see" : "Private · only you can see"}
               </span>
             </p>
           </div>
@@ -187,7 +174,7 @@ function MessengerPage() {
                 ? "Go Private (leave the OG Battle Zone)"
                 : "Go to Battle Zone (leave Private Mode)"
             }
-            className={`group col-span-2 flex min-h-9 w-full items-center justify-center gap-1 rounded-full border px-2.5 text-[10px] font-black uppercase transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 min-[390px]:col-span-1 min-[390px]:w-auto sm:min-h-9 sm:gap-1.5 sm:px-3 sm:text-xs ${
+             className={`group flex h-8 shrink-0 items-center justify-center gap-1 rounded-full border px-2 text-[9px] font-bold uppercase transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 sm:h-9 sm:px-3 sm:text-[11px] ${
               isCommunity
                 ? "border-cyan-400/50 bg-cyan-500/15 text-cyan-100 shadow-[0_0_24px_-6px_rgba(34,211,238,0.6)] hover:bg-cyan-500/25"
                 : "border-primary/40 bg-primary/10 text-primary shadow-[0_0_24px_-6px_oklch(0.7_0.2_25/0.6)] hover:bg-primary/20"
