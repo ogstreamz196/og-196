@@ -36,16 +36,25 @@ function tokenToUuidRange(token: string): { min: string; max: string } {
 }
 
 async function tg(method: string, body: Record<string, unknown>) {
+  // Prefer the Boss's own bot token (direct Telegram API, no Lovable involved).
+  const botToken = process.env.OG_BOT_TOKEN;
   const tgKey = process.env.TELEGRAM_API_KEY;
   const lovableKey = process.env.LOVABLE_API_KEY;
-  if (!tgKey || !lovableKey) return null;
-  const r = await fetch(`https://connector-gateway.lovable.dev/telegram/${method}`, {
+  const direct = Boolean(botToken);
+  if (!direct && (!tgKey || !lovableKey)) return null;
+  const url = direct
+    ? `https://api.telegram.org/bot${botToken}/${method}`
+    : `https://connector-gateway.lovable.dev/telegram/${method}`;
+  const headers: Record<string, string> = direct
+    ? { "Content-Type": "application/json" }
+    : {
+        Authorization: `Bearer ${lovableKey}`,
+        "X-Connection-Api-Key": tgKey as string,
+        "Content-Type": "application/json",
+      };
+  const r = await fetch(url, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${lovableKey}`,
-      "X-Connection-Api-Key": tgKey,
-      "Content-Type": "application/json",
-    },
+    headers,
     body: JSON.stringify(body),
   }).catch(() => null);
   if (!r) return null;
@@ -531,9 +540,10 @@ async function runChatAI(
   userText: string,
   roles: string[],
 ) {
-  const apiKey = process.env.LOVABLE_API_KEY;
-  if (!apiKey) {
-    await reply(chat_id, "AI gateway not configured.");
+  const { aiChatTarget } = await import("@/lib/ai-endpoint.server");
+  const ai = aiChatTarget();
+  if (!ai) {
+    await reply(chat_id, "AI not configured.");
     return;
   }
 
@@ -626,14 +636,11 @@ async function runChatAI(
   });
 
   try {
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const res = await fetch(ai.url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
+      headers: ai.headers,
       body: JSON.stringify({
-        model: "google/gemini-3.7-flash",
+        model: ai.model,
         temperature: foulMouth ? 0.9 : 0.75,
         messages: [
           { role: "system", content: system },

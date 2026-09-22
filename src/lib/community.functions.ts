@@ -82,16 +82,19 @@ HARD LIMITS — never cross:
  * surfaced to the user.
  */
 async function scoreRoast(
-  apiKey: string,
+  _apiKey: string,
   content: string,
   botReply: string | null,
 ): Promise<number> {
   try {
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const { aiChatTarget } = await import("@/lib/ai-endpoint.server");
+    const ai = aiChatTarget();
+    if (!ai) return 0;
+    const res = await fetch(ai.url, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+      headers: ai.headers,
       body: JSON.stringify({
-        model: "google/gemini-3.7-flash",
+        model: ai.model,
         temperature: 0.2,
         max_tokens: 8,
         messages: [
@@ -207,23 +210,22 @@ export const postCommunityMessage = createServerFn({ method: "POST" })
       display_name: string | null;
     }[];
 
-    // 3. Call AI gateway for short reply (fire-and-forget; if it fails, just no reply)
-    const apiKey = process.env.LOVABLE_API_KEY;
+    // 3. Call the AI provider for a short reply (fire-and-forget; if it fails, just no reply)
+    const { aiChatTarget } = await import("@/lib/ai-endpoint.server");
+    const ai = aiChatTarget();
+    const apiKey = ai ? "configured" : "";
     let botReply: string | null = null;
-    if (apiKey) {
+    if (ai) {
       // Live chat = foul mouth by default for everyone.
       // VIPs still get it (and can toggle off via their preference), but the
       // group room always leans savage unless the client explicitly opts out.
       const useFoul = data.foulMouth !== false;
       try {
-        const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        const res = await fetch(ai.url, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${apiKey}`,
-          },
+          headers: ai.headers,
           body: JSON.stringify({
-            model: "google/gemini-3.7-flash",
+            model: ai.model,
             temperature: useFoul ? 1.05 : 0.85,
             max_tokens: useFoul ? 700 : 500,
             messages: [

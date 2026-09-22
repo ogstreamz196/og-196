@@ -48,8 +48,9 @@ export const chatOgBot = createServerFn({ method: "POST" })
     return { messages, pageContext, mode, attachmentDataUrl, language };
   })
   .handler(async ({ data, context }): Promise<ChatReply> => {
-    const apiKey = process.env.LOVABLE_API_KEY;
-    if (!apiKey) throw new Error("AI gateway not configured");
+    const { aiChatTarget } = await import("@/lib/ai-endpoint.server");
+    const ai = aiChatTarget();
+    if (!ai) throw new Error("AI not configured");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
@@ -231,14 +232,11 @@ export const chatOgBot = createServerFn({ method: "POST" })
 
     // 4. Call the AI gateway.
     try {
-      const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      const res = await fetch(ai.url, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
+        headers: ai.headers,
         body: JSON.stringify({
-          model: "google/gemini-3.7-flash",
+          model: ai.model,
           temperature: data.mode === "og" && foulMouth ? 0.9 : data.mode === "og" ? 0.75 : 0.6,
           messages: [
             { role: "system", content: system },
