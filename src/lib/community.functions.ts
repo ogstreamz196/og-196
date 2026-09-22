@@ -149,7 +149,7 @@ export function estimateRoastFloor(content: string): number {
 
   const words = text.match(/[a-z0-9']+/g) ?? [];
   const isMostlyQuestion = /^(why|what|when|where|who|how|can|could|would|did|do|does|is|are)\b/.test(text);
-  const targetHits = text.match(/\b(you|your|youre|you're|ur|u|bot|mum|mom|dad|face|head|brain|mouth|chin|arse|ass)\b/g)?.length ?? 0;
+  const targetHits = text.match(/\b(you|your|youre|you're|ur|u|he|him|his|she|her|hers|they|them|their|bot|mum|mom|dad|face|head|brain|mouth|chin|arse|ass)\b/g)?.length ?? 0;
   const insultHits = text.match(/\b(fuck(?:ing|er|ed)?|shit(?:head)?|dick(?:head)?|twat|wanker|prick|muppet|idiot|imbecile|bellend|bell-end|knob(?:head)?|gobshite|plonker|tosser|git|prat|melt|clown|stupid|dumb|ugly|useless|rubbish|testic(?:le|al)|nuts?|bum|arse|ass|suck|bitch|bastard|pussyhole)\b/g)?.length ?? 0;
   const hasRoastShape = targetHits > 0 && insultHits > 0;
   if (!hasRoastShape || (isMostlyQuestion && insultHits < 2)) return 0;
