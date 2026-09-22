@@ -636,14 +636,11 @@ async function runChatAI(
   });
 
   try {
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const res = await fetch(ai.url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
+      headers: ai.headers,
       body: JSON.stringify({
-        model: "google/gemini-3.7-flash",
+        model: ai.model,
         temperature: foulMouth ? 0.9 : 0.75,
         messages: [
           { role: "system", content: system },
