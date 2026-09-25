@@ -77,6 +77,7 @@ import {
 import { CommunityTrackRow } from "@/components/library/CommunityTrackRow";
 import { MiniPlayer } from "@/components/library/MiniPlayer";
 import { PlaylistProvider, PlaylistOrder, usePlaylist } from "@/hooks/use-playlist";
+import { peekFullTrackPlay, clearFullTrackPlay } from "@/lib/full-track-autoplay";
 import { useFoulIntensity, useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 
 
