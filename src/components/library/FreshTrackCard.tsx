@@ -49,7 +49,32 @@ export function FreshTrackCard({
     if (autoUnlockPrompt) setUnlockOpen(true);
   }, [autoUnlockPrompt]);
   const [busy, setBusy] = useState(false);
-  const [unlocked, setUnlocked] = useState(!!(song as { unlocked?: boolean | null }).unlocked);
+  const propUnlocked = !!(song as { unlocked?: boolean | null }).unlocked;
+  const [unlocked, setUnlocked] = useState(propUnlocked);
+  useEffect(() => {
+    if (propUnlocked) setUnlocked(true);
+  }, [propUnlocked]);
+  // The card may hold a stale snapshot — re-check paid status from the database
+  // on mount, on window focus, and every few seconds until unlocked.
+  useEffect(() => {
+    if (unlocked) return;
+    let cancelled = false;
+    const check = async () => {
+      const [{ data: s }, { data: u }] = await Promise.all([
+        supabase.from("songs").select("unlocked").eq("id", song.id).maybeSingle(),
+        supabase.from("unlocked_songs").select("id").eq("song_id", song.id).limit(1),
+      ]);
+      if (!cancelled && (s?.unlocked || (u && u.length > 0))) setUnlocked(true);
+    };
+    void check();
+    const t = setInterval(check, 5000);
+    window.addEventListener("focus", check);
+    return () => {
+      cancelled = true;
+      clearInterval(t);
+      window.removeEventListener("focus", check);
+    };
+  }, [song.id, unlocked]);
   const title = song.title || "Your track";
   const cap = Math.max(5, sampleSeconds);
 
