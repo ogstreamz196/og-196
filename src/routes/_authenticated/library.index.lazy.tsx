@@ -77,6 +77,7 @@ import {
 import { CommunityTrackRow } from "@/components/library/CommunityTrackRow";
 import { MiniPlayer } from "@/components/library/MiniPlayer";
 import { PlaylistProvider, PlaylistOrder, usePlaylist } from "@/hooks/use-playlist";
+import { peekFullTrackPlay, clearFullTrackPlay } from "@/lib/full-track-autoplay";
 import { useFoulIntensity, useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 
 
@@ -874,6 +875,32 @@ function LibraryPage() {
       return (data ?? []) as Song[];
     },
   });
+
+  // After an unlock, start the full (not sample) version of that track.
+  useEffect(() => {
+    const id = peekFullTrackPlay();
+    if (!id || !playlist) return;
+    const row = (library.data ?? []).find((s) => s.id === id) as
+      | (Song & { unlocked?: boolean | null })
+      | undefined;
+    if (!row || !row.unlocked) {
+      const t = window.setTimeout(() => void library.refetch(), 1500);
+      return () => window.clearTimeout(t);
+    }
+    let tries = 0;
+    const iv = window.setInterval(() => {
+      tries += 1;
+      if (playlist.getControls(id)) {
+        clearFullTrackPlay();
+        window.clearInterval(iv);
+        playlist.playId(id);
+      } else if (tries > 40) {
+        clearFullTrackPlay();
+        window.clearInterval(iv);
+      }
+    }, 300);
+    return () => window.clearInterval(iv);
+  }, [library.data, playlist]);
 
   const versionedLibrary = useMemo(() => {
     const list = library.data ?? [];

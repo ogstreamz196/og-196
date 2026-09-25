@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { requestFullTrackPlay } from "@/lib/full-track-autoplay";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   Loader2, FileText, ChevronDown,
@@ -55,7 +56,7 @@ const VOCALS = ["Any voice", "Female vocal", "Male vocal", "Duo"];
 
 /** Styles offered as chips — curated first, then the rest of the pool. */
 const STYLE_OPTIONS: string[] = (() => {
-  const featured = ["Drill", "Trap", "Drum & Bass", "Pop", "K-Pop", "Slow Jam", "Bhangra", "Nasheed", "Nursery Rhyme"];
+  const featured = ["Hip Hop", "Rap", "Singing", "Drill", "Trap", "Drum & Bass", "Pop", "K-Pop", "Slow Jam", "Bhangra", "Nasheed", "Nursery Rhyme"];
   const rest = POOLS.genre.filter((g) => !featured.includes(g));
   return [...featured, ...rest];
 })();
@@ -472,6 +473,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
     setUnlockDialogOpen(true);
   }
 
+  const navigate = useNavigate();
   async function performUnlock() {
     setUnlocking(true);
     try {
@@ -502,6 +504,8 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       refreshCoinBalance();
       onSaved?.();
       onRefresh?.();
+      requestFullTrackPlay(song.id);
+      void navigate({ to: "/library" });
 
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not unlock");

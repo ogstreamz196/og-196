@@ -24,7 +24,7 @@ export const POOLS: Record<Category, string[]> = {
   ]),
 
   genre: [
-    "Drill", "Trap", "Drum & Bass", "Afrobeats", "R&B", "Pop", "K-Pop", "Slow Jam", "Bhangra",
+    "Hip Hop", "Rap", "Singing", "Drill", "Trap", "Drum & Bass", "Afrobeats", "R&B", "Pop", "K-Pop", "Slow Jam", "Bhangra",
     "Nasheed", "Nursery Rhyme", "Dance", "Reggae",
     "Rock", "Indie", "House", "Lo-fi", "Country", "Jazz", "Funk",
     "Hyperpop", "Amapiano", "Dancehall", "Garage", "Bossa Nova",
@@ -105,6 +105,9 @@ export const META: Record<Category, CategoryMeta> = {
 };
 
 export const GENRE_MOOD_BIAS: Record<string, string[]> = {
+  "Hip Hop": ["Confident", "Hype", "Nostalgic", "Rebellious"],
+  Rap: ["Confident", "Angry", "Hype", "Rebellious"],
+  Singing: ["Romantic", "Hopeful", "Heartbroken", "Dreamy"],
   Drill: ["Dark", "Angry", "Confident", "Rebellious"],
   Trap: ["Hype", "Confident", "Dark", "Triumphant"],
   "Drum & Bass": ["Hype", "Rebellious", "Confident", "Triumphant"],
