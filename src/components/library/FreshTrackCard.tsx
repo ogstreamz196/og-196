@@ -4,6 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { Download, Loader2, Lock, Pause, Play, Share2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { requestFullTrackPlay } from "@/lib/full-track-autoplay";
 import { downloadFile } from "@/lib/download-file";
 import { shareTrack } from "@/lib/share-track";
 import { Button } from "@/components/ui/button";
@@ -127,7 +128,10 @@ export function FreshTrackCard({
         );
       }
       setUnlocked(true);
+      audioRef.current?.pause();
+      requestFullTrackPlay(song.id);
       await qc.invalidateQueries({ queryKey: ["profile"] });
+      await qc.invalidateQueries({ queryKey: ["library"] });
       if (!unlockData?.already) {
         toast.success(`Full track unlocked · -${unlockData?.cost ?? unlockCost} coins`);
       }
