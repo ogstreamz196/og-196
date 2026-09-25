@@ -64,7 +64,7 @@ export function TrackUnlockReturnHandler() {
         clean();
       }
     })();
-  }, [queryClient]);
+  }, [queryClient, navigate]);
 
   return null;
 }

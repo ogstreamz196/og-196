@@ -55,7 +55,7 @@ const VOCALS = ["Any voice", "Female vocal", "Male vocal", "Duo"];
 
 /** Styles offered as chips — curated first, then the rest of the pool. */
 const STYLE_OPTIONS: string[] = (() => {
-  const featured = ["Drill", "Trap", "Drum & Bass", "Pop", "K-Pop", "Slow Jam", "Bhangra", "Nasheed", "Nursery Rhyme"];
+  const featured = ["Hip Hop", "Rap", "Singing", "Drill", "Trap", "Drum & Bass", "Pop", "K-Pop", "Slow Jam", "Bhangra", "Nasheed", "Nursery Rhyme"];
   const rest = POOLS.genre.filter((g) => !featured.includes(g));
   return [...featured, ...rest];
 })();
