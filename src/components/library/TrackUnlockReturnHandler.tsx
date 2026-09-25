@@ -1,17 +1,19 @@
 import { useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { reconcileTrackUnlock } from "@/lib/payments.functions";
 import { getStripeEnvironment } from "@/lib/stripe";
+import { requestFullTrackPlay } from "@/lib/full-track-autoplay";
 
 /**
- * Card unlock returns here: the checkout redirect lands back on the page the
- * user started from with `?track_unlock=1&session_id=cs_…`. We confirm the
- * payment server-side, flip the track to unlocked, then clean the URL and
- * refresh the library so the full track plays straight away.
+ * Card unlock returns with `?track_unlock=1&session_id=cs_…`. We confirm the
+ * payment server-side, then send the user to their library where the full
+ * track starts playing.
  */
 export function TrackUnlockReturnHandler() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const handled = useRef(false);
 
   useEffect(() => {
@@ -43,7 +45,12 @@ export function TrackUnlockReturnHandler() {
         if (result.status === "pending") {
           toast.info("Payment is still processing — your track unlocks shortly.", { id: toastId });
         } else {
-          toast.success("Paid — full track unlocked.", { id: toastId });
+          toast.success("Paid — playing your full track.", { id: toastId });
+          if ("songId" in result && result.songId) {
+            requestFullTrackPlay(result.songId);
+            clean();
+            void navigate({ to: "/library" });
+          }
         }
         await queryClient.invalidateQueries({
           predicate: (q) => {

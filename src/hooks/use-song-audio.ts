@@ -65,6 +65,13 @@ export function useSongAudio({
     }
   }
 
+  // Switching sample → full (after unlock) must drop the cached sample URL.
+  const modeRef = useRef(mode);
+  if (modeRef.current !== mode) {
+    modeRef.current = mode;
+    if (signedUrl) setSignedUrl(null);
+  }
+
   // Pre-warm the signed URL once the song is ready so first-play is instant.
   useEffect(() => {
     if (!ready || signedUrl || loadingUrl) return;
