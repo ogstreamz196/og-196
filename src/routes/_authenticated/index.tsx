@@ -23,6 +23,7 @@ import {
   Send,
   Smartphone,
   Globe,
+  ShieldCheck,
 } from "lucide-react";
 import { useRef, useState, useCallback, type PointerEvent as ReactPointerEvent } from "react";
 import {
