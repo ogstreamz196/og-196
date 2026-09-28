@@ -5,12 +5,11 @@ import {
   Loader2, ShieldCheck, Search, ArrowLeft, Users as UsersIcon,
   UserCog, Crown, Coins, Settings as SettingsIcon, Bot,
   Plus, Minus, Pencil, MoreHorizontal, ChevronDown, ChevronUp,
-  ExternalLink, X, MapPin, Smartphone, Send,
+  ExternalLink, X, Send,
 } from "lucide-react";
 import { listUsersPro } from "@/lib/sign-in-tracking.functions";
 import { getAllCoinPurchases, type AdminPurchaseTotals } from "@/lib/payments.functions";
 import { useServerFn } from "@tanstack/react-start";
-import { formatDistanceToNow } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { maskDevIdentity } from "@/lib/dev-identity";
 import { useRole } from "@/hooks/use-role";
@@ -409,7 +408,7 @@ function UserRow({
   const isVip = roles.includes("vip");
   const isOgBot = roles.includes("og_bot");
   const isAdminUser = roles.includes("admin");
-  const hasPro = !!(pro && (pro.last_country || pro.last_device || pro.telegram_chat_id || pro.last_sign_in_at));
+  const hasPro = !!(pro && (pro.telegram_chat_id || pro.last_sign_in_at));
   const [spendOpen, setSpendOpen] = useState(false);
 
   return (
@@ -498,21 +497,9 @@ function UserRow({
         <TableRow className="border-t-0 hover:bg-transparent">
           <TableCell colSpan={5} className="pt-0 pb-3">
             <div className="ml-12 flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
-              {pro!.last_country && (
-                <span className="inline-flex items-center gap-1 rounded-full border border-border/40 bg-background/40 px-2 py-0.5">
-                  <MapPin className="h-3 w-3 text-sky-400" />
-                  {pro!.last_city ? `${pro!.last_city}, ` : ""}{pro!.last_country}
-                </span>
-              )}
-              {pro!.last_device && (
-                <span className="inline-flex items-center gap-1 rounded-full border border-border/40 bg-background/40 px-2 py-0.5">
-                  <Smartphone className="h-3 w-3 text-primary" />
-                  {pro!.last_device}
-                </span>
-              )}
               {pro!.last_sign_in_at && (
                 <span className="rounded-full border border-border/40 bg-background/40 px-2 py-0.5">
-                  Last seen {formatDistanceToNow(new Date(pro!.last_sign_in_at), { addSuffix: true })}
+                  Last sign-in {new Date(pro!.last_sign_in_at).toLocaleString()}
                   {pro!.sign_in_count ? ` · ${pro!.sign_in_count} total` : ""}
                 </span>
               )}

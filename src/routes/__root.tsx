@@ -22,7 +22,6 @@ import { AuraBridge } from "@/hooks/use-aura";
 import { SingleAudioBridge } from "@/components/SingleAudioBridge";
 import { InstallAppPrompt } from "@/components/InstallAppPrompt";
 import { UserActivityArchiver } from "@/hooks/use-user-activity-archiver";
-import { ActivityTracker } from "@/hooks/use-activity-tracker";
 import { PersistentBackgroundMusic } from "@/components/PersistentBackgroundMusic";
 import { TrackUnlockReturnHandler } from "@/components/library/TrackUnlockReturnHandler";
 
@@ -247,17 +246,6 @@ function RootComponent() {
           router.invalidate();
         }
 
-        // Auto-sync this user's activity to Sheets on app load (once per session).
-        try {
-          const key = `og:auto-sync:${data.user.id}`;
-          if (typeof window !== "undefined" && !window.sessionStorage.getItem(key)) {
-            window.sessionStorage.setItem(key, "1");
-            import("@/lib/user-log.functions")
-              .then((m) => m.syncUserActivity({ data: {} }))
-              .catch((e) => console.warn("auto-sync failed", e));
-          }
-        } catch { /* non-blocking */ }
-
         // Claim a pending referral UUID or OG Leader code captured before sign-in.
         try {
           const pending = typeof window !== "undefined" ? localStorage.getItem("og_pending_ref") : null;
@@ -304,45 +292,9 @@ function RootComponent() {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       router.invalidate();
       if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
-      if (event === "SIGNED_IN" && typeof window !== "undefined") {
-        const key = "og:dev-notified-session";
-        if (window.sessionStorage.getItem(key)) return;
-        window.sessionStorage.setItem(key, "1");
-        import("@/lib/dev-telemetry.functions")
-          .then((m) => m.notifyDevSignIn())
-          .catch(() => undefined);
-        // Snapshot the signed-in user's activity to Sheets (fire-and-forget).
-        import("@/lib/user-log.functions")
-          .then((m) => m.syncUserActivity({ data: {} }))
-          .catch(() => undefined);
-      }
     });
     return () => sub.subscription.unsubscribe();
   }, [router, queryClient]);
-
-  // Track last visited page (debounced) so devs can see it from the admin panel.
-  useEffect(() => {
-    let lastSent = "";
-    let timer: ReturnType<typeof setTimeout> | null = null;
-    const unsub = router.subscribe("onResolved", ({ toLocation }) => {
-      const path = toLocation.pathname;
-      if (!path || path === lastSent) return;
-      if (timer) clearTimeout(timer);
-      timer = setTimeout(() => {
-        lastSent = path;
-        supabase.auth.getSession().then(({ data }) => {
-          if (!data.session) return;
-          import("@/lib/dev-telemetry.functions")
-            .then((m) => m.updateLastPage({ data: { path } }))
-            .catch(() => undefined);
-        });
-      }, 800);
-    });
-    return () => {
-      if (timer) clearTimeout(timer);
-      unsub();
-    };
-  }, [router]);
 
   // Global copy / right-click block (anti-scrape; lyrics protection).
   useEffect(() => {
@@ -379,7 +331,6 @@ function RootComponent() {
         <PersistentBackgroundMusic />
         <TrackUnlockReturnHandler />
         <UserActivityArchiver />
-        <ActivityTracker />
         <Outlet />
         <InstallAppPrompt />
         <Toaster />

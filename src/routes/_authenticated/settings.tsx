@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Crown, Bot, ShieldCheck, Coins, Plus, Minus, LogOut, UserCog, Mail, Fingerprint, KeyRound, Send, Copy, ExternalLink, MapPin, Bell, HardDrive, RotateCcw } from "lucide-react";
+import { Loader2, Crown, Bot, ShieldCheck, Coins, Plus, Minus, LogOut, UserCog, Mail, Fingerprint, KeyRound, Send, Copy, ExternalLink, Bell, HardDrive, RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useDevMode } from "@/hooks/use-dev-mode";
@@ -518,49 +518,6 @@ function TelegramConnectSection({ userId }: { userId: string }) {
 }
 
 function PrivacySection({ userId }: { userId: string }) {
-  const qc = useQueryClient();
-  const consentQuery = useQuery({
-    queryKey: ["profile-gps-consent", userId],
-    enabled: !!userId,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("gps_consent, gps_consent_at")
-        .eq("id", userId)
-        .maybeSingle();
-      if (error) throw new Error(error.message);
-      return data;
-    },
-  });
-
-  const toggle = useMutation({
-    mutationFn: async (value: boolean) => {
-      if (value && typeof navigator !== "undefined" && "geolocation" in navigator) {
-        // Trigger native prompt; if blocked we still record the user's intent.
-        await new Promise<void>((resolve) => {
-          navigator.geolocation.getCurrentPosition(() => resolve(), () => resolve(), { timeout: 6000 });
-        });
-      }
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          gps_consent: value,
-          gps_consent_at: value ? new Date().toISOString() : null,
-        })
-        .eq("id", userId);
-      if (error) throw new Error(error.message);
-      return value;
-    },
-    onSuccess: (v) => {
-      toast.success(v ? "Location sharing on" : "Location sharing off");
-      qc.invalidateQueries({ queryKey: ["profile-gps-consent", userId] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const checked = Boolean(consentQuery.data?.gps_consent);
-  const at = consentQuery.data?.gps_consent_at;
-
   // Browser-level permission state (read-only mirror of the OS prompts).
   const [notifPerm, setNotifPerm] = useState<NotificationPermission | "unsupported">(
     typeof Notification === "undefined" ? "unsupported" : Notification.permission,
@@ -638,28 +595,6 @@ function PrivacySection({ userId }: { userId: string }) {
           Re-show prompt
         </Button>
       </header>
-
-      {/* Location */}
-      <div className="flex items-center justify-between rounded-xl border border-border bg-background/40 p-3">
-        <div className="flex items-center gap-3 min-w-0">
-          <MapPin className="h-5 w-5 text-primary shrink-0" />
-          <div className="min-w-0">
-            <Label className="text-sm font-medium">Share precise location</Label>
-            <p className="text-xs text-muted-foreground">
-              Local drops & smarter recs.
-              {checked && at ? ` Granted ${new Date(at).toLocaleDateString()}.` : " Off."}
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          {toggle.isPending && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
-          <Switch
-            checked={checked}
-            disabled={toggle.isPending}
-            onCheckedChange={(v) => toggle.mutate(v)}
-          />
-        </div>
-      </div>
 
       {/* Notifications */}
       <div className="flex items-center justify-between rounded-xl border border-border bg-background/40 p-3">

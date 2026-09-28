@@ -1,8 +1,7 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
-import { Send, Circle, Radio, ShieldAlert, Loader2, FileSpreadsheet, RefreshCw } from "lucide-react";
+import { Send, Circle, Radio, ShieldAlert, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,7 +13,6 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { BossNav } from "@/components/admin/BossNav";
 import { FreeAccessPanel } from "@/components/admin/FreeAccessPanel";
-import { syncUserActivity, syncAllUsersActivity } from "@/lib/user-log.functions";
 
 export const Route = createFileRoute("/_authenticated/developer")({
   component: DeveloperPage,
@@ -71,37 +69,6 @@ function DeveloperPage() {
     },
   });
 
-  const syncOne = useServerFn(syncUserActivity);
-  const syncAll = useServerFn(syncAllUsersActivity);
-
-  const syncOneM = useMutation({
-    mutationFn: async (vars: { userId: string; label: string }) => {
-      const toastId = toast.loading(`Syncing ${vars.label} to Sheets…`);
-      try {
-        const res = await syncOne({ data: { userId: vars.userId } });
-        toast.success(`Synced tab "${res.tab}" (${res.rows} rows)`, { id: toastId });
-        return res;
-      } catch (e) {
-        toast.error(e instanceof Error ? e.message : "Sync failed", { id: toastId });
-        throw e;
-      }
-    },
-  });
-
-  const syncAllM = useMutation({
-    mutationFn: async () => {
-      const toastId = toast.loading("Syncing all users to Sheets…");
-      try {
-        const res = await syncAll({ data: undefined });
-        toast.success(`Synced ${res.synced}/${res.total} users`, { id: toastId });
-        return res;
-      } catch (e) {
-        toast.error(e instanceof Error ? e.message : "Sync failed", { id: toastId });
-        throw e;
-      }
-    },
-  });
-
   if (isLoading) return <div className="p-8 text-muted-foreground">Loading…</div>;
   if (!isDev) {
     throw redirect({ to: "/" });
@@ -121,65 +88,6 @@ function DeveloperPage() {
               Realtime presence — speak through OG Bot in their widget.
             </p>
           </div>
-        </div>
-        <div className="flex flex-wrap items-center justify-end gap-2">
-          {(() => {
-            const running = syncAllM.isPending || syncOneM.isPending;
-            const failed = !running && (syncAllM.isError || syncOneM.isError);
-            const success = !running && !failed && (syncAllM.isSuccess || syncOneM.isSuccess);
-            const cls = running
-              ? "border-amber-500/40 bg-amber-500/10 text-amber-300"
-              : failed
-                ? "border-destructive/40 bg-destructive/10 text-destructive"
-                : success
-                  ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300"
-                  : "border-border bg-muted/30 text-muted-foreground";
-            const label = running
-              ? "Auto-sync: running…"
-              : failed
-                ? "Auto-sync: failed"
-                : success
-                  ? "Auto-sync: success"
-                  : "Auto-sync: idle";
-            return (
-              <span
-                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${cls}`}
-                title={
-                  failed
-                    ? (syncAllM.error instanceof Error ? syncAllM.error.message : null) ??
-                      (syncOneM.error instanceof Error ? syncOneM.error.message : null) ??
-                      "Sync failed"
-                    : label
-                }
-              >
-                <span
-                  className={`h-1.5 w-1.5 rounded-full ${
-                    running
-                      ? "animate-pulse bg-amber-400"
-                      : failed
-                        ? "bg-destructive"
-                        : success
-                          ? "bg-emerald-400"
-                          : "bg-muted-foreground/60"
-                  }`}
-                />
-                {label}
-              </span>
-            );
-          })()}
-          <Button
-            variant="outline"
-            onClick={() => syncAllM.mutate()}
-            disabled={syncAllM.isPending}
-            className="gap-2"
-          >
-            {syncAllM.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <FileSpreadsheet className="h-4 w-4" />
-            )}
-            Sync all to Sheets
-          </Button>
         </div>
       </header>
 
@@ -214,27 +122,8 @@ function DeveloperPage() {
                       <div className="min-w-0 flex-1">
                         <div className="truncate text-sm font-medium">{label}</div>
                         <div className="truncate text-[11px] text-muted-foreground">{u.email}</div>
-                        {u.last_page && (
-                          <div className="truncate text-[11px] text-primary/80">
-                            on <code>{u.last_page}</code>
-                          </div>
-                        )}
                       </div>
                     </button>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      title="Sync this user to Sheets"
-                      aria-label={`Sync ${label} to Sheets`}
-                      onClick={() => syncOneM.mutate({ userId: u.user_id, label })}
-                      disabled={syncOneM.isPending}
-                    >
-                      {syncOneM.isPending && syncOneM.variables?.userId === u.user_id ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <RefreshCw className="h-3.5 w-3.5" />
-                      )}
-                    </Button>
                   </li>
                 );
               })}

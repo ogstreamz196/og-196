@@ -93,8 +93,9 @@ function TrustPage() {
             <p>
               We collect the minimum needed to run the app: your email and display name from the
               identity provider you choose, the prompts and songs you create, your in-app
-              preferences, and a coin/transaction ledger to power generations and referrals. We do
-              not sell personal data.
+               preferences, and a coin/transaction ledger to power generations and referrals. We do
+               not collect location, IP-based location, contacts, advertising IDs, full device
+               fingerprints, or page-by-page activity, and we do not sell personal data.
             </p>
             <p>
               You can request deletion of your account and associated content by emailing the
