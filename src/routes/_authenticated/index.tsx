@@ -331,6 +331,16 @@ function DashboardHome() {
           </CardContent>
         </Card>
       </div>
+
+      <footer className="flex justify-center border-t border-white/10 pt-6">
+        <Link
+          to="/policy"
+          className="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <ShieldCheck className="h-4 w-4 shrink-0" />
+          Privacy Policy
+        </Link>
+      </footer>
     </div>
   );
 }
