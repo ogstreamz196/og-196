@@ -18,6 +18,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PolicyRouteImport } from './routes/policy'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as MPreviewRouteImport } from './routes/m-preview'
+import { Route as DeleteAccountRouteImport } from './routes/delete-account'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppReturnRouteImport } from './routes/app-return'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
@@ -98,6 +99,11 @@ const McpRoute = McpRouteImport.update({
 const MPreviewRoute = MPreviewRouteImport.update({
   id: '/m-preview',
   path: '/m-preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DeleteAccountRoute = DeleteAccountRouteImport.update({
+  id: '/delete-account',
+  path: '/delete-account',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -344,6 +350,7 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/app-return': typeof AppReturnRoute
   '/auth': typeof AuthRoute
+  '/delete-account': typeof DeleteAccountRoute
   '/m-preview': typeof MPreviewRoute
   '/mcp': typeof McpRoute
   '/policy': typeof PolicyRoute
@@ -394,6 +401,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/app-return': typeof AppReturnRoute
   '/auth': typeof AuthRoute
+  '/delete-account': typeof DeleteAccountRoute
   '/m-preview': typeof MPreviewRoute
   '/mcp': typeof McpRoute
   '/policy': typeof PolicyRoute
@@ -447,6 +455,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/app-return': typeof AppReturnRoute
   '/auth': typeof AuthRoute
+  '/delete-account': typeof DeleteAccountRoute
   '/m-preview': typeof MPreviewRoute
   '/mcp': typeof McpRoute
   '/policy': typeof PolicyRoute
@@ -501,6 +510,7 @@ export interface FileRouteTypes {
     | '/'
     | '/app-return'
     | '/auth'
+    | '/delete-account'
     | '/m-preview'
     | '/mcp'
     | '/policy'
@@ -551,6 +561,7 @@ export interface FileRouteTypes {
   to:
     | '/app-return'
     | '/auth'
+    | '/delete-account'
     | '/m-preview'
     | '/mcp'
     | '/policy'
@@ -603,6 +614,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/app-return'
     | '/auth'
+    | '/delete-account'
     | '/m-preview'
     | '/mcp'
     | '/policy'
@@ -656,6 +668,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AppReturnRoute: typeof AppReturnRoute
   AuthRoute: typeof AuthRoute
+  DeleteAccountRoute: typeof DeleteAccountRoute
   MPreviewRoute: typeof MPreviewRoute
   McpRoute: typeof McpRoute
   PolicyRoute: typeof PolicyRoute
@@ -724,6 +737,13 @@ declare module '@tanstack/react-router' {
       path: '/m-preview'
       fullPath: '/m-preview'
       preLoaderRoute: typeof MPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/delete-account': {
+      id: '/delete-account'
+      path: '/delete-account'
+      fullPath: '/delete-account'
+      preLoaderRoute: typeof DeleteAccountRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -1115,6 +1135,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AppReturnRoute: AppReturnRoute,
   AuthRoute: AuthRoute,
+  DeleteAccountRoute: DeleteAccountRoute,
   MPreviewRoute: MPreviewRoute,
   McpRoute: McpRoute,
   PolicyRoute: PolicyRoute,
