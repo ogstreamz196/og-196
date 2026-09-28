@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useDevMode } from "@/hooks/use-dev-mode";
 import { useProfile } from "@/hooks/use-profile";
 import { useRole } from "@/hooks/use-role";
+import { DeleteMyAccount } from "@/components/DeleteMyAccount";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -372,6 +373,8 @@ function SettingsPage() {
             <LogOut className="mr-2 h-4 w-4" /> Sign out
           </Button>
         </section>
+
+        <DeleteMyAccount />
       </div>
     </DashboardShell>
   );
