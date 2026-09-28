@@ -38,9 +38,15 @@ export const Route = createFileRoute("/_authenticated/referrals")({
   head: () => ({
     meta: [
       { title: "Earn Dashboard | OG BOT" },
-      { name: "description", content: "Track referral earnings, Global releases, and listening activity in OG BOT." },
+      {
+        name: "description",
+        content: "Track referral earnings, Global releases, and listening activity in OG BOT.",
+      },
       { property: "og:title", content: "Earn Dashboard | OG BOT" },
-      { property: "og:description", content: "Track referral earnings, Global releases, and listening activity in OG BOT." },
+      {
+        property: "og:description",
+        content: "Track referral earnings, Global releases, and listening activity in OG BOT.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -147,7 +153,12 @@ function ReferralsPage() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc("get_my_referrer");
       if (error) throw error;
-      return data as { has_referrer: boolean; referrer_name?: string; referrer_code?: string; bound_at?: string };
+      return data as {
+        has_referrer: boolean;
+        referrer_name?: string;
+        referrer_code?: string;
+        bound_at?: string;
+      };
     },
   });
 
@@ -170,9 +181,10 @@ function ReferralsPage() {
             qc.invalidateQueries({ queryKey: ["profile", user.id] });
             if (typeof row.amount === "number" && row.amount > 0) {
               toast.success(`+${row.amount} OG Coins referral reward`, {
-                description: row.type === "referral_payment"
-                  ? "A referred member paid — your reward is in."
-                  : "A referred member used coins — your share is in.",
+                description:
+                  row.type === "referral_payment"
+                    ? "A referred member paid — your reward is in."
+                    : "A referred member used coins — your share is in.",
               });
             }
           }
@@ -281,7 +293,9 @@ function ReferralsPage() {
             </span>
           ) : (
             <button
-              onClick={() => document.getElementById("bind-referrer")?.scrollIntoView({ behavior: "smooth" })}
+              onClick={() =>
+                document.getElementById("bind-referrer")?.scrollIntoView({ behavior: "smooth" })
+              }
               className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-amber-300 transition hover:bg-amber-500/20"
             >
               <ShieldAlert className="h-3 w-3" /> Bind your OG Leader
@@ -318,34 +332,57 @@ function ReferralsPage() {
           data-testid="referrals-hero"
           className="relative overflow-hidden rounded-3xl border border-white/10 bg-card/60 p-5 backdrop-blur-2xl sm:p-10"
         >
-          <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-primary/20 blur-3xl" />
-          <div aria-hidden className="pointer-events-none absolute -left-10 -bottom-10 h-48 w-48 rounded-full bg-destructive/15 blur-3xl" />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-primary/20 blur-3xl"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -left-10 -bottom-10 h-48 w-48 rounded-full bg-destructive/15 blur-3xl"
+          />
 
           <div className="relative text-center">
             <p className="mb-2 text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground sm:mb-3 sm:tracking-[0.4em]">
               OG Coin Cashback Wallet
             </p>
             <div className="relative inline-block max-w-full">
-              <div aria-hidden className="absolute -inset-2 rounded-3xl bg-gradient-to-r from-primary via-fuchsia-500 to-destructive opacity-25 blur-2xl" />
+              <div
+                aria-hidden
+                className="absolute -inset-2 rounded-3xl bg-gradient-to-r from-primary via-fuchsia-500 to-destructive opacity-25 blur-2xl"
+              />
               <div className="relative flex items-baseline justify-center gap-2 sm:gap-3">
                 <span className="font-bungee bg-gradient-to-b from-white to-zinc-400 bg-clip-text text-6xl font-black tabular-nums tracking-tight text-transparent drop-shadow-[0_4px_24px_rgba(239,68,68,0.35)] sm:text-8xl">
                   {summary.total_earned.toLocaleString()}
                 </span>
-                <span className="text-base font-black uppercase tracking-widest text-primary sm:text-2xl">OG</span>
+                <span className="text-base font-black uppercase tracking-widest text-primary sm:text-2xl">
+                  OG
+                </span>
               </div>
             </div>
             <div className="mt-3 flex flex-wrap items-center justify-center gap-2 text-xs sm:mt-4">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 font-semibold text-emerald-300">
-                <TrendingUp className="h-3 w-3" /> {summary.total_referred} {summary.total_referred === 1 ? "referral" : "referrals"} · auto-paid
+                <TrendingUp className="h-3 w-3" /> {summary.total_referred}{" "}
+                {summary.total_referred === 1 ? "referral" : "referrals"} · auto-paid
               </span>
-               <span className="text-muted-foreground">Rewards from their payments and coin use</span>
+              <span className="text-muted-foreground">
+                Rewards from their payments and coin use
+              </span>
             </div>
 
             <div className="mt-5 flex flex-col gap-2 sm:mt-6 sm:flex-row sm:flex-wrap sm:justify-center">
-              <Button onClick={share} size="lg" className="h-12 w-full gap-2 bg-gradient-to-r from-primary to-fuchsia-500 px-6 font-black uppercase tracking-wider shadow-glow hover:scale-[1.02] sm:w-auto">
+              <Button
+                onClick={share}
+                size="lg"
+                className="h-12 w-full gap-2 bg-gradient-to-r from-primary to-fuchsia-500 px-6 font-black uppercase tracking-wider shadow-glow hover:scale-[1.02] sm:w-auto"
+              >
                 <Share2 className="h-4 w-4" /> Share & earn
               </Button>
-              <Button onClick={copy} variant="secondary" size="lg" className="h-12 w-full gap-2 font-bold uppercase tracking-wider sm:w-auto">
+              <Button
+                onClick={copy}
+                variant="secondary"
+                size="lg"
+                className="h-12 w-full gap-2 font-bold uppercase tracking-wider sm:w-auto"
+              >
                 {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 {copied ? "Copied" : "Copy link"}
               </Button>
@@ -354,7 +391,10 @@ function ReferralsPage() {
         </section>
 
         {/* PAID / PENDING / NETWORK — tight stat tiles */}
-        <section data-testid="referrals-stat-tiles" className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <section
+          data-testid="referrals-stat-tiles"
+          className="grid grid-cols-2 gap-3 sm:grid-cols-3"
+        >
           <StatTile
             tone="emerald"
             icon={<CheckCircle2 className="h-4 w-4" />}
@@ -446,7 +486,8 @@ function ReferralsPage() {
                     {codeQ.isLoading ? "Loading…" : (myCode ?? "—")}
                   </div>
                   <div className="mt-1 text-[11px] text-muted-foreground">
-                    Friends paste this in "Connect OG Leader" — locks you in for life. 10% of every coin they burn → yours.
+                    Friends paste this in "Connect OG Leader" — locks you in for life. 10% of every
+                    coin they burn → yours.
                   </div>
                 </div>
               )}
@@ -455,7 +496,13 @@ function ReferralsPage() {
             {link && (
               <div className="flex flex-col items-center gap-2 rounded-2xl border border-white/10 bg-background/60 p-3 md:w-44">
                 <div className="rounded-xl bg-white p-2.5">
-                  <QRCodeSVG id="og-referral-qr" value={link} size={144} level="M" includeMargin={false} />
+                  <QRCodeSVG
+                    id="og-referral-qr"
+                    value={link}
+                    size={144}
+                    level="M"
+                    includeMargin={false}
+                  />
                 </div>
                 <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">
                   <QrCode className="h-3 w-3" /> Scan to join
@@ -500,7 +547,10 @@ function ReferralsPage() {
         </section>
 
         {/* BIND LEADER — kept anchor */}
-        <section id="bind-referrer" className="scroll-mt-24 rounded-3xl border border-white/10 bg-card/60 p-5 backdrop-blur-xl sm:p-6">
+        <section
+          id="bind-referrer"
+          className="scroll-mt-24 rounded-3xl border border-white/10 bg-card/60 p-5 backdrop-blur-xl sm:p-6"
+        >
           <div className="mb-3 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] text-rose-300">
             <KeyRound className="h-3.5 w-3.5" /> Connect your OG Leader
           </div>
@@ -508,10 +558,15 @@ function ReferralsPage() {
         </section>
 
         {/* CASHBACK FEED — dense activity */}
-        <section data-testid="referrals-cashback-feed" className="rounded-3xl border border-white/10 bg-card/60 p-5 backdrop-blur-xl sm:p-6">
+        <section
+          data-testid="referrals-cashback-feed"
+          className="rounded-3xl border border-white/10 bg-card/60 p-5 backdrop-blur-xl sm:p-6"
+        >
           <div className="flex items-center justify-between">
             <h2 className="font-bungee text-xl tracking-tight">Cashback feed</h2>
-            <span className="text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground">Last 20</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground">
+              Last 20
+            </span>
           </div>
           <div className="mt-3 divide-y divide-white/5">
             {summaryQ.isLoading && (
@@ -549,7 +604,13 @@ function ReferralsPage() {
                         </span>
                       </div>
                       <div className="mt-0.5 font-mono text-[11px] text-muted-foreground">
-                        {isPayment ? <>Successful payment reward = </> : burned > 0 ? <>{burned} used × 10% = </> : <>Cashback = </>}
+                        {isPayment ? (
+                          <>Successful payment reward = </>
+                        ) : burned > 0 ? (
+                          <>{burned} used × 10% = </>
+                        ) : (
+                          <>Cashback = </>
+                        )}
                         <span className="font-bold text-primary">+{tx.amount} OG</span>
                       </div>
                     </div>
@@ -586,18 +647,31 @@ function StatTile({
   unit: string;
 }) {
   const tones = {
-    emerald: { ring: "hover:border-emerald-400/40", text: "text-emerald-400", glow: "from-emerald-500/20" },
+    emerald: {
+      ring: "hover:border-emerald-400/40",
+      text: "text-emerald-400",
+      glow: "from-emerald-500/20",
+    },
     amber: { ring: "hover:border-amber-400/40", text: "text-amber-400", glow: "from-amber-500/20" },
     sky: { ring: "hover:border-sky-400/40", text: "text-sky-400", glow: "from-sky-500/20" },
   }[tone];
   return (
-    <div className={`group relative overflow-hidden rounded-2xl border border-white/10 bg-card/70 p-5 backdrop-blur-xl transition ${tones.ring}`}>
-      <div aria-hidden className={`pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-gradient-to-br ${tones.glow} to-transparent blur-2xl`} />
+    <div
+      className={`group relative overflow-hidden rounded-2xl border border-white/10 bg-card/70 p-5 backdrop-blur-xl transition ${tones.ring}`}
+    >
+      <div
+        aria-hidden
+        className={`pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-gradient-to-br ${tones.glow} to-transparent blur-2xl`}
+      />
       <div className="relative flex items-start justify-between">
-        <span className={`inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.22em] ${tones.text}`}>
+        <span
+          className={`inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.22em] ${tones.text}`}
+        >
           {icon} {label}
         </span>
-        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">{unit}</span>
+        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
+          {unit}
+        </span>
       </div>
       <div className="relative mt-3 font-bungee text-4xl tabular-nums">{value}</div>
       <div className="relative mt-1 text-xs text-muted-foreground">{sub}</div>
@@ -627,8 +701,12 @@ function DashboardMetric({
   return (
     <div className="min-w-0 rounded-2xl border border-white/10 bg-card/70 p-3.5 backdrop-blur-xl sm:p-4">
       <div className={`grid h-9 w-9 place-items-center rounded-lg ${tones}`}>{icon}</div>
-      <p className="mt-3 break-words text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
-      <p className="mt-1 break-words font-bungee text-2xl tabular-nums leading-tight sm:text-3xl">{value}</p>
+      <p className="mt-3 break-words text-[10px] font-black uppercase tracking-[0.16em] text-muted-foreground">
+        {label}
+      </p>
+      <p className="mt-1 break-words font-bungee text-2xl tabular-nums leading-tight sm:text-3xl">
+        {value}
+      </p>
       <p className="mt-1 text-[11px] text-muted-foreground">{note}</p>
     </div>
   );
@@ -649,18 +727,29 @@ function Mission({
 }) {
   const tones = {
     primary: { ring: "hover:border-primary/40", bg: "bg-primary/10", text: "text-primary" },
-    fuchsia: { ring: "hover:border-fuchsia-400/40", bg: "bg-fuchsia-500/10", text: "text-fuchsia-400" },
-    destructive: { ring: "hover:border-destructive/40", bg: "bg-destructive/10", text: "text-destructive" },
+    fuchsia: {
+      ring: "hover:border-fuchsia-400/40",
+      bg: "bg-fuchsia-500/10",
+      text: "text-fuchsia-400",
+    },
+    destructive: {
+      ring: "hover:border-destructive/40",
+      bg: "bg-destructive/10",
+      text: "text-destructive",
+    },
   }[tone];
   return (
-    <div className={`group relative overflow-hidden rounded-3xl border border-white/10 bg-card/60 p-5 backdrop-blur-xl transition ${tones.ring}`}>
+    <div
+      className={`group relative overflow-hidden rounded-3xl border border-white/10 bg-card/60 p-5 backdrop-blur-xl transition ${tones.ring}`}
+    >
       <div className="absolute right-3 top-2 font-bungee text-6xl text-white/[0.04]">{n}</div>
       <div className="relative">
-        <div className={`grid h-11 w-11 place-items-center rounded-xl ${tones.bg} ${tones.text}`}>{icon}</div>
+        <div className={`grid h-11 w-11 place-items-center rounded-xl ${tones.bg} ${tones.text}`}>
+          {icon}
+        </div>
         <div className="mt-3 text-base font-black">{title}</div>
         <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{body}</p>
       </div>
     </div>
   );
 }
-

@@ -50,7 +50,9 @@ export function SwipeToOpenSidebar() {
       }
     };
 
-    const onEnd = () => { tracking = false; };
+    const onEnd = () => {
+      tracking = false;
+    };
 
     window.addEventListener("touchstart", onStart, { passive: true });
     window.addEventListener("touchmove", onMove, { passive: true });

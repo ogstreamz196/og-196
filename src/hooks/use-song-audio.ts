@@ -112,7 +112,6 @@ export function useSongAudio({
     };
   }, [playlist, playlistTitle, songId]);
 
-
   const playRef = useRef<() => Promise<void>>(async () => {});
   const pauseRef = useRef<() => void>(() => {});
 
@@ -165,7 +164,6 @@ export function useSongAudio({
     const blob = await downloadFile(url, filename);
     await shareTrack({ title: filename.replace(/\.mp3$/i, ""), blob, filename });
   }
-
 
   function handleEnded() {
     setPlaying(false);

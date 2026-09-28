@@ -1,6 +1,14 @@
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { CheckCircle2, XCircle, Loader2, PlayCircle, Clock, SkipForward, Flame } from "lucide-react";
+import {
+  CheckCircle2,
+  XCircle,
+  Loader2,
+  PlayCircle,
+  Clock,
+  SkipForward,
+  Flame,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { runFoulMouthSmokeTest, type FoulSmokeResult } from "@/lib/foul-mouth-smoke-test.functions";
@@ -37,11 +45,16 @@ export function FoulMouthSmokeTest() {
             <Flame className="h-4 w-4 text-orange-400" /> Live Chat foul-mouth smoke test
           </h3>
           <p className="text-xs text-muted-foreground">
-            Verifies safe-prompt path, server-side VIP gating, and brutal-short-but-helpful reply quality.
+            Verifies safe-prompt path, server-side VIP gating, and brutal-short-but-helpful reply
+            quality.
           </p>
         </div>
         <Button onClick={onRun} disabled={running} className="gap-2">
-          {running ? <Loader2 className="h-4 w-4 animate-spin" /> : <PlayCircle className="h-4 w-4" />}
+          {running ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <PlayCircle className="h-4 w-4" />
+          )}
           {running ? "Running…" : "Run test"}
         </Button>
       </div>

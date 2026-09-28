@@ -94,8 +94,8 @@ export function WebhooksAdminPage() {
               <p className="text-destructive">Failed to load: {(error as Error).message}</p>
             ) : !lastEvent ? (
               <p className="text-muted-foreground">
-                No webhook events received yet. Once Stripe delivers a checkout or
-                subscription event, it will appear here.
+                No webhook events received yet. Once Stripe delivers a checkout or subscription
+                event, it will appear here.
               </p>
             ) : (
               <>
@@ -106,8 +106,8 @@ export function WebhooksAdminPage() {
                   <Badge variant="outline">{lastEvent.environment}</Badge>
                 </div>
                 <p className="text-muted-foreground">
-                  Last event: <span className="font-mono">{lastEvent.eventType}</span>{" "}
-                  — {formatDistanceToNow(new Date(lastEvent.receivedAt), { addSuffix: true })}
+                  Last event: <span className="font-mono">{lastEvent.eventType}</span> —{" "}
+                  {formatDistanceToNow(new Date(lastEvent.receivedAt), { addSuffix: true })}
                 </p>
               </>
             )}
@@ -134,8 +134,7 @@ export function WebhooksAdminPage() {
                 </div>
                 <p>
                   <span className="text-muted-foreground">Credited:</span>{" "}
-                  <span className="font-semibold">+{lastSuccess.credited!.amount} coins</span>{" "}
-                  to{" "}
+                  <span className="font-semibold">+{lastSuccess.credited!.amount} coins</span> to{" "}
                   <span className="font-mono">
                     {lastSuccess.credited!.userEmail ?? lastSuccess.credited!.userId}
                   </span>

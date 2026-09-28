@@ -58,7 +58,12 @@ export function useFreeAccess() {
       )
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "app_settings", filter: "key=eq.free_access_expires_at" },
+        {
+          event: "*",
+          schema: "public",
+          table: "app_settings",
+          filter: "key=eq.free_access_expires_at",
+        },
         () => qc.invalidateQueries({ queryKey: FREE_ACCESS_KEY }),
       )
       .subscribe();
@@ -68,8 +73,7 @@ export function useFreeAccess() {
   }, [qc]);
 
   const row = query.data ?? { rawEnabled: false, expiresAt: null };
-  const expired =
-    !!row.expiresAt && new Date(row.expiresAt).getTime() <= Date.now();
+  const expired = !!row.expiresAt && new Date(row.expiresAt).getTime() <= Date.now();
   const enabled = row.rawEnabled && !expired;
 
   return {
@@ -96,10 +100,7 @@ export function useSetFreeAccess() {
       const expValue = (next.expiresAt ?? null) as unknown as never;
       const { error: e2 } = await supabase
         .from("app_settings")
-        .upsert(
-          { key: "free_access_expires_at", value: expValue },
-          { onConflict: "key" },
-        );
+        .upsert({ key: "free_access_expires_at", value: expValue }, { onConflict: "key" });
       if (e2) throw new Error(e2.message);
       return next;
     },

@@ -7,14 +7,16 @@ import type { RecentSong } from "@/hooks/use-recent-songs";
 import { deleteQueuedSong, retryGeneration } from "@/lib/song-queue-actions";
 import { cn } from "@/lib/utils";
 
-
 type UiStatus = "queued" | "generating" | "ready" | "failed" | "cancelled";
 
 const STATUS_META: Record<UiStatus, { label: string; className: string }> = {
   queued: { label: "Queued", className: "border-amber-400/50 bg-amber-500/15 text-amber-200" },
   generating: { label: "Rendering", className: "border-primary/50 bg-primary/15 text-primary" },
   ready: { label: "Ready", className: "border-emerald-400/50 bg-emerald-500/15 text-emerald-200" },
-  failed: { label: "Failed", className: "border-destructive/50 bg-destructive/15 text-destructive" },
+  failed: {
+    label: "Failed",
+    className: "border-destructive/50 bg-destructive/15 text-destructive",
+  },
   cancelled: { label: "Cancelled", className: "border-white/15 bg-white/5 text-muted-foreground" },
 };
 
@@ -84,7 +86,11 @@ export function DashboardGenerationHistory({ songs }: { songs: RecentSong[] }) {
     queryClient.invalidateQueries({ predicate: (q) => String(q.queryKey[0]).includes("songs") });
 
   async function onDelete(song: RecentSong) {
-    if (!window.confirm(`Delete "${song.title || "Untitled track"}"? Any coins in flight are refunded.`))
+    if (
+      !window.confirm(
+        `Delete "${song.title || "Untitled track"}"? Any coins in flight are refunded.`,
+      )
+    )
       return;
     setBusy(song.id);
     try {
@@ -123,7 +129,10 @@ export function DashboardGenerationHistory({ songs }: { songs: RecentSong[] }) {
         >
           <History className="h-6 w-6 text-primary" /> Generation history
         </h2>
-        <Link to="/library" className="text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground hover:text-primary">
+        <Link
+          to="/library"
+          className="text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground hover:text-primary"
+        >
           Studio
         </Link>
       </div>
@@ -152,7 +161,11 @@ export function DashboardGenerationHistory({ songs }: { songs: RecentSong[] }) {
                   </Link>
                   <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
                     <span className="inline-flex items-center gap-1">
-                      {s.vocals_only ? <Mic2 className="h-3 w-3" /> : <AudioLines className="h-3 w-3" />}
+                      {s.vocals_only ? (
+                        <Mic2 className="h-3 w-3" />
+                      ) : (
+                        <AudioLines className="h-3 w-3" />
+                      )}
                       {beatLabel(s)}
                     </span>
                     {pending && (
@@ -206,5 +219,4 @@ export function DashboardGenerationHistory({ songs }: { songs: RecentSong[] }) {
       )}
     </section>
   );
-
 }

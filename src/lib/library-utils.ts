@@ -4,8 +4,16 @@ export type Category = "language" | "genre" | "mood" | "theme";
 
 /** Most-picked languages — always shown first in every language selector. */
 export const FAVOURITE_LANGUAGES = [
-  "English", "Turkish", "Romanian", "Hindi", "Urdu", "Gujarati",
-  "Spanish", "Arabic", "Filipino", "Punjabi",
+  "English",
+  "Turkish",
+  "Romanian",
+  "Hindi",
+  "Urdu",
+  "Gujarati",
+  "Spanish",
+  "Arabic",
+  "Filipino",
+  "Punjabi",
 ];
 
 /** Puts the favourites at the top of any language list, keeping the rest in order. */
@@ -16,32 +24,107 @@ export function orderLanguages(list: string[]): string[] {
 
 export const POOLS: Record<Category, string[]> = {
   language: orderLanguages([
-    "English", "Albanian", "Spanish", "French", "German", "Italian", "Portuguese",
-    "Japanese", "Korean", "Mandarin", "Hindi", "Gujarati", "Marathi",
-    "Bengali", "Tamil", "Telugu", "Kannada", "Malayalam", "Punjabi",
-    "Urdu", "Arabic", "Swahili", "Yoruba", "Russian", "Turkish",
-    "Romanian", "Dutch", "Greek", "Filipino", "Tagalog", "Lithuanian",
+    "English",
+    "Albanian",
+    "Spanish",
+    "French",
+    "German",
+    "Italian",
+    "Portuguese",
+    "Japanese",
+    "Korean",
+    "Mandarin",
+    "Hindi",
+    "Gujarati",
+    "Marathi",
+    "Bengali",
+    "Tamil",
+    "Telugu",
+    "Kannada",
+    "Malayalam",
+    "Punjabi",
+    "Urdu",
+    "Arabic",
+    "Swahili",
+    "Yoruba",
+    "Russian",
+    "Turkish",
+    "Romanian",
+    "Dutch",
+    "Greek",
+    "Filipino",
+    "Tagalog",
+    "Lithuanian",
   ]),
 
   genre: [
-    "Hip Hop", "Rap", "Singing", "Drill", "Trap", "Drum & Bass", "Afrobeats", "R&B", "Pop", "K-Pop", "Slow Jam", "Bhangra",
-    "Nasheed", "Nursery Rhyme", "Dance", "Reggae",
-    "Rock", "Indie", "House", "Lo-fi", "Country", "Jazz", "Funk",
-    "Hyperpop", "Amapiano", "Dancehall", "Garage", "Bossa Nova",
+    "Hip Hop",
+    "Rap",
+    "Singing",
+    "Drill",
+    "Trap",
+    "Drum & Bass",
+    "Afrobeats",
+    "R&B",
+    "Pop",
+    "K-Pop",
+    "Slow Jam",
+    "Bhangra",
+    "Nasheed",
+    "Nursery Rhyme",
+    "Dance",
+    "Reggae",
+    "Rock",
+    "Indie",
+    "House",
+    "Lo-fi",
+    "Country",
+    "Jazz",
+    "Funk",
+    "Hyperpop",
+    "Amapiano",
+    "Dancehall",
+    "Garage",
+    "Bossa Nova",
   ],
   mood: [
-    "Happy & Upbeat", "Sad & Slow", "Angry & Hype", "Romantic & Chill",
-    "Hype & Floor-filler", "Chill groove", "Melancholy & Slow burn",
-    "Confident & Bouncy", "Heartbroken ballad", "Nostalgic & Mid-tempo",
-    "Playful & Bouncy", "Dark & Half-time", "Hopeful & Upbeat",
-    "Triumphant marching", "Dreamy & Slow", "Rebellious & Frenetic",
+    "Happy & Upbeat",
+    "Sad & Slow",
+    "Angry & Hype",
+    "Romantic & Chill",
+    "Hype & Floor-filler",
+    "Chill groove",
+    "Melancholy & Slow burn",
+    "Confident & Bouncy",
+    "Heartbroken ballad",
+    "Nostalgic & Mid-tempo",
+    "Playful & Bouncy",
+    "Dark & Half-time",
+    "Hopeful & Upbeat",
+    "Triumphant marching",
+    "Dreamy & Slow",
+    "Rebellious & Frenetic",
     "Bittersweet mid-tempo",
   ],
   theme: [
-    "Love", "Heartbreak", "Money", "Party", "Family", "Revenge",
-    "Friendship", "Hustle", "Loss", "Self-belief", "Summer nights",
-    "City lights", "Late-night drive", "First crush", "Coming home",
-    "Underdog story", "Toxic ex", "Glow-up",
+    "Love",
+    "Heartbreak",
+    "Money",
+    "Party",
+    "Family",
+    "Revenge",
+    "Friendship",
+    "Hustle",
+    "Loss",
+    "Self-belief",
+    "Summer nights",
+    "City lights",
+    "Late-night drive",
+    "First crush",
+    "Coming home",
+    "Underdog story",
+    "Toxic ex",
+    "Glow-up",
   ],
 };
 
@@ -66,7 +149,8 @@ export const META: Record<Category, CategoryMeta> = {
     gradient: "from-sky-500/50 via-cyan-500/25 to-transparent",
     emoji: "🌍",
     accent: "text-sky-300",
-    chipActive: "border-sky-400 bg-sky-500/25 text-sky-100 shadow-[0_0_24px_-6px_theme(colors.sky.400)]",
+    chipActive:
+      "border-sky-400 bg-sky-500/25 text-sky-100 shadow-[0_0_24px_-6px_theme(colors.sky.400)]",
     iconBg: "bg-sky-500/20 text-sky-300 border-sky-400/30",
   },
   genre: {
@@ -77,7 +161,8 @@ export const META: Record<Category, CategoryMeta> = {
     gradient: "from-fuchsia-500/50 via-purple-500/25 to-transparent",
     emoji: "🎧",
     accent: "text-fuchsia-300",
-    chipActive: "border-fuchsia-400 bg-fuchsia-500/25 text-fuchsia-100 shadow-[0_0_24px_-6px_theme(colors.fuchsia.400)]",
+    chipActive:
+      "border-fuchsia-400 bg-fuchsia-500/25 text-fuchsia-100 shadow-[0_0_24px_-6px_theme(colors.fuchsia.400)]",
     iconBg: "bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-400/30",
   },
   mood: {
@@ -88,7 +173,8 @@ export const META: Record<Category, CategoryMeta> = {
     gradient: "from-amber-500/50 via-orange-500/25 to-transparent",
     emoji: "✨",
     accent: "text-amber-300",
-    chipActive: "border-amber-400 bg-amber-500/25 text-amber-100 shadow-[0_0_24px_-6px_theme(colors.amber.400)]",
+    chipActive:
+      "border-amber-400 bg-amber-500/25 text-amber-100 shadow-[0_0_24px_-6px_theme(colors.amber.400)]",
     iconBg: "bg-amber-500/20 text-amber-300 border-amber-400/30",
   },
   theme: {
@@ -99,7 +185,8 @@ export const META: Record<Category, CategoryMeta> = {
     gradient: "from-rose-500/50 via-pink-500/25 to-transparent",
     emoji: "💭",
     accent: "text-rose-300",
-    chipActive: "border-rose-400 bg-rose-500/25 text-rose-100 shadow-[0_0_24px_-6px_theme(colors.rose.400)]",
+    chipActive:
+      "border-rose-400 bg-rose-500/25 text-rose-100 shadow-[0_0_24px_-6px_theme(colors.rose.400)]",
     iconBg: "bg-rose-500/20 text-rose-300 border-rose-400/30",
   },
 };
@@ -166,15 +253,23 @@ export function initialChips(): Record<Category, string[]> {
 // --- "Surprise me" data ---------------------------------------------------
 
 export const SURPRISE_TITLES: string[] = [
-  "Late night drive", "Sunday hangover", "Gym warm-up",
-  "Festival anthem", "Heartbreak letter", "Pirate radio cypher",
-  "Summer rooftop", "Last train home", "Glow-up season",
-  "City lights blur", "Toxic ex anthem", "Underdog story",
+  "Late night drive",
+  "Sunday hangover",
+  "Gym warm-up",
+  "Festival anthem",
+  "Heartbreak letter",
+  "Pirate radio cypher",
+  "Summer rooftop",
+  "Last train home",
+  "Glow-up season",
+  "City lights blur",
+  "Toxic ex anthem",
+  "Underdog story",
 ];
 
 export const SURPRISE_TEMPLATES: string[] = [
   "Their name: Aaliyah\nOccasion: 30th birthday\nInside joke: still can't parallel park\nWhat they love: oat-milk lattes",
-  "Their name: Marcus\nStory: ghosted me after 2 years\nCity: Manchester\nInside joke: \"I'll text you back\" — never did",
+  'Their name: Marcus\nStory: ghosted me after 2 years\nCity: Manchester\nInside joke: "I\'ll text you back" — never did',
   "Their name: Sam & Jordan\nOccasion: wedding day\nWhat they love: late-night taco runs\nInside joke: the karaoke night we don't talk about",
   "Their name: Dre\nOccasion: promotion at work\nCity: Brooklyn\nWhat they love: never missing leg day",
 ];
@@ -222,24 +317,46 @@ export function personalDetailsCheck(
 
   let status: PersonalDetailsStatus;
   let message: string;
-  if (len === 0) { status = "empty"; message = "👆 Start with their name — then add anything that makes them them"; }
-  else if (len < 20) { status = "tiny"; message = "Add a name and an occasion for best results"; }
-  else if (!hasName) { status = "warn"; message = "💡 Add a name (e.g. \"Their name: Aaliyah\")"; }
-  else if (!hasDetail) { status = "warn"; message = "💡 Add an occasion, love, or inside joke"; }
-  else if (len > max - 30) { status = "near"; message = "Almost at the limit"; }
-  else { status = "good"; message = "✓ Looking good — the more specific, the better"; }
-  if (len >= max) { status = "full"; message = "Character limit reached"; }
+  if (len === 0) {
+    status = "empty";
+    message = "👆 Start with their name — then add anything that makes them them";
+  } else if (len < 20) {
+    status = "tiny";
+    message = "Add a name and an occasion for best results";
+  } else if (!hasName) {
+    status = "warn";
+    message = '💡 Add a name (e.g. "Their name: Aaliyah")';
+  } else if (!hasDetail) {
+    status = "warn";
+    message = "💡 Add an occasion, love, or inside joke";
+  } else if (len > max - 30) {
+    status = "near";
+    message = "Almost at the limit";
+  } else {
+    status = "good";
+    message = "✓ Looking good — the more specific, the better";
+  }
+  if (len >= max) {
+    status = "full";
+    message = "Character limit reached";
+  }
 
   const tone =
-    status === "good" ? "text-emerald-400" :
-    status === "warn" || status === "tiny" ? "text-amber-400" :
-    status === "near" || status === "full" ? "text-destructive" :
-    "text-muted-foreground";
+    status === "good"
+      ? "text-emerald-400"
+      : status === "warn" || status === "tiny"
+        ? "text-amber-400"
+        : status === "near" || status === "full"
+          ? "text-destructive"
+          : "text-muted-foreground";
   const barTone =
-    status === "full" || status === "near" ? "bg-destructive" :
-    status === "good" ? "bg-emerald-500" :
-    status === "warn" || status === "tiny" ? "bg-amber-500" :
-    "bg-primary/40";
+    status === "full" || status === "near"
+      ? "bg-destructive"
+      : status === "good"
+        ? "bg-emerald-500"
+        : status === "warn" || status === "tiny"
+          ? "bg-amber-500"
+          : "bg-primary/40";
 
   return { status, message, pct, tone, barTone, length: len };
 }

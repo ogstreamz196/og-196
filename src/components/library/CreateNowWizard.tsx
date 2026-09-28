@@ -1,5 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, Check, Globe2, Lock, Mic2, Music4, Sparkles, X } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  Globe2,
+  Lock,
+  Mic2,
+  Music4,
+  Sparkles,
+  X,
+} from "lucide-react";
 import ratingPgImg from "@/assets/rating-pg.png";
 import rating18Img from "@/assets/rating-18.png";
 import {
@@ -100,7 +110,20 @@ export const LENGTH_OPTIONS = [3, 4, 5, 6, 7, 8];
 
 /** Curated styles first, then everything else we already support. */
 const STYLES: string[] = (() => {
-  const featured = ["Hip Hop", "Rap", "Singing", "Drill", "Trap", "Drum & Bass", "Pop", "K-Pop", "Slow Jam", "Bhangra", "Nasheed", "Nursery Rhyme"];
+  const featured = [
+    "Hip Hop",
+    "Rap",
+    "Singing",
+    "Drill",
+    "Trap",
+    "Drum & Bass",
+    "Pop",
+    "K-Pop",
+    "Slow Jam",
+    "Bhangra",
+    "Nasheed",
+    "Nursery Rhyme",
+  ];
   const rest = POOLS.genre.filter((g) => !featured.includes(g));
   return [...featured, ...rest];
 })();
@@ -155,7 +178,7 @@ export function CreateNowWizard({
   const changeIntensity = (next: number) => {
     const value = Math.max(0, Math.min(3, Math.round(next)));
     setIntensityLocal(value);
-    if ((value > 0) !== foulMouth) setFoulMouth.mutate(value > 0);
+    if (value > 0 !== foulMouth) setFoulMouth.mutate(value > 0);
   };
 
   const saveIntensity = (next: number) => {
@@ -368,138 +391,136 @@ export function CreateNowWizard({
             {step === 3 && "Language & vocals"}
           </DialogTitle>
           <DialogDescription className="text-sm">
-            {step === 1 &&
-              "Name it, tell us who it's for, how long it runs, and what it's about."}
+            {step === 1 && "Name it, tell us who it's for, how long it runs, and what it's about."}
             {step === 2 && "Stack as many styles as you like, then pick the voice."}
             {step === 3 &&
               "Pick the language it's sung in. Flip vocals only to sing over your own beat."}
           </DialogDescription>
-
         </DialogHeader>
 
         <div
           className="-mx-1 min-h-0 space-y-3 px-1 sm:flex-1 sm:overflow-y-auto sm:overscroll-contain"
           style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
         >
-        <div
-          key={step}
-          className="min-h-[168px] animate-in fade-in slide-in-from-right-4 py-1 duration-300"
-        >
-          {step === 1 && (
-            <div className="space-y-5">
-              <div className="space-y-3 rounded-xl border border-border bg-background/40 p-3">
-                <Label
-                  htmlFor="wiz-title"
-                  className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
-                >
-                  Title of song
-                </Label>
-                <Input
-                  id="wiz-title"
-                  autoFocus
-                  value={title}
-                  maxLength={120}
-                  onChange={(e) => setTitle(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && next()}
-                  placeholder="e.g. Late night drive"
-                  className="h-11 rounded-lg border border-border bg-background text-base font-semibold"
-                />
-              </div>
-
-              <div className="space-y-3 rounded-xl border border-border bg-background/40 p-3">
-                <Label
-                  htmlFor="wiz-subject"
-                  className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
-                >
-                  Name of person
-                </Label>
-                <Input
-                  id="wiz-subject"
-                  value={subjectName}
-                  maxLength={60}
-                  onChange={(e) => setSubjectName(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && next()}
-                  placeholder="e.g. Aaliyah, the crew, or yourself"
-                  className="h-11 rounded-lg border border-border bg-background text-base font-semibold"
-                />
-              </div>
-
-              <div className="space-y-3 rounded-xl border border-border bg-background/40 p-3">
-                <Label
-                  htmlFor="wiz-desc"
-                  className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
-                >
-                  Short description
-                </Label>
-                <Textarea
-                  id="wiz-desc"
-                  rows={4}
-                  value={description}
-                  maxLength={2000}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Vibes, memories, inside jokes, the moment you want in the lyrics…"
-                  className="min-h-[110px] resize-y rounded-lg border border-border bg-background text-sm leading-relaxed"
-                />
-                <p className="text-[11px] tabular-nums text-muted-foreground">
-                  {description.trim().length}/2000
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Length of track
-                </p>
-                <div className="flex items-center gap-3 rounded-lg border border-border bg-card/40 p-2">
-                  <button
-                    type="button"
-                    aria-label="Shorter track"
-                    disabled={targetMinutes <= MIN_LENGTH}
-                    onClick={() => setTargetMinutes((m) => Math.max(MIN_LENGTH, m - 1))}
-                    className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-border bg-background text-lg font-bold transition hover:border-primary/50 disabled:opacity-40"
+          <div
+            key={step}
+            className="min-h-[168px] animate-in fade-in slide-in-from-right-4 py-1 duration-300"
+          >
+            {step === 1 && (
+              <div className="space-y-5">
+                <div className="space-y-3 rounded-xl border border-border bg-background/40 p-3">
+                  <Label
+                    htmlFor="wiz-title"
+                    className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                   >
-                    −
-                  </button>
-                  <div className="min-w-0 flex-1 text-center">
-                    <p className="text-xl font-bold tabular-nums leading-none">
-                      {targetMinutes} min
-                    </p>
-                    <p className="mt-1 text-[11px] font-medium text-muted-foreground">
-                      {targetMinutes > MIN_LENGTH
-                        ? `+${targetMinutes - MIN_LENGTH} coin${targetMinutes - MIN_LENGTH === 1 ? "" : "s"}`
-                        : "Included"}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    aria-label="Longer track (1 extra coin)"
-                    disabled={targetMinutes >= MAX_LENGTH}
-                    onClick={() => setTargetMinutes((m) => Math.min(MAX_LENGTH, m + 1))}
-                    className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-primary/40 bg-primary/15 text-lg font-bold text-primary transition hover:bg-primary/25 disabled:opacity-40"
-                  >
-                    +
-                  </button>
+                    Title of song
+                  </Label>
+                  <Input
+                    id="wiz-title"
+                    autoFocus
+                    value={title}
+                    maxLength={120}
+                    onChange={(e) => setTitle(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && next()}
+                    placeholder="e.g. Late night drive"
+                    className="h-11 rounded-lg border border-border bg-background text-base font-semibold"
+                  />
                 </div>
-                <p className="text-[11px] text-muted-foreground">
-                  Every length is free to create. Pay only when you download the full track.
-                </p>
-              </div>
-            </div>
-          )}
 
-          {step === 2 && (
-            <div className="space-y-4">
-              <div
-                role="group"
-                aria-label="Track styles"
-                className="grid grid-cols-2 gap-2 sm:grid-cols-3"
-              >
-                {STYLES.map((s) => {
-                  const selected = styles.includes(s);
-                  return (
+                <div className="space-y-3 rounded-xl border border-border bg-background/40 p-3">
+                  <Label
+                    htmlFor="wiz-subject"
+                    className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                  >
+                    Name of person
+                  </Label>
+                  <Input
+                    id="wiz-subject"
+                    value={subjectName}
+                    maxLength={60}
+                    onChange={(e) => setSubjectName(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && next()}
+                    placeholder="e.g. Aaliyah, the crew, or yourself"
+                    className="h-11 rounded-lg border border-border bg-background text-base font-semibold"
+                  />
+                </div>
+
+                <div className="space-y-3 rounded-xl border border-border bg-background/40 p-3">
+                  <Label
+                    htmlFor="wiz-desc"
+                    className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                  >
+                    Short description
+                  </Label>
+                  <Textarea
+                    id="wiz-desc"
+                    rows={4}
+                    value={description}
+                    maxLength={2000}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Vibes, memories, inside jokes, the moment you want in the lyrics…"
+                    className="min-h-[110px] resize-y rounded-lg border border-border bg-background text-sm leading-relaxed"
+                  />
+                  <p className="text-[11px] tabular-nums text-muted-foreground">
+                    {description.trim().length}/2000
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Length of track
+                  </p>
+                  <div className="flex items-center gap-3 rounded-lg border border-border bg-card/40 p-2">
                     <button
-                      key={s}
                       type="button"
-                      aria-pressed={selected}
+                      aria-label="Shorter track"
+                      disabled={targetMinutes <= MIN_LENGTH}
+                      onClick={() => setTargetMinutes((m) => Math.max(MIN_LENGTH, m - 1))}
+                      className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-border bg-background text-lg font-bold transition hover:border-primary/50 disabled:opacity-40"
+                    >
+                      −
+                    </button>
+                    <div className="min-w-0 flex-1 text-center">
+                      <p className="text-xl font-bold tabular-nums leading-none">
+                        {targetMinutes} min
+                      </p>
+                      <p className="mt-1 text-[11px] font-medium text-muted-foreground">
+                        {targetMinutes > MIN_LENGTH
+                          ? `+${targetMinutes - MIN_LENGTH} coin${targetMinutes - MIN_LENGTH === 1 ? "" : "s"}`
+                          : "Included"}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      aria-label="Longer track (1 extra coin)"
+                      disabled={targetMinutes >= MAX_LENGTH}
+                      onClick={() => setTargetMinutes((m) => Math.min(MAX_LENGTH, m + 1))}
+                      className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-primary/40 bg-primary/15 text-lg font-bold text-primary transition hover:bg-primary/25 disabled:opacity-40"
+                    >
+                      +
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">
+                    Every length is free to create. Pay only when you download the full track.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {step === 2 && (
+              <div className="space-y-4">
+                <div
+                  role="group"
+                  aria-label="Track styles"
+                  className="grid grid-cols-2 gap-2 sm:grid-cols-3"
+                >
+                  {STYLES.map((s) => {
+                    const selected = styles.includes(s);
+                    return (
+                      <button
+                        key={s}
+                        type="button"
+                        aria-pressed={selected}
                         onClick={() => {
                           if (s === "Nasheed") {
                             setStyles(selected ? [] : ["Nasheed"]);
@@ -509,302 +530,323 @@ export function CreateNowWizard({
                             if (!selected) selectRating(false);
                             return;
                           }
-                          setStyles((prev) => toggle(prev.filter((style) => style !== "Nasheed"), s));
+                          setStyles((prev) =>
+                            toggle(
+                              prev.filter((style) => style !== "Nasheed"),
+                              s,
+                            ),
+                          );
                         }}
-                      className={cn(
-                        "min-h-11 rounded-xl border px-3 py-2.5 text-sm font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
-                        selected
-                          ? "border-primary bg-primary/20 text-foreground shadow-glow"
-                          : "border-white/10 bg-card/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
-                      )}
-                    >
-                      {s}
-                    </button>
-                  );
-                })}
-              </div>
-              <div>
-                <p className="mb-2 text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
-                  Artist voice (optional)
-                </p>
-                <div
-                  role="group"
-                  aria-label="Artist voice"
-                  className="grid grid-cols-2 gap-2 sm:grid-cols-4"
-                >
-                  {GENDERS.map((g) => {
-                    const selected = gender === g;
-                    return (
-                      <button
-                        key={g}
-                        type="button"
-                        aria-pressed={selected}
-                        onClick={() => setGender((prev) => (prev === g ? "" : g))}
                         className={cn(
-                          "min-h-11 rounded-xl border px-3 py-2 text-xs font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                          "min-h-11 rounded-xl border px-3 py-2.5 text-sm font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                           selected
                             ? "border-primary bg-primary/20 text-foreground shadow-glow"
                             : "border-white/10 bg-card/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
                         )}
                       >
-                        {g}
+                        {s}
                       </button>
                     );
                   })}
                 </div>
-              </div>
-            </div>
-          )}
-
-          {step === 3 && (
-            <div className="space-y-5">
-              {/* Voice setup: vocals-only and, when on, the beat it rides. */}
-              <div className="space-y-2">
-                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
-                  Voice setup
-                </p>
-                <button
-                  type="button"
-                  aria-pressed={vocalsOnly}
-                  onClick={() => {
-                    if (!isNasheed) setVocalsOnly((v) => !v);
-                  }}
-                  className={cn(
-                    "flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
-                    vocalsOnly
-                      ? "border-primary bg-primary/15"
-                      : "border-border bg-background hover:border-primary/40",
-                  )}
-                >
-                  <Mic2 className={cn("h-5 w-5 shrink-0", vocalsOnly ? "text-primary" : "text-muted-foreground")} />
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-sm font-bold">Vocals only</span>
-                    <span className="block text-xs text-muted-foreground">
-                      Strips every instrument — pure voice, humming at most.
-                    </span>
-                  </span>
-                  <span
-                    className={cn(
-                      "shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wider",
-                      vocalsOnly ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
-                    )}
-                  >
-                      {isNasheed ? "Required" : vocalsOnly ? "On" : "Off"}
-                  </span>
-                </button>
-
-                {isNasheed && (
-                  <p className="rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-3 py-2 text-xs font-medium text-emerald-300">
-                    Nasheed is always clean and voice-only: no instruments, beats, or foul language.
+                <div>
+                  <p className="mb-2 text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
+                    Artist voice (optional)
                   </p>
-                )}
-
-                {vocalsOnly && (
-                  <div className="space-y-3 rounded-xl border border-border bg-background/60 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Upload a beat (optional)
-                    </p>
-                    <p className="text-xs leading-relaxed text-muted-foreground">
-                      Add an MP3 or WAV and the vocals are performed over it. Skip it and you get a
-                      pure a cappella — voice and humming only, no instruments at all.
-                    </p>
-                    <input
-                      id="wiz-beat"
-                      type="file"
-                      accept="audio/*"
-                      disabled={uploadingBeat}
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        e.target.value = "";
-                        if (file) void uploadBeat(file);
-                      }}
-                      className="block w-full text-xs file:mr-3 file:min-h-10 file:rounded-lg file:border-0 file:bg-primary/20 file:px-4 file:py-2 file:text-xs file:font-bold file:uppercase file:tracking-wide file:text-primary"
-                    />
-                    {uploadingBeat && (
-                      <p className="text-xs font-semibold text-primary" aria-live="polite">
-                        Uploading beat…
-                      </p>
-                    )}
-                    {beatPath && !uploadingBeat && (
-                      <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
-                        <Music4 className="h-4 w-4 text-primary" />
-                        <span className="min-w-0 flex-1 truncate">{beatName}</span>
-                        <Button
+                  <div
+                    role="group"
+                    aria-label="Artist voice"
+                    className="grid grid-cols-2 gap-2 sm:grid-cols-4"
+                  >
+                    {GENDERS.map((g) => {
+                      const selected = gender === g;
+                      return (
+                        <button
+                          key={g}
                           type="button"
-                          size="sm"
-                          variant="ghost"
-                          className="h-8 text-muted-foreground hover:text-destructive"
-                          onClick={() => {
-                            setBeatPath("");
-                            setBeatName("");
-                          }}
+                          aria-pressed={selected}
+                          onClick={() => setGender((prev) => (prev === g ? "" : g))}
+                          className={cn(
+                            "min-h-11 rounded-xl border px-3 py-2 text-xs font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                            selected
+                              ? "border-primary bg-primary/20 text-foreground shadow-glow"
+                              : "border-white/10 bg-card/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
+                          )}
                         >
-                          Remove
-                        </Button>
-                      </div>
-                    )}
+                          {g}
+                        </button>
+                      );
+                    })}
                   </div>
-                )}
-              </div>
-
-              {/* Content rating — replaces the old foul mouth toggle. */}
-              <div className="space-y-2">
-                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
-                  Lyrics rating
-                </p>
-                <div role="group" aria-label="Lyrics rating" className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    aria-pressed={!foulMouth}
-                    disabled={ratingSaving}
-                    onClick={() => selectRating(false)}
-                    className={cn(
-                      "flex flex-col items-center gap-1.5 rounded-xl border px-3 py-3 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-60",
-                      !foulMouth
-                        ? "border-emerald-400 bg-emerald-400/15"
-                        : "border-border bg-background hover:border-emerald-400/40",
-                    )}
-                  >
-                    <img
-                      src={ratingPgImg}
-                      alt="PG — Parental Guidance rating certificate"
-                      loading="lazy"
-                      width={56}
-                      height={56}
-                      className={cn(
-                        "h-14 w-14 object-contain transition",
-                        !foulMouth ? "opacity-100" : "opacity-50 saturate-50",
-                      )}
-                    />
-                    <span className="text-sm font-bold">PG rated</span>
-                    <span className="text-[11px] text-muted-foreground">Clean, family safe</span>
-                  </button>
-                  <button
-                    type="button"
-                    aria-pressed={foulMouth}
-                    disabled={ratingSaving || isNasheed}
-                    onClick={() => selectRating(true)}
-                    className={cn(
-                      "flex flex-col items-center gap-1.5 rounded-xl border px-3 py-3 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-60",
-                      foulMouth
-                        ? "border-destructive bg-destructive/20"
-                        : "border-border bg-background hover:border-destructive/40",
-                    )}
-                  >
-                    <img
-                      src={rating18Img}
-                      alt="18 — adults only rating certificate"
-                      loading="lazy"
-                      width={56}
-                      height={56}
-                      className={cn(
-                        "h-14 w-14 object-contain transition",
-                        foulMouth ? "opacity-100" : "opacity-50 saturate-50",
-                      )}
-                    />
-                    <span className="text-sm font-bold">18+ rated</span>
-                    <span className="text-[11px] text-muted-foreground">Explicit, no filter</span>
-                  </button>
                 </div>
-
-                {!isNasheed && (
-                  <div className="space-y-2 rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-3">
-                    <div className="flex items-baseline justify-between gap-2">
-                      <label
-                        htmlFor="foul-intensity"
-                        className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground"
-                      >
-                        Swearing intensity
-                      </label>
-                      <span className="text-[11px] font-bold text-destructive">
-                        {INTENSITY_LABELS[intensity]}
-                      </span>
-                    </div>
-                    <Slider
-                      id="foul-intensity"
-                      aria-label="Swearing intensity"
-                      min={0}
-                      max={3}
-                      step={1}
-                      value={[intensity]}
-                      onValueChange={(v) => changeIntensity(v[0] ?? 3)}
-                      onValueCommit={(v) => saveIntensity(v[0] ?? 3)}
-                    />
-                    <div className="flex justify-between text-[10px] text-muted-foreground">
-                      <span>Clean</span>
-                      <span>Mild</span>
-                      <span>Strong</span>
-                      <span>Savage</span>
-                    </div>
-                  </div>
-                )}
               </div>
+            )}
 
-
-              <div className="space-y-2">
-                <div className="flex items-baseline justify-between gap-2">
+            {step === 3 && (
+              <div className="space-y-5">
+                {/* Voice setup: vocals-only and, when on, the beat it rides. */}
+                <div className="space-y-2">
                   <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
-                    Language
+                    Voice setup
                   </p>
-                  <p className="text-[11px] font-semibold text-muted-foreground">
-                    {languages.length ? `${languages.length} selected` : "English by default"}
-                  </p>
+                  <button
+                    type="button"
+                    aria-pressed={vocalsOnly}
+                    onClick={() => {
+                      if (!isNasheed) setVocalsOnly((v) => !v);
+                    }}
+                    className={cn(
+                      "flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                      vocalsOnly
+                        ? "border-primary bg-primary/15"
+                        : "border-border bg-background hover:border-primary/40",
+                    )}
+                  >
+                    <Mic2
+                      className={cn(
+                        "h-5 w-5 shrink-0",
+                        vocalsOnly ? "text-primary" : "text-muted-foreground",
+                      )}
+                    />
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm font-bold">Vocals only</span>
+                      <span className="block text-xs text-muted-foreground">
+                        Strips every instrument — pure voice, humming at most.
+                      </span>
+                    </span>
+                    <span
+                      className={cn(
+                        "shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wider",
+                        vocalsOnly
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground",
+                      )}
+                    >
+                      {isNasheed ? "Required" : vocalsOnly ? "On" : "Off"}
+                    </span>
+                  </button>
+
+                  {isNasheed && (
+                    <p className="rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-3 py-2 text-xs font-medium text-emerald-300">
+                      Nasheed is always clean and voice-only: no instruments, beats, or foul
+                      language.
+                    </p>
+                  )}
+
+                  {vocalsOnly && (
+                    <div className="space-y-3 rounded-xl border border-border bg-background/60 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        Upload a beat (optional)
+                      </p>
+                      <p className="text-xs leading-relaxed text-muted-foreground">
+                        Add an MP3 or WAV and the vocals are performed over it. Skip it and you get
+                        a pure a cappella — voice and humming only, no instruments at all.
+                      </p>
+                      <input
+                        id="wiz-beat"
+                        type="file"
+                        accept="audio/*"
+                        disabled={uploadingBeat}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          e.target.value = "";
+                          if (file) void uploadBeat(file);
+                        }}
+                        className="block w-full text-xs file:mr-3 file:min-h-10 file:rounded-lg file:border-0 file:bg-primary/20 file:px-4 file:py-2 file:text-xs file:font-bold file:uppercase file:tracking-wide file:text-primary"
+                      />
+                      {uploadingBeat && (
+                        <p className="text-xs font-semibold text-primary" aria-live="polite">
+                          Uploading beat…
+                        </p>
+                      )}
+                      {beatPath && !uploadingBeat && (
+                        <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
+                          <Music4 className="h-4 w-4 text-primary" />
+                          <span className="min-w-0 flex-1 truncate">{beatName}</span>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 text-muted-foreground hover:text-destructive"
+                            onClick={() => {
+                              setBeatPath("");
+                              setBeatName("");
+                            }}
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <div
-                  role="group"
-                  aria-label="Languages"
-                  style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
-                  className="grid grid-cols-2 gap-2 rounded-xl border border-border bg-background/40 p-2 sm:max-h-[200px] sm:grid-cols-3 sm:overflow-y-auto sm:overscroll-contain sm:pr-1"
-                >
-                  {POOLS.language.map((l) => {
-                    const selected = languages.includes(l);
-                    return (
-                      <button
-                        key={l}
-                        type="button"
-                        aria-pressed={selected}
-                        onClick={() => setLanguages((prev) => toggle(prev, l))}
+
+                {/* Content rating — replaces the old foul mouth toggle. */}
+                <div className="space-y-2">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
+                    Lyrics rating
+                  </p>
+                  <div role="group" aria-label="Lyrics rating" className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      aria-pressed={!foulMouth}
+                      disabled={ratingSaving}
+                      onClick={() => selectRating(false)}
+                      className={cn(
+                        "flex flex-col items-center gap-1.5 rounded-xl border px-3 py-3 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-60",
+                        !foulMouth
+                          ? "border-emerald-400 bg-emerald-400/15"
+                          : "border-border bg-background hover:border-emerald-400/40",
+                      )}
+                    >
+                      <img
+                        src={ratingPgImg}
+                        alt="PG — Parental Guidance rating certificate"
+                        loading="lazy"
+                        width={56}
+                        height={56}
                         className={cn(
-                          "min-h-10 rounded-lg border px-3 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
-                          selected
-                            ? "border-primary bg-primary/20 text-foreground"
-                            : "border-border bg-card/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
+                          "h-14 w-14 object-contain transition",
+                          !foulMouth ? "opacity-100" : "opacity-50 saturate-50",
                         )}
-                      >
-                        {l}
-                      </button>
-                    );
-                  })}
+                      />
+                      <span className="text-sm font-bold">PG rated</span>
+                      <span className="text-[11px] text-muted-foreground">Clean, family safe</span>
+                    </button>
+                    <button
+                      type="button"
+                      aria-pressed={foulMouth}
+                      disabled={ratingSaving || isNasheed}
+                      onClick={() => selectRating(true)}
+                      className={cn(
+                        "flex flex-col items-center gap-1.5 rounded-xl border px-3 py-3 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-60",
+                        foulMouth
+                          ? "border-destructive bg-destructive/20"
+                          : "border-border bg-background hover:border-destructive/40",
+                      )}
+                    >
+                      <img
+                        src={rating18Img}
+                        alt="18 — adults only rating certificate"
+                        loading="lazy"
+                        width={56}
+                        height={56}
+                        className={cn(
+                          "h-14 w-14 object-contain transition",
+                          foulMouth ? "opacity-100" : "opacity-50 saturate-50",
+                        )}
+                      />
+                      <span className="text-sm font-bold">18+ rated</span>
+                      <span className="text-[11px] text-muted-foreground">Explicit, no filter</span>
+                    </button>
+                  </div>
+
+                  {!isNasheed && (
+                    <div className="space-y-2 rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-3">
+                      <div className="flex items-baseline justify-between gap-2">
+                        <label
+                          htmlFor="foul-intensity"
+                          className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground"
+                        >
+                          Swearing intensity
+                        </label>
+                        <span className="text-[11px] font-bold text-destructive">
+                          {INTENSITY_LABELS[intensity]}
+                        </span>
+                      </div>
+                      <Slider
+                        id="foul-intensity"
+                        aria-label="Swearing intensity"
+                        min={0}
+                        max={3}
+                        step={1}
+                        value={[intensity]}
+                        onValueChange={(v) => changeIntensity(v[0] ?? 3)}
+                        onValueCommit={(v) => saveIntensity(v[0] ?? 3)}
+                      />
+                      <div className="flex justify-between text-[10px] text-muted-foreground">
+                        <span>Clean</span>
+                        <span>Mild</span>
+                        <span>Strong</span>
+                        <span>Savage</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <p className="text-[11px] text-muted-foreground">
-                  It's sung in exactly what you pick — nothing picked means English.
-                </p>
+
+                <div className="space-y-2">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
+                      Language
+                    </p>
+                    <p className="text-[11px] font-semibold text-muted-foreground">
+                      {languages.length ? `${languages.length} selected` : "English by default"}
+                    </p>
+                  </div>
+                  <div
+                    role="group"
+                    aria-label="Languages"
+                    style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
+                    className="grid grid-cols-2 gap-2 rounded-xl border border-border bg-background/40 p-2 sm:max-h-[200px] sm:grid-cols-3 sm:overflow-y-auto sm:overscroll-contain sm:pr-1"
+                  >
+                    {POOLS.language.map((l) => {
+                      const selected = languages.includes(l);
+                      return (
+                        <button
+                          key={l}
+                          type="button"
+                          aria-pressed={selected}
+                          onClick={() => setLanguages((prev) => toggle(prev, l))}
+                          className={cn(
+                            "min-h-10 rounded-lg border px-3 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                            selected
+                              ? "border-primary bg-primary/20 text-foreground"
+                              : "border-border bg-card/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
+                          )}
+                        >
+                          {l}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">
+                    It's sung in exactly what you pick — nothing picked means English.
+                  </p>
+                </div>
+
+                {/* Final review so nothing is a surprise before creating. */}
+                <div className="space-y-1 rounded-xl border border-border bg-background/60 p-3 text-xs">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
+                    Review
+                  </p>
+                  <p className="font-semibold text-foreground">{title.trim() || "Untitled"}</p>
+                  <p className="text-muted-foreground">
+                    {styles.join(", ") || "No style"} · {targetMinutes} min ·{" "}
+                    {(languages.length ? languages : ["English"]).join(", ")}
+                  </p>
+                  <p className="text-muted-foreground">
+                    {gender || "Any voice"} ·{" "}
+                    {isNasheed
+                      ? "Nasheed, voice-only"
+                      : vocalsOnly
+                        ? beatPath
+                          ? "Vocals over your beat"
+                          : "A cappella, no instruments"
+                        : "Full production"}{" "}
+                    · {isNasheed ? "Strictly clean" : foulMouth ? "18+" : "PG"}
+                  </p>
+                  <p className="flex items-center gap-1.5 font-semibold text-foreground">
+                    {isPublic ? (
+                      <Globe2 className="h-3.5 w-3.5 text-primary" />
+                    ) : (
+                      <Lock className="h-3.5 w-3.5 text-primary" />
+                    )}
+                    {isPublic ? "Global player" : "Private library"}
+                  </p>
+                </div>
               </div>
-
-              {/* Final review so nothing is a surprise before creating. */}
-              <div className="space-y-1 rounded-xl border border-border bg-background/60 p-3 text-xs">
-                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
-                  Review
-                </p>
-                <p className="font-semibold text-foreground">{title.trim() || "Untitled"}</p>
-                <p className="text-muted-foreground">
-                  {styles.join(", ") || "No style"} · {targetMinutes} min ·{" "}
-                  {(languages.length ? languages : ["English"]).join(", ")}
-                </p>
-                <p className="text-muted-foreground">
-                  {gender || "Any voice"} · {isNasheed ? "Nasheed, voice-only" : vocalsOnly ? (beatPath ? "Vocals over your beat" : "A cappella, no instruments") : "Full production"} ·{" "}
-                  {isNasheed ? "Strictly clean" : foulMouth ? "18+" : "PG"}
-                </p>
-                <p className="flex items-center gap-1.5 font-semibold text-foreground">
-                  {isPublic ? <Globe2 className="h-3.5 w-3.5 text-primary" /> : <Lock className="h-3.5 w-3.5 text-primary" />}
-                  {isPublic ? "Global player" : "Private library"}
-                </p>
-              </div>
-            </div>
-          )}
-
-
-        </div>
+            )}
+          </div>
 
           {hint && (
             <p className="text-xs font-medium text-muted-foreground" aria-live="polite">
@@ -864,7 +906,11 @@ export function CreateNowWizard({
                 type="button"
                 variant="outline"
                 aria-pressed={isPublic}
-                aria-label={isPublic ? "Global player. Tap to make private" : "Private library. Tap to make global"}
+                aria-label={
+                  isPublic
+                    ? "Global player. Tap to make private"
+                    : "Private library. Tap to make global"
+                }
                 onClick={() => setIsPublic((value) => !value)}
                 className={cn(
                   "min-h-12 min-w-0 flex-col gap-0.5 px-2",

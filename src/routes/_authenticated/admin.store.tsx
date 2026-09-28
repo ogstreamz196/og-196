@@ -23,13 +23,26 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
 import {
@@ -42,7 +55,6 @@ import {
   type StoreItem,
   type StoreCategory,
 } from "@/lib/store.functions";
-
 
 export const Route = createFileRoute("/_authenticated/admin/store")({
   component: AdminStorePage,
@@ -190,7 +202,6 @@ function AdminStorePage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-
   if (isLoading) {
     return (
       <DashboardShell title="Store admin">
@@ -249,19 +260,23 @@ function AdminStorePage() {
     reorderCatsMut.mutate(next.map((x) => x.id));
   }
 
-
-
   return (
     <DashboardShell title="Store admin">
       <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <Link to="/admin" className="mb-2 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
+            <Link
+              to="/admin"
+              className="mb-2 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+            >
               <ArrowLeft className="h-3 w-3" /> Boss Console
             </Link>
-            <FlameHeading as="h1" size="xl">Store Admin</FlameHeading>
+            <FlameHeading as="h1" size="xl">
+              Store Admin
+            </FlameHeading>
             <p className="mt-1 text-sm text-muted-foreground">
-              Add unlimited items across coins, subscriptions, and random loot. Each item is checkout-ready via Google Play.
+              Add unlimited items across coins, subscriptions, and random loot. Each item is
+              checkout-ready via Google Play.
             </p>
           </div>
           <div className="flex gap-2">
@@ -269,11 +284,12 @@ function AdminStorePage() {
               <Plus className="mr-1 h-4 w-4" /> Category
             </Button>
             <Button asChild size="sm" variant="outline">
-              <Link to="/store"><ShoppingBag className="mr-1 h-4 w-4" /> View storefront</Link>
+              <Link to="/store">
+                <ShoppingBag className="mr-1 h-4 w-4" /> View storefront
+              </Link>
             </Button>
           </div>
         </div>
-
 
         {categories.map((cat, catIdx) => {
           const catItems = items.filter((i) => i.category_id === cat.id);
@@ -285,16 +301,34 @@ function AdminStorePage() {
               <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <div className="flex flex-col">
-                    <Button size="icon" variant="ghost" className="h-6 w-6" disabled={catIdx === 0} onClick={() => moveCategory(catIdx, -1)} aria-label="Move category up">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-6 w-6"
+                      disabled={catIdx === 0}
+                      onClick={() => moveCategory(catIdx, -1)}
+                      aria-label="Move category up"
+                    >
                       <ArrowUp className="h-3 w-3" />
                     </Button>
-                    <Button size="icon" variant="ghost" className="h-6 w-6" disabled={catIdx === categories.length - 1} onClick={() => moveCategory(catIdx, 1)} aria-label="Move category down">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-6 w-6"
+                      disabled={catIdx === categories.length - 1}
+                      onClick={() => moveCategory(catIdx, 1)}
+                      aria-label="Move category down"
+                    >
                       <ArrowDown className="h-3 w-3" />
                     </Button>
                   </div>
                   <div>
-                    <h2 className="font-display text-lg font-bold uppercase tracking-wider">{cat.label}</h2>
-                    {cat.description && <p className="text-xs text-muted-foreground">{cat.description}</p>}
+                    <h2 className="font-display text-lg font-bold uppercase tracking-wider">
+                      {cat.label}
+                    </h2>
+                    {cat.description && (
+                      <p className="text-xs text-muted-foreground">{cat.description}</p>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -304,7 +338,11 @@ function AdminStorePage() {
                     onClick={() => toggleCatMut.mutate(cat)}
                     disabled={toggleCatMut.isPending}
                   >
-                    {cat.active ? <EyeOff className="mr-1 h-4 w-4" /> : <Eye className="mr-1 h-4 w-4" />}
+                    {cat.active ? (
+                      <EyeOff className="mr-1 h-4 w-4" />
+                    ) : (
+                      <Eye className="mr-1 h-4 w-4" />
+                    )}
                     {cat.active ? "Hide" : "Show"}
                   </Button>
                   <Button size="sm" onClick={() => openNew(cat.id)} className="bg-gradient-brand">
@@ -340,9 +378,13 @@ function AdminStorePage() {
                             <div className="text-xs text-muted-foreground">{it.slug}</div>
                           </TableCell>
                           <TableCell className="text-sm">
-                            {it.coin_price != null ? `${it.coin_price} OG Coins` : `${(it.price_cents / 100).toFixed(2)} ${it.currency.toUpperCase()}`}
+                            {it.coin_price != null
+                              ? `${it.coin_price} OG Coins`
+                              : `${(it.price_cents / 100).toFixed(2)} ${it.currency.toUpperCase()}`}
                             {it.recurring_interval && (
-                              <span className="ml-1 text-xs text-muted-foreground">/ {it.recurring_interval}</span>
+                              <span className="ml-1 text-xs text-muted-foreground">
+                                / {it.recurring_interval}
+                              </span>
                             )}
                           </TableCell>
                           <TableCell className="text-xs uppercase">{it.rarity}</TableCell>
@@ -352,9 +394,13 @@ function AdminStorePage() {
                           <TableCell className="text-xs">{it.coin_reward ?? "—"}</TableCell>
                           <TableCell className="text-xs">{it.perk_slug ?? "—"}</TableCell>
                           <TableCell>
-                            <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
-                              it.active ? "bg-emerald-500/20 text-emerald-300" : "bg-slate-500/20 text-slate-300"
-                            }`}>
+                            <span
+                              className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+                                it.active
+                                  ? "bg-emerald-500/20 text-emerald-300"
+                                  : "bg-slate-500/20 text-slate-300"
+                              }`}
+                            >
                               {it.active ? "On" : "Off"}
                             </span>
                           </TableCell>
@@ -374,13 +420,20 @@ function AdminStorePage() {
                                 size="icon"
                                 variant="ghost"
                                 className="h-7 w-7"
-                                disabled={itIdx === catItems.length - 1 || reorderItemsMut.isPending}
+                                disabled={
+                                  itIdx === catItems.length - 1 || reorderItemsMut.isPending
+                                }
                                 onClick={() => moveItem(catItems, itIdx, 1)}
                                 aria-label="Move item down"
                               >
                                 <ArrowDown className="h-3.5 w-3.5" />
                               </Button>
-                              <Button size="sm" variant="ghost" onClick={() => openEdit(it)} aria-label="Edit item">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => openEdit(it)}
+                                aria-label="Edit item"
+                              >
                                 <Pencil className="h-4 w-4" />
                               </Button>
                               <Button
@@ -388,9 +441,12 @@ function AdminStorePage() {
                                 variant="ghost"
                                 onClick={() => {
                                   if (it.active) {
-                                    if (confirm(`Hide "${it.name}" from the storefront?`)) delMut.mutate(it.id);
+                                    if (confirm(`Hide "${it.name}" from the storefront?`))
+                                      delMut.mutate(it.id);
                                   } else {
-                                    toast.info("Item is already hidden. Edit it and toggle Active to bring it back.");
+                                    toast.info(
+                                      "Item is already hidden. Edit it and toggle Active to bring it back.",
+                                    );
                                   }
                                 }}
                                 aria-label="Archive item"
@@ -401,7 +457,6 @@ function AdminStorePage() {
                           </TableCell>
                         </TableRow>
                       ))}
-
                     </TableBody>
                   </Table>
                 </div>
@@ -432,53 +487,98 @@ function AdminStorePage() {
                   value={form.category_id}
                   onValueChange={(v) => setForm({ ...form, category_id: v })}
                 >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     {categories.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>{c.label}</SelectItem>
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.label}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="sm:col-span-2">
                 <Label>Name</Label>
-                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+                <Input
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                />
               </div>
               <div className="sm:col-span-2">
                 <Label>Description</Label>
-                <Textarea rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+                <Textarea
+                  rows={2}
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                />
               </div>
               <div className="sm:col-span-2">
                 <Label>Image URL</Label>
-                <Input value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="https://…" />
+                <Input
+                  value={form.image_url}
+                  onChange={(e) => setForm({ ...form, image_url: e.target.value })}
+                  placeholder="https://…"
+                />
               </div>
               <div>
                 <Label>Slug (unique)</Label>
-                <Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value.toLowerCase() })} />
+                <Input
+                  value={form.slug}
+                  onChange={(e) => setForm({ ...form, slug: e.target.value.toLowerCase() })}
+                />
               </div>
               <div>
                 <Label>Sort order</Label>
-                <Input type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: e.target.value })} />
+                <Input
+                  type="number"
+                  value={form.sort_order}
+                  onChange={(e) => setForm({ ...form, sort_order: e.target.value })}
+                />
               </div>
               <div>
                 <Label>Price (major units)</Label>
-                <Input type="number" step="0.01" value={form.price_amount} onChange={(e) => setForm({ ...form, price_amount: e.target.value })} />
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={form.price_amount}
+                  onChange={(e) => setForm({ ...form, price_amount: e.target.value })}
+                />
               </div>
               <div>
                 <Label>Currency</Label>
-                <Input value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value.toLowerCase() })} maxLength={3} />
+                <Input
+                  value={form.currency}
+                  onChange={(e) => setForm({ ...form, currency: e.target.value.toLowerCase() })}
+                  maxLength={3}
+                />
               </div>
               <div>
                 <Label>OG Coin price (optional)</Label>
-                <Input type="number" min="1" step="1" value={form.coin_price} onChange={(e) => setForm({ ...form, coin_price: e.target.value })} placeholder="Leave blank for card checkout" />
+                <Input
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={form.coin_price}
+                  onChange={(e) => setForm({ ...form, coin_price: e.target.value })}
+                  placeholder="Leave blank for card checkout"
+                />
               </div>
               <div>
                 <Label>Recurring</Label>
                 <Select
                   value={form.recurring_interval || "one_time"}
-                  onValueChange={(v) => setForm({ ...form, recurring_interval: v === "one_time" ? "" : (v as "month" | "year") })}
+                  onValueChange={(v) =>
+                    setForm({
+                      ...form,
+                      recurring_interval: v === "one_time" ? "" : (v as "month" | "year"),
+                    })
+                  }
                 >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="one_time">One-time</SelectItem>
                     <SelectItem value="month">Monthly</SelectItem>
@@ -492,7 +592,9 @@ function AdminStorePage() {
                   value={form.rarity}
                   onValueChange={(v) => setForm({ ...form, rarity: v as FormState["rarity"] })}
                 >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="common">Common</SelectItem>
                     <SelectItem value="rare">Rare</SelectItem>
@@ -503,24 +605,40 @@ function AdminStorePage() {
               </div>
               <div>
                 <Label>Stock (blank = ∞)</Label>
-                <Input type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} />
+                <Input
+                  type="number"
+                  value={form.stock}
+                  onChange={(e) => setForm({ ...form, stock: e.target.value })}
+                />
               </div>
               <div>
                 <Label>Coin reward (optional)</Label>
-                <Input type="number" value={form.coin_reward} onChange={(e) => setForm({ ...form, coin_reward: e.target.value })} />
+                <Input
+                  type="number"
+                  value={form.coin_reward}
+                  onChange={(e) => setForm({ ...form, coin_reward: e.target.value })}
+                />
               </div>
               <div>
                 <Label>Perk slug (e.g. role:vip)</Label>
-                <Input value={form.perk_slug} onChange={(e) => setForm({ ...form, perk_slug: e.target.value })} />
+                <Input
+                  value={form.perk_slug}
+                  onChange={(e) => setForm({ ...form, perk_slug: e.target.value })}
+                />
               </div>
               <div className="flex items-center gap-3 sm:col-span-2">
-                <Switch checked={form.active} onCheckedChange={(v) => setForm({ ...form, active: v })} />
+                <Switch
+                  checked={form.active}
+                  onCheckedChange={(v) => setForm({ ...form, active: v })}
+                />
                 <Label className="!m-0">Active (visible in store)</Label>
               </div>
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setForm(null)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setForm(null)}>
+              Cancel
+            </Button>
             <Button
               onClick={() => form && saveMut.mutate(form)}
               disabled={saveMut.isPending}
@@ -542,20 +660,36 @@ function AdminStorePage() {
           <div className="grid gap-3">
             <div>
               <Label>Label</Label>
-              <Input value={catForm.label} onChange={(e) => setCatForm({ ...catForm, label: e.target.value })} />
+              <Input
+                value={catForm.label}
+                onChange={(e) => setCatForm({ ...catForm, label: e.target.value })}
+              />
             </div>
             <div>
               <Label>Slug</Label>
-              <Input value={catForm.slug} onChange={(e) => setCatForm({ ...catForm, slug: e.target.value.toLowerCase() })} />
+              <Input
+                value={catForm.slug}
+                onChange={(e) => setCatForm({ ...catForm, slug: e.target.value.toLowerCase() })}
+              />
             </div>
             <div>
               <Label>Description</Label>
-              <Textarea rows={2} value={catForm.description} onChange={(e) => setCatForm({ ...catForm, description: e.target.value })} />
+              <Textarea
+                rows={2}
+                value={catForm.description}
+                onChange={(e) => setCatForm({ ...catForm, description: e.target.value })}
+              />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCatDialog(false)}>Cancel</Button>
-            <Button onClick={() => catMut.mutate(catForm)} disabled={catMut.isPending} className="bg-gradient-brand">
+            <Button variant="outline" onClick={() => setCatDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => catMut.mutate(catForm)}
+              disabled={catMut.isPending}
+              className="bg-gradient-brand"
+            >
               {catMut.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
               Add category
             </Button>

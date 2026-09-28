@@ -1,7 +1,21 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Coins, Loader2, Receipt, ExternalLink, Crown, Undo2, RefreshCw, Bell, BellOff, Clock, CreditCard, Landmark, Smartphone } from "lucide-react";
+import {
+  Coins,
+  Loader2,
+  Receipt,
+  ExternalLink,
+  Crown,
+  Undo2,
+  RefreshCw,
+  Bell,
+  BellOff,
+  Clock,
+  CreditCard,
+  Landmark,
+  Smartphone,
+} from "lucide-react";
 
 import { toast } from "sonner";
 import {
@@ -16,9 +30,12 @@ import {
 import { getStripeEnvironment } from "@/lib/stripe";
 import { useRole } from "@/hooks/use-role";
 
-
 function formatDate(iso: string) {
-  try { return new Date(iso).toLocaleString(); } catch { return iso; }
+  try {
+    return new Date(iso).toLocaleString();
+  } catch {
+    return iso;
+  }
 }
 
 function formatMoney(amount: number, currency: string) {
@@ -41,8 +58,10 @@ function parseStripeRef(ref: string | null): { env: "sandbox" | "live"; sessionI
 
 function refundStatusFor(d: StripePurchaseDetails | null | undefined) {
   if (!d) return null;
-  if (d.refunded) return { label: "Refunded", tone: "border-destructive/30 bg-destructive/15 text-destructive" };
-  if (d.partiallyRefunded) return { label: "Partial refund", tone: "border-amber-500/30 bg-amber-500/15 text-amber-500" };
+  if (d.refunded)
+    return { label: "Refunded", tone: "border-destructive/30 bg-destructive/15 text-destructive" };
+  if (d.partiallyRefunded)
+    return { label: "Partial refund", tone: "border-amber-500/30 bg-amber-500/15 text-amber-500" };
   return { label: "Paid", tone: "border-emerald-500/30 bg-emerald-500/15 text-emerald-500" };
 }
 
@@ -60,7 +79,10 @@ function ReceiptLink({ row }: { row: PurchaseRow }) {
       // client env produces "No such checkout.session" when envs differ.
       const env = stripe!.env;
       const res = await fetchReceipt({ data: { sessionId: stripe!.sessionId, environment: env } });
-      if ("error" in res) { toast.error(res.error); return; }
+      if ("error" in res) {
+        toast.error(res.error);
+        return;
+      }
       window.open(res.url, "_blank", "noopener,noreferrer");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Couldn't fetch receipt");
@@ -76,7 +98,11 @@ function ReceiptLink({ row }: { row: PurchaseRow }) {
       disabled={loading}
       className="inline-flex items-center gap-1 text-xs font-medium text-primary underline-offset-2 hover:underline disabled:opacity-50"
     >
-      {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <ExternalLink className="h-3 w-3" />}
+      {loading ? (
+        <Loader2 className="h-3 w-3 animate-spin" />
+      ) : (
+        <ExternalLink className="h-3 w-3" />
+      )}
       Receipt
     </button>
   );
@@ -100,7 +126,10 @@ function RefundButton({ row }: { row: PurchaseRow }) {
     try {
       const env = stripe!.env;
       const res = await refundFn({ data: { sessionId: stripe!.sessionId, environment: env } });
-      if ("error" in res) { toast.error(res.error); return; }
+      if ("error" in res) {
+        toast.error(res.error);
+        return;
+      }
       if (res.status === "already_refunded") {
         toast.info(`Already refunded · ${formatMoney(res.refundedAmount, res.currency)}`);
       } else {
@@ -178,7 +207,11 @@ function RefundButton({ row }: { row: PurchaseRow }) {
                 disabled={loading}
                 className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-full border border-amber-400/40 bg-gradient-to-r from-amber-500 to-yellow-500 px-4 py-2 text-sm font-bold text-black shadow-[0_0_20px_-4px_theme(colors.amber.400)] hover:brightness-110 disabled:opacity-50"
               >
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Undo2 className="h-4 w-4" />}
+                {loading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Undo2 className="h-4 w-4" />
+                )}
                 Refund now
               </button>
             </div>
@@ -201,15 +234,24 @@ const RANGE_OPTIONS: { key: RangeKey; label: string; days: number | null }[] = [
 function refundToneFor(status: string) {
   switch (status) {
     case "succeeded":
-      return { label: "Refunded", tone: "border-emerald-500/30 bg-emerald-500/15 text-emerald-500" };
+      return {
+        label: "Refunded",
+        tone: "border-emerald-500/30 bg-emerald-500/15 text-emerald-500",
+      };
     case "pending":
       return { label: "Pending", tone: "border-amber-500/30 bg-amber-500/15 text-amber-500" };
     case "failed":
       return { label: "Failed", tone: "border-destructive/30 bg-destructive/15 text-destructive" };
     case "canceled":
-      return { label: "Canceled", tone: "border-muted-foreground/30 bg-muted/40 text-muted-foreground" };
+      return {
+        label: "Canceled",
+        tone: "border-muted-foreground/30 bg-muted/40 text-muted-foreground",
+      };
     case "requires_action":
-      return { label: "Action required", tone: "border-amber-500/30 bg-amber-500/15 text-amber-500" };
+      return {
+        label: "Action required",
+        tone: "border-amber-500/30 bg-amber-500/15 text-amber-500",
+      };
     default:
       return { label: status, tone: "border-border bg-muted/30 text-muted-foreground" };
   }
@@ -234,7 +276,9 @@ function RefundDetailsDrawer({ refund, onClose }: { refund: RefundRow; onClose: 
             <Undo2 className="h-5 w-5 text-primary" />
             <h4 className="text-lg font-bold">Refund details</h4>
           </div>
-          <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${tone.tone}`}>
+          <span
+            className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${tone.tone}`}
+          >
             {tone.label}
           </span>
         </div>
@@ -242,7 +286,9 @@ function RefundDetailsDrawer({ refund, onClose }: { refund: RefundRow; onClose: 
         <dl className="mt-4 space-y-3 text-sm">
           <div className="flex items-center justify-between gap-3">
             <dt className="text-muted-foreground">Amount</dt>
-            <dd className="font-bold tabular-nums">{formatMoney(refund.amount, refund.currency)}</dd>
+            <dd className="font-bold tabular-nums">
+              {formatMoney(refund.amount, refund.currency)}
+            </dd>
           </div>
           <div className="flex items-center justify-between gap-3">
             <dt className="text-muted-foreground">Currency</dt>
@@ -273,12 +319,16 @@ function RefundDetailsDrawer({ refund, onClose }: { refund: RefundRow; onClose: 
             </div>
           )}
           <div className="rounded-xl border border-border bg-background/50 p-3">
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Refund ID</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Refund ID
+            </p>
             <p className="mt-0.5 break-all font-mono text-xs">{refund.stripe_refund_id}</p>
           </div>
           {refund.stripe_session_id && (
             <div className="rounded-xl border border-border bg-background/50 p-3">
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Checkout session</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                Checkout session
+              </p>
               <p className="mt-0.5 break-all font-mono text-xs">{refund.stripe_session_id}</p>
             </div>
           )}
@@ -328,7 +378,8 @@ function SettlementTimeline() {
         <h4 className="text-sm font-bold">Estimated time to refund</h4>
       </div>
       <p className="mt-1 text-xs text-muted-foreground">
-        Once a refund is approved on our side, settlement back to the original payment method depends on the network. Typical windows:
+        Once a refund is approved on our side, settlement back to the original payment method
+        depends on the network. Typical windows:
       </p>
       <ul className="mt-3 space-y-2.5">
         {items.map((it) => {
@@ -339,7 +390,9 @@ function SettlementTimeline() {
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <p className="text-xs font-semibold">{it.label}</p>
-                  <span className="text-[11px] font-bold tabular-nums text-amber-500">{it.window}</span>
+                  <span className="text-[11px] font-bold tabular-nums text-amber-500">
+                    {it.window}
+                  </span>
                 </div>
                 <p className="text-[11px] text-muted-foreground">{it.note}</p>
               </div>
@@ -348,14 +401,14 @@ function SettlementTimeline() {
         })}
       </ul>
       <p className="mt-3 text-[11px] text-muted-foreground">
-        These are payment-network estimates. Weekends and bank holidays can extend the window. You'll see "Refunded" here as soon as your bank confirms.
+        These are payment-network estimates. Weekends and bank holidays can extend the window.
+        You'll see "Refunded" here as soon as your bank confirms.
       </p>
     </div>
   );
 }
 
 function RefundsPanel() {
-
   const fetcher = useServerFn(getMyRefunds);
   const { data, isLoading, error, refetch, isFetching, dataUpdatedAt } = useQuery({
     queryKey: ["my-refunds"],
@@ -383,7 +436,6 @@ function RefundsPanel() {
     });
   }
 
-
   async function refreshFromStripe() {
     try {
       await refetch();
@@ -410,7 +462,9 @@ function RefundsPanel() {
           if (r.status === "succeeded") {
             toast.success(`Refund completed · ${amount}`, { id: `refund-${r.stripe_refund_id}` });
           } else if (r.status === "failed") {
-            toast.error(`Refund failed · ${r.failure_reason ?? "see details"}`, { id: `refund-${r.stripe_refund_id}` });
+            toast.error(`Refund failed · ${r.failure_reason ?? "see details"}`, {
+              id: `refund-${r.stripe_refund_id}`,
+            });
           } else if (r.status === "canceled") {
             toast(`Refund canceled · ${amount}`, { id: `refund-${r.stripe_refund_id}` });
           } else {
@@ -434,9 +488,11 @@ function RefundsPanel() {
     lastStatusRef.current = next;
   }, [rows, emailNotify]);
 
-  const hasPending = useMemo(() => rows.some((r) => r.status === "pending" || r.status === "requires_action"), [rows]);
+  const hasPending = useMemo(
+    () => rows.some((r) => r.status === "pending" || r.status === "requires_action"),
+    [rows],
+  );
   const lastUpdated = dataUpdatedAt ? new Date(dataUpdatedAt).toLocaleTimeString() : null;
-
 
   return (
     <section className="mx-auto mt-6 w-full max-w-3xl rounded-2xl border border-border bg-card p-6 shadow-card">
@@ -480,7 +536,6 @@ function RefundsPanel() {
 
       {hasPending && <SettlementTimeline />}
 
-
       {isLoading ? (
         <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" /> Loading…
@@ -503,15 +558,21 @@ function RefundsPanel() {
                 >
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${tone.tone}`}>
+                      <span
+                        className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${tone.tone}`}
+                      >
                         {tone.label}
                       </span>
-                      <span className="font-mono text-[11px] text-muted-foreground">{r.stripe_refund_id}</span>
+                      <span className="font-mono text-[11px] text-muted-foreground">
+                        {r.stripe_refund_id}
+                      </span>
                     </div>
                     <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                       <span>{formatDate(r.created_at)}</span>
                       {r.reason && <span>· {r.reason}</span>}
-                      {r.failure_reason && <span className="text-destructive">· {r.failure_reason}</span>}
+                      {r.failure_reason && (
+                        <span className="text-destructive">· {r.failure_reason}</span>
+                      )}
                     </div>
                   </div>
                   <div className="text-sm font-bold tabular-nums text-foreground">
@@ -529,9 +590,7 @@ function RefundsPanel() {
   );
 }
 
-
 export function PurchaseHistory() {
-
   const fetcher = useServerFn(getCoinPurchaseHistory);
   const { isVip } = useRole();
   const { data, isLoading, error, refetch, isFetching } = useQuery({
@@ -544,118 +603,131 @@ export function PurchaseHistory() {
 
   return (
     <>
-    <section className="mx-auto mt-10 w-full max-w-3xl rounded-2xl border border-border bg-card p-6 shadow-card">
+      <section className="mx-auto mt-10 w-full max-w-3xl rounded-2xl border border-border bg-card p-6 shadow-card">
+        <header className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Receipt className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-bold">Purchase history</h3>
+          </div>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="text-xs text-muted-foreground underline hover:text-foreground"
+          >
+            {isFetching ? "Refreshing…" : "Refresh"}
+          </button>
+        </header>
 
-      <header className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <Receipt className="h-5 w-5 text-primary" />
-          <h3 className="text-lg font-bold">Purchase history</h3>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {RANGE_OPTIONS.map((opt) => {
+            const active = range === opt.key;
+            return (
+              <button
+                key={opt.key}
+                type="button"
+                onClick={() => setRange(opt.key)}
+                className={
+                  "rounded-full border px-3 py-1 text-xs font-semibold transition " +
+                  (active
+                    ? "border-primary bg-primary/15 text-primary"
+                    : "border-border bg-background text-muted-foreground hover:text-foreground")
+                }
+              >
+                {opt.label}
+              </button>
+            );
+          })}
         </div>
-        <button
-          type="button"
-          onClick={() => refetch()}
-          className="text-xs text-muted-foreground underline hover:text-foreground"
-        >
-          {isFetching ? "Refreshing…" : "Refresh"}
-        </button>
-      </header>
 
-      <div className="mt-4 flex flex-wrap gap-2">
-        {RANGE_OPTIONS.map((opt) => {
-          const active = range === opt.key;
-          return (
-            <button
-              key={opt.key}
-              type="button"
-              onClick={() => setRange(opt.key)}
-              className={
-                "rounded-full border px-3 py-1 text-xs font-semibold transition " +
-                (active
-                  ? "border-primary bg-primary/15 text-primary"
-                  : "border-border bg-background text-muted-foreground hover:text-foreground")
-              }
-            >
-              {opt.label}
-            </button>
-          );
-        })}
-      </div>
-
-      {isLoading ? (
-        <div className="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> Loading…
-        </div>
-      ) : error ? (
-        <p className="mt-6 text-sm text-destructive">Couldn't load your history.</p>
-      ) : (() => {
-        const days = RANGE_OPTIONS.find((o) => o.key === range)?.days ?? null;
-        const cutoff = days != null ? Date.now() - days * 24 * 60 * 60 * 1000 : null;
-        const rows = (data ?? [])
-          .filter((row) => row.type === "stripe_purchase" && row.amount > 0)
-          .filter((row) => cutoff == null || new Date(row.created_at).getTime() >= cutoff)
-          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-        if (rows.length === 0) {
-          return (
-            <p className="mt-6 text-sm text-muted-foreground">
-              No coin purchases in this range. Try a wider window.
-            </p>
-          );
-        }
-        return (
-          <ul className="mt-4 divide-y divide-border">
-            {rows.map((row) => {
-              const refundStatus = refundStatusFor(row.stripe);
+        {isLoading ? (
+          <div className="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+          </div>
+        ) : error ? (
+          <p className="mt-6 text-sm text-destructive">Couldn't load your history.</p>
+        ) : (
+          (() => {
+            const days = RANGE_OPTIONS.find((o) => o.key === range)?.days ?? null;
+            const cutoff = days != null ? Date.now() - days * 24 * 60 * 60 * 1000 : null;
+            const rows = (data ?? [])
+              .filter((row) => row.type === "stripe_purchase" && row.amount > 0)
+              .filter((row) => cutoff == null || new Date(row.created_at).getTime() >= cutoff)
+              .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+            if (rows.length === 0) {
               return (
-                <li key={row.id} className="flex flex-col gap-2 py-3 text-sm sm:flex-row sm:items-start sm:justify-between sm:gap-3">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-medium">Coin purchase</p>
-                      {refundStatus && (
-                        <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${refundStatus.tone}`}>
-                          {refundStatus.label}
-                        </span>
-                      )}
-                    </div>
-                    <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                      <span>{formatDate(row.created_at)}</span>
-                      <ReceiptLink row={row} />
-                    </div>
-                  </div>
-
-                  <div className="flex shrink-0 flex-col items-start gap-1 sm:items-end">
-                    <div className="flex items-center gap-1.5 font-bold tabular-nums text-emerald-500">
-                      +{row.amount}
-                      <Coins className="h-4 w-4 text-coin" />
-                      <span className="text-[11px] font-medium text-muted-foreground">coins</span>
-                    </div>
-                    {row.stripe ? (
-                      <div className="text-xs tabular-nums text-muted-foreground">
-                        Paid <span className="font-semibold text-foreground">{formatMoney(row.stripe.amountPaid, row.stripe.currency)}</span>
-                        {row.stripe.amountPaid > 0 && row.amount > 0 && (
-                          <span className="ml-1 text-[10px] opacity-70">
-                            ({formatMoney(row.stripe.amountPaid / row.amount, row.stripe.currency)}/coin)
-                          </span>
-                        )}
-                      </div>
-                    ) : null}
-                    {row.stripe && (row.stripe.refunded || row.stripe.partiallyRefunded) && (
-                      <div className="text-xs tabular-nums text-destructive">
-                        Refunded {formatMoney(row.stripe.refundedAmount, row.stripe.currency)}
-                      </div>
-                    )}
-                    {isVip && parseStripeRef(row.reference) && (
-                      <RefundButton row={row} />
-                    )}
-                  </div>
-                </li>
+                <p className="mt-6 text-sm text-muted-foreground">
+                  No coin purchases in this range. Try a wider window.
+                </p>
               );
-            })}
-          </ul>
-        );
-      })()}
-    </section>
-    <RefundsPanel />
+            }
+            return (
+              <ul className="mt-4 divide-y divide-border">
+                {rows.map((row) => {
+                  const refundStatus = refundStatusFor(row.stripe);
+                  return (
+                    <li
+                      key={row.id}
+                      className="flex flex-col gap-2 py-3 text-sm sm:flex-row sm:items-start sm:justify-between sm:gap-3"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="font-medium">Coin purchase</p>
+                          {refundStatus && (
+                            <span
+                              className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${refundStatus.tone}`}
+                            >
+                              {refundStatus.label}
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                          <span>{formatDate(row.created_at)}</span>
+                          <ReceiptLink row={row} />
+                        </div>
+                      </div>
+
+                      <div className="flex shrink-0 flex-col items-start gap-1 sm:items-end">
+                        <div className="flex items-center gap-1.5 font-bold tabular-nums text-emerald-500">
+                          +{row.amount}
+                          <Coins className="h-4 w-4 text-coin" />
+                          <span className="text-[11px] font-medium text-muted-foreground">
+                            coins
+                          </span>
+                        </div>
+                        {row.stripe ? (
+                          <div className="text-xs tabular-nums text-muted-foreground">
+                            Paid{" "}
+                            <span className="font-semibold text-foreground">
+                              {formatMoney(row.stripe.amountPaid, row.stripe.currency)}
+                            </span>
+                            {row.stripe.amountPaid > 0 && row.amount > 0 && (
+                              <span className="ml-1 text-[10px] opacity-70">
+                                (
+                                {formatMoney(
+                                  row.stripe.amountPaid / row.amount,
+                                  row.stripe.currency,
+                                )}
+                                /coin)
+                              </span>
+                            )}
+                          </div>
+                        ) : null}
+                        {row.stripe && (row.stripe.refunded || row.stripe.partiallyRefunded) && (
+                          <div className="text-xs tabular-nums text-destructive">
+                            Refunded {formatMoney(row.stripe.refundedAmount, row.stripe.currency)}
+                          </div>
+                        )}
+                        {isVip && parseStripeRef(row.reference) && <RefundButton row={row} />}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            );
+          })()
+        )}
+      </section>
+      <RefundsPanel />
     </>
   );
 }
-

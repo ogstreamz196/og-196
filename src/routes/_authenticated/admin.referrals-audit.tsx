@@ -1,7 +1,15 @@
 import { createFileRoute, Link, Navigate, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { AlertTriangle, ArrowLeft, CheckCircle2, Copy, Scale, Search, ShieldCheck } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowLeft,
+  CheckCircle2,
+  Copy,
+  Scale,
+  Search,
+  ShieldCheck,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRole } from "@/hooks/use-role";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
@@ -147,7 +155,9 @@ export function ReferralsAuditPage() {
                 className="pl-9"
               />
             </div>
-            <Button type="submit" variant="secondary">Search</Button>
+            <Button type="submit" variant="secondary">
+              Search
+            </Button>
             {query && (
               <Button
                 type="button"
@@ -183,22 +193,33 @@ export function ReferralsAuditPage() {
               </thead>
               <tbody>
                 {auditQ.isLoading && (
-                  <tr><td colSpan={7} className="p-6 text-center text-muted-foreground">Loading…</td></tr>
+                  <tr>
+                    <td colSpan={7} className="p-6 text-center text-muted-foreground">
+                      Loading…
+                    </td>
+                  </tr>
                 )}
                 {!auditQ.isLoading && users.length === 0 && (
-                  <tr><td colSpan={7} className="p-6 text-center text-muted-foreground">No users</td></tr>
+                  <tr>
+                    <td colSpan={7} className="p-6 text-center text-muted-foreground">
+                      No users
+                    </td>
+                  </tr>
                 )}
                 {users.map((u) => (
                   <tr key={u.id} className="border-b border-white/5 hover:bg-white/[0.02]">
                     <td className="p-3">
-                      <div className="font-semibold">{u.display_name ?? u.email?.split("@")[0] ?? "—"}</div>
+                      <div className="font-semibold">
+                        {u.display_name ?? u.email?.split("@")[0] ?? "—"}
+                      </div>
                       <div className="text-muted-foreground">{u.email}</div>
                       <button
                         type="button"
                         className="mt-0.5 inline-flex items-center gap-1 font-mono text-[10px] text-muted-foreground hover:text-foreground"
                         onClick={() => copy(u.id, "User ID copied")}
                       >
-                        <Copy className="h-2.5 w-2.5" />{u.id.slice(0, 8)}…
+                        <Copy className="h-2.5 w-2.5" />
+                        {u.id.slice(0, 8)}…
                       </button>
                     </td>
                     <td className="p-3">
@@ -210,7 +231,9 @@ export function ReferralsAuditPage() {
                         >
                           {u.referral_code} <Copy className="h-3 w-3" />
                         </button>
-                      ) : <span className="text-muted-foreground">—</span>}
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
                     </td>
                     <td className="p-3">
                       {u.bound_referrer_id ? (
@@ -259,13 +282,19 @@ export function ReferralsAuditPage() {
               </thead>
               <tbody>
                 {leaderboard.length === 0 && (
-                  <tr><td colSpan={5} className="p-6 text-center text-muted-foreground">No payouts yet</td></tr>
+                  <tr>
+                    <td colSpan={5} className="p-6 text-center text-muted-foreground">
+                      No payouts yet
+                    </td>
+                  </tr>
                 )}
                 {leaderboard.map((u, i) => (
                   <tr key={u.id} className="border-b border-white/5">
                     <td className="p-3 text-muted-foreground tabular-nums">{i + 1}</td>
                     <td className="p-3">
-                      <div className="font-semibold">{u.display_name ?? u.email?.split("@")[0] ?? "—"}</div>
+                      <div className="font-semibold">
+                        {u.display_name ?? u.email?.split("@")[0] ?? "—"}
+                      </div>
                       <div className="text-muted-foreground">{u.email}</div>
                     </td>
                     <td className="p-3 font-mono text-[11px]">{u.referral_code ?? "—"}</td>
@@ -296,15 +325,23 @@ export function ReferralsAuditPage() {
               </thead>
               <tbody>
                 {ledger.length === 0 && (
-                  <tr><td colSpan={5} className="p-6 text-center text-muted-foreground">No cashback events yet</td></tr>
+                  <tr>
+                    <td colSpan={5} className="p-6 text-center text-muted-foreground">
+                      No cashback events yet
+                    </td>
+                  </tr>
                 )}
                 {ledger.map((r) => (
                   <tr key={r.id} className="border-b border-white/5">
-                    <td className="p-3 text-muted-foreground">{new Date(r.created_at).toLocaleString()}</td>
+                    <td className="p-3 text-muted-foreground">
+                      {new Date(r.created_at).toLocaleString()}
+                    </td>
                     <td className="p-3">{r.referrer_name ?? "—"}</td>
                     <td className="p-3">{r.referee_name ?? "—"}</td>
                     <td className="p-3 text-right tabular-nums text-primary">+{r.amount}</td>
-                    <td className="p-3 truncate font-mono text-[10px] text-muted-foreground">{r.reference}</td>
+                    <td className="p-3 truncate font-mono text-[10px] text-muted-foreground">
+                      {r.reference}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -316,18 +353,29 @@ export function ReferralsAuditPage() {
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/5 p-4">
             <div className="flex items-center gap-2">
               <Scale className="h-4 w-4 text-primary" />
-              <h2 className="font-display text-lg font-bold">Reconciliation · expected vs paid (10%)</h2>
+              <h2 className="font-display text-lg font-bold">
+                Reconciliation · expected vs paid (10%)
+              </h2>
             </div>
             {reconQ.data?.totals && (
               <div className="flex flex-wrap items-center gap-2 text-[11px]">
                 <span className="rounded-full border border-white/10 bg-background/60 px-2 py-0.5 text-muted-foreground">
-                  Burned: <span className="tabular-nums text-foreground">{reconQ.data.totals.total_burned}</span>
+                  Burned:{" "}
+                  <span className="tabular-nums text-foreground">
+                    {reconQ.data.totals.total_burned}
+                  </span>
                 </span>
                 <span className="rounded-full border border-white/10 bg-background/60 px-2 py-0.5 text-muted-foreground">
-                  Expected: <span className="tabular-nums text-foreground">{reconQ.data.totals.expected_payout}</span>
+                  Expected:{" "}
+                  <span className="tabular-nums text-foreground">
+                    {reconQ.data.totals.expected_payout}
+                  </span>
                 </span>
                 <span className="rounded-full border border-white/10 bg-background/60 px-2 py-0.5 text-muted-foreground">
-                  Paid: <span className="tabular-nums text-foreground">{reconQ.data.totals.actual_payout}</span>
+                  Paid:{" "}
+                  <span className="tabular-nums text-foreground">
+                    {reconQ.data.totals.actual_payout}
+                  </span>
                 </span>
                 <span
                   className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold ${
@@ -337,9 +385,14 @@ export function ReferralsAuditPage() {
                   }`}
                 >
                   {reconQ.data.totals.mismatches === 0 ? (
-                    <><CheckCircle2 className="h-3 w-3" /> In sync</>
+                    <>
+                      <CheckCircle2 className="h-3 w-3" /> In sync
+                    </>
                   ) : (
-                    <><AlertTriangle className="h-3 w-3" /> {reconQ.data.totals.mismatches} mismatch{reconQ.data.totals.mismatches === 1 ? "" : "es"}</>
+                    <>
+                      <AlertTriangle className="h-3 w-3" /> {reconQ.data.totals.mismatches} mismatch
+                      {reconQ.data.totals.mismatches === 1 ? "" : "es"}
+                    </>
                   )}
                 </span>
               </div>
@@ -360,15 +413,26 @@ export function ReferralsAuditPage() {
               </thead>
               <tbody>
                 {reconQ.isLoading && (
-                  <tr><td colSpan={7} className="p-6 text-center text-muted-foreground">Computing…</td></tr>
+                  <tr>
+                    <td colSpan={7} className="p-6 text-center text-muted-foreground">
+                      Computing…
+                    </td>
+                  </tr>
                 )}
                 {!reconQ.isLoading && (reconQ.data?.rows.length ?? 0) === 0 && (
-                  <tr><td colSpan={7} className="p-6 text-center text-muted-foreground">No referral activity yet</td></tr>
+                  <tr>
+                    <td colSpan={7} className="p-6 text-center text-muted-foreground">
+                      No referral activity yet
+                    </td>
+                  </tr>
                 )}
                 {reconQ.data?.rows.map((r) => {
                   const ok = r.delta === 0;
                   return (
-                    <tr key={r.referrer_id} className={`border-b border-white/5 ${ok ? "" : "bg-amber-500/[0.04]"}`}>
+                    <tr
+                      key={r.referrer_id}
+                      className={`border-b border-white/5 ${ok ? "" : "bg-amber-500/[0.04]"}`}
+                    >
                       <td className="p-3">
                         <div className="font-semibold">{r.referrer_name ?? "—"}</div>
                         <div className="text-muted-foreground">{r.referrer_email}</div>
@@ -377,9 +441,13 @@ export function ReferralsAuditPage() {
                       <td className="p-3 text-right tabular-nums">{r.burn_count}</td>
                       <td className="p-3 text-right tabular-nums">{r.total_burned}</td>
                       <td className="p-3 text-right tabular-nums">{r.expected_payout}</td>
-                      <td className="p-3 text-right tabular-nums text-primary">+{r.actual_payout}</td>
-                      <td className={`p-3 text-right tabular-nums font-semibold ${ok ? "text-emerald-400" : "text-amber-300"}`}>
-                        {ok ? "0" : (r.delta > 0 ? `+${r.delta}` : r.delta)}
+                      <td className="p-3 text-right tabular-nums text-primary">
+                        +{r.actual_payout}
+                      </td>
+                      <td
+                        className={`p-3 text-right tabular-nums font-semibold ${ok ? "text-emerald-400" : "text-amber-300"}`}
+                      >
+                        {ok ? "0" : r.delta > 0 ? `+${r.delta}` : r.delta}
                       </td>
                     </tr>
                   );
@@ -387,7 +455,9 @@ export function ReferralsAuditPage() {
               </tbody>
             </table>
             <div className="border-t border-white/5 p-3 text-[10px] text-muted-foreground">
-              Expected payout = sum of <span className="font-mono">floor(burn ÷ 10)</span> over each referee's generation rows. Δ &gt; 0 means the leader was overpaid relative to recorded burns; Δ &lt; 0 means cashback is owed.
+              Expected payout = sum of <span className="font-mono">floor(burn ÷ 10)</span> over each
+              referee's generation rows. Δ &gt; 0 means the leader was overpaid relative to recorded
+              burns; Δ &lt; 0 means cashback is owed.
             </div>
           </div>
         </section>

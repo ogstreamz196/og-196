@@ -1,5 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { Film, Loader2, Unlock, Download, Play, RefreshCw, CheckCircle2, AlertTriangle } from "lucide-react";
+import {
+  Film,
+  Loader2,
+  Unlock,
+  Download,
+  Play,
+  RefreshCw,
+  CheckCircle2,
+  AlertTriangle,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -61,7 +70,9 @@ export function LyricVideoSection({ songId, songTitle, mp3Unlocked, onBalanceCha
       setHasFull(!!data?.has_full);
       setError(data?.error ?? null);
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [songId, mp3Unlocked]);
 
   // Realtime subscription to song row → drives status/progress UI.
@@ -77,14 +88,17 @@ export function LyricVideoSection({ songId, songTitle, mp3Unlocked, onBalanceCha
           if (row.lyric_video_status) setStatus(row.lyric_video_status);
           if (typeof row.lyric_video_progress === "number") setProgress(row.lyric_video_progress);
           if (row.lyric_video_stage) setStage(row.lyric_video_stage);
-          if (typeof row.lyric_video_unlocked === "boolean") setVideoUnlocked(row.lyric_video_unlocked);
+          if (typeof row.lyric_video_unlocked === "boolean")
+            setVideoUnlocked(row.lyric_video_unlocked);
           setHasPreview(!!row.lyric_video_preview_path);
           setHasFull(!!row.lyric_video_full_path);
           setError(row.lyric_video_error ?? null);
         },
       )
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [songId, mp3Unlocked]);
 
   // Fetch signed URLs whenever a new path becomes available.
@@ -97,7 +111,9 @@ export function LyricVideoSection({ songId, songTitle, mp3Unlocked, onBalanceCha
       });
       if (!cancelled && data?.url) setPreviewUrl(data.url as string);
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [hasPreview, previewUrl, songId]);
 
   useEffect(() => {
@@ -109,7 +125,9 @@ export function LyricVideoSection({ songId, songTitle, mp3Unlocked, onBalanceCha
       });
       if (!cancelled && data?.url) setFullUrl(data.url as string);
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [hasFull, videoUnlocked, fullUrl, songId]);
 
   async function renderPreview() {
@@ -229,7 +247,7 @@ export function LyricVideoSection({ songId, songTitle, mp3Unlocked, onBalanceCha
       {(previewUrl || fullUrl) && (
         <video
           ref={videoRef}
-          src={videoUnlocked && fullUrl ? fullUrl : previewUrl ?? undefined}
+          src={videoUnlocked && fullUrl ? fullUrl : (previewUrl ?? undefined)}
           controls
           playsInline
           className="mt-3 aspect-square w-full rounded-xl bg-black"
@@ -239,9 +257,10 @@ export function LyricVideoSection({ songId, songTitle, mp3Unlocked, onBalanceCha
       {!videoUnlocked && (
         <>
           <p className="mt-3 text-sm text-muted-foreground">
-            Watch a free <span className="font-bold text-foreground">30-second preview</span> with the{" "}
-            <span className="font-bold text-foreground">PREVIEW</span> watermark, then unlock the full lyric video for{" "}
-            <span className="font-bold text-foreground">{cost} coins</span>.
+            Watch a free <span className="font-bold text-foreground">30-second preview</span> with
+            the <span className="font-bold text-foreground">PREVIEW</span> watermark, then unlock
+            the full lyric video for <span className="font-bold text-foreground">{cost} coins</span>
+            .
           </p>
           <div className="mt-3 grid gap-2 sm:grid-cols-2">
             <Button
@@ -256,10 +275,7 @@ export function LyricVideoSection({ songId, songTitle, mp3Unlocked, onBalanceCha
               )}
               {previewUrl ? "Preview ready" : "Render 30s preview"}
             </Button>
-            <Button
-              onClick={unlockFull}
-              disabled={unlocking || isRendering || balance < cost}
-            >
+            <Button onClick={unlockFull} disabled={unlocking || isRendering || balance < cost}>
               {unlocking ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
@@ -268,7 +284,9 @@ export function LyricVideoSection({ songId, songTitle, mp3Unlocked, onBalanceCha
               {balance < cost ? "Not enough coins" : `Unlock full · ${cost} coins`}
             </Button>
           </div>
-          <p className="mt-2 text-center text-[11px] text-muted-foreground">Balance: {balance} coins</p>
+          <p className="mt-2 text-center text-[11px] text-muted-foreground">
+            Balance: {balance} coins
+          </p>
         </>
       )}
 
@@ -291,7 +309,12 @@ export function LyricVideoSection({ songId, songTitle, mp3Unlocked, onBalanceCha
           <p className="inline-flex items-center gap-1.5 text-xs text-rose-200">
             <AlertTriangle className="h-3.5 w-3.5" /> {error}
           </p>
-          <Button size="sm" variant="ghost" className="mt-2" onClick={videoUnlocked ? unlockFull : renderPreview}>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="mt-2"
+            onClick={videoUnlocked ? unlockFull : renderPreview}
+          >
             <RefreshCw className="mr-1.5 h-3.5 w-3.5" /> Retry
           </Button>
         </div>

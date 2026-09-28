@@ -80,7 +80,6 @@ import { PlaylistProvider, PlaylistOrder, usePlaylist } from "@/hooks/use-playli
 import { peekFullTrackPlay, clearFullTrackPlay } from "@/lib/full-track-autoplay";
 import { useFoulIntensity, useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 
-
 import { FreshTrackCard } from "@/components/library/FreshTrackCard";
 import { MasterpieceDialog } from "@/components/library/MasterpieceDialog";
 import { StudioMeter, StudioLed } from "@/components/library/StudioConsole";
@@ -539,7 +538,6 @@ function LibraryPage() {
     setMasterpieceOpen(true);
   }, [freshTrack]);
 
-
   const totalCost = lyricsCost + audioCost;
   const canRunPipeline =
     !!user && canGenerateLyrics && balance >= totalCost && pipeline.stage === "idle";
@@ -667,16 +665,16 @@ function LibraryPage() {
       ? beatPath
         ? ["vocals only", "a cappella over the uploaded beat", "no added instruments"]
         : [
-          "a cappella",
-          "vocals only",
-          "unaccompanied voice",
-          "humming and vocal harmonies only",
-          "no instruments",
-          "no drums",
-          "no percussion",
-          "no bass",
-          "no synths",
-        ]
+            "a cappella",
+            "vocals only",
+            "unaccompanied voice",
+            "humming and vocal harmonies only",
+            "no instruments",
+            "no drums",
+            "no percussion",
+            "no bass",
+            "no synths",
+          ]
       : [];
 
     // Each style is its own tag (the wizard returns them comma-separated), and
@@ -1222,9 +1220,7 @@ function LibraryPage() {
             tone={queue.rendering > 0 ? "busy" : "idle"}
             pulse={queue.rendering > 0}
           />
-          {queue.failed > 0 && (
-            <StudioLed label={`${queue.failed} failed`} tone="alert" pulse />
-          )}
+          {queue.failed > 0 && <StudioLed label={`${queue.failed} failed`} tone="alert" pulse />}
           <StudioLed
             label={`${completedTracks.length} mastered`}
             tone={completedTracks.length > 0 ? "ok" : "idle"}
@@ -1307,8 +1303,6 @@ function LibraryPage() {
                 </span>
               </button>
             </div>
-
-
 
             <Button
               type="button"

@@ -22,7 +22,9 @@ function AdminAuditHub() {
   if (isLoading) {
     return (
       <DashboardShell title="Audit">
-        <div className="py-24 text-center text-sm text-muted-foreground">Checking admin access…</div>
+        <div className="py-24 text-center text-sm text-muted-foreground">
+          Checking admin access…
+        </div>
       </DashboardShell>
     );
   }

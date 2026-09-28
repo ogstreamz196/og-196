@@ -6,7 +6,9 @@ describe("estimateRoastFloor", () => {
     expect(estimateRoastFloor("Ok go fuck ur mum")).toBeGreaterThanOrEqual(3);
     expect(estimateRoastFloor("Suck her left testical")).toBeGreaterThanOrEqual(3);
     expect(estimateRoastFloor("Dese nuts on ur mums chin")).toBeGreaterThanOrEqual(3);
-    expect(estimateRoastFloor("I will put two O and a big 1 in ur mums bum")).toBeGreaterThanOrEqual(3);
+    expect(
+      estimateRoastFloor("I will put two O and a big 1 in ur mums bum"),
+    ).toBeGreaterThanOrEqual(3);
   });
 
   it("does not reward normal messages, diagnostics, or profanity without a target", () => {
@@ -39,7 +41,11 @@ describe("calibrateAward", () => {
   });
 
   it("reserves the biggest drops for exceptional insults", () => {
-    expect(calibrateAward(10, "an elite devastating original punchline", 8, false, () => 0)).toBe(7);
-    expect(calibrateAward(10, "an elite devastating original punchline", 8, false, () => 0.99)).toBe(10);
+    expect(calibrateAward(10, "an elite devastating original punchline", 8, false, () => 0)).toBe(
+      7,
+    );
+    expect(
+      calibrateAward(10, "an elite devastating original punchline", 8, false, () => 0.99),
+    ).toBe(10);
   });
 });

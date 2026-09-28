@@ -62,8 +62,7 @@ function ChangePasswordPage() {
 
   const email = user?.email ?? "";
   // Users created through Google/Apple have no password identity to replace.
-  const hasPasswordIdentity =
-    !user || (user.identities ?? []).some((i) => i.provider === "email");
+  const hasPasswordIdentity = !user || (user.identities ?? []).some((i) => i.provider === "email");
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -109,8 +108,7 @@ function ChangePasswordPage() {
       setTimeout(() => navigate({ to: "/settings" }), 1800);
     } catch (err) {
       toast.error("Couldn't update your password", {
-        description:
-          err instanceof Error ? err.message : "Something went wrong. Please try again.",
+        description: err instanceof Error ? err.message : "Something went wrong. Please try again.",
       });
     } finally {
       setBusy(false);
@@ -143,8 +141,8 @@ function ChangePasswordPage() {
         ) : !hasPasswordIdentity ? (
           <div className="space-y-3 text-center">
             <p className="text-sm text-muted-foreground">
-              This account signs in with Google or Apple, so there's no password to change.
-              Manage it with your provider instead.
+              This account signs in with Google or Apple, so there's no password to change. Manage
+              it with your provider instead.
             </p>
             <Button asChild variant="secondary" className="w-full">
               <Link to="/settings">Back to settings</Link>

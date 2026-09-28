@@ -33,13 +33,19 @@ export function AdminCollapsible({
     try {
       const saved = localStorage.getItem(key);
       if (saved !== null) setOpen(saved === "1");
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     hydrated.current = true;
   }, [key]);
 
   useEffect(() => {
     if (!hydrated.current) return;
-    try { localStorage.setItem(key, open ? "1" : "0"); } catch { /* ignore */ }
+    try {
+      localStorage.setItem(key, open ? "1" : "0");
+    } catch {
+      /* ignore */
+    }
   }, [key, open]);
 
   useEffect(() => {
@@ -64,9 +70,7 @@ export function AdminCollapsible({
     setOpen((v) => {
       const next = !v;
       if (next) {
-        window.dispatchEvent(
-          new CustomEvent("admin-collapsible:opened", { detail: { key } }),
-        );
+        window.dispatchEvent(new CustomEvent("admin-collapsible:opened", { detail: { key } }));
       }
       return next;
     });
@@ -85,12 +89,9 @@ export function AdminCollapsible({
         aria-expanded={open}
         className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition hover:bg-muted/40"
       >
-
         <div className="min-w-0">
           <div className="truncate font-semibold leading-tight">{title}</div>
-          {subtitle && (
-            <div className="truncate text-xs text-muted-foreground">{subtitle}</div>
-          )}
+          {subtitle && <div className="truncate text-xs text-muted-foreground">{subtitle}</div>}
         </div>
         <ChevronDown
           className={cn(

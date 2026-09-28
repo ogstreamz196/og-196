@@ -106,10 +106,10 @@ async function scoreRoast(
               "+0-3 ORIGINALITY: fresh angle and wordplay; generic insults score 0-1.\n" +
               "+0-2 TIMING: does it answer or flip OG Bot's last clapback?\n" +
               "+0-2 CRAFT: rhythm, brevity, a clean punchline.\n" +
-               "Score 0 for ordinary conversation, random messages, empty text, spam, " +
-               "keyboard mash, a plain question, or anything with no actual insult. " +
-               "Generic insults score 1-2 and still do not win coins. Typical decent " +
-               "effort lands 3-6; 9-10 is reserved for " +
+              "Score 0 for ordinary conversation, random messages, empty text, spam, " +
+              "keyboard mash, a plain question, or anything with no actual insult. " +
+              "Generic insults score 1-2 and still do not win coins. Typical decent " +
+              "effort lands 3-6; 9-10 is reserved for " +
               "genuinely elite, original, devastating lines. Judge the message on its " +
               "own merit every time — do not drift high or low over a session. " +
               "Reply with ONLY the integer, nothing else.",
@@ -117,8 +117,7 @@ async function scoreRoast(
           {
             role: "user",
             content:
-              `CHALLENGER: ${content}` +
-              (botReply ? `\n\nOG BOT CLAPBACK: ${botReply}` : ""),
+              `CHALLENGER: ${content}` + (botReply ? `\n\nOG BOT CLAPBACK: ${botReply}` : ""),
           },
         ],
       }),
@@ -148,9 +147,16 @@ export function estimateRoastFloor(content: string): number {
   if (!text || text.length < 6) return 0;
 
   const words = text.match(/[a-z0-9']+/g) ?? [];
-  const isMostlyQuestion = /^(why|what|when|where|who|how|can|could|would|did|do|does|is|are)\b/.test(text);
-  const targetHits = text.match(/\b(you|your|youre|you're|ur|u|he|him|his|she|her|hers|they|them|their|bot|mum|mom|dad|face|head|brain|mouth|chin|arse|ass)\b/g)?.length ?? 0;
-  const insultHits = text.match(/\b(fuck(?:ing|er|ed)?|shit(?:head)?|dick(?:head)?|twat|wanker|prick|muppet|idiot|imbecile|bellend|bell-end|knob(?:head)?|gobshite|plonker|tosser|git|prat|melt|clown|stupid|dumb|ugly|useless|rubbish|testic(?:le|al)|nuts?|bum|arse|ass|suck|bitch|bastard|pussyhole)\b/g)?.length ?? 0;
+  const isMostlyQuestion =
+    /^(why|what|when|where|who|how|can|could|would|did|do|does|is|are)\b/.test(text);
+  const targetHits =
+    text.match(
+      /\b(you|your|youre|you're|ur|u|he|him|his|she|her|hers|they|them|their|bot|mum|mom|dad|face|head|brain|mouth|chin|arse|ass)\b/g,
+    )?.length ?? 0;
+  const insultHits =
+    text.match(
+      /\b(fuck(?:ing|er|ed)?|shit(?:head)?|dick(?:head)?|twat|wanker|prick|muppet|idiot|imbecile|bellend|bell-end|knob(?:head)?|gobshite|plonker|tosser|git|prat|melt|clown|stupid|dumb|ugly|useless|rubbish|testic(?:le|al)|nuts?|bum|arse|ass|suck|bitch|bastard|pussyhole)\b/g,
+    )?.length ?? 0;
   const hasRoastShape = targetHits > 0 && insultHits > 0;
   if (!hasRoastShape || (isMostlyQuestion && insultHits < 2)) return 0;
 
@@ -176,19 +182,11 @@ export function calibrateAward(
   if (!trimmed || isRepeat) return 0;
   const score = Math.max(0, Math.min(10, Math.round(rawScore)));
   if (score < 3) return 0;
-  const drops = score <= 4
-    ? [1, 2]
-    : score <= 6
-      ? [2, 3, 4]
-      : score <= 8
-        ? [4, 5, 6, 7]
-        : [7, 8, 9, 10];
+  const drops =
+    score <= 4 ? [1, 2] : score <= 6 ? [2, 3, 4] : score <= 8 ? [4, 5, 6, 7] : [7, 8, 9, 10];
   const index = Math.min(drops.length - 1, Math.floor(random() * drops.length));
   return drops[index] ?? 0;
 }
-
-
-
 
 /** Post a user message to the community + trigger a short OG Bot reply. */
 export const postCommunityMessage = createServerFn({ method: "POST" })
@@ -211,8 +209,7 @@ export const postCommunityMessage = createServerFn({ method: "POST" })
     const { maskDevIdentity } = await import("@/lib/dev-identity");
     const masked = maskDevIdentity(profile) ?? profile;
     const displayName =
-      masked?.display_name ||
-      (masked?.email ? String(masked.email).split("@")[0] : "OG member");
+      masked?.display_name || (masked?.email ? String(masked.email).split("@")[0] : "OG member");
 
     // 1. Insert the user message
     const { data: userRow, error: insertErr } = await supabaseAdmin
@@ -366,7 +363,12 @@ export const endBattle = createServerFn({ method: "POST" })
     const coins = pendingTenths / 10;
     if (coins <= 0) {
       await supabaseAdmin.from("battle_tallies").upsert(
-        { user_id: context.userId, pending_tenths: 0, rounds: 0, updated_at: new Date().toISOString() },
+        {
+          user_id: context.userId,
+          pending_tenths: 0,
+          rounds: 0,
+          updated_at: new Date().toISOString(),
+        },
         { onConflict: "user_id" },
       );
       return { coins: 0, rounds, pendingTenths, remainderTenths: 0 };
@@ -405,11 +407,17 @@ export const getBattleLeaderboard = createServerFn({ method: "GET" })
     const { data: profiles } = await supabaseAdmin
       .from("profiles")
       .select("id, display_name, email")
-      .in("id", rows.map((r) => r.user_id));
+      .in(
+        "id",
+        rows.map((r) => r.user_id),
+      );
     const { maskDevIdentity } = await import("@/lib/dev-identity");
     const nameById = new Map<string, string>();
     for (const p of profiles ?? []) {
-      const masked = (maskDevIdentity(p) ?? p) as { display_name?: string | null; email?: string | null };
+      const masked = (maskDevIdentity(p) ?? p) as {
+        display_name?: string | null;
+        email?: string | null;
+      };
       nameById.set(
         p.id,
         masked.display_name || (masked.email ? String(masked.email).split("@")[0]! : "OG member"),
@@ -427,8 +435,6 @@ export const getBattleLeaderboard = createServerFn({ method: "GET" })
       })) satisfies BattleLeaderboardRow[],
     };
   });
-
-
 
 /** Initial fetch of the latest N messages, oldest-first. */
 export const listCommunityMessages = createServerFn({ method: "GET" })
@@ -490,10 +496,7 @@ export const clearCommunityMessages = createServerFn({ method: "POST" })
     });
     if (!isAdmin && !isDev) throw new Error("Forbidden");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
-      .from("community_messages")
-      .delete()
-      .not("id", "is", null);
+    const { error } = await supabaseAdmin.from("community_messages").delete().not("id", "is", null);
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });

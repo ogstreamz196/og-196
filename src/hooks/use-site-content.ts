@@ -4,7 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 
 const KEY = ["site-content"] as const;
 
-interface Row { key: string; value: string }
+interface Row {
+  key: string;
+  value: string;
+}
 
 /** Wire up once at the app root so every user gets live Boss edits. */
 export function useSiteContentRealtime() {
@@ -12,10 +15,8 @@ export function useSiteContentRealtime() {
   useEffect(() => {
     const channel = supabase
       .channel("site_content_live")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "site_content" },
-        () => qc.invalidateQueries({ queryKey: KEY }),
+      .on("postgres_changes", { event: "*", schema: "public", table: "site_content" }, () =>
+        qc.invalidateQueries({ queryKey: KEY }),
       )
       .subscribe();
     return () => {
@@ -24,16 +25,17 @@ export function useSiteContentRealtime() {
   }, [qc]);
 }
 
-interface Row { key: string; value: string }
+interface Row {
+  key: string;
+  value: string;
+}
 
 export function useSiteContent() {
   const q = useQuery({
     queryKey: KEY,
     staleTime: 60_000,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("site_content")
-        .select("key, value");
+      const { data, error } = await supabase.from("site_content").select("key, value");
       if (error) throw error;
       const map = new Map<string, string>();
       ((data ?? []) as Row[]).forEach((r) => map.set(r.key, r.value));

@@ -1,4 +1,15 @@
-import { Sparkles, MessageSquareMore, Music2, Palette, Bell, Type, Rows3, Minus, Plus, RotateCcw } from "lucide-react";
+import {
+  Sparkles,
+  MessageSquareMore,
+  Music2,
+  Palette,
+  Bell,
+  Type,
+  Rows3,
+  Minus,
+  Plus,
+  RotateCcw,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "@tanstack/react-router";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +22,12 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { useRole } from "@/hooks/use-role";
 import { useAppPreferences, type AppPreferences } from "@/hooks/use-app-preferences";
-import { useDisplayPrefs, useSetDisplayPrefs, clampScale, type Density } from "@/hooks/use-display-prefs";
+import {
+  useDisplayPrefs,
+  useSetDisplayPrefs,
+  clampScale,
+  type Density,
+} from "@/hooks/use-display-prefs";
 import { useAura, type AuraLevel } from "@/hooks/use-aura";
 
 /**
@@ -22,7 +38,7 @@ export function PreferencesPanel() {
   const { foulMouth, isLoading } = useFoulMouth();
   const setFoulMouth = useSetFoulMouth();
   const { isVip } = useRole();
-  
+
   const { prefs, update: rawUpdate } = useAppPreferences();
   const update = <K extends keyof AppPreferences>(key: K, value: AppPreferences[K]) => {
     rawUpdate(key, value);
@@ -100,7 +116,9 @@ export function PreferencesPanel() {
           </div>
 
           <div className="space-y-2">
-            <Label className="flex items-center gap-2"><Rows3 className="h-4 w-4" /> Layout density</Label>
+            <Label className="flex items-center gap-2">
+              <Rows3 className="h-4 w-4" /> Layout density
+            </Label>
             <RadioGroup
               value={display.density}
               onValueChange={(v) => setDisplay.mutate({ density: v as Density })}
@@ -113,7 +131,9 @@ export function PreferencesPanel() {
           </div>
 
           <div className="space-y-2">
-            <Label className="flex items-center gap-2"><Palette className="h-4 w-4" /> Red aura intensity</Label>
+            <Label className="flex items-center gap-2">
+              <Palette className="h-4 w-4" /> Red aura intensity
+            </Label>
             <RadioGroup
               value={aura.level}
               onValueChange={(v) => aura.setLevel(v as AuraLevel)}
@@ -128,16 +148,13 @@ export function PreferencesPanel() {
         </CardContent>
       </Card>
 
-
       {/* Assistant */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <Sparkles className="h-4 w-4 text-primary" /> Assistant preferences
           </CardTitle>
-          <CardDescription>
-            Defaults for OG Bot and the floating assistant.
-          </CardDescription>
+          <CardDescription>Defaults for OG Bot and the floating assistant.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
           <ToggleRow
@@ -258,7 +275,12 @@ function ModeOption({ value, title, body }: { value: string; title: string; body
 }
 
 function ToggleRow({
-  icon, label, description, checked, disabled, onChange,
+  icon,
+  label,
+  description,
+  checked,
+  disabled,
+  onChange,
 }: {
   icon: React.ReactNode;
   label: string;
@@ -282,12 +304,27 @@ function ToggleRow({
 }
 
 function Field({
-  id, label, value, onChange, placeholder,
-}: { id: string; label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
+  id,
+  label,
+  value,
+  onChange,
+  placeholder,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+}) {
   return (
     <div className="space-y-1.5">
       <Label htmlFor={id}>{label}</Label>
-      <Input id={id} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} />
+      <Input
+        id={id}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+      />
     </div>
   );
 }

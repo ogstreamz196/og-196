@@ -32,10 +32,10 @@ describe("Powered by OG Bot pill uniqueness", () => {
 
   it.each(files)("%s renders the pill at most once", (file) => {
     const src = readFileSync(file, "utf8");
-    const totals = PILL_PATTERNS.reduce(
-      (n, re) => n + (src.match(re)?.length ?? 0),
-      0,
-    );
-    expect(totals, `${file} has ${totals} pill references — keep ≤ 1 per route`).toBeLessThanOrEqual(1);
+    const totals = PILL_PATTERNS.reduce((n, re) => n + (src.match(re)?.length ?? 0), 0);
+    expect(
+      totals,
+      `${file} has ${totals} pill references — keep ≤ 1 per route`,
+    ).toBeLessThanOrEqual(1);
   });
 });

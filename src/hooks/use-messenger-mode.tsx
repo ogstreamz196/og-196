@@ -63,7 +63,6 @@ export function useMessengerMode() {
     };
   }, [uid, qc]);
 
-
   const effectiveMode: MessengerMode = query.data ?? "community";
 
   return {
@@ -72,7 +71,6 @@ export function useMessengerMode() {
     isReady: !!uid && query.isFetched,
   };
 }
-
 
 export function useSetMessengerMode() {
   const { user } = useAuth();
@@ -100,16 +98,13 @@ export function useSetMessengerMode() {
       toast.error("Couldn't save messenger mode");
     },
     onSuccess: (next) => {
-      toast.success(
-        next === "community" ? "⚔️ OG Battle Zone: ON" : "🤖 OG Bot Loner Mode: ON",
-        {
-          id: "messenger-mode-toggle",
-          description:
-            next === "community"
-              ? "You're in the OG Battle Zone — everyone vs OG Bot. Saved to your profile."
-              : "Back to private chat with OG Bot. Saved to your profile.",
-        },
-      );
+      toast.success(next === "community" ? "⚔️ OG Battle Zone: ON" : "🤖 OG Bot Loner Mode: ON", {
+        id: "messenger-mode-toggle",
+        description:
+          next === "community"
+            ? "You're in the OG Battle Zone — everyone vs OG Bot. Saved to your profile."
+            : "Back to private chat with OG Bot. Saved to your profile.",
+      });
     },
     onSettled: () => {
       qc.invalidateQueries({ queryKey: messengerModeQueryKey(uid) });

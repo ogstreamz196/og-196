@@ -13,7 +13,8 @@ export type FullUrlPrecheck =
 export async function ensureFullUrlAllowed(songId: string): Promise<FullUrlPrecheck> {
   const { data: userData } = await supabase.auth.getUser();
   const userId = userData.user?.id;
-  if (!userId) return { ok: false, code: "not_signed_in", reason: "Sign in to download the full track." };
+  if (!userId)
+    return { ok: false, code: "not_signed_in", reason: "Sign in to download the full track." };
 
   const { data, error } = await supabase
     .from("unlocked_songs")

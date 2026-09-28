@@ -58,7 +58,8 @@ async function gatewayGet(connector: string, path: string): Promise<CheckResult>
   const lovable = process.env.LOVABLE_API_KEY;
   const connKey = process.env[`${connector.toUpperCase()}_API_KEY`];
   if (!lovable) return { ok: false, detail: "LOVABLE_API_KEY missing" };
-  if (!connKey) return { ok: false, detail: `${connector.toUpperCase()}_API_KEY missing — relink connector.` };
+  if (!connKey)
+    return { ok: false, detail: `${connector.toUpperCase()}_API_KEY missing — relink connector.` };
   const { result, latencyMs } = await timed(() =>
     fetch(`https://connector-gateway.lovable.dev/${connector}${path}`, {
       headers: {
@@ -100,7 +101,11 @@ async function runOne(key: string): Promise<CheckResult> {
       );
       const body = await result.json().catch(() => ({}));
       if (!result.ok || body?.ok === false) {
-        return { ok: false, detail: `Telegram: ${body?.description ?? `HTTP ${result.status}`}`, latencyMs };
+        return {
+          ok: false,
+          detail: `Telegram: ${body?.description ?? `HTTP ${result.status}`}`,
+          latencyMs,
+        };
       }
       return { ok: true, detail: `Bot @${body?.result?.username ?? "unknown"}`, latencyMs };
     }
@@ -118,9 +123,19 @@ async function runOne(key: string): Promise<CheckResult> {
     case "stripe_sandbox":
       return stripePing("sandbox");
     case "payments_live_webhook":
-      return present("PAYMENTS_LIVE_WEBHOOK_SECRET") ?? { ok: true, detail: "Live webhook secret present." };
+      return (
+        present("PAYMENTS_LIVE_WEBHOOK_SECRET") ?? {
+          ok: true,
+          detail: "Live webhook secret present.",
+        }
+      );
     case "payments_sandbox_webhook":
-      return present("PAYMENTS_SANDBOX_WEBHOOK_SECRET") ?? { ok: true, detail: "Sandbox webhook secret present." };
+      return (
+        present("PAYMENTS_SANDBOX_WEBHOOK_SECRET") ?? {
+          ok: true,
+          detail: "Sandbox webhook secret present.",
+        }
+      );
     case "gemini":
       return present("GEMINI_API_KEY") ?? { ok: true, detail: "Key present." };
     case "perplexity":
@@ -199,7 +214,13 @@ export const getOnboardingChecks = createServerFn({ method: "GET" })
             c: string,
             v: string,
           ) => Promise<{
-            data: Array<{ key: string; ok: boolean; detail: string | null; latency_ms: number | null; checked_at: string }> | null;
+            data: Array<{
+              key: string;
+              ok: boolean;
+              detail: string | null;
+              latency_ms: number | null;
+              checked_at: string;
+            }> | null;
             error: { message: string } | null;
           }>;
         };

@@ -19,7 +19,7 @@ const ROUTES = [
   "/referrals",
   "/settings",
   "/messenger",
-  
+
   "/developer",
   "/admin",
   "/trust",
@@ -52,7 +52,9 @@ function MobilePreview() {
             aria-label="Pick a route"
           >
             {ROUTES.map((r) => (
-              <option key={r} value={r}>{r}</option>
+              <option key={r} value={r}>
+                {r}
+              </option>
             ))}
           </select>
           <input

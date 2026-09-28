@@ -109,7 +109,11 @@ export function ReferralReminder({ className }: { className?: string }) {
                 size="sm"
                 className="min-h-11 min-w-11 px-2 text-xs text-foreground/85 focus-visible:ring-2 sm:min-h-9"
               >
-                {copied ? <Check className="h-4 w-4 sm:h-3 sm:w-3" aria-hidden /> : <Copy className="h-4 w-4 sm:h-3 sm:w-3" aria-hidden />}
+                {copied ? (
+                  <Check className="h-4 w-4 sm:h-3 sm:w-3" aria-hidden />
+                ) : (
+                  <Copy className="h-4 w-4 sm:h-3 sm:w-3" aria-hidden />
+                )}
                 {copied ? "Copied" : "Copy link"}
               </Button>
             </div>

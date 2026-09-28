@@ -33,8 +33,12 @@ export function HubCard({ to, icon, title, description, cta, primary }: HubCardP
         <span className={primary ? "text-primary-foreground" : "text-primary"}>{icon}</span>
       </div>
       <div className="min-w-0">
-        <FlameHeading as="h3" size="xl" className="break-words">{title}</FlameHeading>
-        <p className="font-bungee mt-3 text-sm sm:text-base md:text-lg leading-snug text-muted-foreground text-pretty">{description}</p>
+        <FlameHeading as="h3" size="xl" className="break-words">
+          {title}
+        </FlameHeading>
+        <p className="font-bungee mt-3 text-sm sm:text-base md:text-lg leading-snug text-muted-foreground text-pretty">
+          {description}
+        </p>
       </div>
       <div className="mt-auto pt-2">
         <FlameHeading as="span" size="sm" className="inline-flex items-center gap-1.5 text-primary">
@@ -42,7 +46,6 @@ export function HubCard({ to, icon, title, description, cta, primary }: HubCardP
           <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
         </FlameHeading>
       </div>
-
     </Link>
   );
 }

@@ -1,4 +1,12 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Pencil, Check, X, Loader2, Coins, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +17,10 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 // --------- Context ---------
-interface Ctx { enabled: boolean; toggle: () => void; }
+interface Ctx {
+  enabled: boolean;
+  toggle: () => void;
+}
 const AdminEditCtx = createContext<Ctx>({ enabled: false, toggle: () => {} });
 
 export function AdminEditModeProvider({ children }: { children: ReactNode }) {
@@ -32,7 +43,9 @@ export function AdminEditModeProvider({ children }: { children: ReactNode }) {
   return <AdminEditCtx.Provider value={value}>{children}</AdminEditCtx.Provider>;
 }
 
-export function useAdminEditMode() { return useContext(AdminEditCtx); }
+export function useAdminEditMode() {
+  return useContext(AdminEditCtx);
+}
 
 // --------- Toggle button (admins only) ---------
 export function AdminEditModeToggle({ className }: { className?: string }) {
@@ -109,17 +122,38 @@ export function AdminEditableLabel({ userId, value, fallback, className }: Edita
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter") mut.mutate();
-            if (e.key === "Escape") { setDraft(value ?? ""); setEditing(false); }
+            if (e.key === "Escape") {
+              setDraft(value ?? "");
+              setEditing(false);
+            }
           }}
           className="h-7 w-44 text-sm"
           maxLength={80}
         />
-        <Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Save"
-          disabled={mut.isPending} onClick={() => mut.mutate()}>
-          {mut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+        <Button
+          size="icon"
+          variant="ghost"
+          className="h-7 w-7"
+          aria-label="Save"
+          disabled={mut.isPending}
+          onClick={() => mut.mutate()}
+        >
+          {mut.isPending ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Check className="h-3.5 w-3.5" />
+          )}
         </Button>
-        <Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Cancel"
-          onClick={() => { setDraft(value ?? ""); setEditing(false); }}>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="h-7 w-7"
+          aria-label="Cancel"
+          onClick={() => {
+            setDraft(value ?? "");
+            setEditing(false);
+          }}
+        >
           <X className="h-3.5 w-3.5" />
         </Button>
       </span>
@@ -129,7 +163,10 @@ export function AdminEditableLabel({ userId, value, fallback, className }: Edita
   return (
     <button
       type="button"
-      onClick={() => { setDraft(value ?? ""); setEditing(true); }}
+      onClick={() => {
+        setDraft(value ?? "");
+        setEditing(true);
+      }}
       className={cn(
         "group inline-flex items-center gap-1 rounded px-1 -mx-1 outline-dashed outline-1 outline-primary/40 hover:bg-primary/10",
         className,
@@ -150,7 +187,12 @@ interface EditableBalanceProps {
   showIcon?: boolean;
 }
 
-export function AdminEditableBalance({ userId, value, className, showIcon = true }: EditableBalanceProps) {
+export function AdminEditableBalance({
+  userId,
+  value,
+  className,
+  showIcon = true,
+}: EditableBalanceProps) {
   const { enabled } = useAdminEditMode();
   const { isAdmin } = useRole();
   const qc = useQueryClient();
@@ -202,21 +244,44 @@ export function AdminEditableBalance({ userId, value, className, showIcon = true
     return (
       <span className={cn("inline-flex items-center gap-1", className)}>
         <Input
-          autoFocus type="number" min={0}
+          autoFocus
+          type="number"
+          min={0}
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter") mut.mutate();
-            if (e.key === "Escape") { setDraft(String(value)); setEditing(false); }
+            if (e.key === "Escape") {
+              setDraft(String(value));
+              setEditing(false);
+            }
           }}
           className="h-7 w-24 text-sm"
         />
-        <Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Save"
-          disabled={mut.isPending} onClick={() => mut.mutate()}>
-          {mut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+        <Button
+          size="icon"
+          variant="ghost"
+          className="h-7 w-7"
+          aria-label="Save"
+          disabled={mut.isPending}
+          onClick={() => mut.mutate()}
+        >
+          {mut.isPending ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Check className="h-3.5 w-3.5" />
+          )}
         </Button>
-        <Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Cancel"
-          onClick={() => { setDraft(String(value)); setEditing(false); }}>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="h-7 w-7"
+          aria-label="Cancel"
+          onClick={() => {
+            setDraft(String(value));
+            setEditing(false);
+          }}
+        >
           <X className="h-3.5 w-3.5" />
         </Button>
       </span>
@@ -226,7 +291,10 @@ export function AdminEditableBalance({ userId, value, className, showIcon = true
   return (
     <button
       type="button"
-      onClick={() => { setDraft(String(value)); setEditing(true); }}
+      onClick={() => {
+        setDraft(String(value));
+        setEditing(true);
+      }}
       className={cn(
         "group inline-flex items-center gap-1 rounded px-1 -mx-1 outline-dashed outline-1 outline-primary/40 hover:bg-primary/10",
         className,
@@ -252,7 +320,13 @@ interface EditablePortalFieldProps {
 }
 
 export function AdminEditablePortalField({
-  portalId, field, value, fallback, className, inputClassName, multiline,
+  portalId,
+  field,
+  value,
+  fallback,
+  className,
+  inputClassName,
+  multiline,
 }: EditablePortalFieldProps) {
   const { enabled } = useAdminEditMode();
   const { isAdmin } = useRole();
@@ -262,7 +336,11 @@ export function AdminEditablePortalField({
 
   const mut = useMutation({
     mutationFn: async () => {
-      let payload: { name?: string; custom_welcome_text?: string | null; coin_cost_per_generation?: number } = {};
+      const payload: {
+        name?: string;
+        custom_welcome_text?: string | null;
+        coin_cost_per_generation?: number;
+      } = {};
       if (field === "coin_cost_per_generation") {
         const n = Number(draft);
         if (!Number.isFinite(n) || n < 0 || n > 10000) throw new Error("Cost must be 0–10000");
@@ -288,7 +366,7 @@ export function AdminEditablePortalField({
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const display = (value == null || value === "") ? (fallback ?? "—") : String(value);
+  const display = value == null || value === "" ? (fallback ?? "—") : String(value);
   if (!enabled || !isAdmin) return <span className={className}>{display}</span>;
 
   if (editing) {
@@ -298,13 +376,22 @@ export function AdminEditablePortalField({
       onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
         setDraft(e.target.value),
       onKeyDown: (e: React.KeyboardEvent) => {
-        if (e.key === "Enter" && !multiline) { e.preventDefault(); mut.mutate(); }
-        if (e.key === "Escape") { setDraft(value == null ? "" : String(value)); setEditing(false); }
+        if (e.key === "Enter" && !multiline) {
+          e.preventDefault();
+          mut.mutate();
+        }
+        if (e.key === "Escape") {
+          setDraft(value == null ? "" : String(value));
+          setEditing(false);
+        }
       },
       className: cn("text-sm", inputClassName),
     };
     return (
-      <span className={cn("inline-flex items-start gap-1", className)} onClick={(e) => e.preventDefault()}>
+      <span
+        className={cn("inline-flex items-start gap-1", className)}
+        onClick={(e) => e.preventDefault()}
+      >
         {multiline ? (
           <textarea
             {...commonProps}
@@ -323,12 +410,36 @@ export function AdminEditablePortalField({
             maxLength={field === "name" ? 80 : undefined}
           />
         )}
-        <Button type="button" size="icon" variant="ghost" className="h-7 w-7 shrink-0" aria-label="Save"
-          disabled={mut.isPending} onClick={(e) => { e.preventDefault(); mut.mutate(); }}>
-          {mut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          className="h-7 w-7 shrink-0"
+          aria-label="Save"
+          disabled={mut.isPending}
+          onClick={(e) => {
+            e.preventDefault();
+            mut.mutate();
+          }}
+        >
+          {mut.isPending ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Check className="h-3.5 w-3.5" />
+          )}
         </Button>
-        <Button type="button" size="icon" variant="ghost" className="h-7 w-7 shrink-0" aria-label="Cancel"
-          onClick={(e) => { e.preventDefault(); setDraft(value == null ? "" : String(value)); setEditing(false); }}>
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          className="h-7 w-7 shrink-0"
+          aria-label="Cancel"
+          onClick={(e) => {
+            e.preventDefault();
+            setDraft(value == null ? "" : String(value));
+            setEditing(false);
+          }}
+        >
           <X className="h-3.5 w-3.5" />
         </Button>
       </span>
@@ -339,10 +450,16 @@ export function AdminEditablePortalField({
     <span
       role="button"
       tabIndex={0}
-      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setDraft(value == null ? "" : String(value)); setEditing(true); }}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDraft(value == null ? "" : String(value));
+        setEditing(true);
+      }}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault(); e.stopPropagation();
+          e.preventDefault();
+          e.stopPropagation();
           setDraft(value == null ? "" : String(value));
           setEditing(true);
         }

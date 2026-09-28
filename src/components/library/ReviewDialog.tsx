@@ -58,7 +58,10 @@ export function ReviewDialog({
         <ScrollArea className="flex-1 px-5 py-4">
           <div className="space-y-5">
             <section aria-labelledby="rv-track">
-              <h3 id="rv-track" className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+              <h3
+                id="rv-track"
+                className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground"
+              >
                 Track
               </h3>
               <div className="mt-2 rounded-xl border border-white/10 bg-card/60 p-3">
@@ -77,7 +80,10 @@ export function ReviewDialog({
             </section>
 
             <section aria-labelledby="rv-cats">
-              <h3 id="rv-cats" className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+              <h3
+                id="rv-cats"
+                className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground"
+              >
                 Style
               </h3>
               <div className="mt-2 space-y-2">
@@ -94,7 +100,9 @@ export function ReviewDialog({
                     <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                       ✨ Style description
                     </div>
-                    <p className="mt-0.5 text-sm font-semibold leading-relaxed">{styleText.trim()}</p>
+                    <p className="mt-0.5 text-sm font-semibold leading-relaxed">
+                      {styleText.trim()}
+                    </p>
                   </div>
                 )}
               </div>
@@ -102,7 +110,10 @@ export function ReviewDialog({
 
             {personalDetails.trim() && (
               <section aria-labelledby="rv-personal">
-                <h3 id="rv-personal" className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                <h3
+                  id="rv-personal"
+                  className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground"
+                >
                   Personal details
                 </h3>
                 <pre className="mt-2 whitespace-pre-wrap rounded-xl border border-white/10 bg-card/60 p-3 font-sans text-sm leading-relaxed">
@@ -113,7 +124,10 @@ export function ReviewDialog({
 
             {extraContext.trim() && (
               <section aria-labelledby="rv-extra">
-                <h3 id="rv-extra" className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                <h3
+                  id="rv-extra"
+                  className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground"
+                >
                   Extra context
                 </h3>
                 <pre className="mt-2 whitespace-pre-wrap rounded-xl border border-white/10 bg-card/60 p-3 font-sans text-sm leading-relaxed">
@@ -124,11 +138,15 @@ export function ReviewDialog({
 
             {lyrics.trim() && (
               <section aria-labelledby="rv-lyrics">
-                <h3 id="rv-lyrics" className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                <h3
+                  id="rv-lyrics"
+                  className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground"
+                >
                   Lyrics
                 </h3>
                 <p className="mt-2 rounded-xl border border-white/10 bg-background/40 p-3 text-xs text-muted-foreground">
-                  🔒 Full-length lyrics are kept private. You'll hear them in your free preview, then unlock the full downloadable track.
+                  🔒 Full-length lyrics are kept private. You'll hear them in your free preview,
+                  then unlock the full downloadable track.
                 </p>
               </section>
             )}

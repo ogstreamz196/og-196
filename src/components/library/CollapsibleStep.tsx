@@ -43,9 +43,7 @@ export function CollapsibleStep({
       aria-labelledby={`step-${step}-label`}
       className={cn(
         "overflow-hidden rounded-2xl border transition-colors",
-        done
-          ? "border-emerald-400/25 bg-emerald-500/[0.04]"
-          : "border-white/10 bg-card/40",
+        done ? "border-emerald-400/25 bg-emerald-500/[0.04]" : "border-white/10 bg-card/40",
       )}
     >
       <button

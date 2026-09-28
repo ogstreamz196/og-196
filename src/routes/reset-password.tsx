@@ -63,7 +63,10 @@ function ResetPasswordPage() {
       });
       if (error) throw error;
       setCooldown(RESEND_COOLDOWN_S);
-      setStatus({ tone: "ok", text: `New reset link sent to ${target}. Check your inbox and spam folder.` });
+      setStatus({
+        tone: "ok",
+        text: `New reset link sent to ${target}. Check your inbox and spam folder.`,
+      });
       toast.success("Reset email sent");
     } catch (err) {
       const text = err instanceof Error ? err.message : "Could not send the reset email";
@@ -120,7 +123,6 @@ function ResetPasswordPage() {
     </div>
   );
 
-
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (password.length < 5) {
@@ -143,7 +145,6 @@ function ResetPasswordPage() {
       // End the temporary recovery session so the user signs in fresh.
       await supabase.auth.signOut().catch(() => {});
       setTimeout(() => navigate({ to: "/welcome" }), 1800);
-
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not update your password");
     } finally {
@@ -184,7 +185,11 @@ function ResetPasswordPage() {
               This reset link is invalid or has expired. Send yourself a fresh one below.
             </p>
             {resendBlock}
-            <Button asChild variant="ghost" className="h-11 w-full font-display font-black uppercase tracking-wide">
+            <Button
+              asChild
+              variant="ghost"
+              className="h-11 w-full font-display font-black uppercase tracking-wide"
+            >
               <Link to="/welcome">Back to sign in</Link>
             </Button>
           </div>
@@ -192,7 +197,10 @@ function ResetPasswordPage() {
           <>
             <form onSubmit={submit} className="space-y-3">
               <div className="space-y-1.5">
-                <Label htmlFor="rp-password" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                <Label
+                  htmlFor="rp-password"
+                  className="text-xs font-bold uppercase tracking-wider text-muted-foreground"
+                >
                   New password
                 </Label>
                 <Input
@@ -207,7 +215,10 @@ function ResetPasswordPage() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="rp-confirm" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                <Label
+                  htmlFor="rp-confirm"
+                  className="text-xs font-bold uppercase tracking-wider text-muted-foreground"
+                >
                   Confirm password
                 </Label>
                 <Input
@@ -221,14 +232,21 @@ function ResetPasswordPage() {
                   required
                 />
               </div>
-              <Button type="submit" disabled={busy} className="h-12 w-full font-display text-base font-black uppercase tracking-wide">
-                {busy ? <Loader2 className="h-5 w-5 animate-spin" aria-hidden /> : "Update password"}
+              <Button
+                type="submit"
+                disabled={busy}
+                className="h-12 w-full font-display text-base font-black uppercase tracking-wide"
+              >
+                {busy ? (
+                  <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
+                ) : (
+                  "Update password"
+                )}
               </Button>
             </form>
             <div className="mt-5 border-t border-white/10 pt-4">{resendBlock}</div>
           </>
         )}
-
       </section>
     </main>
   );
@@ -242,12 +260,14 @@ export const Route = createFileRoute("/reset-password")({
       { title: "Reset your password | OG Streamz" },
       {
         name: "description",
-        content: "Set a new password for your OG Streamz account using the secure reset link we emailed you.",
+        content:
+          "Set a new password for your OG Streamz account using the secure reset link we emailed you.",
       },
       { property: "og:title", content: "Reset your password | OG Streamz" },
       {
         property: "og:description",
-        content: "Set a new password for your OG Streamz account using the secure reset link we emailed you.",
+        content:
+          "Set a new password for your OG Streamz account using the secure reset link we emailed you.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

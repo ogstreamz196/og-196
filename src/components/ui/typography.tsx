@@ -34,11 +34,7 @@ export function Display<T extends React.ElementType = "h1">({
   const Tag = (as ?? "h1") as React.ElementType;
   return (
     <Tag
-      className={cn(
-        "text-display text-foreground",
-        cartoon && "font-cartoon",
-        className,
-      )}
+      className={cn("text-display text-foreground", cartoon && "font-cartoon", className)}
       {...rest}
     />
   );
@@ -73,12 +69,9 @@ export function StickerCard({
 }
 
 type HeadingLevel = 1 | 2 | 3;
-type HeadingProps = PolymorphicProps<
-  React.ElementType,
-  { level?: HeadingLevel }
->;
+type HeadingProps = PolymorphicProps<React.ElementType, { level?: HeadingLevel }>;
 export function Heading({ as, level = 2, className, ...rest }: HeadingProps) {
-  const Tag = (as ?? (`h${level}` as React.ElementType));
+  const Tag = as ?? (`h${level}` as React.ElementType);
   const sizeClass = level === 1 ? "text-h1" : level === 2 ? "text-h2" : "text-h3";
   return <Tag className={cn(sizeClass, "text-foreground", className)} {...rest} />;
 }
@@ -87,8 +80,7 @@ type BodySize = "lg" | "md" | "sm";
 type BodyProps = PolymorphicProps<React.ElementType, { size?: BodySize }>;
 export function Body({ as, size = "md", className, ...rest }: BodyProps) {
   const Tag = (as ?? "p") as React.ElementType;
-  const sizeClass =
-    size === "lg" ? "text-body-lg" : size === "sm" ? "text-body-sm" : "text-body";
+  const sizeClass = size === "lg" ? "text-body-lg" : size === "sm" ? "text-body-sm" : "text-body";
   return <Tag className={cn(sizeClass, "text-foreground/85", className)} {...rest} />;
 }
 
@@ -105,17 +97,8 @@ export function Kicker<T extends React.ElementType = "span">({
 /* Layout                                                                      */
 /* -------------------------------------------------------------------------- */
 
-type SectionProps = PolymorphicProps<
-  React.ElementType,
-  { tight?: boolean; bleed?: boolean }
->;
-export function Section({
-  as,
-  tight = false,
-  bleed = false,
-  className,
-  ...rest
-}: SectionProps) {
+type SectionProps = PolymorphicProps<React.ElementType, { tight?: boolean; bleed?: boolean }>;
+export function Section({ as, tight = false, bleed = false, className, ...rest }: SectionProps) {
   const Tag = (as ?? "section") as React.ElementType;
   return (
     <Tag
@@ -129,9 +112,6 @@ export function Section({
   );
 }
 
-export function SectionStack({
-  className,
-  ...rest
-}: React.HTMLAttributes<HTMLDivElement>) {
+export function SectionStack({ className, ...rest }: React.HTMLAttributes<HTMLDivElement>) {
   return <div className={cn("section-stack", className)} {...rest} />;
 }

@@ -31,7 +31,8 @@ export function DeleteMyAccount() {
       <div>
         <h2 className="font-semibold text-destructive">Delete account</h2>
         <p className="text-xs text-muted-foreground">
-          Permanently deletes your account, songs, coins and linked data. Purchases are not refundable after deletion. This cannot be undone.
+          Permanently deletes your account, songs, coins and linked data. Purchases are not
+          refundable after deletion. This cannot be undone.
         </p>
       </div>
       {!open ? (
@@ -40,11 +41,24 @@ export function DeleteMyAccount() {
         </Button>
       ) : (
         <div className="flex flex-col gap-2 sm:flex-row">
-          <Input aria-label="Type DELETE to confirm" placeholder="Type DELETE" value={text} onChange={(e) => setText(e.target.value)} />
+          <Input
+            aria-label="Type DELETE to confirm"
+            placeholder="Type DELETE"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+          />
           <Button variant="destructive" disabled={text !== "DELETE" || busy} onClick={run}>
             {busy ? "Deleting…" : "Confirm delete"}
           </Button>
-          <Button variant="outline" onClick={() => { setOpen(false); setText(""); }}>Cancel</Button>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setOpen(false);
+              setText("");
+            }}
+          >
+            Cancel
+          </Button>
         </div>
       )}
     </section>

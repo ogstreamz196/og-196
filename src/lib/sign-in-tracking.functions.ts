@@ -34,9 +34,10 @@ async function sendTelegramDirect(
       });
       if (res.ok) return { ok: true, attempts: attempt };
       status = res.status;
-      const j = (await res.json().catch(() => null)) as
-        | { description?: string; parameters?: { retry_after?: number } }
-        | null;
+      const j = (await res.json().catch(() => null)) as {
+        description?: string;
+        parameters?: { retry_after?: number };
+      } | null;
       desc = j?.description ?? `http_${res.status}`;
       lastErr = desc;
 
@@ -121,10 +122,7 @@ export const recordSignIn = createServerFn({ method: "POST" })
     return { ok: true as const, isSignup };
   });
 
-async function notifyBosses(ev: {
-  userId: string;
-  isSignup: boolean;
-}) {
+async function notifyBosses(ev: { userId: string; isSignup: boolean }) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
   // All admins/bosses with a Telegram chat id
@@ -139,9 +137,7 @@ async function notifyBosses(ev: {
     .from("boss_notification_prefs")
     .select("*")
     .in("user_id", adminIds);
-  const prefsMap = new Map(
-    (prefsRows ?? []).map((p) => [p.user_id, p]),
-  );
+  const prefsMap = new Map((prefsRows ?? []).map((p) => [p.user_id, p]));
 
   const { data: bossProfiles } = await supabaseAdmin
     .from("profiles")
@@ -160,8 +156,7 @@ async function notifyBosses(ev: {
   for (const bossId of adminIds) {
     const prefs = prefsMap.get(bossId);
     const notify = prefs
-      ? (ev.isSignup && prefs.notify_on_signup) ||
-        (prefs.notify_every_signin && !ev.isSignup)
+      ? (ev.isSignup && prefs.notify_on_signup) || (prefs.notify_every_signin && !ev.isSignup)
       : ev.isSignup;
 
     if (!notify) continue;
@@ -189,19 +184,16 @@ async function notifyBosses(ev: {
           sent_at: sendResult.ok ? new Date().toISOString() : null,
           last_error: sendResult.ok
             ? null
-            : (sendResult.stale ? `stale_chat:${sendResult.error}` : sendResult.error) ?? "send_failed",
+            : ((sendResult.stale ? `stale_chat:${sendResult.error}` : sendResult.error) ??
+              "send_failed"),
         })
         .eq("id", q.id);
     }
   }
-
 }
 
 function escapeHtml(s: string): string {
-  return s
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;");
+  return s.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 }
 
 // ---------- Boss notification preferences ----------
@@ -239,16 +231,20 @@ export const getBossNotifPrefs = createServerFn({ method: "GET" })
 
 export const updateBossNotifPrefs = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: Partial<{
-    notify_on_signup: boolean;
-    notify_every_signin: boolean;
-    notify_new_device: boolean;
-    notify_new_country: boolean;
-    notify_suspicious: boolean;
-    sheets_sync_enabled: boolean;
-    quiet_hours_start: number | null;
-    quiet_hours_end: number | null;
-  }>) => d ?? {})
+  .inputValidator(
+    (
+      d: Partial<{
+        notify_on_signup: boolean;
+        notify_every_signin: boolean;
+        notify_new_device: boolean;
+        notify_new_country: boolean;
+        notify_suspicious: boolean;
+        sheets_sync_enabled: boolean;
+        quiet_hours_start: number | null;
+        quiet_hours_end: number | null;
+      }>,
+    ) => d ?? {},
+  )
   .handler(async ({ data, context }) => {
     const supabase = context.supabase as any;
     const { data: roleOk } = await supabase.rpc("has_role", {
@@ -332,9 +328,7 @@ export const listUsersPro = createServerFn({ method: "GET" })
       .order("last_sign_in_at", { ascending: false, nullsFirst: false })
       .limit(200);
     if (data.search) {
-      q = q.or(
-        `email.ilike.%${data.search}%,display_name.ilike.%${data.search}%`,
-      );
+      q = q.or(`email.ilike.%${data.search}%,display_name.ilike.%${data.search}%`);
     }
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);

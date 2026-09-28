@@ -37,7 +37,9 @@ export function VariationsCard({
           <Sparkles className="h-4 w-4 text-primary" /> Alternate takes
         </CardTitle>
         <CardDescription>
-          Same lyrics, different sample. Reveal each for {variationCost} coin{variationCost === 1 ? "" : "s"} (half of a fresh generation), or basket them and check out with OG Coins.
+          Same lyrics, different sample. Reveal each for {variationCost} coin
+          {variationCost === 1 ? "" : "s"} (half of a fresh generation), or basket them and check
+          out with OG Coins.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-2">
@@ -46,17 +48,22 @@ export function VariationsCard({
             const inBasket = basket.has(v.id);
             const busy = busyVariation === v.id;
             return (
-              <li key={v.id} className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-card/40 p-3">
+              <li
+                key={v.id}
+                className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-card/40 p-3"
+              >
                 <div className="min-w-0">
                   <div className="truncate text-sm font-medium">
-                    {v.revealed ? (v.title || "Alt take") : "Locked alt take"}
+                    {v.revealed ? v.title || "Alt take" : "Locked alt take"}
                   </div>
                   <div className="text-xs text-muted-foreground">
                     {v.revealed ? "Revealed" : `${variationCost} coins to reveal`}
                   </div>
                 </div>
                 {v.revealed ? (
-                  <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">Unlocked</span>
+                  <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">
+                    Unlocked
+                  </span>
                 ) : (
                   <div className="flex gap-2">
                     <Button
@@ -66,7 +73,11 @@ export function VariationsCard({
                       disabled={busy || checkingOut}
                       aria-pressed={inBasket}
                     >
-                      {inBasket ? <Check className="h-3.5 w-3.5" aria-hidden="true" /> : <Coins className="h-3.5 w-3.5" aria-hidden="true" />}
+                      {inBasket ? (
+                        <Check className="h-3.5 w-3.5" aria-hidden="true" />
+                      ) : (
+                        <Coins className="h-3.5 w-3.5" aria-hidden="true" />
+                      )}
                       {inBasket ? "In basket" : "Add"}
                     </Button>
                     <Button
@@ -74,9 +85,11 @@ export function VariationsCard({
                       onClick={() => onRevealOne(v.id)}
                       disabled={busy || checkingOut || balance < variationCost}
                     >
-                      {busy
-                        ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
-                        : <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />}
+                      {busy ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                      ) : (
+                        <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+                      )}
                       Reveal
                     </Button>
                   </div>
@@ -99,7 +112,11 @@ export function VariationsCard({
                 onClick={onCheckoutBasket}
                 disabled={checkingOut || balance < basket.size * variationCost}
               >
-                {checkingOut ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Coins className="h-3.5 w-3.5" />}
+                {checkingOut ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Coins className="h-3.5 w-3.5" />
+                )}
                 Checkout
               </Button>
             </div>

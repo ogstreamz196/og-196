@@ -213,7 +213,12 @@ export function BindReferrerCard() {
           : supabase.rpc("lookup_referrer", { p_referrer: parsed.value });
       const { data, error } = await rpc;
       if (error) throw error;
-      const r = data as { found: boolean; referrer_id?: string; referrer_name?: string; referrer_code?: string };
+      const r = data as {
+        found: boolean;
+        referrer_id?: string;
+        referrer_name?: string;
+        referrer_code?: string;
+      };
       if (!r.found) {
         setLookupErr(
           parsed.kind === "code"
@@ -281,8 +286,8 @@ export function BindReferrerCard() {
         <h2 className="font-display text-lg font-bold">Bind your OG Leader (one-time, forever)</h2>
       </div>
       <p className="text-sm text-muted-foreground">
-        Paste the <span className="font-semibold text-foreground">OG Leader code</span>{" "}
-        (<span className="font-mono">OG-XXXXXX</span>), ID, or referral link of the person who
+        Paste the <span className="font-semibold text-foreground">OG Leader code</span> (
+        <span className="font-mono">OG-XXXXXX</span>), ID, or referral link of the person who
         brought you in. Once locked, 10% of every OG Coin you ever burn goes to their OG Vault —
         automatically, for life. You can only do this once.
       </p>

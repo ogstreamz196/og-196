@@ -75,19 +75,19 @@ describe.skipIf(!HAS_DB)("get_referral_summary fallback", () => {
   it("falls back to a safe label when the referee profile is missing", () => {
     const json = asUser(referrer, `SELECT public.get_referral_summary()::text`);
     const summary = JSON.parse(json);
-    const orphan = (summary.recent as Array<{
-      referee_id: string | null;
-      referee_name: string | null;
-      amount: number;
-    }>).find((r) => r.referee_id === orphanReferee);
+    const orphan = (
+      summary.recent as Array<{
+        referee_id: string | null;
+        referee_name: string | null;
+        amount: number;
+      }>
+    ).find((r) => r.referee_id === orphanReferee);
 
     expect(orphan).toBeTruthy();
     expect(orphan!.amount).toBe(7);
     // Never NULL — the SQL COALESCE ladder must hand back a non-empty label.
     expect(orphan!.referee_name).toBeTruthy();
     expect(typeof orphan!.referee_name).toBe("string");
-    expect(["Referred user", "Unknown", "Developer"]).toContain(
-      orphan!.referee_name,
-    );
+    expect(["Referred user", "Unknown", "Developer"]).toContain(orphan!.referee_name);
   });
 });

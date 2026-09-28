@@ -28,7 +28,9 @@ function AdminSystemHub() {
   if (isLoading) {
     return (
       <DashboardShell title="System">
-        <div className="py-24 text-center text-sm text-muted-foreground">Checking admin access…</div>
+        <div className="py-24 text-center text-sm text-muted-foreground">
+          Checking admin access…
+        </div>
       </DashboardShell>
     );
   }

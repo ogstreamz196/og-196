@@ -39,9 +39,11 @@ async function callTg(method: string, payload?: unknown) {
     },
     body: payload ? JSON.stringify(payload) : "{}",
   });
-  const body = (await res.json().catch(() => null)) as
-    | { ok?: boolean; result?: Record<string, unknown>; description?: string }
-    | null;
+  const body = (await res.json().catch(() => null)) as {
+    ok?: boolean;
+    result?: Record<string, unknown>;
+    description?: string;
+  } | null;
   return { res, body };
 }
 
@@ -140,9 +142,7 @@ export const getMyTelegramChecklist = createServerFn({ method: "GET" })
     // 4) Personal token + chat link status
     const { data: profile } = await supabaseAdmin
       .from("profiles")
-      .select(
-        "telegram_link_token, telegram_chat_id, telegram_username, telegram_linked_at",
-      )
+      .select("telegram_link_token, telegram_chat_id, telegram_username, telegram_linked_at")
       .eq("id", context.userId)
       .maybeSingle();
 
@@ -175,15 +175,14 @@ export const getMyTelegramChecklist = createServerFn({ method: "GET" })
         const ok =
           res.ok &&
           body?.ok === true &&
-          Number((body.result as { id?: number })?.id) ===
-            Number(profile.telegram_chat_id);
+          Number((body.result as { id?: number })?.id) === Number(profile.telegram_chat_id);
         steps.push({
           id: "chat_verified",
           label: "OG Bot can reach your chat",
           status: ok ? "ok" : "failed",
           detail: ok
             ? `Verified${profile.telegram_linked_at ? ` since ${new Date(profile.telegram_linked_at).toLocaleString()}` : ""}.`
-            : body?.description ?? `HTTP ${res.status}`,
+            : (body?.description ?? `HTTP ${res.status}`),
         });
       } catch (e) {
         steps.push({

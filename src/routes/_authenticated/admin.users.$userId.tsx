@@ -3,7 +3,26 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
-  Loader2, ShieldCheck, ArrowLeft, Crown, Coins, Plus, Minus, UserCog, Mail, Calendar, Fingerprint, Bot, Send, Copy, MessageCircle, RotateCw, CheckCircle2, AlertTriangle, Clock, Trash2,
+  Loader2,
+  ShieldCheck,
+  ArrowLeft,
+  Crown,
+  Coins,
+  Plus,
+  Minus,
+  UserCog,
+  Mail,
+  Calendar,
+  Fingerprint,
+  Bot,
+  Send,
+  Copy,
+  MessageCircle,
+  RotateCw,
+  CheckCircle2,
+  AlertTriangle,
+  Clock,
+  Trash2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { maskDevIdentity } from "@/lib/dev-identity";
@@ -12,7 +31,16 @@ import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { deleteUserAccount } from "@/lib/admin-delete-account.functions";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -68,7 +96,9 @@ function UserSettingsPage() {
     queryFn: async (): Promise<ProfileRow | null> => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, email, display_name, coin_balance, created_at, telegram_chat_id, telegram_username")
+        .select(
+          "id, email, display_name, coin_balance, created_at, telegram_chat_id, telegram_username",
+        )
         .eq("id", userId)
         .maybeSingle();
       if (error) throw error;
@@ -208,7 +238,9 @@ function UserSettingsPage() {
             <UserCog className="h-5 w-5 text-primary-foreground" />
           </div>
           <div className="flex-1 min-w-0">
-            <h2 className="truncate font-semibold">{profile.display_name ?? profile.email ?? "Unnamed user"}</h2>
+            <h2 className="truncate font-semibold">
+              {profile.display_name ?? profile.email ?? "Unnamed user"}
+            </h2>
             <p className="truncate text-xs text-muted-foreground">{profile.email}</p>
           </div>
           <Link to="/admin/users">
@@ -220,30 +252,68 @@ function UserSettingsPage() {
 
         {/* Overview */}
         <section className="grid gap-4 sm:grid-cols-3">
-          <InfoCard icon={<Mail className="h-4 w-4" />} label="Email" value={profile.email ?? "—"} />
-          <InfoCard icon={<Coins className="h-4 w-4 text-coin" />} label="Balance" value={String(profile.coin_balance ?? 0)} />
-          <InfoCard icon={<Calendar className="h-4 w-4" />} label="Joined" value={new Date(profile.created_at).toLocaleDateString()} />
+          <InfoCard
+            icon={<Mail className="h-4 w-4" />}
+            label="Email"
+            value={profile.email ?? "—"}
+          />
+          <InfoCard
+            icon={<Coins className="h-4 w-4 text-coin" />}
+            label="Balance"
+            value={String(profile.coin_balance ?? 0)}
+          />
+          <InfoCard
+            icon={<Calendar className="h-4 w-4" />}
+            label="Joined"
+            value={new Date(profile.created_at).toLocaleDateString()}
+          />
         </section>
 
         {isBoss && !roles.some((role) => ["admin", "boss", "dev"].includes(role)) && (
           <section className="border-t border-destructive/40 pt-6">
             <h3 className="font-semibold text-destructive">Delete account</h3>
-            <p className="mt-1 text-sm text-muted-foreground">Permanently removes this account and its linked records. This cannot be undone.</p>
-            <AlertDialog onOpenChange={(open) => { if (!open) setConfirmDelete(""); }}>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Permanently removes this account and its linked records. This cannot be undone.
+            </p>
+            <AlertDialog
+              onOpenChange={(open) => {
+                if (!open) setConfirmDelete("");
+              }}
+            >
               <AlertDialogTrigger asChild>
-                <Button variant="destructive" className="mt-4 gap-2"><Trash2 className="h-4 w-4" /> Delete account</Button>
+                <Button variant="destructive" className="mt-4 gap-2">
+                  <Trash2 className="h-4 w-4" /> Delete account
+                </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Delete {profile.display_name ?? profile.email ?? "this account"}?</AlertDialogTitle>
-                  <AlertDialogDescription>All linked account data will be permanently removed. Type DELETE to confirm.</AlertDialogDescription>
+                  <AlertDialogTitle>
+                    Delete {profile.display_name ?? profile.email ?? "this account"}?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    All linked account data will be permanently removed. Type DELETE to confirm.
+                  </AlertDialogDescription>
                 </AlertDialogHeader>
                 <Label htmlFor="confirm-delete-account">Confirmation</Label>
-                <Input id="confirm-delete-account" value={confirmDelete} onChange={(event) => setConfirmDelete(event.target.value)} placeholder="DELETE" autoComplete="off" />
+                <Input
+                  id="confirm-delete-account"
+                  value={confirmDelete}
+                  onChange={(event) => setConfirmDelete(event.target.value)}
+                  placeholder="DELETE"
+                  autoComplete="off"
+                />
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <Button variant="destructive" disabled={confirmDelete !== "DELETE" || deleteAccount.isPending} onClick={() => deleteAccount.mutate()}>
-                    {deleteAccount.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
+                  <Button
+                    variant="destructive"
+                    disabled={confirmDelete !== "DELETE" || deleteAccount.isPending}
+                    onClick={() => deleteAccount.mutate()}
+                  >
+                    {deleteAccount.isPending ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="mr-2 h-4 w-4" />
+                    )}
                     Permanently delete
                   </Button>
                 </AlertDialogFooter>
@@ -264,7 +334,10 @@ function UserSettingsPage() {
               <Input
                 id="display-name"
                 value={label}
-                onChange={(e) => { setLabel(e.target.value); setLabelDirty(true); }}
+                onChange={(e) => {
+                  setLabel(e.target.value);
+                  setLabelDirty(true);
+                }}
                 maxLength={80}
                 placeholder="No label"
               />
@@ -287,7 +360,9 @@ function UserSettingsPage() {
         <section className="rounded-2xl border border-border bg-card p-6 shadow-card space-y-4">
           <header>
             <h3 className="font-semibold">Roles & access</h3>
-            <p className="text-sm text-muted-foreground">Grant VIP perks, OG Bot access, and review role assignments.</p>
+            <p className="text-sm text-muted-foreground">
+              Grant VIP perks, OG Bot access, and review role assignments.
+            </p>
           </header>
 
           <RoleToggleRow
@@ -334,13 +409,14 @@ function UserSettingsPage() {
             paramKey="make_boss"
           />
 
-
           <div className="flex items-center justify-between rounded-xl border border-border bg-background/40 p-4 opacity-80">
             <div className="flex items-center gap-3">
               <ShieldCheck className="h-5 w-5 text-primary" />
               <div>
                 <Label className="text-sm font-medium">Boss / admin</Label>
-                <p className="text-xs text-muted-foreground">Provisioned in the database for security.</p>
+                <p className="text-xs text-muted-foreground">
+                  Provisioned in the database for security.
+                </p>
               </div>
             </div>
             <Switch checked={isAdminUser} disabled />
@@ -349,11 +425,16 @@ function UserSettingsPage() {
           <div className="flex flex-wrap gap-1.5">
             {roles.length === 0 ? (
               <span className="text-xs text-muted-foreground">No extra roles</span>
-            ) : roles.map((r) => (
-              <span key={r} className="rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide">
-                {r}
-              </span>
-            ))}
+            ) : (
+              roles.map((r) => (
+                <span
+                  key={r}
+                  className="rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide"
+                >
+                  {r}
+                </span>
+              ))
+            )}
           </div>
         </section>
 
@@ -361,7 +442,9 @@ function UserSettingsPage() {
         <section className="rounded-2xl border border-border bg-card p-6 shadow-card space-y-4">
           <header>
             <h3 className="font-semibold">Coin balance</h3>
-            <p className="text-sm text-muted-foreground">Set an exact balance, or adjust by a delta. All changes are audited.</p>
+            <p className="text-sm text-muted-foreground">
+              Set an exact balance, or adjust by a delta. All changes are audited.
+            </p>
           </header>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -374,9 +457,15 @@ function UserSettingsPage() {
                   min={0}
                   max={100000000}
                   value={balance}
-                  onChange={(e) => { setBalance(e.target.value); setBalanceDirty(true); }}
+                  onChange={(e) => {
+                    setBalance(e.target.value);
+                    setBalanceDirty(true);
+                  }}
                 />
-                <Button onClick={() => saveBalance.mutate()} disabled={!balanceDirty || saveBalance.isPending}>
+                <Button
+                  onClick={() => saveBalance.mutate()}
+                  disabled={!balanceDirty || saveBalance.isPending}
+                >
                   {saveBalance.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Save
                 </Button>
@@ -475,8 +564,7 @@ function TelegramDmCard({
     queryFn: async () => listFn({ data: { userId } }) as Promise<TelegramQueueRow[]>,
   });
 
-  const invalidate = () =>
-    qc.invalidateQueries({ queryKey: ["telegram-dm-queue", userId] });
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["telegram-dm-queue", userId] });
 
   const send = useMutation({
     mutationFn: async () => sendFn({ data: { userId, text } }),
@@ -528,9 +616,7 @@ function TelegramDmCard({
         </div>
         <span
           className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
-            linked
-              ? "bg-emerald-500/15 text-emerald-400"
-              : "bg-muted text-muted-foreground"
+            linked ? "bg-emerald-500/15 text-emerald-400" : "bg-muted text-muted-foreground"
           }`}
         >
           {linked ? "Linked" : "Not linked"}
@@ -539,7 +625,9 @@ function TelegramDmCard({
 
       {linked ? (
         <div className="space-y-2">
-          <Label htmlFor="og-bot-msg" className="text-xs">Message</Label>
+          <Label htmlFor="og-bot-msg" className="text-xs">
+            Message
+          </Label>
           <Textarea
             id="og-bot-msg"
             value={text}
@@ -600,8 +688,20 @@ function TelegramDmCard({
             </Button>
           </div>
           <div className="mt-1 flex items-center gap-2">
-            <Input readOnly value={connectLink} className="font-mono text-xs" onFocus={(e) => e.currentTarget.select()} />
-            <Button type="button" variant="outline" size="icon" onClick={copy} title="Copy link" aria-label="Copy registration link">
+            <Input
+              readOnly
+              value={connectLink}
+              className="font-mono text-xs"
+              onFocus={(e) => e.currentTarget.select()}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={copy}
+              title="Copy link"
+              aria-label="Copy registration link"
+            >
               <Copy className="h-4 w-4" />
             </Button>
           </div>
@@ -629,14 +729,14 @@ function TelegramDmCard({
                 row.status === "sent"
                   ? CheckCircle2
                   : row.status === "failed"
-                  ? AlertTriangle
-                  : Clock;
+                    ? AlertTriangle
+                    : Clock;
               const tone =
                 row.status === "sent"
                   ? "text-emerald-400"
                   : row.status === "failed"
-                  ? "text-red-400"
-                  : "text-amber-400";
+                    ? "text-red-400"
+                    : "text-amber-400";
               return (
                 <li
                   key={row.id}
@@ -654,9 +754,7 @@ function TelegramDmCard({
                         {row.body.length > 240 ? `${row.body.slice(0, 240)}…` : row.body}
                       </p>
                       {row.status === "failed" && row.last_error ? (
-                        <p className="mt-1 text-[11px] text-red-400">
-                          ⚠ {row.last_error}
-                        </p>
+                        <p className="mt-1 text-[11px] text-red-400">⚠ {row.last_error}</p>
                       ) : null}
                     </div>
                     {row.status === "failed" ? (
@@ -691,7 +789,9 @@ function TelegramDmCard({
 function InfoCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="rounded-2xl border border-border bg-card p-4">
-      <div className="flex items-center gap-2 text-xs text-muted-foreground">{icon} {label}</div>
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        {icon} {label}
+      </div>
       <div className="mt-2 truncate text-base font-semibold">{value}</div>
     </div>
   );
@@ -708,7 +808,16 @@ interface RoleToggleRowProps {
   paramKey: "make_vip" | "make_og" | "make_dev" | "make_boss";
 }
 
-function RoleToggleRow({ icon, title, description, checked, userId, role: _role, rpc, paramKey }: RoleToggleRowProps) {
+function RoleToggleRow({
+  icon,
+  title,
+  description,
+  checked,
+  userId,
+  role: _role,
+  rpc,
+  paramKey,
+}: RoleToggleRowProps) {
   const qc = useQueryClient();
   const mut = useMutation({
     mutationFn: async (next: boolean) => {

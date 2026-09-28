@@ -91,7 +91,6 @@ export function DebugContextPage() {
     );
   }
 
-
   const rows = query.data ?? [];
 
   return (
@@ -135,18 +134,13 @@ export function DebugContextPage() {
         ) : (
           <ul className="space-y-3">
             {rows.map((r) => (
-              <li
-                key={r.id}
-                className="rounded-2xl border border-border bg-card/60 p-4 sm:p-5"
-              >
+              <li key={r.id} className="rounded-2xl border border-border bg-card/60 p-4 sm:p-5">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <div className="min-w-0">
-                    <div className="truncate font-semibold">
-                      {r.title || "Untitled"}
-                    </div>
+                    <div className="truncate font-semibold">{r.title || "Untitled"}</div>
                     <div className="text-xs text-muted-foreground">
-                      {r.email ?? r.user_id.slice(0, 8)} ·{" "}
-                      {new Date(r.created_at).toLocaleString()} · {r.status}
+                      {r.email ?? r.user_id.slice(0, 8)} · {new Date(r.created_at).toLocaleString()}{" "}
+                      · {r.status}
                     </div>
                   </div>
                   <Link

@@ -33,7 +33,9 @@ export const purchaseVipPass = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data, error } = await supabaseAdmin.rpc("purchase_vip_pass_for_user", { p_user: context.userId });
+    const { data, error } = await supabaseAdmin.rpc("purchase_vip_pass_for_user", {
+      p_user: context.userId,
+    });
     if (error) throw new Error(error.message);
     return data as { ok: boolean; already_owned: boolean; username: string; password: string };
   });

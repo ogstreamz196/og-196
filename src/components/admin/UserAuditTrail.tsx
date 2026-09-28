@@ -40,8 +40,15 @@ export function UserAuditTrail({ userId, email }: { userId: string; email?: stri
           Last sync {lastSync}
           {latestTx && <> · last change {new Date(latestTx.created_at).toLocaleString()}</>}
         </span>
-        <Button size="icon" variant="ghost" className="h-7 w-7"
-          onClick={() => q.refetch()} disabled={q.isFetching} title="Refresh" aria-label="Refresh audit trail">
+        <Button
+          size="icon"
+          variant="ghost"
+          className="h-7 w-7"
+          onClick={() => q.refetch()}
+          disabled={q.isFetching}
+          title="Refresh"
+          aria-label="Refresh audit trail"
+        >
           <RefreshCw className={cn("h-3.5 w-3.5", q.isFetching && "animate-spin")} />
         </Button>
       </div>
@@ -63,13 +70,16 @@ export function UserAuditTrail({ userId, email }: { userId: string; email?: stri
                     <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
                       {t.type}
                     </span>
-                    <span className={cn(
-                      "font-semibold tabular-nums",
-                      t.amount > 0 && "text-primary",
-                      t.amount < 0 && "text-destructive",
-                      t.amount === 0 && "text-muted-foreground",
-                    )}>
-                      {t.amount > 0 ? "+" : ""}{t.amount}
+                    <span
+                      className={cn(
+                        "font-semibold tabular-nums",
+                        t.amount > 0 && "text-primary",
+                        t.amount < 0 && "text-destructive",
+                        t.amount === 0 && "text-muted-foreground",
+                      )}
+                    >
+                      {t.amount > 0 ? "+" : ""}
+                      {t.amount}
                     </span>
                     <span className="ml-auto text-xs text-muted-foreground whitespace-nowrap">
                       {new Date(t.created_at).toLocaleString()}
@@ -86,7 +96,6 @@ export function UserAuditTrail({ userId, email }: { userId: string; email?: stri
       ) : (
         <p className="text-sm text-muted-foreground">No activity on this account yet.</p>
       )}
-
     </div>
   );
 }

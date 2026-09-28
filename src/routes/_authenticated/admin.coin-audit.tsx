@@ -8,7 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
 import {
@@ -23,7 +28,6 @@ export const Route = createFileRoute("/_authenticated/admin/coin-audit")({
   },
   component: () => null,
 });
-
 
 export function CoinAuditPage() {
   const audit = useServerFn(auditCoinBalances);
@@ -83,7 +87,9 @@ export function CoinAuditPage() {
 
           <div className="flex flex-wrap items-end gap-3">
             <div className="flex-1 min-w-[240px]">
-              <Label htmlFor="uid" className="text-xs">Check a single user (UUID)</Label>
+              <Label htmlFor="uid" className="text-xs">
+                Check a single user (UUID)
+              </Label>
               <Input
                 id="uid"
                 value={userId}
@@ -147,7 +153,9 @@ export function CoinAuditPage() {
                     <TableRow key={r.user_id}>
                       <TableCell>
                         <div className="text-sm font-medium">{r.display_name ?? "—"}</div>
-                        <div className="text-xs text-muted-foreground">{r.email ?? r.user_id.slice(0, 8)}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {r.email ?? r.user_id.slice(0, 8)}
+                        </div>
                       </TableCell>
                       <TableCell className="text-right tabular-nums">{r.balance}</TableCell>
                       <TableCell className="text-right tabular-nums">{r.ledgerSum}</TableCell>
@@ -156,9 +164,12 @@ export function CoinAuditPage() {
                           r.delta > 0 ? "text-amber-400" : "text-destructive"
                         }`}
                       >
-                        {r.delta > 0 ? "+" : ""}{r.delta}
+                        {r.delta > 0 ? "+" : ""}
+                        {r.delta}
                       </TableCell>
-                      <TableCell className="text-right tabular-nums text-muted-foreground">{r.txCount}</TableCell>
+                      <TableCell className="text-right tabular-nums text-muted-foreground">
+                        {r.txCount}
+                      </TableCell>
                       <TableCell className="text-right">
                         <Button
                           size="sm"
@@ -169,7 +180,8 @@ export function CoinAuditPage() {
                               confirm(
                                 `Reconcile ${r.email ?? r.user_id}? Sets balance to ledger sum (${r.ledgerSum}). Writes an admin_reconcile transaction.`,
                               )
-                            ) fix.mutate(r.user_id);
+                            )
+                              fix.mutate(r.user_id);
                           }}
                         >
                           <ShieldCheck className="mr-1.5 h-3.5 w-3.5" />

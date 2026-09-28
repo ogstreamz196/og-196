@@ -36,21 +36,14 @@ function SongCardImpl({ song }: { song: Song }) {
   const isFailed = song.status === "failed";
   const isPending = song.status === "pending" || song.status === "processing";
 
-  const {
-    audioRef,
-    playing,
-    loadingUrl,
-    progress,
-    togglePlay,
-    download,
-    handleEnded,
-  } = useSongAudio({
-    songId: song.id,
-    hasAudio,
-    ready: isReady,
-    sampleSeconds: unlocked ? Number.MAX_SAFE_INTEGER : sampleSeconds,
-    mode: unlocked ? "full" : "preview",
-  });
+  const { audioRef, playing, loadingUrl, progress, togglePlay, download, handleEnded } =
+    useSongAudio({
+      songId: song.id,
+      hasAudio,
+      ready: isReady,
+      sampleSeconds: unlocked ? Number.MAX_SAFE_INTEGER : sampleSeconds,
+      mode: unlocked ? "full" : "preview",
+    });
 
   return (
     <div className="group flex gap-4 rounded-2xl border border-border bg-card p-4 shadow-card transition-all hover:shadow-glow">
@@ -117,7 +110,7 @@ function SongCardImpl({ song }: { song: Song }) {
               <div
                 className="h-full bg-primary transition-all"
                 style={{
-                  width: `${Math.min(100, (progress / (unlocked ? (song.duration_seconds || 180) : sampleSeconds)) * 100)}%`,
+                  width: `${Math.min(100, (progress / (unlocked ? song.duration_seconds || 180 : sampleSeconds)) * 100)}%`,
                 }}
               />
             </div>
@@ -160,12 +153,14 @@ function SongCardImpl({ song }: { song: Song }) {
   );
 }
 
-export const SongCard = memo(SongCardImpl, (a, b) =>
-  a.song.id === b.song.id &&
-  a.song.status === b.song.status &&
-  a.song.audio_path === b.song.audio_path &&
-  a.song.sample_path === b.song.sample_path &&
-  a.song.cover_url === b.song.cover_url &&
-  a.song.title === b.song.title &&
-  a.song.error_message === b.song.error_message,
+export const SongCard = memo(
+  SongCardImpl,
+  (a, b) =>
+    a.song.id === b.song.id &&
+    a.song.status === b.song.status &&
+    a.song.audio_path === b.song.audio_path &&
+    a.song.sample_path === b.song.sample_path &&
+    a.song.cover_url === b.song.cover_url &&
+    a.song.title === b.song.title &&
+    a.song.error_message === b.song.error_message,
 );

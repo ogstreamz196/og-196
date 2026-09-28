@@ -20,7 +20,10 @@ function gatewayHeaders(connectorKey: string) {
 async function gw(url: string, init: RequestInit, connectorKey: string) {
   const res = await fetch(url, {
     ...init,
-    headers: { ...(init.headers as Record<string, string> | undefined), ...gatewayHeaders(connectorKey) },
+    headers: {
+      ...(init.headers as Record<string, string> | undefined),
+      ...gatewayHeaders(connectorKey),
+    },
   });
   if (!res.ok) {
     const text = await res.text().catch(() => "");
@@ -57,7 +60,11 @@ async function ensureUserTab(sheetTitle: string): Promise<void> {
   );
 }
 
-async function writeRange(sheetTitle: string, range: string, values: (string | number | null)[][]): Promise<void> {
+async function writeRange(
+  sheetTitle: string,
+  range: string,
+  values: (string | number | null)[][],
+): Promise<void> {
   // NOTE: do NOT encodeURIComponent the range — the Sheets API requires the
   // literal `!` and `:` characters in the URL path; encoding them yields
   // "Unable to parse range: Sheet1!A1%3AZ1000" (HTTP 400).
@@ -103,10 +110,32 @@ async function buildUserSnapshot(
   const [profileRes, rolesRes, txRes, songsRes, msgsRes, portalsRes] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
     supabase.from("user_roles").select("role").eq("user_id", userId),
-    supabase.from("coin_transactions").select("created_at,type,amount,reference").eq("user_id", userId).order("created_at", { ascending: false }).limit(500),
-    supabase.from("songs").select("id,title,status,style,prompt,duration_seconds,created_at,completed_at,audio_path,cover_url,unlocked,is_variation").eq("user_id", userId).order("created_at", { ascending: false }).limit(500),
-    supabase.from("og_messages").select("created_at,role,content").eq("user_id", userId).order("created_at", { ascending: false }).limit(500),
-    supabase.from("portals").select("id,slug,name,status,created_at").eq("created_by", userId).order("created_at", { ascending: false }).limit(100),
+    supabase
+      .from("coin_transactions")
+      .select("created_at,type,amount,reference")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(500),
+    supabase
+      .from("songs")
+      .select(
+        "id,title,status,style,prompt,duration_seconds,created_at,completed_at,audio_path,cover_url,unlocked,is_variation",
+      )
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(500),
+    supabase
+      .from("og_messages")
+      .select("created_at,role,content")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(500),
+    supabase
+      .from("portals")
+      .select("id,slug,name,status,created_at")
+      .eq("created_by", userId)
+      .order("created_at", { ascending: false })
+      .limit(100),
   ]);
 
   const p = profileRes.data ?? {};
@@ -136,26 +165,67 @@ async function buildUserSnapshot(
     {
       heading: "=== COIN TRANSACTIONS ===",
       columns: ["created_at", "type", "amount", "reference"],
-      rows: (txRes.data ?? []).map((r: { created_at: string; type: string; amount: number; reference: string | null }) => [r.created_at, r.type, r.amount, r.reference ?? ""]),
+      rows: (txRes.data ?? []).map(
+        (r: { created_at: string; type: string; amount: number; reference: string | null }) => [
+          r.created_at,
+          r.type,
+          r.amount,
+          r.reference ?? "",
+        ],
+      ),
     },
     {
       heading: "=== SONGS / GENERATIONS ===",
-      columns: ["created_at", "id", "title", "status", "style", "duration_s", "completed_at", "unlocked", "is_variation", "cover_url", "audio_path", "prompt"],
+      columns: [
+        "created_at",
+        "id",
+        "title",
+        "status",
+        "style",
+        "duration_s",
+        "completed_at",
+        "unlocked",
+        "is_variation",
+        "cover_url",
+        "audio_path",
+        "prompt",
+      ],
       rows: (songsRes.data ?? []).map((s: any) => [
-        s.created_at, s.id, s.title ?? "", s.status ?? "", s.style ?? "",
-        s.duration_seconds ?? "", s.completed_at ?? "", s.unlocked ? "yes" : "no",
-        s.is_variation ? "yes" : "no", s.cover_url ?? "", s.audio_path ?? "", (s.prompt ?? "").slice(0, 500),
+        s.created_at,
+        s.id,
+        s.title ?? "",
+        s.status ?? "",
+        s.style ?? "",
+        s.duration_seconds ?? "",
+        s.completed_at ?? "",
+        s.unlocked ? "yes" : "no",
+        s.is_variation ? "yes" : "no",
+        s.cover_url ?? "",
+        s.audio_path ?? "",
+        (s.prompt ?? "").slice(0, 500),
       ]),
     },
     {
       heading: "=== OG BOT MESSAGES ===",
       columns: ["created_at", "role", "content"],
-      rows: (msgsRes.data ?? []).map((m: { created_at: string; role: string; content: string }) => [m.created_at, m.role, (m.content ?? "").slice(0, 1000)]),
+      rows: (msgsRes.data ?? []).map((m: { created_at: string; role: string; content: string }) => [
+        m.created_at,
+        m.role,
+        (m.content ?? "").slice(0, 1000),
+      ]),
     },
     {
       heading: "=== PORTALS CREATED ===",
       columns: ["created_at", "id", "slug", "name", "status"],
-      rows: (portalsRes.data ?? []).map((p2: { created_at: string; id: string; slug: string; name: string; status: string }) => [p2.created_at, p2.id, p2.slug, p2.name, p2.status]),
+      rows: (portalsRes.data ?? []).map(
+        (p2: { created_at: string; id: string; slug: string; name: string; status: string }) => [
+          p2.created_at,
+          p2.id,
+          p2.slug,
+          p2.name,
+          p2.status,
+        ],
+      ),
     },
   ];
 
@@ -169,8 +239,14 @@ export const syncUserActivity = createServerFn({ method: "POST" })
     const targetId = data.userId ?? context.userId;
     // Only allow dev/admin to sync other users; users can sync themselves.
     if (targetId !== context.userId) {
-      const { data: isDev } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "dev" });
-      const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+      const { data: isDev } = await context.supabase.rpc("has_role", {
+        _user_id: context.userId,
+        _role: "dev",
+      });
+      const { data: isAdmin } = await context.supabase.rpc("has_role", {
+        _user_id: context.userId,
+        _role: "admin",
+      });
       if (!isDev && !isAdmin) throw new Error("forbidden");
     }
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -184,11 +260,20 @@ export const syncUserActivity = createServerFn({ method: "POST" })
 export const syncAllUsersActivity = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data: isDev } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "dev" });
-    const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+    const { data: isDev } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "dev",
+    });
+    const { data: isAdmin } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
     if (!isDev && !isAdmin) throw new Error("forbidden");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: users, error } = await supabaseAdmin.from("profiles").select("id").order("created_at", { ascending: true });
+    const { data: users, error } = await supabaseAdmin
+      .from("profiles")
+      .select("id")
+      .order("created_at", { ascending: true });
     if (error) throw error;
     let synced = 0;
     for (const u of users ?? []) {
@@ -220,8 +305,14 @@ export const archiveFinalSong = createServerFn({ method: "POST" })
 
     // Only owner or dev/admin
     if (song.user_id !== context.userId) {
-      const { data: isDev } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "dev" });
-      const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+      const { data: isDev } = await context.supabase.rpc("has_role", {
+        _user_id: context.userId,
+        _role: "dev",
+      });
+      const { data: isAdmin } = await context.supabase.rpc("has_role", {
+        _user_id: context.userId,
+        _role: "admin",
+      });
       if (!isDev && !isAdmin) throw new Error("forbidden");
     }
 
@@ -233,7 +324,9 @@ export const archiveFinalSong = createServerFn({ method: "POST" })
     // Resolve signed URL from storage if it's a storage path; otherwise fetch directly.
     let downloadUrl = song.audio_path;
     if (!/^https?:\/\//.test(song.audio_path)) {
-      const { data: signed } = await supabaseAdmin.storage.from("song-files").createSignedUrl(song.audio_path, 60 * 10);
+      const { data: signed } = await supabaseAdmin.storage
+        .from("song-files")
+        .createSignedUrl(song.audio_path, 60 * 10);
       if (!signed?.signedUrl) return { ok: false, reason: "sign_failed" };
       downloadUrl = signed.signedUrl;
     }

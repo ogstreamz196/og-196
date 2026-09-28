@@ -34,17 +34,21 @@ export function DevBossPanel({ targetUserId, currentBalance }: Props) {
     mutationFn: async () => {
       const n = Number.parseInt(override, 10);
       if (!Number.isFinite(n) || n < 0) throw new Error("Enter a valid balance");
-      const { data, error } = await supabase.rpc("dev_override_balance" as never, {
-        target_user_id: targetUserId,
-        new_balance: n,
-        dev_notes: overrideNotes.trim() || null,
-      } as never);
+      const { data, error } = await supabase.rpc(
+        "dev_override_balance" as never,
+        {
+          target_user_id: targetUserId,
+          new_balance: n,
+          dev_notes: overrideNotes.trim() || null,
+        } as never,
+      );
       if (error) throw new Error(error.message);
       return data as number;
     },
     onSuccess: (bal) => {
       toast.success(`Balance overridden → ${bal}`);
-      setOverride(""); setOverrideNotes("");
+      setOverride("");
+      setOverrideNotes("");
       invalidate();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -54,11 +58,14 @@ export function DevBossPanel({ targetUserId, currentBalance }: Props) {
     mutationFn: async () => {
       const n = Number.parseInt(burnAmount, 10);
       if (!Number.isFinite(n) || n <= 0) throw new Error("Enter a positive amount");
-      const { data, error } = await supabase.rpc("boss_burn_coins" as never, {
-        target_user_id: targetUserId,
-        amount: n,
-        boss_notes: bossNotes.trim() || null,
-      } as never);
+      const { data, error } = await supabase.rpc(
+        "boss_burn_coins" as never,
+        {
+          target_user_id: targetUserId,
+          amount: n,
+          boss_notes: bossNotes.trim() || null,
+        } as never,
+      );
       if (error) throw new Error(error.message);
       return data as number;
     },
@@ -74,11 +81,14 @@ export function DevBossPanel({ targetUserId, currentBalance }: Props) {
     mutationFn: async () => {
       const n = Number.parseInt(reclaimAmount, 10);
       if (!Number.isFinite(n) || n <= 0) throw new Error("Enter a positive amount");
-      const { data, error } = await supabase.rpc("boss_reclaim_coins" as never, {
-        target_user_id: targetUserId,
-        amount: n,
-        boss_notes: bossNotes.trim() || null,
-      } as never);
+      const { data, error } = await supabase.rpc(
+        "boss_reclaim_coins" as never,
+        {
+          target_user_id: targetUserId,
+          amount: n,
+          boss_notes: bossNotes.trim() || null,
+        } as never,
+      );
       if (error) throw new Error(error.message);
       return data as number;
     },
@@ -99,17 +109,22 @@ export function DevBossPanel({ targetUserId, currentBalance }: Props) {
         <div>
           <h3 className="font-semibold">Dev & Boss controls</h3>
           <p className="text-sm text-muted-foreground">
-            Elevated actions. Current balance: <span className="font-semibold">{currentBalance}</span>. All actions audited.
+            Elevated actions. Current balance:{" "}
+            <span className="font-semibold">{currentBalance}</span>. All actions audited.
           </p>
         </div>
       </header>
 
       {isDev && (
         <div className="rounded-xl border border-border bg-background/60 p-4 space-y-3">
-          <Label className="text-sm font-semibold uppercase tracking-wide">Dev · Manual balance override</Label>
+          <Label className="text-sm font-semibold uppercase tracking-wide">
+            Dev · Manual balance override
+          </Label>
           <div className="grid gap-2 sm:grid-cols-[1fr_2fr_auto]">
             <Input
-              type="number" min={0} max={100000000}
+              type="number"
+              min={0}
+              max={100000000}
               value={override}
               onChange={(e) => setOverride(e.target.value)}
               placeholder="New balance"
@@ -120,7 +135,10 @@ export function DevBossPanel({ targetUserId, currentBalance }: Props) {
               placeholder="Reason (optional)"
               maxLength={200}
             />
-            <Button onClick={() => overrideMut.mutate()} disabled={overrideMut.isPending || !override}>
+            <Button
+              onClick={() => overrideMut.mutate()}
+              disabled={overrideMut.isPending || !override}
+            >
               {overrideMut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Override
             </Button>
@@ -130,7 +148,9 @@ export function DevBossPanel({ targetUserId, currentBalance }: Props) {
 
       {isBoss && (
         <div className="rounded-xl border border-border bg-background/60 p-4 space-y-3">
-          <Label className="text-sm font-semibold uppercase tracking-wide">Boss · Burn / reclaim OG coins</Label>
+          <Label className="text-sm font-semibold uppercase tracking-wide">
+            Boss · Burn / reclaim OG coins
+          </Label>
           <Input
             value={bossNotes}
             onChange={(e) => setBossNotes(e.target.value)}
@@ -140,7 +160,9 @@ export function DevBossPanel({ targetUserId, currentBalance }: Props) {
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="flex gap-2">
               <Input
-                type="number" min={1} max={100000000}
+                type="number"
+                min={1}
+                max={100000000}
                 value={burnAmount}
                 onChange={(e) => setBurnAmount(e.target.value)}
                 placeholder="Amount to burn"
@@ -150,13 +172,19 @@ export function DevBossPanel({ targetUserId, currentBalance }: Props) {
                 onClick={() => burnMut.mutate()}
                 disabled={burnMut.isPending || !burnAmount}
               >
-                {burnMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Flame className="h-4 w-4" />}
+                {burnMut.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Flame className="h-4 w-4" />
+                )}
                 <span className="ml-2">Burn</span>
               </Button>
             </div>
             <div className="flex gap-2">
               <Input
-                type="number" min={1} max={100000000}
+                type="number"
+                min={1}
+                max={100000000}
                 value={reclaimAmount}
                 onChange={(e) => setReclaimAmount(e.target.value)}
                 placeholder="Amount to reclaim"
@@ -166,13 +194,18 @@ export function DevBossPanel({ targetUserId, currentBalance }: Props) {
                 onClick={() => reclaimMut.mutate()}
                 disabled={reclaimMut.isPending || !reclaimAmount}
               >
-                {reclaimMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowLeftRight className="h-4 w-4" />}
+                {reclaimMut.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <ArrowLeftRight className="h-4 w-4" />
+                )}
                 <span className="ml-2">Reclaim to me</span>
               </Button>
             </div>
           </div>
           <p className="text-xs text-muted-foreground">
-            Burn permanently destroys coins. Reclaim transfers them from the target into your own balance.
+            Burn permanently destroys coins. Reclaim transfers them from the target into your own
+            balance.
           </p>
         </div>
       )}

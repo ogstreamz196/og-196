@@ -21,12 +21,14 @@ export const ensureCurrentUserBootstrap = createServerFn({ method: "POST" })
     const { userId, claims } = context;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const email = typeof claims.email === "string" ? claims.email : "";
-    const userMetadata = typeof claims.user_metadata === "object" && claims.user_metadata
-      ? claims.user_metadata as Record<string, unknown>
-      : null;
-    const displayName = userMetadata && typeof userMetadata.display_name === "string"
-      ? userMetadata.display_name
-      : email.split("@")[0] ?? "User";
+    const userMetadata =
+      typeof claims.user_metadata === "object" && claims.user_metadata
+        ? (claims.user_metadata as Record<string, unknown>)
+        : null;
+    const displayName =
+      userMetadata && typeof userMetadata.display_name === "string"
+        ? userMetadata.display_name
+        : (email.split("@")[0] ?? "User");
 
     let ensuredProfile = false;
     let ensuredUserRole = false;
@@ -38,10 +40,7 @@ export const ensureCurrentUserBootstrap = createServerFn({ method: "POST" })
     if (data.deviceId) {
       await supabaseAdmin
         .from("device_accounts")
-        .upsert(
-          { device_id: data.deviceId, user_id: userId },
-          { onConflict: "device_id,user_id" },
-        );
+        .upsert({ device_id: data.deviceId, user_id: userId }, { onConflict: "device_id,user_id" });
       const { isDeviceWhitelisted } = await import("@/lib/device-limit.functions");
       if (await isDeviceWhitelisted(supabaseAdmin, data.deviceId)) {
         withinDeviceAllowance = true;
@@ -78,16 +77,14 @@ export const ensureCurrentUserBootstrap = createServerFn({ method: "POST" })
     }
 
     // Only the trusted, device-aware path can issue the one-time welcome reward.
-    const eligibleForWelcome = Boolean(data.deviceId) &&
-      (withinDeviceAllowance || email.toLowerCase() === BOSS_EMAIL);
+    const eligibleForWelcome =
+      Boolean(data.deviceId) && (withinDeviceAllowance || email.toLowerCase() === BOSS_EMAIL);
     const { data: welcomeResult, error: welcomeError } = await supabaseAdmin.rpc(
       "grant_welcome_bonus",
       { _user_id: userId, _eligible: eligibleForWelcome },
     );
     if (welcomeError) throw welcomeError;
-    const welcomeCoinsGranted = Boolean(
-      (welcomeResult as { granted?: boolean } | null)?.granted,
-    );
+    const welcomeCoinsGranted = Boolean((welcomeResult as { granted?: boolean } | null)?.granted);
 
     const { data: roleRows, error: rolesError } = await supabaseAdmin
       .from("user_roles")
@@ -99,13 +96,17 @@ export const ensureCurrentUserBootstrap = createServerFn({ method: "POST" })
     const roles = new Set((roleRows ?? []).map((row) => row.role));
 
     if (!roles.has("user")) {
-      const { error } = await supabaseAdmin.from("user_roles").insert({ user_id: userId, role: "user" });
+      const { error } = await supabaseAdmin
+        .from("user_roles")
+        .insert({ user_id: userId, role: "user" });
       if (error && error.code !== "23505") throw error;
       ensuredUserRole = true;
     }
 
     if (email.toLowerCase() === BOSS_EMAIL && !roles.has("admin")) {
-      const { error } = await supabaseAdmin.from("user_roles").insert({ user_id: userId, role: "admin" });
+      const { error } = await supabaseAdmin
+        .from("user_roles")
+        .insert({ user_id: userId, role: "admin" });
       if (error && error.code !== "23505") throw error;
       ensuredBossRole = true;
     }

@@ -10,10 +10,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-const SRC = readFileSync(
-  resolve(process.cwd(), "supabase/functions/song-url/index.ts"),
-  "utf8",
-);
+const SRC = readFileSync(resolve(process.cwd(), "supabase/functions/song-url/index.ts"), "utf8");
 
 describe("song-url edge function guards", () => {
   it("requires an authenticated user", () => {

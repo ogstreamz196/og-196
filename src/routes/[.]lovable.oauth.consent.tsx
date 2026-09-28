@@ -11,9 +11,15 @@ type AuthzDetails = {
   scopes?: string[] | null;
 };
 type OAuthNs = {
-  getAuthorizationDetails: (id: string) => Promise<{ data: AuthzDetails | null; error: { message: string } | null }>;
-  approveAuthorization: (id: string) => Promise<{ data: AuthzDetails | null; error: { message: string } | null }>;
-  denyAuthorization: (id: string) => Promise<{ data: AuthzDetails | null; error: { message: string } | null }>;
+  getAuthorizationDetails: (
+    id: string,
+  ) => Promise<{ data: AuthzDetails | null; error: { message: string } | null }>;
+  approveAuthorization: (
+    id: string,
+  ) => Promise<{ data: AuthzDetails | null; error: { message: string } | null }>;
+  denyAuthorization: (
+    id: string,
+  ) => Promise<{ data: AuthzDetails | null; error: { message: string } | null }>;
 };
 function oauth(): OAuthNs {
   return (supabase.auth as unknown as { oauth: OAuthNs }).oauth;
@@ -90,16 +96,22 @@ function Consent() {
         <ul className="list-disc pl-5 space-y-1 text-sm">
           {scopes.includes("profile") && <li>Share your basic profile</li>}
           {scopes.includes("email") && <li>Share your email address</li>}
-          {scopes.filter((s: string) => !["openid", "email", "profile"].includes(s)).map((s: string) => (
-            <li key={s}>Additional permission: {s}</li>
-          ))}
+          {scopes
+            .filter((s: string) => !["openid", "email", "profile"].includes(s))
+            .map((s: string) => (
+              <li key={s}>Additional permission: {s}</li>
+            ))}
         </ul>
 
         <p className="text-xs text-white/50 mt-3">
           This does not bypass OG Studio's permissions or backend policies.
         </p>
       </div>
-      {error && <p role="alert" className="text-red-400 text-sm mb-3">{error}</p>}
+      {error && (
+        <p role="alert" className="text-red-400 text-sm mb-3">
+          {error}
+        </p>
+      )}
       <div className="flex gap-3">
         <button
           type="button"

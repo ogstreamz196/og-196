@@ -53,7 +53,9 @@ export function StyleComposer({ value, onChange }: Props) {
           <ul className="space-y-1.5 text-sm text-muted-foreground">
             {EXAMPLES.map((ex) => (
               <li key={ex} className="flex gap-2">
-                <span aria-hidden className="text-fuchsia-400/70">–</span>
+                <span aria-hidden className="text-fuchsia-400/70">
+                  –
+                </span>
                 <span className="italic">{ex}</span>
               </li>
             ))}
@@ -63,4 +65,3 @@ export function StyleComposer({ value, onChange }: Props) {
     </div>
   );
 }
-

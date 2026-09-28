@@ -45,11 +45,20 @@ export function BossNotificationsPanel() {
         <div>
           <h3 className="text-lg font-semibold">Boss notifications</h3>
           <p className="text-sm text-muted-foreground">
-             Non-sensitive Telegram alerts for new accounts and sign-ins.
+            Non-sensitive Telegram alerts for new accounts and sign-ins.
           </p>
         </div>
-        <Button size="sm" variant="outline" onClick={() => testMut.mutate()} disabled={testMut.isPending}>
-          {testMut.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => testMut.mutate()}
+          disabled={testMut.isPending}
+        >
+          {testMut.isPending ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Send className="mr-2 h-4 w-4" />
+          )}
           Send test DM
         </Button>
       </div>

@@ -1,8 +1,16 @@
 // Web SDK is loaded lazily (dynamic import only inside handlers). Its module
 // scope performs operations the Cloudflare worker forbids at global scope, so
 // a static import here crashes every SSR page.
-import type { CustomerInfo as CustomerInfoWeb, Offerings as OfferingsWeb, Package as PackageWeb } from "@revenuecat/purchases-js";
-import type { CustomerInfo as CustomerInfoCap, PurchasesOfferings as OfferingsCap, PurchasesPackage as PackageCap } from "@revenuecat/purchases-capacitor";
+import type {
+  CustomerInfo as CustomerInfoWeb,
+  Offerings as OfferingsWeb,
+  Package as PackageWeb,
+} from "@revenuecat/purchases-js";
+import type {
+  CustomerInfo as CustomerInfoCap,
+  PurchasesOfferings as OfferingsCap,
+  PurchasesPackage as PackageCap,
+} from "@revenuecat/purchases-capacitor";
 import { Capacitor } from "@capacitor/core";
 
 type RCWebModule = typeof import("@revenuecat/purchases-js");
@@ -38,7 +46,10 @@ export async function configureRevenueCat(appUserId?: string) {
         await (await loadNative()).configure({ apiKey });
       }
       isNativeConfigured = true;
-      console.log(`RevenueCat Native SDK configured for ${platform} with appUserId:`, appUserId || "anonymous");
+      console.log(
+        `RevenueCat Native SDK configured for ${platform} with appUserId:`,
+        appUserId || "anonymous",
+      );
     } catch (error) {
       console.error("Failed to initialize RevenueCat Native", error);
     }
@@ -102,11 +113,15 @@ export async function getOfferings(): Promise<OfferingsWeb | OfferingsCap | null
 /**
  * Purchase a specific package
  */
-export async function purchasePackage(rcPackage: PackageWeb | PackageCap): Promise<CustomerInfoWeb | CustomerInfoCap | null> {
+export async function purchasePackage(
+  rcPackage: PackageWeb | PackageCap,
+): Promise<CustomerInfoWeb | CustomerInfoCap | null> {
   try {
     if (Capacitor.isNativePlatform() && isNativeConfigured) {
-      const result = await (await loadNative()).purchasePackage({
-        aPackage: rcPackage as PackageCap
+      const result = await (
+        await loadNative()
+      ).purchasePackage({
+        aPackage: rcPackage as PackageCap,
       });
       return result.customerInfo;
     } else if (purchasesWebInstance) {
@@ -128,14 +143,14 @@ export async function showCustomerCenter() {
     if (Capacitor.isNativePlatform()) {
       // For native, RevenueCat Customer Center requires the experimental UI plugin,
       // or you simply direct the user to their respective app store subscription management page.
-      if (Capacitor.getPlatform() === 'ios') {
+      if (Capacitor.getPlatform() === "ios") {
         // window.location.href = "https://apps.apple.com/account/subscriptions";
         alert("Please manage your subscription in your Apple ID settings.");
       } else {
         window.location.href = "https://play.google.com/store/account/subscriptions";
       }
     } else {
-      const customerInfo = await getCustomerInfo() as CustomerInfoWeb;
+      const customerInfo = (await getCustomerInfo()) as CustomerInfoWeb;
       if (customerInfo?.managementURL) {
         window.location.href = customerInfo.managementURL;
       } else {

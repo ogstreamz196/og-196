@@ -39,7 +39,6 @@ export const QUICK_STARTS: { label: string; prompt: string }[] = [
   },
   {
     label: "🔎 Look something up",
-    prompt:
-      "I want to look something up. Ask me what I want to know and give me a clear answer.",
+    prompt: "I want to look something up. Ask me what I want to know and give me a clear answer.",
   },
 ];

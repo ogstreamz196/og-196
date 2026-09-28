@@ -40,7 +40,11 @@ export function E2ESmokeTest() {
           </p>
         </div>
         <Button onClick={onRun} disabled={running} className="gap-2">
-          {running ? <Loader2 className="h-4 w-4 animate-spin" /> : <PlayCircle className="h-4 w-4" />}
+          {running ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <PlayCircle className="h-4 w-4" />
+          )}
           {running ? "Running…" : "Run smoke test"}
         </Button>
       </div>
@@ -48,8 +52,7 @@ export function E2ESmokeTest() {
       {result && (
         <div className="mt-4 space-y-2">
           {result.steps.map((s) => {
-            const Icon =
-              s.status === "ok" ? CheckCircle2 : s.status === "fail" ? XCircle : Clock;
+            const Icon = s.status === "ok" ? CheckCircle2 : s.status === "fail" ? XCircle : Clock;
             const color =
               s.status === "ok"
                 ? "text-emerald-400"

@@ -79,7 +79,6 @@ function DeveloperPage() {
       <BossNav />
       <FreeAccessPanel />
       <header className="mb-6 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:flex-wrap sm:justify-between">
-
         <div className="flex min-w-0 items-center gap-3">
           <Radio className="h-6 w-6 shrink-0 text-primary" />
           <div className="min-w-0">
@@ -91,7 +90,6 @@ function DeveloperPage() {
         </div>
       </header>
 
-
       <div className="grid gap-4 md:grid-cols-[320px,1fr]">
         <aside className="glass-panel rounded-2xl border border-border p-3">
           <div className="mb-2 flex items-center justify-between px-1 text-xs uppercase tracking-wider text-muted-foreground">
@@ -101,9 +99,7 @@ function DeveloperPage() {
             </span>
           </div>
           {others.length === 0 ? (
-            <div className="px-2 py-6 text-sm text-muted-foreground">
-              No other users connected.
-            </div>
+            <div className="px-2 py-6 text-sm text-muted-foreground">No other users connected.</div>
           ) : (
             <ul className="space-y-1">
               {others.map((u) => {
@@ -153,9 +149,7 @@ function DeveloperPage() {
 
               <div className="flex-1 space-y-2 overflow-y-auto pr-1">
                 {log.filter((l) => l.target === selected.user_id).length === 0 ? (
-                  <p className="text-sm text-muted-foreground">
-                    No messages sent yet.
-                  </p>
+                  <p className="text-sm text-muted-foreground">No messages sent yet.</p>
                 ) : (
                   log
                     .filter((l) => l.target === selected.user_id)
@@ -182,7 +176,8 @@ function DeveloperPage() {
                   send.mutate({
                     target: selected.user_id,
                     content: text,
-                    targetLabel: selected.display_name || selected.email || selected.user_id.slice(0, 8),
+                    targetLabel:
+                      selected.display_name || selected.email || selected.user_id.slice(0, 8),
                   });
                 }}
               >
@@ -200,14 +195,19 @@ function DeveloperPage() {
                         send.mutate({
                           target: selected.user_id,
                           content: text,
-                          targetLabel: selected.display_name || selected.email || selected.user_id.slice(0, 8),
+                          targetLabel:
+                            selected.display_name || selected.email || selected.user_id.slice(0, 8),
                         });
                       }
                     }
                   }}
                 />
                 <Button type="submit" disabled={!draft.trim() || send.isPending}>
-                  {send.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                  {send.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
                 </Button>
               </form>
             </>

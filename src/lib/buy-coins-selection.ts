@@ -1,8 +1,4 @@
-import {
-  CUSTOM_COIN_UNIT,
-  findCoinPackByBundleId,
-  type CoinPack,
-} from "@/lib/coin-packs";
+import { CUSTOM_COIN_UNIT, findCoinPackByBundleId, type CoinPack } from "@/lib/coin-packs";
 
 const SELECTION_STORAGE_KEY = "buyCoins.lastSelection";
 
@@ -44,8 +40,8 @@ export function persistSelection(s: Selection): void {
     s.type === "vip"
       ? { type: "vip" }
       : s.type === "custom"
-      ? { type: "custom", units: s.units }
-      : { type: "coins", bundleId: s.pack.bundleId };
+        ? { type: "custom", units: s.units }
+        : { type: "coins", bundleId: s.pack.bundleId };
   try {
     sessionStorage.setItem(SELECTION_STORAGE_KEY, JSON.stringify(stored));
   } catch {

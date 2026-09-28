@@ -23,7 +23,6 @@ export function HighContrastToggle({ className }: { className?: string }) {
     return () => window.removeEventListener("storage", onStorage);
   }, []);
 
-
   function toggle() {
     const next = !on;
     setOn(next);

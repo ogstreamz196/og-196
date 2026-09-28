@@ -30,7 +30,7 @@ function Confetti() {
         color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
         rotate: Math.random() * 360,
       })),
-    []
+    [],
   );
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -74,7 +74,7 @@ export function RoyaltyCelebration({ userId }: { userId: string }) {
         (payload) => {
           const row = payload.new as Notice & { kind: string };
           if (row.kind === "track_download") setNotice(row);
-        }
+        },
       )
       .subscribe();
     return () => {

@@ -89,9 +89,7 @@ describe.skipIf(!HAS_DB)("referrals SQL contract", () => {
       psql(`SELECT coin_balance FROM public.profiles WHERE id = '${referrer}'`),
     );
     asUser(referee, `SELECT public.deduct_coins('${referee}', 50, 'test_burn')`);
-    const after = Number(
-      psql(`SELECT coin_balance FROM public.profiles WHERE id = '${referrer}'`),
-    );
+    const after = Number(psql(`SELECT coin_balance FROM public.profiles WHERE id = '${referrer}'`));
     expect(after - before).toBe(5); // floor(50 * 0.10)
 
     const tx = psql(

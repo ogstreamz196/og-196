@@ -29,7 +29,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -56,7 +61,9 @@ function AdminPanel() {
   const songsQuery = useQuery({
     queryKey: ["admin-songs"],
     enabled: isAdmin,
-    queryFn: async (): Promise<(AdminSong & { email: string | null; display_name: string | null; coin_balance: number })[]> => {
+    queryFn: async (): Promise<
+      (AdminSong & { email: string | null; display_name: string | null; coin_balance: number })[]
+    > => {
       const { data: songs, error } = await supabase
         .from("songs")
         .select("id, user_id, title, prompt, status, unlocked, error_message, created_at")
@@ -65,14 +72,24 @@ function AdminPanel() {
       if (error) throw error;
       const list = (songs ?? []) as AdminSong[];
       const userIds = Array.from(new Set(list.map((s) => s.user_id)));
-      let map = new Map<string, { email: string | null; display_name: string | null; coin_balance: number }>();
+      let map = new Map<
+        string,
+        { email: string | null; display_name: string | null; coin_balance: number }
+      >();
       if (userIds.length) {
         const { data: profs } = await supabase
-          .from("profiles").select("id, email, display_name, coin_balance").in("id", userIds);
-        map = new Map((profs ?? []).map((p: any) => {
-          const m = maskDevIdentity({ email: p.email, display_name: p.display_name });
-          return [p.id, { email: m.email, display_name: m.display_name, coin_balance: p.coin_balance }];
-        }));
+          .from("profiles")
+          .select("id, email, display_name, coin_balance")
+          .in("id", userIds);
+        map = new Map(
+          (profs ?? []).map((p: any) => {
+            const m = maskDevIdentity({ email: p.email, display_name: p.display_name });
+            return [
+              p.id,
+              { email: m.email, display_name: m.display_name, coin_balance: p.coin_balance },
+            ];
+          }),
+        );
       }
       return list.map((s) => ({
         ...s,
@@ -87,10 +104,13 @@ function AdminPanel() {
     if (!isAdmin) return;
     const channel = supabase
       .channel("admin-songs-feed")
-      .on("postgres_changes", { event: "*", schema: "public", table: "songs" },
-        () => songsQuery.refetch())
+      .on("postgres_changes", { event: "*", schema: "public", table: "songs" }, () =>
+        songsQuery.refetch(),
+      )
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      supabase.removeChannel(channel);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin]);
 
@@ -124,7 +144,9 @@ function AdminPanel() {
   if (roleLoading) {
     return (
       <DashboardShell title="Admin Controls">
-        <div className="grid place-items-center py-16"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
+        <div className="grid place-items-center py-16">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
       </DashboardShell>
     );
   }
@@ -136,80 +158,171 @@ function AdminPanel() {
       <div className="mx-auto max-w-6xl space-y-8 rounded-3xl border border-border/60 bg-background/95 p-4 backdrop-blur-xl sm:p-6">
         {/* Expand/collapse master controls */}
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Sections</h2>
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+            Sections
+          </h2>
           <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={() => window.dispatchEvent(new CustomEvent("admin-collapsible:set-all", { detail: { open: true } }))}>Expand all</Button>
-            <Button size="sm" variant="outline" onClick={() => window.dispatchEvent(new CustomEvent("admin-collapsible:set-all", { detail: { open: false } }))}>Collapse all</Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                window.dispatchEvent(
+                  new CustomEvent("admin-collapsible:set-all", { detail: { open: true } }),
+                )
+              }
+            >
+              Expand all
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                window.dispatchEvent(
+                  new CustomEvent("admin-collapsible:set-all", { detail: { open: false } }),
+                )
+              }
+            >
+              Collapse all
+            </Button>
           </div>
         </div>
 
-
         {/* Group: Coins & Pricing */}
         <section className="space-y-3">
-          <FlameHeading as="h3" size="md">Coins & Pricing</FlameHeading>
-          <AdminCollapsible storageKey="og-coins" title="OG Coins" subtitle="Boss coin operations" defaultOpen>
+          <FlameHeading as="h3" size="md">
+            Coins & Pricing
+          </FlameHeading>
+          <AdminCollapsible
+            storageKey="og-coins"
+            title="OG Coins"
+            subtitle="Boss coin operations"
+            defaultOpen
+          >
             <OgCoinsPanel />
           </AdminCollapsible>
-          <AdminCollapsible storageKey="mint-coins" title="Mint coins" subtitle="Grant or deduct user balance">
+          <AdminCollapsible
+            storageKey="mint-coins"
+            title="Mint coins"
+            subtitle="Grant or deduct user balance"
+          >
             <MintCoinsPanel />
           </AdminCollapsible>
-          <AdminCollapsible storageKey="pricing" title="Pricing & limits" subtitle="Generation, unlock and signup costs">
+          <AdminCollapsible
+            storageKey="pricing"
+            title="Pricing & limits"
+            subtitle="Generation, unlock and signup costs"
+          >
             <PricingControls />
           </AdminCollapsible>
         </section>
 
         {/* Group: App Configuration */}
         <section className="space-y-3">
-          <FlameHeading as="h3" size="md">App Configuration</FlameHeading>
-          <AdminCollapsible storageKey="app-toggles" title="App toggles" subtitle="Global feature flags">
+          <FlameHeading as="h3" size="md">
+            App Configuration
+          </FlameHeading>
+          <AdminCollapsible
+            storageKey="app-toggles"
+            title="App toggles"
+            subtitle="Global feature flags"
+          >
             <AppToggles />
           </AdminCollapsible>
-          <AdminCollapsible storageKey="portals" title="Portals" subtitle="Manage portal definitions">
+          <AdminCollapsible
+            storageKey="portals"
+            title="Portals"
+            subtitle="Manage portal definitions"
+          >
             <PortalManager />
           </AdminCollapsible>
-          <AdminCollapsible storageKey="capabilities" title="Hardwired capabilities" subtitle="Connector & runtime status">
+          <AdminCollapsible
+            storageKey="capabilities"
+            title="Hardwired capabilities"
+            subtitle="Connector & runtime status"
+          >
             <HardwiredCapabilities />
           </AdminCollapsible>
         </section>
 
         {/* Group: Telegram — everything OG Bot / Telegram-related in one place */}
         <section className="space-y-3">
-          <FlameHeading as="h3" size="md">Telegram</FlameHeading>
-          <AdminCollapsible storageKey="og-bot-ping" title="OG Bot ping" subtitle="Verify OG Bot connectivity">
+          <FlameHeading as="h3" size="md">
+            Telegram
+          </FlameHeading>
+          <AdminCollapsible
+            storageKey="og-bot-ping"
+            title="OG Bot ping"
+            subtitle="Verify OG Bot connectivity"
+          >
             <OgBotPing />
           </AdminCollapsible>
-          <AdminCollapsible storageKey="telegram-webhook" title="Telegram webhook" subtitle="Live delivery status">
+          <AdminCollapsible
+            storageKey="telegram-webhook"
+            title="Telegram webhook"
+            subtitle="Live delivery status"
+          >
             <TelegramWebhookStatus />
           </AdminCollapsible>
-          <AdminCollapsible storageKey="telegram-smoke" title="Telegram smoke test" subtitle="getMe + webhook check">
+          <AdminCollapsible
+            storageKey="telegram-smoke"
+            title="Telegram smoke test"
+            subtitle="getMe + webhook check"
+          >
             <TelegramSmokeTest />
           </AdminCollapsible>
-          <AdminCollapsible storageKey="boss-notifs" title="Boss DM notifications" subtitle="Telegram DM preferences">
+          <AdminCollapsible
+            storageKey="boss-notifs"
+            title="Boss DM notifications"
+            subtitle="Telegram DM preferences"
+          >
             <BossNotificationsPanel />
           </AdminCollapsible>
         </section>
 
         {/* Group: Diagnostics — non-Telegram smoke tests only */}
         <section className="space-y-3">
-          <FlameHeading as="h3" size="md">Diagnostics</FlameHeading>
-          <AdminCollapsible storageKey="e2e-smoke" title="End-to-end smoke test" subtitle="Full stack flow">
+          <FlameHeading as="h3" size="md">
+            Diagnostics
+          </FlameHeading>
+          <AdminCollapsible
+            storageKey="e2e-smoke"
+            title="End-to-end smoke test"
+            subtitle="Full stack flow"
+          >
             <E2ESmokeTest />
           </AdminCollapsible>
-          <AdminCollapsible storageKey="foul-smoke" title="Foul-mouth smoke test" subtitle="Live Chat VIP gating + reply quality">
+          <AdminCollapsible
+            storageKey="foul-smoke"
+            title="Foul-mouth smoke test"
+            subtitle="Live Chat VIP gating + reply quality"
+          >
             <FoulMouthSmokeTest />
           </AdminCollapsible>
         </section>
 
         {/* Group: Activity */}
         <section className="space-y-3">
-          <FlameHeading as="h3" size="md">Activity</FlameHeading>
-          <AdminCollapsible storageKey="boss-audit" title="Boss audit log" subtitle="Recent admin actions">
+          <FlameHeading as="h3" size="md">
+            Activity
+          </FlameHeading>
+          <AdminCollapsible
+            storageKey="boss-audit"
+            title="Boss audit log"
+            subtitle="Recent admin actions"
+          >
             <BossAuditLog />
           </AdminCollapsible>
-          <AdminCollapsible storageKey="recent-songs" title="Recent generations" subtitle="Unlock, lock, retry" defaultOpen>
+          <AdminCollapsible
+            storageKey="recent-songs"
+            title="Recent generations"
+            subtitle="Unlock, lock, retry"
+            defaultOpen
+          >
             <div className="rounded-2xl border border-border bg-card shadow-card">
               {songsQuery.isLoading ? (
-                <div className="grid place-items-center py-16"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
+                <div className="grid place-items-center py-16">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </div>
               ) : songsQuery.data && songsQuery.data.length > 0 ? (
                 <div className="overflow-x-auto">
                   <div className="min-w-[720px]">
@@ -229,34 +342,55 @@ function AdminPanel() {
                           <TableRow key={s.id}>
                             <TableCell className="max-w-[260px]">
                               <div className="truncate font-medium">{s.title || "Untitled"}</div>
-                              <div className="truncate text-xs text-muted-foreground">{s.prompt}</div>
+                              <div className="truncate text-xs text-muted-foreground">
+                                {s.prompt}
+                              </div>
                             </TableCell>
                             <TableCell className="text-sm">
-                              <div className="text-muted-foreground">{s.email ?? s.user_id.slice(0, 8)}</div>
+                              <div className="text-muted-foreground">
+                                {s.email ?? s.user_id.slice(0, 8)}
+                              </div>
                               <div className="mt-0.5 flex items-center gap-2 text-xs">
-                                <AdminEditableLabel userId={s.user_id} value={s.display_name} fallback="No label" />
+                                <AdminEditableLabel
+                                  userId={s.user_id}
+                                  value={s.display_name}
+                                  fallback="No label"
+                                />
                                 <AdminEditableBalance userId={s.user_id} value={s.coin_balance} />
                               </div>
                             </TableCell>
                             <TableCell>
-                              <span className={cn(
-                                "rounded-full px-2 py-0.5 text-xs font-medium",
-                                s.status === "completed" && "bg-primary/15 text-primary",
-                                (s.status === "pending" || s.status === "processing") && "bg-muted text-muted-foreground",
-                                s.status === "failed" && "bg-destructive/15 text-destructive",
-                              )}>
+                              <span
+                                className={cn(
+                                  "rounded-full px-2 py-0.5 text-xs font-medium",
+                                  s.status === "completed" && "bg-primary/15 text-primary",
+                                  (s.status === "pending" || s.status === "processing") &&
+                                    "bg-muted text-muted-foreground",
+                                  s.status === "failed" && "bg-destructive/15 text-destructive",
+                                )}
+                              >
                                 {s.status}
                               </span>
                               {s.status === "failed" && s.error_message && (
-                                <div className="mt-1 max-w-[200px] truncate text-xs text-destructive/80">{s.error_message}</div>
+                                <div className="mt-1 max-w-[200px] truncate text-xs text-destructive/80">
+                                  {s.error_message}
+                                </div>
                               )}
                             </TableCell>
                             <TableCell>
-                              <span className={cn(
-                                "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs",
-                                s.unlocked ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground",
-                              )}>
-                                {s.unlocked ? <Unlock className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
+                              <span
+                                className={cn(
+                                  "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs",
+                                  s.unlocked
+                                    ? "bg-primary/15 text-primary"
+                                    : "bg-muted text-muted-foreground",
+                                )}
+                              >
+                                {s.unlocked ? (
+                                  <Unlock className="h-3 w-3" />
+                                ) : (
+                                  <Lock className="h-3 w-3" />
+                                )}
                                 {s.unlocked ? "Unlocked" : "Locked"}
                               </span>
                             </TableCell>
@@ -269,9 +403,15 @@ function AdminPanel() {
                                   size="sm"
                                   variant={s.unlocked ? "outline" : "default"}
                                   disabled={toggleUnlock.isPending}
-                                  onClick={() => toggleUnlock.mutate({ id: s.id, unlocked: !s.unlocked })}
+                                  onClick={() =>
+                                    toggleUnlock.mutate({ id: s.id, unlocked: !s.unlocked })
+                                  }
                                 >
-                                  {s.unlocked ? <Lock className="h-3.5 w-3.5" /> : <Unlock className="h-3.5 w-3.5" />}
+                                  {s.unlocked ? (
+                                    <Lock className="h-3.5 w-3.5" />
+                                  ) : (
+                                    <Unlock className="h-3.5 w-3.5" />
+                                  )}
                                   <span className="ml-1.5">{s.unlocked ? "Lock" : "Unlock"}</span>
                                 </Button>
                                 {s.status === "failed" && (
@@ -281,7 +421,12 @@ function AdminPanel() {
                                     disabled={reprocess.isPending}
                                     onClick={() => reprocess.mutate(s.id)}
                                   >
-                                    <RefreshCw className={cn("h-3.5 w-3.5", reprocess.isPending && "animate-spin")} />
+                                    <RefreshCw
+                                      className={cn(
+                                        "h-3.5 w-3.5",
+                                        reprocess.isPending && "animate-spin",
+                                      )}
+                                    />
                                     <span className="ml-1.5">Retry</span>
                                   </Button>
                                 )}
@@ -304,20 +449,60 @@ function AdminPanel() {
         </section>
       </div>
     </DashboardShell>
-
   );
 }
 
-
 type FieldRule = { min: number; max: number; integer?: boolean; label: string; help?: string };
 const PRICING_RULES: Record<string, FieldRule> = {
-  signup_credits: { min: 0, max: 1000, integer: true, label: "Free-tier signup OG Coins", help: "Granted once on first sign-in." },
-  coins_per_generation: { min: 0, max: 10000, integer: true, label: "Coins per song generation", help: "Charged when a user generates new audio tracks." },
-  coins_per_lyrics_generation: { min: 0, max: 10000, integer: true, label: "Coins per lyrics generation", help: "Charged each time AI lyrics are generated or regenerated." },
-  songs_per_generation: { min: 1, max: 4, integer: true, label: "Songs per generation", help: "How many audio variations are produced per request." },
-  coins_per_variation_divisor: { min: 1, max: 20, integer: true, label: "Variation cost divisor", help: "Reveal cost per extra variation = generation cost ÷ this number." },
-  sample_seconds: { min: 5, max: 600, integer: true, label: "Sample length (seconds)", help: "Max preview duration the player will stream." },
-  coins_per_full_unlock: { min: 0, max: 100000, integer: true, label: "Coins to unlock full song", help: "Charged when a user downloads the HQ full version." },
+  signup_credits: {
+    min: 0,
+    max: 1000,
+    integer: true,
+    label: "Free-tier signup OG Coins",
+    help: "Granted once on first sign-in.",
+  },
+  coins_per_generation: {
+    min: 0,
+    max: 10000,
+    integer: true,
+    label: "Coins per song generation",
+    help: "Charged when a user generates new audio tracks.",
+  },
+  coins_per_lyrics_generation: {
+    min: 0,
+    max: 10000,
+    integer: true,
+    label: "Coins per lyrics generation",
+    help: "Charged each time AI lyrics are generated or regenerated.",
+  },
+  songs_per_generation: {
+    min: 1,
+    max: 4,
+    integer: true,
+    label: "Songs per generation",
+    help: "How many audio variations are produced per request.",
+  },
+  coins_per_variation_divisor: {
+    min: 1,
+    max: 20,
+    integer: true,
+    label: "Variation cost divisor",
+    help: "Reveal cost per extra variation = generation cost ÷ this number.",
+  },
+  sample_seconds: {
+    min: 5,
+    max: 600,
+    integer: true,
+    label: "Sample length (seconds)",
+    help: "Max preview duration the player will stream.",
+  },
+  coins_per_full_unlock: {
+    min: 0,
+    max: 100000,
+    integer: true,
+    label: "Coins to unlock full song",
+    help: "Charged when a user downloads the HQ full version.",
+  },
 };
 
 function validatePricing(key: string, raw: string): string | null {
@@ -351,9 +536,9 @@ function PricingControls() {
     Object.keys(PRICING_RULES).map((k) => [k, validatePricing(k, values[k] ?? "")]),
   );
   const hasErrors = Object.values(errors).some((e) => e !== null);
-  const dirty = !!settings && Object.keys(PRICING_RULES).some(
-    (k) => String((settings as any)[k]) !== (values[k] ?? ""),
-  );
+  const dirty =
+    !!settings &&
+    Object.keys(PRICING_RULES).some((k) => String((settings as any)[k]) !== (values[k] ?? ""));
 
   const save = useMutation({
     mutationFn: async () => {
@@ -390,9 +575,11 @@ function PricingControls() {
           className={cn("mt-2", err && "border-destructive focus-visible:ring-destructive")}
           aria-invalid={!!err}
         />
-        {err
-          ? <p className="mt-1 text-xs text-destructive">{err}</p>
-          : rule.help ? <p className="mt-1 text-xs text-muted-foreground">{rule.help}</p> : null}
+        {err ? (
+          <p className="mt-1 text-xs text-destructive">{err}</p>
+        ) : rule.help ? (
+          <p className="mt-1 text-xs text-muted-foreground">{rule.help}</p>
+        ) : null}
       </div>
     );
   };
@@ -405,20 +592,33 @@ function PricingControls() {
       </div>
       <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-3 py-2 text-xs">
         <span className="font-bold uppercase tracking-wider text-primary">Live</span>
-        <code className="rounded bg-background/60 px-1.5 py-0.5 font-mono">app_settings.songs_per_generation</code>
+        <code className="rounded bg-background/60 px-1.5 py-0.5 font-mono">
+          app_settings.songs_per_generation
+        </code>
         <span className="text-muted-foreground">=</span>
-        <span className="font-bold text-foreground">{settings ? (settings as { songs_per_generation?: number }).songs_per_generation ?? "—" : "…"}</span>
-        <span className="text-muted-foreground">· edge function <code className="font-mono">suno-callback</code> reads this exact key.</span>
+        <span className="font-bold text-foreground">
+          {settings
+            ? ((settings as { songs_per_generation?: number }).songs_per_generation ?? "—")
+            : "…"}
+        </span>
+        <span className="text-muted-foreground">
+          · edge function <code className="font-mono">suno-callback</code> reads this exact key.
+        </span>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {Object.keys(PRICING_RULES).map(renderField)}
       </div>
       <p className="mt-3 text-xs text-muted-foreground">
-        Changes take effect for the next generation. In-flight jobs keep the pricing captured at request time.
+        Changes take effect for the next generation. In-flight jobs keep the pricing captured at
+        request time.
       </p>
       <div className="mt-4 flex justify-end">
         <Button onClick={() => save.mutate()} disabled={save.isPending || hasErrors || !dirty}>
-          {save.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+          {save.isPending ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Save className="mr-2 h-4 w-4" />
+          )}
           Save pricing
         </Button>
       </div>
