@@ -8,7 +8,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
+const MONTHLY_PLAN = {
+  title: "VIP Monthly",
+  price: "£5",
+  period: "/month",
+  description: "Full VIP access, billed monthly. Cancel any time.",
+};
+
+const YEARLY_PLAN = {
+  title: "VIP Yearly",
+  price: "£50",
+  period: "/year",
+  description: "Full VIP access for a whole year — two months free versus monthly.",
+};
+
 export function Paywall() {
+
   const { offerings, loading, purchasePackage, isVip } = useRevenueCat();
   const [purchasing, setPurchasing] = useState<string | null>(null);
 
