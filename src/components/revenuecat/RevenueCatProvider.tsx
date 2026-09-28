@@ -48,8 +48,8 @@ export function RevenueCatProvider({
         getOfferings(),
         checkVipEntitlement()
       ]);
-      setCustomerInfo(info);
-      setOfferings(offers);
+      setCustomerInfo(info as any);
+      setOfferings(offers as any);
       setIsVip(vipStatus);
     } catch (error) {
       console.error("Error fetching RevenueCat data", error);
@@ -62,7 +62,7 @@ export function RevenueCatProvider({
     try {
       const updatedInfo = await rcPurchasePackage(pkg);
       if (updatedInfo) {
-        setCustomerInfo(updatedInfo);
+        setCustomerInfo(updatedInfo as any);
         const vipStatus = updatedInfo.entitlements.active["og_vip_pass"] !== undefined;
         setIsVip(vipStatus);
         return true;
