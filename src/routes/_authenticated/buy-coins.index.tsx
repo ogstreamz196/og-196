@@ -289,55 +289,79 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                     </div>
                   ) : (
                     <>
-                      {Capacitor.isNativePlatform() && (
+                      {Capacitor.isNativePlatform() ? (
                         <Button
-                          className="w-full mb-3"
+                          className="w-full"
                           size="lg"
                           onClick={async () => {
-                            // This would ideally map to RevenueCat offerings.
-                            // Ensure you have identical product identifiers set up in RevenueCat.
-                            toast.error("Please configure RevenueCat products first, or use Web Checkout.");
+                            if (rcLoading) {
+                              toast.info("Connecting to Google Play...");
+                              return;
+                            }
+                            try {
+                              setCheckoutLoading(true);
+                              const targetId = isVipFlow ? VIP_PLAN.bundleId : isCustomFlow ? "coins_custom" : selected.pack.bundleId;
+
+                              // Find package in RevenueCat offerings
+                              const currentOffering = useRevenueCat().offerings?.current;
+                              const pkg = currentOffering?.availablePackages.find(p => p.identifier === targetId);
+
+                              if (!pkg) {
+                                toast.error("Product not found in Google Play. Please configure RevenueCat products.");
+                                setCheckoutLoading(false);
+                                return;
+                              }
+
+                              const success = await rcPurchase(pkg);
+                              if (success) {
+                                toast.success("Purchase successful! Your account has been credited.");
+                                navigate({ to: "/store" });
+                              }
+                            } catch (e: any) {
+                              toast.error(e.message || "Purchase failed or cancelled.");
+                            } finally {
+                              setCheckoutLoading(false);
+                            }
                           }}
                         >
                           Purchase via Google Play
                         </Button>
-                      )}
+                      ) : (
+                        <Button
+                          className="w-full"
+                          size="lg"
+                          onClick={async () => {
+                            setCheckoutLoading(true);
+                            try {
+                              const returnUrlPack = isVipFlow
+                                ? VIP_PLAN.bundleId
+                                : isCustomFlow
+                                ? "coins_custom"
+                                : selected.pack.bundleId;
 
-                      <Button
-                        variant={Capacitor.isNativePlatform() ? "outline" : "default"}
-                        className="w-full"
-                        size="lg"
-                        onClick={async () => {
-                          setCheckoutLoading(true);
-                          try {
-                            const returnUrlPack = isVipFlow
-                              ? VIP_PLAN.bundleId
-                              : isCustomFlow
-                              ? "coins_custom"
-                              : selected.pack.bundleId;
+                              const returnUrl = `${window.location.origin}/buy-coins/return?session_id={CHECKOUT_SESSION_ID}&pack=${returnUrlPack}`;
 
-                            const returnUrl = `${window.location.origin}/buy-coins/return?session_id={CHECKOUT_SESSION_ID}&pack=${returnUrlPack}`;
+                              let res;
+                              if (isVipFlow) {
+                                res = await createVipCheckout({ data: { returnUrl, environment: "live" } });
+                              } else if (isCustomFlow) {
+                                res = await createCustomCheckout({ data: { units: coinsForOrder / CUSTOM_COIN_UNIT.coins, returnUrl, environment: "live" } });
+                              } else {
+                                res = await createCoinCheckout({ data: { priceId: selected.pack.priceId, returnUrl, environment: "live" } });
+                              }
 
-                            let res;
-                            if (isVipFlow) {
-                              res = await createVipCheckout({ data: { returnUrl, environment: "live" } });
-                            } else if (isCustomFlow) {
-                              res = await createCustomCheckout({ data: { units: coinsForOrder / CUSTOM_COIN_UNIT.coins, returnUrl, environment: "live" } });
-                            } else {
-                              res = await createCoinCheckout({ data: { priceId: selected.pack.priceId, returnUrl, environment: "live" } });
+                              if (res.error) throw new Error(res.error);
+                              if (res.url) window.location.href = res.url;
+                            } catch (e: any) {
+                              toast.error(e.message || "Failed to start checkout.");
+                              setCheckoutLoading(false);
                             }
-
-                            if (res.error) throw new Error(res.error);
-                            if (res.url) window.location.href = res.url;
-                          } catch (e: any) {
-                            toast.error(e.message || "Failed to start checkout.");
-                            setCheckoutLoading(false);
-                          }
-                        }}
-                      >
-                        <CreditCard className="mr-2 h-4 w-4" />
-                        {Capacitor.isNativePlatform() ? "Alternative: Pay with Card (Stripe)" : "Checkout securely with Stripe"}
-                      </Button>
+                          }}
+                        >
+                          <CreditCard className="mr-2 h-4 w-4" />
+                          Checkout securely with Stripe
+                        </Button>
+                      )}
                     </>
                   )}
                 </div>
