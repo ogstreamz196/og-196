@@ -90,7 +90,18 @@ export function Paywall() {
       <CardContent>
         <div className="grid gap-4 sm:grid-cols-2">
           {currentOffering.availablePackages.map((pkg) => {
-            const isYearly = /year|annual/i.test(pkg.identifier);
+            // Google Play product IDs: og_vip_monthly / og_vip_yearly (native),
+            // web billing product, or RevenueCat package identifiers ($rc_annual).
+            const anyPkg = pkg as unknown as {
+              identifier: string;
+              product?: { identifier?: string };
+              webBillingProduct?: { identifier?: string };
+            };
+            const productId =
+              anyPkg.product?.identifier ?? anyPkg.webBillingProduct?.identifier ?? "";
+            const isYearly =
+              productId.startsWith("og_vip_yearly") ||
+              /year|annual/i.test(`${pkg.identifier} ${productId}`);
             const busy = purchasing === pkg.identifier;
             const plan = isYearly ? YEARLY_PLAN : MONTHLY_PLAN;
             return (
