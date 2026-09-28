@@ -91,10 +91,17 @@ export function RevenueCatProvider({
   );
 }
 
+// Safe default while the provider is still loading (server render / before hydration).
+const LOADING_CONTEXT: RevenueCatContextType = {
+  isConfigured: false,
+  isVip: false,
+  customerInfo: null,
+  offerings: null,
+  loading: true,
+  purchasePackage: async () => false,
+  refreshInfo: async () => {},
+};
+
 export function useRevenueCat() {
-  const context = useContext(RevenueCatContext);
-  if (context === undefined) {
-    throw new Error("useRevenueCat must be used within a RevenueCatProvider");
-  }
-  return context;
+  return useContext(RevenueCatContext) ?? LOADING_CONTEXT;
 }
