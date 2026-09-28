@@ -13,6 +13,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as TrustRouteImport } from './routes/trust'
+import { Route as SignInReturnRouteImport } from './routes/sign-in-return'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PolicyRouteImport } from './routes/policy'
 import { Route as McpRouteImport } from './routes/mcp'
@@ -73,6 +74,11 @@ const WelcomeRoute = WelcomeRouteImport.update({
 const TrustRoute = TrustRouteImport.update({
   id: '/trust',
   path: '/trust',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignInReturnRoute = SignInReturnRouteImport.update({
+  id: '/sign-in-return',
+  path: '/sign-in-return',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -349,6 +355,7 @@ export interface FileRoutesByFullPath {
   '/mcp': typeof McpRoute
   '/policy': typeof PolicyRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/sign-in-return': typeof SignInReturnRoute
   '/trust': typeof TrustRoute
   '/welcome': typeof WelcomeRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -399,6 +406,7 @@ export interface FileRoutesByTo {
   '/mcp': typeof McpRoute
   '/policy': typeof PolicyRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/sign-in-return': typeof SignInReturnRoute
   '/trust': typeof TrustRoute
   '/welcome': typeof WelcomeRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -452,6 +460,7 @@ export interface FileRoutesById {
   '/mcp': typeof McpRoute
   '/policy': typeof PolicyRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/sign-in-return': typeof SignInReturnRoute
   '/trust': typeof TrustRoute
   '/welcome': typeof WelcomeRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -506,6 +515,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/policy'
     | '/reset-password'
+    | '/sign-in-return'
     | '/trust'
     | '/welcome'
     | '/.mcp/list-tools'
@@ -556,6 +566,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/policy'
     | '/reset-password'
+    | '/sign-in-return'
     | '/trust'
     | '/welcome'
     | '/.mcp/list-tools'
@@ -608,6 +619,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/policy'
     | '/reset-password'
+    | '/sign-in-return'
     | '/trust'
     | '/welcome'
     | '/.mcp/list-tools'
@@ -661,6 +673,7 @@ export interface RootRouteChildren {
   McpRoute: typeof McpRoute
   PolicyRoute: typeof PolicyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  SignInReturnRoute: typeof SignInReturnRoute
   TrustRoute: typeof TrustRoute
   WelcomeRoute: typeof WelcomeRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
@@ -689,6 +702,13 @@ declare module '@tanstack/react-router' {
       path: '/trust'
       fullPath: '/trust'
       preLoaderRoute: typeof TrustRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sign-in-return': {
+      id: '/sign-in-return'
+      path: '/sign-in-return'
+      fullPath: '/sign-in-return'
+      preLoaderRoute: typeof SignInReturnRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -1121,6 +1141,7 @@ const rootRouteChildren: RootRouteChildren = {
   McpRoute: McpRoute,
   PolicyRoute: PolicyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  SignInReturnRoute: SignInReturnRoute,
   TrustRoute: TrustRoute,
   WelcomeRoute: WelcomeRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
