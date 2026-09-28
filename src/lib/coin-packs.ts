@@ -69,8 +69,8 @@ export const CUSTOM_COIN_UNIT = {
 } as const;
 
 export interface VipPlan {
-  bundleId: "vip_monthly";
-  priceId: "vip_monthly_gbp";
+  bundleId: "og_vip_monthly";
+  priceId: "og_vip_monthly";
   priceCents: number;
   currency: "gbp";
   label: string;
@@ -79,8 +79,8 @@ export interface VipPlan {
 }
 
 export const VIP_PLAN: VipPlan = {
-  bundleId: "vip_monthly",
-  priceId: "vip_monthly_gbp",
+  bundleId: "og_vip_monthly",
+  priceId: "og_vip_monthly",
   priceCents: 500,
   currency: "gbp",
   label: "OG VIP — Monthly",
@@ -89,7 +89,7 @@ export const VIP_PLAN: VipPlan = {
 
 /** Bundles historically used for the VIP plan. Used by webhook/refund/reconcile
  *  paths so legacy purchases are still treated as VIP. */
-const VIP_BUNDLE_IDS = new Set<string>(["vip_monthly", "vip_yearly"]);
+const VIP_BUNDLE_IDS = new Set<string>(["vip_monthly", "vip_yearly", "og_vip_monthly", "og_vip_yearly"]);
 
 export function findCoinPackByPriceId(priceId: string): CoinPack | undefined {
   return COIN_PACKS.find((p) => p.priceId === priceId);
