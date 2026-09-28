@@ -12,3 +12,5 @@
 - [x] Add the Privacy Policy link to the signed-in home page
 - [x] Keep Messenger conversations and composers visible above mobile keyboards
 - [x] Add an explicit browser-to-Android sign-in return for installed builds with /app-return support (no website-link verification needed)
+- [ ] Restrict APK welcome to manual account form and add a D.EV Google sign-in button; preserve web welcome
+- [ ] Allow Boss to delete non-privileged user accounts from user settings

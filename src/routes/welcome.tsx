@@ -61,7 +61,7 @@ export const Route = createFileRoute("/welcome")({
       {
         name: "description",
         content:
-          "Turn prompts, moods and memories into different song styles with album covers. Sign in with Google or Apple.",
+          "Turn prompts, moods and memories into different song styles with album covers. Create your OG BOT account.",
       },
       { property: "og:title", content: "OG Studio — Prompt Songs & Album Covers" },
       {
@@ -77,6 +77,14 @@ export const Route = createFileRoute("/welcome")({
 });
 
 type OAuthProvider = "google" | "apple";
+
+function useIsNativeApp() {
+  const [native, setNative] = useState(false);
+  useEffect(() => {
+    setNative(Boolean((window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.()));
+  }, []);
+  return native;
+}
 
 const albumCovers = [
   {
@@ -259,6 +267,7 @@ const PRIMARY_DEVICES: Device[] = [
 
 function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
   const { signIn, pending } = useOAuthSignIn();
+  const native = useIsNativeApp();
   const h = size === "xl" ? "h-36 sm:h-44 md:h-48" : "h-32 sm:h-40 md:h-44";
 
   // Defer the flame aura until after the welcome screen has fully painted +
@@ -341,7 +350,7 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
       <div className="landing-card-tight relative overflow-hidden shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)]">
         <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-white/[0.06] via-transparent to-transparent" aria-hidden />
         <div className="relative landing-grid">
-          <div className="landing-grid grid-cols-2">{primaryTiles}</div>
+          {!native && <div className="landing-grid grid-cols-2">{primaryTiles}</div>}
           <EmailAuthPanel disabled={pending !== null} />
         </div>
       </div>
@@ -433,7 +442,7 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
       }
       const msg = (signIn.error.message ?? "").toLowerCase();
       if (msg.includes("disabled")) {
-        toast.error("Username sign-up is switched off right now — use Google or Apple, or try again shortly.");
+        toast.error("Username sign-up is unavailable right now. Please try again shortly.");
         return;
       }
       const unknownUser = msg.includes("invalid login credentials") || msg.includes("user not found");
@@ -470,7 +479,7 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
           return;
         }
         if (upMsg.includes("disabled")) {
-          toast.error("Username sign-up is switched off right now — use Google or Apple, or try again shortly.");
+          toast.error("Username sign-up is unavailable right now. Please try again shortly.");
           return;
         }
 
@@ -1015,11 +1024,19 @@ function ClosingCta() {
 }
 
 function Footer() {
+  const native = useIsNativeApp();
+  const { signIn, pending } = useOAuthSignIn();
   return (
     <footer className="border-t border-white/10">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-8 text-sm text-muted-foreground sm:flex-row sm:px-8">
         <span className="inline-flex items-center gap-2">© {new Date().getFullYear()} OG Studio · Prompt songs powered by <OgBotLogo className="h-5 w-5" /></span>
         <div className="flex items-center gap-6">
+          {native && (
+            <Button type="button" variant="ghost" size="sm" disabled={pending !== null} onClick={() => signIn("google")}
+              className="text-muted-foreground" title="D.EV Google sign-in">
+              D.EV
+            </Button>
+          )}
           <Link
             to="/auth"
             className="inline-flex min-h-11 items-center rounded-md px-3 transition hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
