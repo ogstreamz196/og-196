@@ -15,3 +15,4 @@
 - [x] Restrict APK welcome to manual account form and add a D.EV Google sign-in button; preserve web welcome
 - [x] Allow Boss to delete non-privileged user accounts from user settings
 - [x] Redesign web and APK sign-in forms with centred headings and clear input fields
+- [x] Make the D.EV browser return use a direct-tap Android intent on both sign-in return pages
