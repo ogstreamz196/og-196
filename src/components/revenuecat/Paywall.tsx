@@ -75,7 +75,7 @@ export function Paywall() {
       <CardContent>
         <div className="grid gap-4 sm:grid-cols-2">
           {currentOffering.availablePackages.map((pkg) => {
-            const isYearly = pkg.identifier === "yearly";
+            const isYearly = /year|annual/i.test(pkg.identifier);
             const busy = purchasing === pkg.identifier;
             const price = pkg.webBillingProduct.currentPrice;
             return (
