@@ -1,6 +1,16 @@
-import { Purchases as PurchasesWeb, CustomerInfo as CustomerInfoWeb, Offerings as OfferingsWeb, Package as PackageWeb } from "@revenuecat/purchases-js";
+// Web SDK is loaded lazily (dynamic import only inside handlers). Its module
+// scope performs operations the Cloudflare worker forbids at global scope, so
+// a static import here crashes every SSR page.
+import type { CustomerInfo as CustomerInfoWeb, Offerings as OfferingsWeb, Package as PackageWeb } from "@revenuecat/purchases-js";
 import type { CustomerInfo as CustomerInfoCap, PurchasesOfferings as OfferingsCap, PurchasesPackage as PackageCap } from "@revenuecat/purchases-capacitor";
 import { Capacitor } from "@capacitor/core";
+
+type RCWebModule = typeof import("@revenuecat/purchases-js");
+type PurchasesWebInstance = Awaited<ReturnType<RCWebModule["Purchases"]["configure"]>>;
+
+// Native SDK is loaded lazily so the web server never evaluates it.
+const loadNative = () => import("@revenuecat/purchases-capacitor").then((m) => m.Purchases);
+const loadWeb = (): Promise<RCWebModule> => import("@revenuecat/purchases-js");
 
 // RevenueCat Keys
 const RC_WEB_API_KEY = "test_UFDSOGyDTSPOjElYUXAqieTfcny";
