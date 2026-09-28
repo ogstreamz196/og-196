@@ -136,7 +136,11 @@
     "ip-address": "^10.3.1",
     "browserslist": "^4.28.7",
     "js-yaml": "^4.3.2",
-    "undici": "^7.29.0",
-    "hono": "^4.12.34"
+    "undici": "^7.29.1",
+    "hono": "^4.12.34",
+    "qs": "^6.16.0",
+    "uuid": "^11.1.1",
+    "@hono/node-server": "^1.19.15",
+    "@tanstack/start-server-core": "^1.167.30"
   }
 }
