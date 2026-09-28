@@ -290,7 +290,6 @@ export function OgChat({
         data: {
           messages: args.history,
           mode,
-          pageContext: typeof window !== "undefined" ? window.location.pathname : "",
           attachmentDataUrl: args.attachmentDataUrl,
           language: isVip ? language : "English",
         },
