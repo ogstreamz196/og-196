@@ -3,6 +3,19 @@ import "./lib/error-capture";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 
+// h3 logs swallowed errors via console.error(error), but the platform log
+// capture only stores error.message ("HTTPError") — never the stack. Wrap
+// console.error so every logged Error also emits its stack as a plain string.
+const origConsoleError = console.error.bind(console);
+console.error = (...args: unknown[]) => {
+  origConsoleError(...args);
+  for (const arg of args) {
+    if (arg instanceof Error && arg.stack) {
+      origConsoleError("[error-stack]", arg.stack);
+    }
+  }
+};
+
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
 };
