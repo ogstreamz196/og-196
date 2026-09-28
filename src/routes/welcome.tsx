@@ -513,7 +513,7 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
               placeholder="Create/use existing password, must be 6 characters"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="h-14 rounded-lg border-2 border-border bg-surface px-4 font-auth-body text-base text-foreground shadow-inner placeholder:text-muted-foreground/70 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/35"
+              className="h-14 rounded-lg border-2 border-border bg-surface px-4 font-auth-body text-base text-foreground shadow-inner placeholder:text-[13px] placeholder:text-muted-foreground/70 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/35"
               disabled={busy || disabled}
               required
             />
