@@ -39,9 +39,11 @@ export function CoinBalance({ className }: { className?: string }) {
   }
 
   const balance = raw;
-  const compact = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 }).format(raw);
+  const compact = new Intl.NumberFormat("en", {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(raw);
   const full = new Intl.NumberFormat("en").format(raw);
-
 
   return (
     <Link

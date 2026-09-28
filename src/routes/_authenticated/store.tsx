@@ -11,10 +11,15 @@ export const Route = createFileRoute("/_authenticated/store")({
       { title: "OG Store — Coins, VIP & Loot" },
       {
         name: "description",
-        content: "Shop limited items, buy OG Coins, unlock VIP perks, and review purchases in the OG BOT Store.",
+        content:
+          "Shop limited items, buy OG Coins, unlock VIP perks, and review purchases in the OG BOT Store.",
       },
       { property: "og:title", content: "OG Store — Items, Coins & VIP" },
-      { property: "og:description", content: "Shop limited items, buy OG Coins, unlock VIP perks, and review purchases in the OG BOT Store." },
+      {
+        property: "og:description",
+        content:
+          "Shop limited items, buy OG Coins, unlock VIP perks, and review purchases in the OG BOT Store.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

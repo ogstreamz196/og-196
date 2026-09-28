@@ -31,14 +31,35 @@ const ROUTES: RouteEntry[] = [
   { path: "/auth", file: "auth.tsx", guard: "public" },
   { path: "/trust", file: "trust.tsx", guard: "public" },
   { path: "/m-preview", file: "m-preview.tsx", guard: "public" },
-  { path: "/r/$code", file: "r.$code.tsx", guard: "public", hasParam: true, note: "Referral redirect" },
+  {
+    path: "/r/$code",
+    file: "r.$code.tsx",
+    guard: "public",
+    hasParam: true,
+    note: "Referral redirect",
+  },
   { path: "/portal/$slug", file: "portal.$slug.tsx", guard: "public", hasParam: true },
-  { path: "/api/public/payments/webhook", file: "api/public/payments/webhook.ts", guard: "public", note: "RevenueCat webhook" },
-  { path: "/api/public/telegram/webhook", file: "api/public/telegram/webhook.ts", guard: "public", note: "Telegram webhook (secret-verified)" },
+  {
+    path: "/api/public/payments/webhook",
+    file: "api/public/payments/webhook.ts",
+    guard: "public",
+    note: "RevenueCat webhook",
+  },
+  {
+    path: "/api/public/telegram/webhook",
+    file: "api/public/telegram/webhook.ts",
+    guard: "public",
+    note: "Telegram webhook (secret-verified)",
+  },
 
   { path: "/", file: "_authenticated/index.tsx", guard: "auth" },
   { path: "/library", file: "_authenticated/library.index.tsx", guard: "auth" },
-  { path: "/library/$songId", file: "_authenticated/library.$songId.tsx", guard: "auth", hasParam: true },
+  {
+    path: "/library/$songId",
+    file: "_authenticated/library.$songId.tsx",
+    guard: "auth",
+    hasParam: true,
+  },
   { path: "/buy-coins", file: "_authenticated/buy-coins.index.tsx", guard: "auth" },
   { path: "/buy-coins/return", file: "_authenticated/buy-coins.return.tsx", guard: "auth" },
   { path: "/messenger", file: "_authenticated/messenger.tsx", guard: "auth" },
@@ -52,20 +73,47 @@ const ROUTES: RouteEntry[] = [
   { path: "/admin/api-keys", file: "_authenticated/admin.api-keys.tsx", guard: "admin" },
   { path: "/admin/debug-context", file: "_authenticated/admin.debug-context.tsx", guard: "admin" },
   { path: "/admin/og-persona", file: "_authenticated/admin.og-persona.tsx", guard: "admin" },
-  { path: "/admin/health", file: "_authenticated/admin.health.tsx", guard: "admin", note: "Automated API key health check" },
+  {
+    path: "/admin/health",
+    file: "_authenticated/admin.health.tsx",
+    guard: "admin",
+    note: "Automated API key health check",
+  },
   { path: "/admin/onboarding", file: "_authenticated/admin.onboarding.tsx", guard: "admin" },
-  { path: "/admin/referrals-audit", file: "_authenticated/admin.referrals-audit.tsx", guard: "admin" },
+  {
+    path: "/admin/referrals-audit",
+    file: "_authenticated/admin.referrals-audit.tsx",
+    guard: "admin",
+  },
   { path: "/admin/route-map", file: "_authenticated/admin.route-map.tsx", guard: "admin" },
-  { path: "/admin/user-settings", file: "_authenticated/admin.user-settings.tsx", guard: "admin", note: "Redirects to /admin/users" },
+  {
+    path: "/admin/user-settings",
+    file: "_authenticated/admin.user-settings.tsx",
+    guard: "admin",
+    note: "Redirects to /admin/users",
+  },
   { path: "/admin/users", file: "_authenticated/admin.users.tsx", guard: "admin" },
   { path: "/admin/users-pro", file: "_authenticated/admin.users-pro.tsx", guard: "admin" },
-  { path: "/admin/users/$userId", file: "_authenticated/admin.users.$userId.tsx", guard: "admin", hasParam: true },
+  {
+    path: "/admin/users/$userId",
+    file: "_authenticated/admin.users.$userId.tsx",
+    guard: "admin",
+    hasParam: true,
+  },
 ];
 
 const GUARD_META: Record<GuardKind, { label: string; tone: string; Icon: typeof Globe }> = {
-  public: { label: "Public", tone: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30", Icon: Globe },
+  public: {
+    label: "Public",
+    tone: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
+    Icon: Globe,
+  },
   auth: { label: "Signed-in", tone: "bg-sky-500/10 text-sky-300 border-sky-500/30", Icon: Lock },
-  admin: { label: "Admin only", tone: "bg-red-500/10 text-red-300 border-red-500/30", Icon: ShieldCheck },
+  admin: {
+    label: "Admin only",
+    tone: "bg-red-500/10 text-red-300 border-red-500/30",
+    Icon: ShieldCheck,
+  },
 };
 
 export function RouteMapPage() {
@@ -80,7 +128,9 @@ export function RouteMapPage() {
   if (isLoading) {
     return (
       <DashboardShell title="Route map">
-        <div className="py-24 text-center text-sm text-muted-foreground">Checking admin access…</div>
+        <div className="py-24 text-center text-sm text-muted-foreground">
+          Checking admin access…
+        </div>
       </DashboardShell>
     );
   }
@@ -95,7 +145,6 @@ export function RouteMapPage() {
 
   return (
     <DashboardShell title="Route map">
-
       <div className="space-y-6">
         <header className="flex flex-col gap-3 rounded-2xl border border-border/60 bg-card/40 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
@@ -105,7 +154,8 @@ export function RouteMapPage() {
             <div>
               <h1 className="font-display text-2xl font-black">Route map &amp; auth audit</h1>
               <p className="text-sm text-muted-foreground">
-                {total} routes — {counts.public} public, {counts.auth} signed-in, {counts.admin} admin-only.
+                {total} routes — {counts.public} public, {counts.auth} signed-in, {counts.admin}{" "}
+                admin-only.
               </p>
             </div>
           </div>

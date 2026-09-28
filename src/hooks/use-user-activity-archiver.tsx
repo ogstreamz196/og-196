@@ -38,7 +38,6 @@ export function UserActivityArchiver() {
           } catch (e) {
             console.error("song archive failed", e);
           }
-
         },
       )
       .subscribe();

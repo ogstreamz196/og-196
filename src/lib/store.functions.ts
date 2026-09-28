@@ -1,10 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import {
-  type StripeEnv,
-  createStripeClient,
-  getStripeErrorMessage,
-} from "@/lib/stripe.server";
+import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "@/lib/stripe.server";
 
 // ─── shared types ─────────────────────────────────────────────────────────
 export type StoreCategory = {
@@ -139,11 +135,24 @@ export const claimSportsGuideInvite = createServerFn({ method: "POST" })
     if (!lovableKey || !telegramKey) throw new Error("Telegram is not configured");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const [access, profile, setting] = await Promise.all([
-      supabaseAdmin.from("sports_guide_access").select("status").eq("user_id", context.userId).maybeSingle(),
-      supabaseAdmin.from("profiles").select("telegram_chat_id").eq("id", context.userId).maybeSingle(),
-      supabaseAdmin.from("app_settings").select("value").eq("key", "telegram.sports_guide_group_id").maybeSingle(),
+      supabaseAdmin
+        .from("sports_guide_access")
+        .select("status")
+        .eq("user_id", context.userId)
+        .maybeSingle(),
+      supabaseAdmin
+        .from("profiles")
+        .select("telegram_chat_id")
+        .eq("id", context.userId)
+        .maybeSingle(),
+      supabaseAdmin
+        .from("app_settings")
+        .select("value")
+        .eq("key", "telegram.sports_guide_group_id")
+        .maybeSingle(),
     ]);
-    if (!access.data || access.data.status === "revoked") throw new Error("Buy Sports Guide access first");
+    if (!access.data || access.data.status === "revoked")
+      throw new Error("Buy Sports Guide access first");
     if (!profile.data?.telegram_chat_id) throw new Error("Connect Telegram in Settings first");
     const groupId = setting.data?.value;
     if (typeof groupId !== "number" && typeof groupId !== "string") {
@@ -155,32 +164,45 @@ export const claimSportsGuideInvite = createServerFn({ method: "POST" })
       "X-Connection-Api-Key": telegramKey,
       "Content-Type": "application/json",
     };
-    const inviteResponse = await fetch("https://connector-gateway.lovable.dev/telegram/createChatInviteLink", {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        chat_id: groupId,
-        name: `OG Sports Guide · ${context.userId.slice(0, 8)}`,
-        expire_date: expiresAt,
-        member_limit: 1,
-      }),
-    });
-    const inviteBody = await inviteResponse.json().catch(() => null) as { ok?: boolean; description?: string; result?: { invite_link?: string } } | null;
+    const inviteResponse = await fetch(
+      "https://connector-gateway.lovable.dev/telegram/createChatInviteLink",
+      {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          chat_id: groupId,
+          name: `OG Sports Guide · ${context.userId.slice(0, 8)}`,
+          expire_date: expiresAt,
+          member_limit: 1,
+        }),
+      },
+    );
+    const inviteBody = (await inviteResponse.json().catch(() => null)) as {
+      ok?: boolean;
+      description?: string;
+      result?: { invite_link?: string };
+    } | null;
     const inviteLink = inviteBody?.result?.invite_link;
     if (!inviteResponse.ok || inviteBody?.ok !== true || !inviteLink) {
       throw new Error(inviteBody?.description ?? "Could not create the Telegram invite");
     }
-    const messageResponse = await fetch("https://connector-gateway.lovable.dev/telegram/sendMessage", {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        chat_id: profile.data.telegram_chat_id,
-        text: `🏆 <b>OG SPORTS GUIDE ACCESS</b>\n\nYour private one-use invite is ready. It expires in 24 hours.\n\n${inviteLink}\n\nDo not share this link — only one person can use it.`,
-        parse_mode: "HTML",
-        disable_web_page_preview: true,
-      }),
-    });
-    const messageBody = await messageResponse.json().catch(() => null) as { ok?: boolean; description?: string } | null;
+    const messageResponse = await fetch(
+      "https://connector-gateway.lovable.dev/telegram/sendMessage",
+      {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          chat_id: profile.data.telegram_chat_id,
+          text: `🏆 <b>OG SPORTS GUIDE ACCESS</b>\n\nYour private one-use invite is ready. It expires in 24 hours.\n\n${inviteLink}\n\nDo not share this link — only one person can use it.`,
+          parse_mode: "HTML",
+          disable_web_page_preview: true,
+        }),
+      },
+    );
+    const messageBody = (await messageResponse.json().catch(() => null)) as {
+      ok?: boolean;
+      description?: string;
+    } | null;
     if (!messageResponse.ok || messageBody?.ok !== true) {
       throw new Error(messageBody?.description ?? "Invite created, but Telegram delivery failed");
     }
@@ -209,14 +231,8 @@ export const listAllStoreItems = createServerFn({ method: "GET" })
     });
     if (!isAdmin) throw new Error("Forbidden");
     const [cats, items] = await Promise.all([
-      supabase
-        .from("store_categories")
-        .select("*")
-        .order("sort_order", { ascending: true }),
-      supabase
-        .from("store_items")
-        .select("*")
-        .order("sort_order", { ascending: true }),
+      supabase.from("store_categories").select("*").order("sort_order", { ascending: true }),
+      supabase.from("store_items").select("*").order("sort_order", { ascending: true }),
     ]);
     if (cats.error) throw new Error(cats.error.message);
     if (items.error) throw new Error(items.error.message);
@@ -252,13 +268,20 @@ export const upsertStoreItem = createServerFn({ method: "POST" })
     if (!data.category_id) throw new Error("category_id required");
     if (!SLUG_RE.test(data.slug)) throw new Error("Slug must be lowercase letters/digits/-/_");
     if (!data.name?.trim()) throw new Error("Name required");
-    if (!Number.isInteger(data.price_cents) || data.price_cents < 0) throw new Error("Invalid price");
-    if (data.coin_price != null && (!Number.isInteger(data.coin_price) || data.coin_price < 1)) throw new Error("OG Coin price must be a positive whole number");
+    if (!Number.isInteger(data.price_cents) || data.price_cents < 0)
+      throw new Error("Invalid price");
+    if (data.coin_price != null && (!Number.isInteger(data.coin_price) || data.coin_price < 1))
+      throw new Error("OG Coin price must be a positive whole number");
     if (!CURRENCY_RE.test(data.currency)) throw new Error("Invalid currency");
-    if (data.recurring_interval && data.recurring_interval !== "month" && data.recurring_interval !== "year") {
+    if (
+      data.recurring_interval &&
+      data.recurring_interval !== "month" &&
+      data.recurring_interval !== "year"
+    ) {
       throw new Error("Invalid interval");
     }
-    if (!["common", "rare", "epic", "legendary"].includes(data.rarity)) throw new Error("Invalid rarity");
+    if (!["common", "rare", "epic", "legendary"].includes(data.rarity))
+      throw new Error("Invalid rarity");
     return data;
   })
   .handler(async ({ data, context }) => {
@@ -324,7 +347,14 @@ export const deleteStoreItem = createServerFn({ method: "POST" })
 export const upsertStoreCategory = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(
-    (d: { id?: string; slug: string; label: string; description?: string; sort_order?: number; active?: boolean }) => {
+    (d: {
+      id?: string;
+      slug: string;
+      label: string;
+      description?: string;
+      sort_order?: number;
+      active?: boolean;
+    }) => {
       if (!SLUG_RE.test(d.slug)) throw new Error("Invalid slug");
       if (!d.label?.trim()) throw new Error("Label required");
       return d;
@@ -372,7 +402,8 @@ export const reorderStoreItems = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { data: isAdmin } = await supabase.rpc("has_role", {
-      _user_id: userId, _role: "admin",
+      _user_id: userId,
+      _role: "admin",
     });
     if (!isAdmin) throw new Error("Forbidden");
     // Sequential updates keep it simple and safe under RLS.
@@ -399,7 +430,8 @@ export const reorderStoreCategories = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { data: isAdmin } = await supabase.rpc("has_role", {
-      _user_id: userId, _role: "admin",
+      _user_id: userId,
+      _role: "admin",
     });
     if (!isAdmin) throw new Error("Forbidden");
     for (let i = 0; i < data.ids.length; i++) {
@@ -412,22 +444,19 @@ export const reorderStoreCategories = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-
 // ─── purchase: create Stripe embedded checkout session ───────────────────
 type CheckoutResult = { clientSecret: string } | { error: string };
 
 export const createStoreItemCheckoutSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(
-    (data: { itemId: string; returnUrl: string; environment: StripeEnv }) => {
-      if (!/^[0-9a-f-]{36}$/i.test(data.itemId)) throw new Error("Invalid itemId");
-      if (data.environment !== "sandbox" && data.environment !== "live") {
-        throw new Error("Invalid environment");
-      }
-      if (!/^https?:\/\//.test(data.returnUrl)) throw new Error("Invalid returnUrl");
-      return data;
-    },
-  )
+  .inputValidator((data: { itemId: string; returnUrl: string; environment: StripeEnv }) => {
+    if (!/^[0-9a-f-]{36}$/i.test(data.itemId)) throw new Error("Invalid itemId");
+    if (data.environment !== "sandbox" && data.environment !== "live") {
+      throw new Error("Invalid environment");
+    }
+    if (!/^https?:\/\//.test(data.returnUrl)) throw new Error("Invalid returnUrl");
+    return data;
+  })
   .handler(async ({ data, context }): Promise<CheckoutResult> => {
     const { userId, supabase } = context;
     try {
@@ -448,9 +477,14 @@ export const createStoreItemCheckoutSession = createServerFn({ method: "POST" })
       let email: string | undefined;
       try {
         const { data: prof } = await supabase
-          .from("profiles").select("email").eq("id", userId).maybeSingle();
+          .from("profiles")
+          .select("email")
+          .eq("id", userId)
+          .maybeSingle();
         email = (prof?.email as string | undefined) ?? undefined;
-      } catch { /* optional */ }
+      } catch {
+        /* optional */
+      }
 
       // Resolve/create Customer inline (mirrors payments.functions helper).
       let customerId: string | undefined;
@@ -495,7 +529,8 @@ export const createStoreItemCheckoutSession = createServerFn({ method: "POST" })
               product_data: {
                 name: it.name,
                 ...(it.description && { description: it.description }),
-                ...(it.image_url && /^https?:\/\//.test(it.image_url) && { images: [it.image_url] }),
+                ...(it.image_url &&
+                  /^https?:\/\//.test(it.image_url) && { images: [it.image_url] }),
               },
               ...(isRecurring && { recurring: { interval: it.recurring_interval! } }),
             },

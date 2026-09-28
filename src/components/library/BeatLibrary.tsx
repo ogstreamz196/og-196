@@ -53,7 +53,11 @@ function renamedPath(path: string, label: string) {
   const file = path.slice(slash + 1);
   const prefix = /^(\d{10,})-/.exec(file)?.[1] ?? String(Date.now());
   const ext = /\.([a-z0-9]+)$/i.exec(file)?.[1] ?? "mp3";
-  const safe = label.trim().replace(/[^a-zA-Z0-9._ -]+/g, "-").replace(/\s+/g, "-").slice(0, 60);
+  const safe = label
+    .trim()
+    .replace(/[^a-zA-Z0-9._ -]+/g, "-")
+    .replace(/\s+/g, "-")
+    .slice(0, 60);
   return `${dir}/${prefix}-${safe || "beat"}.${ext}`;
 }
 
@@ -157,9 +161,7 @@ export function BeatLibrary({
     }
     setBusyPath(beat.path);
     try {
-      const { data, error } = await supabase.storage
-        .from("beats")
-        .createSignedUrl(beat.path, 600);
+      const { data, error } = await supabase.storage.from("beats").createSignedUrl(beat.path, 600);
       if (error || !data?.signedUrl) throw error ?? new Error("Couldn't open that beat");
       el.src = data.signedUrl;
       el.onended = () => setPlaying(null);
@@ -195,7 +197,9 @@ export function BeatLibrary({
       }
       setBeats((list) =>
         list.map((b) =>
-          b.path === beat.path ? { ...b, path: target, name: pretty(target.split("/").pop() ?? label) } : b,
+          b.path === beat.path
+            ? { ...b, path: target, name: pretty(target.split("/").pop() ?? label) }
+            : b,
         ),
       );
       toast.success("Beat renamed");
@@ -365,7 +369,6 @@ export function BeatLibrary({
                     {size ? <span>{size}</span> : null}
                   </p>
                 </li>
-
               );
             })}
           </ul>

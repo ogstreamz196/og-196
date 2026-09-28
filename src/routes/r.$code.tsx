@@ -3,8 +3,7 @@ import ogbot from "@/assets/ogbot.png.asset.json";
 
 const OG_IMAGE = `https://ogstreamz.co.uk${ogbot.url}`;
 const TITLE = "Join me on OG Streamz — make AI songs";
-const DESC =
-  "Sign up with my link and we both win — turn prompts into full songs with cover art.";
+const DESC = "Sign up with my link and we both win — turn prompts into full songs with cover art.";
 
 export const Route = createFileRoute("/r/$code")({
   head: ({ params }) => ({

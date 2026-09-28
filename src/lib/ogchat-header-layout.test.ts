@@ -10,10 +10,7 @@ import { resolve } from "node:path";
  *   - sm+: side-by-side row, hero flexes and controls keep a balanced fixed
  *     width so the two pieces never overlap or clip.
  */
-const SRC = readFileSync(
-  resolve(__dirname, "../components/messenger/OgChat.tsx"),
-  "utf8",
-);
+const SRC = readFileSync(resolve(__dirname, "../components/messenger/OgChat.tsx"), "utf8");
 
 function classesFor(testId: string) {
   // grab the className string on the element carrying data-testid={testId}

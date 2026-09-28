@@ -171,10 +171,7 @@ export const runE2ESmokeTest = createServerFn({ method: "POST" })
         if (songSelErr) throw songSelErr;
         const songIds = (songRows || []).map((r) => r.id as string);
         if (songIds.length) {
-          const { error: delErr } = await supabaseAdmin
-            .from("songs")
-            .delete()
-            .in("id", songIds);
+          const { error: delErr } = await supabaseAdmin.from("songs").delete().in("id", songIds);
           if (delErr) throw delErr;
           notes.push(`songs=${songIds.length}`);
         } else {

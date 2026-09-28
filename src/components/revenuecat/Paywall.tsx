@@ -23,7 +23,6 @@ const YEARLY_PLAN = {
 };
 
 export function Paywall() {
-
   const { offerings, loading, purchasePackage, isVip } = useRevenueCat();
   const [purchasing, setPurchasing] = useState<string | null>(null);
 
@@ -33,7 +32,11 @@ export function Paywall() {
     ? {
         ...rawOffering,
         availablePackages: rawOffering.availablePackages.filter((p) => {
-          const a = p as unknown as { identifier: string; product?: { identifier?: string }; webBillingProduct?: { identifier?: string } };
+          const a = p as unknown as {
+            identifier: string;
+            product?: { identifier?: string };
+            webBillingProduct?: { identifier?: string };
+          };
           const id = `${a.identifier} ${a.product?.identifier ?? ""} ${a.webBillingProduct?.identifier ?? ""}`;
           return !/coins_|track_unlock/.test(id);
         }),

@@ -20,10 +20,7 @@ export function StudioMeter({
   const level = Math.max(0, Math.min(1, load));
   const lit = active ? Math.max(1, Math.round(bars * (0.35 + level * 0.65))) : 0;
   return (
-    <div
-      aria-hidden="true"
-      className={cn("flex h-6 items-end gap-[3px]", className)}
-    >
+    <div aria-hidden="true" className={cn("flex h-6 items-end gap-[3px]", className)}>
       {Array.from({ length: bars }).map((_, i) => {
         const on = i < lit;
         return (

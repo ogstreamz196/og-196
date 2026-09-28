@@ -1,5 +1,18 @@
 import type { ReactNode } from "react";
-import { Coins, Package, Sparkles, Crown, Gem, ShoppingBag, Repeat, ExternalLink, Check, Loader2, Copy, KeyRound } from "lucide-react";
+import {
+  Coins,
+  Package,
+  Sparkles,
+  Crown,
+  Gem,
+  ShoppingBag,
+  Repeat,
+  ExternalLink,
+  Check,
+  Loader2,
+  Copy,
+  KeyRound,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { CoinPill } from "@/components/ui/coin-pill";
@@ -7,7 +20,10 @@ import type { StoreItem } from "@/lib/store.functions";
 import { cn } from "@/lib/utils";
 import sportsGuideLogo from "@/assets/og-bot-sports-guide.png.asset.json";
 
-const RARITY: Record<StoreItem["rarity"], { label: string; ring: string; glow: string; icon: ReactNode }> = {
+const RARITY: Record<
+  StoreItem["rarity"],
+  { label: string; ring: string; glow: string; icon: ReactNode }
+> = {
   common: {
     label: "Common",
     ring: "border-slate-500/40",
@@ -64,7 +80,8 @@ export function StoreItemCard({
   const stockRemaining = item.stock === null ? null : Math.max(0, item.stock - item.stock_sold);
   const stockSoldOut = stockRemaining !== null && stockRemaining === 0;
   const isSportsGuide = item.slug === "og-sports-guide-access";
-  const ownsSportsGuide = isSportsGuide && sportsGuideState && !["unowned", "revoked"].includes(sportsGuideState);
+  const ownsSportsGuide =
+    isSportsGuide && sportsGuideState && !["unowned", "revoked"].includes(sportsGuideState);
   const imageUrl = isSportsGuide ? sportsGuideLogo.url : item.image_url;
   const isVipPass = item.slug === "og-vip-pass";
   const ownsVipPass = isVipPass && !!vipPass?.owned;
@@ -110,18 +127,14 @@ export function StoreItemCard({
       </div>
 
       {/* name + desc */}
-      <h3 className="line-clamp-2 font-display text-base font-black uppercase">
-        {item.name}
-      </h3>
+      <h3 className="line-clamp-2 font-display text-base font-black uppercase">{item.name}</h3>
       {item.description && (
         <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{item.description}</p>
       )}
 
       {/* meta pills */}
       <div className="mt-3 flex flex-wrap gap-1.5">
-        {item.coin_reward ? (
-          <CoinPill size="sm">+{item.coin_reward} coins</CoinPill>
-        ) : null}
+        {item.coin_reward ? <CoinPill size="sm">+{item.coin_reward} coins</CoinPill> : null}
         {item.perk_slug && !isSportsGuide && (
           <span className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold uppercase text-primary">
             <Sparkles className="h-3 w-3" /> {item.perk_slug.replace("role:", "")}
@@ -134,8 +147,8 @@ export function StoreItemCard({
               soldOut
                 ? "bg-destructive/20 text-destructive"
                 : stockRemaining <= 5
-                ? "bg-amber-500/20 text-amber-300"
-                : "bg-white/5 text-muted-foreground",
+                  ? "bg-amber-500/20 text-amber-300"
+                  : "bg-white/5 text-muted-foreground",
             )}
           >
             {soldOut ? "Sold out" : `${stockRemaining} left`}
@@ -146,7 +159,9 @@ export function StoreItemCard({
       {/* footer */}
       <div className="mt-auto flex flex-col gap-3 pt-4 min-[400px]:grid min-[400px]:grid-cols-[minmax(0,1fr)_auto] min-[400px]:items-end">
         <div className="min-w-0 font-mono text-lg font-bold leading-tight text-foreground sm:text-xl">
-          {item.coin_price !== null ? `${item.coin_price} OG Coins` : formatPrice(item.price_cents, item.currency)}
+          {item.coin_price !== null
+            ? `${item.coin_price} OG Coins`
+            : formatPrice(item.price_cents, item.currency)}
         </div>
         <Button
           size="sm"
@@ -158,11 +173,32 @@ export function StoreItemCard({
             }
             onBuy(item.id);
           }}
-          disabled={(soldOut && !ownsVipPass) || buying || ownsVipPass || (Boolean(ownsSportsGuide) && !sportsGuideInviteUrl)}
+          disabled={
+            (soldOut && !ownsVipPass) ||
+            buying ||
+            ownsVipPass ||
+            (Boolean(ownsSportsGuide) && !sportsGuideInviteUrl)
+          }
           className="w-full bg-gradient-brand font-bold uppercase tracking-wider min-[400px]:w-auto"
         >
-          {buying ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : ownsSportsGuide ? <ExternalLink className="mr-1 h-4 w-4" /> : ownsVipPass ? <Check className="mr-1 h-4 w-4" /> : <Coins className="mr-1 h-4 w-4" />}
-          {ownsVipPass ? "Unlocked" : soldOut ? "Sold out" : buying ? "…" : ownsSportsGuide ? "Open group" : "Buy"}
+          {buying ? (
+            <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+          ) : ownsSportsGuide ? (
+            <ExternalLink className="mr-1 h-4 w-4" />
+          ) : ownsVipPass ? (
+            <Check className="mr-1 h-4 w-4" />
+          ) : (
+            <Coins className="mr-1 h-4 w-4" />
+          )}
+          {ownsVipPass
+            ? "Unlocked"
+            : soldOut
+              ? "Sold out"
+              : buying
+                ? "…"
+                : ownsSportsGuide
+                  ? "Open group"
+                  : "Buy"}
         </Button>
       </div>
       {ownsVipPass && vipPass?.username ? (
@@ -170,10 +206,19 @@ export function StoreItemCard({
           <p className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wide text-primary">
             <KeyRound className="h-3.5 w-3.5" /> Your VIP login
           </p>
-          {([["Username", vipPass.username], ["Password", vipPass.password ?? ""]] as const).map(([label, value]) => (
+          {(
+            [
+              ["Username", vipPass.username],
+              ["Password", vipPass.password ?? ""],
+            ] as const
+          ).map(([label, value]) => (
             <div key={label} className="flex items-center gap-2">
-              <span className="w-20 shrink-0 text-[11px] uppercase text-muted-foreground">{label}</span>
-              <code className="min-w-0 flex-1 truncate rounded bg-background/70 px-2 py-1 font-mono text-xs">{value}</code>
+              <span className="w-20 shrink-0 text-[11px] uppercase text-muted-foreground">
+                {label}
+              </span>
+              <code className="min-w-0 flex-1 truncate rounded bg-background/70 px-2 py-1 font-mono text-xs">
+                {value}
+              </code>
               <Button
                 type="button"
                 size="icon-sm"
@@ -194,7 +239,9 @@ export function StoreItemCard({
       ) : null}
       {isVipPass && !ownsVipPass ? (
         <p className="mt-3 text-[11px] text-muted-foreground">
-          {vipSoldOut ? "All passes are currently claimed — check back soon." : `${vipPass?.available ?? 0} passes left`}
+          {vipSoldOut
+            ? "All passes are currently claimed — check back soon."
+            : `${vipPass?.available ?? 0} passes left`}
         </p>
       ) : null}
       {ownsSportsGuide ? (

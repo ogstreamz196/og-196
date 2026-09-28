@@ -103,7 +103,12 @@ export const VIP_PLAN: VipPlan = {
 
 /** Bundles historically used for the VIP plan. Used by webhook/refund/reconcile
  *  paths so legacy purchases are still treated as VIP. */
-const VIP_BUNDLE_IDS = new Set<string>(["vip_monthly", "vip_yearly", "og_vip_monthly", "og_vip_yearly"]);
+const VIP_BUNDLE_IDS = new Set<string>([
+  "vip_monthly",
+  "vip_yearly",
+  "og_vip_monthly",
+  "og_vip_yearly",
+]);
 
 export function findCoinPackByPriceId(priceId: string): CoinPack | undefined {
   const id = LEGACY_PRICE_ALIASES[priceId] ?? priceId;

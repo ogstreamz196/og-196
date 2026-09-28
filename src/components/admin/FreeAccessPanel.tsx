@@ -35,9 +35,7 @@ export function FreeAccessPanel() {
   const { enabled, rawEnabled, expiresAt, expired, isLoading } = useFreeAccess();
   const mut = useSetFreeAccess();
 
-  const [draftExpiry, setDraftExpiry] = useState<string>(() =>
-    toLocalInputValue(expiresAt),
-  );
+  const [draftExpiry, setDraftExpiry] = useState<string>(() => toLocalInputValue(expiresAt));
 
   useEffect(() => {
     setDraftExpiry(toLocalInputValue(expiresAt));
@@ -73,8 +71,8 @@ export function FreeAccessPanel() {
           <div className="min-w-0">
             <h3 className="font-semibold">Free access for all users</h3>
             <p className="text-sm text-muted-foreground">
-              Limited-time promo: every signed-in user gets VIP-only features,
-              including OG Bot foul-mouth mode. Turn off to restore VIP-only access.
+              Limited-time promo: every signed-in user gets VIP-only features, including OG Bot
+              foul-mouth mode. Turn off to restore VIP-only access.
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
               Status:{" "}
@@ -115,8 +113,8 @@ export function FreeAccessPanel() {
           Auto-revert expiry (optional)
         </div>
         <p className="mt-1 text-xs text-muted-foreground">
-          Pick a date/time when free access automatically reverts to VIP-only.
-          Leave empty for no expiry.
+          Pick a date/time when free access automatically reverts to VIP-only. Leave empty for no
+          expiry.
         </p>
 
         <div className="mt-3 flex flex-wrap items-end gap-3">

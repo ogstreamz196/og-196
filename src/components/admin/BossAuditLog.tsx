@@ -47,11 +47,17 @@ export function BossAuditLog() {
   useEffect(() => {
     const ch = supabase
       .channel("boss-audit-feed")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "boss_audit_log" }, () => {
-        qc.invalidateQueries({ queryKey: ["boss-audit-log"] });
-      })
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "boss_audit_log" },
+        () => {
+          qc.invalidateQueries({ queryKey: ["boss-audit-log"] });
+        },
+      )
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    return () => {
+      supabase.removeChannel(ch);
+    };
   }, [qc]);
 
   return (
@@ -76,7 +82,9 @@ export function BossAuditLog() {
           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
         </div>
       ) : !data || data.length === 0 ? (
-        <p className="py-6 text-center text-sm text-muted-foreground">No boss edits recorded yet.</p>
+        <p className="py-6 text-center text-sm text-muted-foreground">
+          No boss edits recorded yet.
+        </p>
       ) : (
         <ul className="max-h-[480px] space-y-2 overflow-y-auto pr-1">
           {data.map((row) => (
@@ -94,7 +102,9 @@ export function BossAuditLog() {
                   <span className="text-xs uppercase tracking-wide text-muted-foreground">
                     {row.action}
                   </span>
-                  <code className="rounded bg-muted/60 px-1.5 py-0.5 text-xs">{row.target_key}</code>
+                  <code className="rounded bg-muted/60 px-1.5 py-0.5 text-xs">
+                    {row.target_key}
+                  </code>
                   <span className="ml-auto text-xs text-muted-foreground">
                     {new Date(row.created_at).toLocaleString()}
                   </span>
@@ -102,7 +112,9 @@ export function BossAuditLog() {
                 </summary>
                 <div className="grid gap-2 border-t border-border/40 p-3 text-xs sm:grid-cols-[1fr_auto_1fr] sm:items-start">
                   <div className="rounded-lg bg-destructive/10 p-2 text-destructive-foreground/80">
-                    <div className="mb-1 text-[10px] uppercase tracking-wide opacity-70">Before</div>
+                    <div className="mb-1 text-[10px] uppercase tracking-wide opacity-70">
+                      Before
+                    </div>
                     {preview(row.old_value)}
                   </div>
                   <ArrowRight className="hidden h-4 w-4 self-center text-muted-foreground sm:block" />

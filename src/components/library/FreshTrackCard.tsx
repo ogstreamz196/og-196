@@ -305,7 +305,6 @@ export function FreshTrackCard({
         </div>
       </div>
 
-
       <audio
         ref={audioRef}
         preload="auto"

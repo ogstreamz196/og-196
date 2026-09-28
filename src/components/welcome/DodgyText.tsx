@@ -15,12 +15,7 @@ type Props = {
  * desktop and snaps back to its anchor when the cursor leaves. On touch it
  * stays perfectly still — never overrides layout.
  */
-export function DodgyText({
-  children,
-  className = "",
-  dodgeRadius = 180,
-  maxDrift = 40,
-}: Props) {
+export function DodgyText({ children, className = "", dodgeRadius = 180, maxDrift = 40 }: Props) {
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const rafRef = useRef<number | null>(null);
   const targetRef = useRef({ x: 0, y: 0 });

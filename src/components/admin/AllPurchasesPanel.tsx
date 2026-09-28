@@ -10,17 +10,27 @@ type RangeKey = "all" | "today" | "week" | "month" | "custom";
 const PAGE_SIZES = [25, 50, 100, 250] as const;
 
 function fmtDate(iso: string) {
-  try { return new Date(iso).toLocaleString(); } catch { return iso; }
+  try {
+    return new Date(iso).toLocaleString();
+  } catch {
+    return iso;
+  }
 }
 
 function startOfToday() {
-  const d = new Date(); d.setHours(0, 0, 0, 0); return d;
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
 }
 function startOfWeek() {
-  const d = startOfToday(); d.setDate(d.getDate() - d.getDay()); return d;
+  const d = startOfToday();
+  d.setDate(d.getDate() - d.getDay());
+  return d;
 }
 function startOfMonth() {
-  const d = startOfToday(); d.setDate(1); return d;
+  const d = startOfToday();
+  d.setDate(1);
+  return d;
 }
 function toInputDate(d: Date) {
   return d.toISOString().slice(0, 10);
@@ -80,7 +90,9 @@ export function AllPurchasesPanel() {
   const pageItems = items.slice(pageStart, pageStart + pageSize);
 
   // Reset to page 1 when filter inputs change
-  useEffect(() => { setPage(1); }, [range, fromTs, toTs, pageSize]);
+  useEffect(() => {
+    setPage(1);
+  }, [range, fromTs, toTs, pageSize]);
 
   const downloadCsv = () => {
     const header = ["created_at", "user_id", "display_name", "email", "amount_coins", "reference"];
@@ -137,13 +149,15 @@ export function AllPurchasesPanel() {
         <div className="mt-3 space-y-3">
           {/* Range filter row */}
           <div className="flex flex-wrap items-center gap-2">
-            {([
-              ["all", "All time"],
-              ["today", "Today"],
-              ["week", "This week"],
-              ["month", "This month"],
-              ["custom", "Custom"],
-            ] as Array<[RangeKey, string]>).map(([key, label]) => (
+            {(
+              [
+                ["all", "All time"],
+                ["today", "Today"],
+                ["week", "This week"],
+                ["month", "This month"],
+                ["custom", "Custom"],
+              ] as Array<[RangeKey, string]>
+            ).map(([key, label]) => (
               <button
                 key={key}
                 type="button"
@@ -201,9 +215,7 @@ export function AllPurchasesPanel() {
               <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading purchases…
             </div>
           )}
-          {q.error && (
-            <p className="text-xs text-destructive">{(q.error as Error).message}</p>
-          )}
+          {q.error && <p className="text-xs text-destructive">{(q.error as Error).message}</p>}
           {!q.isLoading && !q.error && items.length === 0 && (
             <p className="text-xs text-muted-foreground">No purchases in this range.</p>
           )}
@@ -223,8 +235,7 @@ export function AllPurchasesPanel() {
                       </div>
                     </div>
                     <div className="inline-flex shrink-0 items-center gap-1 rounded-full border border-coin/30 bg-coin/10 px-2 py-0.5 font-mono tabular-nums text-coin">
-                      <Coins className="h-3 w-3" />
-                      +{r.amount.toLocaleString()}
+                      <Coins className="h-3 w-3" />+{r.amount.toLocaleString()}
                     </div>
                   </li>
                 ))}
@@ -240,7 +251,9 @@ export function AllPurchasesPanel() {
                     aria-label="Rows per page"
                   >
                     {PAGE_SIZES.map((n) => (
-                      <option key={n} value={n}>{n}</option>
+                      <option key={n} value={n}>
+                        {n}
+                      </option>
                     ))}
                   </select>
                 </label>

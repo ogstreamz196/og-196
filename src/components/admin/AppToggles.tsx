@@ -11,19 +11,55 @@ interface ToggleDef {
 }
 
 const MUSIC_HUB_TOGGLES: ToggleDef[] = [
-  { key: "mh_autoplay", label: "Autoplay new tracks", desc: "Start playing songs as soon as they finish generating." },
-  { key: "mh_show_lyrics", label: "Show lyrics by default", desc: "Open the lyrics panel automatically on every song." },
-  { key: "mh_allow_downloads", label: "Allow downloads", desc: "Show the download button on completed tracks." },
-  { key: "mh_public_library", label: "Public library", desc: "Make your finished tracks discoverable in the public hub." },
-  { key: "mh_explicit_filter", label: "Filter explicit prompts", desc: "Block prompts containing flagged language before generation." },
+  {
+    key: "mh_autoplay",
+    label: "Autoplay new tracks",
+    desc: "Start playing songs as soon as they finish generating.",
+  },
+  {
+    key: "mh_show_lyrics",
+    label: "Show lyrics by default",
+    desc: "Open the lyrics panel automatically on every song.",
+  },
+  {
+    key: "mh_allow_downloads",
+    label: "Allow downloads",
+    desc: "Show the download button on completed tracks.",
+  },
+  {
+    key: "mh_public_library",
+    label: "Public library",
+    desc: "Make your finished tracks discoverable in the public hub.",
+  },
+  {
+    key: "mh_explicit_filter",
+    label: "Filter explicit prompts",
+    desc: "Block prompts containing flagged language before generation.",
+  },
 ];
 
 const OG_BOT_TOGGLES: ToggleDef[] = [
-  { key: "ob_widget_enabled", label: "Floating widget", desc: "Show the OG Bot bubble on every page." },
+  {
+    key: "ob_widget_enabled",
+    label: "Floating widget",
+    desc: "Show the OG Bot bubble on every page.",
+  },
   { key: "ob_messenger_enabled", label: "OG Bot", desc: "Turn on the full-page chat experience." },
-  { key: "ob_proactive_greetings", label: "Proactive greetings", desc: "Let OG Bot start the conversation when a visitor lands." },
-  { key: "ob_voice_replies", label: "Voice replies", desc: "Read replies aloud using OG Bot's voice." },
-  { key: "ob_foul_mouth", label: "Foul-mouth mode", desc: "Allow OG Bot to use unfiltered slang and adult language." },
+  {
+    key: "ob_proactive_greetings",
+    label: "Proactive greetings",
+    desc: "Let OG Bot start the conversation when a visitor lands.",
+  },
+  {
+    key: "ob_voice_replies",
+    label: "Voice replies",
+    desc: "Read replies aloud using OG Bot's voice.",
+  },
+  {
+    key: "ob_foul_mouth",
+    label: "Foul-mouth mode",
+    desc: "Allow OG Bot to use unfiltered slang and adult language.",
+  },
 ];
 
 export function AppToggles() {
@@ -48,7 +84,11 @@ export function AppToggles() {
 }
 
 function SettingsGroup({
-  icon, title, subtitle, toggles, storageKey,
+  icon,
+  title,
+  subtitle,
+  toggles,
+  storageKey,
 }: {
   icon: React.ReactNode;
   title: string;
@@ -62,13 +102,19 @@ function SettingsGroup({
     try {
       const raw = localStorage.getItem(storageKey);
       if (raw) setState(JSON.parse(raw));
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }, [storageKey]);
 
   function update(k: string, v: boolean, label: string) {
     setState((prev) => {
       const next = { ...prev, [k]: v };
-      try { localStorage.setItem(storageKey, JSON.stringify(next)); } catch { /* ignore */ }
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(next));
+      } catch {
+        /* ignore */
+      }
       return next;
     });
     toast.success(`${label} ${v ? "enabled" : "disabled"}`);
@@ -78,7 +124,10 @@ function SettingsGroup({
     <AdminSection icon={icon} title={title} subtitle={subtitle} flush>
       <div className="divide-y divide-border/60">
         {toggles.map((t) => (
-          <div key={t.key} className="flex items-start justify-between gap-4 py-3 first:pt-0 last:pb-0">
+          <div
+            key={t.key}
+            className="flex items-start justify-between gap-4 py-3 first:pt-0 last:pb-0"
+          >
             <div className="min-w-0">
               <p className="font-medium">{t.label}</p>
               <p className="text-sm text-muted-foreground">{t.desc}</p>

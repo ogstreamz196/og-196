@@ -62,10 +62,13 @@ export function MessengerWelcomeDialog({
   const name = (displayName ?? "").trim().split(/\s+/)[0] || "friend";
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { if (!o) onDismiss(); }}>
-      <DialogContent
-        className="max-h-[calc(100dvh-1rem)] w-[calc(100vw-1rem)] max-w-md gap-3 overflow-y-auto bg-card/98 px-3 pb-3 pt-4 shadow-2xl backdrop-blur-xl sm:gap-4 sm:p-6"
-      >
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) onDismiss();
+      }}
+    >
+      <DialogContent className="max-h-[calc(100dvh-1rem)] w-[calc(100vw-1rem)] max-w-md gap-3 overflow-y-auto bg-card/98 px-3 pb-3 pt-4 shadow-2xl backdrop-blur-xl sm:gap-4 sm:p-6">
         <DialogHeader className="items-center !text-center">
           <img
             src={ogBotAsset.url}
@@ -98,9 +101,7 @@ export function MessengerWelcomeDialog({
               )}
             </span>
             <span className="min-w-0">
-              <span className="block text-xs font-black uppercase sm:text-base">
-                Private chat
-              </span>
+              <span className="block text-xs font-black uppercase sm:text-base">Private chat</span>
               <span className="block text-pretty text-[11px] leading-snug text-muted-foreground sm:text-sm">
                 Just you &amp; OG Bot. Nobody else sees a word.
               </span>

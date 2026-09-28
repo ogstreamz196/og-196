@@ -58,11 +58,15 @@ async function tg(method: string, body: Record<string, unknown>) {
     body: JSON.stringify(body),
   }).catch(() => null);
   if (!r) return null;
-  const payload = await r.json().catch(() => null) as
-    | { ok?: boolean; description?: string; result?: unknown }
-    | null;
+  const payload = (await r.json().catch(() => null)) as {
+    ok?: boolean;
+    description?: string;
+    result?: unknown;
+  } | null;
   if (!r.ok || payload?.ok === false) {
-    console.error(`Telegram ${method} failed [${r.status}]: ${payload?.description ?? "unknown error"}`);
+    console.error(
+      `Telegram ${method} failed [${r.status}]: ${payload?.description ?? "unknown error"}`,
+    );
     return null;
   }
   return payload;
@@ -129,8 +133,7 @@ type AdminProfile = {
   telegram_username: string | null;
 };
 
-const PROFILE_COLS =
-  "id, display_name, email, coin_balance, telegram_chat_id, telegram_username";
+const PROFILE_COLS = "id, display_name, email, coin_balance, telegram_chat_id, telegram_username";
 
 async function findProfile(
   admin: Awaited<ReturnType<typeof loadAdmin>>,
@@ -139,11 +142,7 @@ async function findProfile(
   const v = needle.trim().replace(/^@/, "");
   // UUID?
   if (/^[0-9a-f-]{32,36}$/i.test(v)) {
-    const { data } = await admin
-      .from("profiles")
-      .select(PROFILE_COLS)
-      .eq("id", v)
-      .maybeSingle();
+    const { data } = await admin.from("profiles").select(PROFILE_COLS).eq("id", v).maybeSingle();
     if (data) return data as AdminProfile;
   }
   const { data } = await admin
@@ -161,18 +160,16 @@ async function loadAdmin() {
 }
 
 async function isAdmin(admin: Awaited<ReturnType<typeof loadAdmin>>, userId: string) {
-  const { data } = await admin
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId);
+  const { data } = await admin.from("user_roles").select("role").eq("user_id", userId);
   const roles = (data ?? []).map((r) => r.role);
   return { admin: roles.includes("admin") || roles.includes("dev"), roles };
 }
 
 async function verifyTelegramChat(chat_id: number): Promise<boolean> {
-  const verifyJson = await tg("getChat", { chat_id }) as
-    | { ok?: boolean; result?: { id?: number } }
-    | null;
+  const verifyJson = (await tg("getChat", { chat_id })) as {
+    ok?: boolean;
+    result?: { id?: number };
+  } | null;
   return verifyJson?.ok === true && Number(verifyJson.result?.id) === Number(chat_id);
 }
 
@@ -189,7 +186,11 @@ async function maybeBootstrapBossTelegram(
   }
 
   const username = msg?.from?.username?.trim().replace(/^@/, "").toLowerCase();
-  if (!username || !BOSS_TELEGRAM_USERNAMES.includes(username as (typeof BOSS_TELEGRAM_USERNAMES)[number])) return false;
+  if (
+    !username ||
+    !BOSS_TELEGRAM_USERNAMES.includes(username as (typeof BOSS_TELEGRAM_USERNAMES)[number])
+  )
+    return false;
 
   const { data: boss } = await admin
     .from("profiles")
@@ -225,14 +226,20 @@ async function maybeBootstrapBossTelegram(
     return true;
   }
 
-  await admin.from("telegram_sign_in_events").insert({
-    user_id: boss.id as string,
-    chat_id,
-    telegram_username: msg?.from?.username ?? BOSS_TELEGRAM_USERNAME,
-    telegram_first_name: (msg?.from?.first_name as string | undefined) ?? null,
-    event_kind: "boss_link",
-    source: "webhook_start",
-  }).then(() => undefined, () => undefined);
+  await admin
+    .from("telegram_sign_in_events")
+    .insert({
+      user_id: boss.id as string,
+      chat_id,
+      telegram_username: msg?.from?.username ?? BOSS_TELEGRAM_USERNAME,
+      telegram_first_name: (msg?.from?.first_name as string | undefined) ?? null,
+      event_kind: "boss_link",
+      source: "webhook_start",
+    })
+    .then(
+      () => undefined,
+      () => undefined,
+    );
 
   await reply(
     chat_id,
@@ -275,8 +282,6 @@ async function runAdminCommand(
     await reply(chat_id, fmtProfile(p));
     return true;
   }
-
-
 
   if (cmd === "/users" || cmd === "/find") {
     const q = arg.trim();
@@ -470,10 +475,7 @@ async function runChatAI(
   // Charge 1 coin per message — skip for admins/dev.
   if (!isAdminUser) {
     if ((profile.coin_balance ?? 0) <= 0) {
-      await reply(
-        chat_id,
-        "💸 Out of OG coins. Top up in the app to keep chatting.",
-      );
+      await reply(chat_id, "💸 Out of OG coins. Top up in the app to keep chatting.");
       return;
     }
     const { error: deductErr } = await admin.rpc("deduct_coins", {
@@ -603,7 +605,10 @@ async function runChatAI(
           amount: 1,
           admin_notes: "telegram_chat_refund",
         })
-        .then(() => undefined, () => undefined);
+        .then(
+          () => undefined,
+          () => undefined,
+        );
     }
     await reply(chat_id, `❌ ${(err as Error).message}`);
   }
@@ -681,270 +686,270 @@ async function handleTelegramUpdate(
     from?: { id?: number; username?: string; first_name?: string };
   },
 ): Promise<Response> {
+  // Look up linked profile by chat_id FIRST so already-linked users
+  // get full chat + admin commands without needing /start.
+  const { data: linkedProfile } = await admin
+    .from("profiles")
+    .select("id")
+    .eq("telegram_chat_id", chat_id)
+    .maybeSingle();
 
-        // Look up linked profile by chat_id FIRST so already-linked users
-        // get full chat + admin commands without needing /start.
-        const { data: linkedProfile } = await admin
-          .from("profiles")
-          .select("id")
-          .eq("telegram_chat_id", chat_id)
-          .maybeSingle();
+  const startMatch = typeof text === "string" ? text.match(/^\/start\s+(\S+)/i) : null;
 
-        const startMatch =
-          typeof text === "string" ? text.match(/^\/start\s+(\S+)/i) : null;
+  // ===== Linked user path =====
+  if (linkedProfile && typeof text === "string") {
+    let trimmed = text.trim();
+    const { admin: isBoss, roles } = await isAdmin(admin, linkedProfile.id);
+    const keyboard = isBoss ? BOSS_KEYBOARD : USER_KEYBOARD;
 
-        // ===== Linked user path =====
-        if (linkedProfile && typeof text === "string") {
-          let trimmed = text.trim();
-          const { admin: isBoss, roles } = await isAdmin(admin, linkedProfile.id);
-          const keyboard = isBoss ? BOSS_KEYBOARD : USER_KEYBOARD;
+    // Map emoji-keyboard button taps → slash commands
+    const buttonMap: Record<string, string> = {
+      "💰 Balance": "/balance",
+      "🎧 Library": "/library",
+      "🛒 Buy Coins": "/buy",
+      "👤 My Profile": "/me",
+      "❓ Help": "/help",
+      "📊 Stats": "/stats",
+      "👥 Users": "/users",
+    };
+    if (buttonMap[trimmed]) trimmed = buttonMap[trimmed];
 
-          // Map emoji-keyboard button taps → slash commands
-          const buttonMap: Record<string, string> = {
-            "💰 Balance": "/balance",
-            "🎧 Library": "/library",
-            "🛒 Buy Coins": "/buy",
-            "👤 My Profile": "/me",
-            "❓ Help": "/help",
-            "📊 Stats": "/stats",
-            "👥 Users": "/users",
-          };
-          if (buttonMap[trimmed]) trimmed = buttonMap[trimmed];
+    if (/^\/help\b/i.test(trimmed) || /^\/menu\b/i.test(trimmed)) {
+      await reply(chat_id, isBoss ? HELP_ADMIN : HELP_USER, {
+        reply_markup: keyboard,
+      });
+      return Response.json({ ok: true, help: true });
+    }
+    if (/^\/balance\b/i.test(trimmed)) {
+      const { data: p } = await admin
+        .from("profiles")
+        .select("coin_balance")
+        .eq("id", linkedProfile.id)
+        .maybeSingle();
+      await reply(chat_id, `💰 Balance: <b>${p?.coin_balance ?? 0}</b> OG coins`, {
+        reply_markup: keyboard,
+      });
+      return Response.json({ ok: true, balance: true });
+    }
+    if (/^\/library\b/i.test(trimmed)) {
+      await reply(chat_id, "🎧 <b>Your library</b>", {
+        reply_markup: {
+          inline_keyboard: [[{ text: "Open Library", url: "https://og-196.lovable.app/library" }]],
+        },
+      });
+      return Response.json({ ok: true, library: true });
+    }
+    if (/^\/buy\b/i.test(trimmed)) {
+      await reply(chat_id, "🛒 <b>Top up OG coins</b>", {
+        reply_markup: {
+          inline_keyboard: [[{ text: "Open Store", url: "https://og-196.lovable.app/buy-coins" }]],
+        },
+      });
+      return Response.json({ ok: true, buy: true });
+    }
+    if (/^\/me\b/i.test(trimmed)) {
+      const { data: p } = await admin
+        .from("profiles")
+        .select(PROFILE_COLS)
+        .eq("id", linkedProfile.id)
+        .maybeSingle();
+      await reply(chat_id, p ? fmtProfile(p as AdminProfile) : "Profile not found.", {
+        reply_markup: keyboard,
+      });
+      return Response.json({ ok: true, me: true });
+    }
+    if (/^\/start\b/i.test(trimmed)) {
+      await reply(chat_id, `✅ Already linked. Tap a button below or type /help.`, {
+        reply_markup: keyboard,
+      });
+      return Response.json({ ok: true, already_linked: true });
+    }
 
-          if (/^\/help\b/i.test(trimmed) || /^\/menu\b/i.test(trimmed)) {
-            await reply(chat_id, isBoss ? HELP_ADMIN : HELP_USER, {
-              reply_markup: keyboard,
-            });
-            return Response.json({ ok: true, help: true });
-          }
-          if (/^\/balance\b/i.test(trimmed)) {
-            const { data: p } = await admin
-              .from("profiles")
-              .select("coin_balance")
-              .eq("id", linkedProfile.id)
-              .maybeSingle();
-            await reply(chat_id, `💰 Balance: <b>${p?.coin_balance ?? 0}</b> OG coins`, {
-              reply_markup: keyboard,
-            });
-            return Response.json({ ok: true, balance: true });
-          }
-          if (/^\/library\b/i.test(trimmed)) {
-            await reply(chat_id, "🎧 <b>Your library</b>", {
-              reply_markup: {
-                inline_keyboard: [[{ text: "Open Library", url: "https://og-196.lovable.app/library" }]],
-              },
-            });
-            return Response.json({ ok: true, library: true });
-          }
-          if (/^\/buy\b/i.test(trimmed)) {
-            await reply(chat_id, "🛒 <b>Top up OG coins</b>", {
-              reply_markup: {
-                inline_keyboard: [
-                  [{ text: "Open Store", url: "https://og-196.lovable.app/buy-coins" }],
-                ],
-              },
-            });
-            return Response.json({ ok: true, buy: true });
-          }
-          if (/^\/me\b/i.test(trimmed)) {
-            const { data: p } = await admin
-              .from("profiles")
-              .select(PROFILE_COLS)
-              .eq("id", linkedProfile.id)
-              .maybeSingle();
-            await reply(chat_id, p ? fmtProfile(p as AdminProfile) : "Profile not found.", {
-              reply_markup: keyboard,
-            });
-            return Response.json({ ok: true, me: true });
-          }
-          if (/^\/start\b/i.test(trimmed)) {
-            await reply(chat_id, `✅ Already linked. Tap a button below or type /help.`, {
-              reply_markup: keyboard,
-            });
-            return Response.json({ ok: true, already_linked: true });
-          }
+    // Admin commands
+    if (isBoss && trimmed.startsWith("/")) {
+      const handled = await runAdminCommand(admin, chat_id, trimmed);
+      if (handled) return Response.json({ ok: true, admin_cmd: true });
+    }
 
-          // Admin commands
-          if (isBoss && trimmed.startsWith("/")) {
-            const handled = await runAdminCommand(admin, chat_id, trimmed);
-            if (handled) return Response.json({ ok: true, admin_cmd: true });
-          }
+    // Reject unknown slash commands for non-admins
+    if (trimmed.startsWith("/")) {
+      await reply(chat_id, "Unknown command. Type /help.", { reply_markup: keyboard });
+      return Response.json({ ok: true, unknown_cmd: true });
+    }
 
-          // Reject unknown slash commands for non-admins
-          if (trimmed.startsWith("/")) {
-            await reply(chat_id, "Unknown command. Type /help.", { reply_markup: keyboard });
-            return Response.json({ ok: true, unknown_cmd: true });
-          }
+    // Otherwise route to AI chat
+    await runChatAI(admin, linkedProfile.id, chat_id, text, roles);
+    return Response.json({ ok: true, chatted: true });
+  }
 
+  // ===== Not linked yet =====
+  // Boss bootstrap runs on ANY message (not just /start) so the boss
+  // gets auto-linked even if they just say "hi" from a known username.
+  {
+    const bootstrapped = await maybeBootstrapBossTelegram(admin, chat_id, msg);
+    if (bootstrapped) return Response.json({ ok: true, boss_bootstrap: true });
+  }
 
-          // Otherwise route to AI chat
-          await runChatAI(admin, linkedProfile.id, chat_id, text, roles);
-          return Response.json({ ok: true, chatted: true });
-        }
+  if (typeof text === "string" && /^\/help\b/i.test(text.trim())) {
+    await reply(
+      chat_id,
+      "🛠️ <b>OG Bot is online.</b>\n\nTo link your account, open OG Streamz → Settings → Connect Telegram, then tap your personal Telegram link.\n\nAfter linking, you can chat with me (same brain as the in-app messenger) and admins get full user/coin management commands.",
+    );
+    return Response.json({ ok: true, help: true });
+  }
 
-        // ===== Not linked yet =====
-        // Boss bootstrap runs on ANY message (not just /start) so the boss
-        // gets auto-linked even if they just say "hi" from a known username.
-        {
-          const bootstrapped = await maybeBootstrapBossTelegram(admin, chat_id, msg);
-          if (bootstrapped) return Response.json({ ok: true, boss_bootstrap: true });
-        }
+  if (!startMatch) {
+    if (typeof text === "string" && /^\/start\b/i.test(text.trim())) {
+      await reply(
+        chat_id,
+        "🔥 <b>OG Bot is alive.</b>\n\nYou opened me without your private link token, so I can't connect this Telegram chat to your OG profile yet.\n\nGo to OG Streamz → Settings → <b>Connect Telegram</b>, tap your personal link, then hit Start again.",
+      );
+      return Response.json({ ok: true, missing_token: true });
+    }
+    await reply(
+      chat_id,
+      "👋 <b>OG Bot is online.</b>\n\nLink your OG profile from Settings → Connect Telegram to unlock the full assistant here.",
+    );
+    return Response.json({ ok: true, unlinked_reply: true });
+  }
 
-        if (typeof text === "string" && /^\/help\b/i.test(text.trim())) {
-          await reply(
-            chat_id,
-            "🛠️ <b>OG Bot is online.</b>\n\nTo link your account, open OG Streamz → Settings → Connect Telegram, then tap your personal Telegram link.\n\nAfter linking, you can chat with me (same brain as the in-app messenger) and admins get full user/coin management commands.",
-          );
-          return Response.json({ ok: true, help: true });
-        }
+  const rawToken = startMatch[1].toLowerCase();
+  const tokenMatch = rawToken.match(TOKEN_RE);
+  if (!tokenMatch) {
+    await reply(
+      chat_id,
+      "⚠️ That Telegram connect link is invalid. Please generate/open a fresh link from OG Streamz → Settings → Connect Telegram.",
+    );
+    return Response.json({ ok: true, rejected: "bad_token_format" });
+  }
+  const token = tokenMatch[1];
 
-        if (!startMatch) {
-          if (typeof text === "string" && /^\/start\b/i.test(text.trim())) {
-            await reply(
-              chat_id,
-              "🔥 <b>OG Bot is alive.</b>\n\nYou opened me without your private link token, so I can't connect this Telegram chat to your OG profile yet.\n\nGo to OG Streamz → Settings → <b>Connect Telegram</b>, tap your personal link, then hit Start again.",
-            );
-            return Response.json({ ok: true, missing_token: true });
-          }
-          await reply(
-            chat_id,
-            "👋 <b>OG Bot is online.</b>\n\nLink your OG profile from Settings → Connect Telegram to unlock the full assistant here.",
-          );
-          return Response.json({ ok: true, unlinked_reply: true });
-        }
+  let profileId: string | null = null;
 
-        const rawToken = startMatch[1].toLowerCase();
-        const tokenMatch = rawToken.match(TOKEN_RE);
-        if (!tokenMatch) {
-          await reply(
-            chat_id,
-            "⚠️ That Telegram connect link is invalid. Please generate/open a fresh link from OG Streamz → Settings → Connect Telegram.",
-          );
-          return Response.json({ ok: true, rejected: "bad_token_format" });
-        }
-        const token = tokenMatch[1];
+  if (token.startsWith("t_")) {
+    const { data: byToken } = await admin
+      .from("profiles")
+      .select("id")
+      .eq("telegram_link_token", token)
+      .limit(2);
+    if (!byToken || byToken.length !== 1) {
+      await reply(
+        chat_id,
+        "⚠️ That Telegram connect link has expired or was already used. Please generate/open a fresh link from OG Streamz → Settings.",
+      );
+      return Response.json({ ok: true, rejected: "no_or_ambiguous_match" });
+    }
+    profileId = byToken[0].id as string;
+  } else {
+    const uuidPrefix = tokenToUuidPrefix(token);
+    const { min, max } = tokenToUuidRange(token);
+    const { data: candidates } = await admin
+      .from("profiles")
+      .select("id")
+      .gte("id", min)
+      .lte("id", max)
+      .limit(2);
+    if (!candidates || candidates.length !== 1) {
+      await reply(
+        chat_id,
+        "⚠️ I couldn't match that link to an OG profile. Please open the Telegram button directly from OG Streamz Settings.",
+      );
+      return Response.json({ ok: true, rejected: "no_or_ambiguous_match" });
+    }
+    const pid = candidates[0].id as string;
+    const reconstructed = pid.replace(/-/g, "").slice(0, 24).toLowerCase();
+    if (reconstructed !== token) {
+      await reply(
+        chat_id,
+        "⚠️ This connect token doesn't match your OG profile. Please open a fresh Telegram link from Settings.",
+      );
+      return Response.json({ ok: true, rejected: "token_mismatch" });
+    }
+    profileId = pid;
+  }
 
-        let profileId: string | null = null;
+  // Verify chat reachable
+  const chatVerified = await verifyTelegramChat(chat_id);
 
-        if (token.startsWith("t_")) {
-          const { data: byToken } = await admin
-            .from("profiles")
-            .select("id")
-            .eq("telegram_link_token", token)
-            .limit(2);
-          if (!byToken || byToken.length !== 1) {
-            await reply(
-              chat_id,
-              "⚠️ That Telegram connect link has expired or was already used. Please generate/open a fresh link from OG Streamz → Settings.",
-            );
-            return Response.json({ ok: true, rejected: "no_or_ambiguous_match" });
-          }
-          profileId = byToken[0].id as string;
-        } else {
-          const uuidPrefix = tokenToUuidPrefix(token);
-          const { min, max } = tokenToUuidRange(token);
-          const { data: candidates } = await admin
-            .from("profiles")
-            .select("id")
-            .gte("id", min)
-            .lte("id", max)
-            .limit(2);
-          if (!candidates || candidates.length !== 1) {
-            await reply(
-              chat_id,
-              "⚠️ I couldn't match that link to an OG profile. Please open the Telegram button directly from OG Streamz Settings.",
-            );
-            return Response.json({ ok: true, rejected: "no_or_ambiguous_match" });
-          }
-          const pid = candidates[0].id as string;
-          const reconstructed = pid.replace(/-/g, "").slice(0, 24).toLowerCase();
-          if (reconstructed !== token) {
-            await reply(
-              chat_id,
-              "⚠️ This connect token doesn't match your OG profile. Please open a fresh Telegram link from Settings.",
-            );
-            return Response.json({ ok: true, rejected: "token_mismatch" });
-          }
-          profileId = pid;
-        }
+  if (!chatVerified) {
+    await reply(
+      chat_id,
+      "⚠️ I received your Start request, but Telegram chat verification failed. Please tap Start again in a moment.",
+    );
+    return Response.json({ ok: true, rejected: "chat_verification_failed" }, { status: 200 });
+  }
 
-        // Verify chat reachable
-        const chatVerified = await verifyTelegramChat(chat_id);
+  const { error: linkError } = await admin
+    .from("profiles")
+    .update({
+      telegram_chat_id: chat_id,
+      telegram_username: msg?.from?.username ?? null,
+      telegram_linked_at: new Date().toISOString(),
+      telegram_link_token: null,
+    })
+    .eq("id", profileId);
 
-        if (!chatVerified) {
-          await reply(
-            chat_id,
-            "⚠️ I received your Start request, but Telegram chat verification failed. Please tap Start again in a moment.",
-          );
-          return Response.json(
-            { ok: true, rejected: "chat_verification_failed" },
-            { status: 200 },
-          );
-        }
+  if (linkError) {
+    await reply(chat_id, `❌ Telegram link failed: ${linkError.message}`);
+    return Response.json({ ok: true, rejected: "profile_update_failed" });
+  }
 
-        const { error: linkError } = await admin
-          .from("profiles")
-          .update({
-            telegram_chat_id: chat_id,
-            telegram_username: msg?.from?.username ?? null,
-            telegram_linked_at: new Date().toISOString(),
-            telegram_link_token: null,
-          })
-          .eq("id", profileId);
+  await admin
+    .from("telegram_sign_in_events")
+    .insert({
+      user_id: profileId,
+      chat_id,
+      telegram_username: msg?.from?.username ?? null,
+      telegram_first_name: (msg?.from?.first_name as string | undefined) ?? null,
+      event_kind: "link",
+      source: "webhook_start",
+    })
+    .then(
+      () => undefined,
+      () => undefined,
+    );
 
-        if (linkError) {
-          await reply(chat_id, `❌ Telegram link failed: ${linkError.message}`);
-          return Response.json({ ok: true, rejected: "profile_update_failed" });
-        }
+  const { data: profile } = await admin
+    .from("profiles")
+    .select("display_name, email, coin_balance")
+    .eq("id", profileId)
+    .maybeSingle();
 
-        await admin.from("telegram_sign_in_events").insert({
-          user_id: profileId,
-          chat_id,
-          telegram_username: msg?.from?.username ?? null,
-          telegram_first_name: (msg?.from?.first_name as string | undefined) ?? null,
-          event_kind: "link",
-          source: "webhook_start",
-        }).then(() => undefined, () => undefined);
+  const { admin: isBoss } = await isAdmin(admin, profileId);
 
-        const { data: profile } = await admin
-          .from("profiles")
-          .select("display_name, email, coin_balance")
-          .eq("id", profileId)
-          .maybeSingle();
+  const tgFirst = (msg?.from?.first_name as string | undefined)?.trim();
+  const name =
+    tgFirst ||
+    profile?.display_name ||
+    (profile?.email ? profile.email.split("@")[0] : null) ||
+    "legend";
+  const balance = profile?.coin_balance ?? 0;
 
-        const { admin: isBoss } = await isAdmin(admin, profileId);
+  const greeting =
+    `✅ <b>Connected!</b> OG Bot is now linked to your account.\n\n` +
+    `🔥 Yo <b>${name}</b> — link verified. OG Bot in your pocket now.\n\n` +
+    `💰 Balance: <b>${balance}</b> OG coins\n` +
+    `🎧 Just chat — same brain as the in-app messenger.\n` +
+    (isBoss
+      ? `👑 Boss mode unlocked — type /help for admin commands.\n\n`
+      : `Type /help for commands.\n\n`) +
+    `Now go make some noise. 🎤`;
 
-        const tgFirst = (msg?.from?.first_name as string | undefined)?.trim();
-        const name =
-          tgFirst ||
-          profile?.display_name ||
-          (profile?.email ? profile.email.split("@")[0] : null) ||
-          "legend";
-        const balance = profile?.coin_balance ?? 0;
+  await reply(chat_id, greeting, {
+    reply_markup: isBoss ? BOSS_KEYBOARD : USER_KEYBOARD,
+  });
 
-        const greeting =
-          `✅ <b>Connected!</b> OG Bot is now linked to your account.\n\n` +
-          `🔥 Yo <b>${name}</b> — link verified. OG Bot in your pocket now.\n\n` +
-          `💰 Balance: <b>${balance}</b> OG coins\n` +
-          `🎧 Just chat — same brain as the in-app messenger.\n` +
-          (isBoss
-            ? `👑 Boss mode unlocked — type /help for admin commands.\n\n`
-            : `Type /help for commands.\n\n`) +
-          `Now go make some noise. 🎤`;
-
-        await reply(chat_id, greeting, {
-          reply_markup: isBoss ? BOSS_KEYBOARD : USER_KEYBOARD,
-        });
-
-        await admin
-          .from("og_messages")
-          .insert({
-            user_id: profileId,
-            role: "assistant",
-            content: `✅ Telegram linked. I'll DM you at @${msg?.from?.username ?? "your handle"} from now on.`,
-          })
-          .then(() => undefined, () => undefined);
+  await admin
+    .from("og_messages")
+    .insert({
+      user_id: profileId,
+      role: "assistant",
+      content: `✅ Telegram linked. I'll DM you at @${msg?.from?.username ?? "your handle"} from now on.`,
+    })
+    .then(
+      () => undefined,
+      () => undefined,
+    );
 
   return Response.json({ ok: true, linked: true, verified: true });
 }
-

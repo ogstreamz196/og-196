@@ -59,7 +59,9 @@ export function TrackUnlockReturnHandler() {
           },
         });
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "Couldn't confirm the payment", { id: toastId });
+        toast.error(e instanceof Error ? e.message : "Couldn't confirm the payment", {
+          id: toastId,
+        });
       } finally {
         clean();
       }

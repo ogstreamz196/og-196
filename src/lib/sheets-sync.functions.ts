@@ -29,8 +29,7 @@ export const getSheetsConfig = createServerFn({ method: "GET" })
     return {
       sheetId: id,
       updatedAt: data?.updated_at ?? null,
-      connectorPresent:
-        !!process.env.LOVABLE_API_KEY && !!process.env.GOOGLE_SHEETS_API_KEY,
+      connectorPresent: !!process.env.LOVABLE_API_KEY && !!process.env.GOOGLE_SHEETS_API_KEY,
     };
   });
 
@@ -44,9 +43,11 @@ export const setSheetsConfig = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertBossOrAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
-      .from("app_settings")
-      .upsert({ key: "users_sheet_id", value: { id: data.sheetId }, updated_at: new Date().toISOString() });
+    const { error } = await supabaseAdmin.from("app_settings").upsert({
+      key: "users_sheet_id",
+      value: { id: data.sheetId },
+      updated_at: new Date().toISOString(),
+    });
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });

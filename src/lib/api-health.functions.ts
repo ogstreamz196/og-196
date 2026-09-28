@@ -47,7 +47,10 @@ async function assertAdmin(context: { supabase: unknown; userId: string }) {
 
 const SECRETS_FIX = "Open Project Settings → Secrets and set this value, then re-run the check.";
 
-function missing(name: string, extra?: string): Omit<HealthCheck, "key" | "label" | "group" | "required"> {
+function missing(
+  name: string,
+  extra?: string,
+): Omit<HealthCheck, "key" | "label" | "group" | "required"> {
   return {
     status: "missing",
     detail: `${name} is not set — every call that needs it fails immediately.`,
@@ -136,7 +139,9 @@ async function checkSuno(): Promise<Partial_> {
           : typeof parsed.data?.credit === "number"
             ? parsed.data.credit
             : null;
-    } catch { /* non-JSON body is still a 200 */ }
+    } catch {
+      /* non-JSON body is still a 200 */
+    }
     if (credits !== null && credits <= 0) {
       return {
         status: "degraded",
@@ -310,11 +315,41 @@ type Spec = Pick<HealthCheck, "key" | "label" | "group" | "required"> & {
 };
 
 const SPECS: Spec[] = [
-  { key: "gemini", label: "GEMINI_API_KEY (lyrics)", group: "AI providers", required: true, run: checkGemini },
-  { key: "suno", label: "SUNO_API_KEY (audio)", group: "AI providers", required: true, run: checkSuno },
-  { key: "perplexity", label: "PERPLEXITY_API_KEY (research)", group: "AI providers", required: true, run: checkPerplexity },
-  { key: "lovable_ai", label: "LOVABLE_API_KEY (gateway)", group: "Core", required: true, run: checkLovable },
-  { key: "og_bot_token", label: "OG_BOT_TOKEN (Telegram bot)", group: "OG Bot", required: true, run: checkOgBotToken },
+  {
+    key: "gemini",
+    label: "GEMINI_API_KEY (lyrics)",
+    group: "AI providers",
+    required: true,
+    run: checkGemini,
+  },
+  {
+    key: "suno",
+    label: "SUNO_API_KEY (audio)",
+    group: "AI providers",
+    required: true,
+    run: checkSuno,
+  },
+  {
+    key: "perplexity",
+    label: "PERPLEXITY_API_KEY (research)",
+    group: "AI providers",
+    required: true,
+    run: checkPerplexity,
+  },
+  {
+    key: "lovable_ai",
+    label: "LOVABLE_API_KEY (gateway)",
+    group: "Core",
+    required: true,
+    run: checkLovable,
+  },
+  {
+    key: "og_bot_token",
+    label: "OG_BOT_TOKEN (Telegram bot)",
+    group: "OG Bot",
+    required: true,
+    run: checkOgBotToken,
+  },
   {
     key: "og_bot_host",
     label: "OG_BOT_HOST",
@@ -347,7 +382,13 @@ export const runApiHealthCheck = createServerFn({ method: "POST" })
       SPECS.map(async (spec): Promise<HealthCheck> => {
         try {
           const outcome = await spec.run();
-          return { key: spec.key, label: spec.label, group: spec.group, required: spec.required, ...outcome };
+          return {
+            key: spec.key,
+            label: spec.label,
+            group: spec.group,
+            required: spec.required,
+            ...outcome,
+          };
         } catch (e) {
           return {
             key: spec.key,

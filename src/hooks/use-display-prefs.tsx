@@ -76,9 +76,10 @@ export function useDisplayPrefs() {
         "postgres_changes",
         { event: "*", schema: "public", table: "user_preferences", filter: `user_id=eq.${uid}` },
         (payload) => {
-          const row = (payload.new ?? payload.old) as
-            | { text_scale?: number; density?: Density }
-            | null;
+          const row = (payload.new ?? payload.old) as {
+            text_scale?: number;
+            density?: Density;
+          } | null;
           if (!row) return;
           qc.setQueryData<DisplayPrefs>(displayPrefsKey(uid), {
             textScale: clampScale(Number(row.text_scale ?? 1)),

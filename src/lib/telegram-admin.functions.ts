@@ -33,9 +33,7 @@ async function sendViaGateway(chatId: number, text: string) {
   });
   const body = await res.json().catch(() => ({}));
   if (!res.ok || body?.ok === false) {
-    throw new Error(
-      `Telegram error [${res.status}]: ${body?.description ?? "send failed"}`,
-    );
+    throw new Error(`Telegram error [${res.status}]: ${body?.description ?? "send failed"}`);
   }
   return body?.result?.message_id as number | undefined;
 }
@@ -295,9 +293,7 @@ export const getMyTelegramStatus = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin
       .from("profiles")
-      .select(
-        "telegram_chat_id, telegram_username, telegram_linked_at, telegram_link_token",
-      )
+      .select("telegram_chat_id, telegram_username, telegram_linked_at, telegram_link_token")
       .eq("id", context.userId)
       .maybeSingle();
     if (error) throw new Error(error.message);
@@ -327,14 +323,12 @@ export const getMyTelegramStatus = createServerFn({ method: "GET" })
             },
             body: JSON.stringify({ chat_id: chatId }),
           });
-          const body = (await res.json().catch(() => null)) as
-            | { ok?: boolean; description?: string; result?: { id?: number } }
-            | null;
-          if (
-            res.ok &&
-            body?.ok === true &&
-            Number(body?.result?.id) === Number(chatId)
-          ) {
+          const body = (await res.json().catch(() => null)) as {
+            ok?: boolean;
+            description?: string;
+            result?: { id?: number };
+          } | null;
+          if (res.ok && body?.ok === true && Number(body?.result?.id) === Number(chatId)) {
             state = "verified";
           } else {
             state = "failed";

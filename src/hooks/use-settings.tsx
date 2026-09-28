@@ -34,13 +34,9 @@ export function useSettings() {
   useEffect(() => {
     const channel = supabase
       .channel(`app-settings-sync:${Math.random().toString(36).slice(2, 10)}`)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "app_settings" },
-        () => {
-          qc.invalidateQueries({ queryKey: SETTINGS_QUERY_KEY });
-        },
-      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "app_settings" }, () => {
+        qc.invalidateQueries({ queryKey: SETTINGS_QUERY_KEY });
+      })
       .subscribe();
     return () => {
       void supabase.removeChannel(channel);
@@ -56,7 +52,11 @@ export function useSettings() {
       const map: Record<string, unknown> = {};
       for (const row of data ?? []) map[row.key] = row.value;
       const numOrDefault = (v: unknown, d: number) =>
-        typeof v === "number" ? v : (typeof v === "string" && Number.isFinite(Number(v)) ? Number(v) : d);
+        typeof v === "number"
+          ? v
+          : typeof v === "string" && Number.isFinite(Number(v))
+            ? Number(v)
+            : d;
       const out = { ...DEFAULTS };
       for (const key of Object.keys(DEFAULTS) as (keyof AppSettings)[]) {
         out[key] = numOrDefault(map[key], DEFAULTS[key]);

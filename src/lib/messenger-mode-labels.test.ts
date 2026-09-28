@@ -22,12 +22,8 @@ describe("messenger mode labels", () => {
   it("heading + badge always match the underlying mode", () => {
     for (const mode of MODES) {
       const isCommunity = mode === "community";
-      expect(modeHeading(mode)).toBe(
-        isCommunity ? "OG Battle Zone" : "OG Bot Loner Mode",
-      );
-      expect(modeBadge(mode)).toContain(
-        isCommunity ? "OG Battle Zone" : "OG Bot Loner Mode",
-      );
+      expect(modeHeading(mode)).toBe(isCommunity ? "OG Battle Zone" : "OG Bot Loner Mode");
+      expect(modeBadge(mode)).toContain(isCommunity ? "OG Battle Zone" : "OG Bot Loner Mode");
     }
   });
 

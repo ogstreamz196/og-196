@@ -32,7 +32,10 @@ export function OgCoinsPanel() {
         .eq("reference", REFERENCE)
         .gte("created_at", todayStart);
       if (error) throw error;
-      return (data ?? []).reduce((sum, r: { amount: number }) => sum + (r.amount > 0 ? r.amount : 0), 0);
+      return (data ?? []).reduce(
+        (sum, r: { amount: number }) => sum + (r.amount > 0 ? r.amount : 0),
+        0,
+      );
     },
   });
 
@@ -78,7 +81,8 @@ export function OgCoinsPanel() {
             </span>
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
-            You still pay coins to test like every user — this gives you {DAILY_LIMIT} free coins per day to mint for yourself.
+            You still pay coins to test like every user — this gives you {DAILY_LIMIT} free coins
+            per day to mint for yourself.
           </p>
           <div className="mt-3 flex items-center gap-3 text-xs">
             <span className="inline-flex items-center gap-1 rounded-full bg-background/60 px-2.5 py-1">
@@ -86,7 +90,9 @@ export function OgCoinsPanel() {
               <span className="font-semibold tabular-nums">{remaining}</span>
               <span className="text-muted-foreground">/ {DAILY_LIMIT} left today</span>
             </span>
-            {usedQ.isLoading && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
+            {usedQ.isLoading && (
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+            )}
           </div>
         </div>
       </div>
@@ -100,7 +106,11 @@ export function OgCoinsPanel() {
             onClick={() => mint.mutate(n)}
             className="bg-gradient-brand text-primary-foreground"
           >
-            {mint.isPending ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Coins className="mr-1.5 h-3.5 w-3.5" />}
+            {mint.isPending ? (
+              <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Coins className="mr-1.5 h-3.5 w-3.5" />
+            )}
             +{n}
           </Button>
         ))}

@@ -12,7 +12,8 @@ function supabaseForUser(ctx: ToolContext) {
 export default defineTool({
   name: "list_my_songs",
   title: "List my songs",
-  description: "List songs created by the signed-in user, newest first. Returns title, prompt, style, status, unlocked flag, and creation time.",
+  description:
+    "List songs created by the signed-in user, newest first. Returns title, prompt, style, status, unlocked flag, and creation time.",
   inputSchema: {
     limit: z.number().int().min(1).max(50).default(10).describe("Max songs to return (1-50)."),
   },

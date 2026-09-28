@@ -18,7 +18,7 @@ const KEY_LINKS = [
   "/buy-coins",
   "/buy-coins/return",
   "/settings",
-  
+
   "/developer",
   "/referrals",
   "/admin",
@@ -37,9 +37,7 @@ describe("route smoke test", () => {
   it.each(KEY_LINKS)("route %s is registered", (path) => {
     // Routes are keyed by file id; child index routes end with "/".
     const candidates = [path, path === "/" ? "/" : `${path}/`];
-    const found = candidates.some(
-      (p) => ids.has(p) || ids.has(`/_authenticated${p}`),
-    );
+    const found = candidates.some((p) => ids.has(p) || ids.has(`/_authenticated${p}`));
     expect(found, `missing route ${path}. Known: ${[...ids].join(", ")}`).toBe(true);
   });
 });

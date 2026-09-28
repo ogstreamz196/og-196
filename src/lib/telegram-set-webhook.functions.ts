@@ -3,8 +3,7 @@ import { createHash } from "crypto";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/telegram";
-const DEFAULT_WEBHOOK_URL =
-  "https://ogwidget.lovable.app/api/public/telegram/webhook";
+const DEFAULT_WEBHOOK_URL = "https://ogwidget.lovable.app/api/public/telegram/webhook";
 
 export type SetWebhookResult = {
   ok: boolean;
@@ -24,12 +23,10 @@ function deriveSecret(key: string): string {
  */
 export const setTelegramWebhook = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(
-    (data: unknown): { url?: string } => {
-      const d = (data ?? {}) as { url?: unknown };
-      return { url: typeof d.url === "string" && d.url.length ? d.url : undefined };
-    },
-  )
+  .inputValidator((data: unknown): { url?: string } => {
+    const d = (data ?? {}) as { url?: unknown };
+    return { url: typeof d.url === "string" && d.url.length ? d.url : undefined };
+  })
   .handler(async ({ context, data }): Promise<SetWebhookResult> => {
     const supabase = context.supabase as unknown as {
       rpc: (
@@ -66,9 +63,10 @@ export const setTelegramWebhook = createServerFn({ method: "POST" })
         allowed_updates: ["message", "edited_message"],
       }),
     });
-    const setJson = (await setRes.json().catch(() => null)) as
-      | { ok?: boolean; description?: string }
-      | null;
+    const setJson = (await setRes.json().catch(() => null)) as {
+      ok?: boolean;
+      description?: string;
+    } | null;
     if (!setRes.ok || setJson?.ok !== true) {
       throw new Error(setJson?.description ?? `setWebhook HTTP ${setRes.status}`);
     }
@@ -85,9 +83,10 @@ export const setTelegramWebhook = createServerFn({ method: "POST" })
         },
         body: JSON.stringify({}),
       });
-      const meJson = (await meRes.json().catch(() => null)) as
-        | { ok?: boolean; result?: { username?: string } }
-        | null;
+      const meJson = (await meRes.json().catch(() => null)) as {
+        ok?: boolean;
+        result?: { username?: string };
+      } | null;
       botUsername = meJson?.result?.username ?? null;
     } catch {
       botUsername = null;

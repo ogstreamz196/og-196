@@ -1,13 +1,45 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
-import { Coins, Check, ArrowLeft, Crown, Star, Zap, ShieldCheck, Lock, Sparkles, Infinity as InfinityIcon, TrendingDown, Gift, Pencil, X, Loader2, CreditCard, Plus, Minus, SlidersHorizontal, Store, Tag, ToggleLeft, ToggleRight, Gem, Trophy, Flame, Wallet } from "lucide-react";
+import {
+  Coins,
+  Check,
+  ArrowLeft,
+  Crown,
+  Star,
+  Zap,
+  ShieldCheck,
+  Lock,
+  Sparkles,
+  Infinity as InfinityIcon,
+  TrendingDown,
+  Gift,
+  Pencil,
+  X,
+  Loader2,
+  CreditCard,
+  Plus,
+  Minus,
+  SlidersHorizontal,
+  Store,
+  Tag,
+  ToggleLeft,
+  ToggleRight,
+  Gem,
+  Trophy,
+  Flame,
+  Wallet,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { EditableContent } from "@/components/admin/EditableContent";
 import { useAdminEditMode, AdminEditModeToggle } from "@/components/admin/AdminEditMode";
 import { useServerFn } from "@tanstack/react-start";
-import { createCoinCheckoutSession, createVipCheckoutSession, createCustomCoinCheckoutSession } from "@/lib/payments.functions";
+import {
+  createCoinCheckoutSession,
+  createVipCheckoutSession,
+  createCustomCoinCheckoutSession,
+} from "@/lib/payments.functions";
 import { Capacitor } from "@capacitor/core";
 import { useRevenueCat } from "@/components/revenuecat/RevenueCatProvider";
 import { StripeCheckoutDialog } from "@/components/payments/StripeCheckoutDialog";
@@ -17,9 +49,16 @@ import { useRole } from "@/hooks/use-role";
 import { useSiteContent, useSetSiteContent } from "@/hooks/use-site-content";
 import { cn } from "@/lib/utils";
 import {
-  COIN_PACKS, CURRENCY_SYMBOL, VIP_PLAN, CUSTOM_COIN_UNIT,
-  applyPackOverride, parsePackOverride, packOverrideKey, packShowsBonus,
-  type CoinPack, type PackOverride,
+  COIN_PACKS,
+  CURRENCY_SYMBOL,
+  VIP_PLAN,
+  CUSTOM_COIN_UNIT,
+  applyPackOverride,
+  parsePackOverride,
+  packOverrideKey,
+  packShowsBonus,
+  type CoinPack,
+  type PackOverride,
 } from "@/lib/coin-packs";
 import {
   loadStoredSelection,
@@ -43,9 +82,15 @@ export const Route = createFileRoute("/_authenticated/buy-coins/")({
   head: () => ({
     meta: [
       { title: "OG Coins & VIP — OG BOT Store" },
-      { name: "description", content: "Buy OG Coins, unlock VIP perks, and review purchases in the OG BOT Store." },
+      {
+        name: "description",
+        content: "Buy OG Coins, unlock VIP perks, and review purchases in the OG BOT Store.",
+      },
       { property: "og:title", content: "OG Coins & VIP — OG BOT Store" },
-      { property: "og:description", content: "Buy OG Coins, unlock VIP perks, and review purchases in the OG BOT Store." },
+      {
+        property: "og:description",
+        content: "Buy OG Coins, unlock VIP perks, and review purchases in the OG BOT Store.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -87,8 +132,6 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
     navigate({ to: "/store", search: {}, replace: true });
   }, [editMode, isDev, roleLoading, navigate]);
 
-
-
   // Restore previous selection (e.g. after a canceled Stripe checkout).
   useEffect(() => {
     if (selected) return;
@@ -111,12 +154,8 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
     setStage("confirm");
   };
 
-
   // Anchor savings calc against the worst per-coin price (the smallest pack).
-  const basePerCoin = COIN_PACKS.reduce(
-    (max, p) => Math.max(max, p.priceCents / 100 / p.coins),
-    0,
-  );
+  const basePerCoin = COIN_PACKS.reduce((max, p) => Math.max(max, p.priceCents / 100 / p.coins), 0);
 
   if (selected) {
     const isVipFlow = selected.type === "vip";
@@ -124,33 +163,40 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
     const coinsForOrder = isVipFlow
       ? 0
       : isCustomFlow
-      ? selected.units * CUSTOM_COIN_UNIT.coins
-      : selected.pack.coins;
+        ? selected.units * CUSTOM_COIN_UNIT.coins
+        : selected.pack.coins;
     const labelForOrder = isVipFlow
       ? VIP_PLAN.label
       : isCustomFlow
-      ? `Custom · ${coinsForOrder} OG Coins`
-      : `${selected.pack.coins} OG Coins · ${selected.pack.label}`;
+        ? `Custom · ${coinsForOrder} OG Coins`
+        : `${selected.pack.coins} OG Coins · ${selected.pack.label}`;
     const totalCents = isVipFlow
       ? VIP_PLAN.priceCents
       : isCustomFlow
-      ? selected.units * CUSTOM_COIN_UNIT.priceCents
-      : selected.pack.priceCents;
+        ? selected.units * CUSTOM_COIN_UNIT.priceCents
+        : selected.pack.priceCents;
     const returnUrlPack = isVipFlow
       ? VIP_PLAN.bundleId
       : isCustomFlow
-      ? "coins_custom"
-      : selected.pack.bundleId;
+        ? "coins_custom"
+        : selected.pack.bundleId;
     const returnUrl = `${window.location.origin}/buy-coins/return?session_id={CHECKOUT_SESSION_ID}&pack=${returnUrlPack}`;
     const headline = isVipFlow ? "Join OG VIP" : `Buy ${coinsForOrder} OG Coins`;
     const perCoin = !isVipFlow && coinsForOrder > 0 ? totalCents / 100 / coinsForOrder : 0;
-    const savingsPct = !isVipFlow && basePerCoin > 0 && perCoin > 0
-      ? Math.round((1 - perCoin / basePerCoin) * 100)
-      : 0;
+    const savingsPct =
+      !isVipFlow && basePerCoin > 0 && perCoin > 0
+        ? Math.round((1 - perCoin / basePerCoin) * 100)
+        : 0;
 
     return (
       <DashboardShell title={headline}>
-        <StripeCheckoutDialog clientSecret={clientSecret} onClose={() => { setClientSecret(null); setCheckoutLoading(false); }} />
+        <StripeCheckoutDialog
+          clientSecret={clientSecret}
+          onClose={() => {
+            setClientSecret(null);
+            setCheckoutLoading(false);
+          }}
+        />
         <PaymentTestModeBanner />
         <div className="mx-auto max-w-2xl">
           <Button variant="ghost" className="mb-4 -ml-2" onClick={clearSelection}>
@@ -166,14 +212,13 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                   <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
                     Order summary
                   </p>
-                  <p className="truncate text-base font-bold">
-                    {labelForOrder}
-                  </p>
+                  <p className="truncate text-base font-bold">{labelForOrder}</p>
                 </div>
               </div>
               <div className="text-right">
                 <div className="text-2xl font-black tabular-nums leading-none sm:text-3xl">
-                  {CURRENCY_SYMBOL}{(totalCents / 100).toFixed(2)}
+                  {CURRENCY_SYMBOL}
+                  {(totalCents / 100).toFixed(2)}
                 </div>
                 <div className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                   {isVipFlow ? "billed yearly" : "one-time"}
@@ -181,9 +226,15 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
               </div>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 border-b border-border/60 bg-background/40 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground sm:px-5 sm:py-2.5">
-              <span className="inline-flex items-center gap-1.5"><Lock className="h-3 w-3" /> Secure checkout</span>
-              <span aria-hidden className="hidden sm:inline">·</span>
-              <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-3 w-3" /> Apple / Google Pay</span>
+              <span className="inline-flex items-center gap-1.5">
+                <Lock className="h-3 w-3" /> Secure checkout
+              </span>
+              <span aria-hidden className="hidden sm:inline">
+                ·
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <ShieldCheck className="h-3 w-3" /> Apple / Google Pay
+              </span>
             </div>
             {stage === "confirm" ? (
               <div className="p-5 sm:p-6">
@@ -202,26 +253,36 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                     <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-red-500/25 blur-3xl animate-pulse" />
                   )}
                   <div className="relative flex items-start gap-3">
-                    <div className={cn(
-                      "grid h-10 w-10 shrink-0 place-items-center rounded-xl",
-                      isCustomFlow ? "border border-red-500/50 bg-red-500/15 text-red-300" : "bg-emerald-500/20 text-emerald-300",
-                    )}>
+                    <div
+                      className={cn(
+                        "grid h-10 w-10 shrink-0 place-items-center rounded-xl",
+                        isCustomFlow
+                          ? "border border-red-500/50 bg-red-500/15 text-red-300"
+                          : "bg-emerald-500/20 text-emerald-300",
+                      )}
+                    >
                       {isCustomFlow ? <Flame className="h-5 w-5" /> : <Check className="h-5 w-5" />}
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-[10px] font-black uppercase tracking-[0.25em] text-white/70">
-                        {isCustomFlow ? "Custom stack locked in" : isVipFlow ? "VIP plan selected" : "Pack selected"}
+                        {isCustomFlow
+                          ? "Custom stack locked in"
+                          : isVipFlow
+                            ? "VIP plan selected"
+                            : "Pack selected"}
                       </p>
                       <p className="mt-0.5 truncate font-display text-lg font-black text-white sm:text-xl">
                         {isVipFlow
                           ? VIP_PLAN.label
                           : isCustomFlow
-                          ? `${coinsForOrder} OG Coins`
-                          : `${(selected as { pack: CoinPack }).pack.coins} OG Coins · ${(selected as { pack: CoinPack }).pack.label}`}
+                            ? `${coinsForOrder} OG Coins`
+                            : `${(selected as { pack: CoinPack }).pack.coins} OG Coins · ${(selected as { pack: CoinPack }).pack.label}`}
                       </p>
                       {!isVipFlow && (
                         <p className="mt-0.5 text-[11px] font-bold uppercase tracking-wider text-white/60 tabular-nums">
-                          {CURRENCY_SYMBOL}{(totalCents / 100).toFixed(2)} · {CURRENCY_SYMBOL}{perCoin.toFixed(3)} per coin
+                          {CURRENCY_SYMBOL}
+                          {(totalCents / 100).toFixed(2)} · {CURRENCY_SYMBOL}
+                          {perCoin.toFixed(3)} per coin
                           {savingsPct > 0 ? ` · save ${savingsPct}%` : ""}
                         </p>
                       )}
@@ -235,7 +296,13 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                 <div className="mt-2 grid gap-2 rounded-2xl border border-border bg-background/40 p-4 text-sm">
                   <Row
                     label={isVipFlow ? "Plan" : "Pack"}
-                    value={isVipFlow ? VIP_PLAN.label : isCustomFlow ? "Custom" : (selected as { pack: CoinPack }).pack.label}
+                    value={
+                      isVipFlow
+                        ? VIP_PLAN.label
+                        : isCustomFlow
+                          ? "Custom"
+                          : (selected as { pack: CoinPack }).pack.label
+                    }
                   />
                   {!isVipFlow && <Row label="Coins" value={`${coinsForOrder} OG Coins`} />}
                   {!isVipFlow && (
@@ -250,9 +317,12 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                     value={isVipFlow ? "Yearly subscription" : "One-time payment"}
                   />
                   <div className="mt-1 flex items-baseline justify-between border-t border-border/60 pt-3">
-                    <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Total today</span>
+                    <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                      Total today
+                    </span>
                     <span className="text-2xl font-black tabular-nums">
-                      {CURRENCY_SYMBOL}{(totalCents / 100).toFixed(2)}
+                      {CURRENCY_SYMBOL}
+                      {(totalCents / 100).toFixed(2)}
                     </span>
                   </div>
                 </div>
@@ -262,31 +332,42 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                   What happens next
                 </p>
                 <ol className="mt-2 space-y-2">
-                  <NextStep n={1} title="Continue to secure checkout" body="Pay with card, Apple Pay, or Google Pay. PCI-compliant via Stripe." />
+                  <NextStep
+                    n={1}
+                    title="Continue to secure checkout"
+                    body="Pay with card, Apple Pay, or Google Pay. PCI-compliant via Stripe."
+                  />
                   <NextStep
                     n={2}
                     title={isVipFlow ? "VIP unlocks instantly" : "Coins land in your wallet"}
-                    body={isVipFlow
-                      ? "All VIP perks activate the moment payment confirms."
-                      : `${coinsForOrder} OG Coins credited within seconds — no waiting.`}
+                    body={
+                      isVipFlow
+                        ? "All VIP perks activate the moment payment confirms."
+                        : `${coinsForOrder} OG Coins credited within seconds — no waiting.`
+                    }
                   />
                   <NextStep
                     n={3}
                     title={isVipFlow ? "Manage anytime in Settings" : "Start burning coins"}
-                    body={isVipFlow
-                      ? "Cancel or change plan whenever you like."
-                      : "Head to MusicHUB or Messenger and spend when ready. Coins never expire."}
+                    body={
+                      isVipFlow
+                        ? "Cancel or change plan whenever you like."
+                        : "Head to MusicHUB or Messenger and spend when ready. Coins never expire."
+                    }
                   />
                 </ol>
 
                 <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-                  <Button variant="outline" onClick={clearSelection} className="h-12 sm:h-10">Cancel</Button>
+                  <Button variant="outline" onClick={clearSelection} className="h-12 sm:h-10">
+                    Cancel
+                  </Button>
                   <Button
                     onClick={() => setStage("pay")}
                     className="h-12 w-full bg-gradient-brand font-bold text-primary-foreground shadow-glow hover:opacity-90 sm:h-10 sm:w-auto"
                   >
                     <CreditCard className="mr-2 h-4 w-4" />
-                    Continue · {CURRENCY_SYMBOL}{(totalCents / 100).toFixed(2)}
+                    Continue · {CURRENCY_SYMBOL}
+                    {(totalCents / 100).toFixed(2)}
                   </Button>
                 </div>
               </div>
@@ -311,25 +392,41 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                             }
                             try {
                               setCheckoutLoading(true);
-                              const targetId = isVipFlow ? VIP_PLAN.bundleId : isCustomFlow ? "coins_custom" : selected.pack.bundleId;
+                              const targetId = isVipFlow
+                                ? VIP_PLAN.bundleId
+                                : isCustomFlow
+                                  ? "coins_custom"
+                                  : selected.pack.bundleId;
 
                               // Match by package id or Google Play product id (coins_50, coins_100, coins_240, coins_600).
                               const currentOffering = rc.offerings?.current;
                               const pkg = currentOffering?.availablePackages.find((p) => {
-                                const a = p as unknown as { identifier: string; product?: { identifier?: string }; webBillingProduct?: { identifier?: string } };
-                                const pid = (a.product?.identifier ?? a.webBillingProduct?.identifier ?? "").split(":")[0];
+                                const a = p as unknown as {
+                                  identifier: string;
+                                  product?: { identifier?: string };
+                                  webBillingProduct?: { identifier?: string };
+                                };
+                                const pid = (
+                                  a.product?.identifier ??
+                                  a.webBillingProduct?.identifier ??
+                                  ""
+                                ).split(":")[0];
                                 return a.identifier === targetId || pid === targetId;
                               });
 
                               if (!pkg) {
-                                toast.error("Product not found in Google Play. Please configure RevenueCat products.");
+                                toast.error(
+                                  "Product not found in Google Play. Please configure RevenueCat products.",
+                                );
                                 setCheckoutLoading(false);
                                 return;
                               }
 
                               const success = await rcPurchase(pkg);
                               if (success) {
-                                toast.success("Purchase successful! Your account has been credited.");
+                                toast.success(
+                                  "Purchase successful! Your account has been credited.",
+                                );
                                 navigate({ to: "/store" });
                               }
                             } catch (e: any) {
@@ -351,18 +448,32 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                               const returnUrlPack = isVipFlow
                                 ? VIP_PLAN.bundleId
                                 : isCustomFlow
-                                ? "coins_custom"
-                                : selected.pack.bundleId;
+                                  ? "coins_custom"
+                                  : selected.pack.bundleId;
 
                               const returnUrl = `${window.location.origin}/buy-coins/return?session_id={CHECKOUT_SESSION_ID}&pack=${returnUrlPack}`;
 
                               let res;
                               if (isVipFlow) {
-                                res = await createVipCheckout({ data: { returnUrl, environment: getStripeEnvironment() } });
+                                res = await createVipCheckout({
+                                  data: { returnUrl, environment: getStripeEnvironment() },
+                                });
                               } else if (isCustomFlow) {
-                                res = await createCustomCheckout({ data: { units: coinsForOrder / CUSTOM_COIN_UNIT.coins, returnUrl, environment: getStripeEnvironment() } });
+                                res = await createCustomCheckout({
+                                  data: {
+                                    units: coinsForOrder / CUSTOM_COIN_UNIT.coins,
+                                    returnUrl,
+                                    environment: getStripeEnvironment(),
+                                  },
+                                });
                               } else {
-                                res = await createCoinCheckout({ data: { priceId: selected.pack.priceId, returnUrl, environment: getStripeEnvironment() } });
+                                res = await createCoinCheckout({
+                                  data: {
+                                    priceId: selected.pack.priceId,
+                                    returnUrl,
+                                    environment: getStripeEnvironment(),
+                                  },
+                                });
                               }
 
                               const r = res as any;
@@ -399,7 +510,6 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
     );
   }
 
-
   return (
     <DashboardShell title="Store">
       <PaymentTestModeBanner />
@@ -412,24 +522,36 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                 <EditableContent contentKey="buyCoins.heading" defaultValue="Stock up. Power up." />
               </h1>
             </div>
-            <div role="status" aria-label={`Wallet balance ${profile?.coin_balance ?? 0} OG coins`} className="text-left min-[360px]:text-right">
+            <div
+              role="status"
+              aria-label={`Wallet balance ${profile?.coin_balance ?? 0} OG coins`}
+              className="text-left min-[360px]:text-right"
+            >
               <p className="text-xs font-semibold uppercase text-muted-foreground">Balance</p>
               <div className="mt-1 flex items-center justify-start gap-2 min-[360px]:justify-end">
                 <Coins className="h-5 w-5 text-primary" />
-                <span className="font-mono text-xl font-bold tabular-nums sm:text-2xl">{profile?.coin_balance ?? 0}</span>
+                <span className="font-mono text-xl font-bold tabular-nums sm:text-2xl">
+                  {profile?.coin_balance ?? 0}
+                </span>
                 <span className="hidden text-xs text-muted-foreground min-[360px]:inline">OG</span>
               </div>
             </div>
           </div>
           <ReferralReminder className="mt-4 border-border bg-background/45 shadow-none" />
-          {isDev ? <div className="mt-3 flex justify-end"><AdminEditModeToggle /></div> : null}
+          {isDev ? (
+            <div className="mt-3 flex justify-end">
+              <AdminEditModeToggle />
+            </div>
+          ) : null}
         </section>
 
         <div className="grid gap-4 lg:grid-cols-2">
           <section aria-labelledby="section-custom" className="scroll-mt-24">
             <div className="mb-3 flex items-center gap-2">
               <SlidersHorizontal className="h-4 w-4 text-primary" />
-              <h2 id="section-custom" className="font-display text-lg font-black">Custom coin pack</h2>
+              <h2 id="section-custom" className="font-display text-lg font-black">
+                Custom coin pack
+              </h2>
             </div>
             <CustomPackCard onBuy={(units) => pickSelection({ type: "custom", units })} />
           </section>
@@ -437,17 +559,26 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
           <section aria-labelledby="section-vip" className="scroll-mt-24">
             <div className="mb-3 flex items-center gap-2">
               <Crown className="h-4 w-4 text-primary" />
-              <h2 id="section-vip" className="font-display text-lg font-black">VIP membership</h2>
+              <h2 id="section-vip" className="font-display text-lg font-black">
+                VIP membership
+              </h2>
             </div>
             <div className="flex h-[calc(100%-2.25rem)] min-h-0 flex-col rounded-xl border border-primary/30 bg-store-card p-4 shadow-card sm:p-5">
               <p className="text-sm leading-relaxed text-muted-foreground">
-                <EditableContent contentKey="buyCoins.vip.subtitle" defaultValue="Unlock exclusive privileges across OG Streamz — billed monthly, cancel anytime." multiline />
+                <EditableContent
+                  contentKey="buyCoins.vip.subtitle"
+                  defaultValue="Unlock exclusive privileges across OG Streamz — billed monthly, cancel anytime."
+                  multiline
+                />
               </p>
               <div className="mt-4 grid flex-1 gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="font-display text-lg font-black">
-                      <EditableContent contentKey="buyCoins.vip.heading" defaultValue="OG Vault VIP Pass" />
+                      <EditableContent
+                        contentKey="buyCoins.vip.heading"
+                        defaultValue="OG Vault VIP Pass"
+                      />
                     </h3>
                     {isVip && (
                       <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400 ring-1 ring-emerald-500/30">
@@ -456,16 +587,29 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                     )}
                   </div>
                   <ul className="mt-3 grid gap-2 text-sm text-muted-foreground min-[440px]:grid-cols-2">
-                    <li className="flex items-start gap-2"><Star className="mt-0.5 h-3.5 w-3.5 shrink-0 text-coin" /> <span className="min-w-0">Foul-mouth OG Bot unlocked</span></li>
-                    <li className="flex items-start gap-2"><Star className="mt-0.5 h-3.5 w-3.5 shrink-0 text-coin" /> <span className="min-w-0">Priority OG Bot replies</span></li>
-                    <li className="flex items-start gap-2"><Star className="mt-0.5 h-3.5 w-3.5 shrink-0 text-coin" /> <span className="min-w-0">VIP badge across the hub</span></li>
-                    <li className="flex items-start gap-2"><Gift className="mt-0.5 h-3.5 w-3.5 shrink-0 text-coin" /> <span className="min-w-0">Daily 10-coin safety net</span></li>
+                    <li className="flex items-start gap-2">
+                      <Star className="mt-0.5 h-3.5 w-3.5 shrink-0 text-coin" />{" "}
+                      <span className="min-w-0">Foul-mouth OG Bot unlocked</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Star className="mt-0.5 h-3.5 w-3.5 shrink-0 text-coin" />{" "}
+                      <span className="min-w-0">Priority OG Bot replies</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Star className="mt-0.5 h-3.5 w-3.5 shrink-0 text-coin" />{" "}
+                      <span className="min-w-0">VIP badge across the hub</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Gift className="mt-0.5 h-3.5 w-3.5 shrink-0 text-coin" />{" "}
+                      <span className="min-w-0">Daily 10-coin safety net</span>
+                    </li>
                   </ul>
                 </div>
                 <div className="flex flex-col gap-3 border-t border-border pt-4 min-[400px]:flex-row min-[400px]:items-end min-[400px]:justify-between sm:flex-col sm:items-end sm:justify-center sm:border-t-0 sm:pt-0">
                   <div className="min-w-0">
                     <div className="text-3xl font-black tabular-nums leading-none">
-                      {CURRENCY_SYMBOL}{(VIP_PLAN.priceCents / 100).toFixed(0)}
+                      {CURRENCY_SYMBOL}
+                      {(VIP_PLAN.priceCents / 100).toFixed(0)}
                     </div>
                     <div className="mt-1 text-xs font-semibold text-muted-foreground">/ month</div>
                   </div>
@@ -475,43 +619,60 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                     onClick={() => pickSelection({ type: "vip" })}
                     className="h-11 w-full font-bold min-[400px]:w-auto sm:min-w-32"
                   >
-                    {isVip ? "You're VIP" : (<><Crown className="mr-2 h-4 w-4" /> Join VIP</>)}
+                    {isVip ? (
+                      "You're VIP"
+                    ) : (
+                      <>
+                        <Crown className="mr-2 h-4 w-4" /> Join VIP
+                      </>
+                    )}
                   </Button>
                 </div>
               </div>
             </div>
-        </section>
+          </section>
         </div>
 
         <section aria-labelledby="section-bundles" className="scroll-mt-24">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase text-muted-foreground">One-time purchase</p>
-              <h2 id="section-bundles" className="font-display text-xl font-black">Coin packs</h2>
+              <p className="text-xs font-semibold uppercase text-muted-foreground">
+                One-time purchase
+              </p>
+              <h2 id="section-bundles" className="font-display text-xl font-black">
+                Coin packs
+              </h2>
             </div>
             <span className="shrink-0 rounded-md bg-primary/10 px-2 py-1 text-xs font-bold text-primary">
-              Save up to {Math.round((1 - (COIN_PACKS[COIN_PACKS.length - 1].priceCents / 100 / COIN_PACKS[COIN_PACKS.length - 1].coins) / basePerCoin) * 100)}%
+              Save up to{" "}
+              {Math.round(
+                (1 -
+                  COIN_PACKS[COIN_PACKS.length - 1].priceCents /
+                    100 /
+                    COIN_PACKS[COIN_PACKS.length - 1].coins /
+                    basePerCoin) *
+                  100,
+              )}
+              %
             </span>
           </div>
           <div className="rounded-xl border border-border bg-store-card-muted p-3 shadow-card sm:p-4">
-              <div className="grid grid-cols-1 gap-3 min-[430px]:grid-cols-2 lg:grid-cols-4">
-                {COIN_PACKS.map((t, i) => (
-                  <PackCard
-                    key={t.bundleId}
-                    pack={t}
-                    tierIndex={i}
-                    totalTiers={COIN_PACKS.length}
-                    basePerCoin={basePerCoin}
-                    onBuy={(effective) => pickSelection({ type: "coins", pack: effective })}
-                  />
-                ))}
-              </div>
+            <div className="grid grid-cols-1 gap-3 min-[430px]:grid-cols-2 lg:grid-cols-4">
+              {COIN_PACKS.map((t, i) => (
+                <PackCard
+                  key={t.bundleId}
+                  pack={t}
+                  tierIndex={i}
+                  totalTiers={COIN_PACKS.length}
+                  basePerCoin={basePerCoin}
+                  onBuy={(effective) => pickSelection({ type: "coins", pack: effective })}
+                />
+              ))}
+            </div>
 
-
-
-              <p className="mt-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center text-xs text-muted-foreground">
-                <Lock className="h-3 w-3" /> Secure checkout · Apple Pay · Google Pay · Card
-              </p>
+            <p className="mt-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center text-xs text-muted-foreground">
+              <Lock className="h-3 w-3" /> Secure checkout · Apple Pay · Google Pay · Card
+            </p>
           </div>
         </section>
         <StoreItemsSection />
@@ -525,7 +686,12 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
 
 function SectionCard({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <section className={cn("overflow-hidden rounded-3xl border border-border bg-card shadow-card", className)}>
+    <section
+      className={cn(
+        "overflow-hidden rounded-3xl border border-border bg-card shadow-card",
+        className,
+      )}
+    >
       {children}
     </section>
   );
@@ -548,7 +714,11 @@ function SectionEyebrow({ children }: { children: ReactNode }) {
 }
 
 function SectionHeader({
-  icon, eyebrow, title, subtitle, action,
+  icon,
+  eyebrow,
+  title,
+  subtitle,
+  action,
 }: {
   icon?: ReactNode;
   eyebrow?: ReactNode;
@@ -578,11 +748,41 @@ function SectionHeader({
 type EditingField = "label" | "description" | "coins" | "price" | null;
 
 const RARITY_TIERS = [
-  { name: "Common",    Icon: Coins,  ring: "ring-slate-400/40",   glow: "",                   pill: "bg-slate-500/15 text-slate-300 ring-slate-400/30" },
-  { name: "Rare",      Icon: Zap,    ring: "ring-sky-400/50",     glow: "shadow-[0_0_30px_-8px_oklch(0.7_0.18_240)]", pill: "bg-sky-500/15 text-sky-300 ring-sky-400/40" },
-  { name: "Epic",      Icon: Gem,    ring: "ring-purple-400/60",  glow: "shadow-[0_0_40px_-10px_oklch(0.7_0.22_300)]", pill: "bg-purple-500/15 text-purple-300 ring-purple-400/40" },
-  { name: "Legendary", Icon: Trophy, ring: "ring-coin/70",        glow: "shadow-[0_0_60px_-10px_oklch(0.8_0.18_85)]",  pill: "bg-coin/20 text-coin ring-coin/50" },
-  { name: "Mythic",    Icon: Flame,  ring: "ring-red-400/60",     glow: "shadow-[0_0_60px_-10px_oklch(0.7_0.22_25)]",  pill: "bg-red-500/15 text-red-300 ring-red-400/40" },
+  {
+    name: "Common",
+    Icon: Coins,
+    ring: "ring-slate-400/40",
+    glow: "",
+    pill: "bg-slate-500/15 text-slate-300 ring-slate-400/30",
+  },
+  {
+    name: "Rare",
+    Icon: Zap,
+    ring: "ring-sky-400/50",
+    glow: "shadow-[0_0_30px_-8px_oklch(0.7_0.18_240)]",
+    pill: "bg-sky-500/15 text-sky-300 ring-sky-400/40",
+  },
+  {
+    name: "Epic",
+    Icon: Gem,
+    ring: "ring-purple-400/60",
+    glow: "shadow-[0_0_40px_-10px_oklch(0.7_0.22_300)]",
+    pill: "bg-purple-500/15 text-purple-300 ring-purple-400/40",
+  },
+  {
+    name: "Legendary",
+    Icon: Trophy,
+    ring: "ring-coin/70",
+    glow: "shadow-[0_0_60px_-10px_oklch(0.8_0.18_85)]",
+    pill: "bg-coin/20 text-coin ring-coin/50",
+  },
+  {
+    name: "Mythic",
+    Icon: Flame,
+    ring: "ring-red-400/60",
+    glow: "shadow-[0_0_60px_-10px_oklch(0.7_0.22_25)]",
+    pill: "bg-red-500/15 text-red-300 ring-red-400/40",
+  },
 ] as const;
 
 function PackCard({
@@ -619,9 +819,13 @@ function PackCard({
   const savingsPct = basePerCoin > 0 ? Math.round((1 - perCoin / basePerCoin) * 100) : 0;
   const accent = pack.bestValue || pack.popular;
   // Map pack position → rarity tier (last pack always gets the top tier).
-  const tierIdx = totalTiers <= 1
-    ? 0
-    : Math.min(RARITY_TIERS.length - 1, Math.round((tierIndex / (totalTiers - 1)) * (RARITY_TIERS.length - 1)));
+  const tierIdx =
+    totalTiers <= 1
+      ? 0
+      : Math.min(
+          RARITY_TIERS.length - 1,
+          Math.round((tierIndex / (totalTiers - 1)) * (RARITY_TIERS.length - 1)),
+        );
   const tier = RARITY_TIERS[tierIdx];
   const TierIcon = tier.Icon;
 
@@ -661,11 +865,13 @@ function PackCard({
       next.description = draft.trim() || undefined;
     } else if (field === "coins") {
       const n = Math.trunc(Number(draft));
-      if (!Number.isFinite(n) || n <= 0 || n > 1_000_000) return toast.error("Coins must be 1–1,000,000");
+      if (!Number.isFinite(n) || n <= 0 || n > 1_000_000)
+        return toast.error("Coins must be 1–1,000,000");
       next.coins = n;
     } else if (field === "price") {
       const pounds = Number(draft);
-      if (!Number.isFinite(pounds) || pounds <= 0 || pounds > 10_000) return toast.error("Price must be > 0");
+      if (!Number.isFinite(pounds) || pounds <= 0 || pounds > 10_000)
+        return toast.error("Price must be > 0");
       next.priceCents = Math.round(pounds * 100);
     }
     persist(next);
@@ -701,9 +907,11 @@ function PackCard({
       )}
     >
       {/* Rarity tier pill */}
-      <div className={cn(
-        "absolute left-3 top-3 inline-flex items-center gap-1 text-[10px] font-bold uppercase text-muted-foreground",
-      )}>
+      <div
+        className={cn(
+          "absolute left-3 top-3 inline-flex items-center gap-1 text-[10px] font-bold uppercase text-muted-foreground",
+        )}
+      >
         <TierIcon className="h-3 w-3" /> {tier.name}
       </div>
 
@@ -725,7 +933,6 @@ function PackCard({
 
       {/* spacer so the rarity pill doesn't collide with content */}
       <div className="h-6" aria-hidden />
-
 
       {/* Label row */}
       <EditableField
@@ -791,7 +998,11 @@ function PackCard({
                 )}
                 title="Toggle 2× bonus visual"
               >
-                {showBonus ? <ToggleRight className="h-3 w-3" /> : <ToggleLeft className="h-3 w-3" />}
+                {showBonus ? (
+                  <ToggleRight className="h-3 w-3" />
+                ) : (
+                  <ToggleLeft className="h-3 w-3" />
+                )}
                 {showBonus ? "2× bonus on" : "2× bonus off"}
               </button>
             ) : showBonus ? (
@@ -800,7 +1011,8 @@ function PackCard({
               </span>
             ) : null}
             <span className="text-[11px] text-muted-foreground">
-              {CURRENCY_SYMBOL}{perCoin.toFixed(3)} / coin
+              {CURRENCY_SYMBOL}
+              {perCoin.toFixed(3)} / coin
             </span>
           </div>
         </div>
@@ -823,7 +1035,8 @@ function PackCard({
           view={
             <div className="flex items-baseline gap-1">
               <span className="text-2xl font-black tracking-tight">
-                {CURRENCY_SYMBOL}{(effective.priceCents / 100).toFixed(2)}
+                {CURRENCY_SYMBOL}
+                {(effective.priceCents / 100).toFixed(2)}
               </span>
               <span className="text-xs text-muted-foreground">one-time</span>
             </div>
@@ -846,9 +1059,7 @@ function PackCard({
           multiline
           inputProps={{ maxLength: 240 }}
           view={
-            <p className="text-xs leading-relaxed text-muted-foreground">
-              {effective.description}
-            </p>
+            <p className="text-xs leading-relaxed text-muted-foreground">{effective.description}</p>
           }
         />
       </div>
@@ -873,10 +1084,19 @@ function PackCard({
 
 // Inline editable field — pencil on hover, ✓/✗ to commit/cancel, ↺ to reset.
 function EditableField({
-  canEdit, editing, overridden,
-  onStart, onCancel, onCommit, onReset,
-  draft, setDraft,
-  view, multiline = false, prefix, inputProps,
+  canEdit,
+  editing,
+  overridden,
+  onStart,
+  onCancel,
+  onCommit,
+  onReset,
+  draft,
+  setDraft,
+  view,
+  multiline = false,
+  prefix,
+  inputProps,
 }: {
   canEdit: boolean;
   editing: boolean;
@@ -912,8 +1132,14 @@ function EditableField({
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter") { e.preventDefault(); onCommit(); }
-                if (e.key === "Escape") { e.preventDefault(); onCancel(); }
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  onCommit();
+                }
+                if (e.key === "Escape") {
+                  e.preventDefault();
+                  onCancel();
+                }
               }}
               className="h-8 flex-1 text-sm"
               {...(inputProps as React.InputHTMLAttributes<HTMLInputElement>)}
@@ -921,10 +1147,25 @@ function EditableField({
           )}
         </div>
         <div className="mt-2 flex items-center justify-end gap-1">
-          <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={onCancel} title="Cancel" aria-label="Cancel edit">
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            className="h-7 w-7"
+            onClick={onCancel}
+            title="Cancel"
+            aria-label="Cancel edit"
+          >
             <X className="h-3.5 w-3.5" />
           </Button>
-          <Button type="button" size="icon" className="h-7 w-7 bg-emerald-500 text-white hover:bg-emerald-600" onClick={onCommit} title="Save" aria-label="Save changes">
+          <Button
+            type="button"
+            size="icon"
+            className="h-7 w-7 bg-emerald-500 text-white hover:bg-emerald-600"
+            onClick={onCommit}
+            title="Save"
+            aria-label="Save changes"
+          >
             <Check className="h-3.5 w-3.5" />
           </Button>
         </div>
@@ -941,7 +1182,10 @@ function EditableField({
         {overridden && (
           <button
             type="button"
-            onClick={(e) => { e.stopPropagation(); onReset(); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onReset();
+            }}
             className="pointer-events-auto grid h-5 w-5 place-items-center rounded-full bg-background/90 text-muted-foreground shadow-sm hover:text-foreground"
             title="Reset to default"
             aria-label="Reset"
@@ -951,7 +1195,10 @@ function EditableField({
         )}
         <button
           type="button"
-          onClick={(e) => { e.stopPropagation(); onStart(); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onStart();
+          }}
           className="pointer-events-auto grid h-5 w-5 place-items-center rounded-full bg-primary text-primary-foreground shadow-sm"
           title="Edit"
           aria-label="Edit"
@@ -960,14 +1207,13 @@ function EditableField({
         </button>
       </div>
       {overridden && (
-        <span className="ml-1 inline-block align-middle text-[9px] font-bold uppercase tracking-wider text-primary">●</span>
+        <span className="ml-1 inline-block align-middle text-[9px] font-bold uppercase tracking-wider text-primary">
+          ●
+        </span>
       )}
     </div>
   );
 }
-
-
-
 
 function TrustItem({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
   return (
@@ -984,15 +1230,20 @@ function TrustItem({ icon, title, body }: { icon: React.ReactNode; title: string
 function Row({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
     <div className="flex items-baseline justify-between gap-3">
-      <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</span>
+      <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        {label}
+      </span>
       <span className="text-right">
         <span className="text-sm font-bold tabular-nums">{value}</span>
-        {hint && <span className="ml-2 text-[10px] font-bold uppercase tracking-wider text-emerald-400">{hint}</span>}
+        {hint && (
+          <span className="ml-2 text-[10px] font-bold uppercase tracking-wider text-emerald-400">
+            {hint}
+          </span>
+        )}
       </span>
     </div>
   );
 }
-
 
 function NextStep({ n, title, body }: { n: number; title: string; body: string }) {
   return (
@@ -1020,9 +1271,6 @@ function CustomPackCard({ onBuy }: { onBuy: (units: number) => void }) {
   // Per-coin price using consistent GBP rounding (3 dp for fractional pennies).
   const perCoin = CUSTOM_COIN_UNIT.priceCents / 100 / CUSTOM_COIN_UNIT.coins;
 
-
-
-
   const bump = (delta: number) => {
     const next = Math.min(
       CUSTOM_COIN_UNIT.maxUnits,
@@ -1044,23 +1292,24 @@ function CustomPackCard({ onBuy }: { onBuy: (units: number) => void }) {
 
   return (
     <div className="relative overflow-hidden rounded-xl border border-border bg-store-card p-4 shadow-card sm:p-5">
-
       {/* Header */}
       <div className="relative flex items-start gap-3 sm:gap-4">
         <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
           <Coins className="h-5 w-5" />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="text-xs font-semibold uppercase text-muted-foreground">Choose any amount</div>
-          <h3 className="font-display text-lg font-black sm:text-xl">
-            Build your stack
-          </h3>
+          <div className="text-xs font-semibold uppercase text-muted-foreground">
+            Choose any amount
+          </div>
+          <h3 className="font-display text-lg font-black sm:text-xl">Build your stack</h3>
           <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
             <span className="inline-flex items-center gap-1 rounded bg-primary/10 px-2 py-1 text-xs font-bold text-primary">
-              {CURRENCY_SYMBOL}{(CUSTOM_COIN_UNIT.priceCents / 100).toFixed(2)} → {CUSTOM_COIN_UNIT.coins} OG
+              {CURRENCY_SYMBOL}
+              {(CUSTOM_COIN_UNIT.priceCents / 100).toFixed(2)} → {CUSTOM_COIN_UNIT.coins} OG
             </span>
             <span className="text-xs text-muted-foreground">
-              ≈ {CURRENCY_SYMBOL}{perCoin.toFixed(3)} / coin
+              ≈ {CURRENCY_SYMBOL}
+              {perCoin.toFixed(3)} / coin
             </span>
           </div>
           <p className="mt-1 text-xs leading-snug text-muted-foreground sm:text-sm">
@@ -1078,7 +1327,11 @@ function CustomPackCard({ onBuy }: { onBuy: (units: number) => void }) {
           onClick={() => bump(-1)}
           disabled={atMin}
           aria-label={`Remove ${CUSTOM_COIN_UNIT.coins} coins`}
-          title={atMin ? `Already at minimum (${minCoins} coins)` : `Remove ${CUSTOM_COIN_UNIT.coins} coins`}
+          title={
+            atMin
+              ? `Already at minimum (${minCoins} coins)`
+              : `Remove ${CUSTOM_COIN_UNIT.coins} coins`
+          }
         >
           <Minus className="h-7 w-7" />
         </Button>
@@ -1096,12 +1349,11 @@ function CustomPackCard({ onBuy }: { onBuy: (units: number) => void }) {
             >
               {coins}
             </span>
-            <span className="text-xs font-bold text-primary">
-              OG
-            </span>
+            <span className="text-xs font-bold text-primary">OG</span>
           </div>
           <div className="relative mt-1 text-xs text-muted-foreground tabular-nums">
-            {units} × {CURRENCY_SYMBOL}{(CUSTOM_COIN_UNIT.priceCents / 100).toFixed(2)}
+            {units} × {CURRENCY_SYMBOL}
+            {(CUSTOM_COIN_UNIT.priceCents / 100).toFixed(2)}
           </div>
         </div>
 
@@ -1112,7 +1364,9 @@ function CustomPackCard({ onBuy }: { onBuy: (units: number) => void }) {
           onClick={() => bump(1)}
           disabled={atMax}
           aria-label={`Add ${CUSTOM_COIN_UNIT.coins} coins`}
-          title={atMax ? `Already at maximum (${maxCoins} coins)` : `Add ${CUSTOM_COIN_UNIT.coins} coins`}
+          title={
+            atMax ? `Already at maximum (${maxCoins} coins)` : `Add ${CUSTOM_COIN_UNIT.coins} coins`
+          }
         >
           <Plus className="h-7 w-7" />
         </Button>
@@ -1124,15 +1378,19 @@ function CustomPackCard({ onBuy }: { onBuy: (units: number) => void }) {
           <button
             key={q}
             type="button"
-            onClick={() => { setBumpError(null); setUnits(q); }}
+            onClick={() => {
+              setBumpError(null);
+              setUnits(q);
+            }}
             className={cn(
-               "min-h-9 rounded-md border px-2.5 py-1 text-xs font-bold transition",
+              "min-h-9 rounded-md border px-2.5 py-1 text-xs font-bold transition",
               units === q
-                 ? "border-primary bg-primary text-primary-foreground"
-                 : "border-border bg-background/50 text-muted-foreground hover:border-primary hover:text-foreground",
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-border bg-background/50 text-muted-foreground hover:border-primary hover:text-foreground",
             )}
           >
-            +{q * CUSTOM_COIN_UNIT.coins} · {CURRENCY_SYMBOL}{((q * CUSTOM_COIN_UNIT.priceCents) / 100).toFixed(2)}
+            +{q * CUSTOM_COIN_UNIT.coins} · {CURRENCY_SYMBOL}
+            {((q * CUSTOM_COIN_UNIT.priceCents) / 100).toFixed(2)}
           </button>
         ))}
       </div>
@@ -1141,9 +1399,11 @@ function CustomPackCard({ onBuy }: { onBuy: (units: number) => void }) {
         <p role="alert" className="relative mt-2 text-[11px] font-bold text-red-300">
           {bumpError}
         </p>
-      ) : (atMin || atMax) ? (
+      ) : atMin || atMax ? (
         <p className="relative mt-2 text-[11px] text-white/60">
-          {atMin ? `You're at the minimum (${minCoins} coins).` : `You're at the maximum (${maxCoins} coins).`}
+          {atMin
+            ? `You're at the minimum (${minCoins} coins).`
+            : `You're at the maximum (${maxCoins} coins).`}
         </p>
       ) : null}
 
@@ -1155,23 +1415,20 @@ function CustomPackCard({ onBuy }: { onBuy: (units: number) => void }) {
             key={totalCents}
             className="font-mono text-2xl font-bold tabular-nums leading-none sm:text-3xl"
           >
-            {CURRENCY_SYMBOL}{(totalCents / 100).toFixed(2)}
+            {CURRENCY_SYMBOL}
+            {(totalCents / 100).toFixed(2)}
           </div>
-          <div className="mt-1 text-xs text-muted-foreground">
-            one-time · {coins} OG coins
-          </div>
+          <div className="mt-1 text-xs text-muted-foreground">one-time · {coins} OG coins</div>
         </div>
         <Button
           size="lg"
           onClick={() => onBuy(units)}
           className="h-11 w-full rounded-md px-4 font-bold min-[400px]:w-auto"
         >
-          <Flame className="mr-2 h-4 w-4" /> Buy · {CURRENCY_SYMBOL}{(totalCents / 100).toFixed(2)}
+          <Flame className="mr-2 h-4 w-4" /> Buy · {CURRENCY_SYMBOL}
+          {(totalCents / 100).toFixed(2)}
         </Button>
       </div>
     </div>
   );
 }
-
-
-

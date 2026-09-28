@@ -10,9 +10,14 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 export const improveLyricDescription = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: { text: string; subjectName?: string }) => {
-    const text = String(data?.text ?? "").trim().slice(0, 2000);
+    const text = String(data?.text ?? "")
+      .trim()
+      .slice(0, 2000);
     if (!text) throw new Error("Description is empty");
-    const subjectName = String(data?.subjectName ?? "").trim().slice(0, 60) || null;
+    const subjectName =
+      String(data?.subjectName ?? "")
+        .trim()
+        .slice(0, 60) || null;
     return { text, subjectName };
   })
   .handler(async ({ data, context }): Promise<{ improved: string; draftId: string | null }> => {
@@ -71,7 +76,9 @@ export const improveLyricDescription = createServerFn({ method: "POST" })
         .select("id")
         .single();
       if (!error && row) draftId = (row as { id: string }).id;
-    } catch (_) { /* best-effort */ }
+    } catch (_) {
+      /* best-effort */
+    }
 
     return { improved, draftId };
   });
@@ -111,10 +118,7 @@ export const deleteSongBriefDraft = createServerFn({ method: "POST" })
     return { id };
   })
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase
-      .from("song_brief_drafts")
-      .delete()
-      .eq("id", data.id);
+    const { error } = await context.supabase.from("song_brief_drafts").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -133,7 +137,9 @@ export const updateSongBriefDraft = createServerFn({ method: "POST" })
     const subjectName =
       data?.subjectName === undefined
         ? undefined
-        : (String(data.subjectName ?? "").trim().slice(0, 60) || null);
+        : String(data.subjectName ?? "")
+            .trim()
+            .slice(0, 60) || null;
     return { id, improvedText, subjectName };
   })
   .handler(async ({ data, context }) => {
@@ -148,4 +154,3 @@ export const updateSongBriefDraft = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
-

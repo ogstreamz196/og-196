@@ -33,7 +33,16 @@ import { useDevMode } from "@/hooks/use-dev-mode";
 import ogStreamzLogo from "@/assets/ogstreamz-logo.jpg.asset.json";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
 
-type AppRoute = "/" | "/library" | "/messenger" | "/store" | "/buy-coins" | "/settings" | "/developer" | "/admin" | "/referrals";
+type AppRoute =
+  | "/"
+  | "/library"
+  | "/messenger"
+  | "/store"
+  | "/buy-coins"
+  | "/settings"
+  | "/developer"
+  | "/admin"
+  | "/referrals";
 type NavItem = {
   title: string;
   url: AppRoute;
@@ -47,15 +56,32 @@ type NavItem = {
 
 const primaryNav: NavItem[] = [
   { title: "Home", url: "/", icon: Home, accent: "from-sky-400/30 to-indigo-500/30" },
-  { title: "Music", url: "/library", icon: Disc3, badge: "Studio", accent: "from-fuchsia-500/40 to-amber-400/40", spin: true },
-  { title: "OG Bot", url: "/messenger", image: ogBotAsset.url, badge: "Live", accent: "from-primary/40 to-cyan-400/40" },
-
+  {
+    title: "Music",
+    url: "/library",
+    icon: Disc3,
+    badge: "Studio",
+    accent: "from-fuchsia-500/40 to-amber-400/40",
+    spin: true,
+  },
+  {
+    title: "OG Bot",
+    url: "/messenger",
+    image: ogBotAsset.url,
+    badge: "Live",
+    accent: "from-primary/40 to-cyan-400/40",
+  },
 ];
 
 const accountNav: NavItem[] = [
   { title: "Earnings", url: "/referrals", icon: Gift, accent: "from-pink-500/30 to-rose-400/30" },
   { title: "Store", url: "/store", icon: Coins, accent: "from-amber-400/40 to-yellow-300/40" },
-  { title: "Settings", url: "/settings", icon: Settings, accent: "from-slate-400/25 to-zinc-400/25" },
+  {
+    title: "Settings",
+    url: "/settings",
+    icon: Settings,
+    accent: "from-slate-400/25 to-zinc-400/25",
+  },
 ];
 
 export function AppSidebar() {
@@ -91,13 +117,16 @@ export function AppSidebar() {
             isActive={active}
             tooltip={item.title}
             className={`group/nav font-display relative min-h-14 overflow-hidden rounded-2xl border-2 px-3 py-2 text-[15px] leading-tight tracking-wide uppercase transition-all duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0.5 ${
-
               active
                 ? "border-primary/50 bg-gradient-brand text-primary-foreground shadow-[0_6px_0_0_hsl(var(--primary)/0.4),0_14px_28px_-10px_hsl(var(--primary)/0.6)] hover:bg-gradient-brand active:shadow-[0_2px_0_0_hsl(var(--primary)/0.4)]"
                 : "border-transparent hover:border-white/10 hover:bg-white/[0.04] hover:shadow-[0_4px_0_0_hsl(var(--primary)/0.25)] active:shadow-[0_1px_0_0_hsl(var(--primary)/0.2)]"
             }`}
           >
-            <Link to={item.url} onClick={() => isMobile && setOpenMobile(false)} className="flex items-center gap-3">
+            <Link
+              to={item.url}
+              onClick={() => isMobile && setOpenMobile(false)}
+              className="flex items-center gap-3"
+            >
               {/* Animated accent sheen on hover */}
               <span
                 aria-hidden
@@ -130,9 +159,7 @@ export function AppSidebar() {
               {item.badge && !collapsed && (
                 <span
                   className={`relative z-10 font-display ml-auto rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider shadow-[0_2px_0_0_hsl(var(--primary)/0.4)] ${
-                    active
-                      ? "bg-white/25 text-primary-foreground"
-                      : "bg-primary/20 text-primary"
+                    active ? "bg-white/25 text-primary-foreground" : "bg-primary/20 text-primary"
                   }`}
                 >
                   {item.badge}
@@ -143,7 +170,6 @@ export function AppSidebar() {
         </SidebarMenuItem>
       );
     });
-
 
   return (
     <Sidebar collapsible="icon">
@@ -173,8 +199,6 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
 
-
-
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Workspace</SidebarGroupLabel>
@@ -189,7 +213,6 @@ export function AppSidebar() {
             <SidebarMenu>{renderItems(accountNav)}</SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
 
         {isAdmin && (
           <SidebarGroup>
@@ -207,7 +230,11 @@ export function AppSidebar() {
                         : "border-transparent hover:border-white/10 hover:bg-white/[0.04] hover:shadow-[0_4px_0_0_hsl(var(--primary)/0.25)] active:shadow-[0_1px_0_0_hsl(var(--primary)/0.2)]"
                     }`}
                   >
-                    <Link to="/admin" onClick={() => isMobile && setOpenMobile(false)} className="flex items-center gap-3">
+                    <Link
+                      to="/admin"
+                      onClick={() => isMobile && setOpenMobile(false)}
+                      className="flex items-center gap-3"
+                    >
                       <span
                         aria-hidden
                         className="pointer-events-none absolute inset-0 -z-0 bg-gradient-to-r from-red-500/30 to-amber-400/30 opacity-0 transition-opacity duration-300 group-hover/nav:opacity-100"
@@ -221,14 +248,15 @@ export function AppSidebar() {
                       >
                         <Shield className="h-5 w-5 transition-transform duration-300 group-hover/nav:scale-110 group-hover/nav:-rotate-6" />
                       </span>
-                      <span className="relative z-10 min-w-0 flex-1 break-words">Admin & Settings</span>
+                      <span className="relative z-10 min-w-0 flex-1 break-words">
+                        Admin & Settings
+                      </span>
                       {!collapsed && (
                         <Sparkles className="relative z-10 ml-auto h-4 w-4 text-amber-300 opacity-0 transition-opacity group-hover/nav:opacity-100" />
                       )}
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -241,7 +269,9 @@ export function AppSidebar() {
             <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-muted text-[10px] font-bold uppercase">
               {dev.isDev ? "D" : (user?.email?.[0] ?? "U")}
             </div>
-            <span className="truncate">{dev.isDev ? "Dev mode" : (user?.email ?? "Signed in")}</span>
+            <span className="truncate">
+              {dev.isDev ? "Dev mode" : (user?.email ?? "Signed in")}
+            </span>
           </div>
           <Button
             variant="outline"

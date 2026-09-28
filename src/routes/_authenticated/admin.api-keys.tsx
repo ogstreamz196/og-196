@@ -20,7 +20,9 @@ export function AdminApiKeysPage() {
     <DashboardShell title="API Keys & Secrets">
       <div className="max-w-3xl mx-auto space-y-6 p-4">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Link to="/admin" className="hover:underline">← Back to Admin</Link>
+          <Link to="/admin" className="hover:underline">
+            ← Back to Admin
+          </Link>
         </div>
 
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 flex gap-3">
@@ -28,9 +30,10 @@ export function AdminApiKeysPage() {
           <div className="text-sm text-amber-100/90">
             <p className="font-medium mb-1">Secrets cannot be edited from the app.</p>
             <p>
-              Edge Function secrets (like <code className="bg-black/30 px-1 rounded">SUNO_API_KEY</code>) live in
-              Lovable Cloud's encrypted secret store. They are rotated through the Lovable editor's secure prompt —
-              never via a runtime form, which would be a security hole.
+              Edge Function secrets (like{" "}
+              <code className="bg-black/30 px-1 rounded">SUNO_API_KEY</code>) live in Lovable
+              Cloud's encrypted secret store. They are rotated through the Lovable editor's secure
+              prompt — never via a runtime form, which would be a security hole.
             </p>
           </div>
         </div>
@@ -42,14 +45,17 @@ export function AdminApiKeysPage() {
           </div>
           <p className="text-sm text-muted-foreground">
             Used by the <code className="bg-black/30 px-1 rounded">suno-generate</code> and
-            <code className="bg-black/30 px-1 rounded"> suno-callback</code> Edge Functions to generate songs.
-            If generation fails with 401, the key is expired or out of credits.
+            <code className="bg-black/30 px-1 rounded"> suno-callback</code> Edge Functions to
+            generate songs. If generation fails with 401, the key is expired or out of credits.
           </p>
 
           <ol className="text-sm space-y-2 list-decimal list-inside text-foreground/90">
             <li>Open the Suno API provider dashboard and generate / copy a new key.</li>
             <li>Top up credits if the balance is empty.</li>
-            <li>In Lovable chat, say <em>"update my SUNO_API_KEY"</em>. A secure prompt opens — paste the key there.</li>
+            <li>
+              In Lovable chat, say <em>"update my SUNO_API_KEY"</em>. A secure prompt opens — paste
+              the key there.
+            </li>
           </ol>
 
           <div className="flex flex-wrap gap-2 pt-1">
@@ -74,9 +80,9 @@ export function AdminApiKeysPage() {
             <h2 className="text-lg font-semibold">Why no in-app form?</h2>
           </div>
           <p className="text-sm text-muted-foreground">
-            An admin form that writes API keys at runtime would mean a compromised admin session could silently swap
-            your backend credentials. The Lovable secret prompt is out-of-band: only the workspace owner can paste
-            into it, and the value is encrypted at rest.
+            An admin form that writes API keys at runtime would mean a compromised admin session
+            could silently swap your backend credentials. The Lovable secret prompt is out-of-band:
+            only the workspace owner can paste into it, and the value is encrypted at rest.
           </p>
         </section>
       </div>

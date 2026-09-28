@@ -33,10 +33,7 @@ export async function grantTrackUnlock(
     .maybeSingle();
 
   if (song.user_id === userId) {
-    const { error } = await supabaseAdmin
-      .from("songs")
-      .update({ unlocked: true })
-      .eq("id", songId);
+    const { error } = await supabaseAdmin.from("songs").update({ unlocked: true }).eq("id", songId);
     if (error) return { ok: false, error: error.message };
   }
 

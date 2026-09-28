@@ -234,7 +234,8 @@ export interface BuildPromptOpts {
   songIntent?: boolean;
 }
 
-const SONG_INTENT_RE = /\b(song|songs|lyric|lyrics|verse|chorus|hook|bridge|rap|melody|beat|track|tune|anthem|ballad|suno|jingle|rhyme|rhymes|sing|singing|sung|drill|afrobeats?|r&b|gospel|cover\s+song|write\s+(?:me\s+)?a\s+(?:song|track|tune))\b/i;
+const SONG_INTENT_RE =
+  /\b(song|songs|lyric|lyrics|verse|chorus|hook|bridge|rap|melody|beat|track|tune|anthem|ballad|suno|jingle|rhyme|rhymes|sing|singing|sung|drill|afrobeats?|r&b|gospel|cover\s+song|write\s+(?:me\s+)?a\s+(?:song|track|tune))\b/i;
 
 export function detectSongIntent(text: string | null | undefined): boolean {
   if (!text) return false;
@@ -251,18 +252,14 @@ export function buildSystemPrompt(opts: BuildPromptOpts): string {
     opts.user.is_admin ? "BOSS / admin" : null,
     opts.user.is_vip ? "VIP" : null,
   ].filter(Boolean);
-  const roleLine = roles.length
-    ? `User role: ${roles.join(", ")}.`
-    : "User role: free tier.";
+  const roleLine = roles.length ? `User role: ${roles.join(", ")}.` : "User role: free tier.";
 
   const greeting = opts.user.display_name
     ? `User name: ${opts.user.display_name}.`
     : "User name: unknown.";
 
   const balanceLine = `OG coin balance: ${opts.user.coin_balance} (each message costs 1 coin).`;
-  const pageLine = opts.user.page_context
-    ? `User is currently on: ${opts.user.page_context}.`
-    : "";
+  const pageLine = opts.user.page_context ? `User is currently on: ${opts.user.page_context}.` : "";
 
   const learnedBlock =
     opts.mode === "og" && opts.foulMouth && opts.learnedInsults && opts.learnedInsults.length
@@ -317,8 +314,7 @@ export const QUICK_STARTS: { label: string; prompt: string }[] = [
   },
   {
     label: "🔎 Look something up",
-    prompt:
-      "I want to look something up. Ask me what I want to know and give me a clear answer.",
+    prompt: "I want to look something up. Ask me what I want to know and give me a clear answer.",
   },
 ];
 

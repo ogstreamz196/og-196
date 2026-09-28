@@ -47,8 +47,14 @@ export function BackgroundMusicHeaderControl({ className = "" }: { className?: s
         title={playing ? "Pause background music" : "Play background music"}
         data-background-music-control
       >
-        {playing ? <Pause className="h-4 w-4" aria-hidden /> : <Play className="h-4 w-4" aria-hidden />}
-        <span className="sr-only">{playing ? "Pause background music" : "Play background music"}</span>
+        {playing ? (
+          <Pause className="h-4 w-4" aria-hidden />
+        ) : (
+          <Play className="h-4 w-4" aria-hidden />
+        )}
+        <span className="sr-only">
+          {playing ? "Pause background music" : "Play background music"}
+        </span>
       </Button>
       <Button
         type="button"
@@ -88,24 +94,27 @@ export function PersistentBackgroundMusic() {
     }
   }, []);
 
-  const fadeIn = useCallback((audio: HTMLAudioElement) => {
-    stopFade();
-    audio.volume = 0;
-    const startedAt = performance.now();
-    const tick = (now: number) => {
-      // Some browsers can deliver a frame timestamp fractionally before
-      // performance.now(); clamp both ends so HTMLMediaElement never receives
-      // an out-of-range volume during the first fade frame.
-      const progress = Math.max(0, Math.min((now - startedAt) / FADE_DURATION_MS, 1));
-      audio.volume = BACKGROUND_VOLUME * progress;
-      if (progress < 1 && !audio.paused) {
-        fadeFrameRef.current = window.requestAnimationFrame(tick);
-      } else {
-        fadeFrameRef.current = null;
-      }
-    };
-    fadeFrameRef.current = window.requestAnimationFrame(tick);
-  }, [stopFade]);
+  const fadeIn = useCallback(
+    (audio: HTMLAudioElement) => {
+      stopFade();
+      audio.volume = 0;
+      const startedAt = performance.now();
+      const tick = (now: number) => {
+        // Some browsers can deliver a frame timestamp fractionally before
+        // performance.now(); clamp both ends so HTMLMediaElement never receives
+        // an out-of-range volume during the first fade frame.
+        const progress = Math.max(0, Math.min((now - startedAt) / FADE_DURATION_MS, 1));
+        audio.volume = BACKGROUND_VOLUME * progress;
+        if (progress < 1 && !audio.paused) {
+          fadeFrameRef.current = window.requestAnimationFrame(tick);
+        } else {
+          fadeFrameRef.current = null;
+        }
+      };
+      fadeFrameRef.current = window.requestAnimationFrame(tick);
+    },
+    [stopFade],
+  );
 
   const start = useCallback(async () => {
     const audio = audioRef.current;
@@ -154,7 +163,6 @@ export function PersistentBackgroundMusic() {
       audio.currentTime = storedPosition;
     }
 
-
     const onPlay = () => {
       setPlaying(true);
       announceStatus(true);
@@ -188,11 +196,16 @@ export function PersistentBackgroundMusic() {
         // the visitor declines or the browser still blocks playback.
         const unlock = (event: Event) => {
           if (!enabledRef.current) return;
-          if (event.target instanceof Element && event.target.closest("[data-background-music-control]")) {
+          if (
+            event.target instanceof Element &&
+            event.target.closest("[data-background-music-control]")
+          ) {
             return;
           }
           const otherMediaPlaying = Array.from(
-            document.querySelectorAll<HTMLMediaElement>("audio:not([data-background-music]), video"),
+            document.querySelectorAll<HTMLMediaElement>(
+              "audio:not([data-background-music]), video",
+            ),
           ).some((media) => !media.paused && !media.ended);
           if (otherMediaPlaying) return;
           void start().then((unlocked) => {

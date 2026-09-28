@@ -20,9 +20,7 @@ function isByok(): boolean {
 
 export function getConnectionApiKey(env: StripeEnv): string {
   if (isByok()) return getEnv("STRIPE_SECRET_KEY");
-  return env === "sandbox"
-    ? getEnv("STRIPE_SANDBOX_API_KEY")
-    : getEnv("STRIPE_LIVE_API_KEY");
+  return env === "sandbox" ? getEnv("STRIPE_SANDBOX_API_KEY") : getEnv("STRIPE_LIVE_API_KEY");
 }
 
 export function createStripeClient(env: StripeEnv): Stripe {
@@ -38,7 +36,8 @@ export function createStripeClient(env: StripeEnv): Stripe {
   return new Stripe(apiKey, {
     apiVersion: "2026-08-26.dahlia",
     httpClient: Stripe.createFetchHttpClient(((input: URL | RequestInfo, init?: RequestInit) => {
-      const original = typeof input === "string" || input instanceof URL ? input.toString() : input.url;
+      const original =
+        typeof input === "string" || input instanceof URL ? input.toString() : input.url;
       const gatewayUrl = original.replace("https://api.stripe.com", GATEWAY_STRIPE_BASE);
       return fetch(gatewayUrl, {
         ...init,
@@ -55,9 +54,20 @@ export function createStripeClient(env: StripeEnv): Stripe {
 export function getStripeErrorMessage(error: unknown): string {
   if (error && typeof error === "object") {
     const e = error as {
-      message?: string; type?: string; code?: string;
-      decline_code?: string; param?: string; requestId?: string;
-      raw?: { message?: string; type?: string; code?: string; decline_code?: string; param?: string; requestId?: string };
+      message?: string;
+      type?: string;
+      code?: string;
+      decline_code?: string;
+      param?: string;
+      requestId?: string;
+      raw?: {
+        message?: string;
+        type?: string;
+        code?: string;
+        decline_code?: string;
+        param?: string;
+        requestId?: string;
+      };
     };
     const message = e.raw?.message ?? e.message;
     if (message) {

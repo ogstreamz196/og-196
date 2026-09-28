@@ -107,9 +107,7 @@ describe("coin balance atomic increment under concurrency", () => {
     const store = createBalanceStore(0);
     // If this control ever passes with === 5050, the harness no longer
     // interleaves operations and the atomic test above is vacuous.
-    await Promise.all(
-      Array.from({ length: 100 }, (_, i) => store.racyReadModifyWrite(i + 1)),
-    );
+    await Promise.all(Array.from({ length: 100 }, (_, i) => store.racyReadModifyWrite(i + 1)));
     expect(store.get()).toBeLessThan(5050);
   });
 });

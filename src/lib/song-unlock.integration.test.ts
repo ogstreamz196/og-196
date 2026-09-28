@@ -27,16 +27,23 @@ function canSeed(): boolean {
       { encoding: "utf8" },
     ).trim();
     return out === "t";
-  } catch { return false; }
+  } catch {
+    return false;
+  }
 }
 const HAS_DB = canSeed();
 
 function psql(sql: string): string {
-  return execFileSync("psql", ["-tA", "-v", "ON_ERROR_STOP=1", "-c", sql], { encoding: "utf8" }).trim();
+  return execFileSync("psql", ["-tA", "-v", "ON_ERROR_STOP=1", "-c", sql], {
+    encoding: "utf8",
+  }).trim();
 }
 function psqlSoft(sql: string): { ok: boolean; out: string } {
-  try { return { ok: true, out: psql(sql) }; }
-  catch (e: any) { return { ok: false, out: String(e?.stderr ?? e?.message ?? e) }; }
+  try {
+    return { ok: true, out: psql(sql) };
+  } catch (e: any) {
+    return { ok: false, out: String(e?.stderr ?? e?.message ?? e) };
+  }
 }
 
 describe.skipIf(!HAS_DB)("song unlock flow", () => {
@@ -98,7 +105,9 @@ describe.skipIf(!HAS_DB)("song unlock flow", () => {
        SELECT public.deduct_coins('${user}', 50, 'unlock:${lockedSong}')`,
     );
     expect(res.ok).toBe(false);
-    expect(psql(`SELECT unlocked::text FROM public.songs WHERE id = '${lockedSong}'`)).toBe("false");
+    expect(psql(`SELECT unlocked::text FROM public.songs WHERE id = '${lockedSong}'`)).toBe(
+      "false",
+    );
     expect(Number(psql(`SELECT coin_balance FROM public.profiles WHERE id = '${user}'`))).toBe(1);
   });
 });

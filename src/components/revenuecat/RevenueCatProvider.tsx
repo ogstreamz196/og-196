@@ -5,7 +5,7 @@ import {
   getCustomerInfo,
   getOfferings,
   purchasePackage as rcPurchasePackage,
-  checkVipEntitlement
+  checkVipEntitlement,
 } from "@/lib/revenuecat";
 
 interface RevenueCatContextType {
@@ -22,7 +22,7 @@ const RevenueCatContext = createContext<RevenueCatContextType | undefined>(undef
 
 export function RevenueCatProvider({
   children,
-  userId // Pass the authenticated user ID here when available
+  userId, // Pass the authenticated user ID here when available
 }: {
   children: React.ReactNode;
   userId?: string;
@@ -46,7 +46,7 @@ export function RevenueCatProvider({
       const [info, offers, vipStatus] = await Promise.all([
         getCustomerInfo(),
         getOfferings(),
-        checkVipEntitlement()
+        checkVipEntitlement(),
       ]);
       setCustomerInfo(info as any);
       setOfferings(offers as any);
@@ -75,15 +75,17 @@ export function RevenueCatProvider({
   };
 
   return (
-    <RevenueCatContext.Provider value={{
-      isConfigured,
-      isVip,
-      customerInfo,
-      offerings,
-      loading,
-      purchasePackage,
-      refreshInfo
-    }}>
+    <RevenueCatContext.Provider
+      value={{
+        isConfigured,
+        isVip,
+        customerInfo,
+        offerings,
+        loading,
+        purchasePackage,
+        refreshInfo,
+      }}
+    >
       {children}
     </RevenueCatContext.Provider>
   );

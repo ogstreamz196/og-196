@@ -122,10 +122,7 @@ export const reconcileUserCoinBalance = createServerFn({ method: "POST" })
         .eq("user_id", data.userId);
       if (tErr) return { error: tErr.message };
 
-      const ledger = (txs ?? []).reduce(
-        (acc: number, t: any) => acc + (Number(t.amount) || 0),
-        0,
-      );
+      const ledger = (txs ?? []).reduce((acc: number, t: any) => acc + (Number(t.amount) || 0), 0);
       const prev = Number(profile.coin_balance) || 0;
       const delta = ledger - prev;
       if (delta === 0) {

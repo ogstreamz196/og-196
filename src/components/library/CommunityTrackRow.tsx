@@ -1,7 +1,17 @@
 import { memo, useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { CloudDownload, Download, Loader2, Music2, Pause, Pencil, Play, Share2, Trash2 } from "lucide-react";
+import {
+  CloudDownload,
+  Download,
+  Loader2,
+  Music2,
+  Pause,
+  Pencil,
+  Play,
+  Share2,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useSongAudio } from "@/hooks/use-song-audio";
 import { useProfile } from "@/hooks/use-profile";
@@ -294,7 +304,6 @@ function CommunityTrackRowImpl({
         </span>
         {actions}
       </div>
-
 
       <audio
         ref={audioRef}

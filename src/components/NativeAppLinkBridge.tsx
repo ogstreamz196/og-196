@@ -7,7 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
  */
 export function NativeAppLinkBridge() {
   useEffect(() => {
-    const cap = (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor;
+    const cap = (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } })
+      .Capacitor;
     if (!cap?.isNativePlatform?.()) return;
     let remove: (() => void) | undefined;
     import("@capacitor/app")
@@ -15,13 +16,21 @@ export function NativeAppLinkBridge() {
         const open = async (url: string) => {
           try {
             const u = new URL(url);
-            if (u.protocol !== "https:" || !["ogbot.co.uk", "www.ogbot.co.uk"].includes(u.hostname) || u.pathname !== "/app-return") return;
+            if (
+              u.protocol !== "https:" ||
+              !["ogbot.co.uk", "www.ogbot.co.uk"].includes(u.hostname) ||
+              u.pathname !== "/app-return"
+            )
+              return;
             const next = u.searchParams.get("next");
             const destination = next?.startsWith("/") && !next.startsWith("//") ? next : "/";
             const accessToken = u.searchParams.get("access_token");
             const refreshToken = u.searchParams.get("refresh_token");
             if (accessToken && refreshToken) {
-              const { error } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+              const { error } = await supabase.auth.setSession({
+                access_token: accessToken,
+                refresh_token: refreshToken,
+              });
               if (error) throw error;
               window.location.replace(destination);
               return;
@@ -32,7 +41,9 @@ export function NativeAppLinkBridge() {
             window.location.replace("/welcome");
           }
         };
-        const listener = await App.addListener("appUrlOpen", ({ url }) => { void open(url); });
+        const listener = await App.addListener("appUrlOpen", ({ url }) => {
+          void open(url);
+        });
         // Cold launches do not always fire appUrlOpen after React mounts.
         const launch = await App.getLaunchUrl();
         if (launch?.url) void open(launch.url);

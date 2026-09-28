@@ -80,8 +80,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       {
         name: "viewport",
-        content:
-          "width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover",
+        content: "width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover",
       },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
@@ -122,7 +121,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       // Warm the image origin used for song cover thumbnails so they decode
       // without stalling the animated hero on first paint.
-      { rel: "preconnect", href: "https://khjoyiqxupykicqnvhlc.supabase.co", crossOrigin: "anonymous" },
+      {
+        rel: "preconnect",
+        href: "https://khjoyiqxupykicqnvhlc.supabase.co",
+        crossOrigin: "anonymous",
+      },
       { rel: "dns-prefetch", href: "https://khjoyiqxupykicqnvhlc.supabase.co" },
       // High-priority preload of the Google Fonts CSS so @font-face entries
       // are discovered before any text paints (cuts FOUT/FOIT noticeably).
@@ -174,7 +177,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://fonts.gstatic.com/s/bungee/v14/N0bU2SZBIuF2PU_0Cn40Kd_PmA.woff2",
         crossOrigin: "anonymous",
       },
-
     ],
     scripts: [
       {
@@ -184,8 +186,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@type": "WebSite",
           name: "OG Streamz",
           url: "https://ogwidget.lovable.app",
-          description:
-            "AI song generation, OG Bot assistant, and a coin-powered creator economy.",
+          description: "AI song generation, OG Bot assistant, and a coin-powered creator economy.",
         }),
       },
       {
@@ -222,15 +223,10 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
-
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
   const bootstrapUser = useServerFn(ensureCurrentUserBootstrap);
-
-
-
-
 
   useEffect(() => {
     let active = true;
@@ -255,7 +251,8 @@ function RootComponent() {
 
         // Claim a pending referral UUID or OG Leader code captured before sign-in.
         try {
-          const pending = typeof window !== "undefined" ? localStorage.getItem("og_pending_ref") : null;
+          const pending =
+            typeof window !== "undefined" ? localStorage.getItem("og_pending_ref") : null;
           if (pending) {
             let referrerId = pending;
             if (/^OG-[A-Z0-9]{6}$/i.test(pending)) {
@@ -272,7 +269,9 @@ function RootComponent() {
               localStorage.removeItem("og_pending_ref");
               return;
             }
-            const { data: claimed, error } = await supabase.rpc("claim_referral", { p_referrer: referrerId });
+            const { data: claimed, error } = await supabase.rpc("claim_referral", {
+              p_referrer: referrerId,
+            });
             if (error) throw error;
             if (claimed === true) {
               queryClient.invalidateQueries({ queryKey: ["referral-summary"] });
@@ -311,7 +310,7 @@ function RootComponent() {
       const target = e.target as HTMLElement | null;
       // Allow copying inside inputs the user typed in (form fields) but block
       // page text copy. The Library lyrics textarea adds its own onCopy block.
-      if (target && (target.tagName === "INPUT")) return;
+      if (target && target.tagName === "INPUT") return;
       e.preventDefault();
     };
     document.addEventListener("contextmenu", blockContext);
@@ -324,25 +323,21 @@ function RootComponent() {
     };
   }, []);
 
-
-
-
-
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <RevenueCatBridge>
-        <SiteContentRealtimeBridge />
-        <DisplayPrefsBridge />
-        <AuraBridge />
-        <SingleAudioBridge />
-        <PersistentBackgroundMusic />
-        <TrackUnlockReturnHandler />
-        <UserActivityArchiver />
-        <NativeAppLinkBridge />
-        <Outlet />
-        <InstallAppPrompt />
-        <Toaster />
+          <SiteContentRealtimeBridge />
+          <DisplayPrefsBridge />
+          <AuraBridge />
+          <SingleAudioBridge />
+          <PersistentBackgroundMusic />
+          <TrackUnlockReturnHandler />
+          <UserActivityArchiver />
+          <NativeAppLinkBridge />
+          <Outlet />
+          <InstallAppPrompt />
+          <Toaster />
         </RevenueCatBridge>
       </AuthProvider>
     </QueryClientProvider>

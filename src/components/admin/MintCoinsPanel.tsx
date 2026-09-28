@@ -1,6 +1,16 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Coins, Loader2, Plus, Minus, History, ChevronsUpDown, Check, User as UserIcon, Equal } from "lucide-react";
+import {
+  Coins,
+  Loader2,
+  Plus,
+  Minus,
+  History,
+  ChevronsUpDown,
+  Check,
+  User as UserIcon,
+  Equal,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { maskDevIdentity } from "@/lib/dev-identity";
 import { Button } from "@/components/ui/button";
@@ -9,14 +19,18 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
-  Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList,
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
 } from "@/components/ui/command";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { UserAuditTrail } from "./UserAuditTrail";
 import { CollapsiblePanel } from "@/components/ui/collapsible-panel";
 import { ConfirmAction } from "./ConfirmAction";
-
 
 interface ProfileLite {
   id: string;
@@ -68,8 +82,7 @@ export function MintCoinsPanel() {
       const list = (data ?? []) as MintTx[];
       const ids = Array.from(new Set(list.map((t) => t.user_id)));
       if (!ids.length) return list;
-      const { data: profs } = await supabase
-        .from("profiles").select("id, email").in("id", ids);
+      const { data: profs } = await supabase.from("profiles").select("id, email").in("id", ids);
       const map = new Map((profs ?? []).map((p: any) => [p.id, p.email]));
       return list.map((t) => ({ ...t, email: map.get(t.user_id) ?? null }));
     },
@@ -145,8 +158,10 @@ export function MintCoinsPanel() {
   const disabled = mint.isPending || !selected || !validAmount;
 
   const sortedProfiles = useMemo(
-    () => (profilesQuery.data ?? []).slice().sort((a, b) =>
-      (a.email ?? "").localeCompare(b.email ?? "")),
+    () =>
+      (profilesQuery.data ?? [])
+        .slice()
+        .sort((a, b) => (a.email ?? "").localeCompare(b.email ?? "")),
     [profilesQuery.data],
   );
 
@@ -206,17 +221,26 @@ export function MintCoinsPanel() {
                             <CommandItem
                               key={p.id}
                               value={label}
-                              onSelect={() => { setSelected(p); setOpen(false); }}
+                              onSelect={() => {
+                                setSelected(p);
+                                setOpen(false);
+                              }}
                               className="flex items-center gap-2"
                             >
-                              <Check className={cn(
-                                "h-4 w-4",
-                                selected?.id === p.id ? "opacity-100" : "opacity-0",
-                              )} />
+                              <Check
+                                className={cn(
+                                  "h-4 w-4",
+                                  selected?.id === p.id ? "opacity-100" : "opacity-0",
+                                )}
+                              />
                               <div className="min-w-0 flex-1">
-                                <div className="truncate text-sm">{p.email ?? p.id.slice(0, 8)}</div>
+                                <div className="truncate text-sm">
+                                  {p.email ?? p.id.slice(0, 8)}
+                                </div>
                                 {p.display_name && (
-                                  <div className="truncate text-xs text-muted-foreground">{p.display_name}</div>
+                                  <div className="truncate text-xs text-muted-foreground">
+                                    {p.display_name}
+                                  </div>
                                 )}
                               </div>
                               <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
@@ -279,7 +303,11 @@ export function MintCoinsPanel() {
           onConfirm={() => mint.mutate(Math.abs(numericAmount))}
         >
           <Button disabled={disabled} className="bg-gradient-brand text-primary-foreground">
-            {mint.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
+            {mint.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Plus className="mr-2 h-4 w-4" />
+            )}
             Award {Math.abs(numericAmount || 0)} coins
           </Button>
         </ConfirmAction>
@@ -294,7 +322,8 @@ export function MintCoinsPanel() {
               <p>
                 <b>{selected?.email ?? "No user selected"}</b> goes from{" "}
                 <b>{selected?.coin_balance ?? 0}</b> to{" "}
-                <b>{Math.max(0, (selected?.coin_balance ?? 0) - Math.abs(numericAmount || 0))}</b> coins.
+                <b>{Math.max(0, (selected?.coin_balance ?? 0) - Math.abs(numericAmount || 0))}</b>{" "}
+                coins.
               </p>
               <p>Deductions are permanent — you'd have to award coins back manually.</p>
             </>
@@ -323,18 +352,24 @@ export function MintCoinsPanel() {
         >
           <Button
             variant="secondary"
-            disabled={setExact.isPending || !selected || !Number.isFinite(numericAmount) || numericAmount < 0}
+            disabled={
+              setExact.isPending ||
+              !selected ||
+              !Number.isFinite(numericAmount) ||
+              numericAmount < 0
+            }
           >
-            {setExact.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Equal className="mr-2 h-4 w-4" />}
+            {setExact.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Equal className="mr-2 h-4 w-4" />
+            )}
             Set to {Math.abs(numericAmount || 0)}
           </Button>
         </ConfirmAction>
       </div>
 
-
-      {selected && (
-        <UserAuditTrail userId={selected.id} email={selected.email} />
-      )}
+      {selected && <UserAuditTrail userId={selected.id} email={selected.email} />}
 
       <CollapsiblePanel title="Recent admin changes (global)" className="mt-6">
         <div className="px-3 py-2">
@@ -350,8 +385,15 @@ export function MintCoinsPanel() {
                       {t.reference || t.type} · {new Date(t.created_at).toLocaleString()}
                     </div>
                   </div>
-                  <div className={t.amount >= 0 ? "font-semibold text-primary" : "font-semibold text-destructive"}>
-                    {t.amount >= 0 ? "+" : ""}{t.amount}
+                  <div
+                    className={
+                      t.amount >= 0
+                        ? "font-semibold text-primary"
+                        : "font-semibold text-destructive"
+                    }
+                  >
+                    {t.amount >= 0 ? "+" : ""}
+                    {t.amount}
                   </div>
                 </li>
               ))}
@@ -361,8 +403,6 @@ export function MintCoinsPanel() {
           )}
         </div>
       </CollapsiblePanel>
-
     </div>
   );
 }
-

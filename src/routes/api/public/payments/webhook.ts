@@ -8,11 +8,7 @@ async function getAdminClient() {
 }
 
 // ─── structured logging ────────────────────────────────────────────────────
-function log(
-  level: "info" | "warn" | "error",
-  msg: string,
-  ctx: Record<string, unknown> = {},
-) {
+function log(level: "info" | "warn" | "error", msg: string, ctx: Record<string, unknown> = {}) {
   const line = { ts: new Date().toISOString(), level, scope: "payments.webhook", msg, ...ctx };
   if (level === "error") console.error(JSON.stringify(line));
   else if (level === "warn") console.warn(JSON.stringify(line));
@@ -64,7 +60,11 @@ async function creditPaymentReferral(
     _payment_reference: paymentReference,
   });
   if (error) {
-    log("error", "payment referral reward failed", { userId, paymentReference, err: error.message });
+    log("error", "payment referral reward failed", {
+      userId,
+      paymentReference,
+      err: error.message,
+    });
     return;
   }
   const result = data as { credited?: boolean; reason?: string; reward_coins?: number } | null;
@@ -104,7 +104,10 @@ async function creditCoinsForSession(session: any, env: StripeEnv) {
   }
 
   if (session?.payment_status && session.payment_status !== "paid") {
-    log("info", "ignoring unpaid session", { sessionId: session.id, status: session.payment_status });
+    log("info", "ignoring unpaid session", {
+      sessionId: session.id,
+      status: session.payment_status,
+    });
     return;
   }
 
@@ -116,13 +119,15 @@ async function creditCoinsForSession(session: any, env: StripeEnv) {
   // the caller that wins that insert increments the wallet. This prevents both
   // lost credits and double credits when the return-page reconcile races the
   // Stripe webhook.
-  const { data: result, error: creditErr } = await (supabase as any)
-    .rpc("credit_coin_transaction", {
+  const { data: result, error: creditErr } = await (supabase as any).rpc(
+    "credit_coin_transaction",
+    {
       _user_id: userId,
       _amount: coins,
       _type: "stripe_purchase",
       _reference: reference,
-    });
+    },
+  );
   if (creditErr) {
     log("error", "coin credit failed", { userId, reference, err: creditErr.message });
     return;
@@ -150,7 +155,10 @@ async function grantVipRole(userId: string, ctx: Record<string, unknown>) {
 async function revokeVipRole(userId: string, ctx: Record<string, unknown>) {
   const supabase = await getAdminClient();
   const { error } = await supabase
-    .from("user_roles").delete().eq("user_id", userId).eq("role", "vip");
+    .from("user_roles")
+    .delete()
+    .eq("user_id", userId)
+    .eq("role", "vip");
   if (error) log("error", "VIP revoke failed", { userId, err: error.message, ...ctx });
   else log("info", "VIP revoked", { userId, ...ctx });
 }
@@ -163,10 +171,11 @@ async function upsertSubscriptionRow(subscription: any, env: StripeEnv) {
     return null;
   }
   const item = subscription.items?.data?.[0];
-  const priceId = item?.price?.lookup_key
-    || item?.price?.metadata?.lovable_external_id
-    || item?.price?.id
-    || null;
+  const priceId =
+    item?.price?.lookup_key ||
+    item?.price?.metadata?.lovable_external_id ||
+    item?.price?.id ||
+    null;
   const productId = item?.price?.product ?? null;
   const periodStart = item?.current_period_start ?? subscription.current_period_start;
   const periodEnd = item?.current_period_end ?? subscription.current_period_end;
@@ -188,7 +197,8 @@ async function upsertSubscriptionRow(subscription: any, env: StripeEnv) {
     },
     { onConflict: "stripe_subscription_id" },
   );
-  if (error) log("error", "subscription upsert failed", { subId: subscription.id, err: error.message });
+  if (error)
+    log("error", "subscription upsert failed", { subId: subscription.id, err: error.message });
   return userId;
 }
 
@@ -201,8 +211,7 @@ async function syncVipFromSubscription(subscription: any, env: StripeEnv) {
   // when the user requests cancellation (cancel_at_period_end=true), revoke
   // VIP perks immediately rather than waiting for period end.
   const keep =
-    !cancelAtPeriodEnd &&
-    (status === "active" || status === "trialing" || status === "past_due");
+    !cancelAtPeriodEnd && (status === "active" || status === "trialing" || status === "past_due");
   const ctx = { subId: subscription.id, status, cancelAtPeriodEnd, env };
   if (keep) await grantVipRole(userId, ctx);
   else await revokeVipRole(userId, ctx);
@@ -221,16 +230,16 @@ async function grantVipFromCheckout(session: any, env: StripeEnv) {
     log("warn", "vip checkout missing userId", { sessionId: session?.id });
     return;
   }
-  if (session?.payment_status && session.payment_status !== "paid" && session?.status !== "complete") {
+  if (
+    session?.payment_status &&
+    session.payment_status !== "paid" &&
+    session?.status !== "complete"
+  ) {
     log("info", "ignoring unpaid vip checkout", { sessionId: session.id });
     return;
   }
   await grantVipRole(userId, { sessionId: session.id, env, source: "checkout" });
-  await creditPaymentReferral(
-    userId,
-    paidAmountReward(session),
-    `stripe:${env}:vip:${session.id}`,
-  );
+  await creditPaymentReferral(userId, paidAmountReward(session), `stripe:${env}:vip:${session.id}`);
 }
 
 // ─── one-off card unlock of a single track (99p) ───────────────────────────
@@ -242,7 +251,11 @@ async function fulfilTrackUnlock(session: any, env: StripeEnv) {
     log("warn", "track unlock missing metadata", { sessionId: session?.id });
     return;
   }
-  if (session?.payment_status && session.payment_status !== "paid" && session.payment_status !== "no_payment_required") {
+  if (
+    session?.payment_status &&
+    session.payment_status !== "paid" &&
+    session.payment_status !== "no_payment_required"
+  ) {
     log("info", "ignoring unpaid track unlock", { sessionId: session.id });
     return;
   }
@@ -353,7 +366,10 @@ async function clawbackCoinsForRefund(opts: {
   const supabase = await getAdminClient();
   const reference = `stripe:refund:${opts.refundId}`;
   const { data: already } = await supabase
-    .from("coin_transactions").select("id").eq("reference", reference).maybeSingle();
+    .from("coin_transactions")
+    .select("id")
+    .eq("reference", reference)
+    .maybeSingle();
   if (already) {
     log("info", "refund clawback already applied", { reference });
     return;
@@ -371,16 +387,24 @@ async function clawbackCoinsForRefund(opts: {
     return;
   }
   const { data: profile } = await supabase
-    .from("profiles").select("coin_balance").eq("id", opts.userId).maybeSingle();
+    .from("profiles")
+    .select("coin_balance")
+    .eq("id", opts.userId)
+    .maybeSingle();
   const newBalance = (profile?.coin_balance ?? 0) - coins;
   const { error: updErr } = await supabase
-    .from("profiles").update({ coin_balance: newBalance }).eq("id", opts.userId);
+    .from("profiles")
+    .update({ coin_balance: newBalance })
+    .eq("id", opts.userId);
   if (updErr) {
     log("error", "clawback balance update failed", { userId: opts.userId, err: updErr.message });
     return;
   }
   const { error: txErr } = await supabase.from("coin_transactions").insert({
-    user_id: opts.userId, amount: -coins, type: "stripe_refund", reference,
+    user_id: opts.userId,
+    amount: -coins,
+    type: "stripe_refund",
+    reference,
   });
   if (txErr) log("error", "clawback tx log failed", { reference, err: txErr.message });
   else log("info", "coins clawed back", { userId: opts.userId, coins, reference, newBalance });
@@ -436,13 +460,20 @@ async function fulfilStoreItemCheckout(session: any, env: StripeEnv) {
     log("warn", "store checkout missing userId/itemId", { sessionId: session?.id });
     return;
   }
-  if (session?.payment_status && session.payment_status !== "paid" && session.mode !== "subscription") {
+  if (
+    session?.payment_status &&
+    session.payment_status !== "paid" &&
+    session.mode !== "subscription"
+  ) {
     log("info", "ignoring unpaid store session", { sessionId: session.id });
     return;
   }
   const supabase = await getAdminClient();
   const { data: item } = await supabase
-    .from("store_items").select("*").eq("id", itemId).maybeSingle();
+    .from("store_items")
+    .select("*")
+    .eq("id", itemId)
+    .maybeSingle();
   if (!item) {
     log("warn", "store item not found", { itemId });
     return;
@@ -452,7 +483,10 @@ async function fulfilStoreItemCheckout(session: any, env: StripeEnv) {
   // Idempotency check via coin_transactions reference (for coin-reward items)
   // and a marker insert for perk/stock (any item).
   const { data: already } = await supabase
-    .from("coin_transactions").select("id").eq("reference", reference).maybeSingle();
+    .from("coin_transactions")
+    .select("id")
+    .eq("reference", reference)
+    .maybeSingle();
   if (already) {
     log("info", "store checkout already processed", { reference });
     return;
@@ -470,12 +504,16 @@ async function fulfilStoreItemCheckout(session: any, env: StripeEnv) {
   } else {
     // Still log a zero-amount ledger row so the idempotency check works.
     await supabase.from("coin_transactions").insert({
-      user_id: userId, amount: 0, type: "store_purchase", reference,
+      user_id: userId,
+      amount: 0,
+      type: "store_purchase",
+      reference,
     });
   }
 
   // Increment stock_sold
-  await supabase.from("store_items")
+  await supabase
+    .from("store_items")
     .update({ stock_sold: ((item as any).stock_sold ?? 0) + 1 })
     .eq("id", itemId);
 
@@ -500,7 +538,10 @@ async function fulfilStoreItemCheckout(session: any, env: StripeEnv) {
 }
 
 // ─── dispatch ──────────────────────────────────────────────────────────────
-export async function handleEvent(event: { id: string; type: string; data: { object: any } }, env: StripeEnv) {
+export async function handleEvent(
+  event: { id: string; type: string; data: { object: any } },
+  env: StripeEnv,
+) {
   log("info", "handling event", { eventId: event.id, type: event.type, env });
   switch (event.type) {
     case "checkout.session.completed":
@@ -547,7 +588,9 @@ export const Route = createFileRoute("/api/public/payments/webhook")({
         const env: StripeEnv = rawEnv;
         try {
           const event = (await verifyWebhook(request, env)) as {
-            id: string; type: string; data: { object: any };
+            id: string;
+            type: string;
+            data: { object: any };
           };
           if (!event?.id || !event?.type) {
             log("error", "event missing id/type", {});

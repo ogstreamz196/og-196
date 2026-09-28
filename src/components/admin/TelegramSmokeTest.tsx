@@ -8,7 +8,10 @@ import {
   Stethoscope,
   XCircle,
 } from "lucide-react";
-import { runTelegramSmokeTest, type TelegramSmokeResult } from "@/lib/telegram-smoke-test.functions";
+import {
+  runTelegramSmokeTest,
+  type TelegramSmokeResult,
+} from "@/lib/telegram-smoke-test.functions";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -49,11 +52,10 @@ export function TelegramSmokeTest() {
           <Stethoscope className="h-5 w-5" />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-bold uppercase tracking-[0.18em]">
-            Webhook smoke test
-          </p>
+          <p className="text-sm font-bold uppercase tracking-[0.18em]">Webhook smoke test</p>
           <p className="text-xs text-muted-foreground">
-            Runs <span className="font-mono">getMe</span> + <span className="font-mono">getWebhookInfo</span> through the connector gateway.
+            Runs <span className="font-mono">getMe</span> +{" "}
+            <span className="font-mono">getWebhookInfo</span> through the connector gateway.
           </p>
         </div>
         <span
@@ -71,12 +73,7 @@ export function TelegramSmokeTest() {
           )}
           {label}
         </span>
-        <Button
-          size="sm"
-          onClick={() => m.mutate()}
-          disabled={running}
-          className="gap-1.5"
-        >
+        <Button size="sm" onClick={() => m.mutate()} disabled={running} className="gap-1.5">
           {running ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (

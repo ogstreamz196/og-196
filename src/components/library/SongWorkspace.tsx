@@ -3,8 +3,16 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { requestFullTrackPlay } from "@/lib/full-track-autoplay";
 import { useQueryClient } from "@tanstack/react-query";
 import {
-  Loader2, FileText, ChevronDown,
-  Coins, Check, Sparkles, Music2, AlertCircle, Play, RefreshCw,
+  Loader2,
+  FileText,
+  ChevronDown,
+  Coins,
+  Check,
+  Sparkles,
+  Music2,
+  AlertCircle,
+  Play,
+  RefreshCw,
 } from "lucide-react";
 
 import { toast } from "sonner";
@@ -21,7 +29,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 import { useSettings } from "@/hooks/use-settings";
-import { useFoulIntensity, useFoulMouth, useSetFoulIntensity, useSetFoulMouth } from "@/hooks/use-foul-mouth";
+import {
+  useFoulIntensity,
+  useFoulMouth,
+  useSetFoulIntensity,
+  useSetFoulMouth,
+} from "@/hooks/use-foul-mouth";
 
 import { useProfile } from "@/hooks/use-profile";
 import { useVariations } from "@/hooks/use-variations";
@@ -32,23 +45,59 @@ import { StageStepper, type Stage } from "./song-workspace/StageStepper";
 import { VariationsCard } from "./song-workspace/VariationsCard";
 import { UnlockConfirmDialog } from "./UnlockConfirmDialog";
 import type { WorkspaceSong } from "./song-workspace/types";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
 import type { TablesUpdate } from "@/integrations/supabase/types";
 import { useRole } from "@/hooks/use-role";
 import { POOLS, orderLanguages } from "@/lib/library-utils";
 import { LENGTH_OPTIONS, MIN_LENGTH, MAX_LENGTH } from "./CreateNowWizard";
 
-
 const LANGUAGES = orderLanguages([
-  "English", "Spanish", "French", "Portuguese", "Hindi", "Gujarati",
-  "Marathi", "Bengali", "Tamil", "Telugu", "Kannada", "Malayalam",
-  "Urdu", "Punjabi", "Arabic", "Swahili", "Patois", "Yoruba", "German",
-  "Italian", "Romanian", "Filipino", "Tagalog", "Cebuano", "Mandarin", "Japanese",
-  "Korean", "Turkish", "Russian", "Polish", "Dutch", "Greek", "Thai",
-  "Vietnamese", "Indonesian", "Malay", "Hebrew", "Lithuanian",
+  "English",
+  "Spanish",
+  "French",
+  "Portuguese",
+  "Hindi",
+  "Gujarati",
+  "Marathi",
+  "Bengali",
+  "Tamil",
+  "Telugu",
+  "Kannada",
+  "Malayalam",
+  "Urdu",
+  "Punjabi",
+  "Arabic",
+  "Swahili",
+  "Patois",
+  "Yoruba",
+  "German",
+  "Italian",
+  "Romanian",
+  "Filipino",
+  "Tagalog",
+  "Cebuano",
+  "Mandarin",
+  "Japanese",
+  "Korean",
+  "Turkish",
+  "Russian",
+  "Polish",
+  "Dutch",
+  "Greek",
+  "Thai",
+  "Vietnamese",
+  "Indonesian",
+  "Malay",
+  "Hebrew",
+  "Lithuanian",
 ]);
-
 
 const LANG_RE = /Language:\s*(?:write the lyrics in\s*)?([A-Za-z][A-Za-z\s+]{1,80})/i;
 
@@ -56,7 +105,20 @@ const VOCALS = ["Any voice", "Female vocal", "Male vocal", "Duo"];
 
 /** Styles offered as chips — curated first, then the rest of the pool. */
 const STYLE_OPTIONS: string[] = (() => {
-  const featured = ["Hip Hop", "Rap", "Singing", "Drill", "Trap", "Drum & Bass", "Pop", "K-Pop", "Slow Jam", "Bhangra", "Nasheed", "Nursery Rhyme"];
+  const featured = [
+    "Hip Hop",
+    "Rap",
+    "Singing",
+    "Drill",
+    "Trap",
+    "Drum & Bass",
+    "Pop",
+    "K-Pop",
+    "Slow Jam",
+    "Bhangra",
+    "Nasheed",
+    "Nursery Rhyme",
+  ];
   const rest = POOLS.genre.filter((g) => !featured.includes(g));
   return [...featured, ...rest];
 })();
@@ -67,13 +129,17 @@ function toggleItem(list: string[], v: string) {
 
 /** Split a saved style string into known chips + custom leftovers. */
 function splitStyles(style: string | null | undefined): { known: string[]; extra: string } {
-  const parts = (style ?? "").split(/[,·]/).map((s) => s.trim()).filter(Boolean);
+  const parts = (style ?? "")
+    .split(/[,·]/)
+    .map((s) => s.trim())
+    .filter(Boolean);
   const known: string[] = [];
   const extra: string[] = [];
   for (const p of parts) {
     const match = STYLE_OPTIONS.find((s) => s.toLowerCase() === p.toLowerCase());
-    if (match) { if (!known.includes(match)) known.push(match); }
-    else extra.push(p);
+    if (match) {
+      if (!known.includes(match)) known.push(match);
+    } else extra.push(p);
   }
   return { known, extra: extra.join(", ") };
 }
@@ -157,7 +223,6 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const [step1Open, setStep1Open] = useState(!song.lyrics);
   const [step2Open, setStep2Open] = useState(!!song.lyrics && song.status !== "completed");
 
-
   const [saving, setSaving] = useState(false);
   const [genLyrics, setGenLyrics] = useState(false);
   const [genPreview, setGenPreview] = useState(false);
@@ -194,7 +259,6 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
     }
   }, [missing, recheckActive]);
 
-
   const lyricsRef = useRef<HTMLTextAreaElement | null>(null);
 
   // Derived, always-current values for saving + generating.
@@ -208,13 +272,22 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
     () => Array.from(new Set(languages.length ? languages : ["English"])).join(" + "),
     [languages],
   );
-  const nextBriefValue = useMemo(() => setBriefLanguage(brief, languageValue), [brief, languageValue]);
+  const nextBriefValue = useMemo(
+    () => setBriefLanguage(brief, languageValue),
+    [brief, languageValue],
+  );
   const languageChanged = languageValue !== detectLanguages(song.prompt).join(" + ");
 
-
   const {
-    variations, basket, busyVariation, checkingOut, variationCost,
-    revealOne, toggleBasket, clearBasket, checkoutBasket,
+    variations,
+    basket,
+    busyVariation,
+    checkingOut,
+    variationCost,
+    revealOne,
+    toggleBasket,
+    clearBasket,
+    checkoutBasket,
   } = useVariations({
     songId: song.id,
     songStatus: song.status,
@@ -275,7 +348,10 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   // Elapsed-seconds counter for the Generate button while a job is in flight.
   const [elapsed, setElapsed] = useState(0);
   useEffect(() => {
-    if (!isPending) { setElapsed(0); return; }
+    if (!isPending) {
+      setElapsed(0);
+      return;
+    }
     const startedAt = song.generation_started_at
       ? new Date(song.generation_started_at).getTime()
       : Date.now();
@@ -295,9 +371,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
     vocal !== detectVocal(song.style) ||
     targetMinutes * 60 !== (song.target_duration_sec ?? MIN_LENGTH * 60);
 
-  async function persist(
-    patch: TablesUpdate<"songs">,
-  ) {
+  async function persist(patch: TablesUpdate<"songs">) {
     // Community songs aren't editable by the viewer — skip persistence, keep generation working.
     if (!isOwner) return;
     const { error } = await supabase.from("songs").update(patch).eq("id", song.id);
@@ -329,21 +403,20 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
     }
   }
 
-
-
   async function generateLyrics() {
     if (missing) {
       toast.error("This song is no longer available");
       return;
     }
 
-
     if (!brief.trim() && !title.trim()) {
       toast.error("Add a title or a brief first");
       return;
     }
     if (balance < lyricsCost) {
-      toast.error(`Need ${lyricsCost} coin${lyricsCost === 1 ? "" : "s"} — current balance ${balance}`);
+      toast.error(
+        `Need ${lyricsCost} coin${lyricsCost === 1 ? "" : "s"} — current balance ${balance}`,
+      );
       return;
     }
     setGenLyrics(true);
@@ -365,16 +438,20 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
         },
       });
 
-
       if (error) {
         const msg = invokeError(error, "Lyrics generation failed");
-        toast.error(msg.toLowerCase().includes("insufficient")
-          ? "Not enough coins for a lyrics generation"
-          : msg);
+        toast.error(
+          msg.toLowerCase().includes("insufficient")
+            ? "Not enough coins for a lyrics generation"
+            : msg,
+        );
         return;
       }
       const next = (data?.lyrics ?? "").toString();
-      if (!next) { toast.error("No lyrics returned"); return; }
+      if (!next) {
+        toast.error("No lyrics returned");
+        return;
+      }
       setLyrics(next);
       toast.success("Lyrics ready · free", {
         description: "Scroll down to review your new lyrics.",
@@ -388,7 +465,6 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
         }
       });
       onSaved?.();
-
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Lyrics generation failed");
     } finally {
@@ -404,7 +480,6 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       return;
     }
 
-
     if (!hasLyrics) {
       toast.error("Generate lyrics first");
       return;
@@ -415,8 +490,12 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
     }
     submitLockRef.current = true;
     setGenPreview(true);
-    try { localStorage.setItem("welcome.personal_banner.dismissed", "1"); } catch {}
-    try { window.dispatchEvent(new CustomEvent("og:generate-start")); } catch {}
+    try {
+      localStorage.setItem("welcome.personal_banner.dismissed", "1");
+    } catch {}
+    try {
+      window.dispatchEvent(new CustomEvent("og:generate-start"));
+    } catch {}
     try {
       if (dirty) await saveSettingsPatch();
       const { data, error } = await supabase.functions.invoke("suno-generate", {
@@ -434,12 +513,13 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
         },
       });
 
-
       if (error) {
         const msg = invokeError(error, "Could not start generation");
         if (/song not found/i.test(msg)) {
           setMissing(true);
-          toast.error("This song is no longer available — it may have been deleted. Start a new one from the studio.");
+          toast.error(
+            "This song is no longer available — it may have been deleted. Start a new one from the studio.",
+          );
           return;
         }
         toast.error(msg);
@@ -467,7 +547,9 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       return;
     }
     if (balance < fullUnlockCost) {
-      toast.error(`Need ${fullUnlockCost} coins to unlock the HQ version — current balance ${balance}`);
+      toast.error(
+        `Need ${fullUnlockCost} coins to unlock the HQ version — current balance ${balance}`,
+      );
       return;
     }
     setUnlockDialogOpen(true);
@@ -506,7 +588,6 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       onRefresh?.();
       requestFullTrackPlay(song.id);
       void navigate({ to: "/library" });
-
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not unlock");
     } finally {
@@ -532,8 +613,8 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
             <div className="space-y-1">
               <h3 className="text-lg font-semibold">This song is no longer available</h3>
               <p className="text-sm text-muted-foreground">
-                It may have been deleted. Refresh your library to load the latest list,
-                or head back to the studio to start a new one.
+                It may have been deleted. Refresh your library to load the latest list, or head back
+                to the studio to start a new one.
               </p>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-2">
@@ -552,9 +633,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
               <Button asChild variant="outline" className="gap-2">
                 <Link to="/library">Back to My Library</Link>
               </Button>
-
             </div>
-
           </CardContent>
         </Card>
       </div>
@@ -580,7 +659,9 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       {/* Compact summary bar — replaces the old side rail */}
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-border bg-card/70 px-3 py-3 sm:px-4">
         <div className="min-w-0">
-          <p className="line-clamp-2 break-words text-sm font-semibold leading-snug">{title.trim() || "Untitled track"}</p>
+          <p className="line-clamp-2 break-words text-sm font-semibold leading-snug">
+            {title.trim() || "Untitled track"}
+          </p>
           <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-muted-foreground sm:text-xs">
             Create free · Download {fullUnlockCost} credits or 99p
           </p>
@@ -596,460 +677,534 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       </div>
 
       <div className="space-y-4">
-          {/* Step 1 — Details & lyrics */}
-          <Card className={cn(stage > 1 && !dirty && "border-primary/30")}>
-            <Collapsible open={step1Open} onOpenChange={setStep1Open}>
-              <CollapsibleTrigger className="flex w-full items-center justify-between gap-3 p-4 text-left sm:p-5">
-                <div className="min-w-0">
-                  <span className="flex items-center gap-2 text-lg font-semibold">
-                    <FileText className="h-4 w-4 shrink-0 text-primary" />
-                    1 · Lyrics
-                  </span>
-                  <span className="mt-0.5 block truncate text-xs text-muted-foreground">
-                    {hasLyrics ? "Ready — tap to edit" : "Write the lyrics · Free"}
-                  </span>
+        {/* Step 1 — Details & lyrics */}
+        <Card className={cn(stage > 1 && !dirty && "border-primary/30")}>
+          <Collapsible open={step1Open} onOpenChange={setStep1Open}>
+            <CollapsibleTrigger className="flex w-full items-center justify-between gap-3 p-4 text-left sm:p-5">
+              <div className="min-w-0">
+                <span className="flex items-center gap-2 text-lg font-semibold">
+                  <FileText className="h-4 w-4 shrink-0 text-primary" />1 · Lyrics
+                </span>
+                <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+                  {hasLyrics ? "Ready — tap to edit" : "Write the lyrics · Free"}
+                </span>
+              </div>
+              <ChevronDown
+                className={cn("h-5 w-5 shrink-0 transition-transform", step1Open && "rotate-180")}
+              />
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <CardContent className="space-y-4">
+                {/* Locked identity — the track name and story stay as created */}
+                <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+                  <p className="text-sm font-semibold">{title.trim() || "Untitled track"}</p>
+                  <p className="mt-1 line-clamp-3 text-xs text-muted-foreground">
+                    {brief.trim() || "No description saved."}
+                  </p>
+                  <p className="mt-2 text-[11px] text-muted-foreground/80">
+                    Name and story can't be changed — everything below can.
+                  </p>
                 </div>
-                <ChevronDown className={cn("h-5 w-5 shrink-0 transition-transform", step1Open && "rotate-180")} />
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-            <CardContent className="space-y-4">
-                  {/* Locked identity — the track name and story stay as created */}
-                  <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
-                    <p className="text-sm font-semibold">{title.trim() || "Untitled track"}</p>
-                    <p className="mt-1 line-clamp-3 text-xs text-muted-foreground">
-                      {brief.trim() || "No description saved."}
-                    </p>
-                    <p className="mt-2 text-[11px] text-muted-foreground/80">
-                      Name and story can't be changed — everything below can.
-                    </p>
-                  </div>
 
-                  {/* Styles — stack as many as you like */}
-                  <div className="space-y-2">
-                    <Label>Styles <span className="text-xs font-normal text-muted-foreground">(pick one or more)</span></Label>
-                    <div className="flex flex-wrap gap-1.5">
-                      {STYLE_OPTIONS.map((s) => {
-                        const on = styles.includes(s);
-                        return (
-                          <button
-                            key={s}
-                            type="button"
-                            aria-pressed={on}
-                            onClick={() => {
-                              if (s === "Nasheed") {
-                                setStyles(on ? [] : ["Nasheed"]);
-                                setStyleExtra("");
-                                setVocalsOnly(!on);
-                                if (!on) {
-                                  setFoulIntensityLocal(0);
-                                  setFoulIntensity.mutate(0);
-                                  if (foulMouth) setFoulMouth.mutate(false);
-                                }
-                                return;
+                {/* Styles — stack as many as you like */}
+                <div className="space-y-2">
+                  <Label>
+                    Styles{" "}
+                    <span className="text-xs font-normal text-muted-foreground">
+                      (pick one or more)
+                    </span>
+                  </Label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {STYLE_OPTIONS.map((s) => {
+                      const on = styles.includes(s);
+                      return (
+                        <button
+                          key={s}
+                          type="button"
+                          aria-pressed={on}
+                          onClick={() => {
+                            if (s === "Nasheed") {
+                              setStyles(on ? [] : ["Nasheed"]);
+                              setStyleExtra("");
+                              setVocalsOnly(!on);
+                              if (!on) {
+                                setFoulIntensityLocal(0);
+                                setFoulIntensity.mutate(0);
+                                if (foulMouth) setFoulMouth.mutate(false);
                               }
-                              setStyles((list) => toggleItem(list.filter((style) => style !== "Nasheed"), s));
-                            }}
-                            className={cn(
-                              "rounded-full border px-3 py-1.5 text-xs font-semibold transition",
-                              on
-                                ? "border-primary bg-primary/15 text-foreground shadow-[0_0_14px_-6px_hsl(var(--primary))]"
-                                : "border-border bg-background/40 text-muted-foreground hover:border-primary/50",
-                            )}
-                          >
-                            {s}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <Input
-                      id="song-style-extra"
-                      value={styleExtra}
-                      onChange={(e) => setStyleExtra(e.target.value)}
-                      placeholder="Add your own, e.g. dark piano, 90s boom bap"
-                    />
+                              return;
+                            }
+                            setStyles((list) =>
+                              toggleItem(
+                                list.filter((style) => style !== "Nasheed"),
+                                s,
+                              ),
+                            );
+                          }}
+                          className={cn(
+                            "rounded-full border px-3 py-1.5 text-xs font-semibold transition",
+                            on
+                              ? "border-primary bg-primary/15 text-foreground shadow-[0_0_14px_-6px_hsl(var(--primary))]"
+                              : "border-border bg-background/40 text-muted-foreground hover:border-primary/50",
+                          )}
+                        >
+                          {s}
+                        </button>
+                      );
+                    })}
                   </div>
+                  <Input
+                    id="song-style-extra"
+                    value={styleExtra}
+                    onChange={(e) => setStyleExtra(e.target.value)}
+                    placeholder="Add your own, e.g. dark piano, 90s boom bap"
+                  />
+                </div>
 
-                  {/* Languages — multi select, English always included */}
-                  <div className="space-y-2">
-                    <Label>Languages <span className="text-xs font-normal text-muted-foreground">(mix as many as you like)</span></Label>
-                    <div className="flex flex-wrap gap-1.5">
-                      {LANGUAGES.map((l) => {
-                        const on = languages.includes(l);
-                        return (
-                          <button
-                            key={l}
-                            type="button"
-                            aria-pressed={on}
-                            onClick={() => setLanguages((list) => {
+                {/* Languages — multi select, English always included */}
+                <div className="space-y-2">
+                  <Label>
+                    Languages{" "}
+                    <span className="text-xs font-normal text-muted-foreground">
+                      (mix as many as you like)
+                    </span>
+                  </Label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {LANGUAGES.map((l) => {
+                      const on = languages.includes(l);
+                      return (
+                        <button
+                          key={l}
+                          type="button"
+                          aria-pressed={on}
+                          onClick={() =>
+                            setLanguages((list) => {
                               const next = toggleItem(list, l);
                               return next.length ? next : ["English"];
-                            })}
-                            className={cn(
-                              "rounded-full border px-3 py-1.5 text-xs font-semibold transition",
-                              on
-                                ? "border-primary bg-primary/15 text-foreground"
-                                : "border-border bg-background/40 text-muted-foreground hover:border-primary/50",
-                            )}
-                          >
-                            {l}
-                          </button>
-                        );
-                      })}
-                    </div>
+                            })
+                          }
+                          className={cn(
+                            "rounded-full border px-3 py-1.5 text-xs font-semibold transition",
+                            on
+                              ? "border-primary bg-primary/15 text-foreground"
+                              : "border-border bg-background/40 text-muted-foreground hover:border-primary/50",
+                          )}
+                        >
+                          {l}
+                        </button>
+                      );
+                    })}
                   </div>
-
-                  {/* Voice + length */}
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-1.5">
-                      <Label htmlFor="song-vocal">Voice</Label>
-                      <Select value={vocal || "Any voice"} onValueChange={setVocal}>
-                        <SelectTrigger id="song-vocal">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {VOCALS.map((v) => (
-                            <SelectItem key={v} value={v}>{v}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label htmlFor="song-length">Track length</Label>
-                      <Select
-                        value={String(targetMinutes)}
-                        onValueChange={(v) => setTargetMinutes(Number(v))}
-                      >
-                        <SelectTrigger id="song-length">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {LENGTH_OPTIONS.map((m) => (
-                            <SelectItem key={m} value={String(m)}>
-                              {m} min{m > MIN_LENGTH ? ` · +${m - MIN_LENGTH} coin${m - MIN_LENGTH === 1 ? "" : "s"}` : ""}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  {/* Vocals only */}
-                  <label
-                    htmlFor="vocals-only-toggle"
-                    className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-muted/20 px-3 py-2.5 text-sm font-medium"
-                  >
-                    <span className="min-w-0">
-                      Vocals only {isNasheed ? "· REQUIRED" : vocalsOnly ? "· ON" : "· OFF"}
-                      <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
-                        {isNasheed ? "Nasheed stays strictly voice-only with no music or instruments." : "A cappella vocals with no generated instrumental."}
-                      </span>
-                    </span>
-                    <Switch
-                      id="vocals-only-toggle"
-                      checked={vocalsOnly}
-                      onCheckedChange={setVocalsOnly}
-                      disabled={isNasheed}
-                    />
-                  </label>
-
-
-
-              {hasLyrics && languageChanged && (
-                <div className="rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-xs text-foreground/80">
-                  Language changed to <b>{languageValue}</b> — regenerate lyrics to rewrite them.
                 </div>
-              )}
 
-              <Collapsible open={lyricsOpen} onOpenChange={setLyricsOpen}>
-                <div className="flex items-center justify-between gap-3">
-                  <CollapsibleTrigger className="flex min-w-0 items-center gap-2 text-sm font-semibold hover:text-primary">
-                    <ChevronDown className={cn("h-4 w-4 shrink-0 transition-transform", lyricsOpen && "rotate-180")} />
-                    <span className="truncate">{lyricsOpen ? "Hide lyrics" : "View / edit lyrics"}</span>
-                  </CollapsibleTrigger>
-                  {hasLyrics && !genLyrics && (
-                    <span className="inline-flex shrink-0 items-center gap-1 text-[11px] text-emerald-500">
-                      <Check className="h-3 w-3" /> Ready
-                    </span>
-                  )}
-                  {genLyrics && (
-                    <span className="inline-flex shrink-0 items-center gap-1 text-[11px] text-primary">
-                      <Loader2 className="h-3 w-3 animate-spin" /> Writing…
-                    </span>
-                  )}
-                </div>
-                {genLyrics ? (
-                  <div className="pt-3">
-                    <LyricsSkeleton songId={song.id} />
+                {/* Voice + length */}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="song-vocal">Voice</Label>
+                    <Select value={vocal || "Any voice"} onValueChange={setVocal}>
+                      <SelectTrigger id="song-vocal">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {VOCALS.map((v) => (
+                          <SelectItem key={v} value={v}>
+                            {v}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                ) : (
-                  <CollapsibleContent className="pt-3">
-                    <Label htmlFor="song-lyrics" className="sr-only">Lyrics</Label>
-                    <Textarea
-                      ref={lyricsRef}
-                      id="song-lyrics"
-                      value={lyrics}
-                      onChange={(e) => setLyrics(e.target.value)}
-                      rows={12}
-                      placeholder={"Tap Generate lyrics below — or paste your own.\n\n[Verse 1]\n…\n[Chorus]\n…"}
-                      className="font-mono text-sm"
-                    />
-                  </CollapsibleContent>
-                )}
-              </Collapsible>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="song-length">Track length</Label>
+                    <Select
+                      value={String(targetMinutes)}
+                      onValueChange={(v) => setTargetMinutes(Number(v))}
+                    >
+                      <SelectTrigger id="song-length">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {LENGTH_OPTIONS.map((m) => (
+                          <SelectItem key={m} value={String(m)}>
+                            {m} min
+                            {m > MIN_LENGTH
+                              ? ` · +${m - MIN_LENGTH} coin${m - MIN_LENGTH === 1 ? "" : "s"}`
+                              : ""}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
 
-              <div className="grid grid-cols-2 items-center gap-2 sm:flex sm:flex-wrap sm:justify-end sm:gap-3">
-                {dirty && <span className="mr-auto text-xs text-muted-foreground">Unsaved changes</span>}
+                {/* Vocals only */}
                 <label
-                  htmlFor="foul-mouth-toggle"
-                  className="col-span-2 grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded-md border border-border/60 bg-muted/30 px-3 py-2 text-xs font-medium sm:col-span-1 sm:flex sm:w-auto sm:py-1.5"
-                  title="Allow explicit language in generated lyrics"
+                  htmlFor="vocals-only-toggle"
+                  className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-muted/20 px-3 py-2.5 text-sm font-medium"
                 >
-                  <span aria-hidden>🤬</span>
-                  <span className="min-w-0 whitespace-normal">Foul Mouth</span>
+                  <span className="min-w-0">
+                    Vocals only {isNasheed ? "· REQUIRED" : vocalsOnly ? "· ON" : "· OFF"}
+                    <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
+                      {isNasheed
+                        ? "Nasheed stays strictly voice-only with no music or instruments."
+                        : "A cappella vocals with no generated instrumental."}
+                    </span>
+                  </span>
                   <Switch
-                    id="foul-mouth-toggle"
-                    checked={foulMouth}
-                    onCheckedChange={(explicit) => {
-                      const value = explicit ? 3 : 0;
-                      setFoulIntensityLocal(value);
-                      setFoulIntensity.mutate(value);
-                      setFoulMouth.mutate(explicit);
-                    }}
-                    disabled={setFoulMouth.isPending || setFoulIntensity.isPending || isNasheed}
+                    id="vocals-only-toggle"
+                    checked={vocalsOnly}
+                    onCheckedChange={setVocalsOnly}
+                    disabled={isNasheed}
                   />
                 </label>
-                {!isNasheed && (
-                  <div className="col-span-2 grid w-full grid-cols-[auto_minmax(7rem,1fr)_auto] items-center gap-2 rounded-md border border-border/60 bg-muted/30 px-3 py-2 sm:col-span-1 sm:w-64">
-                    <span className="text-[10px] font-semibold text-muted-foreground">Clean</span>
-                    <Slider
-                      aria-label="Swearing intensity"
-                      min={0}
-                      max={3}
-                      step={1}
-                      value={[displayedFoulIntensity]}
-                      onValueChange={(values) => setFoulIntensityLocal(
-                        Math.max(0, Math.min(3, Math.round(values[0] ?? 3))),
-                      )}
-                      onValueCommit={(values) => {
-                        const value = Math.max(0, Math.min(3, Math.round(values[0] ?? 3)));
-                        setFoulIntensityLocal(value);
-                        setFoulIntensity.mutate(value);
-                        if ((value > 0) !== foulMouth) setFoulMouth.mutate(value > 0);
-                      }}
-                    />
-                    <span className="text-[10px] font-semibold text-destructive">Savage</span>
+
+                {hasLyrics && languageChanged && (
+                  <div className="rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-xs text-foreground/80">
+                    Language changed to <b>{languageValue}</b> — regenerate lyrics to rewrite them.
                   </div>
                 )}
-                <Button variant="ghost" onClick={handleSave} disabled={!dirty || saving} className="min-w-0">
-                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
-                </Button>
 
-                <Button onClick={generateLyrics} disabled={genLyrics || missing} className="min-w-0 gap-1.5 sm:gap-2">
-                  {genLyrics ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                  {hasLyrics ? "Regenerate lyrics · Free" : "Generate lyrics · Free"}
-                </Button>
-              </div>
-            </CardContent>
-              </CollapsibleContent>
-            </Collapsible>
-          </Card>
-
-          {/* Stage 2 — Sample */}
-          <Card className={cn(stage === 2 && "border-primary/40 shadow-glow", stage < 2 && "opacity-60")}>
-            <Collapsible open={step2Open} onOpenChange={setStep2Open}>
-              <CollapsibleTrigger className="flex w-full items-center justify-between gap-3 p-4 text-left sm:p-5">
-                <div className="min-w-0">
-                  <span className="flex items-center gap-2 text-lg font-semibold">
-                    <Play className="h-4 w-4 shrink-0 text-primary" />
-                    2 · Preview
-                  </span>
-                  <span className="mt-0.5 block truncate text-xs text-muted-foreground">
-                    {isReady
-                      ? `Free ${settings?.sample_seconds ?? 60}s sample ready`
-                      : isPending
-                        ? "Generating…"
-                        : `Free ${settings?.sample_seconds ?? 60}s sample`}
-                  </span>
-                </div>
-                <ChevronDown className={cn("h-5 w-5 shrink-0 transition-transform", step2Open && "rotate-180")} />
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-
-            <CardContent className="space-y-3">
-              {!hasLyrics && (
-                <p className="text-sm text-muted-foreground">
-                  Generate lyrics in step 1 first.
-                </p>
-              )}
-              {isPending && (
-                <>
-                  <GeneratingProgress
-                    sampleSeconds={settings?.sample_seconds ?? 60}
-                    startedAt={song.generation_started_at ?? song.updated_at ?? song.created_at}
-                    taskId={song.suno_task_id}
-                    hasLivePreview={!!song.stream_audio_url}
-                    songId={song.id}
-                    onCancelled={onSaved}
-                  />
-                  {song.stream_audio_url && (
-                    <LiveStreamPreview streamUrl={song.stream_audio_url} limitSeconds={35} />
-                  )}
-                </>
-              )}
-              {isFailed && (
-                <div
-                  role="alert"
-                  className="space-y-3 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
-                >
-                  <div className="flex items-start gap-2">
-                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-                    <div className="min-w-0 flex-1">
-                      <p className="font-semibold">Generation failed</p>
-                      <p className="mt-0.5 text-xs opacity-90">
-                        {song.error_message || "Something went wrong on OG Bot's side."}
-                        {" "}Your coins were refunded automatically.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={generatePreview}
-                      disabled={!hasLyrics || genPreview || balance < previewCost || missing}
-                      className="gap-1.5"
-                    >
-                      {genPreview ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
-                      Try again
-                      <span className="ml-0.5 rounded-full bg-background/30 px-1.5 py-0.5 text-[10px] font-semibold">Free</span>
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        setStep1Open(true);
-                        setLyricsOpen(true);
-                        requestAnimationFrame(() =>
-                          lyricsRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }),
-                        );
-                      }}
-                      className="gap-1.5"
-                    >
-                      <FileText className="h-3.5 w-3.5" /> Tweak lyrics
-                    </Button>
-                    {balance < previewCost && (
-                      <Button asChild size="sm" variant="secondary" className="gap-1.5">
-                        <Link to="/buy-coins">
-                          <Coins className="h-3.5 w-3.5" /> Top up coins
-                        </Link>
-                      </Button>
+                <Collapsible open={lyricsOpen} onOpenChange={setLyricsOpen}>
+                  <div className="flex items-center justify-between gap-3">
+                    <CollapsibleTrigger className="flex min-w-0 items-center gap-2 text-sm font-semibold hover:text-primary">
+                      <ChevronDown
+                        className={cn(
+                          "h-4 w-4 shrink-0 transition-transform",
+                          lyricsOpen && "rotate-180",
+                        )}
+                      />
+                      <span className="truncate">
+                        {lyricsOpen ? "Hide lyrics" : "View / edit lyrics"}
+                      </span>
+                    </CollapsibleTrigger>
+                    {hasLyrics && !genLyrics && (
+                      <span className="inline-flex shrink-0 items-center gap-1 text-[11px] text-emerald-500">
+                        <Check className="h-3 w-3" /> Ready
+                      </span>
+                    )}
+                    {genLyrics && (
+                      <span className="inline-flex shrink-0 items-center gap-1 text-[11px] text-primary">
+                        <Loader2 className="h-3 w-3 animate-spin" /> Writing…
+                      </span>
                     )}
                   </div>
-                </div>
-              )}
-              {isReady && <InlineSamplePlayer songId={song.id} unlocked={!!song.unlocked} />}
-              <div className="flex flex-wrap items-center justify-end gap-2">
-                <Button
-                  onClick={generatePreview}
-                  disabled={!hasLyrics || genPreview || isPending || balance < previewCost || missing}
-                  aria-busy={genPreview || isPending}
-                  className="gap-2"
-                >
-                  {genPreview || isPending ? <Loader2 className="h-4 w-4 animate-spin" /> :
-                    isReady ? <RefreshCw className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                  {genPreview ? "Starting…" : isPending ? `Generating… ${elapsed}s` : isReady ? "Regenerate sample" : "Generate preview"}
-                  <span className="ml-1 rounded-full bg-background/30 px-1.5 py-0.5 text-[10px] font-semibold">Free</span>
-                </Button>
-              </div>
-            </CardContent>
-              </CollapsibleContent>
-            </Collapsible>
-          </Card>
+                  {genLyrics ? (
+                    <div className="pt-3">
+                      <LyricsSkeleton songId={song.id} />
+                    </div>
+                  ) : (
+                    <CollapsibleContent className="pt-3">
+                      <Label htmlFor="song-lyrics" className="sr-only">
+                        Lyrics
+                      </Label>
+                      <Textarea
+                        ref={lyricsRef}
+                        id="song-lyrics"
+                        value={lyrics}
+                        onChange={(e) => setLyrics(e.target.value)}
+                        rows={12}
+                        placeholder={
+                          "Tap Generate lyrics below — or paste your own.\n\n[Verse 1]\n…\n[Chorus]\n…"
+                        }
+                        className="font-mono text-sm"
+                      />
+                    </CollapsibleContent>
+                  )}
+                </Collapsible>
 
-
-          {/* Stage 3 — Final song */}
-          <Card className={cn(stage === 3 && "border-primary/40 shadow-glow", stage < 3 && "opacity-60")}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Music2 className="h-4 w-4 text-primary" />
-                3 · Full HQ
-              </CardTitle>
-              <CardDescription>
-                Choose {fullUnlockCost} credits or a one-off 99p payment to unlock and download.
-              </CardDescription>
-
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {!isReady ? (
-                <p className="text-sm text-muted-foreground">
-                  Once the preview is ready, the full track unlocks here.
-                </p>
-              ) : (
-                <>
-                  <p className="text-sm text-muted-foreground">
-                    {song.unlocked
-                      ? "Full HQ unlocked. Download as many times as you like."
-                      : "Unlock once to download the full HQ track."}
-                  </p>
-
-                  {!song.unlocked && balance < fullUnlockCost && (
-                    <div className="flex items-start gap-3 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
-                      <Coins className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
-                      <div className="flex-1">
-                        <p className="font-semibold text-amber-100">
-                          You need {fullUnlockCost - balance} more coin{fullUnlockCost - balance === 1 ? "" : "s"} to unlock
-                        </p>
-                        <p className="text-xs text-amber-200/80">
-                          Balance: {balance} · Cost: {fullUnlockCost}
-                        </p>
-                      </div>
-                      <Button asChild size="sm" className="shrink-0">
-                        <Link to="/buy-coins">Top up</Link>
-                      </Button>
+                <div className="grid grid-cols-2 items-center gap-2 sm:flex sm:flex-wrap sm:justify-end sm:gap-3">
+                  {dirty && (
+                    <span className="mr-auto text-xs text-muted-foreground">Unsaved changes</span>
+                  )}
+                  <label
+                    htmlFor="foul-mouth-toggle"
+                    className="col-span-2 grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded-md border border-border/60 bg-muted/30 px-3 py-2 text-xs font-medium sm:col-span-1 sm:flex sm:w-auto sm:py-1.5"
+                    title="Allow explicit language in generated lyrics"
+                  >
+                    <span aria-hidden>🤬</span>
+                    <span className="min-w-0 whitespace-normal">Foul Mouth</span>
+                    <Switch
+                      id="foul-mouth-toggle"
+                      checked={foulMouth}
+                      onCheckedChange={(explicit) => {
+                        const value = explicit ? 3 : 0;
+                        setFoulIntensityLocal(value);
+                        setFoulIntensity.mutate(value);
+                        setFoulMouth.mutate(explicit);
+                      }}
+                      disabled={setFoulMouth.isPending || setFoulIntensity.isPending || isNasheed}
+                    />
+                  </label>
+                  {!isNasheed && (
+                    <div className="col-span-2 grid w-full grid-cols-[auto_minmax(7rem,1fr)_auto] items-center gap-2 rounded-md border border-border/60 bg-muted/30 px-3 py-2 sm:col-span-1 sm:w-64">
+                      <span className="text-[10px] font-semibold text-muted-foreground">Clean</span>
+                      <Slider
+                        aria-label="Swearing intensity"
+                        min={0}
+                        max={3}
+                        step={1}
+                        value={[displayedFoulIntensity]}
+                        onValueChange={(values) =>
+                          setFoulIntensityLocal(
+                            Math.max(0, Math.min(3, Math.round(values[0] ?? 3))),
+                          )
+                        }
+                        onValueCommit={(values) => {
+                          const value = Math.max(0, Math.min(3, Math.round(values[0] ?? 3)));
+                          setFoulIntensityLocal(value);
+                          setFoulIntensity.mutate(value);
+                          if (value > 0 !== foulMouth) setFoulMouth.mutate(value > 0);
+                        }}
+                      />
+                      <span className="text-[10px] font-semibold text-destructive">Savage</span>
                     </div>
                   )}
+                  <Button
+                    variant="ghost"
+                    onClick={handleSave}
+                    disabled={!dirty || saving}
+                    className="min-w-0"
+                  >
+                    {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
+                  </Button>
 
-                  <div className="flex flex-wrap justify-end gap-2">
-                    <Button
-                      onClick={unlockFull}
-                      disabled={unlocking || (!song.unlocked && balance < fullUnlockCost)}
-                      className="gap-2"
-                      aria-live="polite"
-                    >
-                      {unlocking ? (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          {song.unlocked ? "Preparing download…" : "Processing payment…"}
-                        </>
-                      ) : (
-                        <>
-                          <Music2 className="h-4 w-4" />
-                          {song.unlocked
-                            ? "Download full HQ"
-                            : `Unlock & download · ${fullUnlockCost} coins`}
-                        </>
+                  <Button
+                    onClick={generateLyrics}
+                    disabled={genLyrics || missing}
+                    className="min-w-0 gap-1.5 sm:gap-2"
+                  >
+                    {genLyrics ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-4 w-4" />
+                    )}
+                    {hasLyrics ? "Regenerate lyrics · Free" : "Generate lyrics · Free"}
+                  </Button>
+                </div>
+              </CardContent>
+            </CollapsibleContent>
+          </Collapsible>
+        </Card>
+
+        {/* Stage 2 — Sample */}
+        <Card
+          className={cn(stage === 2 && "border-primary/40 shadow-glow", stage < 2 && "opacity-60")}
+        >
+          <Collapsible open={step2Open} onOpenChange={setStep2Open}>
+            <CollapsibleTrigger className="flex w-full items-center justify-between gap-3 p-4 text-left sm:p-5">
+              <div className="min-w-0">
+                <span className="flex items-center gap-2 text-lg font-semibold">
+                  <Play className="h-4 w-4 shrink-0 text-primary" />2 · Preview
+                </span>
+                <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+                  {isReady
+                    ? `Free ${settings?.sample_seconds ?? 60}s sample ready`
+                    : isPending
+                      ? "Generating…"
+                      : `Free ${settings?.sample_seconds ?? 60}s sample`}
+                </span>
+              </div>
+              <ChevronDown
+                className={cn("h-5 w-5 shrink-0 transition-transform", step2Open && "rotate-180")}
+              />
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <CardContent className="space-y-3">
+                {!hasLyrics && (
+                  <p className="text-sm text-muted-foreground">Generate lyrics in step 1 first.</p>
+                )}
+                {isPending && (
+                  <>
+                    <GeneratingProgress
+                      sampleSeconds={settings?.sample_seconds ?? 60}
+                      startedAt={song.generation_started_at ?? song.updated_at ?? song.created_at}
+                      taskId={song.suno_task_id}
+                      hasLivePreview={!!song.stream_audio_url}
+                      songId={song.id}
+                      onCancelled={onSaved}
+                    />
+                    {song.stream_audio_url && (
+                      <LiveStreamPreview streamUrl={song.stream_audio_url} limitSeconds={35} />
+                    )}
+                  </>
+                )}
+                {isFailed && (
+                  <div
+                    role="alert"
+                    className="space-y-3 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
+                  >
+                    <div className="flex items-start gap-2">
+                      <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold">Generation failed</p>
+                        <p className="mt-0.5 text-xs opacity-90">
+                          {song.error_message || "Something went wrong on OG Bot's side."} Your
+                          coins were refunded automatically.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={generatePreview}
+                        disabled={!hasLyrics || genPreview || balance < previewCost || missing}
+                        className="gap-1.5"
+                      >
+                        {genPreview ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <RefreshCw className="h-3.5 w-3.5" />
+                        )}
+                        Try again
+                        <span className="ml-0.5 rounded-full bg-background/30 px-1.5 py-0.5 text-[10px] font-semibold">
+                          Free
+                        </span>
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setStep1Open(true);
+                          setLyricsOpen(true);
+                          requestAnimationFrame(() =>
+                            lyricsRef.current?.scrollIntoView({
+                              behavior: "smooth",
+                              block: "center",
+                            }),
+                          );
+                        }}
+                        className="gap-1.5"
+                      >
+                        <FileText className="h-3.5 w-3.5" /> Tweak lyrics
+                      </Button>
+                      {balance < previewCost && (
+                        <Button asChild size="sm" variant="secondary" className="gap-1.5">
+                          <Link to="/buy-coins">
+                            <Coins className="h-3.5 w-3.5" /> Top up coins
+                          </Link>
+                        </Button>
                       )}
+                    </div>
+                  </div>
+                )}
+                {isReady && <InlineSamplePlayer songId={song.id} unlocked={!!song.unlocked} />}
+                <div className="flex flex-wrap items-center justify-end gap-2">
+                  <Button
+                    onClick={generatePreview}
+                    disabled={
+                      !hasLyrics || genPreview || isPending || balance < previewCost || missing
+                    }
+                    aria-busy={genPreview || isPending}
+                    className="gap-2"
+                  >
+                    {genPreview || isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : isReady ? (
+                      <RefreshCw className="h-4 w-4" />
+                    ) : (
+                      <Play className="h-4 w-4" />
+                    )}
+                    {genPreview
+                      ? "Starting…"
+                      : isPending
+                        ? `Generating… ${elapsed}s`
+                        : isReady
+                          ? "Regenerate sample"
+                          : "Generate preview"}
+                    <span className="ml-1 rounded-full bg-background/30 px-1.5 py-0.5 text-[10px] font-semibold">
+                      Free
+                    </span>
+                  </Button>
+                </div>
+              </CardContent>
+            </CollapsibleContent>
+          </Collapsible>
+        </Card>
+
+        {/* Stage 3 — Final song */}
+        <Card
+          className={cn(stage === 3 && "border-primary/40 shadow-glow", stage < 3 && "opacity-60")}
+        >
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Music2 className="h-4 w-4 text-primary" />3 · Full HQ
+            </CardTitle>
+            <CardDescription>
+              Choose {fullUnlockCost} credits or a one-off 99p payment to unlock and download.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {!isReady ? (
+              <p className="text-sm text-muted-foreground">
+                Once the preview is ready, the full track unlocks here.
+              </p>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground">
+                  {song.unlocked
+                    ? "Full HQ unlocked. Download as many times as you like."
+                    : "Unlock once to download the full HQ track."}
+                </p>
+
+                {!song.unlocked && balance < fullUnlockCost && (
+                  <div className="flex items-start gap-3 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
+                    <Coins className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+                    <div className="flex-1">
+                      <p className="font-semibold text-amber-100">
+                        You need {fullUnlockCost - balance} more coin
+                        {fullUnlockCost - balance === 1 ? "" : "s"} to unlock
+                      </p>
+                      <p className="text-xs text-amber-200/80">
+                        Balance: {balance} · Cost: {fullUnlockCost}
+                      </p>
+                    </div>
+                    <Button asChild size="sm" className="shrink-0">
+                      <Link to="/buy-coins">Top up</Link>
                     </Button>
                   </div>
-                </>
-              )}
-            </CardContent>
-          </Card>
+                )}
 
-          <VariationsCard
-            variations={variations}
-            variationCost={variationCost}
-            basket={basket}
-            busyVariation={busyVariation}
-            checkingOut={checkingOut}
-            balance={balance}
-            onToggleBasket={toggleBasket}
-            onRevealOne={revealOne}
-            onClearBasket={clearBasket}
-            onCheckoutBasket={checkoutBasket}
-          />
+                <div className="flex flex-wrap justify-end gap-2">
+                  <Button
+                    onClick={unlockFull}
+                    disabled={unlocking || (!song.unlocked && balance < fullUnlockCost)}
+                    className="gap-2"
+                    aria-live="polite"
+                  >
+                    {unlocking ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        {song.unlocked ? "Preparing download…" : "Processing payment…"}
+                      </>
+                    ) : (
+                      <>
+                        <Music2 className="h-4 w-4" />
+                        {song.unlocked
+                          ? "Download full HQ"
+                          : `Unlock & download · ${fullUnlockCost} coins`}
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
+        <VariationsCard
+          variations={variations}
+          variationCost={variationCost}
+          basket={basket}
+          busyVariation={busyVariation}
+          checkingOut={checkingOut}
+          balance={balance}
+          onToggleBasket={toggleBasket}
+          onRevealOne={revealOne}
+          onClearBasket={clearBasket}
+          onCheckoutBasket={checkoutBasket}
+        />
       </div>
-
 
       <UnlockConfirmDialog
         open={unlockDialogOpen}
@@ -1098,25 +1253,34 @@ function LyricsSkeleton({ songId }: { songId?: string }) {
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "songs", filter: `id=eq.${songId}` },
         (payload) => {
-          const row = payload.new as { lyrics_progress?: number | null; lyrics_stage?: string | null };
-          if (typeof row.lyrics_progress === "number") setProgress((p) => Math.max(p, row.lyrics_progress!));
-          if (typeof row.lyrics_stage === "string" && row.lyrics_stage) setStageLabel(row.lyrics_stage);
+          const row = payload.new as {
+            lyrics_progress?: number | null;
+            lyrics_stage?: string | null;
+          };
+          if (typeof row.lyrics_progress === "number")
+            setProgress((p) => Math.max(p, row.lyrics_progress!));
+          if (typeof row.lyrics_stage === "string" && row.lyrics_stage)
+            setStageLabel(row.lyrics_stage);
         },
       )
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [songId]);
 
   // ETA = linear extrapolation from elapsed wall-clock against real progress.
   const elapsedS = (Date.now() - startedAt.current) / 1000;
-  const etaSeconds = progress > 5 && progress < 99
-    ? Math.max(1, Math.round((elapsedS / progress) * (100 - progress)))
-    : null;
-  const etaLabel = etaSeconds == null
-    ? "Almost there…"
-    : etaSeconds >= 60
-      ? `~${Math.floor(etaSeconds / 60)}m ${String(etaSeconds % 60).padStart(2, "0")}s left`
-      : `~${etaSeconds}s left`;
+  const etaSeconds =
+    progress > 5 && progress < 99
+      ? Math.max(1, Math.round((elapsedS / progress) * (100 - progress)))
+      : null;
+  const etaLabel =
+    etaSeconds == null
+      ? "Almost there…"
+      : etaSeconds >= 60
+        ? `~${Math.floor(etaSeconds / 60)}m ${String(etaSeconds % 60).padStart(2, "0")}s left`
+        : `~${etaSeconds}s left`;
 
   return (
     <div
@@ -1161,8 +1325,6 @@ function LyricsSkeleton({ songId }: { songId?: string }) {
         </div>
       </div>
 
-
-
       {blocks.map((b, bi) => (
         <div key={bi} className="space-y-1.5">
           <div className="text-[11px] font-semibold text-primary/80">{b.label}</div>
@@ -1182,9 +1344,6 @@ function LyricsSkeleton({ songId }: { songId?: string }) {
   );
 }
 
-
-
-
 function CostBadge({ cost }: { cost: number }) {
   return <CoinPill>{cost} coins</CoinPill>;
 }
@@ -1203,7 +1362,11 @@ function formatDuration(totalSeconds: number) {
   return `${minutes}m ${String(rest).padStart(2, "0")}s`;
 }
 
-function getGenerationStatus(elapsed: number, hasTaskId: boolean, hasLivePreview: boolean): {
+function getGenerationStatus(
+  elapsed: number,
+  hasTaskId: boolean,
+  hasLivePreview: boolean,
+): {
   progress: number;
   etaSeconds: number;
   headline: string;
@@ -1224,7 +1387,10 @@ function getGenerationStatus(elapsed: number, hasTaskId: boolean, hasLivePreview
       progress,
       etaSeconds,
       headline: "Starting the music job with the generator…",
-      detail: elapsed > 45 ? "Still waiting for the generator to accept the job — no fake progress here." : "Getting a real task ID before the mix begins. Typically 2-5 minutes in total.",
+      detail:
+        elapsed > 45
+          ? "Still waiting for the generator to accept the job — no fake progress here."
+          : "Getting a real task ID before the mix begins. Typically 2-5 minutes in total.",
       steps: [
         { label: "Queued", detail: "Saving your prompt", state: "done" },
         { label: "Accepted", detail: "Waiting for task ID", state: "active" },
@@ -1250,13 +1416,23 @@ function getGenerationStatus(elapsed: number, hasTaskId: boolean, hasLivePreview
   return {
     progress,
     etaSeconds,
-    headline: elapsed < 35 ? "Composing melody and beat…" : elapsed < 90 ? "Rendering vocals and mix…" : "Waiting for the generator to hand back the audio…",
-    detail: elapsed > targetSeconds
-      ? "Past the usual window — it can take a few more minutes. Nothing is stuck, and you keep your coins if it fails."
-      : "Most tracks take 2-5 minutes. We only show real progress, never a fake countdown.",
+    headline:
+      elapsed < 35
+        ? "Composing melody and beat…"
+        : elapsed < 90
+          ? "Rendering vocals and mix…"
+          : "Waiting for the generator to hand back the audio…",
+    detail:
+      elapsed > targetSeconds
+        ? "Past the usual window — it can take a few more minutes. Nothing is stuck, and you keep your coins if it fails."
+        : "Most tracks take 2-5 minutes. We only show real progress, never a fake countdown.",
     steps: [
       { label: "Queued", detail: "Task accepted", state: "done" },
-      { label: "Audio", detail: elapsed < 75 ? "Generating track" : "Awaiting callback", state: "active" },
+      {
+        label: "Audio",
+        detail: elapsed < 75 ? "Generating track" : "Awaiting callback",
+        state: "active",
+      },
       { label: "Sample", detail: "Ready after callback", state: "waiting" },
     ],
   };
@@ -1313,19 +1489,24 @@ function GeneratingProgress({
     return Date.now();
   }, [startedAt]);
 
-  const [elapsed, setElapsed] = useState(() => Math.max(0, Math.floor((Date.now() - startMs) / 1000)));
+  const [elapsed, setElapsed] = useState(() =>
+    Math.max(0, Math.floor((Date.now() - startMs) / 1000)),
+  );
   useEffect(() => {
     setElapsed(Math.max(0, Math.floor((Date.now() - startMs) / 1000)));
-    const id = setInterval(() => setElapsed(Math.max(0, Math.floor((Date.now() - startMs) / 1000))), 250);
+    const id = setInterval(
+      () => setElapsed(Math.max(0, Math.floor((Date.now() - startMs) / 1000))),
+      250,
+    );
     return () => clearInterval(id);
   }, [startMs]);
-
 
   const status = getGenerationStatus(elapsed, !!taskId, hasLivePreview);
   const pct = status.progress;
   // Once the typical window has passed we stop pretending to know a finish
   // time — the label switches to a plain "still rendering" state.
-  const etaLabel = status.etaSeconds > 0 ? `~${formatDuration(status.etaSeconds)}` : "still rendering";
+  const etaLabel =
+    status.etaSeconds > 0 ? `~${formatDuration(status.etaSeconds)}` : "still rendering";
 
   const mm = String(Math.floor(elapsed / 60)).padStart(2, "0");
   const ss = String(elapsed % 60).padStart(2, "0");
@@ -1367,8 +1548,12 @@ function GeneratingProgress({
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <div className="rounded-full border border-primary/40 bg-background/70 px-3 py-1.5 text-right text-xs font-bold text-foreground shadow-[0_0_18px_-4px_hsl(var(--primary)/0.7)]">
-            <span className="block tabular-nums">{status.etaSeconds > 0 ? `ETA ${etaLabel}` : etaLabel}</span>
-            <span className="block text-[10px] font-medium text-muted-foreground tabular-nums">{mm}:{ss} elapsed</span>
+            <span className="block tabular-nums">
+              {status.etaSeconds > 0 ? `ETA ${etaLabel}` : etaLabel}
+            </span>
+            <span className="block text-[10px] font-medium text-muted-foreground tabular-nums">
+              {mm}:{ss} elapsed
+            </span>
           </div>
           {songId && (
             <Button
@@ -1392,12 +1577,19 @@ function GeneratingProgress({
             className={cn(
               "rounded-lg border px-3 py-2",
               step.state === "done" && "border-emerald-500/30 bg-emerald-500/10 text-emerald-100",
-              step.state === "active" && "border-primary/40 bg-primary/10 text-foreground shadow-[0_0_16px_-8px_hsl(var(--primary)/0.8)]",
+              step.state === "active" &&
+                "border-primary/40 bg-primary/10 text-foreground shadow-[0_0_16px_-8px_hsl(var(--primary)/0.8)]",
               step.state === "waiting" && "border-border bg-background/30",
             )}
           >
             <div className="flex items-center gap-2 font-semibold">
-              {step.state === "done" ? <Check className="h-3.5 w-3.5" /> : step.state === "active" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <span className="h-3.5 w-3.5 rounded-full border border-current opacity-50" />}
+              {step.state === "done" ? (
+                <Check className="h-3.5 w-3.5" />
+              ) : step.state === "active" ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <span className="h-3.5 w-3.5 rounded-full border border-current opacity-50" />
+              )}
               {step.label}
             </div>
             <p className="mt-1 text-[11px] opacity-80">{step.detail}</p>
@@ -1454,11 +1646,9 @@ function GeneratingProgress({
           <span className="tabular-nums text-foreground/90">{pct}%</span>
         </div>
       </div>
-
     </div>
   );
 }
-
 
 /**
  * Inline mini-player shown directly under the "Generate preview" button so
@@ -1511,7 +1701,9 @@ function InlineSamplePlayer({ songId, unlocked = false }: { songId: string; unlo
         if (!cancelled) setLoading(false);
       }
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [songId, canPlayFull]);
 
   // Cap playback at the sample length — unless the track has been paid for.
@@ -1540,9 +1732,7 @@ function InlineSamplePlayer({ songId, unlocked = false }: { songId: string; unlo
           <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading sample…
         </div>
       )}
-      {error && (
-        <div className="text-xs text-destructive">{error}</div>
-      )}
+      {error && <div className="text-xs text-destructive">{error}</div>}
       {url && (
         <audio
           ref={audioRef}

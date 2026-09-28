@@ -26,7 +26,12 @@ import ogBotAsset from "@/assets/ogbot.png.asset.json";
 
 function initials(name: string | null) {
   if (!name) return "?";
-  return name.split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
+  return name
+    .split(/\s+/)
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 }
 
 function formatTime(iso: string) {
@@ -40,7 +45,6 @@ function formatTime(iso: string) {
 const TYPING_TTL_MS = 4000;
 
 type BattleTally = { pendingTenths: number; rounds: number; totalAwardedCoins: number };
-
 
 export function CommunityRoom() {
   const { user } = useAuth();
@@ -78,7 +82,6 @@ export function CommunityRoom() {
   const pendingCoins = ((tally?.pendingTenths ?? 0) / 10).toFixed(2);
   const messages: CommunityMessage[] = useMemo(() => data?.messages ?? [], [data?.messages]);
 
-
   const scrollRef = useRef<HTMLDivElement>(null);
   const composerRef = useRef<HTMLTextAreaElement>(null);
   const [jumpAnnounce, setJumpAnnounce] = useState("");
@@ -115,7 +118,6 @@ export function CommunityRoom() {
             setNewCount((n) => n + 1);
           }
         },
-
       )
       .subscribe();
     return () => {
@@ -274,14 +276,14 @@ export function CommunityRoom() {
     }, 350);
   }, [messages.length, rowVirtualizer]);
 
-
   const send = useMutation({
     mutationFn: (content: string) => postFn({ data: { content, foulMouth } }),
     onSuccess: (res) => {
       setText("");
       stickToBottomRef.current = true;
-      const award = (res as { award?: { earnedTenths: number; pendingTenths: number; rounds: number } })
-        .award;
+      const award = (
+        res as { award?: { earnedTenths: number; pendingTenths: number; rounds: number } }
+      ).award;
       if (award) {
         qc.setQueryData(["battle-tally"], (prev: BattleTally | undefined) => ({
           pendingTenths: award.pendingTenths,
@@ -316,7 +318,6 @@ export function CommunityRoom() {
     },
     onError: (err: Error) => toast.error(err.message),
   });
-
 
   const clear = useMutation({
     mutationFn: () => clearFn(),
@@ -383,7 +384,7 @@ export function CommunityRoom() {
             ) : (
               <Flag className="h-3 w-3" />
             )}
-              <span>Bank</span>
+            <span>Bank</span>
           </Button>
           {canClear && (
             <Button
@@ -432,11 +433,12 @@ export function CommunityRoom() {
                 >
                   <span className="flex min-w-0 items-center gap-2">
                     <span className="w-4 shrink-0 tabular-nums">{i + 1}</span>
-                    <span className="truncate">{row.name}{row.isMe ? " (you)" : ""}</span>
+                    <span className="truncate">
+                      {row.name}
+                      {row.isMe ? " (you)" : ""}
+                    </span>
                   </span>
-                  <span className="shrink-0 tabular-nums text-primary">
-                    {row.coinsWon} OG
-                  </span>
+                  <span className="shrink-0 tabular-nums text-primary">{row.coinsWon} OG</span>
                 </li>
               ))}
             </ol>
@@ -450,7 +452,6 @@ export function CommunityRoom() {
           className="absolute inset-0 overflow-y-auto overscroll-contain rounded-xl border border-border/40 bg-background/75 p-1.5 backdrop-blur-md sm:p-2.5 [-webkit-overflow-scrolling:touch]"
           style={{ touchAction: "pan-y" }}
         >
-
           {isLoading ? (
             <div className="flex h-full items-center justify-center text-muted-foreground">
               <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Loading the Battle Zone…
@@ -473,7 +474,11 @@ export function CommunityRoom() {
                 </div>
               )}
               <div
-                style={{ height: rowVirtualizer.getTotalSize(), position: "relative", width: "100%" }}
+                style={{
+                  height: rowVirtualizer.getTotalSize(),
+                  position: "relative",
+                  width: "100%",
+                }}
               >
                 {rowVirtualizer.getVirtualItems().map((vi) => {
                   const m = messages[vi.index];
@@ -497,7 +502,7 @@ export function CommunityRoom() {
                         className={`flex items-end gap-1.5 py-1 motion-safe:animate-[pop_0.2s_ease-out] ${mine ? "flex-row-reverse" : "flex-row"}`}
                       >
                         <span
-                           className={`grid h-6 w-6 shrink-0 place-items-center overflow-hidden rounded-full text-[8px] font-bold uppercase sm:h-7 sm:w-7 ${
+                          className={`grid h-6 w-6 shrink-0 place-items-center overflow-hidden rounded-full text-[8px] font-bold uppercase sm:h-7 sm:w-7 ${
                             isBot
                               ? "bg-primary/20 ring-1 ring-primary/40"
                               : mine
@@ -506,13 +511,17 @@ export function CommunityRoom() {
                           }`}
                         >
                           {isBot ? (
-                            <img src={ogBotAsset.url} alt="OG Bot" className="h-full w-full object-cover" />
+                            <img
+                              src={ogBotAsset.url}
+                              alt="OG Bot"
+                              className="h-full w-full object-cover"
+                            />
                           ) : (
                             initials(m.display_name)
                           )}
                         </span>
                         <div
-                           className={`min-w-0 max-w-[88%] rounded-xl px-2.5 py-1.5 text-[12px] leading-[1.35] shadow-sm sm:max-w-[82%] sm:text-[13px] lg:max-w-[74%] ${
+                          className={`min-w-0 max-w-[88%] rounded-xl px-2.5 py-1.5 text-[12px] leading-[1.35] shadow-sm sm:max-w-[82%] sm:text-[13px] lg:max-w-[74%] ${
                             isBot
                               ? "border border-primary/30 bg-primary/10 text-foreground"
                               : mine
@@ -521,13 +530,16 @@ export function CommunityRoom() {
                           }`}
                         >
                           <p
-                             className={`mb-0.5 text-[8px] font-bold uppercase ${
+                            className={`mb-0.5 text-[8px] font-bold uppercase ${
                               mine ? "text-primary-foreground/80" : "text-muted-foreground"
                             }`}
                           >
-                            {isBot ? "OG Bot" : m.display_name || "OG member"} · {formatTime(m.created_at)}
+                            {isBot ? "OG Bot" : m.display_name || "OG member"} ·{" "}
+                            {formatTime(m.created_at)}
                           </p>
-                          <p className="whitespace-pre-wrap break-words leading-snug">{m.content}</p>
+                          <p className="whitespace-pre-wrap break-words leading-snug">
+                            {m.content}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -578,9 +590,9 @@ export function CommunityRoom() {
         </div>
       )}
 
-       <form
+      <form
         onSubmit={submit}
-         className="sticky bottom-0 flex items-end gap-1.5 rounded-xl border border-border/40 bg-card/95 p-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-lg backdrop-blur-md sm:p-2"
+        className="sticky bottom-0 flex items-end gap-1.5 rounded-xl border border-border/40 bg-card/95 p-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-lg backdrop-blur-md sm:p-2"
       >
         <Textarea
           ref={composerRef}
@@ -595,7 +607,8 @@ export function CommunityRoom() {
           onKeyDown={(e) => {
             // On desktop: Enter sends, Shift+Enter newline.
             // On mobile (touch): Enter always inserts newline; tap Send to submit.
-            const isTouch = typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches;
+            const isTouch =
+              typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches;
             if (e.key === "Enter" && !e.shiftKey && !isTouch) {
               e.preventDefault();
               submit(e as unknown as React.FormEvent);
@@ -605,17 +618,21 @@ export function CommunityRoom() {
           rows={1}
           maxLength={1000}
           enterKeyHint="send"
-           className="min-h-10 max-h-24 resize-none overflow-y-auto border-0 bg-transparent px-2 py-2 text-sm leading-snug focus-visible:ring-0"
+          className="min-h-10 max-h-24 resize-none overflow-y-auto border-0 bg-transparent px-2 py-2 text-sm leading-snug focus-visible:ring-0"
           disabled={send.isPending}
         />
         <Button
           type="submit"
           size="icon"
           disabled={!text.trim() || send.isPending}
-           className="h-10 w-10 shrink-0 rounded-xl"
+          className="h-10 w-10 shrink-0 rounded-xl"
           aria-label="Send message"
         >
-          {send.isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+          {send.isPending ? (
+            <Loader2 className="h-5 w-5 animate-spin" />
+          ) : (
+            <Send className="h-5 w-5" />
+          )}
         </Button>
       </form>
     </div>

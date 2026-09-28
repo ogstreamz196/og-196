@@ -96,7 +96,10 @@ async function uploadFile(opts: {
     body: JSON.stringify({ role: "reader", type: "anyone" }),
   }).catch(() => undefined);
 
-  return { id: file.id, link: file.webViewLink ?? `https://drive.google.com/file/d/${file.id}/view` };
+  return {
+    id: file.id,
+    link: file.webViewLink ?? `https://drive.google.com/file/d/${file.id}/view`,
+  };
 }
 
 export type DriveArchiveResult = {

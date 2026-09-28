@@ -86,6 +86,6 @@ export const listStripeWebhookEvents = createServerFn({ method: "GET" })
 
     return rows.map(({ reference, ...r }) => ({
       ...r,
-      credited: reference ? txByRef.get(reference) ?? null : null,
+      credited: reference ? (txByRef.get(reference) ?? null) : null,
     }));
   });

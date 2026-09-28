@@ -2,7 +2,19 @@ import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Send, Trash2, Skull, ShieldCheck, Paperclip, Mic, MicOff, Crown, X, Loader2, ArrowDown } from "lucide-react";
+import {
+  Send,
+  Trash2,
+  Skull,
+  ShieldCheck,
+  Paperclip,
+  Mic,
+  MicOff,
+  Crown,
+  X,
+  Loader2,
+  ArrowDown,
+} from "lucide-react";
 import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
 import { chatOgBot, type OgChatMessage } from "@/lib/og-messenger.functions";
 import { transcribeOgAudio } from "@/lib/og-transcribe.functions";
@@ -20,7 +32,6 @@ import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import type { RealtimePostgresInsertPayload } from "@supabase/supabase-js";
-
 
 /** Telegram-style premium font stack — SF on Apple, Segoe on Windows, Roboto on Android. */
 const TELEGRAM_FONT_STACK =
@@ -41,24 +52,54 @@ function OgAvatar({ size = 36, className = "" }: { size?: number; className?: st
       alt="OG Bot"
       width={size}
       height={size}
-      className={cn("rounded-full object-cover ring-0 border-0 outline-none select-none pointer-events-none", className)}
+      className={cn(
+        "rounded-full object-cover ring-0 border-0 outline-none select-none pointer-events-none",
+        className,
+      )}
       style={{ width: size, height: size }}
       draggable={false}
     />
   );
 }
 
-
 const STORAGE_KEY_PREFIX = "og-messenger-thread-v3:";
 const SYNC_EVENT = "og-messenger:sync";
 const MAX_PERSISTED = 60;
 const LANG_KEY = "og-bot:language";
 const OG_LANGUAGES = [
-  "English", "Spanish", "French", "Portuguese", "Hindi", "Urdu",
-  "Punjabi", "Arabic", "Swahili", "Patois", "Yoruba", "German",
-  "Italian", "Romanian", "Filipino", "Tagalog", "Cebuano", "Mandarin", "Japanese",
-  "Korean", "Turkish", "Russian", "Polish", "Dutch", "Greek", "Thai",
-  "Vietnamese", "Indonesian", "Malay", "Bengali", "Tamil", "Hebrew", "Lithuanian",
+  "English",
+  "Spanish",
+  "French",
+  "Portuguese",
+  "Hindi",
+  "Urdu",
+  "Punjabi",
+  "Arabic",
+  "Swahili",
+  "Patois",
+  "Yoruba",
+  "German",
+  "Italian",
+  "Romanian",
+  "Filipino",
+  "Tagalog",
+  "Cebuano",
+  "Mandarin",
+  "Japanese",
+  "Korean",
+  "Turkish",
+  "Russian",
+  "Polish",
+  "Dutch",
+  "Greek",
+  "Thai",
+  "Vietnamese",
+  "Indonesian",
+  "Malay",
+  "Bengali",
+  "Tamil",
+  "Hebrew",
+  "Lithuanian",
 ];
 
 function storageKey(userId: string | null | undefined) {
@@ -116,7 +157,7 @@ export function OgChat({
   const { data: profile } = useProfile();
   const { foulMouth } = useFoulMouth();
   const setFoulMouth = useSetFoulMouth();
-  
+
   const { isVip } = useRole();
   // shareLive removed: Loner Mode is enforced by the page mounting OgChat.
   const postCommunity = useServerFn(postCommunityMessage);
@@ -142,19 +183,13 @@ export function OgChat({
   // replies don't pop in and out (matches Suno-style "cooking" feel).
   const [showSkeleton, setShowSkeleton] = useState(false);
 
-
-
-
   useEffect(() => {
     setMessages(loadThread(userId));
   }, [userId]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    window.localStorage.setItem(
-      storageKey(userId),
-      JSON.stringify(messages.slice(-MAX_PERSISTED)),
-    );
+    window.localStorage.setItem(storageKey(userId), JSON.stringify(messages.slice(-MAX_PERSISTED)));
   }, [messages, userId]);
 
   useEffect(() => {
@@ -212,8 +247,6 @@ export function OgChat({
       void supabase.removeChannel(channel);
     };
   }, [userId]);
-
-
 
   // Smart auto-scroll: only stick to bottom when the user is already near it,
   // so reading older messages isn't interrupted by new replies streaming in.
@@ -305,10 +338,7 @@ export function OgChat({
       setTimeout(() => inputRef.current?.focus(), 0);
     },
     onError: (err: Error) => {
-      setMessages((cur) => [
-        ...cur,
-        { role: "assistant", content: `⚠️ ${err.message}` },
-      ]);
+      setMessages((cur) => [...cur, { role: "assistant", content: `⚠️ ${err.message}` }]);
       qc.invalidateQueries({ queryKey: ["profile"] });
     },
   });
@@ -351,7 +381,12 @@ export function OgChat({
       postCommunity({ data: { content: t } })
         .then(() => {
           toast.success("Posted to the OG Battle Zone", {
-            action: { label: "Open", onClick: () => { window.location.href = "/messenger?live=1"; } },
+            action: {
+              label: "Open",
+              onClick: () => {
+                window.location.href = "/messenger?live=1";
+              },
+            },
           });
         })
         .catch((e: Error) => toast.error(e.message));
@@ -372,7 +407,6 @@ export function OgChat({
     m.mutate({ history: next, attachmentDataUrl: att?.dataUrl });
   }
 
-
   function clearChat() {
     setMessages([]);
     selfSyncRef.current = true;
@@ -383,7 +417,12 @@ export function OgChat({
   async function toggleFoul() {
     if (!isVip) {
       toast.message("Foul-mouth is a VIP perk — grab OG VIP for £5/month.", {
-        action: { label: "Get VIP", onClick: () => { window.location.href = "/buy-coins?flow=vip"; } },
+        action: {
+          label: "Get VIP",
+          onClick: () => {
+            window.location.href = "/buy-coins?flow=vip";
+          },
+        },
       });
       return;
     }
@@ -395,7 +434,6 @@ export function OgChat({
     } catch (e) {
       toast.error((e as Error).message);
     }
-
   }
 
   async function handleFile(file: File) {
@@ -420,7 +458,8 @@ export function OgChat({
     if (!user) return toast.error("Sign in to use voice.");
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mimeType = ["audio/webm", "audio/mp4"].find((t) => MediaRecorder.isTypeSupported(t)) ?? "";
+      const mimeType =
+        ["audio/webm", "audio/mp4"].find((t) => MediaRecorder.isTypeSupported(t)) ?? "";
       const rec = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
       recordChunksRef.current = [];
       rec.ondataavailable = (e) => e.data.size > 0 && recordChunksRef.current.push(e.data);
@@ -472,8 +511,6 @@ export function OgChat({
     setRecording(false);
   }
 
-
-
   const balance = profile?.coin_balance ?? 0;
   const isOut = balance <= 0;
   const foulActive = foulMouth;
@@ -490,10 +527,8 @@ export function OgChat({
       {showHeader && (
         <div
           data-testid="ogchat-header"
-           className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-1.5 border-b border-border/60 bg-muted/20 px-2 py-1.5 sm:flex sm:px-3 sm:py-2"
+          className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-1.5 border-b border-border/60 bg-muted/20 px-2 py-1.5 sm:flex sm:px-3 sm:py-2"
         >
-
-
           {/* Foul-mouth hero toggle — the main highlight */}
           <button
             type="button"
@@ -502,9 +537,8 @@ export function OgChat({
             aria-pressed={foulActive}
             aria-label="Toggle foul mouth"
             data-testid="ogchat-foulmouth-hero"
-
             className={cn(
-               "group relative flex min-w-0 items-center justify-between gap-1.5 overflow-hidden rounded-lg border px-2 py-1 text-left shadow-sm transition-all active:scale-[0.99] disabled:opacity-50 sm:w-full sm:flex-1 sm:px-3 sm:py-1.5",
+              "group relative flex min-w-0 items-center justify-between gap-1.5 overflow-hidden rounded-lg border px-2 py-1 text-left shadow-sm transition-all active:scale-[0.99] disabled:opacity-50 sm:w-full sm:flex-1 sm:px-3 sm:py-1.5",
               foulActive
                 ? "border-destructive bg-gradient-to-br from-destructive/25 via-destructive/15 to-destructive/10 shadow-[0_6px_24px_-8px_hsl(var(--destructive)/0.6)] hover:shadow-[0_8px_28px_-6px_hsl(var(--destructive)/0.7)]"
                 : "border-border bg-card hover:border-destructive/60 hover:bg-destructive/5",
@@ -513,7 +547,7 @@ export function OgChat({
             <span className="flex min-w-0 items-center gap-2 sm:gap-3">
               <span
                 className={cn(
-                   "grid h-7 w-7 shrink-0 place-items-center rounded-md text-sm transition-transform group-hover:scale-105 sm:h-8 sm:w-8 sm:text-base",
+                  "grid h-7 w-7 shrink-0 place-items-center rounded-md text-sm transition-transform group-hover:scale-105 sm:h-8 sm:w-8 sm:text-base",
                   foulActive
                     ? "bg-destructive text-destructive-foreground shadow-[0_0_18px_-2px_hsl(var(--destructive)/0.8)]"
                     : "bg-muted text-muted-foreground",
@@ -523,29 +557,28 @@ export function OgChat({
                 {foulActive ? "🤬" : <Skull className="h-5 w-5" />}
               </span>
               <span className="flex min-w-0 flex-col leading-tight">
-                <span className={cn(
-                   "truncate text-[10px] font-bold uppercase sm:text-xs",
-                  foulActive ? "text-destructive" : "text-foreground",
-                )}>
+                <span
+                  className={cn(
+                    "truncate text-[10px] font-bold uppercase sm:text-xs",
+                    foulActive ? "text-destructive" : "text-foreground",
+                  )}
+                >
                   {foulActive ? "Foul mouth on" : "Foul mouth off"}
                 </span>
               </span>
-
             </span>
             {/* Big visual switch */}
             <span
               className={cn(
-                 "relative h-5 w-9 shrink-0 rounded-full border transition-colors sm:h-6 sm:w-10",
-                foulActive
-                  ? "border-destructive bg-destructive"
-                  : "border-border bg-muted",
+                "relative h-5 w-9 shrink-0 rounded-full border transition-colors sm:h-6 sm:w-10",
+                foulActive ? "border-destructive bg-destructive" : "border-border bg-muted",
               )}
               aria-hidden="true"
             >
               <span
                 className={cn(
-                   "absolute top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full bg-background shadow-md transition-all sm:h-4 sm:w-4",
-                   foulActive ? "left-[calc(100%-1rem)] sm:left-[calc(100%-1.15rem)]" : "left-0.5",
+                  "absolute top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full bg-background shadow-md transition-all sm:h-4 sm:w-4",
+                  foulActive ? "left-[calc(100%-1rem)] sm:left-[calc(100%-1.15rem)]" : "left-0.5",
                 )}
               />
             </span>
@@ -554,12 +587,13 @@ export function OgChat({
           {/* Secondary controls row */}
           <div
             data-testid="ogchat-controls"
-             className="flex shrink-0 items-center justify-end gap-1 text-xs sm:w-[150px] sm:flex-col sm:items-stretch sm:justify-center"
+            className="flex shrink-0 items-center justify-end gap-1 text-xs sm:w-[150px] sm:flex-col sm:items-stretch sm:justify-center"
           >
-
             <span className="hidden items-center gap-1.5 text-muted-foreground sm:mr-auto sm:inline-flex">
               <OgAvatar size={18} />
-              <span className="font-semibold">{balance} coin{balance === 1 ? "" : "s"}</span>
+              <span className="font-semibold">
+                {balance} coin{balance === 1 ? "" : "s"}
+              </span>
             </span>
             {/* OG/Safe mode toggle removed — Foul Mouth is the single tone control. */}
             {isVip ? (
@@ -571,7 +605,9 @@ export function OgChat({
                 aria-label="Reply language"
               >
                 {OG_LANGUAGES.map((l) => (
-                  <option key={l} value={l}>🌐 {l}</option>
+                  <option key={l} value={l}>
+                    🌐 {l}
+                  </option>
                 ))}
               </select>
             ) : (
@@ -591,7 +627,8 @@ export function OgChat({
                 className="grid h-8 w-8 place-items-center rounded-lg border border-border bg-muted text-muted-foreground transition hover:bg-muted/80 sm:inline-flex sm:w-auto sm:gap-1 sm:border-2 sm:px-2.5 sm:py-1.5 sm:text-[12px] sm:font-semibold"
                 title="Clear chat history"
               >
-                <Trash2 className="h-3.5 w-3.5" /> <span className="sr-only sm:not-sr-only">Clear</span>
+                <Trash2 className="h-3.5 w-3.5" />{" "}
+                <span className="sr-only sm:not-sr-only">Clear</span>
               </button>
             )}
           </div>
@@ -599,187 +636,194 @@ export function OgChat({
       )}
 
       <div className="relative flex min-h-0 flex-1 flex-col">
-      <div
-        ref={scrollRef}
-         className="flex-1 space-y-1.5 overflow-y-auto overscroll-contain px-2 pb-2 pt-2 scroll-smooth [-webkit-overflow-scrolling:touch] sm:space-y-2.5 sm:px-3 sm:pb-4 sm:pt-3"
-        style={{ touchAction: "pan-y" }}
-      >
-
-        {messages.length === 0 && (
-          <div className="grid h-full place-items-center text-center">
-             <div className="w-full max-w-md space-y-2 sm:space-y-4">
-               <div className="relative mx-auto h-20 w-20 sm:h-32 sm:w-32">
-                <div className="absolute inset-0 rounded-full bg-primary/40 blur-[60px] animate-pulse" />
-                <div
-                  aria-hidden="true"
-                  className="absolute -inset-6 -z-10 opacity-80"
-                  style={{
-                    background:
-                      "radial-gradient(45% 50% at 30% 30%, rgba(239,68,68,0.45), transparent 70%), radial-gradient(50% 55% at 70% 70%, rgba(59,130,246,0.55), transparent 70%)",
-                    filter: "blur(28px)",
-                  }}
-                />
-                <img
-                  src={ogBotAsset.url}
-                  alt="OG Bot"
-                  className="relative h-full w-full rounded-full object-cover ring-4 ring-primary/40 shadow-[0_0_60px_-10px_hsl(var(--primary)/0.9)] animate-[bob_3s_ease-in-out_infinite]"
-                />
-              </div>
-              <div className="space-y-2">
-                 <h2 className="text-lg font-extrabold sm:text-2xl">
-                  Message <span className="text-gradient-brand">OG Bot</span>
-                </h2>
-                <p className="text-xs text-muted-foreground sm:text-base">Ask anything. Replies cost 1 coin.</p>
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary/80">
-                  {balance} coins left
-                </p>
-              </div>
-              {showQuickStarts && (
-                <div className="flex flex-col items-center gap-2 pt-2">
-                  <div
-                    className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary"
-                    title="Private chat — only you and OG Bot can see this"
-                  >
-                    <ShieldCheck className="h-3 w-3" />
-                    Private · OG Bot Loner Mode
-                  </div>
-                  <div className="flex flex-wrap justify-center gap-2">
-                    {QUICK_STARTS.map((q) => (
-                      <button
-                        key={q.label}
-                        type="button"
-                        data-testid="og-quickstart-chip"
-                        data-target="private"
-                        onClick={() => sendText(q.prompt, { forcePrivate: true })}
-                        disabled={m.isPending || isOut || !user}
-                        className="rounded-full border-2 border-primary/40 bg-primary/10 px-4 py-1.5 text-xs font-bold text-foreground transition hover:-translate-y-0.5 hover:rotate-[-1deg] hover:border-primary hover:bg-primary/20 active:translate-y-0 disabled:opacity-40"
-                      >
-                        {q.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-        {messages.map((msg, i) => {
-          const isUser = msg.role === "user";
-          const initial = dev.isDev ? "D" : (profile?.display_name || user?.email || "Y").trim().charAt(0).toUpperCase();
-          return (
-            <div
-              key={i}
-              className={cn(
-                     "flex items-end gap-1.5 motion-safe:animate-[pop_0.2s_ease-out] sm:gap-2",
-                isUser ? "flex-row-reverse" : "flex-row",
-              )}
-            >
-              {isUser ? (
-                <div
-                  className={cn(
-                     "relative grid h-7 w-7 shrink-0 place-items-center rounded-full bg-gradient-brand text-[10px] font-black text-primary-foreground shadow-glow sm:h-8 sm:w-8",
-                    isVip && "ring-2 ring-amber-300 ring-offset-2 ring-offset-background shadow-[0_0_18px_rgba(251,191,36,0.55)]",
-                  )}
-                >
-                  {initial}
-                  {isVip && (
-                    <Crown
-                      className="absolute -top-2 -right-1 h-4 w-4 rotate-[18deg] fill-amber-300 text-amber-500 drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]"
-                      aria-label="VIP"
-                    />
-                  )}
-                </div>
-              ) : (
-                   <OgAvatar size={28} className="shrink-0 sm:h-8 sm:w-8" />
-              )}
-               <Message from={msg.role} className={cn("min-w-0 flex-1 max-w-[calc(100%-2rem)] gap-0.5 sm:max-w-[82%] lg:max-w-[74%]", isUser ? "items-end" : "items-start")}>
-                <span
-                  className={cn(
-                     "inline-flex items-center gap-1 px-1.5 text-[8px] font-bold uppercase",
-                    isUser ? (isVip ? "text-amber-400" : "text-primary") : "text-foreground/70",
-                  )}
-                >
-                  {isUser ? "You" : "OG Bot"}
-                  {isUser && isVip && (
-                    <>
-                      <Crown className="h-3 w-3 fill-amber-300 text-amber-500" />
-                      <span className="text-amber-400">VIP</span>
-                    </>
-                  )}
-                </span>
-                <MessageContent
-                  className={cn(
-                     "break-words text-[13px] leading-[1.38] sm:text-sm",
-                    isUser
-                      ? isVip
-                         ? "rounded-2xl rounded-br-sm whitespace-pre-wrap px-3 py-2 font-medium text-amber-50 bg-gradient-to-br from-amber-500 via-amber-600 to-yellow-700 ring-1 ring-amber-300/60"
-                         : "rounded-2xl rounded-br-sm bg-primary px-3 py-2 text-primary-foreground whitespace-pre-wrap font-medium"
-                        : "w-full bg-transparent p-0 text-foreground shadow-none",
-                  )}
-                >
-                  {msg.role === "assistant" ? (
-                     <MessageResponse className="prose-sm max-w-none prose-p:my-0.5 prose-p:leading-snug prose-ul:my-0.5 prose-ol:my-0.5 prose-headings:my-0.5 prose-code:text-primary">{msg.content}</MessageResponse>
-
-                  ) : (
-                    msg.content
-                  )}
-                </MessageContent>
-              </Message>
-            </div>
-          );
-        })}
-        {(showSkeleton || m.isPending) && (
-          <div
-            className="flex items-end gap-3"
-            role="status"
-            aria-live="polite"
-            aria-label="OG Bot is typing"
-          >
-            <OgAvatar size={40} className="shrink-0 animate-pulse" />
-            <div className="flex flex-col gap-1.5 min-w-[60%] max-w-[78%]">
-              <span className="px-2 text-[10px] font-black uppercase tracking-[0.18em] text-foreground/70 inline-flex items-center gap-1.5">
-                OG Bot
-                <span className="font-bold normal-case tracking-normal text-muted-foreground/80">
-                  is typing<span className="inline-block animate-pulse">…</span>
-                </span>
-              </span>
-              <div className="rounded-2xl rounded-bl-sm bg-card border-2 border-border px-4 py-3 inline-flex items-center">
-                <TypingDots aria-label="OG Bot is typing" />
-              </div>
-              {/* Shimmering bubble skeletons — Suno-style "still cooking" placeholders */}
-              <div className="space-y-1.5">
-                <div className="h-3 w-[85%] rounded-md bg-gradient-to-r from-muted via-muted/40 to-muted bg-[length:200%_100%] animate-[shimmer_1.6s_linear_infinite]" />
-                <div className="h-3 w-[70%] rounded-md bg-gradient-to-r from-muted via-muted/40 to-muted bg-[length:200%_100%] animate-[shimmer_1.6s_linear_infinite]" />
-                <div className="h-3 w-[55%] rounded-md bg-gradient-to-r from-muted via-muted/40 to-muted bg-[length:200%_100%] animate-[shimmer_1.6s_linear_infinite]" />
-              </div>
-              <span className="sr-only">OG Bot is generating a response</span>
-            </div>
-          </div>
-        )}
-
-
-      </div>
-      {!atBottom && (
-        <button
-          type="button"
-          onClick={() => scrollToBottom("smooth")}
-          aria-label="Jump to latest message"
-          className={cn(
-            "absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-primary/40 bg-background/90 px-3.5 py-1.5 text-xs font-bold text-foreground shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.6)] backdrop-blur-md transition hover:scale-105 active:scale-95",
-            hasNew && "border-primary bg-primary text-primary-foreground shadow-glow animate-[pop_0.25s_ease-out]",
-          )}
+        <div
+          ref={scrollRef}
+          className="flex-1 space-y-1.5 overflow-y-auto overscroll-contain px-2 pb-2 pt-2 scroll-smooth [-webkit-overflow-scrolling:touch] sm:space-y-2.5 sm:px-3 sm:pb-4 sm:pt-3"
+          style={{ touchAction: "pan-y" }}
         >
-          <ArrowDown className="h-3.5 w-3.5" />
-          {hasNew ? "New messages" : "Jump to latest"}
-        </button>
-      )}
-      <div aria-live="polite" aria-atomic="true" className="sr-only">
-        {jumpAnnounce}
+          {messages.length === 0 && (
+            <div className="grid h-full place-items-center text-center">
+              <div className="w-full max-w-md space-y-2 sm:space-y-4">
+                <div className="relative mx-auto h-20 w-20 sm:h-32 sm:w-32">
+                  <div className="absolute inset-0 rounded-full bg-primary/40 blur-[60px] animate-pulse" />
+                  <div
+                    aria-hidden="true"
+                    className="absolute -inset-6 -z-10 opacity-80"
+                    style={{
+                      background:
+                        "radial-gradient(45% 50% at 30% 30%, rgba(239,68,68,0.45), transparent 70%), radial-gradient(50% 55% at 70% 70%, rgba(59,130,246,0.55), transparent 70%)",
+                      filter: "blur(28px)",
+                    }}
+                  />
+                  <img
+                    src={ogBotAsset.url}
+                    alt="OG Bot"
+                    className="relative h-full w-full rounded-full object-cover ring-4 ring-primary/40 shadow-[0_0_60px_-10px_hsl(var(--primary)/0.9)] animate-[bob_3s_ease-in-out_infinite]"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <h2 className="text-lg font-extrabold sm:text-2xl">
+                    Message <span className="text-gradient-brand">OG Bot</span>
+                  </h2>
+                  <p className="text-xs text-muted-foreground sm:text-base">
+                    Ask anything. Replies cost 1 coin.
+                  </p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary/80">
+                    {balance} coins left
+                  </p>
+                </div>
+                {showQuickStarts && (
+                  <div className="flex flex-col items-center gap-2 pt-2">
+                    <div
+                      className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary"
+                      title="Private chat — only you and OG Bot can see this"
+                    >
+                      <ShieldCheck className="h-3 w-3" />
+                      Private · OG Bot Loner Mode
+                    </div>
+                    <div className="flex flex-wrap justify-center gap-2">
+                      {QUICK_STARTS.map((q) => (
+                        <button
+                          key={q.label}
+                          type="button"
+                          data-testid="og-quickstart-chip"
+                          data-target="private"
+                          onClick={() => sendText(q.prompt, { forcePrivate: true })}
+                          disabled={m.isPending || isOut || !user}
+                          className="rounded-full border-2 border-primary/40 bg-primary/10 px-4 py-1.5 text-xs font-bold text-foreground transition hover:-translate-y-0.5 hover:rotate-[-1deg] hover:border-primary hover:bg-primary/20 active:translate-y-0 disabled:opacity-40"
+                        >
+                          {q.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          {messages.map((msg, i) => {
+            const isUser = msg.role === "user";
+            const initial = dev.isDev
+              ? "D"
+              : (profile?.display_name || user?.email || "Y").trim().charAt(0).toUpperCase();
+            return (
+              <div
+                key={i}
+                className={cn(
+                  "flex items-end gap-1.5 motion-safe:animate-[pop_0.2s_ease-out] sm:gap-2",
+                  isUser ? "flex-row-reverse" : "flex-row",
+                )}
+              >
+                {isUser ? (
+                  <div
+                    className={cn(
+                      "relative grid h-7 w-7 shrink-0 place-items-center rounded-full bg-gradient-brand text-[10px] font-black text-primary-foreground shadow-glow sm:h-8 sm:w-8",
+                      isVip &&
+                        "ring-2 ring-amber-300 ring-offset-2 ring-offset-background shadow-[0_0_18px_rgba(251,191,36,0.55)]",
+                    )}
+                  >
+                    {initial}
+                    {isVip && (
+                      <Crown
+                        className="absolute -top-2 -right-1 h-4 w-4 rotate-[18deg] fill-amber-300 text-amber-500 drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]"
+                        aria-label="VIP"
+                      />
+                    )}
+                  </div>
+                ) : (
+                  <OgAvatar size={28} className="shrink-0 sm:h-8 sm:w-8" />
+                )}
+                <Message
+                  from={msg.role}
+                  className={cn(
+                    "min-w-0 flex-1 max-w-[calc(100%-2rem)] gap-0.5 sm:max-w-[82%] lg:max-w-[74%]",
+                    isUser ? "items-end" : "items-start",
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "inline-flex items-center gap-1 px-1.5 text-[8px] font-bold uppercase",
+                      isUser ? (isVip ? "text-amber-400" : "text-primary") : "text-foreground/70",
+                    )}
+                  >
+                    {isUser ? "You" : "OG Bot"}
+                    {isUser && isVip && (
+                      <>
+                        <Crown className="h-3 w-3 fill-amber-300 text-amber-500" />
+                        <span className="text-amber-400">VIP</span>
+                      </>
+                    )}
+                  </span>
+                  <MessageContent
+                    className={cn(
+                      "break-words text-[13px] leading-[1.38] sm:text-sm",
+                      isUser
+                        ? isVip
+                          ? "rounded-2xl rounded-br-sm whitespace-pre-wrap px-3 py-2 font-medium text-amber-50 bg-gradient-to-br from-amber-500 via-amber-600 to-yellow-700 ring-1 ring-amber-300/60"
+                          : "rounded-2xl rounded-br-sm bg-primary px-3 py-2 text-primary-foreground whitespace-pre-wrap font-medium"
+                        : "w-full bg-transparent p-0 text-foreground shadow-none",
+                    )}
+                  >
+                    {msg.role === "assistant" ? (
+                      <MessageResponse className="prose-sm max-w-none prose-p:my-0.5 prose-p:leading-snug prose-ul:my-0.5 prose-ol:my-0.5 prose-headings:my-0.5 prose-code:text-primary">
+                        {msg.content}
+                      </MessageResponse>
+                    ) : (
+                      msg.content
+                    )}
+                  </MessageContent>
+                </Message>
+              </div>
+            );
+          })}
+          {(showSkeleton || m.isPending) && (
+            <div
+              className="flex items-end gap-3"
+              role="status"
+              aria-live="polite"
+              aria-label="OG Bot is typing"
+            >
+              <OgAvatar size={40} className="shrink-0 animate-pulse" />
+              <div className="flex flex-col gap-1.5 min-w-[60%] max-w-[78%]">
+                <span className="px-2 text-[10px] font-black uppercase tracking-[0.18em] text-foreground/70 inline-flex items-center gap-1.5">
+                  OG Bot
+                  <span className="font-bold normal-case tracking-normal text-muted-foreground/80">
+                    is typing<span className="inline-block animate-pulse">…</span>
+                  </span>
+                </span>
+                <div className="rounded-2xl rounded-bl-sm bg-card border-2 border-border px-4 py-3 inline-flex items-center">
+                  <TypingDots aria-label="OG Bot is typing" />
+                </div>
+                {/* Shimmering bubble skeletons — Suno-style "still cooking" placeholders */}
+                <div className="space-y-1.5">
+                  <div className="h-3 w-[85%] rounded-md bg-gradient-to-r from-muted via-muted/40 to-muted bg-[length:200%_100%] animate-[shimmer_1.6s_linear_infinite]" />
+                  <div className="h-3 w-[70%] rounded-md bg-gradient-to-r from-muted via-muted/40 to-muted bg-[length:200%_100%] animate-[shimmer_1.6s_linear_infinite]" />
+                  <div className="h-3 w-[55%] rounded-md bg-gradient-to-r from-muted via-muted/40 to-muted bg-[length:200%_100%] animate-[shimmer_1.6s_linear_infinite]" />
+                </div>
+                <span className="sr-only">OG Bot is generating a response</span>
+              </div>
+            </div>
+          )}
+        </div>
+        {!atBottom && (
+          <button
+            type="button"
+            onClick={() => scrollToBottom("smooth")}
+            aria-label="Jump to latest message"
+            className={cn(
+              "absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-primary/40 bg-background/90 px-3.5 py-1.5 text-xs font-bold text-foreground shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.6)] backdrop-blur-md transition hover:scale-105 active:scale-95",
+              hasNew &&
+                "border-primary bg-primary text-primary-foreground shadow-glow animate-[pop_0.25s_ease-out]",
+            )}
+          >
+            <ArrowDown className="h-3.5 w-3.5" />
+            {hasNew ? "New messages" : "Jump to latest"}
+          </button>
+        )}
+        <div aria-live="polite" aria-atomic="true" className="sr-only">
+          {jumpAnnounce}
+        </div>
       </div>
-      </div>
-
-
-
 
       {isOut && user && (
         <div className="flex flex-wrap items-center justify-between gap-2 border-t border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive sm:px-4">
@@ -799,9 +843,8 @@ export function OgChat({
           e.preventDefault();
           sendText(input);
         }}
-         className="sticky bottom-0 z-20 border-t border-border/80 bg-card/95 px-2 pb-[max(0.4rem,env(safe-area-inset-bottom))] pt-1.5 shadow-lg backdrop-blur transition-transform duration-150 supports-[backdrop-filter]:bg-card/75 sm:px-3 sm:py-2"
+        className="sticky bottom-0 z-20 border-t border-border/80 bg-card/95 px-2 pb-[max(0.4rem,env(safe-area-inset-bottom))] pt-1.5 shadow-lg backdrop-blur transition-transform duration-150 supports-[backdrop-filter]:bg-card/75 sm:px-3 sm:py-2"
       >
-
         {attachment && (
           <div className="mb-2 flex items-center gap-2 rounded-xl border border-border bg-muted/40 p-2">
             <img src={attachment.dataUrl} alt="" className="h-10 w-10 rounded-md object-cover" />
@@ -830,7 +873,7 @@ export function OgChat({
         {/* Unified composer pill — attachment | mic | textarea | send (Telegram/WhatsApp pattern) */}
         <div
           className={cn(
-             "flex items-end gap-0.5 rounded-xl border border-primary/40 bg-background/80 px-1 py-1 ring-1 ring-primary/20 backdrop-blur-xl transition focus-within:border-primary/70 focus-within:ring-2 focus-within:ring-primary/30 sm:rounded-2xl sm:px-2 sm:py-1.5",
+            "flex items-end gap-0.5 rounded-xl border border-primary/40 bg-background/80 px-1 py-1 ring-1 ring-primary/20 backdrop-blur-xl transition focus-within:border-primary/70 focus-within:ring-2 focus-within:ring-primary/30 sm:rounded-2xl sm:px-2 sm:py-1.5",
             (isOut || !user) && "opacity-70",
           )}
         >
@@ -902,8 +945,7 @@ export function OgChat({
               // newest messages visible without scrolling the whole page.
               window.setTimeout(() => scrollToBottom("auto"), 120);
             }}
-             className="min-h-9 max-h-24 flex-1 resize-none bg-transparent px-1.5 py-1.5 text-sm leading-snug placeholder:text-muted-foreground/70 focus:outline-none disabled:cursor-not-allowed sm:max-h-32 sm:px-2 sm:text-[15px]"
-
+            className="min-h-9 max-h-24 flex-1 resize-none bg-transparent px-1.5 py-1.5 text-sm leading-snug placeholder:text-muted-foreground/70 focus:outline-none disabled:cursor-not-allowed sm:max-h-32 sm:px-2 sm:text-[15px]"
           />
           <button
             type="submit"
@@ -913,10 +955,17 @@ export function OgChat({
             data-testid="og-loner-send"
             className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-brand text-primary-foreground shadow-[0_8px_22px_-6px_hsl(var(--primary)/0.6)] ring-1 ring-primary/40 transition hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 disabled:bg-muted disabled:text-muted-foreground disabled:shadow-none disabled:ring-0 sm:h-11 sm:w-11"
           >
-            {m.isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+            {m.isPending ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <Send className="h-5 w-5" />
+            )}
           </button>
         </div>
-        <p className="mt-1 flex items-center justify-between gap-2 px-1 text-[10px] font-medium text-muted-foreground/80 sm:mt-2.5 sm:flex-wrap sm:justify-start sm:px-2 sm:text-xs" aria-live="polite">
+        <p
+          className="mt-1 flex items-center justify-between gap-2 px-1 text-[10px] font-medium text-muted-foreground/80 sm:mt-2.5 sm:flex-wrap sm:justify-start sm:px-2 sm:text-xs"
+          aria-live="polite"
+        >
           {m.isPending ? (
             <span className="inline-flex items-center gap-1.5 font-semibold text-foreground/90">
               <Loader2 className="h-3 w-3 animate-spin" /> Sending…
@@ -924,14 +973,15 @@ export function OgChat({
           ) : (
             <span className="hidden sm:inline">Enter to send · Shift+Enter for newline</span>
           )}
-          <span aria-hidden className="hidden sm:inline">·</span>
-          <span><span className="font-bold text-foreground/90">{balance}</span> coin{balance === 1 ? "" : "s"} left</span>
+          <span aria-hidden className="hidden sm:inline">
+            ·
+          </span>
+          <span>
+            <span className="font-bold text-foreground/90">{balance}</span> coin
+            {balance === 1 ? "" : "s"} left
+          </span>
         </p>
-
       </form>
-
-
-
     </div>
   );
 }

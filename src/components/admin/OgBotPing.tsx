@@ -32,11 +32,24 @@ export function OgBotPing() {
   );
 
   const badge = (
-    <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium", tone)}>
-      {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-        : ok ? <CheckCircle2 className="h-3.5 w-3.5" />
-        : <AlertTriangle className="h-3.5 w-3.5" />}
-      {loading ? "Checking…" : ok ? `Online (${status?.status ?? 200})` : `Offline${status?.status ? ` (${status.status})` : ""}`}
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium",
+        tone,
+      )}
+    >
+      {loading ? (
+        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+      ) : ok ? (
+        <CheckCircle2 className="h-3.5 w-3.5" />
+      ) : (
+        <AlertTriangle className="h-3.5 w-3.5" />
+      )}
+      {loading
+        ? "Checking…"
+        : ok
+          ? `Online (${status?.status ?? 200})`
+          : `Offline${status?.status ? ` (${status.status})` : ""}`}
     </span>
   );
 

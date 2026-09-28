@@ -1,6 +1,9 @@
 import { Cpu } from "lucide-react";
 import {
-  Accordion, AccordionContent, AccordionItem, AccordionTrigger,
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
 } from "@/components/ui/accordion";
 
 const CAPABILITIES = [
@@ -48,8 +51,8 @@ export function HardwiredCapabilities() {
           </AccordionTrigger>
           <AccordionContent className="px-5 pb-5">
             <p className="mb-3 text-xs text-muted-foreground">
-              Read-only. These capabilities are permanently hard-wired into the OG Bot runtime
-              and cannot be toggled from this surface.
+              Read-only. These capabilities are permanently hard-wired into the OG Bot runtime and
+              cannot be toggled from this surface.
             </p>
             <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {CAPABILITIES.map((cap) => (

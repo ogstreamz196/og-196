@@ -17,7 +17,6 @@ import { setTelegramWebhook } from "@/lib/telegram-set-webhook.functions";
 import { cn } from "@/lib/utils";
 import { ConfirmAction } from "./ConfirmAction";
 
-
 const LAST_SET_KEY = "telegram:lastSetWebhookAt";
 const AUTO_ATTEMPT_KEY = "telegram:autoRegisterAttemptedAt";
 const EXPECTED_WEBHOOK_PATH = "/api/public/telegram/webhook";
@@ -69,16 +68,12 @@ export function TelegramWebhookStatus({ autoRegister = true }: Props = {}) {
       setLastSetAt(stamp);
       if (!opts?.silent) {
         toast.success(
-          r.botUsername
-            ? `Webhook registered on @${r.botUsername}`
-            : "Webhook registered",
+          r.botUsername ? `Webhook registered on @${r.botUsername}` : "Webhook registered",
           { description: r.url },
         );
       } else {
         toast.success(
-          r.botUsername
-            ? `Auto-fixed webhook on @${r.botUsername}`
-            : "Auto-fixed Telegram webhook",
+          r.botUsername ? `Auto-fixed webhook on @${r.botUsername}` : "Auto-fixed Telegram webhook",
         );
       }
       q.refetch();
@@ -96,8 +91,7 @@ export function TelegramWebhookStatus({ autoRegister = true }: Props = {}) {
     const data = q.data;
     const isMissing = !data.ok || !data.url;
     const wrongUrl = data.url ? !data.url.endsWith(EXPECTED_WEBHOOK_PATH) : false;
-    const recentErr =
-      !!data.lastErrorDate && Date.now() / 1000 - data.lastErrorDate < 60 * 60;
+    const recentErr = !!data.lastErrorDate && Date.now() / 1000 - data.lastErrorDate < 60 * 60;
     if (!(isMissing || wrongUrl || recentErr)) return;
     // Throttle: don't auto-retry more than once per 10 minutes across reloads.
     try {
@@ -120,8 +114,7 @@ export function TelegramWebhookStatus({ autoRegister = true }: Props = {}) {
 
   // Receiving updates if: webhook is up AND no recent error AND we either have
   // historical pending traffic or no error in the last 24h.
-  const recentErr24h =
-    !!data?.lastErrorDate && Date.now() / 1000 - data.lastErrorDate < 86_400;
+  const recentErr24h = !!data?.lastErrorDate && Date.now() / 1000 - data.lastErrorDate < 86_400;
   const receiving = !!data?.ok && !!data?.url && !recentErr24h;
 
   const tone = loading
@@ -151,9 +144,7 @@ export function TelegramWebhookStatus({ autoRegister = true }: Props = {}) {
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="text-sm font-bold uppercase tracking-[0.18em]">
-              Telegram webhook
-            </p>
+            <p className="text-sm font-bold uppercase tracking-[0.18em]">Telegram webhook</p>
             <span
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium",
@@ -175,9 +166,7 @@ export function TelegramWebhookStatus({ autoRegister = true }: Props = {}) {
               className="ml-auto inline-flex items-center gap-1 rounded-full border border-border/50 px-2 py-1 text-[10px] uppercase tracking-wider text-muted-foreground hover:bg-muted/40"
               aria-label="Refresh webhook status"
             >
-              <RefreshCw
-                className={cn("h-3 w-3", q.isFetching && "animate-spin")}
-              />
+              <RefreshCw className={cn("h-3 w-3", q.isFetching && "animate-spin")} />
               Refresh
             </button>
             <ConfirmAction
@@ -206,7 +195,6 @@ export function TelegramWebhookStatus({ autoRegister = true }: Props = {}) {
                 Re-register
               </button>
             </ConfirmAction>
-
           </div>
 
           {data?.url ? (
@@ -226,34 +214,24 @@ export function TelegramWebhookStatus({ autoRegister = true }: Props = {}) {
                 <dt className="text-[10px] uppercase tracking-wider text-muted-foreground">
                   Pending
                 </dt>
-                <dd className="font-mono text-sm">
-                  {data.pendingUpdateCount}
-                </dd>
+                <dd className="font-mono text-sm">{data.pendingUpdateCount}</dd>
               </div>
               <div className="rounded-lg bg-muted/30 p-2">
                 <dt className="text-[10px] uppercase tracking-wider text-muted-foreground">
                   Max conns
                 </dt>
-                <dd className="font-mono text-sm">
-                  {data.maxConnections ?? "—"}
-                </dd>
+                <dd className="font-mono text-sm">{data.maxConnections ?? "—"}</dd>
               </div>
               <div className="rounded-lg bg-muted/30 p-2">
-                <dt className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                  IP
-                </dt>
-                <dd className="truncate font-mono text-xs">
-                  {data.ipAddress ?? "—"}
-                </dd>
+                <dt className="text-[10px] uppercase tracking-wider text-muted-foreground">IP</dt>
+                <dd className="truncate font-mono text-xs">{data.ipAddress ?? "—"}</dd>
               </div>
               <div className="rounded-lg bg-muted/30 p-2">
                 <dt className="text-[10px] uppercase tracking-wider text-muted-foreground">
                   Allowed
                 </dt>
                 <dd className="truncate text-xs">
-                  {data.allowedUpdates?.length
-                    ? data.allowedUpdates.join(", ")
-                    : "all"}
+                  {data.allowedUpdates?.length ? data.allowedUpdates.join(", ") : "all"}
                 </dd>
               </div>
             </dl>
@@ -261,8 +239,7 @@ export function TelegramWebhookStatus({ autoRegister = true }: Props = {}) {
 
           {data?.lastErrorMessage ? (
             <p className="mt-2 rounded-lg border border-amber-400/40 bg-amber-500/10 px-2 py-1 text-xs text-amber-300">
-              Last delivery error{" "}
-              {data.lastErrorDate ? `at ${fmtTs(data.lastErrorDate)}` : ""}:{" "}
+              Last delivery error {data.lastErrorDate ? `at ${fmtTs(data.lastErrorDate)}` : ""}:{" "}
               {data.lastErrorMessage}
             </p>
           ) : null}
@@ -301,9 +278,7 @@ export function TelegramWebhookStatus({ autoRegister = true }: Props = {}) {
                 <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
                   Checked
                 </p>
-                <p className="font-mono">
-                  {new Date(data.checkedAt).toLocaleTimeString()}
-                </p>
+                <p className="font-mono">{new Date(data.checkedAt).toLocaleTimeString()}</p>
               </div>
             </div>
           ) : null}

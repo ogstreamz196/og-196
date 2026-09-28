@@ -19,7 +19,6 @@ import {
   Gift,
   Infinity as InfinityIcon,
   Share2,
-  
   Send,
   Smartphone,
   Globe,
@@ -58,9 +57,16 @@ export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
     meta: [
       { title: "AI Music Studio — OG Streamz" },
-      { name: "description", content: "Your OG Streamz studio: generate AI songs, chat with OG Bot, and manage your coin-powered creator economy." },
+      {
+        name: "description",
+        content:
+          "Your OG Streamz studio: generate AI songs, chat with OG Bot, and manage your coin-powered creator economy.",
+      },
       { property: "og:title", content: "AI Music Studio — OG Streamz" },
-      { property: "og:description", content: "Generate AI songs, chat with OG Bot, and run your creator economy." },
+      {
+        property: "og:description",
+        content: "Generate AI songs, chat with OG Bot, and run your creator economy.",
+      },
       { property: "og:url", content: "https://ogwidget.lovable.app/" },
     ],
     links: [{ rel: "canonical", href: "https://ogwidget.lovable.app/" }],
@@ -70,12 +76,36 @@ export const Route = createFileRoute("/_authenticated/")({
 type PromptIdea = { title: string; description: string; vibe: string };
 
 const EXAMPLE_PROMPTS: PromptIdea[] = [
-  { title: "Late night drive", description: "Synthwave with moody vocals and neon city energy.", vibe: "Synthwave" },
-  { title: "Sunday hangover", description: "Lo-fi acoustic ballad about regretting last night.", vibe: "Lo-fi" },
-  { title: "Gym warm-up", description: "Hard-hitting trap beat with chant-style hooks.", vibe: "Trap" },
-  { title: "Festival anthem", description: "Big-room house drop, euphoric chorus, hands in the air.", vibe: "House" },
-  { title: "Heartbreak letter", description: "Slow piano ballad with raw, emotional lyrics.", vibe: "Ballad" },
-  { title: "Pirate radio cypher", description: "UK drill instrumental with sliding 808s and dark keys.", vibe: "Drill" },
+  {
+    title: "Late night drive",
+    description: "Synthwave with moody vocals and neon city energy.",
+    vibe: "Synthwave",
+  },
+  {
+    title: "Sunday hangover",
+    description: "Lo-fi acoustic ballad about regretting last night.",
+    vibe: "Lo-fi",
+  },
+  {
+    title: "Gym warm-up",
+    description: "Hard-hitting trap beat with chant-style hooks.",
+    vibe: "Trap",
+  },
+  {
+    title: "Festival anthem",
+    description: "Big-room house drop, euphoric chorus, hands in the air.",
+    vibe: "House",
+  },
+  {
+    title: "Heartbreak letter",
+    description: "Slow piano ballad with raw, emotional lyrics.",
+    vibe: "Ballad",
+  },
+  {
+    title: "Pirate radio cypher",
+    description: "UK drill instrumental with sliding 808s and dark keys.",
+    vibe: "Drill",
+  },
 ];
 
 function DashboardHome() {
@@ -118,12 +148,18 @@ function DashboardHome() {
           className="pointer-events-none absolute -inset-32 opacity-40 [background:conic-gradient(from_0deg,oklch(0.55_0.22_268/0.35),transparent_35%,oklch(0.7_0.22_25/0.3)_60%,transparent_85%,oklch(0.55_0.22_268/0.35))] animate-[spin_22s_linear_infinite] blur-3xl"
         />
         {/* Floating cartoon blobs */}
-        <div aria-hidden className="pointer-events-none absolute -right-10 top-8 h-40 w-40 rounded-full bg-primary/30 blur-2xl wc-blob" />
-        <div aria-hidden className="pointer-events-none absolute -left-12 bottom-0 h-32 w-32 rounded-full bg-accent/30 blur-2xl wc-float-slow" />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-10 top-8 h-40 w-40 rounded-full bg-primary/30 blur-2xl wc-blob"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -left-12 bottom-0 h-32 w-32 rounded-full bg-accent/30 blur-2xl wc-float-slow"
+        />
         {/* Sparkle particles */}
         <div aria-hidden className="pointer-events-none absolute inset-0">
           {[
-            { top: "12%", left: "8%", d: "0s",   s: "h-2 w-2" },
+            { top: "12%", left: "8%", d: "0s", s: "h-2 w-2" },
             { top: "22%", left: "92%", d: "0.6s", s: "h-1.5 w-1.5" },
             { top: "68%", left: "14%", d: "1.2s", s: "h-1 w-1" },
             { top: "82%", left: "78%", d: "0.3s", s: "h-2 w-2" },
@@ -142,13 +178,22 @@ function DashboardHome() {
           <div className="flex animate-[wc-shimmer_22s_linear_infinite] whitespace-nowrap text-xs font-bold uppercase tracking-[0.3em] text-foreground/70 [background:linear-gradient(90deg,transparent,oklch(1_0_0/0.15),transparent)] [background-size:200%_100%] sm:text-sm">
             {Array.from({ length: 2 }).map((_, k) => (
               <div key={k} className="flex shrink-0 items-center gap-6 px-6">
-                <span className="inline-flex items-center gap-2"><Disc3 className="h-4 w-4 animate-[spin_4s_linear_infinite] text-primary" /> Live studio</span>
+                <span className="inline-flex items-center gap-2">
+                  <Disc3 className="h-4 w-4 animate-[spin_4s_linear_infinite] text-primary" /> Live
+                  studio
+                </span>
                 <span className="opacity-40">✦</span>
-                <span className="inline-flex items-center gap-2"><Radio className="h-4 w-4 text-accent" /> OG Bot online</span>
+                <span className="inline-flex items-center gap-2">
+                  <Radio className="h-4 w-4 text-accent" /> OG Bot online
+                </span>
                 <span className="opacity-40">✦</span>
-                <span className="inline-flex items-center gap-2"><AudioLines className="h-4 w-4 text-primary" /> Beats ready</span>
+                <span className="inline-flex items-center gap-2">
+                  <AudioLines className="h-4 w-4 text-primary" /> Beats ready
+                </span>
                 <span className="opacity-40">✦</span>
-                <span className="inline-flex items-center gap-2"><Sparkles className="h-4 w-4 text-accent" /> Mint a hit</span>
+                <span className="inline-flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-accent" /> Mint a hit
+                </span>
                 <span className="opacity-40">✦</span>
               </div>
             ))}
@@ -158,16 +203,26 @@ function DashboardHome() {
         <div className="relative flex flex-col gap-3 sm:flex sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-4">
           <div className="order-2 flex w-full flex-row items-center gap-2 sm:order-none sm:w-auto sm:flex-row sm:items-center sm:text-lg">
             {isVip && (
-              <Badge variant="secondary" className="justify-center gap-1 rounded-full border-2 border-white/20 px-3 py-1.5 text-xs shadow-glow wc-bounce-soft sm:gap-1.5 sm:px-5 sm:py-2.5 sm:text-lg">
-                <Sparkles className="h-4 w-4 animate-[wiggle_2s_ease-in-out_infinite] sm:h-6 sm:w-6" /> VIP
+              <Badge
+                variant="secondary"
+                className="justify-center gap-1 rounded-full border-2 border-white/20 px-3 py-1.5 text-xs shadow-glow wc-bounce-soft sm:gap-1.5 sm:px-5 sm:py-2.5 sm:text-lg"
+              >
+                <Sparkles className="h-4 w-4 animate-[wiggle_2s_ease-in-out_infinite] sm:h-6 sm:w-6" />{" "}
+                VIP
               </Badge>
             )}
-            <Badge variant="outline" className="justify-center gap-1.5 rounded-full border-2 border-white/20 bg-white/5 px-3 py-1.5 text-xs sm:gap-2 sm:px-5 sm:py-2.5 sm:text-lg">
+            <Badge
+              variant="outline"
+              className="justify-center gap-1.5 rounded-full border-2 border-white/20 bg-white/5 px-3 py-1.5 text-xs sm:gap-2 sm:px-5 sm:py-2.5 sm:text-lg"
+            >
               <Coins className="h-4 w-4 shrink-0 text-primary animate-[bounce_2s_ease-in-out_infinite] sm:h-6 sm:w-6" />
               <span className="truncate">{balance} OG coins</span>
             </Badge>
             {/* Live mini equalizer */}
-            <span aria-hidden className="ml-1 hidden items-end gap-[3px] rounded-full border-2 border-white/15 bg-white/[0.04] px-3 py-2 sm:inline-flex">
+            <span
+              aria-hidden
+              className="ml-1 hidden items-end gap-[3px] rounded-full border-2 border-white/15 bg-white/[0.04] px-3 py-2 sm:inline-flex"
+            >
               <span className="inline-flex items-center gap-1.5 pr-2 text-xs font-bold uppercase tracking-[0.2em] text-foreground/70">
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
@@ -179,17 +234,25 @@ function DashboardHome() {
                 <span
                   key={i}
                   className="w-[3px] rounded-full bg-gradient-to-t from-primary/60 to-primary"
-                  style={{ height: `${h * 18}px`, animation: `eqPulse 0.${(i % 5) + 4}s ease-in-out ${i * 0.08}s infinite alternate` }}
+                  style={{
+                    height: `${h * 18}px`,
+                    animation: `eqPulse 0.${(i % 5) + 4}s ease-in-out ${i * 0.08}s infinite alternate`,
+                  }}
                 />
               ))}
             </span>
           </div>
           <div className="order-1 w-full min-w-0 basis-full rounded-3xl bg-background/35 p-4 text-center backdrop-blur-md ring-2 ring-white/10 transition-transform duration-500 group-hover/welcome:-translate-y-1 sm:order-none sm:p-8">
             <p className="inline-flex items-center justify-center gap-2 text-xs uppercase tracking-[0.28em] text-muted-foreground sm:text-xl">
-              <span className="inline-block animate-[wiggle_1.6s_ease-in-out_infinite] [transform-origin:70%_70%]">👋</span>
+              <span className="inline-block animate-[wiggle_1.6s_ease-in-out_infinite] [transform-origin:70%_70%]">
+                👋
+              </span>
               <span className="relative">
                 Welcome back
-                <span aria-hidden className="absolute -bottom-1 left-0 h-[2px] w-full origin-left scale-x-0 bg-gradient-to-r from-primary via-accent to-primary animate-[shimmer_3s_ease-in-out_infinite] [animation:wc-pop_0.8s_0.3s_cubic-bezier(.34,1.56,.64,1)_forwards]" />
+                <span
+                  aria-hidden
+                  className="absolute -bottom-1 left-0 h-[2px] w-full origin-left scale-x-0 bg-gradient-to-r from-primary via-accent to-primary animate-[shimmer_3s_ease-in-out_infinite] [animation:wc-pop_0.8s_0.3s_cubic-bezier(.34,1.56,.64,1)_forwards]"
+                />
               </span>
             </p>
             <div className="mt-4 flex flex-col items-center gap-4 sm:mt-5 sm:gap-7">
@@ -226,11 +289,17 @@ function DashboardHome() {
                   </span>
                 </h1>
               </DodgyText>
-
             </div>
             <p className="mx-auto mt-5 max-w-2xl text-sm leading-[1.5] text-foreground [text-shadow:0_1px_12px_rgba(0,0,0,0.75)] sm:text-xl md:text-2xl">
-              Dive into <span className="text-gradient-red font-black tracking-tight text-[0.92em]">MusicHub</span> to create tracks, or open{" "}
-              <span className="text-gradient-red font-black tracking-tight text-[0.92em]">OG Streamz Messenger</span> to chat with{" "}
+              Dive into{" "}
+              <span className="text-gradient-red font-black tracking-tight text-[0.92em]">
+                MusicHub
+              </span>{" "}
+              to create tracks, or open{" "}
+              <span className="text-gradient-red font-black tracking-tight text-[0.92em]">
+                OG Streamz Messenger
+              </span>{" "}
+              to chat with{" "}
               <span className="relative inline-block text-gradient-red font-black tracking-tight text-[0.92em]">
                 OG Bot
                 <span aria-hidden className="ml-1 inline-flex gap-0.5 align-middle">
@@ -242,9 +311,7 @@ function DashboardHome() {
               .
             </p>
           </div>
-
         </div>
-
       </section>
 
       {/* Primary CTAs — MusicHub + OG Bot at the top */}
@@ -286,7 +353,6 @@ function DashboardHome() {
 
       {/* Ask OG Bot CTA removed per request */}
 
-
       {/* Continuity demo */}
       {/* <ContinuityDemo /> hidden per request */}
 
@@ -296,29 +362,45 @@ function DashboardHome() {
           ⚡ Quick actions
         </h2>
         <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 sm:gap-4">
-          <QuickAction to="/library" icon={<Plus className="h-7 w-7" />} label="Create" tone="violet" />
-          <QuickAction to="/messenger" icon={<Wand2 className="h-7 w-7" />} label="Ask OG" tone="pink" />
-          <QuickAction to="/library" icon={<Library className="h-7 w-7" />} label="Music" tone="cyan" />
-          <QuickAction to="/referrals" icon={<Gift className="h-7 w-7" />} label="Earn" tone="emerald" />
+          <QuickAction
+            to="/library"
+            icon={<Plus className="h-7 w-7" />}
+            label="Create"
+            tone="violet"
+          />
+          <QuickAction
+            to="/messenger"
+            icon={<Wand2 className="h-7 w-7" />}
+            label="Ask OG"
+            tone="pink"
+          />
+          <QuickAction
+            to="/library"
+            icon={<Library className="h-7 w-7" />}
+            label="Music"
+            tone="cyan"
+          />
+          <QuickAction
+            to="/referrals"
+            icon={<Gift className="h-7 w-7" />}
+            label="Earn"
+            tone="emerald"
+          />
         </div>
       </section>
-
-
-
-
 
       <DashboardGenerationHistory songs={recentSongs} />
 
       <div className="grid grid-cols-1 gap-6">
-
-
         {/* Next steps */}
         <Card className="rounded-[2rem] border-2 border-white/15 shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)]">
           <CardHeader>
             <CardTitle className="font-display text-2xl font-black leading-[1.1] tracking-tight break-words sm:text-4xl md:text-5xl">
               ✅ Next steps
             </CardTitle>
-            <CardDescription className="text-base sm:text-lg">Get the most out of OG Studio.</CardDescription>
+            <CardDescription className="text-base sm:text-lg">
+              Get the most out of OG Studio.
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <ChecklistItem
@@ -356,7 +438,10 @@ function AskOgCta() {
     const text = prompt.trim();
     if (text && typeof window !== "undefined") {
       try {
-        window.localStorage.setItem("og:pending-prompt", JSON.stringify({ service, text, at: Date.now() }));
+        window.localStorage.setItem(
+          "og:pending-prompt",
+          JSON.stringify({ service, text, at: Date.now() }),
+        );
       } catch {}
     }
     setOpen(false);
@@ -371,13 +456,18 @@ function AskOgCta() {
             type="button"
             className="group relative flex w-full items-center justify-between gap-4 overflow-hidden rounded-[2rem] border-2 border-primary/50 bg-gradient-to-r from-primary/25 via-accent/20 to-primary/25 p-6 text-left shadow-[0_24px_60px_-20px_rgba(80,60,255,0.55)] backdrop-blur-xl transition-all hover:-translate-y-1 hover:border-primary hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:p-8"
           >
-            <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-primary/40 blur-3xl transition-transform duration-700 group-hover:scale-110" />
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-primary/40 blur-3xl transition-transform duration-700 group-hover:scale-110"
+            />
             <div className="relative flex items-center gap-5">
               <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-primary/30 ring-2 ring-primary/60 sm:h-16 sm:w-16">
                 <Sparkles className="h-7 w-7 text-primary sm:h-8 sm:w-8" />
               </span>
               <div className="min-w-0">
-                <div className="text-[10px] font-bold uppercase tracking-[0.28em] text-primary">Ask OG Bot</div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.28em] text-primary">
+                  Ask OG Bot
+                </div>
                 <h2 className="font-display mt-1 text-2xl font-black leading-tight sm:text-4xl">
                   Start any task — pick a service & go
                 </h2>
@@ -394,9 +484,12 @@ function AskOgCta() {
         </DialogTrigger>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle className="font-display text-2xl font-black">What do you want to do?</DialogTitle>
+            <DialogTitle className="font-display text-2xl font-black">
+              What do you want to do?
+            </DialogTitle>
             <DialogDescription>
-              Pick a service and tell OG Bot what to spin up. We'll drop you in with your prompt ready.
+              Pick a service and tell OG Bot what to spin up. We'll drop you in with your prompt
+              ready.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -413,7 +506,11 @@ function AskOgCta() {
                       : "text-muted-foreground hover:text-foreground",
                   )}
                 >
-                  {s === "musichub" ? <Music2 className="h-4 w-4" /> : <MessageSquareMore className="h-4 w-4" />}
+                  {s === "musichub" ? (
+                    <Music2 className="h-4 w-4" />
+                  ) : (
+                    <MessageSquareMore className="h-4 w-4" />
+                  )}
                   {s === "musichub" ? "MusicHub" : "Messenger"}
                 </button>
               ))}
@@ -429,7 +526,11 @@ function AskOgCta() {
               rows={4}
               className="resize-none rounded-xl text-base"
             />
-            <Button onClick={handleStart} size="lg" className="w-full gap-2 rounded-xl text-base font-bold">
+            <Button
+              onClick={handleStart}
+              size="lg"
+              className="w-full gap-2 rounded-xl text-base font-bold"
+            >
               <Send className="h-4 w-4" />
               Start in {service === "musichub" ? "MusicHub" : "Messenger"}
             </Button>
@@ -443,14 +544,21 @@ function AskOgCta() {
 function ContinuityDemo() {
   return (
     <section className="relative overflow-hidden rounded-[2rem] border-2 border-white/15 bg-card/55 p-6 shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)] backdrop-blur-xl sm:p-8">
-      <div aria-hidden className="pointer-events-none absolute -left-16 -bottom-16 h-56 w-56 rounded-full bg-accent/20 blur-3xl" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -left-16 -bottom-16 h-56 w-56 rounded-full bg-accent/20 blur-3xl"
+      />
       <div className="relative mb-5 flex items-center gap-3">
         <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary/20 ring-1 ring-primary/40">
           <InfinityIcon className="h-5 w-5 text-primary" />
         </span>
         <div>
-          <div className="text-[10px] font-bold uppercase tracking-[0.28em] text-primary">Continue the conversation</div>
-          <h2 className="font-display text-xl font-black sm:text-2xl">One bot, one memory, every surface.</h2>
+          <div className="text-[10px] font-bold uppercase tracking-[0.28em] text-primary">
+            Continue the conversation
+          </div>
+          <h2 className="font-display text-xl font-black sm:text-2xl">
+            One bot, one memory, every surface.
+          </h2>
         </div>
       </div>
       <div className="relative grid gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-stretch">
@@ -476,7 +584,8 @@ function ContinuityDemo() {
         />
       </div>
       <p className="relative mt-5 text-center text-xs text-muted-foreground sm:text-sm">
-        Every OG Bot — web, Messenger, Telegram, MusicHub — shares the same memory. Pick up exactly where you left off.
+        Every OG Bot — web, Messenger, Telegram, MusicHub — shares the same memory. Pick up exactly
+        where you left off.
       </p>
     </section>
   );
@@ -499,7 +608,9 @@ function ChatBubbleCard({
     <div
       className={cn(
         "flex flex-col gap-3 rounded-2xl border bg-background/60 p-4 backdrop-blur",
-        highlight ? "border-primary/50 shadow-[0_10px_30px_-15px_rgba(80,60,255,0.6)]" : "border-white/10",
+        highlight
+          ? "border-primary/50 shadow-[0_10px_30px_-15px_rgba(80,60,255,0.6)]"
+          : "border-white/10",
       )}
     >
       <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
@@ -519,7 +630,6 @@ function ChatBubbleCard({
     </div>
   );
 }
-
 
 function PrimaryCard({
   to,
@@ -558,16 +668,21 @@ function PrimaryCard({
         aria-hidden
         className={
           "pointer-events-none absolute inset-0 opacity-80 " +
-           (isAccent
+          (isAccent
             ? "bg-[radial-gradient(circle_at_top,oklch(0.65_0.18_310/0.32),transparent_65%)]"
-             : isCinema
-               ? "bg-[radial-gradient(circle_at_top,oklch(0.62_0.22_25/0.28),transparent_65%)]"
-               : "bg-[radial-gradient(circle_at_top,oklch(0.55_0.22_268/0.32),transparent_65%)]")
+            : isCinema
+              ? "bg-[radial-gradient(circle_at_top,oklch(0.62_0.22_25/0.28),transparent_65%)]"
+              : "bg-[radial-gradient(circle_at_top,oklch(0.55_0.22_268/0.32),transparent_65%)]")
         }
       />
 
       {/* HERO IMAGE — large, meaningful, fills the top */}
-      <div className={cn("relative w-full overflow-hidden", wide ? "aspect-video sm:aspect-auto sm:min-h-72" : "aspect-square")}>
+      <div
+        className={cn(
+          "relative w-full overflow-hidden",
+          wide ? "aspect-video sm:aspect-auto sm:min-h-72" : "aspect-square",
+        )}
+      >
         <img
           src={image}
           alt={imageAlt}
@@ -576,7 +691,7 @@ function PrimaryCard({
           height={768}
           className={
             "h-full w-full object-cover transition-transform duration-700 group-hover:scale-110 " +
-             (isAccent ? "p-4 sm:p-6" : "")
+            (isAccent ? "p-4 sm:p-6" : "")
           }
         />
         <div
@@ -622,8 +737,6 @@ function PrimaryCard({
   );
 }
 
-
-
 const QUICK_TONES = {
   violet: "from-violet-500/30 to-fuchsia-500/20 text-violet-200 ring-violet-400/40",
   cyan: "from-cyan-500/30 to-sky-500/20 text-cyan-200 ring-cyan-400/40",
@@ -668,7 +781,10 @@ function PromptCard({ prompt }: { prompt: PromptIdea }) {
       >
         <div className="flex items-center justify-between gap-2">
           <p className="text-xl font-bold text-foreground">{prompt.title}</p>
-          <Badge variant="outline" className="shrink-0 rounded-full border-2 border-white/15 bg-white/[0.04] text-sm">
+          <Badge
+            variant="outline"
+            className="shrink-0 rounded-full border-2 border-white/15 bg-white/[0.04] text-sm"
+          >
             {prompt.vibe}
           </Badge>
         </div>
@@ -712,7 +828,10 @@ function RecentRow({ song }: { song: RecentSong }) {
             {new Date(song.created_at).toLocaleDateString()}
           </p>
         </div>
-        <Badge variant="outline" className="shrink-0 border-white/10 bg-white/[0.04] text-sm capitalize">
+        <Badge
+          variant="outline"
+          className="shrink-0 border-white/10 bg-white/[0.04] text-sm capitalize"
+        >
           {song.status}
         </Badge>
         <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
@@ -751,7 +870,10 @@ function EmptyRecent() {
       </div>
       <Link
         to="/library"
-        className={cn(buttonVariants({ size: "lg", variant: "premium" }), "mt-2 rounded-full text-base")}
+        className={cn(
+          buttonVariants({ size: "lg", variant: "premium" }),
+          "mt-2 rounded-full text-base",
+        )}
       >
         Create a song
       </Link>

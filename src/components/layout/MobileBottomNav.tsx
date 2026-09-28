@@ -12,8 +12,18 @@ type Tab = {
 const TABS: Tab[] = [
   { to: "/", label: "Home", icon: Home, match: (p) => p === "/" },
   { to: "/library", label: "Music", icon: Library, match: (p) => p.startsWith("/library") },
-  { to: "/messenger", label: "OG Bot", icon: MessageCircle, match: (p) => p.startsWith("/messenger") },
-  { to: "/store", label: "Store", icon: ShoppingBag, match: (p) => p.startsWith("/store") || p.startsWith("/buy-coins") },
+  {
+    to: "/messenger",
+    label: "OG Bot",
+    icon: MessageCircle,
+    match: (p) => p.startsWith("/messenger"),
+  },
+  {
+    to: "/store",
+    label: "Store",
+    icon: ShoppingBag,
+    match: (p) => p.startsWith("/store") || p.startsWith("/buy-coins"),
+  },
   { to: "/referrals", label: "Earn", icon: Sparkles, match: (p) => p.startsWith("/referrals") },
 ];
 
@@ -36,9 +46,7 @@ export function MobileBottomNav() {
                 aria-current={active ? "page" : undefined}
                 aria-label={label}
                 className={`flex min-h-[56px] min-w-0 flex-col items-center justify-center gap-0.5 px-1 py-1.5 text-[9px] font-semibold uppercase transition-colors min-[380px]:px-2 min-[380px]:text-[10px] ${
-                  active
-                    ? "text-primary"
-                    : "text-muted-foreground hover:text-foreground"
+                  active ? "text-primary" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <Icon

@@ -121,7 +121,9 @@ async function findRowIndex(
   return null;
 }
 
-export async function upsertProfileRowToSheet(userId: string): Promise<{ ok: boolean; reason?: string }> {
+export async function upsertProfileRowToSheet(
+  userId: string,
+): Promise<{ ok: boolean; reason?: string }> {
   const headers = gwHeaders();
   if (!headers) return { ok: false, reason: "google_sheets connector not configured" };
   const spreadsheetId = await getSheetId();
@@ -166,7 +168,11 @@ export async function upsertProfileRowToSheet(userId: string): Promise<{ ok: boo
   return { ok: res.ok, reason: res.ok ? undefined : `append HTTP ${res.status}` };
 }
 
-export async function resyncAllProfilesToSheet(): Promise<{ ok: boolean; count: number; reason?: string }> {
+export async function resyncAllProfilesToSheet(): Promise<{
+  ok: boolean;
+  count: number;
+  reason?: string;
+}> {
   const headers = gwHeaders();
   if (!headers) return { ok: false, count: 0, reason: "google_sheets connector not configured" };
   const spreadsheetId = await getSheetId();
@@ -186,7 +192,10 @@ export async function resyncAllProfilesToSheet(): Promise<{ ok: boolean; count: 
   const clearUrl = `${GW}/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(`${TAB}!A:Z`)}:clear`;
   await fetch(clearUrl, { method: "POST", headers }).catch(() => null);
 
-  const values: (string | number | null)[][] = [HEADERS, ...rows.map((r) => rowFrom(r as ProfileRow))];
+  const values: (string | number | null)[][] = [
+    HEADERS,
+    ...rows.map((r) => rowFrom(r as ProfileRow)),
+  ];
   const writeUrl = `${GW}/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(
     `${TAB}!A1`,
   )}?valueInputOption=RAW`;

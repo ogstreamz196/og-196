@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
 import { DODGE_QUERIES, shouldDodgeCursor } from "./dodgy-logo-detect";
 
-
 type Props = {
   /** Pixel size of the logo. */
   size?: number;
@@ -55,8 +54,6 @@ export function DodgyLogo({
       window.removeEventListener("touchstart", onTouch);
     };
   }, []);
-
-
 
   useEffect(() => {
     const el = wrapRef.current;

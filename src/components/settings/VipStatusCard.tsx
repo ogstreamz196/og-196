@@ -16,7 +16,9 @@ function formatDate(iso: string | null): string {
   if (!iso) return "—";
   try {
     return new Date(iso).toLocaleDateString(undefined, {
-      day: "numeric", month: "short", year: "numeric",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
     });
   } catch {
     return "—";
@@ -33,7 +35,10 @@ export function VipStatusCard() {
     setBusy(true);
     try {
       const res = await openPortal({
-        data: { returnUrl: window.location.origin + "/settings", environment: getStripeEnvironment() },
+        data: {
+          returnUrl: window.location.origin + "/settings",
+          environment: getStripeEnvironment(),
+        },
       });
       if ("error" in res) {
         toast.error(res.error);
@@ -72,7 +77,9 @@ export function VipStatusCard() {
             <Badge variant="outline">Not subscribed</Badge>
           )}
           {sub?.status && sub.status !== "active" && (
-            <Badge variant="secondary" className="capitalize">{sub.status.replace(/_/g, " ")}</Badge>
+            <Badge variant="secondary" className="capitalize">
+              {sub.status.replace(/_/g, " ")}
+            </Badge>
           )}
         </div>
 
@@ -89,11 +96,18 @@ export function VipStatusCard() {
         <div className="flex min-w-0 flex-wrap gap-2">
           {isVip ? (
             <Button onClick={handleManage} disabled={busy} variant="outline">
-              {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ExternalLink className="mr-2 h-4 w-4" />}
+              {busy ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <ExternalLink className="mr-2 h-4 w-4" />
+              )}
               Manage my subscription
             </Button>
           ) : (
-            <Button asChild className="h-auto min-h-11 w-full whitespace-normal bg-gradient-brand py-2 text-center leading-tight text-primary-foreground shadow-glow min-[430px]:w-auto">
+            <Button
+              asChild
+              className="h-auto min-h-11 w-full whitespace-normal bg-gradient-brand py-2 text-center leading-tight text-primary-foreground shadow-glow min-[430px]:w-auto"
+            >
               <Link to="/buy-coins" search={{ flow: "vip" } as never}>
                 <Crown className="mr-2 h-4 w-4" /> Upgrade to OG VIP — £5/month
               </Link>

@@ -2,18 +2,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import {
-  CheckCircle2,
-  MessageCircle,
-  AlertCircle,
-  Loader2,
-  XCircle,
-  Send,
-} from "lucide-react";
-import {
-  getMyTelegramStatus,
-  getMyTelegramLinkToken,
-} from "@/lib/telegram-admin.functions";
+import { CheckCircle2, MessageCircle, AlertCircle, Loader2, XCircle, Send } from "lucide-react";
+import { getMyTelegramStatus, getMyTelegramLinkToken } from "@/lib/telegram-admin.functions";
 
 const TELEGRAM_BOT_USERNAME = "OGStreamzBot";
 
@@ -116,8 +106,7 @@ export function TelegramLinkStatus() {
       const { token } = await tokenFn();
       if (!token) throw new Error("No token");
       toast.message("Opening Telegram…", {
-        description:
-          "Tap Start and allow ALL permissions so OG Bot can message you.",
+        description: "Tap Start and allow ALL permissions so OG Bot can message you.",
       });
       launchedAt.current = Date.now();
       const url = `https://t.me/${TELEGRAM_BOT_USERNAME}?start=${token}`;
@@ -206,9 +195,7 @@ export function TelegramLinkStatus() {
         <span
           className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${tone.iconBg} ${tone.iconText}`}
         >
-          <Icon
-            className={`h-5 w-5 ${state === "pending" ? "animate-spin" : ""}`}
-          />
+          <Icon className={`h-5 w-5 ${state === "pending" ? "animate-spin" : ""}`} />
         </span>
         <div className="min-w-0 flex-1">
           <p
@@ -255,4 +242,3 @@ export function TelegramLinkStatus() {
     </section>
   );
 }
-

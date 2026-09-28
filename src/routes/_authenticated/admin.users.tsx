@@ -2,10 +2,25 @@ import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
 import { useMemo, useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Loader2, ShieldCheck, Search, ArrowLeft, Users as UsersIcon,
-  UserCog, Crown, Coins, Settings as SettingsIcon, Bot,
-  Plus, Minus, Pencil, MoreHorizontal, ChevronDown, ChevronUp,
-  ExternalLink, X, Send,
+  Loader2,
+  ShieldCheck,
+  Search,
+  ArrowLeft,
+  Users as UsersIcon,
+  UserCog,
+  Crown,
+  Coins,
+  Settings as SettingsIcon,
+  Bot,
+  Plus,
+  Minus,
+  Pencil,
+  MoreHorizontal,
+  ChevronDown,
+  ChevronUp,
+  ExternalLink,
+  X,
+  Send,
 } from "lucide-react";
 import { listUsersPro } from "@/lib/sign-in-tracking.functions";
 import { getAllCoinPurchases, type AdminPurchaseTotals } from "@/lib/payments.functions";
@@ -20,11 +35,14 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
-import {
-  Popover, PopoverContent, PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AdminEditModeToggle } from "@/components/admin/AdminEditMode";
 import { BulkReconcilePanel } from "@/components/admin/BulkReconcilePanel";
@@ -128,20 +146,25 @@ function AdminUsersPage() {
     }
 
     if (needle) {
-      list = list.filter((u) =>
-        (u.email ?? "").toLowerCase().includes(needle)
-        || (u.display_name ?? "").toLowerCase().includes(needle)
-        || u.id.toLowerCase().includes(needle),
+      list = list.filter(
+        (u) =>
+          (u.email ?? "").toLowerCase().includes(needle) ||
+          (u.display_name ?? "").toLowerCase().includes(needle) ||
+          u.id.toLowerCase().includes(needle),
       );
     }
 
     const sorted = [...list].sort((a, b) => {
       let cmp = 0;
-      if (sort === "joined") cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      if (sort === "joined")
+        cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
       else if (sort === "balance") cmp = (a.coin_balance ?? 0) - (b.coin_balance ?? 0);
-      else if (sort === "name") cmp = (a.display_name ?? a.email ?? "").localeCompare(b.display_name ?? b.email ?? "");
-      else if (sort === "spend") cmp = (spendByUser[a.id]?.totalCoins ?? 0) - (spendByUser[b.id]?.totalCoins ?? 0);
-      else if (sort === "buys") cmp = (spendByUser[a.id]?.purchaseCount ?? 0) - (spendByUser[b.id]?.purchaseCount ?? 0);
+      else if (sort === "name")
+        cmp = (a.display_name ?? a.email ?? "").localeCompare(b.display_name ?? b.email ?? "");
+      else if (sort === "spend")
+        cmp = (spendByUser[a.id]?.totalCoins ?? 0) - (spendByUser[b.id]?.totalCoins ?? 0);
+      else if (sort === "buys")
+        cmp = (spendByUser[a.id]?.purchaseCount ?? 0) - (spendByUser[b.id]?.purchaseCount ?? 0);
       return sortDir === "asc" ? cmp : -cmp;
     });
 
@@ -166,7 +189,10 @@ function AdminUsersPage() {
 
   const toggleSort = (key: SortKey) => {
     if (sort === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
-    else { setSort(key); setSortDir(key === "name" ? "asc" : "desc"); }
+    else {
+      setSort(key);
+      setSortDir(key === "name" ? "asc" : "desc");
+    }
   };
 
   return (
@@ -198,10 +224,30 @@ function AdminUsersPage() {
 
           {/* Stats */}
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <StatCard icon={<UserCog className="h-4 w-4" />} label="Total users" value={totalUsers} accent="primary" />
-            <StatCard icon={<Coins className="h-4 w-4" />} label="Coins in circulation" value={totalCoins} accent="coin" />
-            <StatCard icon={<Crown className="h-4 w-4" />} label="VIP members" value={totalVip} accent="amber" />
-            <StatCard icon={<Bot className="h-4 w-4" />} label="OG Bots" value={totalBots} accent="primary" />
+            <StatCard
+              icon={<UserCog className="h-4 w-4" />}
+              label="Total users"
+              value={totalUsers}
+              accent="primary"
+            />
+            <StatCard
+              icon={<Coins className="h-4 w-4" />}
+              label="Coins in circulation"
+              value={totalCoins}
+              accent="coin"
+            />
+            <StatCard
+              icon={<Crown className="h-4 w-4" />}
+              label="VIP members"
+              value={totalVip}
+              accent="amber"
+            />
+            <StatCard
+              icon={<Bot className="h-4 w-4" />}
+              label="OG Bots"
+              value={totalBots}
+              accent="primary"
+            />
           </div>
 
           {/* Bulk tools (collapsible) */}
@@ -215,7 +261,11 @@ function AdminUsersPage() {
                 <SettingsIcon className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm font-medium">Bulk reconcile & maintenance</span>
               </div>
-              {showBulk ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+              {showBulk ? (
+                <ChevronUp className="h-4 w-4 text-muted-foreground" />
+              ) : (
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              )}
             </button>
             {showBulk && (
               <div className="border-t border-border p-4">
@@ -278,29 +328,57 @@ function AdminUsersPage() {
                 style={{ WebkitOverflowScrolling: "touch", overscrollBehaviorX: "contain" }}
               >
                 <div className="min-w-[640px]">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/30 hover:bg-muted/30">
-                    <SortableHead label="User" active={sort === "name"} dir={sortDir} onClick={() => toggleSort("name")} />
-                    <TableHead>Roles</TableHead>
-                    <SortableHead label="Balance" align="right" active={sort === "balance"} dir={sortDir} onClick={() => toggleSort("balance")} />
-                    <SortableHead label="Spent" align="right" active={sort === "spend"} dir={sortDir} onClick={() => toggleSort("spend")} />
-                    <SortableHead label="Buys" align="right" active={sort === "buys"} dir={sortDir} onClick={() => toggleSort("buys")} />
-                    <SortableHead label="Joined" active={sort === "joined"} dir={sortDir} onClick={() => toggleSort("joined")} />
-                    <TableHead className="text-right">Quick actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filtered.map((u) => {
-                    const roles = rolesByUser.get(u.id) ?? [];
-                    const pro = proByUser.get(u.id);
-                    const spend = spendByUser[u.id];
-                    return (
-                      <UserRow key={u.id} user={u} roles={roles} pro={pro} spend={spend} />
-                    );
-                  })}
-                </TableBody>
-              </Table>
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-muted/30 hover:bg-muted/30">
+                        <SortableHead
+                          label="User"
+                          active={sort === "name"}
+                          dir={sortDir}
+                          onClick={() => toggleSort("name")}
+                        />
+                        <TableHead>Roles</TableHead>
+                        <SortableHead
+                          label="Balance"
+                          align="right"
+                          active={sort === "balance"}
+                          dir={sortDir}
+                          onClick={() => toggleSort("balance")}
+                        />
+                        <SortableHead
+                          label="Spent"
+                          align="right"
+                          active={sort === "spend"}
+                          dir={sortDir}
+                          onClick={() => toggleSort("spend")}
+                        />
+                        <SortableHead
+                          label="Buys"
+                          align="right"
+                          active={sort === "buys"}
+                          dir={sortDir}
+                          onClick={() => toggleSort("buys")}
+                        />
+                        <SortableHead
+                          label="Joined"
+                          active={sort === "joined"}
+                          dir={sortDir}
+                          onClick={() => toggleSort("joined")}
+                        />
+                        <TableHead className="text-right">Quick actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filtered.map((u) => {
+                        const roles = rolesByUser.get(u.id) ?? [];
+                        const pro = proByUser.get(u.id);
+                        const spend = spendByUser[u.id];
+                        return (
+                          <UserRow key={u.id} user={u} roles={roles} pro={pro} spend={spend} />
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
                 </div>
               </div>
             ) : (
@@ -308,7 +386,14 @@ function AdminUsersPage() {
                 <UsersIcon className="h-8 w-8" />
                 <p className="text-sm">No users match.</p>
                 {(q || roleFilter !== "all") && (
-                  <Button variant="ghost" size="sm" onClick={() => { setQ(""); setRoleFilter("all"); }}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setQ("");
+                      setRoleFilter("all");
+                    }}
+                  >
                     Clear filters
                   </Button>
                 )}
@@ -356,21 +441,44 @@ function InlineNameEdit({ user }: { user: ProfileRow }) {
     return (
       <form
         className="flex items-center gap-1"
-        onSubmit={(e) => { e.preventDefault(); save.mutate(); }}
+        onSubmit={(e) => {
+          e.preventDefault();
+          save.mutate();
+        }}
       >
         <Input
           autoFocus
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Escape") setEditing(false); }}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") setEditing(false);
+          }}
           maxLength={80}
           className="h-7 text-sm"
           aria-label="Edit display name"
         />
-        <Button type="submit" size="icon" variant="ghost" className="h-7 w-7" disabled={save.isPending} aria-label="Save name">
-          {save.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Pencil className="h-3.5 w-3.5" />}
+        <Button
+          type="submit"
+          size="icon"
+          variant="ghost"
+          className="h-7 w-7"
+          disabled={save.isPending}
+          aria-label="Save name"
+        >
+          {save.isPending ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Pencil className="h-3.5 w-3.5" />
+          )}
         </Button>
-        <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={() => setEditing(false)} aria-label="Cancel">
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          className="h-7 w-7"
+          onClick={() => setEditing(false)}
+          aria-label="Cancel"
+        >
           <X className="h-3.5 w-3.5" />
         </Button>
       </form>
@@ -388,11 +496,13 @@ function InlineNameEdit({ user }: { user: ProfileRow }) {
       <span className="truncate text-sm font-medium">
         {user.display_name ?? user.email?.split("@")[0] ?? "—"}
       </span>
-      <Pencil className="h-3 w-3 shrink-0 opacity-0 transition-opacity group-hover/name:opacity-60" aria-hidden />
+      <Pencil
+        className="h-3 w-3 shrink-0 opacity-0 transition-opacity group-hover/name:opacity-60"
+        aria-hidden
+      />
     </button>
   );
 }
-
 
 function UserRow({
   user,
@@ -436,7 +546,11 @@ function UserRow({
               )}
               {spendOpen && spend && (
                 <div className="mt-1 rounded-md border border-border/40 bg-background/40 px-2 py-1 text-[11px] text-muted-foreground">
-                  Lifetime: <span className="font-mono tabular-nums text-coin">{spend.totalCoins.toLocaleString()} coins</span> across {spend.purchaseCount} purchase{spend.purchaseCount === 1 ? "" : "s"}.
+                  Lifetime:{" "}
+                  <span className="font-mono tabular-nums text-coin">
+                    {spend.totalCoins.toLocaleString()} coins
+                  </span>{" "}
+                  across {spend.purchaseCount} purchase{spend.purchaseCount === 1 ? "" : "s"}.
                 </div>
               )}
             </div>
@@ -483,7 +597,12 @@ function UserRow({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link to="/admin/users/$userId" params={{ userId: user.id }}>
-                  <Button size="icon" variant="ghost" className="h-8 w-8" aria-label="Open full user settings">
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8"
+                    aria-label="Open full user settings"
+                  >
                     <ExternalLink className="h-3.5 w-3.5" />
                   </Button>
                 </Link>
@@ -524,11 +643,14 @@ function VipQuickToggle({ userId, checked }: { userId: string; checked: boolean 
   const qc = useQueryClient();
   const mut = useMutation({
     mutationFn: async (next: boolean) => {
-      const { error } = await supabase.rpc("set_vip_admin" as never, {
-        target_user_id: userId,
-        make_vip: next,
-        admin_notes: "users_list_quick_toggle",
-      } as never);
+      const { error } = await supabase.rpc(
+        "set_vip_admin" as never,
+        {
+          target_user_id: userId,
+          make_vip: next,
+          admin_notes: "users_list_quick_toggle",
+        } as never,
+      );
       if (error) throw new Error(error.message);
       return next;
     },
@@ -543,7 +665,9 @@ function VipQuickToggle({ userId, checked }: { userId: string; checked: boolean 
     <Tooltip>
       <TooltipTrigger asChild>
         <div className="flex h-8 items-center rounded-md border border-border bg-background/40 px-2">
-          <Crown className={`mr-1.5 h-3.5 w-3.5 ${checked ? "text-amber-500" : "text-muted-foreground"}`} />
+          <Crown
+            className={`mr-1.5 h-3.5 w-3.5 ${checked ? "text-amber-500" : "text-muted-foreground"}`}
+          />
           <Switch
             checked={checked}
             disabled={mut.isPending}
@@ -592,7 +716,12 @@ function CoinsPopover({ userId, balance }: { userId: string; balance: number }) 
       <Tooltip>
         <TooltipTrigger asChild>
           <PopoverTrigger asChild>
-            <Button size="icon" variant="ghost" className="h-8 w-8" aria-label="Grant or remove coins">
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-8 w-8"
+              aria-label="Grant or remove coins"
+            >
               <Coins className="h-3.5 w-3.5 text-coin" />
             </Button>
           </PopoverTrigger>
@@ -602,7 +731,9 @@ function CoinsPopover({ userId, balance }: { userId: string; balance: number }) 
       <PopoverContent align="end" className="w-72 space-y-3">
         <div className="flex items-center justify-between">
           <p className="text-sm font-semibold">Adjust coins</p>
-          <span className="text-xs text-muted-foreground">current: <span className="font-mono">{balance.toLocaleString()}</span></span>
+          <span className="text-xs text-muted-foreground">
+            current: <span className="font-mono">{balance.toLocaleString()}</span>
+          </span>
         </div>
         <Input
           type="number"
@@ -618,7 +749,13 @@ function CoinsPopover({ userId, balance }: { userId: string; balance: number }) 
             disabled={!valid || mut.isPending}
             className="bg-emerald-600 text-white hover:bg-emerald-700"
           >
-            {mut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Plus className="mr-1 h-4 w-4" /> Grant</>}
+            {mut.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <>
+                <Plus className="mr-1 h-4 w-4" /> Grant
+              </>
+            )}
           </Button>
           <Button
             variant="outline"
@@ -687,11 +824,14 @@ function EditUserPopover({ user, roles }: { user: ProfileRow; roles: string[] })
 
   const toggleOg = useMutation({
     mutationFn: async (next: boolean) => {
-      const { error } = await supabase.rpc("set_og_bot_admin" as never, {
-        target_user_id: user.id,
-        make_og: next,
-        admin_notes: "users_list_edit",
-      } as never);
+      const { error } = await supabase.rpc(
+        "set_og_bot_admin" as never,
+        {
+          target_user_id: user.id,
+          make_og: next,
+          admin_notes: "users_list_edit",
+        } as never,
+      );
       if (error) throw new Error(error.message);
       return next;
     },
@@ -721,9 +861,16 @@ function EditUserPopover({ user, roles }: { user: ProfileRow; roles: string[] })
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor={`lbl-${user.id}`} className="text-xs">Display name</Label>
+          <Label htmlFor={`lbl-${user.id}`} className="text-xs">
+            Display name
+          </Label>
           <div className="flex gap-1.5">
-            <Input id={`lbl-${user.id}`} value={label} onChange={(e) => setLabel(e.target.value)} maxLength={80} />
+            <Input
+              id={`lbl-${user.id}`}
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              maxLength={80}
+            />
             <Button size="sm" onClick={() => saveLabel.mutate()} disabled={saveLabel.isPending}>
               {saveLabel.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
             </Button>
@@ -731,9 +878,17 @@ function EditUserPopover({ user, roles }: { user: ProfileRow; roles: string[] })
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor={`bal-${user.id}`} className="text-xs">Set balance</Label>
+          <Label htmlFor={`bal-${user.id}`} className="text-xs">
+            Set balance
+          </Label>
           <div className="flex gap-1.5">
-            <Input id={`bal-${user.id}`} type="number" min={0} value={balance} onChange={(e) => setBalance(e.target.value)} />
+            <Input
+              id={`bal-${user.id}`}
+              type="number"
+              min={0}
+              value={balance}
+              onChange={(e) => setBalance(e.target.value)}
+            />
             <Button size="sm" onClick={() => saveBalance.mutate()} disabled={saveBalance.isPending}>
               {saveBalance.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Set"}
             </Button>
@@ -750,7 +905,11 @@ function EditUserPopover({ user, roles }: { user: ProfileRow; roles: string[] })
               <p className="text-[11px] text-muted-foreground">Bot privileges</p>
             </div>
           </div>
-          <Switch checked={isOgBot} disabled={toggleOg.isPending} onCheckedChange={(v) => toggleOg.mutate(v)} />
+          <Switch
+            checked={isOgBot}
+            disabled={toggleOg.isPending}
+            onCheckedChange={(v) => toggleOg.mutate(v)}
+          />
         </div>
 
         <Link to="/admin/users/$userId" params={{ userId: user.id }} onClick={() => setOpen(false)}>
@@ -766,8 +925,18 @@ function EditUserPopover({ user, roles }: { user: ProfileRow; roles: string[] })
 /* ---------- Atoms ---------- */
 
 function SortableHead({
-  label, active, dir, onClick, align = "left",
-}: { label: string; active: boolean; dir: "asc" | "desc"; onClick: () => void; align?: "left" | "right" }) {
+  label,
+  active,
+  dir,
+  onClick,
+  align = "left",
+}: {
+  label: string;
+  active: boolean;
+  dir: "asc" | "desc";
+  onClick: () => void;
+  align?: "left" | "right";
+}) {
   return (
     <TableHead className={align === "right" ? "text-right" : ""}>
       <button
@@ -778,13 +947,20 @@ function SortableHead({
         }`}
       >
         {label}
-        {active && (dir === "asc" ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />)}
+        {active &&
+          (dir === "asc" ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />)}
       </button>
     </TableHead>
   );
 }
 
-function RoleChip({ label, tone }: { label: string; tone: "primary" | "primary-soft" | "amber" | "muted" }) {
+function RoleChip({
+  label,
+  tone,
+}: {
+  label: string;
+  tone: "primary" | "primary-soft" | "amber" | "muted";
+}) {
   const styles: Record<typeof tone, string> = {
     primary: "border-primary/40 bg-primary/15 text-primary",
     "primary-soft": "border-primary/30 bg-primary/10 text-primary",
@@ -792,15 +968,25 @@ function RoleChip({ label, tone }: { label: string; tone: "primary" | "primary-s
     muted: "border-border bg-muted text-muted-foreground",
   };
   return (
-    <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${styles[tone]}`}>
+    <span
+      className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${styles[tone]}`}
+    >
       {label}
     </span>
   );
 }
 
 function StatCard({
-  icon, label, value, accent,
-}: { icon: React.ReactNode; label: string; value: number; accent: "primary" | "coin" | "amber" }) {
+  icon,
+  label,
+  value,
+  accent,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: number;
+  accent: "primary" | "coin" | "amber";
+}) {
   const ring: Record<typeof accent, string> = {
     primary: "bg-primary/15 text-primary",
     coin: "bg-coin/15 text-coin",
@@ -808,10 +994,14 @@ function StatCard({
   };
   return (
     <div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-card">
-      <div className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${ring[accent]}`}>{icon}</div>
+      <div className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${ring[accent]}`}>
+        {icon}
+      </div>
       <div className="min-w-0">
         <div className="truncate text-xs text-muted-foreground">{label}</div>
-        <div className="text-2xl font-bold tabular-nums leading-tight">{value.toLocaleString()}</div>
+        <div className="text-2xl font-bold tabular-nums leading-tight">
+          {value.toLocaleString()}
+        </div>
       </div>
     </div>
   );

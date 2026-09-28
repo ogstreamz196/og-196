@@ -66,8 +66,7 @@ function friendlyError(raw?: string | null): string {
     return "Not enough coins — top up and retry.";
   if (msg.includes("timeout") || msg.includes("timed out") || msg.includes("stuck"))
     return "Provider timed out — safe to retry, you weren't charged.";
-  if (msg.includes("rate") || msg.includes("429"))
-    return "Rate limited — wait a moment and retry.";
+  if (msg.includes("rate") || msg.includes("429")) return "Rate limited — wait a moment and retry.";
   if (msg.includes("network") || msg.includes("fetch") || msg.includes("econn"))
     return "Network hiccup — retry usually fixes it.";
   if (msg.includes("moderation") || msg.includes("policy") || msg.includes("forbidden"))
@@ -76,10 +75,30 @@ function friendlyError(raw?: string | null): string {
 }
 
 const META: Record<JobStatus, { label: string; icon: typeof Clock3; cls: string; dot: string }> = {
-  queued:     { label: "Queued",     icon: Clock3,        cls: "border-amber-400/40 bg-amber-400/10 text-amber-200",  dot: "bg-amber-400" },
-  generating: { label: "Generating", icon: Loader2,       cls: "border-primary/40 bg-primary/10 text-primary",        dot: "bg-primary animate-pulse" },
-  completed:  { label: "Completed",  icon: CheckCircle2,  cls: "border-emerald-400/40 bg-emerald-400/10 text-emerald-200", dot: "bg-emerald-400" },
-  failed:     { label: "Failed",     icon: AlertTriangle, cls: "border-rose-500/40 bg-rose-500/10 text-rose-200",     dot: "bg-rose-500" },
+  queued: {
+    label: "Queued",
+    icon: Clock3,
+    cls: "border-amber-400/40 bg-amber-400/10 text-amber-200",
+    dot: "bg-amber-400",
+  },
+  generating: {
+    label: "Generating",
+    icon: Loader2,
+    cls: "border-primary/40 bg-primary/10 text-primary",
+    dot: "bg-primary animate-pulse",
+  },
+  completed: {
+    label: "Completed",
+    icon: CheckCircle2,
+    cls: "border-emerald-400/40 bg-emerald-400/10 text-emerald-200",
+    dot: "bg-emerald-400",
+  },
+  failed: {
+    label: "Failed",
+    icon: AlertTriangle,
+    cls: "border-rose-500/40 bg-rose-500/10 text-rose-200",
+    dot: "bg-rose-500",
+  },
 };
 
 export function JobQueuePanel({ songs, onRemoved }: { songs: Song[]; onRemoved?: () => void }) {
@@ -87,11 +106,14 @@ export function JobQueuePanel({ songs, onRemoved }: { songs: Song[]; onRemoved?:
   const [deleting, setDeleting] = useState<string | null>(null);
   const [detailsSong, setDetailsSong] = useState<Song | null>(null);
 
-
   // Tick once per second while there are in-flight jobs so the elapsed/stall
   // indicators stay accurate without forcing a parent refetch.
   const hasActive = useMemo(
-    () => songs.some((s) => { const k = classify(s.status); return k === "queued" || k === "generating"; }),
+    () =>
+      songs.some((s) => {
+        const k = classify(s.status);
+        return k === "queued" || k === "generating";
+      }),
     [songs],
   );
   const [now, setNow] = useState(() => Date.now());
@@ -109,10 +131,17 @@ export function JobQueuePanel({ songs, onRemoved }: { songs: Song[]; onRemoved?:
     const standalone: Song[] = [];
     for (const s of songs) {
       const taskId = (s as { suno_task_id?: string | null }).suno_task_id;
-      if (!taskId) { standalone.push(s); continue; }
+      if (!taskId) {
+        standalone.push(s);
+        continue;
+      }
       const prev = byTask.get(taskId);
-      if (!prev) { byTask.set(taskId, s); continue; }
-      const rank = (st: string) => st === "completed" ? 3 : st === "processing" ? 2 : st === "failed" ? 1 : 0;
+      if (!prev) {
+        byTask.set(taskId, s);
+        continue;
+      }
+      const rank = (st: string) =>
+        st === "completed" ? 3 : st === "processing" ? 2 : st === "failed" ? 1 : 0;
       if (rank(s.status) > rank(prev.status)) byTask.set(taskId, s);
     }
     return [...standalone, ...byTask.values()];
@@ -120,7 +149,9 @@ export function JobQueuePanel({ songs, onRemoved }: { songs: Song[]; onRemoved?:
 
   const jobs = useMemo(() => {
     const active = dedupedSongs.filter((s) => classify(s.status) !== "completed");
-    const recentCompleted = dedupedSongs.filter((s) => classify(s.status) === "completed").slice(0, 4);
+    const recentCompleted = dedupedSongs
+      .filter((s) => classify(s.status) === "completed")
+      .slice(0, 4);
     return [...active.slice(0, 8), ...recentCompleted].map((s) => {
       const kind = classify(s.status);
       const startedAt = new Date(s.created_at).getTime();
@@ -137,7 +168,6 @@ export function JobQueuePanel({ songs, onRemoved }: { songs: Song[]; onRemoved?:
     for (const s of dedupedSongs) c[classify(s.status)]++;
     return c;
   }, [dedupedSongs]);
-
 
   async function retry(song: Song) {
     setRetrying(song.id);
@@ -179,8 +209,6 @@ export function JobQueuePanel({ songs, onRemoved }: { songs: Song[]; onRemoved?:
     }
   }
 
-
-
   if (jobs.length === 0) return null;
 
   return (
@@ -191,13 +219,21 @@ export function JobQueuePanel({ songs, onRemoved }: { songs: Song[]; onRemoved?:
             <ListChecks className="h-4 w-4 text-primary" />
           </div>
           <div>
-            <h3 className="font-display text-lg font-black tracking-tight sm:text-xl">Generation queue</h3>
+            <h3 className="font-display text-lg font-black tracking-tight sm:text-xl">
+              Generation queue
+            </h3>
             <p className="text-xs text-muted-foreground">Live status — updates instantly</p>
           </div>
         </div>
         <div className="flex flex-wrap gap-1.5 text-[11px] font-bold uppercase tracking-wider">
           {(["queued", "generating", "completed", "failed"] as JobStatus[]).map((k) => (
-            <span key={k} className={cn("inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1", META[k].cls)}>
+            <span
+              key={k}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1",
+                META[k].cls,
+              )}
+            >
               <span className={cn("h-1.5 w-1.5 rounded-full", META[k].dot)} />
               {counts[k]} {META[k].label}
             </span>
@@ -210,11 +246,12 @@ export function JobQueuePanel({ songs, onRemoved }: { songs: Song[]; onRemoved?:
           const m = META[kind];
           const Icon = m.icon;
           const showRetry = kind === "failed" || stuck;
-          const subline = kind === "failed"
-            ? friendlyError(song.error_message)
-            : inFlight
-              ? `${m.label} · ${formatElapsed(elapsed)}${stuck ? " · looks stuck" : slow ? " · taking longer than usual" : ""}`
-              : m.label;
+          const subline =
+            kind === "failed"
+              ? friendlyError(song.error_message)
+              : inFlight
+                ? `${m.label} · ${formatElapsed(elapsed)}${stuck ? " · looks stuck" : slow ? " · taking longer than usual" : ""}`
+                : m.label;
           return (
             <li
               key={song.id}
@@ -224,7 +261,9 @@ export function JobQueuePanel({ songs, onRemoved }: { songs: Song[]; onRemoved?:
                 slow && !stuck && "border-amber-400/40 bg-amber-400/5",
               )}
             >
-              <span className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-xl border", m.cls)}>
+              <span
+                className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-xl border", m.cls)}
+              >
                 <Icon className={cn("h-4 w-4", kind === "generating" && "animate-spin")} />
               </span>
               <div className="min-w-0 flex-1">
@@ -241,9 +280,13 @@ export function JobQueuePanel({ songs, onRemoved }: { songs: Song[]; onRemoved?:
                 <p
                   className={cn(
                     "truncate text-[11px] uppercase tracking-wider",
-                    kind === "failed" || stuck ? "text-rose-200" : slow ? "text-amber-200" : "text-muted-foreground",
+                    kind === "failed" || stuck
+                      ? "text-rose-200"
+                      : slow
+                        ? "text-amber-200"
+                        : "text-muted-foreground",
                   )}
-                  title={kind === "failed" ? song.error_message ?? undefined : undefined}
+                  title={kind === "failed" ? (song.error_message ?? undefined) : undefined}
                 >
                   {subline}
                 </p>
@@ -304,7 +347,6 @@ export function JobQueuePanel({ songs, onRemoved }: { songs: Song[]; onRemoved?:
                 )}
               </Button>
             </li>
-
           );
         })}
       </ul>
@@ -330,7 +372,8 @@ function JobDetailsDrawer({
   const { data: settings } = useSettings();
   const { data: profile, refetch: refetchProfile } = useProfile();
   const sampleSeconds = settings?.sample_seconds ?? 60;
-  const unlockCost = (settings as { coins_per_full_unlock?: number } | undefined)?.coins_per_full_unlock ?? 5;
+  const unlockCost =
+    (settings as { coins_per_full_unlock?: number } | undefined)?.coins_per_full_unlock ?? 5;
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [fullUrl, setFullUrl] = useState<string | null>(null);
@@ -485,16 +528,20 @@ function JobDetailsDrawer({
       <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-md">
         <SheetHeader>
           <SheetTitle className="truncate">{song?.title || "Untitled"}</SheetTitle>
-          <SheetDescription>
-            {song?.style || song?.prompt || "Track details"}
-          </SheetDescription>
+          <SheetDescription>{song?.style || song?.prompt || "Track details"}</SheetDescription>
         </SheetHeader>
 
         <div className="mt-6 space-y-5">
           {/* Cover */}
           <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-gradient-to-br from-primary/30 to-fuchsia-500/15">
             {song?.cover_url ? (
-              <img src={song.cover_url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
+              <img
+                src={song.cover_url}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                className="h-full w-full object-cover"
+              />
             ) : null}
           </div>
 
@@ -536,8 +583,8 @@ function JobDetailsDrawer({
                 <p className="text-sm font-bold uppercase tracking-wider">Locked</p>
               </div>
               <p className="mt-2 text-sm text-muted-foreground">
-                Spend <span className="font-bold text-foreground">{unlockCost} coins</span> to unlock the full
-                track and get the download link.
+                Spend <span className="font-bold text-foreground">{unlockCost} coins</span> to
+                unlock the full track and get the download link.
               </p>
               <Button
                 className="mt-3 w-full"

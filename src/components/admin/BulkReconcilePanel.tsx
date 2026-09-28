@@ -5,7 +5,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
@@ -24,9 +29,15 @@ interface CsvRow {
 }
 
 function parseCsv(text: string): { rows: CsvRow[]; error?: string } {
-  const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  const lines = text
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean);
   if (lines.length === 0) return { rows: [], error: "Empty file" };
-  const header = lines[0].toLowerCase().split(",").map((s) => s.trim());
+  const header = lines[0]
+    .toLowerCase()
+    .split(",")
+    .map((s) => s.trim());
   const idIdx = header.findIndex((h) => h === "user_id" || h === "userid" || h === "id");
   const balIdx = header.findIndex((h) => h === "coin_balance" || h === "balance" || h === "coins");
   if (idIdx === -1 || balIdx === -1) {
@@ -38,7 +49,12 @@ function parseCsv(text: string): { rows: CsvRow[]; error?: string } {
     const user_id = cols[idIdx];
     const target = Number(cols[balIdx]);
     if (!user_id || !Number.isFinite(target) || target < 0) {
-      rows.push({ user_id: user_id || `(row ${i + 1})`, target: NaN, status: "invalid", error: "Bad row" });
+      rows.push({
+        user_id: user_id || `(row ${i + 1})`,
+        target: NaN,
+        status: "invalid",
+        error: "Bad row",
+      });
       continue;
     }
     rows.push({ user_id, target: Math.trunc(target) });
@@ -55,8 +71,14 @@ export function BulkReconcilePanel() {
     const reader = new FileReader();
     reader.onload = () => {
       const { rows: parsed, error } = parseCsv(String(reader.result ?? ""));
-      if (error) { toast.error(error); return; }
-      if (!parsed.length) { toast.error("No rows found in CSV"); return; }
+      if (error) {
+        toast.error(error);
+        return;
+      }
+      if (!parsed.length) {
+        toast.error("No rows found in CSV");
+        return;
+      }
       setRows(parsed);
       toast.success(`Loaded ${parsed.length} row(s). Click Verify to reconcile.`);
     };
@@ -108,14 +130,23 @@ export function BulkReconcilePanel() {
         };
       });
     },
-    onSuccess: (next) => { setRows(next); setVerifying(false); },
-    onError: (e: Error) => { setVerifying(false); toast.error(e.message); },
+    onSuccess: (next) => {
+      setRows(next);
+      setVerifying(false);
+    },
+    onError: (e: Error) => {
+      setVerifying(false);
+      toast.error(e.message);
+    },
   });
 
   const applyMut = useMutation({
     mutationFn: async () => {
-      const toApply = rows.filter((r) => r.selected && r.status !== "invalid" && r.status !== "missing_user");
-      let ok = 0; let fail = 0;
+      const toApply = rows.filter(
+        (r) => r.selected && r.status !== "invalid" && r.status !== "missing_user",
+      );
+      let ok = 0;
+      let fail = 0;
       for (const r of toApply) {
         try {
           const { error } = await supabase.rpc("set_balance_admin", {
@@ -155,9 +186,11 @@ export function BulkReconcilePanel() {
   }, [rows]);
 
   function toggleAll(checked: boolean) {
-    setRows((rs) => rs.map((r) =>
-      r.status === "verified" || r.status === "mismatch" ? { ...r, selected: checked } : r,
-    ));
+    setRows((rs) =>
+      rs.map((r) =>
+        r.status === "verified" || r.status === "mismatch" ? { ...r, selected: checked } : r,
+      ),
+    );
   }
   function toggleOne(idx: number, checked: boolean) {
     setRows((rs) => rs.map((r, i) => (i === idx ? { ...r, selected: checked } : r)));
@@ -178,8 +211,14 @@ export function BulkReconcilePanel() {
           <Upload className="h-4 w-4" />
           <span>Choose CSV</span>
           <Input
-            type="file" accept=".csv,text/csv" className="hidden"
-            onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f); e.currentTarget.value = ""; }}
+            type="file"
+            accept=".csv,text/csv"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) onFile(f);
+              e.currentTarget.value = "";
+            }}
           />
         </label>
         <Button
@@ -187,9 +226,11 @@ export function BulkReconcilePanel() {
           disabled={!rows.length || verifying || verifyMut.isPending}
           onClick={() => verifyMut.mutate()}
         >
-          {verifyMut.isPending
-            ? <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            : <CheckCircle2 className="mr-2 h-4 w-4" />}
+          {verifyMut.isPending ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <CheckCircle2 className="mr-2 h-4 w-4" />
+          )}
           Verify against ledger
         </Button>
         <Button
@@ -197,7 +238,11 @@ export function BulkReconcilePanel() {
           onClick={() => applyMut.mutate()}
           className="bg-gradient-brand text-primary-foreground"
         >
-          {applyMut.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Play className="mr-2 h-4 w-4" />}
+          {applyMut.isPending ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Play className="mr-2 h-4 w-4" />
+          )}
           Apply {summary.selected || 0} update(s)
         </Button>
 
@@ -219,7 +264,10 @@ export function BulkReconcilePanel() {
               <TableRow>
                 <TableHead className="w-10">
                   <Checkbox
-                    checked={summary.selected > 0 && summary.selected === (summary.verified + summary.mismatch)}
+                    checked={
+                      summary.selected > 0 &&
+                      summary.selected === summary.verified + summary.mismatch
+                    }
                     onCheckedChange={(v) => toggleAll(Boolean(v))}
                     aria-label="Select all"
                   />
@@ -233,17 +281,26 @@ export function BulkReconcilePanel() {
             </TableHeader>
             <TableBody>
               {rows.map((r, i) => (
-                <TableRow key={`${r.user_id}-${i}`} className={cn(r.status === "invalid" && "opacity-60")}>
+                <TableRow
+                  key={`${r.user_id}-${i}`}
+                  className={cn(r.status === "invalid" && "opacity-60")}
+                >
                   <TableCell>
                     <Checkbox
                       checked={!!r.selected}
-                      disabled={r.status === "invalid" || r.status === "missing_user" || r.current === r.target}
+                      disabled={
+                        r.status === "invalid" ||
+                        r.status === "missing_user" ||
+                        r.current === r.target
+                      }
                       onCheckedChange={(v) => toggleOne(i, Boolean(v))}
                     />
                   </TableCell>
                   <TableCell className="font-mono text-xs">
                     <div className="truncate max-w-[280px]">{r.email ?? r.user_id}</div>
-                    {r.email && <div className="text-muted-foreground">{r.user_id.slice(0, 8)}…</div>}
+                    {r.email && (
+                      <div className="text-muted-foreground">{r.user_id.slice(0, 8)}…</div>
+                    )}
                   </TableCell>
                   <TableCell className="text-right tabular-nums">{r.current ?? "—"}</TableCell>
                   <TableCell className="text-right tabular-nums">{r.tx_sum ?? "—"}</TableCell>
@@ -263,31 +320,47 @@ export function BulkReconcilePanel() {
       {rows.length > 0 && summary.mismatch > 0 && (
         <p className="mt-3 flex items-start gap-2 text-xs text-muted-foreground">
           <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-amber-500" />
-          Mismatch = CSV target does not equal the sum of <code>coin_transactions</code>.
-          You can still tick &amp; apply, but the ledger won't add up afterwards.
-          Prefer adjusting via the Award/Deduct panel which logs the delta.
+          Mismatch = CSV target does not equal the sum of <code>coin_transactions</code>. You can
+          still tick &amp; apply, but the ledger won't add up afterwards. Prefer adjusting via the
+          Award/Deduct panel which logs the delta.
         </p>
       )}
     </div>
   );
 }
 
-function Badge({ children, ok, warn, err }: { children: React.ReactNode; ok?: boolean; warn?: boolean; err?: boolean }) {
+function Badge({
+  children,
+  ok,
+  warn,
+  err,
+}: {
+  children: React.ReactNode;
+  ok?: boolean;
+  warn?: boolean;
+  err?: boolean;
+}) {
   return (
-    <span className={cn(
-      "rounded-full px-2 py-0.5 font-medium",
-      ok && "bg-primary/15 text-primary",
-      warn && "bg-amber-500/15 text-amber-600 dark:text-amber-400",
-      err && "bg-destructive/15 text-destructive",
-    )}>{children}</span>
+    <span
+      className={cn(
+        "rounded-full px-2 py-0.5 font-medium",
+        ok && "bg-primary/15 text-primary",
+        warn && "bg-amber-500/15 text-amber-600 dark:text-amber-400",
+        err && "bg-destructive/15 text-destructive",
+      )}
+    >
+      {children}
+    </span>
   );
 }
 
 function StatusBadge({ row }: { row: CsvRow }) {
   if (row.status === "verified") {
-    return row.current === row.target
-      ? <span className="text-xs text-muted-foreground">in sync</span>
-      : <Badge ok>verified · safe to apply</Badge>;
+    return row.current === row.target ? (
+      <span className="text-xs text-muted-foreground">in sync</span>
+    ) : (
+      <Badge ok>verified · safe to apply</Badge>
+    );
   }
   if (row.status === "mismatch") return <Badge warn>ledger ≠ target</Badge>;
   if (row.status === "missing_user") return <Badge err>user not found</Badge>;

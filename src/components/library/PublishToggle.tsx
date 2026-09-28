@@ -27,9 +27,7 @@ export function PublishToggle({ songId, isPublic, onChanged }: Props) {
         .update({ is_public: next } as never)
         .eq("id", songId);
       if (error) throw error;
-      toast.success(
-        next ? "Published to the global player" : "Removed from the global player",
-      );
+      toast.success(next ? "Published to the global player" : "Removed from the global player");
       onChanged?.();
     } catch (e) {
       setValue(!next);

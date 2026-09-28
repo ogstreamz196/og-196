@@ -2,14 +2,25 @@ import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { CheckCircle2, XCircle, Loader2, PlayCircle, ExternalLink, ShieldCheck } from "lucide-react";
+import {
+  CheckCircle2,
+  XCircle,
+  Loader2,
+  PlayCircle,
+  ExternalLink,
+  ShieldCheck,
+} from "lucide-react";
 import { useRole } from "@/hooks/use-role";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { runOnboardingCheck, getOnboardingChecks, type CheckResult } from "@/lib/onboarding-checks.functions";
+import {
+  runOnboardingCheck,
+  getOnboardingChecks,
+  type CheckResult,
+} from "@/lib/onboarding-checks.functions";
 import { listStripeWebhookEvents } from "@/lib/stripe-events.functions";
 import { cn } from "@/lib/utils";
 
@@ -28,10 +39,30 @@ type Step = {
 
 const STEPS: Step[] = [
   { key: "lovable_ai", label: "Lovable AI key", group: "Core" },
-  { key: "telegram", label: "Telegram bot (getMe)", group: "Connectors", fixLabel: "Reconnect Telegram" },
-  { key: "google_drive", label: "Google Drive (about)", group: "Connectors", fixLabel: "Reconnect Drive" },
-  { key: "google_sheets", label: "Google Sheets key", group: "Connectors", fixLabel: "Reconnect Sheets" },
-  { key: "google_search_console", label: "Search Console (sites)", group: "Connectors", fixLabel: "Reconnect GSC" },
+  {
+    key: "telegram",
+    label: "Telegram bot (getMe)",
+    group: "Connectors",
+    fixLabel: "Reconnect Telegram",
+  },
+  {
+    key: "google_drive",
+    label: "Google Drive (about)",
+    group: "Connectors",
+    fixLabel: "Reconnect Drive",
+  },
+  {
+    key: "google_sheets",
+    label: "Google Sheets key",
+    group: "Connectors",
+    fixLabel: "Reconnect Sheets",
+  },
+  {
+    key: "google_search_console",
+    label: "Search Console (sites)",
+    group: "Connectors",
+    fixLabel: "Reconnect GSC",
+  },
   { key: "stripe_live", label: "Stripe live key", group: "Payments" },
   { key: "stripe_sandbox", label: "Stripe sandbox key", group: "Payments" },
   { key: "payments_live_webhook", label: "Stripe live webhook secret", group: "Payments" },
@@ -52,7 +83,9 @@ function OnboardingWizard() {
   const { isAdmin, isLoading } = useRole();
   const runCheck = useServerFn(runOnboardingCheck);
   const loadChecks = useServerFn(getOnboardingChecks);
-  const [results, setResults] = useState<Record<string, { status: Status; data?: CheckResult; checkedAt?: string }>>({});
+  const [results, setResults] = useState<
+    Record<string, { status: Status; data?: CheckResult; checkedAt?: string }>
+  >({});
 
   const saved = useQuery({
     queryKey: ["onboarding-checks"],
@@ -83,12 +116,18 @@ function OnboardingWizard() {
       return { key, data };
     },
     onSuccess: ({ key, data }) => {
-      setResults((r) => ({ ...r, [key]: { status: data.ok ? "ok" : "fail", data, checkedAt: new Date().toISOString() } }));
+      setResults((r) => ({
+        ...r,
+        [key]: { status: data.ok ? "ok" : "fail", data, checkedAt: new Date().toISOString() },
+      }));
     },
     onError: (err, key) => {
       setResults((r) => ({
         ...r,
-        [key]: { status: "fail", data: { ok: false, detail: err instanceof Error ? err.message : "failed" } },
+        [key]: {
+          status: "fail",
+          data: { ok: false, detail: err instanceof Error ? err.message : "failed" },
+        },
       }));
     },
   });
@@ -100,11 +139,18 @@ function OnboardingWizard() {
     }
   };
 
-  if (isLoading) return <DashboardShell title="Onboarding"><div className="p-6 text-muted-foreground">Loading…</div></DashboardShell>;
+  if (isLoading)
+    return (
+      <DashboardShell title="Onboarding">
+        <div className="p-6 text-muted-foreground">Loading…</div>
+      </DashboardShell>
+    );
   if (!isAdmin) return <Navigate to="/" />;
 
   const total = STEPS.length;
-  const done = Object.values(results).filter((r) => r.status === "ok" || r.status === "fail").length;
+  const done = Object.values(results).filter(
+    (r) => r.status === "ok" || r.status === "fail",
+  ).length;
   const okCount = Object.values(results).filter((r) => r.status === "ok").length;
   const failCount = Object.values(results).filter((r) => r.status === "fail").length;
   const verifiedPct = Math.round((okCount / total) * 100);
@@ -112,15 +158,15 @@ function OnboardingWizard() {
   const statusLabel = isReady
     ? "Ready to generate"
     : failCount > 0
-    ? "Needs attention"
-    : done === 0
-    ? "Not started"
-    : "In progress";
+      ? "Needs attention"
+      : done === 0
+        ? "Not started"
+        : "In progress";
   const statusTone = isReady
     ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-500"
     : failCount > 0
-    ? "border-red-500/40 bg-red-500/10 text-red-500"
-    : "border-amber-500/40 bg-amber-500/10 text-amber-500";
+      ? "border-red-500/40 bg-red-500/10 text-red-500"
+      : "border-amber-500/40 bg-amber-500/10 text-amber-500";
   const groups = Array.from(new Set(STEPS.map((s) => s.group)));
 
   return (
@@ -139,13 +185,21 @@ function OnboardingWizard() {
                 <ShieldCheck className="h-6 w-6 text-primary" />
                 Connector onboarding
               </h1>
-              <Badge variant="outline" className={cn("gap-1.5 px-2.5 py-0.5 text-xs font-semibold", statusTone)}>
-                {isReady ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Loader2 className={cn("h-3.5 w-3.5", done === total ? "" : "animate-spin")} />}
+              <Badge
+                variant="outline"
+                className={cn("gap-1.5 px-2.5 py-0.5 text-xs font-semibold", statusTone)}
+              >
+                {isReady ? (
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                ) : (
+                  <Loader2 className={cn("h-3.5 w-3.5", done === total ? "" : "animate-spin")} />
+                )}
                 {statusLabel} · {verifiedPct}%
               </Badge>
             </div>
             <p className="text-sm text-muted-foreground">
-              {okCount}/{total} connectors verified. Run each test, fix the red ones, and you're done.
+              {okCount}/{total} connectors verified. Run each test, fix the red ones, and you're
+              done.
             </p>
           </div>
           <div className="flex gap-2">
@@ -153,7 +207,11 @@ function OnboardingWizard() {
               <Link to="/admin">Back to admin</Link>
             </Button>
             <Button onClick={runAll} disabled={single.isPending} size="sm">
-              {single.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlayCircle className="mr-2 h-4 w-4" />}
+              {single.isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <PlayCircle className="mr-2 h-4 w-4" />
+              )}
               Run all tests
             </Button>
           </div>
@@ -181,7 +239,6 @@ function OnboardingWizard() {
           </div>
         </Card>
 
-
         {groups.map((group) => (
           <Card key={group} className="overflow-hidden">
             <div className="border-b bg-muted/40 px-4 py-2 text-sm font-medium">{group}</div>
@@ -195,19 +252,28 @@ function OnboardingWizard() {
                     <div className="min-w-0 flex-1">
                       <div className="font-medium">{step.label}</div>
                       {r?.data && (
-                        <div className={cn("truncate text-xs", r.data.ok ? "text-muted-foreground" : "text-red-500")}>
+                        <div
+                          className={cn(
+                            "truncate text-xs",
+                            r.data.ok ? "text-muted-foreground" : "text-red-500",
+                          )}
+                        >
                           {r.data.detail}
                           {typeof r.data.latencyMs === "number" && (
                             <span className="ml-2 text-muted-foreground">{r.data.latencyMs}ms</span>
                           )}
                           {r.checkedAt && (
-                            <span className="ml-2 text-muted-foreground">· {new Date(r.checkedAt).toLocaleString()}</span>
+                            <span className="ml-2 text-muted-foreground">
+                              · {new Date(r.checkedAt).toLocaleString()}
+                            </span>
                           )}
                         </div>
                       )}
                     </div>
                     {status === "fail" && (
-                      <Badge variant="destructive" className="hidden sm:inline-flex">Fix</Badge>
+                      <Badge variant="destructive" className="hidden sm:inline-flex">
+                        Fix
+                      </Badge>
                     )}
                     <Button
                       size="sm"
@@ -231,10 +297,32 @@ function OnboardingWizard() {
         <Card className="p-4 text-sm text-muted-foreground">
           <p className="mb-2 font-medium text-foreground">When a test fails</p>
           <ul className="list-disc space-y-1 pl-5">
-            <li>Connector rows (Telegram, Google *) → open <span className="font-mono">Connectors</span> in the sidebar and reconnect with the same account.</li>
-            <li>Stripe rows → open <Link to="/admin" className="underline">Admin</Link> → Payments and re-enable Stripe.</li>
-            <li>Plain key rows (Gemini / Perplexity / Suno / OG_BOT_*) → Project Settings → Secrets.</li>
-            <li>Full reference list: <a className="inline-flex items-center gap-1 underline" href="/.lovable/SECRETS.md" target="_blank" rel="noreferrer">SECRETS.md <ExternalLink className="h-3 w-3" /></a></li>
+            <li>
+              Connector rows (Telegram, Google *) → open{" "}
+              <span className="font-mono">Connectors</span> in the sidebar and reconnect with the
+              same account.
+            </li>
+            <li>
+              Stripe rows → open{" "}
+              <Link to="/admin" className="underline">
+                Admin
+              </Link>{" "}
+              → Payments and re-enable Stripe.
+            </li>
+            <li>
+              Plain key rows (Gemini / Perplexity / Suno / OG_BOT_*) → Project Settings → Secrets.
+            </li>
+            <li>
+              Full reference list:{" "}
+              <a
+                className="inline-flex items-center gap-1 underline"
+                href="/.lovable/SECRETS.md"
+                target="_blank"
+                rel="noreferrer"
+              >
+                SECRETS.md <ExternalLink className="h-3 w-3" />
+              </a>
+            </li>
           </ul>
         </Card>
 
@@ -273,15 +361,22 @@ function StripeWebhookViewer() {
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-mono text-xs">{e.eventType}</span>
-                  <Badge variant="outline" className="text-[10px] uppercase">{e.environment}</Badge>
-                  {e.status && <Badge variant="secondary" className="text-[10px]">{e.status}</Badge>}
+                  <Badge variant="outline" className="text-[10px] uppercase">
+                    {e.environment}
+                  </Badge>
+                  {e.status && (
+                    <Badge variant="secondary" className="text-[10px]">
+                      {e.status}
+                    </Badge>
+                  )}
                 </div>
                 <div className="truncate text-xs text-muted-foreground">
                   {e.objectId ?? "—"} · {new Date(e.receivedAt).toLocaleString()}
                 </div>
                 {e.credited ? (
                   <div className="text-xs text-emerald-500">
-                    +{e.credited.amount} OG → {e.credited.userEmail ?? e.credited.userId.slice(0, 8)}
+                    +{e.credited.amount} OG →{" "}
+                    {e.credited.userEmail ?? e.credited.userId.slice(0, 8)}
                   </div>
                 ) : (
                   <div className="text-xs text-amber-500">
@@ -298,7 +393,8 @@ function StripeWebhookViewer() {
 }
 
 function StatusIcon({ status }: { status: Status }) {
-  if (status === "running") return <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />;
+  if (status === "running")
+    return <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />;
   if (status === "ok") return <CheckCircle2 className="h-5 w-5 text-emerald-500" />;
   if (status === "fail") return <XCircle className="h-5 w-5 text-red-500" />;
   return <div className="h-5 w-5 rounded-full border-2 border-muted-foreground/30" />;

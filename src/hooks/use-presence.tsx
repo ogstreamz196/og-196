@@ -27,14 +27,12 @@ export function PresenceTracker() {
       config: { presence: { key: user.id } },
     });
 
-    let currentPath =
-      typeof window !== "undefined" ? window.location.pathname : "/";
+    let currentPath = typeof window !== "undefined" ? window.location.pathname : "/";
 
     const payload = () => ({
       user_id: user.id,
       email: user.email ?? null,
-      display_name:
-        (user.user_metadata?.display_name as string | undefined) ?? null,
+      display_name: (user.user_metadata?.display_name as string | undefined) ?? null,
       online_at: new Date().toISOString(),
       last_page: currentPath,
     });

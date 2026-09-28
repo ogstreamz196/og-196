@@ -80,7 +80,10 @@ export function EditableContent({
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Escape") { setDraft(current); setEditing(false); }
+              if (e.key === "Escape") {
+                setDraft(current);
+                setEditing(false);
+              }
               if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) save();
             }}
             rows={3}
@@ -93,19 +96,47 @@ export function EditableContent({
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") { e.preventDefault(); save(); }
-              if (e.key === "Escape") { setDraft(current); setEditing(false); }
+              if (e.key === "Enter") {
+                e.preventDefault();
+                save();
+              }
+              if (e.key === "Escape") {
+                setDraft(current);
+                setEditing(false);
+              }
             }}
             maxLength={500}
             className="h-8 min-w-[200px] text-sm"
           />
         )}
-        <Button type="button" size="icon" variant="ghost" className="h-7 w-7 shrink-0"
-          disabled={setMut.isPending} onClick={save} title="Save site-wide" aria-label="Save site-wide">
-          {setMut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          className="h-7 w-7 shrink-0"
+          disabled={setMut.isPending}
+          onClick={save}
+          title="Save site-wide"
+          aria-label="Save site-wide"
+        >
+          {setMut.isPending ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Check className="h-3.5 w-3.5" />
+          )}
         </Button>
-        <Button type="button" size="icon" variant="ghost" className="h-7 w-7 shrink-0"
-          onClick={() => { setDraft(current); setEditing(false); }} title="Cancel" aria-label="Cancel edit">
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          className="h-7 w-7 shrink-0"
+          onClick={() => {
+            setDraft(current);
+            setEditing(false);
+          }}
+          title="Cancel"
+          aria-label="Cancel edit"
+        >
           <X className="h-3.5 w-3.5" />
         </Button>
       </Tag>
@@ -117,13 +148,17 @@ export function EditableContent({
       role="button"
       tabIndex={0}
       onClick={(e: React.MouseEvent) => {
-        e.preventDefault(); e.stopPropagation();
-        setDraft(current); setEditing(true);
+        e.preventDefault();
+        e.stopPropagation();
+        setDraft(current);
+        setEditing(true);
       }}
       onKeyDown={(e: React.KeyboardEvent) => {
         if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault(); e.stopPropagation();
-          setDraft(current); setEditing(true);
+          e.preventDefault();
+          e.stopPropagation();
+          setDraft(current);
+          setEditing(true);
         }
       }}
       className={cn(

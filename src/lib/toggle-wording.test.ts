@@ -18,8 +18,14 @@ const SRC = join(__dirname, "..");
 const BANNED = ["Enable", "Disable", "Switch on", "Switch off", "Toggle on", "Toggle off"];
 // Attributes whose string values are user-facing toggle copy.
 const ATTRS = [
-  "aria-label", "title", "label", "placeholder",
-  "description", "desc", "tooltip", "content",
+  "aria-label",
+  "title",
+  "label",
+  "placeholder",
+  "description",
+  "desc",
+  "tooltip",
+  "content",
 ];
 const SKIP_DIRS = new Set(["__snapshots__", "node_modules"]);
 const SKIP_FILES = /\.(test|spec|gen|d)\.[tj]sx?$/;
@@ -40,9 +46,7 @@ function walk(dir: string, acc: string[] = []): string[] {
 
 function stripComments(src: string): string {
   // Drop /* … */ and // … line comments so doc-comments and code notes are exempt.
-  return src
-    .replace(/\/\*[\s\S]*?\*\//g, "")
-    .replace(/^\s*\/\/.*$/gm, "");
+  return src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 }
 
 function bannedRe(): RegExp {
@@ -56,10 +60,7 @@ function findViolations(src: string): Array<{ snippet: string; phrase: string }>
   const re = bannedRe();
 
   // 1. Attribute values: aria-label="…", title={"…"}, etc.
-  const attrRe = new RegExp(
-    `(?:${ATTRS.join("|")})\\s*=\\s*\\{?\\s*["\`]([^"\`]+)["\`]`,
-    "g",
-  );
+  const attrRe = new RegExp(`(?:${ATTRS.join("|")})\\s*=\\s*\\{?\\s*["\`]([^"\`]+)["\`]`, "g");
   for (const m of code.matchAll(attrRe)) {
     const value = m[1];
     const hit = re.exec(value);
@@ -91,9 +92,6 @@ describe("toggle wording", () => {
         offenders.push(`${rel}: "${h.phrase}" in ${h.snippet.slice(0, 120)}`);
       }
     }
-    expect(
-      offenders,
-      `Replace with "Turn on" / "Turn off":\n${offenders.join("\n")}`,
-    ).toEqual([]);
+    expect(offenders, `Replace with "Turn on" / "Turn off":\n${offenders.join("\n")}`).toEqual([]);
   });
 });

@@ -84,8 +84,8 @@ function TrustPage() {
               configuration and admin tooling are restricted to signed-in users and admin roles.
             </p>
             <p>
-              Transport is encrypted with HTTPS/TLS end-to-end between your device, our app, and
-              our backend.
+              Transport is encrypted with HTTPS/TLS end-to-end between your device, our app, and our
+              backend.
             </p>
           </Section>
 
@@ -93,9 +93,9 @@ function TrustPage() {
             <p>
               We collect the minimum needed to run the app: your email and display name from the
               identity provider you choose, the prompts and songs you create, your in-app
-               preferences, and a coin/transaction ledger to power generations and referrals. We do
-               not collect location, IP-based location, contacts, advertising IDs, full device
-               fingerprints, or page-by-page activity, and we do not sell personal data.
+              preferences, and a coin/transaction ledger to power generations and referrals. We do
+              not collect location, IP-based location, contacts, advertising IDs, full device
+              fingerprints, or page-by-page activity, and we do not sell personal data.
             </p>
             <p>
               You can request deletion of your account and associated content by emailing the
@@ -105,8 +105,8 @@ function TrustPage() {
 
           <Section icon={ShieldCheck} title="Subprocessors &amp; integrations">
             <p>
-              OG Studio uses a small set of trusted providers to operate: a managed Postgres
-              backend with auth and storage, an AI gateway for lyrics and persona responses, a
+              OG Studio uses a small set of trusted providers to operate: a managed Postgres backend
+              with auth and storage, an AI gateway for lyrics and persona responses, a
               music-generation API for audio, and optional payment and analytics partners. Each
               provider only receives the data needed to perform its specific task.
             </p>
@@ -114,8 +114,8 @@ function TrustPage() {
 
           <Section icon={Cookie} title="Cookies, storage &amp; analytics">
             <p>
-              We use first-party browser storage to keep you signed in and remember preferences
-              such as your OG bot mode. We do not use cross-site advertising trackers.
+              We use first-party browser storage to keep you signed in and remember preferences such
+              as your OG bot mode. We do not use cross-site advertising trackers.
             </p>
           </Section>
 
@@ -139,7 +139,10 @@ function TrustPage() {
           Shared responsibility: OG Studio provides app-level controls described above; the
           underlying hosting platform provides the infrastructure they run on. You're responsible
           for keeping your sign-in provider account and device secure. See also our full{" "}
-          <Link to="/policy" className="font-semibold text-primary underline-offset-4 hover:underline">
+          <Link
+            to="/policy"
+            className="font-semibold text-primary underline-offset-4 hover:underline"
+          >
             Privacy Policy
           </Link>
           .

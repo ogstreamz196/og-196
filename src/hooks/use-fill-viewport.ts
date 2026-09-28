@@ -22,9 +22,7 @@ export function useFillViewport<T extends HTMLElement>(bottomGutter = 0) {
       const nav = document.querySelector("nav.safe-bottom.fixed") as HTMLElement | null;
       // The mobile bottom nav is fixed — stop the panel at its top edge.
       const limit =
-        nav && nav.offsetHeight > 0
-          ? nav.getBoundingClientRect().top - (vv?.offsetTop ?? 0)
-          : vh;
+        nav && nav.offsetHeight > 0 ? nav.getBoundingClientRect().top - (vv?.offsetTop ?? 0) : vh;
       const availableHeight = Math.round(Math.min(limit, vh) - top - bottomGutter);
       const keyboardOpen = vv ? window.innerHeight - vv.height > 120 : false;
       // A tall minimum is useful during normal browsing, but it can make the
@@ -53,7 +51,6 @@ export function useFillViewport<T extends HTMLElement>(bottomGutter = 0) {
       window.visualViewport?.removeEventListener("resize", measure);
       window.visualViewport?.removeEventListener("scroll", measure);
     };
-
   }, [bottomGutter]);
 
   return { ref, height };

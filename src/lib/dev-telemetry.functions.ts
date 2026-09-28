@@ -24,10 +24,7 @@ async function sendTg(chatId: number, text: string) {
 }
 
 function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 /**
@@ -37,9 +34,7 @@ function escapeHtml(s: string): string {
 export const notifyDevSignIn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { supabaseAdmin } = await import(
-      "@/integrations/supabase/client.server"
-    );
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     // Skip if caller is themselves an admin (we don't want to notify on dev's own logins)
     const { data: isAdmin } = await supabaseAdmin.rpc("has_role", {
@@ -77,4 +72,3 @@ export const notifyDevSignIn = createServerFn({ method: "POST" })
 
     return { ok: true, notified: targets?.length ?? 0 };
   });
-

@@ -15,13 +15,27 @@ type Row = {
 
 function kindBadge(kind: string) {
   const map: Record<string, { label: string; cls: string; icon: typeof Link2 }> = {
-    link: { label: "Linked", cls: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30", icon: Link2 },
-    boss_link: { label: "Boss linked", cls: "bg-amber-500/15 text-amber-300 border-amber-500/30", icon: Crown },
+    link: {
+      label: "Linked",
+      cls: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
+      icon: Link2,
+    },
+    boss_link: {
+      label: "Boss linked",
+      cls: "bg-amber-500/15 text-amber-300 border-amber-500/30",
+      icon: Crown,
+    },
   };
-  const entry = map[kind] ?? { label: kind, cls: "bg-muted text-foreground/80 border-border", icon: Send };
+  const entry = map[kind] ?? {
+    label: kind,
+    cls: "bg-muted text-foreground/80 border-border",
+    icon: Send,
+  };
   const Icon = entry.icon;
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs ${entry.cls}`}>
+    <span
+      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs ${entry.cls}`}
+    >
       <Icon className="h-3 w-3" /> {entry.label}
     </span>
   );
@@ -33,7 +47,9 @@ export function TelegramSignInLog({ userId }: { userId: string }) {
     queryFn: async (): Promise<Row[]> => {
       const { data, error } = await supabase
         .from("telegram_sign_in_events")
-        .select("id, chat_id, telegram_username, telegram_first_name, event_kind, source, created_at")
+        .select(
+          "id, chat_id, telegram_username, telegram_first_name, event_kind, source, created_at",
+        )
         .eq("user_id", userId)
         .order("created_at", { ascending: false })
         .limit(50);

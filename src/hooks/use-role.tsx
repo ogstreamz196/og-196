@@ -3,8 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./use-auth";
 import { useFreeAccess } from "./use-free-access";
 
-
-
 export type AppRole = "admin" | "user" | "vip" | "og_bot" | "dev" | "boss";
 
 export function useRole() {
@@ -49,4 +47,3 @@ export function useRole() {
     roles: query.data?.roles ?? [],
   };
 }
-

@@ -56,10 +56,7 @@ export const runFoulMouthSmokeTest = createServerFn({ method: "POST" })
 
     // 1) Admin gate
     await run("auth", "Verify admin/dev caller", async () => {
-      const { data } = await supabaseAdmin
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", userId);
+      const { data } = await supabaseAdmin.from("user_roles").select("role").eq("user_id", userId);
       const ok = (data ?? []).some((r) => r.role === "admin" || r.role === "dev");
       if (!ok) throw new Error("Caller is not admin/dev");
       return `userId=${userId.slice(0, 8)}…`;
@@ -93,10 +90,7 @@ export const runFoulMouthSmokeTest = createServerFn({ method: "POST" })
 
     // 2) SAFE prompt path (foulMouth=false)
     await run("safe_reply", "Safe prompt → short clean reply", async () => {
-      const bot = await postAndFetchReply(
-        "smoke test · safe mode · say hi briefly",
-        false,
-      );
+      const bot = await postAndFetchReply("smoke test · safe mode · say hi briefly", false);
       if (!bot?.content) throw new Error("No bot reply produced");
       if (bot.content.length > 280) throw new Error(`Reply too long (${bot.content.length}>280)`);
       return `${bot.content.length} chars`;
@@ -106,14 +100,13 @@ export const runFoulMouthSmokeTest = createServerFn({ method: "POST" })
     await run("vip_gating", "VIP gating enforced server-side", async () => {
       // Re-issue a foul-mouth request and confirm reply length is capped to the
       // role-appropriate ceiling. Non-VIP must fall back to the SAFE cap (≤280).
-      const bot = await postAndFetchReply(
-        "smoke test · foul gating · roast me in one line",
-        true,
-      );
+      const bot = await postAndFetchReply("smoke test · foul gating · roast me in one line", true);
       if (!bot?.content) throw new Error("No bot reply produced");
       const cap = isVip ? 420 : 280;
       if (bot.content.length > cap) {
-        throw new Error(`Reply exceeded ${isVip ? "FOUL" : "SAFE"} cap (${bot.content.length}>${cap})`);
+        throw new Error(
+          `Reply exceeded ${isVip ? "FOUL" : "SAFE"} cap (${bot.content.length}>${cap})`,
+        );
       }
       return isVip
         ? `VIP caller → FOUL cap honored (${bot.content.length}≤420)`
@@ -131,10 +124,7 @@ export const runFoulMouthSmokeTest = createServerFn({ method: "POST" })
       });
     } else {
       await run("foul_quality", "Brutal-short-but-helpful reply (VIP)", async () => {
-        const bot = await postAndFetchReply(
-          "smoke test · how do I center a div in CSS?",
-          true,
-        );
+        const bot = await postAndFetchReply("smoke test · how do I center a div in CSS?", true);
         if (!bot?.content) throw new Error("No bot reply produced");
         const sentences = bot.content.split(/(?<=[.!?])\s+/).filter(Boolean).length;
         if (sentences > 4) throw new Error(`Too long (${sentences} sentences > 3)`);

@@ -23,9 +23,7 @@ type Ctx = {
           col: string,
           pat: string,
         ) => {
-          order: (
-            col: string,
-          ) => Promise<{ data: unknown; error: { message: string } | null }>;
+          order: (col: string) => Promise<{ data: unknown; error: { message: string } | null }>;
         };
       };
     };

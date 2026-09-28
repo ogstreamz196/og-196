@@ -1,10 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import {
-  type StripeEnv,
-  createStripeClient,
-  getStripeErrorMessage,
-} from "@/lib/stripe.server";
+import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "@/lib/stripe.server";
 import {
   findCoinPackByPriceId,
   findCoinPackByBundleId,
@@ -59,18 +55,16 @@ async function resolveOrCreateCustomer(
 
 export const createCoinCheckoutSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(
-    (data: { priceId: string; returnUrl: string; environment: StripeEnv }) => {
-      if (!/^[a-zA-Z0-9_-]+$/.test(data.priceId)) throw new Error("Invalid priceId");
-      const pack = findCoinPackByPriceId(data.priceId);
-      if (!pack) throw new Error("Unknown coin pack");
-      if (data.environment !== "sandbox" && data.environment !== "live") {
-        throw new Error("Invalid environment");
-      }
-      if (!/^https?:\/\//.test(data.returnUrl)) throw new Error("Invalid returnUrl");
-      return data;
-    },
-  )
+  .inputValidator((data: { priceId: string; returnUrl: string; environment: StripeEnv }) => {
+    if (!/^[a-zA-Z0-9_-]+$/.test(data.priceId)) throw new Error("Invalid priceId");
+    const pack = findCoinPackByPriceId(data.priceId);
+    if (!pack) throw new Error("Unknown coin pack");
+    if (data.environment !== "sandbox" && data.environment !== "live") {
+      throw new Error("Invalid environment");
+    }
+    if (!/^https?:\/\//.test(data.returnUrl)) throw new Error("Invalid returnUrl");
+    return data;
+  })
   .handler(async ({ data, context }): Promise<CheckoutSessionResult> => {
     const { userId, supabase } = context;
     try {
@@ -92,7 +86,9 @@ export const createCoinCheckoutSession = createServerFn({ method: "POST" })
           .eq("key", packOverrideKey(basePack.bundleId))
           .maybeSingle();
         override = parsePackOverride(row?.value);
-      } catch { /* override is best-effort; fall back to canonical pack */ }
+      } catch {
+        /* override is best-effort; fall back to canonical pack */
+      }
 
       const pack = applyPackOverride(basePack, override);
       const priceChanged = pack.priceCents !== basePack.priceCents;
@@ -101,19 +97,22 @@ export const createCoinCheckoutSession = createServerFn({ method: "POST" })
       let email: string | undefined;
       try {
         const { data: prof } = await supabase
-          .from("profiles").select("email").eq("id", userId).maybeSingle();
+          .from("profiles")
+          .select("email")
+          .eq("id", userId)
+          .maybeSingle();
         email = (prof?.email as string | undefined) ?? undefined;
-      } catch { /* email is optional */ }
+      } catch {
+        /* email is optional */
+      }
 
       const customerId = await resolveOrCreateCustomer(stripe, { email, userId });
 
-      const productId = typeof stripePrice.product === "string"
-        ? stripePrice.product
-        : stripePrice.product.id;
+      const productId =
+        typeof stripePrice.product === "string" ? stripePrice.product : stripePrice.product.id;
       const product = await stripe.products.retrieve(productId);
-      const productDescription = pack.label !== basePack.label
-        ? `${pack.label} · ${pack.coins} OG Coins`
-        : product.name;
+      const productDescription =
+        pack.label !== basePack.label ? `${pack.label} · ${pack.coins} OG Coins` : product.name;
 
       // When the admin has changed the price, we cannot reuse the catalog
       // price id (its unit_amount is fixed). Build a one-off price_data
@@ -162,15 +161,13 @@ export const createCoinCheckoutSession = createServerFn({ method: "POST" })
 
 export const createVipCheckoutSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(
-    (data: { returnUrl: string; environment: StripeEnv }) => {
-      if (data.environment !== "sandbox" && data.environment !== "live") {
-        throw new Error("Invalid environment");
-      }
-      if (!/^https?:\/\//.test(data.returnUrl)) throw new Error("Invalid returnUrl");
-      return data;
-    },
-  )
+  .inputValidator((data: { returnUrl: string; environment: StripeEnv }) => {
+    if (data.environment !== "sandbox" && data.environment !== "live") {
+      throw new Error("Invalid environment");
+    }
+    if (!/^https?:\/\//.test(data.returnUrl)) throw new Error("Invalid returnUrl");
+    return data;
+  })
   .handler(async ({ data, context }): Promise<CheckoutSessionResult> => {
     const { userId, supabase } = context;
     try {
@@ -182,9 +179,14 @@ export const createVipCheckoutSession = createServerFn({ method: "POST" })
       let email: string | undefined;
       try {
         const { data: prof } = await supabase
-          .from("profiles").select("email").eq("id", userId).maybeSingle();
+          .from("profiles")
+          .select("email")
+          .eq("id", userId)
+          .maybeSingle();
         email = (prof?.email as string | undefined) ?? undefined;
-      } catch { /* email optional */ }
+      } catch {
+        /* email optional */
+      }
 
       const customerId = await resolveOrCreateCustomer(stripe, { email, userId });
 
@@ -216,51 +218,57 @@ export const createVipCheckoutSession = createServerFn({ method: "POST" })
 
 export const createCustomCoinCheckoutSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(
-    (data: { units: number; returnUrl: string; environment: StripeEnv }) => {
-      if (!Number.isInteger(data.units)) throw new Error("Invalid units");
-      if (data.units < CUSTOM_COIN_UNIT.minUnits || data.units > CUSTOM_COIN_UNIT.maxUnits) {
-        throw new Error(`Units must be between ${CUSTOM_COIN_UNIT.minUnits} and ${CUSTOM_COIN_UNIT.maxUnits}`);
-      }
-      if (data.environment !== "sandbox" && data.environment !== "live") {
-        throw new Error("Invalid environment");
-      }
-      if (!/^https?:\/\//.test(data.returnUrl)) throw new Error("Invalid returnUrl");
-      return data;
-    },
-  )
+  .inputValidator((data: { units: number; returnUrl: string; environment: StripeEnv }) => {
+    if (!Number.isInteger(data.units)) throw new Error("Invalid units");
+    if (data.units < CUSTOM_COIN_UNIT.minUnits || data.units > CUSTOM_COIN_UNIT.maxUnits) {
+      throw new Error(
+        `Units must be between ${CUSTOM_COIN_UNIT.minUnits} and ${CUSTOM_COIN_UNIT.maxUnits}`,
+      );
+    }
+    if (data.environment !== "sandbox" && data.environment !== "live") {
+      throw new Error("Invalid environment");
+    }
+    if (!/^https?:\/\//.test(data.returnUrl)) throw new Error("Invalid returnUrl");
+    return data;
+  })
   .handler(async ({ data, context }): Promise<CheckoutSessionResult> => {
     const { userId, supabase } = context;
     try {
       const stripe = createStripeClient(data.environment);
       const coins = data.units * CUSTOM_COIN_UNIT.coins;
 
-
       let email: string | undefined;
       try {
         const { data: prof } = await supabase
-          .from("profiles").select("email").eq("id", userId).maybeSingle();
+          .from("profiles")
+          .select("email")
+          .eq("id", userId)
+          .maybeSingle();
         email = (prof?.email as string | undefined) ?? undefined;
-      } catch { /* optional */ }
+      } catch {
+        /* optional */
+      }
 
       const customerId = await resolveOrCreateCustomer(stripe, { email, userId });
 
       const description = `${coins} OG Coins (Custom)`;
       const session = await stripe.checkout.sessions.create({
-        line_items: [{
-          // Use quantity = units so Stripe Checkout shows the line as
-          // "<units> × £0.99" (per-unit pricing) instead of a single
-          // opaque amount. The total still equals units * priceCents.
-          price_data: {
-            currency: "gbp",
-            product_data: {
-              name: `${CUSTOM_COIN_UNIT.coins}-coin top-up`,
-              description: `Each unit = ${CUSTOM_COIN_UNIT.coins} OG Coins`,
+        line_items: [
+          {
+            // Use quantity = units so Stripe Checkout shows the line as
+            // "<units> × £0.99" (per-unit pricing) instead of a single
+            // opaque amount. The total still equals units * priceCents.
+            price_data: {
+              currency: "gbp",
+              product_data: {
+                name: `${CUSTOM_COIN_UNIT.coins}-coin top-up`,
+                description: `Each unit = ${CUSTOM_COIN_UNIT.coins} OG Coins`,
+              },
+              unit_amount: CUSTOM_COIN_UNIT.priceCents,
             },
-            unit_amount: CUSTOM_COIN_UNIT.priceCents,
+            quantity: data.units,
           },
-          quantity: data.units,
-        }],
+        ],
 
         mode: "payment",
         ui_mode: "embedded_page",
@@ -307,7 +315,8 @@ export const reconcileCoinSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: { sessionId: string; environment: StripeEnv }) => {
     if (!/^cs_(test|live)_[A-Za-z0-9]+$/.test(data.sessionId)) throw new Error("Invalid sessionId");
-    if (data.environment !== "sandbox" && data.environment !== "live") throw new Error("Invalid environment");
+    if (data.environment !== "sandbox" && data.environment !== "live")
+      throw new Error("Invalid environment");
     return data;
   })
   .handler(async ({ data, context }): Promise<ReconcileResult> => {
@@ -320,7 +329,12 @@ export const reconcileCoinSession = createServerFn({ method: "POST" })
       if (meta.userId !== userId) {
         return { error: "Session does not belong to this user" };
       }
-      if (session.status !== "complete" || (session.payment_status && session.payment_status !== "paid" && session.payment_status !== "no_payment_required")) {
+      if (
+        session.status !== "complete" ||
+        (session.payment_status &&
+          session.payment_status !== "paid" &&
+          session.payment_status !== "no_payment_required")
+      ) {
         return { status: "pending", reason: session.payment_status ?? session.status ?? "unknown" };
       }
 
@@ -342,24 +356,29 @@ export const reconcileCoinSession = createServerFn({ method: "POST" })
       if (!coins || coins <= 0) return { error: "Could not determine coin amount" };
 
       const reference = `stripe:${data.environment}:${session.id}`;
-      const { data: result, error: creditErr } = await (supabaseAdmin as any)
-        .rpc("credit_coin_transaction", {
+      const { data: result, error: creditErr } = await (supabaseAdmin as any).rpc(
+        "credit_coin_transaction",
+        {
           _user_id: userId,
           _amount: coins,
           _type: "stripe_purchase",
           _reference: reference,
-        });
+        },
+      );
       if (creditErr) return { error: creditErr.message };
 
       const balance = Number((result as { balance?: number } | null)?.balance ?? 0);
       const credited = Boolean((result as { credited?: boolean } | null)?.credited);
       if (credited) {
         const rewardCoins = Math.max(1, Math.floor(coins / 10));
-        const { error: referralError } = await (supabaseAdmin as any).rpc("credit_payment_referral", {
-          _referee_id: userId,
-          _reward_coins: rewardCoins,
-          _payment_reference: reference,
-        });
+        const { error: referralError } = await (supabaseAdmin as any).rpc(
+          "credit_payment_referral",
+          {
+            _referee_id: userId,
+            _reward_coins: rewardCoins,
+            _payment_reference: reference,
+          },
+        );
         if (referralError) console.error("payment referral reward failed", referralError);
       }
       return credited
@@ -390,7 +409,8 @@ export const createTrackUnlockCheckoutSession = createServerFn({ method: "POST" 
   .handler(async ({ data, context }): Promise<CheckoutSessionResult> => {
     const { userId, supabase } = context;
     try {
-      const { TRACK_UNLOCK_PENCE, TRACK_UNLOCK_CURRENCY } = await import("@/lib/track-unlock.server");
+      const { TRACK_UNLOCK_PENCE, TRACK_UNLOCK_CURRENCY } =
+        await import("@/lib/track-unlock.server");
       const stripe = createStripeClient(data.environment);
 
       const { data: song } = await supabase
@@ -404,22 +424,29 @@ export const createTrackUnlockCheckoutSession = createServerFn({ method: "POST" 
       let email: string | undefined;
       try {
         const { data: prof } = await supabase
-          .from("profiles").select("email").eq("id", userId).maybeSingle();
+          .from("profiles")
+          .select("email")
+          .eq("id", userId)
+          .maybeSingle();
         email = (prof?.email as string | undefined) ?? undefined;
-      } catch { /* email is optional */ }
+      } catch {
+        /* email is optional */
+      }
 
       const customerId = await resolveOrCreateCustomer(stripe, { email, userId });
       const description = `Full track unlock — ${song.title || "OG Bot track"}`;
 
       const session = await stripe.checkout.sessions.create({
-        line_items: [{
-          price_data: {
-            currency: TRACK_UNLOCK_CURRENCY,
-            unit_amount: TRACK_UNLOCK_PENCE,
-            product_data: { name: "Full track unlock" },
+        line_items: [
+          {
+            price_data: {
+              currency: TRACK_UNLOCK_CURRENCY,
+              unit_amount: TRACK_UNLOCK_PENCE,
+              product_data: { name: "Full track unlock" },
+            },
+            quantity: 1,
           },
-          quantity: 1,
-        }],
+        ],
         mode: "payment",
         ui_mode: "embedded_page",
         return_url: data.returnUrl,
@@ -447,49 +474,65 @@ export const reconcileTrackUnlock = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: { sessionId: string; environment: StripeEnv }) => {
     if (!/^cs_(test|live)_[A-Za-z0-9]+$/.test(data.sessionId)) throw new Error("Invalid sessionId");
-    if (data.environment !== "sandbox" && data.environment !== "live") throw new Error("Invalid environment");
+    if (data.environment !== "sandbox" && data.environment !== "live")
+      throw new Error("Invalid environment");
     return data;
   })
-  .handler(async ({ data, context }): Promise<
-    { status: "unlocked"; songId: string } | { status: "pending"; reason: string } | { error: string }
-  > => {
-    const { userId } = context;
-    try {
-      const stripe = createStripeClient(data.environment);
-      const session = await stripe.checkout.sessions.retrieve(data.sessionId);
-      const meta = (session.metadata ?? {}) as Record<string, string | undefined>;
-      if (meta.userId !== userId) return { error: "Session does not belong to this user" };
-      if (meta.kind !== "track_unlock" || !meta.songId) return { error: "Not a track unlock session" };
-      if (
-        session.status !== "complete" ||
-        (session.payment_status && session.payment_status !== "paid" && session.payment_status !== "no_payment_required")
-      ) {
-        return { status: "pending", reason: session.payment_status ?? session.status ?? "unknown" };
-      }
+  .handler(
+    async ({
+      data,
+      context,
+    }): Promise<
+      | { status: "unlocked"; songId: string }
+      | { status: "pending"; reason: string }
+      | { error: string }
+    > => {
+      const { userId } = context;
+      try {
+        const stripe = createStripeClient(data.environment);
+        const session = await stripe.checkout.sessions.retrieve(data.sessionId);
+        const meta = (session.metadata ?? {}) as Record<string, string | undefined>;
+        if (meta.userId !== userId) return { error: "Session does not belong to this user" };
+        if (meta.kind !== "track_unlock" || !meta.songId)
+          return { error: "Not a track unlock session" };
+        if (
+          session.status !== "complete" ||
+          (session.payment_status &&
+            session.payment_status !== "paid" &&
+            session.payment_status !== "no_payment_required")
+        ) {
+          return {
+            status: "pending",
+            reason: session.payment_status ?? session.status ?? "unknown",
+          };
+        }
 
-      const { grantTrackUnlock } = await import("@/lib/track-unlock.server");
-      const result = await grantTrackUnlock(
-        userId,
-        meta.songId,
-        `stripe:${data.environment}:${session.id}`,
-      );
-      if (!result.ok) return { error: result.error };
-      if (!result.already) {
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const { error: referralError } = await (supabaseAdmin as any).rpc("credit_payment_referral", {
-          _referee_id: userId,
-          _reward_coins: 1,
-          _payment_reference: `stripe:${data.environment}:track:${session.id}`,
-        });
-        if (referralError) console.error("payment referral reward failed", referralError);
+        const { grantTrackUnlock } = await import("@/lib/track-unlock.server");
+        const result = await grantTrackUnlock(
+          userId,
+          meta.songId,
+          `stripe:${data.environment}:${session.id}`,
+        );
+        if (!result.ok) return { error: result.error };
+        if (!result.already) {
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          const { error: referralError } = await (supabaseAdmin as any).rpc(
+            "credit_payment_referral",
+            {
+              _referee_id: userId,
+              _reward_coins: 1,
+              _payment_reference: `stripe:${data.environment}:track:${session.id}`,
+            },
+          );
+          if (referralError) console.error("payment referral reward failed", referralError);
+        }
+        return { status: "unlocked", songId: meta.songId };
+      } catch (error) {
+        console.error("reconcileTrackUnlock failed", error);
+        return { error: getStripeErrorMessage(error) };
       }
-      return { status: "unlocked", songId: meta.songId };
-    } catch (error) {
-      console.error("reconcileTrackUnlock failed", error);
-      return { error: getStripeErrorMessage(error) };
-    }
-  });
-
+    },
+  );
 
 // -------------------------------------------------------------------------
 // Purchase history: any user can see their own coin/VIP transactions.
@@ -513,8 +556,25 @@ export type PurchaseRow = {
   stripe?: StripePurchaseDetails | null;
 };
 
-const ZERO_DECIMAL = new Set(["bif","clp","djf","gnf","jpy","kmf","krw","mga","pyg","rwf","ugx","vnd","vuv","xaf","xof","xpf"]);
-const THREE_DECIMAL = new Set(["bhd","jod","kwd","omr","tnd"]);
+const ZERO_DECIMAL = new Set([
+  "bif",
+  "clp",
+  "djf",
+  "gnf",
+  "jpy",
+  "kmf",
+  "krw",
+  "mga",
+  "pyg",
+  "rwf",
+  "ugx",
+  "vnd",
+  "vuv",
+  "xaf",
+  "xof",
+  "xpf",
+]);
+const THREE_DECIMAL = new Set(["bhd", "jod", "kwd", "omr", "tnd"]);
 function toMajorUnit(amount: number, currency: string) {
   const c = (currency ?? "").toLowerCase();
   if (ZERO_DECIMAL.has(c)) return amount;
@@ -574,7 +634,10 @@ export const getCoinPurchaseHistory = createServerFn({ method: "GET" })
     const rows = (data ?? []) as PurchaseRow[];
 
     const stripeRows = rows
-      .filter((r) => ["stripe_purchase", "store_purchase"].includes(r.type) && parseStripeRef(r.reference))
+      .filter(
+        (r) =>
+          ["stripe_purchase", "store_purchase"].includes(r.type) && parseStripeRef(r.reference),
+      )
       .slice(0, 30);
 
     const enriched = await Promise.all(
@@ -609,61 +672,64 @@ export type AdminPurchaseTotals = Record<string, { totalCoins: number; purchaseC
 
 export const getAllCoinPurchases = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }): Promise<{ items: AdminPurchaseRow[]; totals: AdminPurchaseTotals }> => {
-    const { supabase, userId } = context;
-    const [bossRes, adminRes] = await Promise.all([
-      supabase.rpc("has_role", { _user_id: userId, _role: "boss" }),
-      supabase.rpc("has_role", { _user_id: userId, _role: "admin" }),
-    ]);
-    if (!bossRes.data && !adminRes.data) throw new Error("Forbidden");
+  .handler(
+    async ({ context }): Promise<{ items: AdminPurchaseRow[]; totals: AdminPurchaseTotals }> => {
+      const { supabase, userId } = context;
+      const [bossRes, adminRes] = await Promise.all([
+        supabase.rpc("has_role", { _user_id: userId, _role: "boss" }),
+        supabase.rpc("has_role", { _user_id: userId, _role: "admin" }),
+      ]);
+      if (!bossRes.data && !adminRes.data) throw new Error("Forbidden");
 
-    const { data, error } = await supabase
-      .from("coin_transactions")
-      .select("id, user_id, amount, reference, created_at")
-      .eq("type", "stripe_purchase")
-      .gt("amount", 0)
-      .order("created_at", { ascending: false })
-      .limit(2000);
-    if (error) throw new Error(error.message);
+      const { data, error } = await supabase
+        .from("coin_transactions")
+        .select("id, user_id, amount, reference, created_at")
+        .eq("type", "stripe_purchase")
+        .gt("amount", 0)
+        .order("created_at", { ascending: false })
+        .limit(2000);
+      if (error) throw new Error(error.message);
 
-    const totals: AdminPurchaseTotals = {};
-    const userIds = new Set<string>();
-    for (const r of data ?? []) {
-      userIds.add(r.user_id);
-      const t = totals[r.user_id] ?? { totalCoins: 0, purchaseCount: 0 };
-      t.totalCoins += r.amount ?? 0;
-      t.purchaseCount += 1;
-      totals[r.user_id] = t;
-    }
+      const totals: AdminPurchaseTotals = {};
+      const userIds = new Set<string>();
+      for (const r of data ?? []) {
+        userIds.add(r.user_id);
+        const t = totals[r.user_id] ?? { totalCoins: 0, purchaseCount: 0 };
+        t.totalCoins += r.amount ?? 0;
+        t.purchaseCount += 1;
+        totals[r.user_id] = t;
+      }
 
-    let profileMap = new Map<string, { email: string | null; display_name: string | null }>();
-    if (userIds.size) {
-      const { data: profs } = await supabase
-        .from("profiles")
-        .select("id, email, display_name")
-        .in("id", Array.from(userIds));
-      profileMap = new Map(
-        (profs ?? []).map((p: any) => [p.id, { email: p.email ?? null, display_name: p.display_name ?? null }]),
-      );
-    }
+      let profileMap = new Map<string, { email: string | null; display_name: string | null }>();
+      if (userIds.size) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("id, email, display_name")
+          .in("id", Array.from(userIds));
+        profileMap = new Map(
+          (profs ?? []).map((p: any) => [
+            p.id,
+            { email: p.email ?? null, display_name: p.display_name ?? null },
+          ]),
+        );
+      }
 
-    const items: AdminPurchaseRow[] = (data ?? []).slice(0, 300).map((r) => {
-      const p = profileMap.get(r.user_id);
-      return {
-        id: r.id,
-        user_id: r.user_id,
-        amount: r.amount,
-        reference: r.reference,
-        created_at: r.created_at,
-        email: p?.email ?? null,
-        display_name: p?.display_name ?? null,
-      };
-    });
+      const items: AdminPurchaseRow[] = (data ?? []).slice(0, 300).map((r) => {
+        const p = profileMap.get(r.user_id);
+        return {
+          id: r.id,
+          user_id: r.user_id,
+          amount: r.amount,
+          reference: r.reference,
+          created_at: r.created_at,
+          email: p?.email ?? null,
+          display_name: p?.display_name ?? null,
+        };
+      });
 
-    return { items, totals };
-  });
-
-
+      return { items, totals };
+    },
+  );
 
 // -------------------------------------------------------------------------
 // Receipt link
@@ -675,7 +741,8 @@ export const getStripeReceiptUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: { sessionId: string; environment: StripeEnv }) => {
     if (!/^cs_(test|live)_[A-Za-z0-9]+$/.test(data.sessionId)) throw new Error("Invalid sessionId");
-    if (data.environment !== "sandbox" && data.environment !== "live") throw new Error("Invalid environment");
+    if (data.environment !== "sandbox" && data.environment !== "live")
+      throw new Error("Invalid environment");
     return data;
   })
   .handler(async ({ data, context }): Promise<ReceiptResult> => {
@@ -712,7 +779,8 @@ export const refundCoinPurchase = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: { sessionId: string; environment: StripeEnv }) => {
     if (!/^cs_(test|live)_[A-Za-z0-9]+$/.test(data.sessionId)) throw new Error("Invalid sessionId");
-    if (data.environment !== "sandbox" && data.environment !== "live") throw new Error("Invalid environment");
+    if (data.environment !== "sandbox" && data.environment !== "live")
+      throw new Error("Invalid environment");
     return data;
   })
   .handler(async ({ data, context }): Promise<RefundResult> => {
@@ -754,7 +822,10 @@ export const refundCoinPurchase = createServerFn({ method: "POST" })
 
       const coinsToReverse = Math.max(0, Number(session.metadata?.coins ?? 0)) || 0;
       const { data: prof } = await supabaseAdmin
-        .from("profiles").select("coin_balance").eq("id", userId).maybeSingle();
+        .from("profiles")
+        .select("coin_balance")
+        .eq("id", userId)
+        .maybeSingle();
       const current = prof?.coin_balance ?? 0;
       const newBalance = Math.max(0, current - coinsToReverse);
       if (coinsToReverse > 0) {
@@ -779,15 +850,13 @@ type PortalResult = { url: string } | { error: string };
 
 export const createBillingPortalSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(
-    (data: { returnUrl: string; environment: StripeEnv }) => {
-      if (data.environment !== "sandbox" && data.environment !== "live") {
-        throw new Error("Invalid environment");
-      }
-      if (!/^https?:\/\//.test(data.returnUrl)) throw new Error("Invalid returnUrl");
-      return data;
-    },
-  )
+  .inputValidator((data: { returnUrl: string; environment: StripeEnv }) => {
+    if (data.environment !== "sandbox" && data.environment !== "live") {
+      throw new Error("Invalid environment");
+    }
+    if (!/^https?:\/\//.test(data.returnUrl)) throw new Error("Invalid returnUrl");
+    return data;
+  })
   .handler(async ({ data, context }): Promise<PortalResult> => {
     const { userId, supabase } = context;
     try {
@@ -818,7 +887,10 @@ export const createBillingPortalSession = createServerFn({ method: "POST" })
           // lacks the search permission. Fall back to email lookup.
           console.warn("billingPortal customer search failed, falling back", err);
           const { data: prof } = await supabase
-            .from("profiles").select("email").eq("id", userId).maybeSingle();
+            .from("profiles")
+            .select("email")
+            .eq("id", userId)
+            .maybeSingle();
           const email = (prof?.email as string | undefined) ?? undefined;
           if (email) {
             const list = await stripe.customers.list({ email, limit: 1 });
@@ -875,15 +947,13 @@ export const getMyRefunds = createServerFn({ method: "POST" })
       .limit(50);
     if (error) throw new Error(error.message);
 
-    let working = (rows ?? []) as Array<RefundRow & { amount: number }>;
+    const working = (rows ?? []) as Array<RefundRow & { amount: number }>;
 
     // Live refresh: re-fetch up to 10 most recent refunds whose status is
     // still pending or that the caller asked to refresh.
     if (data.refresh && working.length) {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const targets = working
-        .filter((r) => data.refresh || r.status === "pending")
-        .slice(0, 10);
+      const targets = working.filter((r) => data.refresh || r.status === "pending").slice(0, 10);
       await Promise.all(
         targets.map(async (r) => {
           try {
@@ -915,6 +985,3 @@ export const getMyRefunds = createServerFn({ method: "POST" })
       amount: toMajorUnit(r.amount, r.currency),
     }));
   });
-
-
-

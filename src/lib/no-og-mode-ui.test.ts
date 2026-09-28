@@ -20,8 +20,8 @@ const BANNED: RegExp[] = [
   /\bOgModeToggle\b/,
   /\bOgModeProvider\b/,
   /\bOgModeContext\b/,
-  /\bog_mode\b/,           // profile column / preference key
-  /["']og-mode["']/,        // route segment / storage key
+  /\bog_mode\b/, // profile column / preference key
+  /["']og-mode["']/, // route segment / storage key
 ];
 
 const SKIP_DIRS = new Set(["__snapshots__", "node_modules", "dist", "build"]);

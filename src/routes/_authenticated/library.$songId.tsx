@@ -102,22 +102,10 @@ function SongDetailPage() {
   );
 }
 
-function OwnerPublishToggle({
-  song,
-  onChanged,
-}: {
-  song: FullSong;
-  onChanged: () => void;
-}) {
+function OwnerPublishToggle({ song, onChanged }: { song: FullSong; onChanged: () => void }) {
   const { user } = useAuth();
   if (!user || song.user_id !== user.id) return null;
-  return (
-    <PublishToggle
-      songId={song.id}
-      isPublic={!!song.is_public}
-      onChanged={onChanged}
-    />
-  );
+  return <PublishToggle songId={song.id} isPublic={!!song.is_public} onChanged={onChanged} />;
 }
 
 function SkeletonState({ message }: { message: string }) {
@@ -141,7 +129,8 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
 
   const isReady = song.status === "completed" && !!(song.audio_path || (song as any).sample_path);
   const isFailed = song.status === "failed";
-  const isPending = song.status === "draft" || song.status === "pending" || song.status === "processing";
+  const isPending =
+    song.status === "draft" || song.status === "pending" || song.status === "processing";
   const wasPendingRef = useRef(isPending);
   // Boss/admin accounts always hear the full track — no unlock needed.
   const { isBoss } = useRole();
@@ -166,9 +155,10 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
       setLoadingPreview(true);
       try {
         const { data, error } = await supabase.functions.invoke("song-url", {
-          body: communityMode || unlocked
-            ? { song_id: song.id, mode: "full", purpose: "stream" }
-            : { song_id: song.id, mode: "preview" },
+          body:
+            communityMode || unlocked
+              ? { song_id: song.id, mode: "full", purpose: "stream" }
+              : { song_id: song.id, mode: "preview" },
         });
 
         if (error) throw error;
@@ -186,7 +176,9 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
       }
     }
     load();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [isReady, song.id, previewUrl, loadingPreview, communityMode, unlocked]);
 
   // The moment a track becomes paid-for, drop the sample link so the player
@@ -199,11 +191,13 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
       setProgress(0);
       setPlaying(false);
       const el = audioRef.current;
-      if (el) { el.pause(); el.removeAttribute("src"); }
+      if (el) {
+        el.pause();
+        el.removeAttribute("src");
+      }
     }
     wasUnlockedRef.current = unlocked;
   }, [unlocked]);
-
 
   // Once the preview URL is warmed after a pending→ready transition, auto-play
   // it so the user gets an immediate "song is ready" moment.
@@ -240,8 +234,6 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
     el.addEventListener("timeupdate", onTime);
     return () => el.removeEventListener("timeupdate", onTime);
   }, [sampleSeconds, communityMode, unlocked]);
-
-
 
   async function togglePlay() {
     if (!previewUrl) return;
@@ -327,7 +319,6 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
         qc.invalidateQueries({ queryKey: ["songs"] }),
       ]);
       onRefresh();
-
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Download failed");
     } finally {
@@ -335,10 +326,10 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
     }
   }
 
-
-  const progressDenom = communityMode || unlocked
-    ? Math.max(1, song.duration_seconds ?? audioRef.current?.duration ?? sampleSeconds)
-    : sampleSeconds;
+  const progressDenom =
+    communityMode || unlocked
+      ? Math.max(1, song.duration_seconds ?? audioRef.current?.duration ?? sampleSeconds)
+      : sampleSeconds;
 
   const progressPct = useMemo(
     () => Math.min(100, (progress / progressDenom) * 100),
@@ -346,12 +337,22 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
   );
 
   return (
-    <article id="song-player" tabIndex={-1} aria-label="Song player" className="scroll-mt-20 overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-card focus:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:p-6">
-
+    <article
+      id="song-player"
+      tabIndex={-1}
+      aria-label="Song player"
+      className="scroll-mt-20 overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-card focus:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:p-6"
+    >
       <div className="flex flex-col gap-6 sm:flex-row">
         <div className="relative h-48 w-48 shrink-0 self-center overflow-hidden rounded-xl bg-gradient-brand-soft">
           {song.cover_url ? (
-            <img src={song.cover_url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
+            <img
+              src={song.cover_url}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              className="h-full w-full object-cover"
+            />
           ) : (
             <div className="grid h-full w-full place-items-center">
               <Music2 className="h-12 w-12 text-muted-foreground" />
@@ -369,7 +370,9 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
             <h2 className="break-words text-xl font-bold leading-tight sm:text-2xl">
               {song.title || (isPending ? "Generating…" : "Untitled")}
             </h2>
-            <p className="mt-2 line-clamp-3 break-words text-sm leading-relaxed text-muted-foreground">{song.prompt}</p>
+            <p className="mt-2 line-clamp-3 break-words text-sm leading-relaxed text-muted-foreground">
+              {song.prompt}
+            </p>
             {song.style && (
               <span className="mt-3 inline-block max-w-full break-words rounded-lg bg-secondary px-2.5 py-1 text-xs leading-relaxed text-secondary-foreground">
                 {song.style}
@@ -412,8 +415,12 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
                     <Play className="h-5 w-5" />
                   )}
                   {playing
-                    ? communityMode ? "Pause" : "Pause preview"
-                    : communityMode ? "Play full track" : "Play preview"}
+                    ? communityMode
+                      ? "Pause"
+                      : "Pause preview"
+                    : communityMode
+                      ? "Play full track"
+                      : "Play preview"}
                 </Button>
                 <Button
                   onClick={requestDownload}
@@ -429,9 +436,7 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
                   ) : (
                     <Lock className="h-5 w-5" />
                   )}
-                  {communityMode
-                    ? "Download · 3 coins"
-                    : unlocked ? "Download HQ" : "Locked"}
+                  {communityMode ? "Download · 3 coins" : unlocked ? "Download HQ" : "Locked"}
                 </Button>
               </div>
 
@@ -479,10 +484,7 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
 }
 
 function GeneratingStatus({ song }: { song: FullSong }) {
-  const startedAt = useMemo(
-    () => new Date(song.created_at).getTime(),
-    [song.created_at],
-  );
+  const startedAt = useMemo(() => new Date(song.created_at).getTime(), [song.created_at]);
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const id = window.setInterval(() => setNow(Date.now()), 1000);
@@ -501,8 +503,7 @@ function GeneratingStatus({ song }: { song: FullSong }) {
     {
       label: "Writing arrangement",
       hint: "Composing the track structure",
-      state:
-        song.status === "processing" || hasCover || hasAudio ? "done" : "active",
+      state: song.status === "processing" || hasCover || hasAudio ? "done" : "active",
     },
     {
       label: "Generating audio",
@@ -531,9 +532,7 @@ function GeneratingStatus({ song }: { song: FullSong }) {
           <Loader2 className="h-4 w-4 animate-spin text-primary" />
           Generating your track…
         </div>
-        <div className="text-xs tabular-nums text-muted-foreground">
-          Elapsed {elapsedLabel}
-        </div>
+        <div className="text-xs tabular-nums text-muted-foreground">Elapsed {elapsedLabel}</div>
       </div>
 
       <div className="h-2 w-full overflow-hidden rounded-full bg-white/5">
@@ -562,9 +561,7 @@ function GeneratingStatus({ song }: { song: FullSong }) {
             <span className="min-w-0">
               <span
                 className={
-                  s.state === "pending"
-                    ? "text-muted-foreground"
-                    : "font-semibold text-foreground"
+                  s.state === "pending" ? "text-muted-foreground" : "font-semibold text-foreground"
                 }
               >
                 {s.label}
@@ -584,8 +581,8 @@ function GeneratingStatus({ song }: { song: FullSong }) {
       </ol>
 
       <p className="text-xs text-muted-foreground">
-        This usually takes 60–90 seconds. The page refreshes automatically the
-        moment your song is ready — feel free to keep it open or come back later.
+        This usually takes 60–90 seconds. The page refreshes automatically the moment your song is
+        ready — feel free to keep it open or come back later.
       </p>
       {longRunning && (
         <p className="text-xs text-amber-400">

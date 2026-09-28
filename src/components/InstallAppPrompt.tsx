@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { X, Share, Plus } from "lucide-react";
 
-
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
@@ -67,7 +66,11 @@ export function InstallAppPrompt() {
   function dismiss(e?: { preventDefault?: () => void; stopPropagation?: () => void }) {
     e?.preventDefault?.();
     e?.stopPropagation?.();
-    try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch { /* ignore */ }
+    try {
+      localStorage.setItem(DISMISS_KEY, String(Date.now()));
+    } catch {
+      /* ignore */
+    }
     setOpen(false);
     setIosHelp(false);
   }
@@ -114,8 +117,14 @@ export function InstallAppPrompt() {
           </button>
           <div className="font-semibold text-foreground">Do this first 👇</div>
           <ol className="mt-1.5 space-y-1 text-muted-foreground">
-            <li>1. Tap <Share className="mx-0.5 inline h-3 w-3 text-primary" /> <span className="text-foreground">Share</span> below</li>
-            <li>2. Pick <Plus className="mx-0.5 inline h-3 w-3 text-primary" /> <span className="text-foreground">Add to Home Screen</span></li>
+            <li>
+              1. Tap <Share className="mx-0.5 inline h-3 w-3 text-primary" />{" "}
+              <span className="text-foreground">Share</span> below
+            </li>
+            <li>
+              2. Pick <Plus className="mx-0.5 inline h-3 w-3 text-primary" />{" "}
+              <span className="text-foreground">Add to Home Screen</span>
+            </li>
           </ol>
           <ArrowAnchor />
         </div>
@@ -168,4 +177,3 @@ function ArrowAnchor() {
     </span>
   );
 }
-

@@ -119,7 +119,6 @@ export function AppShell({ children }: { children: ReactNode }) {
                 paddingRight: "max(0.75rem, env(safe-area-inset-right))",
               }}
             >
-
               <SidebarTrigger className="shrink-0" />
 
               <div className="flex min-w-0 items-center gap-2 sm:gap-3">
@@ -176,7 +175,11 @@ export function AppShell({ children }: { children: ReactNode }) {
                   variant="ghost"
                   size="icon"
                   onClick={handleSignOut}
-                  title={dev.isDev ? "Sign out (Dev mode)" : `Sign out${user?.email ? ` ${user.email}` : ""}`}
+                  title={
+                    dev.isDev
+                      ? "Sign out (Dev mode)"
+                      : `Sign out${user?.email ? ` ${user.email}` : ""}`
+                  }
                   className="hidden h-9 w-9 hover:bg-white/5 min-[380px]:inline-flex"
                 >
                   <LogOut className="h-4 w-4" />
@@ -208,8 +211,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                       const trigger = document.querySelector<HTMLElement>(
                         "[aria-label='More actions']",
                       );
-                      const triggerVisible =
-                        !!trigger && trigger.offsetParent !== null;
+                      const triggerVisible = !!trigger && trigger.offsetParent !== null;
                       if (!triggerVisible) {
                         const pill = document.querySelector<HTMLElement>(
                           "[data-coin-balance-pill]",
@@ -252,7 +254,6 @@ export function AppShell({ children }: { children: ReactNode }) {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-
             </header>
 
             {!roleLoading && isAdmin && (
@@ -263,10 +264,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             )}
             <AdminEditHint />
 
-            <main
-              className="safe-x min-w-0 flex-1 overflow-x-hidden pb-[calc(env(safe-area-inset-bottom)+72px)] md:pb-0"
-            >
-
+            <main className="safe-x min-w-0 flex-1 overflow-x-hidden pb-[calc(env(safe-area-inset-bottom)+72px)] md:pb-0">
               <div className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
                 {children}
               </div>

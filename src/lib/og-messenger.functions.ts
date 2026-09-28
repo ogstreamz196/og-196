@@ -7,7 +7,6 @@ import type { UserContextSummary } from "@/lib/og-persona-public";
 
 export type OgChatMessage = { role: "user" | "assistant"; content: string };
 
-
 interface ChatReply {
   reply: string;
   coin_balance: number;
@@ -26,27 +25,39 @@ interface ChatReply {
  */
 export const chatOgBot = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { messages: OgChatMessage[]; pageContext?: string; mode?: "safe" | "og"; attachmentDataUrl?: string; language?: string }) => {
-    if (!data || !Array.isArray(data.messages)) throw new Error("messages required");
-    const messages = data.messages.slice(-30).map((m) => ({
-      role: m.role === "assistant" ? "assistant" as const : "user" as const,
-      content: String(m.content ?? "").slice(0, 4000),
-    }));
-    if (messages.length === 0) throw new Error("Empty conversation");
-    const pageContext =
-      typeof data.pageContext === "string" ? data.pageContext.slice(0, 200) : "";
-    const mode: "safe" | "og" = data.mode === "safe" ? "safe" : "og";
-    const language =
-      typeof data.language === "string" && data.language.trim()
-        ? data.language.trim().slice(0, 40)
-        : "English";
-    let attachmentDataUrl: string | undefined;
-    if (typeof data.attachmentDataUrl === "string" && data.attachmentDataUrl.startsWith("data:image/")) {
-      if (data.attachmentDataUrl.length > 8_000_000) throw new Error("Image too large (max ~6MB).");
-      attachmentDataUrl = data.attachmentDataUrl;
-    }
-    return { messages, pageContext, mode, attachmentDataUrl, language };
-  })
+  .inputValidator(
+    (data: {
+      messages: OgChatMessage[];
+      pageContext?: string;
+      mode?: "safe" | "og";
+      attachmentDataUrl?: string;
+      language?: string;
+    }) => {
+      if (!data || !Array.isArray(data.messages)) throw new Error("messages required");
+      const messages = data.messages.slice(-30).map((m) => ({
+        role: m.role === "assistant" ? ("assistant" as const) : ("user" as const),
+        content: String(m.content ?? "").slice(0, 4000),
+      }));
+      if (messages.length === 0) throw new Error("Empty conversation");
+      const pageContext =
+        typeof data.pageContext === "string" ? data.pageContext.slice(0, 200) : "";
+      const mode: "safe" | "og" = data.mode === "safe" ? "safe" : "og";
+      const language =
+        typeof data.language === "string" && data.language.trim()
+          ? data.language.trim().slice(0, 40)
+          : "English";
+      let attachmentDataUrl: string | undefined;
+      if (
+        typeof data.attachmentDataUrl === "string" &&
+        data.attachmentDataUrl.startsWith("data:image/")
+      ) {
+        if (data.attachmentDataUrl.length > 8_000_000)
+          throw new Error("Image too large (max ~6MB).");
+        attachmentDataUrl = data.attachmentDataUrl;
+      }
+      return { messages, pageContext, mode, attachmentDataUrl, language };
+    },
+  )
   .handler(async ({ data, context }): Promise<ChatReply> => {
     const { aiChatTarget } = await import("@/lib/ai-endpoint.server");
     const ai = aiChatTarget();
@@ -61,10 +72,7 @@ export const chatOgBot = createServerFn({ method: "POST" })
         .select("display_name, email, coin_balance")
         .eq("id", context.userId)
         .maybeSingle(),
-      supabaseAdmin
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", context.userId),
+      supabaseAdmin.from("user_roles").select("role").eq("user_id", context.userId),
       supabaseAdmin
         .from("user_preferences")
         .select("foul_mouth")
@@ -86,16 +94,13 @@ export const chatOgBot = createServerFn({ method: "POST" })
         .in("key", ["free_access_all", "free_access_expires_at"]),
     ]);
 
-
     if (profileRes.error) throw new Error(profileRes.error.message);
     const rawProfile = profileRes.data;
     if (!rawProfile) throw new Error("Profile not found");
     const { maskDevIdentity } = await import("@/lib/dev-identity");
     const profile = maskDevIdentity(rawProfile)!;
     if ((profile.coin_balance ?? 0) <= 0) {
-      throw new Error(
-        "Out of OG coins. Top up from Buy OG Coins or grab VIP to keep chatting.",
-      );
+      throw new Error("Out of OG coins. Top up from Buy OG Coins or grab VIP to keep chatting.");
     }
 
     const roles = (rolesRes.data ?? []).map((r) => r.role);
@@ -119,7 +124,6 @@ export const chatOgBot = createServerFn({ method: "POST" })
 
     const foulMouth = isVip ? (prefRes.data?.foul_mouth ?? true) : false;
 
-
     const userCtx: UserContextSummary = {
       display_name: profile.display_name,
       email: profile.email,
@@ -131,14 +135,13 @@ export const chatOgBot = createServerFn({ method: "POST" })
 
     const learnedInsults = (learnedRes.data ?? []).map((r: { phrase: string }) => r.phrase);
 
-    const effectiveLanguage = isVip ? (data.language || "English") : "English";
+    const effectiveLanguage = isVip ? data.language || "English" : "English";
 
     const { buildSystemPrompt, detectSongIntent } = await import("@/lib/og-persona.server");
 
     const latestUserMsg = [...data.messages].reverse().find((m) => m.role === "user");
     const songIntent =
-      detectSongIntent(latestUserMsg?.content) ||
-      detectSongIntent(data.pageContext);
+      detectSongIntent(latestUserMsg?.content) || detectSongIntent(data.pageContext);
 
     const system = buildSystemPrompt({
       mode: data.mode,
@@ -164,7 +167,12 @@ export const chatOgBot = createServerFn({ method: "POST" })
           // Upsert each phrase, bumping uses + last_seen_at.
           await Promise.all(
             candidates.map((phrase: string) =>
-              (supabaseAdmin.rpc as unknown as (fn: string, args: Record<string, unknown>) => Promise<{ error: { message: string } | null }>)("og_learn_insult", {
+              (
+                supabaseAdmin.rpc as unknown as (
+                  fn: string,
+                  args: Record<string, unknown>,
+                ) => Promise<{ error: { message: string } | null }>
+              )("og_learn_insult", {
                 p_user_id: context.userId,
                 p_phrase: phrase,
               }).then((r) => {
@@ -216,7 +224,9 @@ export const chatOgBot = createServerFn({ method: "POST" })
             const hits = j.data?.web ?? [];
             if (hits.length) {
               const block = hits
-                .map((h, i) => `${i + 1}. [${h.title ?? h.url}](${h.url})\n   ${h.description ?? ""}`)
+                .map(
+                  (h, i) => `${i + 1}. [${h.title ?? h.url}](${h.url})\n   ${h.description ?? ""}`,
+                )
                 .join("\n");
               outgoing[outgoing.length - 1] = {
                 role: "user",
@@ -260,7 +270,8 @@ export const chatOgBot = createServerFn({ method: "POST" })
         const text = await res.text().catch(() => "");
         console.error("Lovable AI gateway error", res.status, text);
         if (res.status === 429) throw new Error("OG Bot is rate-limited, try again soon.");
-        if (res.status === 402) throw new Error("AI credits exhausted — Boss needs to top up Lovable AI.");
+        if (res.status === 402)
+          throw new Error("AI credits exhausted — Boss needs to top up Lovable AI.");
         throw new Error(`OG Bot couldn't respond right now (HTTP ${res.status})`);
       }
 

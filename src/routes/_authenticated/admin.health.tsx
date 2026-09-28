@@ -123,7 +123,9 @@ export function ApiHealthPage() {
                           {c.status}
                         </Badge>
                         {c.latencyMs != null && (
-                          <span className="text-[11px] text-muted-foreground">{c.latencyMs} ms</span>
+                          <span className="text-[11px] text-muted-foreground">
+                            {c.latencyMs} ms
+                          </span>
                         )}
                       </div>
                       <p className="break-words text-sm text-muted-foreground">{c.detail}</p>

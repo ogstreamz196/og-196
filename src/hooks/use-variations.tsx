@@ -17,7 +17,13 @@ interface UseVariationsArgs {
   onChanged?: () => void;
 }
 
-export function useVariations({ songId, songStatus, balance, previewCost, onChanged }: UseVariationsArgs) {
+export function useVariations({
+  songId,
+  songStatus,
+  balance,
+  previewCost,
+  onChanged,
+}: UseVariationsArgs) {
   const { data: settings } = useSettings();
   const [variations, setVariations] = useState<Variation[]>([]);
   const [basket, setBasket] = useState<Set<string>>(() => new Set());
@@ -34,9 +40,15 @@ export function useVariations({ songId, songStatus, balance, previewCost, onChan
     let cancelled = false;
     (async () => {
       const { data: self } = await supabase
-        .from("songs").select("suno_task_id").eq("id", songId).maybeSingle();
+        .from("songs")
+        .select("suno_task_id")
+        .eq("id", songId)
+        .maybeSingle();
       const task = (self as { suno_task_id?: string | null })?.suno_task_id;
-      if (!task) { if (!cancelled) setVariations([]); return; }
+      if (!task) {
+        if (!cancelled) setVariations([]);
+        return;
+      }
       const { data: sibs } = await supabase
         .from("songs")
         .select("id, title, cover_url, revealed")
@@ -45,24 +57,32 @@ export function useVariations({ songId, songStatus, balance, previewCost, onChan
         .neq("id", songId);
       if (!cancelled) setVariations((sibs ?? []) as Variation[]);
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [songId, songStatus]);
 
-  const revealOne = useCallback(async (id: string) => {
-    setBusyVariation(id);
-    try {
-      const { data, error } = await supabase.functions.invoke("reveal-variation", { body: { song_id: id } });
-      if (error) throw new Error(invokeError(error, "Reveal failed"));
-      if (!data?.already) toast.success(`Alt take revealed · -${data?.cost ?? variationCost} coins`);
-      setVariations((vs) => vs.map((v) => v.id === id ? { ...v, revealed: true } : v));
-      onChanged?.();
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Reveal failed");
-      throw e;
-    } finally {
-      setBusyVariation(null);
-    }
-  }, [onChanged, variationCost]);
+  const revealOne = useCallback(
+    async (id: string) => {
+      setBusyVariation(id);
+      try {
+        const { data, error } = await supabase.functions.invoke("reveal-variation", {
+          body: { song_id: id },
+        });
+        if (error) throw new Error(invokeError(error, "Reveal failed"));
+        if (!data?.already)
+          toast.success(`Alt take revealed · -${data?.cost ?? variationCost} coins`);
+        setVariations((vs) => vs.map((v) => (v.id === id ? { ...v, revealed: true } : v)));
+        onChanged?.();
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "Reveal failed");
+        throw e;
+      } finally {
+        setBusyVariation(null);
+      }
+    },
+    [onChanged, variationCost],
+  );
 
   const toggleBasket = useCallback((id: string) => {
     setBasket((b) => {
@@ -79,12 +99,17 @@ export function useVariations({ songId, songStatus, balance, previewCost, onChan
     const ids = Array.from(basket);
     const total = ids.length * variationCost;
     if (ids.length === 0) return;
-    if (balance < total) { toast.error(`Need ${total} coins — current balance ${balance}`); return; }
+    if (balance < total) {
+      toast.error(`Need ${total} coins — current balance ${balance}`);
+      return;
+    }
     setCheckingOut(true);
     try {
       for (const id of ids) {
         // Sequential so deduct_coins sees a consistent running balance.
-        await revealOne(id).catch(() => { throw new Error(`Stopped at ${id.slice(0, 6)}`); });
+        await revealOne(id).catch(() => {
+          throw new Error(`Stopped at ${id.slice(0, 6)}`);
+        });
       }
       setBasket(new Set());
       toast.success(`Basket checked out · -${total} coins`);

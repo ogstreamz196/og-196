@@ -24,8 +24,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 
-
-
 import { lovable } from "@/integrations/lovable";
 import { getDeviceId } from "@/lib/device-id";
 import { checkDeviceAccountAllowed } from "@/lib/device-limit.functions";
@@ -38,7 +36,6 @@ import drillCoverAsset from "@/assets/album-drill.jpg.asset.json";
 import afrobeatsCoverAsset from "@/assets/album-afrobeats.jpg.asset.json";
 import { WelcomeBackdrop } from "@/components/layout/WelcomeBackdrop";
 import { BackgroundMusicHeaderControl } from "@/components/PersistentBackgroundMusic";
-
 
 function OgBotLogo({ className = "h-8 w-8" }: { className?: string }) {
   return (
@@ -69,10 +66,18 @@ export const Route = createFileRoute("/welcome")({
         property: "og:description",
         content: "Prompt rap, pop, drill, afrobeats, heartbreak and party songs with cover art.",
       },
-      { property: "og:image", content: "https://ogstreamz.co.uk/__l5e/assets-v1/c71b8b8a-3ff4-448e-ad15-3446b8fe5e88/ogbot.png" },
+      {
+        property: "og:image",
+        content:
+          "https://ogstreamz.co.uk/__l5e/assets-v1/c71b8b8a-3ff4-448e-ad15-3446b8fe5e88/ogbot.png",
+      },
       { property: "og:image:alt", content: "OG Streamz bot" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:image", content: "https://ogstreamz.co.uk/__l5e/assets-v1/c71b8b8a-3ff4-448e-ad15-3446b8fe5e88/ogbot.png" },
+      {
+        name: "twitter:image",
+        content:
+          "https://ogstreamz.co.uk/__l5e/assets-v1/c71b8b8a-3ff4-448e-ad15-3446b8fe5e88/ogbot.png",
+      },
     ],
   }),
 });
@@ -140,7 +145,11 @@ function useRedirectIfSignedIn() {
           : normalizedRef.startsWith("OG-")
             ? normalizedRef
             : `OG-${normalizedRef}`;
-        try { localStorage.setItem(PENDING_REF_KEY, stored); } catch { /* ignore */ }
+        try {
+          localStorage.setItem(PENDING_REF_KEY, stored);
+        } catch {
+          /* ignore */
+        }
       }
     }
     let cancelled = false;
@@ -165,7 +174,6 @@ function useRedirectIfSignedIn() {
   }, [navigate]);
 }
 
-
 function useOAuthSignIn() {
   const navigate = useNavigate();
   const [pending, setPending] = useState<OAuthProvider | null>(null);
@@ -179,7 +187,9 @@ function useOAuthSignIn() {
         // /welcome with the same param and can forward the user to their
         // original destination (e.g. the MCP consent URL) after sign-in.
         const isNativeApp = Boolean(
-          (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.(),
+          (
+            window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }
+          ).Capacitor?.isNativePlatform?.(),
         );
         // Always finish the provider flow in the browser, outside Android's app-link
         // path. The return screen can then explicitly open even unverified APKs.
@@ -195,7 +205,9 @@ function useOAuthSignIn() {
         if (result.error) {
           const raw = (result.error.message ?? "").toLowerCase();
           const transient =
-            raw.includes("authorization code") || raw.includes("code verifier") || raw.includes("pkce");
+            raw.includes("authorization code") ||
+            raw.includes("code verifier") ||
+            raw.includes("pkce");
           if (!transient) toast.error(result.error.message || `${provider} sign-in failed`);
           return;
         }
@@ -205,7 +217,9 @@ function useOAuthSignIn() {
       } catch (e) {
         const raw = (e instanceof Error ? e.message : "").toLowerCase();
         const transient =
-          raw.includes("authorization code") || raw.includes("code verifier") || raw.includes("pkce");
+          raw.includes("authorization code") ||
+          raw.includes("code verifier") ||
+          raw.includes("pkce");
         if (!transient) toast.error(e instanceof Error ? e.message : "Sign-in failed");
       } finally {
         setPending(null);
@@ -217,15 +231,25 @@ function useOAuthSignIn() {
   return { signIn, pending };
 }
 
-
-
 function GoogleIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 48 48" aria-hidden xmlns="http://www.w3.org/2000/svg">
-      <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/>
-      <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/>
-      <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/>
-      <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571.001-.001.002-.001.003-.002l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/>
+      <path
+        fill="#FFC107"
+        d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"
+      />
+      <path
+        fill="#FF3D00"
+        d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"
+      />
+      <path
+        fill="#4CAF50"
+        d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"
+      />
+      <path
+        fill="#1976D2"
+        d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571.001-.001.002-.001.003-.002l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"
+      />
     </svg>
   );
 }
@@ -238,10 +262,6 @@ function AppleIcon({ className }: { className?: string }) {
   );
 }
 
-
-
-
-
 type Device = {
   key: string;
   label: string;
@@ -252,9 +272,14 @@ type Device = {
 
 const PRIMARY_DEVICES: Device[] = [
   { key: "google", label: "Continue with Google", provider: "google", Icon: GoogleIcon },
-  { key: "apple", label: "Continue with Apple ID", provider: "apple", Icon: AppleIcon, iconClass: "text-black" },
+  {
+    key: "apple",
+    label: "Continue with Apple ID",
+    provider: "apple",
+    Icon: AppleIcon,
+    iconClass: "text-black",
+  },
 ];
-
 
 function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
   const { signIn, pending } = useOAuthSignIn();
@@ -262,33 +287,36 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
   const compact = size === "lg";
 
   const renderTile = (d: Device) => {
-      const isPending = pending === d.provider;
-      return (
-        <Button
-          key={d.key}
-          type="button"
-          variant="outline"
-          onClick={() => signIn(d.provider)}
-          disabled={pending !== null}
-          aria-label={d.label}
-          className="h-14 min-w-0 justify-center gap-2.5 rounded-lg border-border/80 bg-secondary/75 px-3 font-auth-body text-base font-semibold text-foreground shadow-sm backdrop-blur-sm transition-colors hover:border-primary/60 hover:bg-secondary focus-visible:ring-2 focus-visible:ring-primary"
-        >
-          {isPending ? (
-            <Loader2 className="h-6 w-6 animate-spin" aria-hidden />
-          ) : d.provider === "google" ? (
-            <GoogleIcon className="h-6 w-6 shrink-0" />
-          ) : (
-            <AppleIcon className="h-6 w-6 shrink-0 text-foreground" />
-          )}
-          <span className="truncate">{d.provider === "google" ? "Google" : "Apple"}</span>
-        </Button>
-      );
+    const isPending = pending === d.provider;
+    return (
+      <Button
+        key={d.key}
+        type="button"
+        variant="outline"
+        onClick={() => signIn(d.provider)}
+        disabled={pending !== null}
+        aria-label={d.label}
+        className="h-14 min-w-0 justify-center gap-2.5 rounded-lg border-border/80 bg-secondary/75 px-3 font-auth-body text-base font-semibold text-foreground shadow-sm backdrop-blur-sm transition-colors hover:border-primary/60 hover:bg-secondary focus-visible:ring-2 focus-visible:ring-primary"
+      >
+        {isPending ? (
+          <Loader2 className="h-6 w-6 animate-spin" aria-hidden />
+        ) : d.provider === "google" ? (
+          <GoogleIcon className="h-6 w-6 shrink-0" />
+        ) : (
+          <AppleIcon className="h-6 w-6 shrink-0 text-foreground" />
+        )}
+        <span className="truncate">{d.provider === "google" ? "Google" : "Apple"}</span>
+      </Button>
+    );
   };
 
   return (
     <div className={`mx-auto w-full font-auth-body ${compact ? "max-w-md" : "max-w-lg"}`}>
       <div className="relative overflow-hidden rounded-xl border border-border/80 bg-card/95 px-5 py-7 shadow-[0_24px_70px_-24px_hsl(var(--primary)/0.65)] backdrop-blur-xl sm:px-8 sm:py-9">
-        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-destructive via-primary to-destructive" aria-hidden />
+        <div
+          className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-destructive via-primary to-destructive"
+          aria-hidden
+        />
         <div className="text-center">
           <OgBotLogo className="mx-auto h-32 w-32 rounded-2xl sm:h-40 sm:w-40" />
           <h2 className="mt-3 text-lg font-semibold text-foreground sm:text-xl">
@@ -309,12 +337,12 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
           <>
             <div className="my-6 flex items-center gap-4" aria-hidden>
               <span className="h-px flex-1 bg-border" />
-              <span className="font-auth-display text-5xl font-black uppercase leading-none text-foreground sm:text-6xl">or</span>
+              <span className="font-auth-display text-5xl font-black uppercase leading-none text-foreground sm:text-6xl">
+                or
+              </span>
               <span className="h-px flex-1 bg-border" />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              {PRIMARY_DEVICES.map(renderTile)}
-            </div>
+            <div className="grid grid-cols-2 gap-3">{PRIMARY_DEVICES.map(renderTile)}</div>
           </>
         )}
       </div>
@@ -324,7 +352,11 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
 
 /** Usernames become a deterministic hidden address so no inbox is needed. */
 const USERNAME_DOMAIN = "ogstreamz.app";
-const normalizeHandle = (v: string) => v.trim().toLowerCase().replace(/[^a-z0-9._-]/g, "");
+const normalizeHandle = (v: string) =>
+  v
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]/g, "");
 const toLoginEmail = (v: string) =>
   v.includes("@") ? v.trim() : `${normalizeHandle(v)}@${USERNAME_DOMAIN}`;
 
@@ -407,12 +439,16 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
       }
       const msg = (signIn.error.message ?? "").toLowerCase();
       if (msg.includes("disabled")) {
-        toast.error(native ? "Username sign-up is unavailable right now. Please try again shortly." : "Username sign-up is switched off right now — use Google or Apple, or try again shortly.");
+        toast.error(
+          native
+            ? "Username sign-up is unavailable right now. Please try again shortly."
+            : "Username sign-up is switched off right now — use Google or Apple, or try again shortly.",
+        );
         return;
       }
-      const unknownUser = msg.includes("invalid login credentials") || msg.includes("user not found");
+      const unknownUser =
+        msg.includes("invalid login credentials") || msg.includes("user not found");
       if (!unknownUser) throw signIn.error;
-
 
       // 2) Device limit: max 2 accounts per device (blocks free-coin farming).
       const deviceId = getDeviceId();
@@ -444,7 +480,11 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
           return;
         }
         if (upMsg.includes("disabled")) {
-          toast.error(native ? "Username sign-up is unavailable right now. Please try again shortly." : "Username sign-up is switched off right now — use Google or Apple, or try again shortly.");
+          toast.error(
+            native
+              ? "Username sign-up is unavailable right now. Please try again shortly."
+              : "Username sign-up is switched off right now — use Google or Apple, or try again shortly.",
+          );
           return;
         }
 
@@ -476,14 +516,12 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
         </p>
       </div>
 
-      <form
-        onSubmit={submit}
-        className="space-y-5"
-        id="wc-auth-panel"
-      >
+      <form onSubmit={submit} className="space-y-5" id="wc-auth-panel">
         <div className="space-y-2">
-
-          <Label htmlFor="wc-email" className="ml-0.5 block text-left text-sm font-semibold text-foreground">
+          <Label
+            htmlFor="wc-email"
+            className="ml-0.5 block text-left text-sm font-semibold text-foreground"
+          >
             {mode === "reset" ? "Email" : "Username"}
           </Label>
           <Input
@@ -502,7 +540,10 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
         </div>
         {mode !== "reset" && (
           <div className="space-y-2">
-            <Label htmlFor="wc-password" className="ml-0.5 block text-left text-sm font-semibold text-foreground">
+            <Label
+              htmlFor="wc-password"
+              className="ml-0.5 block text-left text-sm font-semibold text-foreground"
+            >
               Password
             </Label>
 
@@ -534,7 +575,9 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
               <span className="font-display text-xs font-black uppercase tracking-wider text-primary-foreground">
                 Getting you in
               </span>
-              <span className="text-xs font-bold tabular-nums text-primary-foreground">{createProgress}%</span>
+              <span className="text-xs font-bold tabular-nums text-primary-foreground">
+                {createProgress}%
+              </span>
             </div>
             <Progress value={createProgress} className="h-1.5 bg-primary/20" />
             <p className="text-xs text-muted-foreground">Setting up your OG Studio profile.</p>
@@ -555,7 +598,11 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
               {mode === "reset" ? "Sending..." : "One sec..."}
             </>
           ) : mode === "reset" ? (
-            resetSent ? "Resend reset link" : "Send reset link"
+            resetSent ? (
+              "Resend reset link"
+            ) : (
+              "Send reset link"
+            )
           ) : (
             <>
               <Sparkles className="mr-2 h-5 w-5" aria-hidden />
@@ -565,44 +612,44 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
         </Button>
       </form>
 
-
       {mode !== "reset" && (
         <button
           type="button"
-          onClick={() => { setResetSent(false); setMode("reset"); }}
+          onClick={() => {
+            setResetSent(false);
+            setMode("reset");
+          }}
           className="mt-5 w-full text-center text-sm font-medium text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground"
         >
           Forgot password?
         </button>
       )}
 
-
       {mode === "reset" && (
         <button
           type="button"
-          onClick={() => { setResetSent(false); setMode("enter"); }}
+          onClick={() => {
+            setResetSent(false);
+            setMode("enter");
+          }}
           className="mt-5 w-full text-center text-sm font-semibold text-foreground/80 underline underline-offset-4 hover:text-foreground"
         >
           Back
         </button>
       )}
-
     </div>
   );
 }
-
-
-
-
-
-
 
 function WelcomePage() {
   // Single session check for the whole page (AuthButtons is mounted twice).
   useRedirectIfSignedIn();
   return (
     <AdminEditModeProvider>
-      <main suppressHydrationWarning className="safe-top safe-bottom safe-x relative min-h-dvh overflow-x-hidden text-foreground">
+      <main
+        suppressHydrationWarning
+        className="safe-top safe-bottom safe-x relative min-h-dvh overflow-x-hidden text-foreground"
+      >
         <WelcomeBackdrop />
         <TopNav />
         <Hero />
@@ -612,7 +659,7 @@ function WelcomePage() {
 
         <ClosingCta />
         <Footer />
-        
+
         <div className="fixed bottom-4 right-4 z-50">
           <AdminEditModeToggle />
         </div>
@@ -620,7 +667,6 @@ function WelcomePage() {
     </AdminEditModeProvider>
   );
 }
-
 
 function CardEditBadge() {
   const { enabled } = useAdminEditMode();
@@ -636,19 +682,28 @@ function CardEditBadge() {
   );
 }
 
-
-
-
 function TopNav() {
   return (
     <header className="sticky top-0 z-30 border-b border-white/10 bg-background/40 backdrop-blur-xl">
-      <nav aria-label="Primary" className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:h-20 sm:px-8">
-        <Link to="/welcome" aria-label="OG Streamz — home" className="group flex min-w-0 items-center gap-3">
-          <span aria-hidden className="wc-wiggle grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-gradient-brand text-primary-foreground shadow-glow sm:h-11 sm:w-11">
+      <nav
+        aria-label="Primary"
+        className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:h-20 sm:px-8"
+      >
+        <Link
+          to="/welcome"
+          aria-label="OG Streamz — home"
+          className="group flex min-w-0 items-center gap-3"
+        >
+          <span
+            aria-hidden
+            className="wc-wiggle grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-gradient-brand text-primary-foreground shadow-glow sm:h-11 sm:w-11"
+          >
             <Sparkles className="h-5 w-5" />
           </span>
           <div className="min-w-0 leading-none">
-            <p className="font-display truncate text-lg font-black uppercase tracking-tight sm:text-xl">OG Streamz</p>
+            <p className="font-display truncate text-lg font-black uppercase tracking-tight sm:text-xl">
+              OG Streamz
+            </p>
             <p className="mt-1 inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:text-[11px]">
               <span>Powered by</span>
               <OgBotLogo className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
@@ -657,10 +712,8 @@ function TopNav() {
           </div>
         </Link>
         <BackgroundMusicHeaderControl />
-
       </nav>
     </header>
-
   );
 }
 
@@ -682,20 +735,17 @@ function Hero() {
       </Sticker>
 
       <div className="relative mx-auto w-full max-w-6xl text-center">
-
         <div className="mx-auto mb-3 inline-flex max-w-full flex-wrap items-center justify-center gap-2 rounded-full border-2 border-primary/40 bg-primary/15 px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-primary shadow-[0_0_28px_-8px_oklch(0.7_0.2_300_/_0.7)] sm:text-sm">
           <span>🎵 MusicHUB</span>
-          <span aria-hidden className="text-primary/50">·</span>
+          <span aria-hidden className="text-primary/50">
+            ·
+          </span>
           <span className="inline-flex items-center gap-1.5 normal-case tracking-normal text-foreground">
             Powered by
             <OgBotLogo className="h-5 w-5 sm:h-6 sm:w-6" />
             <span className="font-black uppercase tracking-tight">OG Bot</span>
           </span>
         </div>
-
-
-
-
 
         <h1 className="font-display mt-5 text-[clamp(2rem,9.5vw,12rem)] font-black leading-[0.92] tracking-[-0.045em] [text-wrap:balance] hyphens-none drop-shadow-[0_8px_30px_rgba(80,60,255,0.35)] sm:mt-10 sm:leading-[0.85] sm:tracking-[-0.055em]">
           <span className="wc-pop block">PROMPT IT.</span>
@@ -713,22 +763,13 @@ function Hero() {
           </span>
         </h1>
 
-
         <div id="sign-in" className="mx-auto mt-6 max-w-md scroll-mt-24 sm:mt-14 sm:max-w-3xl">
           <AuthButtons size="xl" />
           <p className="mt-3 text-center text-sm font-semibold tracking-wide text-muted-foreground sm:mt-6 sm:text-lg sm:font-bold sm:text-foreground">
             Free to start — no card required
           </p>
         </div>
-
-
-
-
-
-        
       </div>
-
-
     </section>
   );
 }
@@ -745,14 +786,18 @@ function AlbumCoverShowcase() {
         if (typeof window !== "undefined" && localStorage.getItem(PERSONAL_BANNER_KEY) === "1") {
           return;
         }
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         if (user) {
           const { count } = await supabase
             .from("songs")
             .select("id", { count: "exact", head: true })
             .eq("user_id", user.id);
           if ((count ?? 0) > 0) {
-            try { localStorage.setItem(PERSONAL_BANNER_KEY, "1"); } catch {}
+            try {
+              localStorage.setItem(PERSONAL_BANNER_KEY, "1");
+            } catch {}
             return;
           }
         }
@@ -762,7 +807,9 @@ function AlbumCoverShowcase() {
       }
     })();
     const onGenerate = () => {
-      try { localStorage.setItem(PERSONAL_BANNER_KEY, "1"); } catch {}
+      try {
+        localStorage.setItem(PERSONAL_BANNER_KEY, "1");
+      } catch {}
       setHidden(true);
     };
     window.addEventListener("og:generate-start", onGenerate);
@@ -773,7 +820,9 @@ function AlbumCoverShowcase() {
   }, []);
 
   const dismiss = useCallback(() => {
-    try { localStorage.setItem(PERSONAL_BANNER_KEY, "1"); } catch {}
+    try {
+      localStorage.setItem(PERSONAL_BANNER_KEY, "1");
+    } catch {}
     setHidden(true);
   }, []);
 
@@ -794,17 +843,17 @@ function AlbumCoverShowcase() {
           ✨ Reminder
         </span>
         <h3 className="font-display mt-3 text-balance text-[clamp(1.5rem,6vw,2.25rem)] font-semibold leading-[1.05] tracking-[-0.025em] sm:mt-4 sm:text-4xl">
-          Make it as personal as you like — <em className="italic text-gradient-brand">the more you share, the better the song</em>
+          Make it as personal as you like —{" "}
+          <em className="italic text-gradient-brand">the more you share, the better the song</em>
         </h3>
         <p className="mt-3 text-sm font-medium text-muted-foreground sm:mt-4 sm:text-base">
-          Names, inside jokes, occasions, favourite things — drop it all in. OG Bot turns your details into a track that feels like <em className="italic text-foreground">them</em>. 🎧
+          Names, inside jokes, occasions, favourite things — drop it all in. OG Bot turns your
+          details into a track that feels like <em className="italic text-foreground">them</em>. 🎧
         </p>
       </div>
     </div>
   );
 }
-
-
 
 function Sticker({
   children,
@@ -879,7 +928,10 @@ function Pillars() {
                 className="group wc-pop relative h-full overflow-hidden rounded-[2rem] border-2 border-white/15 bg-card/80 p-4 shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)] transition-all duration-300 max-sm:rounded-[1.5rem] sm:p-6 md:backdrop-blur-xl md:hover:-translate-y-2 md:hover:border-primary/40 md:hover:shadow-glow"
               >
                 {/* hover aurora */}
-                <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-[radial-gradient(circle_at_top_right,oklch(0.55_0.22_268/0.22),transparent_60%)]" />
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 -z-10 opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-[radial-gradient(circle_at_top_right,oklch(0.55_0.22_268/0.22),transparent_60%)]"
+                />
                 <CardEditBadge />
                 <div className="flex items-center gap-3">
                   <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gradient-brand text-primary-foreground shadow-glow transition-transform duration-300 sm:h-13 sm:w-13 md:group-hover:scale-110 md:group-hover:rotate-6">
@@ -909,20 +961,27 @@ function Pillars() {
   );
 }
 
-
-
 function FoulMouthHype() {
   return (
     <section className="relative border-t border-white/10">
       <div className="relative mx-auto max-w-5xl px-4 py-16 sm:px-8 sm:py-24">
         <div className="relative overflow-hidden rounded-[2.5rem] border-2 border-destructive/40 bg-gradient-to-br from-destructive/25 via-destructive/10 to-transparent p-6 shadow-[0_30px_80px_-30px_oklch(0.62_0.22_25_/_0.7)] sm:p-12">
-          <div aria-hidden className="pointer-events-none absolute -right-12 -top-12 h-56 w-56 rounded-full bg-destructive/30 blur-3xl" />
-          <div aria-hidden className="pointer-events-none absolute -bottom-16 -left-10 h-56 w-56 rounded-full bg-primary/30 blur-3xl" />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -right-12 -top-12 h-56 w-56 rounded-full bg-destructive/30 blur-3xl"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -bottom-16 -left-10 h-56 w-56 rounded-full bg-primary/30 blur-3xl"
+          />
 
           <div className="relative grid items-center gap-8 md:grid-cols-[auto_minmax(0,1fr)]">
             <div className="flex items-center justify-center">
               <div className="relative">
-                <span aria-hidden className="absolute -inset-3 animate-pulse rounded-full bg-destructive/30 blur-2xl" />
+                <span
+                  aria-hidden
+                  className="absolute -inset-3 animate-pulse rounded-full bg-destructive/30 blur-2xl"
+                />
                 <div className="relative grid h-28 w-28 place-items-center rounded-[2rem] border-2 border-destructive/60 bg-background/60 text-6xl shadow-[0_0_40px_-6px_oklch(0.62_0.22_25_/_0.8)] sm:h-36 sm:w-36 sm:text-8xl">
                   🤬
                 </div>
@@ -934,11 +993,11 @@ function FoulMouthHype() {
                 ⚠ Before you walk away
               </p>
               <h2 className="font-display mt-4 text-balance text-4xl font-black leading-[0.95] tracking-[-0.03em] sm:text-6xl md:text-7xl">
-                Don't forget to flip{" "}
-                <span className="italic text-destructive">Foul Mouth</span> ON.
+                Don't forget to flip <span className="italic text-destructive">Foul Mouth</span> ON.
               </h2>
               <p className="mt-4 text-lg leading-relaxed text-foreground/85 sm:text-2xl">
-                The clean version is cute. <span className="font-black text-foreground">Foul Mouth</span> is where{" "}
+                The clean version is cute.{" "}
+                <span className="font-black text-foreground">Foul Mouth</span> is where{" "}
                 <span className="inline-flex items-center gap-1.5 align-middle">
                   <OgBotLogo className="h-6 w-6" />
                   <span className="font-black">OG Bot</span>
@@ -969,14 +1028,26 @@ function ClosingCta() {
     <section id="how" className="relative border-t border-white/10">
       <div className="relative mx-auto max-w-4xl px-4 py-20 text-center sm:px-8 sm:py-28 lg:py-32">
         <CardEditBadge />
-        <EditableContent as="p" contentKey="welcome.closing.eyebrow" defaultValue="Ready?"
-          className="block text-xs font-medium uppercase tracking-[0.25em] text-muted-foreground sm:text-sm" />
-        <EditableContent as="h2" contentKey="welcome.closing.title" defaultValue="Your next prompt could be a hit."
+        <EditableContent
+          as="p"
+          contentKey="welcome.closing.eyebrow"
+          defaultValue="Ready?"
+          className="block text-xs font-medium uppercase tracking-[0.25em] text-muted-foreground sm:text-sm"
+        />
+        <EditableContent
+          as="h2"
+          contentKey="welcome.closing.title"
+          defaultValue="Your next prompt could be a hit."
           multiline
-          className="font-display mt-4 block text-balance text-5xl font-semibold leading-[0.95] tracking-[-0.045em] sm:mt-5 sm:text-7xl md:text-8xl lg:text-9xl" />
-        <EditableContent as="p" multiline contentKey="welcome.closing.body"
+          className="font-display mt-4 block text-balance text-5xl font-semibold leading-[0.95] tracking-[-0.045em] sm:mt-5 sm:text-7xl md:text-8xl lg:text-9xl"
+        />
+        <EditableContent
+          as="p"
+          multiline
+          contentKey="welcome.closing.body"
           defaultValue="Sign in. Type the idea. Pick the vibe. Get the cover and the song. 🎉"
-          className="mx-auto mt-6 block max-w-2xl text-lg text-muted-foreground sm:mt-8 sm:text-2xl md:text-3xl" />
+          className="mx-auto mt-6 block max-w-2xl text-lg text-muted-foreground sm:mt-8 sm:text-2xl md:text-3xl"
+        />
 
         <div className="mx-auto mt-10 max-w-2xl sm:mt-12">
           <AuthButtons size="xl" />
@@ -992,11 +1063,21 @@ function Footer() {
   return (
     <footer className="border-t border-white/10">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-8 text-sm text-muted-foreground sm:flex-row sm:px-8">
-        <span className="inline-flex items-center gap-2">© {new Date().getFullYear()} OG Studio · Prompt songs powered by <OgBotLogo className="h-5 w-5" /></span>
+        <span className="inline-flex items-center gap-2">
+          © {new Date().getFullYear()} OG Studio · Prompt songs powered by{" "}
+          <OgBotLogo className="h-5 w-5" />
+        </span>
         <div className="flex items-center gap-6">
           {native && (
-            <Button type="button" variant="ghost" size="sm" disabled={pending !== null} onClick={() => signIn("google")}
-              className="text-muted-foreground" title="D.EV Google sign-in">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              disabled={pending !== null}
+              onClick={() => signIn("google")}
+              className="text-muted-foreground"
+              title="D.EV Google sign-in"
+            >
               D.EV
             </Button>
           )}

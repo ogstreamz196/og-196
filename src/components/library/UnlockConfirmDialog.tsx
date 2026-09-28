@@ -1,5 +1,14 @@
 import { useState } from "react";
-import { Coins, Download, Music2, Sparkles, Loader2, CreditCard, ArrowLeft, Lock } from "lucide-react";
+import {
+  Coins,
+  Download,
+  Music2,
+  Sparkles,
+  Loader2,
+  CreditCard,
+  ArrowLeft,
+  Lock,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -68,7 +77,12 @@ export function UnlockConfirmDialog({
             Unlock the full track
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            {songTitle ? <span className="font-medium text-foreground">{songTitle}</span> : "This track"} —{" "}
+            {songTitle ? (
+              <span className="font-medium text-foreground">{songTitle}</span>
+            ) : (
+              "This track"
+            )}{" "}
+            —{" "}
             {payByCard
               ? `pay ${CARD_PRICE_LABEL} once to unlock and download the full studio version.`
               : "choose how you'd like to pay for the full studio version."}
@@ -78,11 +92,13 @@ export function UnlockConfirmDialog({
         {payByCard ? (
           <div className="space-y-3">
             <div className="flex flex-col items-center justify-center p-8 bg-muted/30 rounded-xl border border-border">
-                <p className="text-center text-muted-foreground mb-4">Google Play Billing is being configured.</p>
-                <Button disabled>
-                    <Lock className="w-4 h-4 mr-2" />
-                    Pay 99p
-                </Button>
+              <p className="text-center text-muted-foreground mb-4">
+                Google Play Billing is being configured.
+              </p>
+              <Button disabled>
+                <Lock className="w-4 h-4 mr-2" />
+                Pay 99p
+              </Button>
             </div>
             <Button variant="ghost" className="w-full" onClick={() => setPayByCard(false)}>
               <ArrowLeft className="mr-2 h-4 w-4" /> Back to payment options
@@ -103,7 +119,8 @@ export function UnlockConfirmDialog({
               </div>
               {royalty > 0 && (
                 <p className="mt-2 text-xs text-muted-foreground">
-                  Includes <strong className="text-foreground">{royalty}</strong> coin royalty to the original creator · {burnt} burnt.
+                  Includes <strong className="text-foreground">{royalty}</strong> coin royalty to
+                  the original creator · {burnt} burnt.
                 </p>
               )}
             </div>
@@ -112,7 +129,10 @@ export function UnlockConfirmDialog({
             <div className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3 text-sm">
               <span className="text-muted-foreground">Your balance</span>
               <span className="font-semibold">
-                {balance} → <span className={canAfford ? "text-coin" : "text-destructive"}>{balance - cost}</span>
+                {balance} →{" "}
+                <span className={canAfford ? "text-coin" : "text-destructive"}>
+                  {balance - cost}
+                </span>
               </span>
             </div>
 
@@ -131,7 +151,9 @@ export function UnlockConfirmDialog({
                 <div className="text-sm font-bold text-foreground">Pay with Coins</div>
                 <div className="flex items-center gap-1 text-lg font-black text-primary">
                   {cost}
-                  <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">coins</span>
+                  <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    coins
+                  </span>
                 </div>
                 {busy ? (
                   <Loader2 className="h-4 w-4 animate-spin text-primary" />
@@ -151,13 +173,13 @@ export function UnlockConfirmDialog({
                   <CreditCard className="h-5 w-5 text-foreground" />
                 </div>
                 <div className="text-sm font-bold text-foreground">Pay by Card</div>
-                <div className="text-lg font-black text-foreground">
-                  {CARD_PRICE_LABEL}
-                </div>
+                <div className="text-lg font-black text-foreground">{CARD_PRICE_LABEL}</div>
                 {cardAvailable ? (
                   <Lock className="h-3.5 w-3.5 text-muted-foreground" />
                 ) : (
-                  <span className="text-[10px] uppercase tracking-wide text-muted-foreground">Unavailable</span>
+                  <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                    Unavailable
+                  </span>
                 )}
               </button>
             </div>
@@ -169,7 +191,12 @@ export function UnlockConfirmDialog({
               </p>
             )}
 
-            <Button variant="ghost" className="w-full" onClick={() => onOpenChange(false)} disabled={busy}>
+            <Button
+              variant="ghost"
+              className="w-full"
+              onClick={() => onOpenChange(false)}
+              disabled={busy}
+            >
               Cancel
             </Button>
           </div>
