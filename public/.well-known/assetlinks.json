@@ -1,0 +1,14 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "uk.co.ogbot.app",
+      "sha256_cert_fingerprints": [
+        "CF:EA:2A:06:AA:3F:9B:0C:76:FE:BA:59:40:63:AE:B9:B3:DC:CC:19:97:3B:7C:6A:84:A2:15:27:7D:91:4B:29",
+        "94:B5:96:D2:C0:B1:CF:AA:77:35:C0:95:1A:AA:5F:38:AE:34:9D:1F:34:D0:07:A9:32:0F:0D:8D:AA:73:88:76",
+        "18:1D:EB:BF:F0:82:9A:98:51:6C:67:A5:2F:84:28:E4:22:84:78:B9:6B:13:61:20:52:DC:91:37:A6:60:32:33"
+      ]
+    }
+  }
+]
