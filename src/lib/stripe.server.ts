@@ -30,13 +30,13 @@ export function createStripeClient(env: StripeEnv): Stripe {
 
   // BYOK: call api.stripe.com directly with the project's own secret key.
   if (isByok()) {
-    return new Stripe(apiKey, { apiVersion: "2026-03-25.dahlia" });
+    return new Stripe(apiKey, { apiVersion: "2026-08-26.dahlia" });
   }
 
   // Managed: route through the connector gateway, which attaches the real key.
   const lovableApiKey = getEnv("LOVABLE_API_KEY");
   return new Stripe(apiKey, {
-    apiVersion: "2026-03-25.dahlia",
+    apiVersion: "2026-08-26.dahlia",
     httpClient: Stripe.createFetchHttpClient(((input: URL | RequestInfo, init?: RequestInit) => {
       const original = typeof input === "string" || input instanceof URL ? input.toString() : input.url;
       const gatewayUrl = original.replace("https://api.stripe.com", GATEWAY_STRIPE_BASE);
