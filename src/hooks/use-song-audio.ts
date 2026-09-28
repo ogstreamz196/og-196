@@ -104,15 +104,6 @@ export function useSongAudio({
     const onPlayEvt = () => {
       setPlaying(true);
       if (playlistTitle) playlist?.markCurrent(songId);
-      if (Date.now() - lastPlayLogRef.current > 10_000) {
-        lastPlayLogRef.current = Date.now();
-        void supabase.rpc("log_user_activity", {
-          p_action: "player_play",
-          p_path: "/library",
-          p_label: playlistTitle || "Track playback",
-          p_metadata: { song_id: songId, mode },
-        });
-      }
     };
     el.addEventListener("pause", onPause);
     el.addEventListener("play", onPlayEvt);
@@ -120,7 +111,7 @@ export function useSongAudio({
       el.removeEventListener("pause", onPause);
       el.removeEventListener("play", onPlayEvt);
     };
-  }, [mode, playlist, playlistTitle, songId]);
+  }, [playlist, playlistTitle, songId]);
 
 
   const playRef = useRef<() => Promise<void>>(async () => {});

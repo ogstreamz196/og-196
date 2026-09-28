@@ -20,8 +20,6 @@ import {
   QrCode,
   Download,
   KeyRound,
-  Music2,
-  PlayCircle,
   Radio,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
@@ -61,13 +59,6 @@ type Summary = {
     referee_id: string | null;
     referee_name: string | null;
   }[];
-};
-
-type PlayerActivity = {
-  id: string;
-  label: string | null;
-  created_at: string;
-  metadata: { song_id?: string; mode?: string } | null;
 };
 
 async function copyTextWithFallback(text: string): Promise<boolean> {
@@ -130,24 +121,6 @@ function ReferralsPage() {
         .eq("is_public", true);
       if (error) throw error;
       return count ?? 0;
-    },
-  });
-
-  const playerActivityQ = useQuery({
-    queryKey: ["earn-player-activity", user?.id],
-    enabled: !!user,
-    refetchInterval: 30_000,
-    queryFn: async (): Promise<{ rows: PlayerActivity[]; total: number }> => {
-      if (!user) return { rows: [], total: 0 };
-      const { data, count, error } = await supabase
-        .from("user_activity_log")
-        .select("id,label,created_at,metadata", { count: "exact" })
-        .eq("user_id", user.id)
-        .eq("action", "player_play")
-        .order("created_at", { ascending: false })
-        .limit(8);
-      if (error) throw error;
-      return { rows: (data ?? []) as PlayerActivity[], total: count ?? 0 };
     },
   });
 
@@ -338,51 +311,6 @@ function ReferralsPage() {
             note="Live in Global"
             tone="sky"
           />
-          <DashboardMetric
-            icon={<PlayCircle className="h-4 w-4" />}
-            label="Player starts"
-            value={playerActivityQ.isLoading ? "—" : (playerActivityQ.data?.total ?? 0).toLocaleString()}
-            note="All player starts"
-            tone="amber"
-          />
-        </section>
-
-        <section className="overflow-hidden rounded-2xl border border-white/10 bg-card/70 backdrop-blur-xl">
-          <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3 sm:px-5">
-            <div className="min-w-0">
-              <h2 className="font-bungee text-base sm:text-lg">Player activity</h2>
-              <p className="text-xs text-muted-foreground">Your latest track starts</p>
-            </div>
-            <Music2 className="h-5 w-5 shrink-0 text-primary" />
-          </div>
-          <div className="divide-y divide-white/5">
-            {playerActivityQ.isLoading && (
-              <p className="px-4 py-6 text-center text-sm text-muted-foreground">Loading plays…</p>
-            )}
-            {!playerActivityQ.isLoading && playerActivityQ.data?.rows.length === 0 && (
-              <p className="px-4 py-6 text-center text-sm text-muted-foreground">
-                Play a track in Music and your activity will appear here.
-              </p>
-            )}
-            {playerActivityQ.data?.rows.map((activity) => (
-              <div key={activity.id} className="flex min-w-0 items-center gap-3 px-4 py-3 sm:px-5">
-                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/15 text-primary">
-                  <PlayCircle className="h-4 w-4" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-bold">{activity.label || "Track playback"}</p>
-                  <p className="text-[11px] text-muted-foreground">
-                    {activity.metadata?.mode === "full" ? "Full track" : "Preview"}
-                  </p>
-                </div>
-                <time className="shrink-0 text-right text-[10px] leading-tight text-muted-foreground" dateTime={activity.created_at}>
-                  {new Date(activity.created_at).toLocaleDateString([], { day: "2-digit", month: "short" })}
-                  <br />
-                  {new Date(activity.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                </time>
-              </div>
-            ))}
-          </div>
         </section>
 
         {/* HERO — oversized wallet counter */}
