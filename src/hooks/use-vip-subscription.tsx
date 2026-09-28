@@ -1,4 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { getStripeEnvironment } from "@/lib/stripe";
 import { useAuth } from "./use-auth";
 
 export type VipSubscription = {
@@ -24,7 +26,7 @@ export function useVipSubscription() {
       const { data, error } = await supabase
         .from("subscriptions")
         .select(
-          "status,current_period_end,cancel_at_period_end,environment",
+          "status,current_period_end,cancel_at_period_end,environment,price_id",
         )
         .eq("user_id", user!.id)
         .eq("environment", env)

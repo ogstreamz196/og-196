@@ -25,6 +25,7 @@ import { UserActivityArchiver } from "@/hooks/use-user-activity-archiver";
 import { PersistentBackgroundMusic } from "@/components/PersistentBackgroundMusic";
 import { TrackUnlockReturnHandler } from "@/components/library/TrackUnlockReturnHandler";
 import { NativeAppLinkBridge } from "@/components/NativeAppLinkBridge";
+import { RevenueCatBridge } from "@/components/revenuecat/RevenueCatBridge";
 
 function NotFoundComponent() {
   return (
@@ -330,6 +331,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+        <RevenueCatBridge>
         <SiteContentRealtimeBridge />
         <DisplayPrefsBridge />
         <AuraBridge />
@@ -341,6 +343,7 @@ function RootComponent() {
         <Outlet />
         <InstallAppPrompt />
         <Toaster />
+        </RevenueCatBridge>
       </AuthProvider>
     </QueryClientProvider>
   );

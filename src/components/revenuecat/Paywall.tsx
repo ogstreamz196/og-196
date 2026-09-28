@@ -1,95 +1,124 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import { Check, Crown, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { useRevenueCat } from "./RevenueCatProvider";
 import { showCustomerCenter } from "@/lib/revenuecat";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 export function Paywall() {
   const { offerings, loading, purchasePackage, isVip } = useRevenueCat();
-  const [purchasing, setPurchasing] = useState(false);
+  const [purchasing, setPurchasing] = useState<string | null>(null);
 
-  // Example: Use the current offering configured in RevenueCat
   const currentOffering = offerings?.current;
 
   if (loading) {
-    return <div className="p-4 text-center">Loading Subscription Details...</div>;
+    return (
+      <Card>
+        <CardContent className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading subscription details…
+        </CardContent>
+      </Card>
+    );
   }
 
-  // If user is already VIP, show Customer Center option instead of Paywall
   if (isVip) {
     return (
-      <div className="p-6 bg-green-50 rounded-xl shadow border border-green-200 text-center">
-        <h2 className="text-2xl font-bold text-green-800 mb-2">You are a VIP!</h2>
-        <p className="text-green-700 mb-6">Enjoy your premium features.</p>
-        <button
-          onClick={showCustomerCenter}
-          className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors"
-        >
-          Manage Subscription (Customer Center)
-        </button>
-      </div>
+      <Card className="border-primary/40">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Crown className="h-4 w-4 text-primary" /> You are VIP
+          </CardTitle>
+          <CardDescription>Enjoy your premium features.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button variant="outline" onClick={() => void showCustomerCenter()}>
+            Manage subscription
+          </Button>
+        </CardContent>
+      </Card>
     );
   }
 
-  if (!currentOffering || currentOffering.packages.length === 0) {
+  if (!currentOffering || currentOffering.availablePackages.length === 0) {
     return (
-      <div className="p-4 text-center text-gray-500">
-        No subscription packages available at the moment.
-      </div>
+      <Card>
+        <CardContent className="py-8 text-center text-sm text-muted-foreground">
+          No subscription packages available at the moment.
+        </CardContent>
+      </Card>
     );
   }
 
-  const handlePurchase = async (pkg: any) => {
-    setPurchasing(true);
+  const handlePurchase = async (pkg: (typeof currentOffering.availablePackages)[number]) => {
+    setPurchasing(pkg.identifier);
     try {
       const success = await purchasePackage(pkg);
-      if (success) {
-        alert("Welcome to VIP!");
-      }
-    } catch (e: any) {
-      alert(e.message || "Purchase failed or cancelled.");
+      if (success) toast.success("Welcome to VIP!");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Purchase failed or cancelled.");
     } finally {
-      setPurchasing(false);
+      setPurchasing(null);
     }
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-lg border">
-      <h2 className="text-3xl font-extrabold text-center mb-2">Unlock OG VIP Pass</h2>
-      <p className="text-center text-gray-600 mb-8">Get unlimited access to all premium features.</p>
-
-      <div className="grid gap-6 md:grid-cols-2">
-        {currentOffering.packages.map((pkg) => {
-          // You expect products with identifiers "monthly" and "yearly"
-          const isYearly = pkg.identifier === "yearly";
-
-          return (
-            <div
-              key={pkg.identifier}
-              className={`p-6 border-2 rounded-xl flex flex-col ${isYearly ? 'border-indigo-600 bg-indigo-50' : 'border-gray-200'}`}
-            >
-              {isYearly && <span className="bg-indigo-600 text-white text-xs font-bold px-2 py-1 rounded w-fit mb-2">BEST VALUE</span>}
-              <h3 className="text-xl font-bold mb-1">{pkg.product.title}</h3>
-              <div className="text-2xl font-black mb-4">
-                {pkg.product.currentPrice?.currency} {pkg.product.currentPrice?.amount.toFixed(2)}
-              </div>
-              <p className="text-gray-600 flex-grow mb-6">{pkg.product.description}</p>
-
-              <button
-                disabled={purchasing}
-                onClick={() => handlePurchase(pkg)}
-                className={`w-full py-3 rounded-lg font-bold text-white transition-colors ${
-                  purchasing
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : isYearly
-                      ? 'bg-indigo-600 hover:bg-indigo-700'
-                      : 'bg-gray-800 hover:bg-gray-900'
-                }`}
+    <Card>
+      <CardHeader className="text-center">
+        <CardTitle className="flex items-center justify-center gap-2 text-2xl">
+          <Crown className="h-5 w-5 text-primary" /> Unlock OG VIP Pass
+        </CardTitle>
+        <CardDescription>Get unlimited access to all premium features.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {currentOffering.availablePackages.map((pkg) => {
+            const isYearly = /year|annual/i.test(pkg.identifier);
+            const busy = purchasing === pkg.identifier;
+            const price = pkg.webBillingProduct.currentPrice;
+            return (
+              <div
+                key={pkg.identifier}
+                className={cn(
+                  "flex flex-col rounded-2xl border p-5",
+                  isYearly ? "border-primary/60 bg-primary/10" : "border-border bg-card",
+                )}
               >
-                {purchasing ? 'Processing...' : `Subscribe ${pkg.identifier === 'monthly' ? 'Monthly' : 'Yearly'}`}
-              </button>
-            </div>
-          );
-        })}
-      </div>
-    </div>
+                {isYearly && (
+                  <Badge className="mb-2 w-fit bg-gradient-brand text-primary-foreground shadow-glow">
+                    Best value
+                  </Badge>
+                )}
+                <h3 className="text-lg font-bold">{pkg.webBillingProduct.title}</h3>
+                <div className="mb-3 text-2xl font-black">
+                  {price ? `${price.currency} ${price.amount.toFixed(2)}` : "—"}
+                </div>
+                <p className="mb-5 flex-grow text-sm text-muted-foreground">
+                  {pkg.webBillingProduct.description}
+                </p>
+                <Button
+                  disabled={purchasing !== null}
+                  onClick={() => void handlePurchase(pkg)}
+                  className={cn(
+                    "w-full",
+                    isYearly && "bg-gradient-brand text-primary-foreground shadow-glow",
+                  )}
+                  variant={isYearly ? "default" : "outline"}
+                >
+                  {busy ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Check className="mr-2 h-4 w-4" />
+                  )}
+                  {busy ? "Processing…" : `Subscribe ${isYearly ? "yearly" : "monthly"}`}
+                </Button>
+              </div>
+            );
+          })}
+        </div>
+      </CardContent>
+    </Card>
   );
 }

@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { useRole } from "@/hooks/use-role";
 import { useVipSubscription } from "@/hooks/use-vip-subscription";
+import { getStripeEnvironment } from "@/lib/stripe";
 
 import { createBillingPortalSession } from "@/lib/payments.functions";
 
@@ -32,7 +33,7 @@ export function VipStatusCard() {
     setBusy(true);
     try {
       const res = await openPortal({
-        data: { returnUrl: window.location.origin + "/settings" },
+        data: { returnUrl: window.location.origin + "/settings", environment: getStripeEnvironment() },
       });
       if ("error" in res) {
         toast.error(res.error);

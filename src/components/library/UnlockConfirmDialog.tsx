@@ -8,6 +8,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { arePaymentsEnabled } from "@/lib/stripe";
 
 /** One-off card price shown in the UI. Must match TRACK_UNLOCK_PENCE server-side. */
 const CARD_PRICE_LABEL = "99p";

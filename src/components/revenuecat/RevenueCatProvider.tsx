@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { CustomerInfo, Offerings, PurchasesPackage } from "@revenuecat/purchases-js";
+import { CustomerInfo, Offerings, Package } from "@revenuecat/purchases-js";
 import {
   configureRevenueCat,
   getCustomerInfo,
@@ -14,7 +14,7 @@ interface RevenueCatContextType {
   customerInfo: CustomerInfo | null;
   offerings: Offerings | null;
   loading: boolean;
-  purchasePackage: (pkg: PurchasesPackage) => Promise<boolean>;
+  purchasePackage: (pkg: Package) => Promise<boolean>;
   refreshInfo: () => Promise<void>;
 }
 
@@ -58,7 +58,7 @@ export function RevenueCatProvider({
     }
   };
 
-  const purchasePackage = async (pkg: PurchasesPackage): Promise<boolean> => {
+  const purchasePackage = async (pkg: Package): Promise<boolean> => {
     try {
       const updatedInfo = await rcPurchasePackage(pkg);
       if (updatedInfo) {
