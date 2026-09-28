@@ -21,7 +21,6 @@ import {
   clearStoredSelection,
   type Selection,
 } from "@/lib/buy-coins-selection";
-import { StripeEmbeddedCheckoutInline } from "@/components/StripeEmbeddedCheckout";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
 import { toast } from "sonner";
@@ -278,13 +277,12 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
               </div>
             ) : (
               <div className="p-4 sm:p-5">
-                {selected.type === "coins" ? (
-                  <StripeEmbeddedCheckoutInline priceId={selected.pack.priceId} returnUrl={returnUrl} />
-                ) : selected.type === "custom" ? (
-                  <StripeEmbeddedCheckoutInline type="custom" customUnits={selected.units} returnUrl={returnUrl} />
-                ) : (
-                  <StripeEmbeddedCheckoutInline type="vip" returnUrl={returnUrl} />
-                )}
+                <div className="flex flex-col items-center justify-center p-8 bg-muted/30 rounded-xl border border-border">
+                    <p className="text-center text-muted-foreground mb-4">Google Play Billing is being configured.</p>
+                    <Button disabled>
+                        Purchase via Google Play
+                    </Button>
+                </div>
                 <button
                   type="button"
                   onClick={() => setStage("confirm")}

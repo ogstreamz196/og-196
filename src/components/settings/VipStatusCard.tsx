@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { useRole } from "@/hooks/use-role";
 import { useVipSubscription } from "@/hooks/use-vip-subscription";
-import { getStripeEnvironment } from "@/lib/stripe";
+
 import { createBillingPortalSession } from "@/lib/payments.functions";
 
 function formatDate(iso: string | null): string {
@@ -31,9 +31,8 @@ export function VipStatusCard() {
   async function handleManage() {
     setBusy(true);
     try {
-      const env = getStripeEnvironment();
       const res = await openPortal({
-        data: { returnUrl: window.location.origin + "/settings", environment: env },
+        data: { returnUrl: window.location.origin + "/settings" },
       });
       if ("error" in res) {
         toast.error(res.error);

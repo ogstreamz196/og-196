@@ -39,7 +39,7 @@ export function TrackUnlockReturnHandler() {
       const toastId = toast.loading("Confirming your payment…");
       try {
         const result = await reconcileTrackUnlock({
-          data: { sessionId, environment: getStripeEnvironment() },
+          data: { sessionId },
         });
         if ("error" in result) throw new Error(result.error);
         if (result.status === "pending") {

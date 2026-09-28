@@ -22,7 +22,7 @@ export function labelForPath(pathname: string): string {
     "/admin/users": "Admin — Users",
     "/admin/onboarding": "Admin — Onboarding",
     "/admin/telegram": "Admin — Telegram",
-    "/admin/stripe": "Admin — Stripe",
+    "/admin/revenuecat": "Admin — RevenueCat",
     "/admin/pricing": "Admin — Pricing",
   };
   if (map[pathname]) return map[pathname];

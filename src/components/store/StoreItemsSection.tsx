@@ -3,7 +3,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, PackageOpen, X } from "lucide-react";
 import { toast } from "sonner";
-import { StripeEmbeddedCheckoutInline } from "@/components/StripeEmbeddedCheckout";
 import { StoreItemCard } from "@/components/store/StoreItemCard";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -143,7 +142,14 @@ export function StoreItemsSection() {
             </DialogTitle>
           </DialogHeader>
           <div className="p-4">
-            {checkoutItemId ? <StripeEmbeddedCheckoutInline type="store_item" storeItemId={checkoutItemId} returnUrl={returnUrl} /> : null}
+            {checkoutItemId ? (
+                <div className="flex flex-col items-center justify-center p-8 bg-muted/30 rounded-xl border border-border">
+                    <p className="text-center text-muted-foreground mb-4">Google Play Billing is being configured.</p>
+                    <Button disabled>
+                        Purchase via Google Play
+                    </Button>
+                </div>
+            ) : null}
           </div>
         </DialogContent>
       </Dialog>

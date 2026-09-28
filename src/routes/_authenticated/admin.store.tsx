@@ -262,7 +262,7 @@ function AdminStorePage() {
             </Link>
             <FlameHeading as="h1" size="xl">Store Admin</FlameHeading>
             <p className="mt-1 text-sm text-muted-foreground">
-              Add unlimited items across coins, subscriptions, and random loot. Each item is checkout-ready via Stripe.
+              Add unlimited items across coins, subscriptions, and random loot. Each item is checkout-ready via Google Play.
             </p>
           </div>
           <div className="flex gap-2">

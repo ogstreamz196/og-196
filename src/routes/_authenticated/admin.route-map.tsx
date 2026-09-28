@@ -33,7 +33,7 @@ const ROUTES: RouteEntry[] = [
   { path: "/m-preview", file: "m-preview.tsx", guard: "public" },
   { path: "/r/$code", file: "r.$code.tsx", guard: "public", hasParam: true, note: "Referral redirect" },
   { path: "/portal/$slug", file: "portal.$slug.tsx", guard: "public", hasParam: true },
-  { path: "/api/public/payments/webhook", file: "api/public/payments/webhook.ts", guard: "public", note: "Stripe webhook (signature-verified)" },
+  { path: "/api/public/payments/webhook", file: "api/public/payments/webhook.ts", guard: "public", note: "RevenueCat webhook" },
   { path: "/api/public/telegram/webhook", file: "api/public/telegram/webhook.ts", guard: "public", note: "Telegram webhook (secret-verified)" },
 
   { path: "/", file: "_authenticated/index.tsx", guard: "auth" },

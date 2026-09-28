@@ -9,7 +9,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
  * device cannot reach the site at all.
  */
 const config: CapacitorConfig = {
-  appId: "uk.co.ogbot.app",
+  appId: "og.bot",
   appName: "OG BOT",
   webDir: "mobile/www",
   server: {

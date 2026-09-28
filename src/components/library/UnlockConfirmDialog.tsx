@@ -8,8 +8,6 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { StripeEmbeddedCheckoutInline } from "@/components/StripeEmbeddedCheckout";
-import { arePaymentsEnabled } from "@/lib/stripe";
 
 /** One-off card price shown in the UI. Must match TRACK_UNLOCK_PENCE server-side. */
 const CARD_PRICE_LABEL = "99p";
@@ -78,11 +76,13 @@ export function UnlockConfirmDialog({
 
         {payByCard ? (
           <div className="space-y-3">
-            <StripeEmbeddedCheckoutInline
-              type="track_unlock"
-              songId={songId}
-              returnUrl={returnUrl}
-            />
+            <div className="flex flex-col items-center justify-center p-8 bg-muted/30 rounded-xl border border-border">
+                <p className="text-center text-muted-foreground mb-4">Google Play Billing is being configured.</p>
+                <Button disabled>
+                    <Lock className="w-4 h-4 mr-2" />
+                    Pay 99p
+                </Button>
+            </div>
             <Button variant="ghost" className="w-full" onClick={() => setPayByCard(false)}>
               <ArrowLeft className="mr-2 h-4 w-4" /> Back to payment options
             </Button>
