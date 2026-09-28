@@ -1656,6 +1656,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_battle_reward: {
+        Args: { _earned_tenths: number; _user_id: string }
+        Returns: Json
+      }
       admin_delete_lexicon_phrase: {
         Args: { p_phrase: string }
         Returns: boolean
