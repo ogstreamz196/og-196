@@ -605,14 +605,14 @@ function PrimaryCard({
         <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-primary sm:text-xs">
           {eyebrow}
         </p>
-        <h3 className="font-display text-xl font-black uppercase leading-[1.05] tracking-tight text-foreground sm:text-3xl">
+        <h3 className="font-display text-lg font-black uppercase leading-[1.08] tracking-tight text-foreground [overflow-wrap:anywhere] sm:text-3xl">
           {title}
         </h3>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground sm:text-sm">
+        <p className="text-[10px] font-semibold uppercase leading-relaxed tracking-[0.12em] text-muted-foreground sm:text-sm sm:tracking-[0.18em]">
           {body}
         </p>
-        <div className="mt-auto inline-flex items-center gap-1.5 pt-2 text-sm font-bold text-primary sm:text-base">
-          <span className="rounded-full border-2 border-primary/40 bg-primary/15 px-3 py-1.5 backdrop-blur-sm transition-colors group-hover:bg-primary/25 sm:px-4 sm:py-2">
+        <div className="mt-auto grid grid-cols-[minmax(0,1fr)_auto] items-center gap-1 pt-2 text-xs font-bold text-primary sm:text-base">
+          <span className="min-w-0 rounded-full border-2 border-primary/40 bg-primary/15 px-2.5 py-1.5 leading-tight backdrop-blur-sm transition-colors group-hover:bg-primary/25 sm:px-4 sm:py-2">
             {cta}
           </span>
           <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 sm:h-5 sm:w-5" />

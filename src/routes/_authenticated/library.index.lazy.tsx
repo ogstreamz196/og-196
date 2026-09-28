@@ -1298,7 +1298,7 @@ function LibraryPage() {
                 ))}
                 <span className="relative z-10 flex flex-col items-center gap-1.5">
                   <Sparkles className="h-10 w-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] sm:h-11 sm:w-11" />
-                  <span className="font-display text-4xl font-black uppercase leading-none tracking-[0.04em] drop-shadow-[0_3px_5px_rgba(0,0,0,0.9)] sm:text-5xl">
+                  <span className="font-display text-4xl font-black uppercase leading-[1.08] tracking-[0.04em] drop-shadow-[0_3px_5px_rgba(0,0,0,0.9)] sm:text-5xl">
                     Create
                   </span>
                   <span className="font-display text-2xl font-black uppercase leading-none tracking-[0.18em] drop-shadow-[0_3px_5px_rgba(0,0,0,0.9)] sm:text-3xl">

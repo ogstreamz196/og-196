@@ -41,7 +41,7 @@ export function BackgroundMusicHeaderControl({ className = "" }: { className?: s
         type="button"
         variant="ghost"
         size="icon"
-        className="h-9 w-9 shrink-0 rounded-full hover:bg-white/5"
+        className="h-8 w-8 shrink-0 rounded-full hover:bg-white/5 sm:h-9 sm:w-9"
         onClick={() => window.dispatchEvent(new Event(TOGGLE_EVENT))}
         aria-label={playing ? "Pause background music" : "Play background music"}
         title={playing ? "Pause background music" : "Play background music"}
@@ -54,7 +54,7 @@ export function BackgroundMusicHeaderControl({ className = "" }: { className?: s
         type="button"
         variant="ghost"
         size="icon"
-        className="h-9 w-9 shrink-0 rounded-full hover:bg-white/5"
+        className="h-8 w-8 shrink-0 rounded-full hover:bg-white/5 sm:h-9 sm:w-9"
         onClick={() => window.dispatchEvent(new Event(NEXT_EVENT))}
         aria-label="Play next background track"
         title="Next background track"

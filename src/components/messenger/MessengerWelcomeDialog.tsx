@@ -64,7 +64,7 @@ export function MessengerWelcomeDialog({
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) onDismiss(); }}>
       <DialogContent
-        className="max-h-[calc(100dvh-1rem)] w-[calc(100vw-1rem)] max-w-md overflow-y-auto bg-card/98 p-3 shadow-2xl backdrop-blur-xl sm:p-6"
+        className="max-h-[calc(100dvh-1rem)] w-[calc(100vw-1rem)] max-w-md gap-3 overflow-y-auto bg-card/98 px-3 pb-3 pt-4 shadow-2xl backdrop-blur-xl sm:gap-4 sm:p-6"
       >
         <DialogHeader className="items-center !text-center">
           <img
@@ -72,7 +72,7 @@ export function MessengerWelcomeDialog({
             alt="OG Bot"
             className="mb-0.5 h-11 w-11 rounded-full object-cover ring-2 ring-primary/50 ring-offset-2 ring-offset-card sm:h-14 sm:w-14"
           />
-          <DialogTitle className="text-balance text-lg font-black leading-tight sm:text-2xl">
+          <DialogTitle className="max-w-[calc(100%-2.5rem)] text-balance text-base font-black leading-tight sm:max-w-none sm:text-2xl">
             Hey {name} — lovely to see you.
           </DialogTitle>
           <DialogDescription className="text-pretty text-xs leading-snug sm:text-sm sm:leading-relaxed">
@@ -88,7 +88,7 @@ export function MessengerWelcomeDialog({
               setPicked("loner");
               onChoose("loner");
             }}
-            className="group flex w-full items-center gap-2.5 rounded-xl border border-primary/40 bg-primary/10 p-2.5 text-left transition-all hover:bg-primary/20 active:scale-[0.99] disabled:opacity-60 sm:gap-3 sm:rounded-2xl sm:p-4"
+            className="group grid w-full grid-cols-[auto_minmax(0,1fr)] items-center gap-2.5 rounded-xl border border-primary/40 bg-primary/10 p-2.5 text-left transition-all hover:bg-primary/20 active:scale-[0.99] disabled:opacity-60 sm:gap-3 sm:rounded-2xl sm:p-4"
           >
             <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary/20 ring-1 ring-primary/50 sm:h-11 sm:w-11">
               {pending && picked === "loner" ? (
@@ -114,7 +114,7 @@ export function MessengerWelcomeDialog({
               setPicked("community");
               onChoose("community");
             }}
-            className="group flex w-full items-center gap-2.5 rounded-xl border border-cyan-400/40 bg-cyan-500/10 p-2.5 text-left transition-all hover:bg-cyan-500/20 active:scale-[0.99] disabled:opacity-60 sm:gap-3 sm:rounded-2xl sm:p-4"
+            className="group grid w-full grid-cols-[auto_minmax(0,1fr)] items-center gap-2.5 rounded-xl border border-cyan-400/40 bg-cyan-500/10 p-2.5 text-left transition-all hover:bg-cyan-500/20 active:scale-[0.99] disabled:opacity-60 sm:gap-3 sm:rounded-2xl sm:p-4"
           >
             <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-cyan-500/20 ring-1 ring-cyan-400/50 sm:h-11 sm:w-11">
               {pending && picked === "community" ? (
