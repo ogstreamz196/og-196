@@ -12,20 +12,21 @@ export const getVipPassStatus = createServerFn({ method: "GET" })
       .maybeSingle();
     let username: string | null = null;
     let password: string | null = null;
-    if (purchase) {
-      const { data: cred } = await supabaseAdmin
-        .from("vip_pass_credentials")
-        .select("username,password")
-        .eq("id", purchase.credential_id)
-        .maybeSingle();
-      username = cred?.username ?? null;
-      password = cred?.password ?? null;
-    }
-    const { count } = await supabaseAdmin
+    const { data: creds } = await supabaseAdmin
       .from("vip_pass_credentials")
-      .select("id", { count: "exact", head: true })
-      .eq("active", true);
-    return { owned: !!purchase, username, password, available: count ?? 0 };
+      .select("username,password")
+      .eq("active", true)
+      .order("created_at", { ascending: true });
+    const available = creds?.length ?? 0;
+    if (purchase && creds && creds.length > 0) {
+      // Rotate the shown login every 2 hours; everyone sees the same one
+      // in the same window, including the same user on repeat views.
+      const windowIndex = Math.floor(Date.now() / (2 * 60 * 60 * 1000));
+      const cred = creds[windowIndex % creds.length];
+      username = cred.username;
+      password = cred.password;
+    }
+    return { owned: !!purchase, username, password, available };
   });
 
 export const purchaseVipPass = createServerFn({ method: "POST" })
