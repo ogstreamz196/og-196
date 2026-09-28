@@ -172,10 +172,10 @@ function useOAuthSignIn() {
         const isNativeApp = Boolean(
           (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.(),
         );
-        // Inside the Android app, Google sign-in finishes in the phone browser.
-        // /app-return is an Android App Link, so the browser hands it back to OG BOT.
+        // Always finish the provider flow in the browser, outside Android's app-link
+        // path. The return screen can then explicitly open even unverified APKs.
         const redirectUri = isNativeApp
-          ? `${window.location.origin}/app-return${next ? `?next=${encodeURIComponent(next)}` : ""}`
+          ? `${window.location.origin}/sign-in-return${next ? `?next=${encodeURIComponent(next)}` : ""}`
           : next
             ? `${window.location.origin}/welcome?next=${encodeURIComponent(next)}`
             : window.location.origin;

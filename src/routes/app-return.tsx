@@ -19,7 +19,7 @@ export const Route = createFileRoute("/app-return")({
   component: AppReturn,
 });
 
-function AppReturn() {
+export function AppReturn() {
   const [sessionReady, setSessionReady] = useState(false);
   const [native, setNative] = useState(false);
   const [opening, setOpening] = useState(false);
@@ -61,7 +61,7 @@ function AppReturn() {
     url.searchParams.set("next", next);
     url.searchParams.set("access_token", data.session.access_token);
     url.searchParams.set("refresh_token", data.session.refresh_token);
-    const fallback = encodeURIComponent(`${window.location.origin}/app-return${window.location.search}`);
+    const fallback = encodeURIComponent(`${window.location.origin}/sign-in-return${window.location.search}`);
     window.location.href = `intent://${url.host}${url.pathname}${url.search}#Intent;scheme=https;package=uk.co.ogbot.app;S.browser_fallback_url=${fallback};end`;
     // If no compatible app is installed Chrome returns to this page.
     window.setTimeout(() => setOpening(false), 2500);
