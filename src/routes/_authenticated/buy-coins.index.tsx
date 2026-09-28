@@ -357,8 +357,9 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                                 res = await createCoinCheckout({ data: { priceId: selected.pack.priceId, returnUrl, environment: "live" } });
                               }
 
-                              if (res.error) throw new Error(res.error);
-                              if (res.url) window.location.href = res.url;
+                              const r = res as any;
+                              if (r.error) throw new Error(r.error);
+                              if (r.url) window.location.href = r.url;
                             } catch (e: any) {
                               toast.error(e.message || "Failed to start checkout.");
                               setCheckoutLoading(false);

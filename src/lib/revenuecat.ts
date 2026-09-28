@@ -1,5 +1,5 @@
 import { Purchases as PurchasesWeb, CustomerInfo as CustomerInfoWeb, Offerings as OfferingsWeb, Package as PackageWeb } from "@revenuecat/purchases-js";
-import { Purchases as PurchasesCapacitor, CustomerInfo as CustomerInfoCap, Offerings as OfferingsCap, PurchasesPackage as PackageCap } from "@revenuecat/purchases-capacitor";
+import { Purchases as PurchasesCapacitor, CustomerInfo as CustomerInfoCap, PurchasesOfferings as OfferingsCap, PurchasesPackage as PackageCap } from "@revenuecat/purchases-capacitor";
 import { Capacitor } from "@capacitor/core";
 
 // RevenueCat Keys
@@ -18,7 +18,7 @@ export async function configureRevenueCat(appUserId?: string) {
 
   if (Capacitor.isNativePlatform()) {
     try {
-      await PurchasesCapacitor.setLogLevel({ level: "DEBUG" });
+      await PurchasesCapacitor.setLogLevel({ level: "DEBUG" as any });
       const platform = Capacitor.getPlatform();
       const apiKey = platform === "ios" ? RC_IOS_API_KEY : RC_ANDROID_API_KEY;
 
@@ -77,7 +77,7 @@ export async function getOfferings(): Promise<OfferingsWeb | OfferingsCap | null
   try {
     if (Capacitor.isNativePlatform() && isNativeConfigured) {
       const offerings = await PurchasesCapacitor.getOfferings();
-      return offerings.offerings;
+      return offerings as any;
     } else if (purchasesWebInstance) {
       return await purchasesWebInstance.getOfferings();
     }
