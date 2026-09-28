@@ -106,11 +106,13 @@ export const VIP_PLAN: VipPlan = {
 const VIP_BUNDLE_IDS = new Set<string>(["vip_monthly", "vip_yearly", "og_vip_monthly", "og_vip_yearly"]);
 
 export function findCoinPackByPriceId(priceId: string): CoinPack | undefined {
-  return COIN_PACKS.find((p) => p.priceId === priceId);
+  const id = LEGACY_PRICE_ALIASES[priceId] ?? priceId;
+  return COIN_PACKS.find((p) => p.priceId === id);
 }
 
 export function findCoinPackByBundleId(bundleId: string): CoinPack | undefined {
-  return COIN_PACKS.find((p) => p.bundleId === bundleId);
+  const id = LEGACY_BUNDLE_ALIASES[bundleId] ?? bundleId;
+  return COIN_PACKS.find((p) => p.bundleId === id);
 }
 
 export function isVipBundle(bundleId: string | undefined): boolean {
