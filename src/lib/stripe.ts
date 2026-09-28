@@ -1,3 +1,4 @@
+import { Capacitor } from "@capacitor/core";
 import { loadStripe, type Stripe } from "@stripe/stripe-js";
 
 type StripeEnv = "sandbox" | "live";
@@ -8,7 +9,9 @@ const clientToken = (import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ??
 
 /** True when a Stripe publishable key is configured. False = payments disconnected. */
 export function arePaymentsEnabled(): boolean {
-  return true; // ALWAYS LIVE
+  // Google Play policy: no card checkout for digital goods inside the Android/iOS app.
+  if (typeof window !== "undefined" && Capacitor.isNativePlatform()) return false;
+  return true;
 }
 
 function paymentsEnvironment(): StripeEnv {

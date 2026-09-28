@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, PackageOpen, X } from "lucide-react";
 import { toast } from "sonner";
+import { arePaymentsEnabled } from "@/lib/stripe";
 import { StoreItemCard } from "@/components/store/StoreItemCard";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -77,6 +78,10 @@ export function StoreItemsSection() {
     }
     if (item?.slug === "og-vip-pass") {
       vipPassPurchase.mutate();
+      return;
+    }
+    if (!arePaymentsEnabled()) {
+      toast.info("This item can be bought on ogbot.co.uk.");
       return;
     }
     setCheckoutItemId(itemId);
