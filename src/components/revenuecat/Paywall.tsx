@@ -27,7 +27,18 @@ export function Paywall() {
   const { offerings, loading, purchasePackage, isVip } = useRevenueCat();
   const [purchasing, setPurchasing] = useState<string | null>(null);
 
-  const currentOffering = offerings?.current;
+  const rawOffering = offerings?.current;
+  // The Current offering also holds coin packs (coins_*, track_unlock_99p); the VIP paywall shows only subscriptions.
+  const currentOffering = rawOffering
+    ? {
+        ...rawOffering,
+        availablePackages: rawOffering.availablePackages.filter((p) => {
+          const a = p as unknown as { identifier: string; product?: { identifier?: string }; webBillingProduct?: { identifier?: string } };
+          const id = `${a.identifier} ${a.product?.identifier ?? ""} ${a.webBillingProduct?.identifier ?? ""}`;
+          return !/coins_|track_unlock/.test(id);
+        }),
+      }
+    : undefined;
 
   if (loading) {
     return (
