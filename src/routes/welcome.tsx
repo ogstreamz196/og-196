@@ -271,14 +271,14 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
           onClick={() => signIn(d.provider)}
           disabled={pending !== null}
           aria-label={d.label}
-          className="h-12 min-w-0 flex-1 justify-center gap-2 rounded-lg border-border/80 bg-secondary/75 px-3 font-auth-body text-sm font-semibold text-foreground shadow-sm backdrop-blur-sm transition-colors hover:border-primary/60 hover:bg-secondary focus-visible:ring-2 focus-visible:ring-primary"
+          className="h-14 min-w-0 justify-center gap-2.5 rounded-lg border-border/80 bg-secondary/75 px-3 font-auth-body text-base font-semibold text-foreground shadow-sm backdrop-blur-sm transition-colors hover:border-primary/60 hover:bg-secondary focus-visible:ring-2 focus-visible:ring-primary"
         >
           {isPending ? (
-            <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
+            <Loader2 className="h-6 w-6 animate-spin" aria-hidden />
+          ) : d.provider === "google" ? (
+            <GoogleIcon className="h-6 w-6 shrink-0" />
           ) : (
-            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-foreground">
-              <d.Icon className={`h-5 w-5 ${d.iconClass ?? ""}`} />
-            </span>
+            <AppleIcon className="h-6 w-6 shrink-0 text-foreground" />
           )}
           <span className="truncate">{d.provider === "google" ? "Google" : "Apple"}</span>
         </Button>
@@ -301,22 +301,22 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
           </p>
         </div>
 
+        <div className="mt-6">
+          <EmailAuthPanel disabled={pending !== null} />
+        </div>
+
         {!native && (
           <>
-            <div className="mt-6 flex gap-3">
-              {PRIMARY_DEVICES.map(renderTile)}
-            </div>
             <div className="my-6 flex items-center gap-4" aria-hidden>
               <span className="h-px flex-1 bg-border" />
               <span className="font-auth-display text-5xl font-black uppercase leading-none text-foreground sm:text-6xl">or</span>
               <span className="h-px flex-1 bg-border" />
             </div>
+            <div className="grid grid-cols-2 gap-3">
+              {PRIMARY_DEVICES.map(renderTile)}
+            </div>
           </>
         )}
-
-        <div className={native ? "mt-7" : ""}>
-          <EmailAuthPanel disabled={pending !== null} />
-        </div>
       </div>
     </div>
   );
@@ -390,8 +390,8 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
       toast.error("Pick a username with at least 3 letters or numbers");
       return;
     }
-    if (password.length < 5) {
-      toast.error("Password must be at least 5 characters");
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters");
 
       return;
     }
@@ -510,7 +510,7 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
               id="wc-password"
               type="password"
               autoComplete="current-password"
-              placeholder="At least 5 characters"
+              placeholder="Create/use existing password, must be 6 characters"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="h-14 rounded-lg border-2 border-border bg-surface px-4 font-auth-body text-base text-foreground shadow-inner placeholder:text-muted-foreground/70 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/35"
