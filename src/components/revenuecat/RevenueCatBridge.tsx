@@ -10,9 +10,12 @@ const RevenueCatProvider = lazy(() =>
 
 export function RevenueCatBridge({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
+  // During SSR (and the first client render) the RevenueCat provider is not
+  // available, so children must render directly — otherwise the whole page
+  // tree renders nothing on the server and every route fails.
   return (
-    <ClientOnly fallback={null}>
-      <Suspense fallback={null}>
+    <ClientOnly fallback={<>{children}</>}>
+      <Suspense fallback={<>{children}</>}>
         <RevenueCatProvider userId={user?.id}>{children}</RevenueCatProvider>
       </Suspense>
     </ClientOnly>
