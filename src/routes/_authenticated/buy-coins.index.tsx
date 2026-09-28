@@ -309,9 +309,13 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                               setCheckoutLoading(true);
                               const targetId = isVipFlow ? VIP_PLAN.bundleId : isCustomFlow ? "coins_custom" : selected.pack.bundleId;
 
-                              // Find package in RevenueCat offerings
+                              // Match by package id or Google Play product id (coins_50, coins_100, coins_240, coins_600).
                               const currentOffering = rc.offerings?.current;
-                              const pkg = currentOffering?.availablePackages.find(p => p.identifier === targetId);
+                              const pkg = currentOffering?.availablePackages.find((p) => {
+                                const a = p as unknown as { identifier: string; product?: { identifier?: string }; webBillingProduct?: { identifier?: string } };
+                                const pid = (a.product?.identifier ?? a.webBillingProduct?.identifier ?? "").split(":")[0];
+                                return a.identifier === targetId || pid === targetId;
+                              });
 
                               if (!pkg) {
                                 toast.error("Product not found in Google Play. Please configure RevenueCat products.");
