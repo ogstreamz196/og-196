@@ -24,6 +24,7 @@ import { InstallAppPrompt } from "@/components/InstallAppPrompt";
 import { UserActivityArchiver } from "@/hooks/use-user-activity-archiver";
 import { PersistentBackgroundMusic } from "@/components/PersistentBackgroundMusic";
 import { TrackUnlockReturnHandler } from "@/components/library/TrackUnlockReturnHandler";
+import { NativeAppLinkBridge } from "@/components/NativeAppLinkBridge";
 
 function NotFoundComponent() {
   return (
@@ -336,6 +337,7 @@ function RootComponent() {
         <PersistentBackgroundMusic />
         <TrackUnlockReturnHandler />
         <UserActivityArchiver />
+        <NativeAppLinkBridge />
         <Outlet />
         <InstallAppPrompt />
         <Toaster />

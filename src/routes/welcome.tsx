@@ -169,9 +169,16 @@ function useOAuthSignIn() {
         // Preserve `next` across a full-page OAuth round-trip so we return to
         // /welcome with the same param and can forward the user to their
         // original destination (e.g. the MCP consent URL) after sign-in.
-        const redirectUri = next
-          ? `${window.location.origin}/welcome?next=${encodeURIComponent(next)}`
-          : window.location.origin;
+        const isNativeApp = Boolean(
+          (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.(),
+        );
+        // Inside the Android app, Google sign-in finishes in the phone browser.
+        // /app-return is an Android App Link, so the browser hands it back to OG BOT.
+        const redirectUri = isNativeApp
+          ? `${window.location.origin}/app-return${next ? `?next=${encodeURIComponent(next)}` : ""}`
+          : next
+            ? `${window.location.origin}/welcome?next=${encodeURIComponent(next)}`
+            : window.location.origin;
         const result = await lovable.auth.signInWithOAuth(provider, {
           redirect_uri: redirectUri,
           extraParams: provider === "google" ? { prompt: "select_account" } : undefined,
