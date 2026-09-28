@@ -20,9 +20,6 @@ const RC_IOS_API_KEY = "test_UFDSOGyDTSPOjElYUXAqieTfcny"; // TODO: Replace with
 let purchasesWebInstance: PurchasesWebInstance | null = null;
 let isNativeConfigured = false;
 
-// Native SDK is loaded lazily so the web server never evaluates it.
-const loadNative = () => import("@revenuecat/purchases-capacitor").then((m) => m.Purchases);
-
 /**
  * Configure and initialize RevenueCat for Web or Native
  */
