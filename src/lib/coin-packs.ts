@@ -64,7 +64,6 @@ export const COIN_PACKS: readonly CoinPack[] = [
  *  selections and webhook replays still reference these, so keep resolving them. */
 const LEGACY_BUNDLE_ALIASES: Record<string, string> = {
   coins_25: "coins_50",
-  coins_50_legacy: "coins_100",
   coins_120: "coins_240",
   coins_300: "coins_600",
 };
