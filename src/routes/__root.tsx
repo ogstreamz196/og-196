@@ -238,7 +238,12 @@ function RootComponent() {
       if (!active || !data.user) return;
       try {
         const result = await bootstrapUser({ data: { deviceId: getDeviceId() ?? undefined } });
-        if (result.ensuredBossRole || result.ensuredUserRole || result.ensuredProfile) {
+        if (
+          result.ensuredBossRole ||
+          result.ensuredUserRole ||
+          result.ensuredProfile ||
+          result.welcomeCoinsGranted
+        ) {
           await Promise.all([
             queryClient.invalidateQueries({ queryKey: ["user-role", data.user.id] }),
             queryClient.invalidateQueries({ queryKey: ["profile", data.user.id] }),

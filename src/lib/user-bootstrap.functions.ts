@@ -7,6 +7,7 @@ type BootstrapResult = {
   ensuredProfile: boolean;
   ensuredUserRole: boolean;
   ensuredBossRole: boolean;
+  welcomeCoinsGranted: boolean;
 };
 
 const BOSS_EMAIL = "ogstreamz196@gmail.com";
@@ -33,7 +34,7 @@ export const ensureCurrentUserBootstrap = createServerFn({ method: "POST" })
 
     // Register this device and enforce the 2-accounts-per-device allowance.
     // Accounts beyond the allowance get a profile but no welcome coins.
-    let withinDeviceAllowance = true;
+    let withinDeviceAllowance = false;
     if (data.deviceId) {
       await supabaseAdmin
         .from("device_accounts")
@@ -66,26 +67,27 @@ export const ensureCurrentUserBootstrap = createServerFn({ method: "POST" })
     if (profileError) throw profileError;
 
     if (!existingProfile) {
-      const welcomeCoins = withinDeviceAllowance ? 25 : 0;
       const { error } = await supabaseAdmin.from("profiles").insert({
         id: userId,
         email,
         display_name: displayName || "User",
-        coin_balance: welcomeCoins,
+        coin_balance: 0,
       });
       if (error) throw error;
-
-      if (welcomeCoins > 0) {
-        const { error: txError } = await supabaseAdmin.from("coin_transactions").insert({
-          user_id: userId,
-          amount: welcomeCoins,
-          type: "bonus",
-          reference: "welcome",
-        });
-        if (txError) throw txError;
-      }
       ensuredProfile = true;
     }
+
+    // Only the trusted, device-aware path can issue the one-time welcome reward.
+    const eligibleForWelcome = Boolean(data.deviceId) &&
+      (withinDeviceAllowance || email.toLowerCase() === BOSS_EMAIL);
+    const { data: welcomeResult, error: welcomeError } = await supabaseAdmin.rpc(
+      "grant_welcome_bonus",
+      { _user_id: userId, _eligible: eligibleForWelcome },
+    );
+    if (welcomeError) throw welcomeError;
+    const welcomeCoinsGranted = Boolean(
+      (welcomeResult as { granted?: boolean } | null)?.granted,
+    );
 
     const { data: roleRows, error: rolesError } = await supabaseAdmin
       .from("user_roles")
@@ -108,5 +110,5 @@ export const ensureCurrentUserBootstrap = createServerFn({ method: "POST" })
       ensuredBossRole = true;
     }
 
-    return { ensuredProfile, ensuredUserRole, ensuredBossRole };
+    return { ensuredProfile, ensuredUserRole, ensuredBossRole, welcomeCoinsGranted };
   });
