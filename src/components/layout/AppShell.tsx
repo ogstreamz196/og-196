@@ -124,7 +124,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
               <div className="flex min-w-0 items-center gap-2 sm:gap-3">
                 {!pathname.startsWith("/messenger") && (
-                  <div className="hidden min-[380px]:block">
+                  <div className="hidden min-[480px]:block">
                     <BrandLockup compact />
                   </div>
                 )}
@@ -148,7 +148,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </div>
               </div>
 
-              <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+              <div className="flex min-w-0 shrink-0 items-center gap-0.5 sm:gap-2">
                 <BackgroundMusicHeaderControl />
                 {!roleLoading && isAdmin && (
                   <div className="hidden items-center gap-1.5 rounded-full border border-primary/40 bg-gradient-brand px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow-glow md:flex">
