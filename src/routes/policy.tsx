@@ -99,8 +99,8 @@ function PolicyPage() {
           <Section icon={Database} title="2. Information we collect">
             <p>
               <strong className="text-foreground">Account data:</strong> when you
-              sign in with Google or Apple we receive your email address, display
-              name, and a unique account identifier from that provider. We never
+              sign in, we receive your email address and a unique account identifier
+              needed to keep your account linked and synchronised. We never
               see or store your provider password.
             </p>
             <p>
@@ -117,10 +117,11 @@ function PolicyPage() {
               status — never your full card number.
             </p>
             <p>
-              <strong className="text-foreground">Usage &amp; device data:</strong>{" "}
-              sign-in and sign-out times, pages visited, player activity, and a
-              device identifier used to limit the number of free accounts per
-              device. We do not request or track your precise location.
+              <strong className="text-foreground">Minimal account security data:</strong>{" "}
+              sign-in timestamps and a random first-party device token used only to
+              limit free-account abuse. We do not collect precise location, IP-based
+              location, contacts, advertising IDs, full device fingerprints, browsing
+              history, or page-by-page activity.
             </p>
             <p>
               <strong className="text-foreground">Messages:</strong> chats you send
@@ -165,8 +166,8 @@ function PolicyPage() {
                 bot notifications and the Sports Guide invite if you purchase it.
               </li>
               <li>
-                <strong className="text-foreground">Google Drive &amp; Sheets</strong>{" "}
-                — backing up created tracks and operational records.
+                <strong className="text-foreground">Google Drive</strong> — backing
+                up created tracks.
               </li>
             </ul>
             <p>
@@ -220,8 +221,8 @@ function PolicyPage() {
           <Section icon={Cookie} title="7. Cookies &amp; local storage">
             <p>
               We use first-party browser storage to keep you signed in, remember
-              preferences (such as bot mode and playback state), and detect your
-              device for account limits. No third-party advertising cookies are
+              preferences (such as bot mode and playback state), and keep a random
+              app token for free-account limits. No third-party advertising cookies are
               used.
             </p>
           </Section>
