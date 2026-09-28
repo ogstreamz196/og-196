@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { CustomerInfo, Offerings, Package } from "@revenuecat/purchases-js";
+import type { CustomerInfo, Offerings, Package } from "@revenuecat/purchases-js";
 import {
   configureRevenueCat,
   getCustomerInfo,
