@@ -137,7 +137,11 @@ function TrustPage() {
         <p className="text-sm text-muted-foreground sm:text-base">
           Shared responsibility: OG Studio provides app-level controls described above; the
           underlying hosting platform provides the infrastructure they run on. You're responsible
-          for keeping your sign-in provider account and device secure.
+          for keeping your sign-in provider account and device secure. See also our full{" "}
+          <Link to="/policy" className="font-semibold text-primary underline-offset-4 hover:underline">
+            Privacy Policy
+          </Link>
+          .
         </p>
       </div>
     </div>
