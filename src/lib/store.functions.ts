@@ -42,6 +42,7 @@ export type SportsGuideAccessStatus = {
   telegramLinked: boolean;
   groupConfigured: boolean;
   inviteExpiresAt: string | null;
+  inviteUrl: string | null;
 };
 
 export type StoreCatalog = {
@@ -115,6 +116,7 @@ export const getSportsGuideAccessStatus = createServerFn({ method: "GET" })
       telegramLinked: !!profile.data?.telegram_chat_id,
       groupConfigured: setting.data?.value !== null && setting.data?.value !== undefined,
       inviteExpiresAt: access.data?.invite_expires_at ?? null,
+      inviteUrl: access.data?.telegram_invite_link ?? null,
     };
   });
 

@@ -26,7 +26,7 @@ export function useVipSubscription() {
       const { data, error } = await supabase
         .from("subscriptions")
         .select(
-          "status,current_period_end,cancel_at_period_end,environment",
+          "status,current_period_end,cancel_at_period_end,environment,price_id",
         )
         .eq("user_id", user!.id)
         .eq("environment", env)

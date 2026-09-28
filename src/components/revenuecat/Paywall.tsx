@@ -77,7 +77,7 @@ export function Paywall() {
           {currentOffering.availablePackages.map((pkg) => {
             const isYearly = pkg.identifier === "yearly";
             const busy = purchasing === pkg.identifier;
-            const price = pkg.product.currentPrice;
+            const price = pkg.webBillingProduct.currentPrice;
             return (
               <div
                 key={pkg.identifier}
@@ -91,12 +91,12 @@ export function Paywall() {
                     Best value
                   </Badge>
                 )}
-                <h3 className="text-lg font-bold">{pkg.product.title}</h3>
+                <h3 className="text-lg font-bold">{pkg.webBillingProduct.title}</h3>
                 <div className="mb-3 text-2xl font-black">
                   {price ? `${price.currency} ${price.amount.toFixed(2)}` : "—"}
                 </div>
                 <p className="mb-5 flex-grow text-sm text-muted-foreground">
-                  {pkg.product.description}
+                  {pkg.webBillingProduct.description}
                 </p>
                 <Button
                   disabled={purchasing !== null}
