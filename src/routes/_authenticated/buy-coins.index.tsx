@@ -10,7 +10,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { createCoinCheckoutSession, createVipCheckoutSession, createCustomCoinCheckoutSession } from "@/lib/payments.functions";
 import { Capacitor } from "@capacitor/core";
 import { useRevenueCat } from "@/components/revenuecat/RevenueCatProvider";
-import { findCoinPackByBundleId, VIP_PLAN } from "@/lib/coin-packs";
+import { useProfile } from "@/hooks/use-profile";
 import { useRole } from "@/hooks/use-role";
 import { useSiteContent, useSetSiteContent } from "@/hooks/use-site-content";
 import { cn } from "@/lib/utils";
@@ -58,6 +58,13 @@ function BuyCoinsPage() {
 
 export function CoinStore({ editMode }: { editMode?: 1 }) {
   const { data: profile } = useProfile();
+  const rc = useRevenueCat();
+  const rcLoading = rc.loading;
+  const rcPurchase = rc.purchasePackage;
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const createVipCheckout = useServerFn(createVipCheckoutSession);
+  const createCustomCheckout = useServerFn(createCustomCoinCheckoutSession);
+  const createCoinCheckout = useServerFn(createCoinCheckoutSession);
   const { isVip, isDev, isLoading: roleLoading } = useRole();
   const navigate = useNavigate();
   const [selected, setSelected] = useState<Selection | null>(null);
@@ -303,7 +310,7 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                               const targetId = isVipFlow ? VIP_PLAN.bundleId : isCustomFlow ? "coins_custom" : selected.pack.bundleId;
 
                               // Find package in RevenueCat offerings
-                              const currentOffering = useRevenueCat().offerings?.current;
+                              const currentOffering = rc.offerings?.current;
                               const pkg = currentOffering?.availablePackages.find(p => p.identifier === targetId);
 
                               if (!pkg) {
