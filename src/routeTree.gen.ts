@@ -38,8 +38,6 @@ import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]
 import { Route as AuthenticatedBuyCoinsIndexRouteImport } from './routes/_authenticated/buy-coins.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedLibrarySongIdRouteImport } from './routes/_authenticated/library.$songId'
-import { Route as AuthenticatedBuyCoinsReturnRouteImport } from './routes/_authenticated/buy-coins.return'
-import { Route as AuthenticatedAdminWebhooksRouteImport } from './routes/_authenticated/admin.webhooks'
 import { Route as AuthenticatedAdminUsersProRouteImport } from './routes/_authenticated/admin.users-pro'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedAdminUserSettingsRouteImport } from './routes/_authenticated/admin.user-settings'
@@ -47,7 +45,6 @@ import { Route as AuthenticatedAdminSystemRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAdminStoreRouteImport } from './routes/_authenticated/admin.store'
 import { Route as AuthenticatedAdminRouteMapRouteImport } from './routes/_authenticated/admin.route-map'
 import { Route as AuthenticatedAdminReferralsAuditRouteImport } from './routes/_authenticated/admin.referrals-audit'
-import { Route as AuthenticatedAdminOnboardingRouteImport } from './routes/_authenticated/admin.onboarding'
 import { Route as AuthenticatedAdminOgPersonaRouteImport } from './routes/_authenticated/admin.og-persona'
 import { Route as AuthenticatedAdminHealthRouteImport } from './routes/_authenticated/admin.health'
 import { Route as AuthenticatedAdminDebugContextRouteImport } from './routes/_authenticated/admin.debug-context'
@@ -59,7 +56,6 @@ import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicTelegramWebhookRouteImport } from './routes/api/public/telegram/webhook'
-import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as AuthenticatedAdminUsersUserIdRouteImport } from './routes/_authenticated/admin.users.$userId'
 
 const AuthenticatedLibraryIndexLazyRouteImport = createFileRoute(
@@ -214,18 +210,6 @@ const AuthenticatedLibrarySongIdRoute =
     path: '/library/$songId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedBuyCoinsReturnRoute =
-  AuthenticatedBuyCoinsReturnRouteImport.update({
-    id: '/buy-coins/return',
-    path: '/buy-coins/return',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAdminWebhooksRoute =
-  AuthenticatedAdminWebhooksRouteImport.update({
-    id: '/admin/webhooks',
-    path: '/admin/webhooks',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedAdminUsersProRoute =
   AuthenticatedAdminUsersProRouteImport.update({
     id: '/admin/users-pro',
@@ -264,12 +248,6 @@ const AuthenticatedAdminReferralsAuditRoute =
   AuthenticatedAdminReferralsAuditRouteImport.update({
     id: '/admin/referrals-audit',
     path: '/admin/referrals-audit',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAdminOnboardingRoute =
-  AuthenticatedAdminOnboardingRouteImport.update({
-    id: '/admin/onboarding',
-    path: '/admin/onboarding',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedAdminOgPersonaRoute =
@@ -334,12 +312,6 @@ const ApiPublicTelegramWebhookRoute =
     path: '/api/public/telegram/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicPaymentsWebhookRoute =
-  ApiPublicPaymentsWebhookRouteImport.update({
-    id: '/api/public/payments/webhook',
-    path: '/api/public/payments/webhook',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const AuthenticatedAdminUsersUserIdRoute =
   AuthenticatedAdminUsersUserIdRouteImport.update({
     id: '/$userId',
@@ -379,7 +351,6 @@ export interface FileRoutesByFullPath {
   '/admin/debug-context': typeof AuthenticatedAdminDebugContextRoute
   '/admin/health': typeof AuthenticatedAdminHealthRoute
   '/admin/og-persona': typeof AuthenticatedAdminOgPersonaRoute
-  '/admin/onboarding': typeof AuthenticatedAdminOnboardingRoute
   '/admin/referrals-audit': typeof AuthenticatedAdminReferralsAuditRoute
   '/admin/route-map': typeof AuthenticatedAdminRouteMapRoute
   '/admin/store': typeof AuthenticatedAdminStoreRoute
@@ -387,14 +358,11 @@ export interface FileRoutesByFullPath {
   '/admin/user-settings': typeof AuthenticatedAdminUserSettingsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/admin/users-pro': typeof AuthenticatedAdminUsersProRoute
-  '/admin/webhooks': typeof AuthenticatedAdminWebhooksRoute
-  '/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
   '/library/$songId': typeof AuthenticatedLibrarySongIdRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/buy-coins/': typeof AuthenticatedBuyCoinsIndexRoute
   '/library/': typeof AuthenticatedLibraryIndexLazyRoute
   '/admin/users/$userId': typeof AuthenticatedAdminUsersUserIdRoute
-  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -431,7 +399,6 @@ export interface FileRoutesByTo {
   '/admin/debug-context': typeof AuthenticatedAdminDebugContextRoute
   '/admin/health': typeof AuthenticatedAdminHealthRoute
   '/admin/og-persona': typeof AuthenticatedAdminOgPersonaRoute
-  '/admin/onboarding': typeof AuthenticatedAdminOnboardingRoute
   '/admin/referrals-audit': typeof AuthenticatedAdminReferralsAuditRoute
   '/admin/route-map': typeof AuthenticatedAdminRouteMapRoute
   '/admin/store': typeof AuthenticatedAdminStoreRoute
@@ -439,14 +406,11 @@ export interface FileRoutesByTo {
   '/admin/user-settings': typeof AuthenticatedAdminUserSettingsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/admin/users-pro': typeof AuthenticatedAdminUsersProRoute
-  '/admin/webhooks': typeof AuthenticatedAdminWebhooksRoute
-  '/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
   '/library/$songId': typeof AuthenticatedLibrarySongIdRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/buy-coins': typeof AuthenticatedBuyCoinsIndexRoute
   '/library': typeof AuthenticatedLibraryIndexLazyRoute
   '/admin/users/$userId': typeof AuthenticatedAdminUsersUserIdRoute
-  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -485,7 +449,6 @@ export interface FileRoutesById {
   '/_authenticated/admin/debug-context': typeof AuthenticatedAdminDebugContextRoute
   '/_authenticated/admin/health': typeof AuthenticatedAdminHealthRoute
   '/_authenticated/admin/og-persona': typeof AuthenticatedAdminOgPersonaRoute
-  '/_authenticated/admin/onboarding': typeof AuthenticatedAdminOnboardingRoute
   '/_authenticated/admin/referrals-audit': typeof AuthenticatedAdminReferralsAuditRoute
   '/_authenticated/admin/route-map': typeof AuthenticatedAdminRouteMapRoute
   '/_authenticated/admin/store': typeof AuthenticatedAdminStoreRoute
@@ -493,14 +456,11 @@ export interface FileRoutesById {
   '/_authenticated/admin/user-settings': typeof AuthenticatedAdminUserSettingsRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/_authenticated/admin/users-pro': typeof AuthenticatedAdminUsersProRoute
-  '/_authenticated/admin/webhooks': typeof AuthenticatedAdminWebhooksRoute
-  '/_authenticated/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
   '/_authenticated/library/$songId': typeof AuthenticatedLibrarySongIdRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/buy-coins/': typeof AuthenticatedBuyCoinsIndexRoute
   '/_authenticated/library/': typeof AuthenticatedLibraryIndexLazyRoute
   '/_authenticated/admin/users/$userId': typeof AuthenticatedAdminUsersUserIdRoute
-  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -539,7 +499,6 @@ export interface FileRouteTypes {
     | '/admin/debug-context'
     | '/admin/health'
     | '/admin/og-persona'
-    | '/admin/onboarding'
     | '/admin/referrals-audit'
     | '/admin/route-map'
     | '/admin/store'
@@ -547,14 +506,11 @@ export interface FileRouteTypes {
     | '/admin/user-settings'
     | '/admin/users'
     | '/admin/users-pro'
-    | '/admin/webhooks'
-    | '/buy-coins/return'
     | '/library/$songId'
     | '/admin/'
     | '/buy-coins/'
     | '/library/'
     | '/admin/users/$userId'
-    | '/api/public/payments/webhook'
     | '/api/public/telegram/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -591,7 +547,6 @@ export interface FileRouteTypes {
     | '/admin/debug-context'
     | '/admin/health'
     | '/admin/og-persona'
-    | '/admin/onboarding'
     | '/admin/referrals-audit'
     | '/admin/route-map'
     | '/admin/store'
@@ -599,14 +554,11 @@ export interface FileRouteTypes {
     | '/admin/user-settings'
     | '/admin/users'
     | '/admin/users-pro'
-    | '/admin/webhooks'
-    | '/buy-coins/return'
     | '/library/$songId'
     | '/admin'
     | '/buy-coins'
     | '/library'
     | '/admin/users/$userId'
-    | '/api/public/payments/webhook'
     | '/api/public/telegram/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -644,7 +596,6 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/debug-context'
     | '/_authenticated/admin/health'
     | '/_authenticated/admin/og-persona'
-    | '/_authenticated/admin/onboarding'
     | '/_authenticated/admin/referrals-audit'
     | '/_authenticated/admin/route-map'
     | '/_authenticated/admin/store'
@@ -652,14 +603,11 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/user-settings'
     | '/_authenticated/admin/users'
     | '/_authenticated/admin/users-pro'
-    | '/_authenticated/admin/webhooks'
-    | '/_authenticated/buy-coins/return'
     | '/_authenticated/library/$songId'
     | '/_authenticated/admin/'
     | '/_authenticated/buy-coins/'
     | '/_authenticated/library/'
     | '/_authenticated/admin/users/$userId'
-    | '/api/public/payments/webhook'
     | '/api/public/telegram/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -682,7 +630,6 @@ export interface RootRouteChildren {
   RCodeRoute: typeof RCodeRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
-  ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   ApiPublicTelegramWebhookRoute: typeof ApiPublicTelegramWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -886,20 +833,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLibrarySongIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/buy-coins/return': {
-      id: '/_authenticated/buy-coins/return'
-      path: '/buy-coins/return'
-      fullPath: '/buy-coins/return'
-      preLoaderRoute: typeof AuthenticatedBuyCoinsReturnRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/admin/webhooks': {
-      id: '/_authenticated/admin/webhooks'
-      path: '/admin/webhooks'
-      fullPath: '/admin/webhooks'
-      preLoaderRoute: typeof AuthenticatedAdminWebhooksRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/admin/users-pro': {
       id: '/_authenticated/admin/users-pro'
       path: '/admin/users-pro'
@@ -947,13 +880,6 @@ declare module '@tanstack/react-router' {
       path: '/admin/referrals-audit'
       fullPath: '/admin/referrals-audit'
       preLoaderRoute: typeof AuthenticatedAdminReferralsAuditRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/admin/onboarding': {
-      id: '/_authenticated/admin/onboarding'
-      path: '/admin/onboarding'
-      fullPath: '/admin/onboarding'
-      preLoaderRoute: typeof AuthenticatedAdminOnboardingRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin/og-persona': {
@@ -1033,13 +959,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicTelegramWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/payments/webhook': {
-      id: '/api/public/payments/webhook'
-      path: '/api/public/payments/webhook'
-      fullPath: '/api/public/payments/webhook'
-      preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_authenticated/admin/users/$userId': {
       id: '/_authenticated/admin/users/$userId'
       path: '/$userId'
@@ -1081,7 +1000,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminDebugContextRoute: typeof AuthenticatedAdminDebugContextRoute
   AuthenticatedAdminHealthRoute: typeof AuthenticatedAdminHealthRoute
   AuthenticatedAdminOgPersonaRoute: typeof AuthenticatedAdminOgPersonaRoute
-  AuthenticatedAdminOnboardingRoute: typeof AuthenticatedAdminOnboardingRoute
   AuthenticatedAdminReferralsAuditRoute: typeof AuthenticatedAdminReferralsAuditRoute
   AuthenticatedAdminRouteMapRoute: typeof AuthenticatedAdminRouteMapRoute
   AuthenticatedAdminStoreRoute: typeof AuthenticatedAdminStoreRoute
@@ -1089,8 +1007,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminUserSettingsRoute: typeof AuthenticatedAdminUserSettingsRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRouteWithChildren
   AuthenticatedAdminUsersProRoute: typeof AuthenticatedAdminUsersProRoute
-  AuthenticatedAdminWebhooksRoute: typeof AuthenticatedAdminWebhooksRoute
-  AuthenticatedBuyCoinsReturnRoute: typeof AuthenticatedBuyCoinsReturnRoute
   AuthenticatedLibrarySongIdRoute: typeof AuthenticatedLibrarySongIdRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedBuyCoinsIndexRoute: typeof AuthenticatedBuyCoinsIndexRoute
@@ -1114,7 +1030,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminDebugContextRoute: AuthenticatedAdminDebugContextRoute,
   AuthenticatedAdminHealthRoute: AuthenticatedAdminHealthRoute,
   AuthenticatedAdminOgPersonaRoute: AuthenticatedAdminOgPersonaRoute,
-  AuthenticatedAdminOnboardingRoute: AuthenticatedAdminOnboardingRoute,
   AuthenticatedAdminReferralsAuditRoute: AuthenticatedAdminReferralsAuditRoute,
   AuthenticatedAdminRouteMapRoute: AuthenticatedAdminRouteMapRoute,
   AuthenticatedAdminStoreRoute: AuthenticatedAdminStoreRoute,
@@ -1122,8 +1037,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminUserSettingsRoute: AuthenticatedAdminUserSettingsRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRouteWithChildren,
   AuthenticatedAdminUsersProRoute: AuthenticatedAdminUsersProRoute,
-  AuthenticatedAdminWebhooksRoute: AuthenticatedAdminWebhooksRoute,
-  AuthenticatedBuyCoinsReturnRoute: AuthenticatedBuyCoinsReturnRoute,
   AuthenticatedLibrarySongIdRoute: AuthenticatedLibrarySongIdRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
   AuthenticatedBuyCoinsIndexRoute: AuthenticatedBuyCoinsIndexRoute,
@@ -1151,7 +1064,6 @@ const rootRouteChildren: RootRouteChildren = {
   RCodeRoute: RCodeRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
-  ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   ApiPublicTelegramWebhookRoute: ApiPublicTelegramWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
