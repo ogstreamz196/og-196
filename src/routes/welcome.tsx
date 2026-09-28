@@ -290,9 +290,8 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
       <div className="relative overflow-hidden rounded-xl border border-border/80 bg-card/95 px-5 py-7 shadow-[0_24px_70px_-24px_hsl(var(--primary)/0.65)] backdrop-blur-xl sm:px-8 sm:py-9">
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-destructive via-primary to-destructive" aria-hidden />
         <div className="text-center">
-          <OgBotLogo className="mx-auto h-14 w-14 rounded-xl sm:h-16 sm:w-16" />
-          <p className="mt-4 font-auth-display text-4xl uppercase leading-none text-foreground sm:text-5xl">OG BOT</p>
-          <h2 className="mt-2 text-lg font-semibold text-foreground sm:text-xl">
+          <OgBotLogo className="mx-auto h-32 w-32 rounded-2xl sm:h-40 sm:w-40" />
+          <h2 className="mt-3 text-lg font-semibold text-foreground sm:text-xl">
             {native ? "Create your account" : "Sign in to your account"}
           </h2>
           <p className="mx-auto mt-1.5 max-w-sm text-sm leading-relaxed text-muted-foreground">
@@ -307,9 +306,9 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
             <div className="mt-6 flex gap-3">
               {PRIMARY_DEVICES.map(renderTile)}
             </div>
-            <div className="my-6 flex items-center gap-3" aria-hidden>
+            <div className="my-6 flex items-center gap-4" aria-hidden>
               <span className="h-px flex-1 bg-border" />
-              <span className="text-xs font-semibold uppercase text-muted-foreground">or continue manually</span>
+              <span className="font-auth-display text-5xl font-black uppercase leading-none text-foreground sm:text-6xl">or</span>
               <span className="h-px flex-1 bg-border" />
             </div>
           </>
@@ -468,7 +467,7 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
     <div>
       <div className="mb-5 text-center">
         <h3 className="font-auth-display text-3xl uppercase leading-none text-foreground">
-          {mode === "reset" ? "Reset password" : native ? "Set up your login" : "Username sign in"}
+          {mode === "reset" ? "Reset password" : "Create account / Sign in"}
         </h3>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
           {mode === "reset"
