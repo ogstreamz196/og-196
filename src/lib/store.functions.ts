@@ -92,7 +92,7 @@ export const getSportsGuideAccessStatus = createServerFn({ method: "GET" })
     const [access, profile, setting] = await Promise.all([
       supabaseAdmin
         .from("sports_guide_access")
-        .select("status, invite_expires_at")
+        .select("status, invite_expires_at, telegram_invite_link")
         .eq("user_id", context.userId)
         .maybeSingle(),
       supabaseAdmin
