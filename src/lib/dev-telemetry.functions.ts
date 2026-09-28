@@ -41,13 +41,6 @@ export const notifyDevSignIn = createServerFn({ method: "POST" })
       "@/integrations/supabase/client.server"
     );
 
-    // Look up the signer
-    const { data: me } = await supabaseAdmin
-      .from("profiles")
-      .select("email, display_name")
-      .eq("id", context.userId)
-      .maybeSingle();
-
     // Skip if caller is themselves an admin (we don't want to notify on dev's own logins)
     const { data: isAdmin } = await supabaseAdmin.rpc("has_role", {
       _user_id: context.userId,
@@ -69,17 +62,10 @@ export const notifyDevSignIn = createServerFn({ method: "POST" })
       .in("id", adminIds)
       .not("telegram_chat_id", "is", null);
 
-    const name = escapeHtml(
-      me?.display_name?.trim() ||
-        me?.email?.split("@")[0] ||
-        context.userId.slice(0, 8),
-    );
-    const email = escapeHtml(me?.email ?? "—");
     const when = new Date().toLocaleString("en-GB", { timeZone: "UTC" });
     const text =
       `🟢 <b>Sign-in</b>\n` +
-      `<b>${name}</b>\n` +
-      `<code>${email}</code>\n` +
+      `Account <code>${escapeHtml(context.userId.slice(0, 8))}</code>\n` +
       `<i>${when} UTC</i>`;
 
     await Promise.all(
