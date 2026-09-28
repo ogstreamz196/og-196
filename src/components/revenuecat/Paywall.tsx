@@ -77,7 +77,7 @@ export function Paywall() {
           {currentOffering.availablePackages.map((pkg) => {
             const isYearly = /year|annual/i.test(pkg.identifier);
             const busy = purchasing === pkg.identifier;
-            const price = pkg.webBillingProduct.currentPrice;
+            const plan = isYearly ? YEARLY_PLAN : MONTHLY_PLAN;
             return (
               <div
                 key={pkg.identifier}
@@ -91,13 +91,13 @@ export function Paywall() {
                     Best value
                   </Badge>
                 )}
-                <h3 className="text-lg font-bold">{pkg.webBillingProduct.title}</h3>
-                <div className="mb-3 text-2xl font-black">
-                  {price ? `${price.currency} ${price.amount.toFixed(2)}` : "—"}
+                <h3 className="text-lg font-bold">{plan.title}</h3>
+                <div className="mb-1 text-2xl font-black">
+                  {plan.price}
+                  <span className="text-sm font-semibold text-muted-foreground">{plan.period}</span>
                 </div>
-                <p className="mb-5 flex-grow text-sm text-muted-foreground">
-                  {pkg.webBillingProduct.description}
-                </p>
+                <p className="mb-5 flex-grow text-sm text-muted-foreground">{plan.description}</p>
+
                 <Button
                   disabled={purchasing !== null}
                   onClick={() => void handlePurchase(pkg)}
