@@ -14,3 +14,4 @@
 - [x] Add an explicit browser-to-Android sign-in return for installed builds with /app-return support (no website-link verification needed)
 - [x] Restrict APK welcome to manual account form and add a D.EV Google sign-in button; preserve web welcome
 - [x] Allow Boss to delete non-privileged user accounts from user settings
+- [x] Redesign web and APK sign-in forms with centred headings and clear input fields

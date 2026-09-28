@@ -19,6 +19,8 @@
   --font-cartoon: "Bowlby One", "Lilita One", "Arial Black", "Impact", system-ui, sans-serif;
   --font-store-heading: "Archivo Black", "Arial Black", system-ui, sans-serif;
   --font-store-body: "Hind", "Segoe UI", system-ui, sans-serif;
+  --font-auth-display: "Bebas Neue", "Archivo Black", "Arial Black", system-ui, sans-serif;
+  --font-auth-body: "Barlow", "Hind", "Segoe UI", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);

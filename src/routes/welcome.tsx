@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type ReactElement } from "react";
+import { Capacitor } from "@capacitor/core";
+import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactElement } from "react";
 import {
   Music2,
   Sparkles,
@@ -79,9 +80,9 @@ export const Route = createFileRoute("/welcome")({
 type OAuthProvider = "google" | "apple";
 
 function useIsNativeApp() {
-  const [native, setNative] = useState(false);
+  const [native, setNative] = useState(() => Capacitor.isNativePlatform());
   useEffect(() => {
-    setNative(Boolean((window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.()));
+    setNative(Capacitor.isNativePlatform());
   }, []);
   return native;
 }
@@ -249,16 +250,6 @@ type Device = {
   iconClass?: string;
 };
 
-const TILE_CLASS =
-  "group relative bg-white/[0.06] backdrop-blur-md border-2 border-white/15 rounded-[28px] " +
-  "shadow-[0_10px_0_0_hsl(var(--primary)/0.35),0_24px_44px_-12px_hsl(var(--primary)/0.45)] " +
-  "transition-all duration-150 ease-out " +
-  "hover:-translate-y-1 hover:border-white/40 hover:bg-white/[0.1] " +
-  "hover:shadow-[0_12px_0_0_hsl(var(--primary)/0.5),0_28px_50px_-10px_hsl(var(--primary)/0.6)] " +
-  "active:translate-y-1 active:shadow-[0_4px_0_0_hsl(var(--primary)/0.35),0_10px_20px_-6px_hsl(var(--primary)/0.4)] " +
-  "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background " +
-  "disabled:opacity-70 disabled:cursor-wait disabled:translate-y-0 cursor-pointer";
-
 const PRIMARY_DEVICES: Device[] = [
   { key: "google", label: "Continue with Google", provider: "google", Icon: GoogleIcon },
   { key: "apple", label: "Continue with Apple ID", provider: "apple", Icon: AppleIcon, iconClass: "text-black" },
@@ -268,89 +259,63 @@ const PRIMARY_DEVICES: Device[] = [
 function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
   const { signIn, pending } = useOAuthSignIn();
   const native = useIsNativeApp();
-  const h = size === "xl" ? "h-36 sm:h-44 md:h-48" : "h-32 sm:h-40 md:h-44";
+  const compact = size === "lg";
 
-  // Defer the flame aura until after the welcome screen has fully painted +
-  // gone idle so low-end phones aren't doing shadow compositing during the
-  // initial render. Falls back to a timeout when requestIdleCallback is absent.
-  const [auraOn, setAuraOn] = useState(false);
-  useEffect(() => {
-    let cancelled = false;
-    const start = () => {
-      if (!cancelled) setAuraOn(true);
-    };
-    const raf = requestAnimationFrame(() => {
-      const w = window as typeof window & {
-        requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
-        cancelIdleCallback?: (id: number) => void;
-      };
-      if (typeof w.requestIdleCallback === "function") {
-        const id = w.requestIdleCallback(start, { timeout: 1500 });
-        return () => w.cancelIdleCallback?.(id);
-      }
-      const t = window.setTimeout(start, 600);
-      return () => window.clearTimeout(t);
-    });
-    return () => {
-      cancelled = true;
-      cancelAnimationFrame(raf);
-    };
-  }, []);
-
-  const renderTile = useCallback(
-    (d: Device, idx: number) => {
+  const renderTile = (d: Device) => {
       const isPending = pending === d.provider;
       return (
-        <button
+        <Button
           key={d.key}
+          type="button"
+          variant="outline"
           onClick={() => signIn(d.provider)}
           disabled={pending !== null}
           aria-label={d.label}
-          style={{ ["--luxe-delay" as string]: `${idx * 0.6}s` }}
-          className={`${h} ${TILE_CLASS} ${auraOn ? "luxe-glow" : ""} flex flex-col items-center justify-between gap-[clamp(0.5rem,1.2vw,0.875rem)] px-[clamp(0.5rem,1.2vw,0.875rem)] pt-[clamp(0.875rem,2vw,1.25rem)] pb-[clamp(0.5rem,1.2vw,0.875rem)] text-foreground`}
+          className="h-12 min-w-0 flex-1 justify-center gap-2 rounded-lg border-border/80 bg-secondary/75 px-3 font-auth-body text-sm font-semibold text-foreground shadow-sm backdrop-blur-sm transition-colors hover:border-primary/60 hover:bg-secondary focus-visible:ring-2 focus-visible:ring-primary"
         >
-
-          <div className="flex flex-1 items-center justify-center">
-            {isPending ? (
-              <Loader2 className="h-10 w-10 animate-spin text-foreground sm:h-16 sm:w-16" aria-hidden />
-            ) : (
-              <div className="grid aspect-square w-[clamp(3rem,9vw,6rem)] place-items-center rounded-[clamp(14px,2vw,24px)] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.45)] ring-2 ring-white/90 transition-transform duration-200 group-hover:scale-110 group-hover:rotate-[-3deg] group-active:scale-95">
-                <div className={`grid place-items-center ${d.iconClass ?? "text-black"}`}>
-                  <d.Icon className="h-[clamp(2.25rem,7vw,5.5rem)] w-[clamp(2.25rem,7vw,5.5rem)]" />
-                </div>
-              </div>
-            )}
-          </div>
-          <div className="w-full min-w-0">
-            <span className="font-display landing-tile-label block w-full rounded-xl bg-white px-[clamp(0.375rem,0.8vw,0.625rem)] py-[clamp(0.5rem,1vw,0.75rem)] text-center text-black shadow-[0_3px_0_0_rgba(0,0,0,0.15)] break-words text-[clamp(0.85rem,2.6vw,1.25rem)]">
-              {d.label}
+          {isPending ? (
+            <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
+          ) : (
+            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-foreground">
+              <d.Icon className={`h-5 w-5 ${d.iconClass ?? ""}`} />
             </span>
-          </div>
-        </button>
+          )}
+          <span className="truncate">{d.provider === "google" ? "Google" : "Apple"}</span>
+        </Button>
       );
-    },
-    [pending, signIn, h, auraOn],
-  );
-
-  const primaryTiles = useMemo(() => PRIMARY_DEVICES.map((d, i) => renderTile(d, i)), [renderTile]);
+  };
 
   return (
-    <div className="w-full space-y-4 sm:space-y-6">
-      <div className="relative mx-auto max-w-xl overflow-hidden rounded-3xl border-2 border-primary/50 bg-linear-to-br from-primary/25 via-primary/10 to-transparent px-4 py-4 text-center shadow-[0_12px_40px_-12px_rgba(59,130,246,0.55)] sm:px-6 sm:py-6">
-        <div className="pointer-events-none absolute inset-x-0 -top-1/2 h-full animate-pulse bg-linear-to-b from-primary/20 to-transparent blur-2xl" aria-hidden />
-        <span className="relative inline-flex items-center gap-1.5 rounded-full border border-primary/60 bg-primary/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-primary-foreground sm:gap-2 sm:px-3 sm:text-xs sm:tracking-[0.2em]">
-           {!native && <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-black text-primary-foreground sm:h-5 sm:w-5 sm:text-[11px]">1</span>}
-           {native ? "OG BOT" : "Step 1"}
-        </span>
-        <p className="relative mt-2.5 font-display text-[clamp(1.4rem,7vw,3rem)] font-black uppercase leading-[1.02] tracking-[0.01em] text-foreground sm:mt-3 sm:text-4xl sm:tracking-[0.04em] md:text-5xl">
-           {native ? "Create your account" : <><span aria-hidden>👇 </span>Select Your Device</>}
-        </p>
-      </div>
+    <div className={`mx-auto w-full font-auth-body ${compact ? "max-w-md" : "max-w-lg"}`}>
+      <div className="relative overflow-hidden rounded-xl border border-border/80 bg-card/95 px-5 py-7 shadow-[0_24px_70px_-24px_hsl(var(--primary)/0.65)] backdrop-blur-xl sm:px-8 sm:py-9">
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-destructive via-primary to-destructive" aria-hidden />
+        <div className="text-center">
+          <OgBotLogo className="mx-auto h-14 w-14 rounded-xl sm:h-16 sm:w-16" />
+          <p className="mt-4 font-auth-display text-4xl uppercase leading-none text-foreground sm:text-5xl">OG BOT</p>
+          <h2 className="mt-2 text-lg font-semibold text-foreground sm:text-xl">
+            {native ? "Create your account" : "Sign in to your account"}
+          </h2>
+          <p className="mx-auto mt-1.5 max-w-sm text-sm leading-relaxed text-muted-foreground">
+            {native
+              ? "Choose a username and password to get started."
+              : "Continue with a connected account, or use your username and password."}
+          </p>
+        </div>
 
-      <div className="landing-card-tight relative overflow-hidden shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)]">
-        <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-white/[0.06] via-transparent to-transparent" aria-hidden />
-        <div className="relative landing-grid">
-          {!native && <div className="landing-grid grid-cols-2">{primaryTiles}</div>}
+        {!native && (
+          <>
+            <div className="mt-6 flex gap-3">
+              {PRIMARY_DEVICES.map(renderTile)}
+            </div>
+            <div className="my-6 flex items-center gap-3" aria-hidden>
+              <span className="h-px flex-1 bg-border" />
+              <span className="text-xs font-semibold uppercase text-muted-foreground">or continue manually</span>
+              <span className="h-px flex-1 bg-border" />
+            </div>
+          </>
+        )}
+
+        <div className={native ? "mt-7" : ""}>
           <EmailAuthPanel disabled={pending !== null} />
         </div>
       </div>
@@ -500,28 +465,26 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
   };
 
   return (
-    <div className="relative mt-3 rounded-3xl border-2 border-primary/60 bg-card/90 p-5 shadow-[0_20px_60px_-16px_hsl(var(--primary)/0.75),0_0_0_1px_hsl(var(--primary)/0.25),inset_0_1px_0_hsl(var(--foreground)/0.08)] backdrop-blur-xl sm:p-7">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-10 left-1/2 -z-10 h-40 w-72 -translate-x-1/2 rounded-full bg-primary/25 blur-3xl"
-      />
+    <div>
       <div className="mb-5 text-center">
-        <p className="font-display text-[clamp(1.6rem,6vw,2.3rem)] font-black uppercase leading-none tracking-tight text-gradient-brand drop-shadow-[0_2px_12px_hsl(var(--primary)/0.5)]">
-          {mode === "reset" ? "Reset password" : "Jump in"}
+        <h3 className="font-auth-display text-3xl uppercase leading-none text-foreground">
+          {mode === "reset" ? "Reset password" : native ? "Set up your login" : "Username sign in"}
+        </h3>
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+          {mode === "reset"
+            ? "Enter the email linked to your account."
+            : "New username? We’ll create your account automatically."}
         </p>
-        {mode === "reset" && (
-          <p className="mt-1.5 text-sm text-muted-foreground">We'll send you a secure link.</p>
-        )}
       </div>
 
       <form
         onSubmit={submit}
-        className="space-y-3"
+        className="space-y-5"
         id="wc-auth-panel"
       >
-        <div className="space-y-1.5">
+        <div className="space-y-2">
 
-          <Label htmlFor="wc-email" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+          <Label htmlFor="wc-email" className="ml-0.5 block text-left text-sm font-semibold text-foreground">
             {mode === "reset" ? "Email" : "Username"}
           </Label>
           <Input
@@ -530,17 +493,17 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
             autoComplete="username"
             autoCapitalize="none"
             spellCheck={false}
-            placeholder={mode === "reset" ? "you@example.com" : "pick a username"}
+            placeholder={mode === "reset" ? "you@example.com" : "Enter your username"}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="h-14 border-white/15 bg-background/50 text-lg focus-visible:border-primary/60"
+            className="h-14 rounded-lg border-2 border-border bg-surface px-4 font-auth-body text-base text-foreground shadow-inner placeholder:text-muted-foreground/70 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/35"
             disabled={busy || disabled}
             required
           />
         </div>
         {mode !== "reset" && (
-          <div className="space-y-1.5">
-            <Label htmlFor="wc-password" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+          <div className="space-y-2">
+            <Label htmlFor="wc-password" className="ml-0.5 block text-left text-sm font-semibold text-foreground">
               Password
             </Label>
 
@@ -551,7 +514,7 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
               placeholder="At least 5 characters"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="h-14 border-white/15 bg-background/50 text-lg focus-visible:border-primary/60"
+              className="h-14 rounded-lg border-2 border-border bg-surface px-4 font-auth-body text-base text-foreground shadow-inner placeholder:text-muted-foreground/70 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/35"
               disabled={busy || disabled}
               required
             />
@@ -585,7 +548,7 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
         <Button
           type="submit"
           disabled={busy || disabled}
-          className="h-14 w-full font-display text-lg font-black uppercase tracking-wide shadow-[0_10px_30px_-10px_hsl(var(--primary))] transition-transform hover:-translate-y-0.5 active:translate-y-0"
+          className="h-14 w-full rounded-lg font-auth-body text-base font-bold shadow-[0_12px_28px_-12px_hsl(var(--primary))] transition-transform hover:-translate-y-0.5 active:translate-y-0"
         >
           {busy ? (
             <>
@@ -597,7 +560,7 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
           ) : (
             <>
               <Sparkles className="mr-2 h-5 w-5" aria-hidden />
-              Let's go
+              Sign in or create account
             </>
           )}
         </Button>
@@ -608,7 +571,7 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
         <button
           type="button"
           onClick={() => { setResetSent(false); setMode("reset"); }}
-          className="mt-3 w-full text-center text-[11px] font-medium text-muted-foreground/70 underline underline-offset-4 hover:text-foreground"
+          className="mt-5 w-full text-center text-sm font-medium text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground"
         >
           Forgot password?
         </button>
@@ -619,7 +582,7 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
         <button
           type="button"
           onClick={() => { setResetSent(false); setMode("enter"); }}
-          className="mt-3 w-full text-center text-sm font-semibold text-foreground/80 underline underline-offset-4 hover:text-foreground"
+          className="mt-5 w-full text-center text-sm font-semibold text-foreground/80 underline underline-offset-4 hover:text-foreground"
         >
           Back
         </button>
