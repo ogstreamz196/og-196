@@ -589,6 +589,9 @@ export function CommunityRoom() {
             setText(e.target.value);
             broadcastTyping();
           }}
+          onFocus={() => {
+            window.setTimeout(() => jumpToBottom(), 120);
+          }}
           onKeyDown={(e) => {
             // On desktop: Enter sends, Shift+Enter newline.
             // On mobile (touch): Enter always inserts newline; tap Send to submit.

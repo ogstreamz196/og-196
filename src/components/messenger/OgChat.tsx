@@ -130,46 +130,6 @@ export function OgChat({
     window.localStorage.setItem(LANG_KEY, language);
   }, [language]);
 
-  // Mobile keyboard handling: pin composer above the on-screen keyboard via
-  // visualViewport, and restore the chat scroll position when it closes so
-  // the conversation doesn't jump.
-  const composerRef = useRef<HTMLFormElement>(null);
-  const savedScrollRef = useRef<number | null>(null);
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const vv = window.visualViewport;
-    if (!vv) return;
-    const apply = () => {
-      const offset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-      const el = composerRef.current;
-      if (el) el.style.transform = offset > 0 ? `translateY(-${offset}px)` : "";
-      if (offset > 0 && scrollRef.current) {
-        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-      }
-    };
-    vv.addEventListener("resize", apply);
-    vv.addEventListener("scroll", apply);
-    return () => {
-      vv.removeEventListener("resize", apply);
-      vv.removeEventListener("scroll", apply);
-      if (composerRef.current) composerRef.current.style.transform = "";
-    };
-  }, []);
-  const handleComposerFocus = () => {
-    if (scrollRef.current) savedScrollRef.current = scrollRef.current.scrollTop;
-  };
-  const handleComposerBlur = () => {
-    const saved = savedScrollRef.current;
-    if (saved != null && scrollRef.current) {
-      requestAnimationFrame(() => {
-        if (scrollRef.current) scrollRef.current.scrollTop = saved;
-      });
-    }
-    if (composerRef.current) composerRef.current.style.transform = "";
-  };
-
-
-
   // Attachment + mic state
   const [attachment, setAttachment] = useState<{ dataUrl: string; name: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -836,7 +796,6 @@ export function OgChat({
         </div>
       )}
       <form
-        ref={composerRef}
         onSubmit={(e) => {
           e.preventDefault();
           sendText(input);
@@ -939,12 +898,11 @@ export function OgChat({
             enterKeyHint="send"
             aria-label="Message OG Bot in Loner Mode"
             data-testid="og-loner-composer"
-            onFocus={(e) => {
-              handleComposerFocus();
-              // Ensure the composer scrolls into view above the mobile keyboard.
-              setTimeout(() => e.currentTarget?.scrollIntoView({ block: "end", behavior: "smooth" }), 250);
+            onFocus={() => {
+              // The outer Messenger panel follows visualViewport. Keep the
+              // newest messages visible without scrolling the whole page.
+              window.setTimeout(() => scrollToBottom("auto"), 120);
             }}
-            onBlur={handleComposerBlur}
              className="min-h-9 max-h-24 flex-1 resize-none bg-transparent px-1.5 py-1.5 text-sm leading-snug placeholder:text-muted-foreground/70 focus:outline-none disabled:cursor-not-allowed sm:max-h-32 sm:px-2 sm:text-[15px]"
 
           />

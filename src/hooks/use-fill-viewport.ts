@@ -25,7 +25,12 @@ export function useFillViewport<T extends HTMLElement>(bottomGutter = 0) {
         nav && nav.offsetHeight > 0
           ? nav.getBoundingClientRect().top - (vv?.offsetTop ?? 0)
           : vh;
-      setHeight(Math.max(280, Math.round(Math.min(limit, vh) - top - bottomGutter)));
+      const availableHeight = Math.round(Math.min(limit, vh) - top - bottomGutter);
+      const keyboardOpen = vv ? window.innerHeight - vv.height > 120 : false;
+      // A tall minimum is useful during normal browsing, but it can make the
+      // composer sit underneath a phone keyboard. While typing, honour the
+      // smaller visual viewport instead of forcing the panel to overflow it.
+      setHeight(Math.max(keyboardOpen ? 140 : 280, availableHeight));
     }
     measure();
     const raf = requestAnimationFrame(measure);

@@ -9,3 +9,5 @@
 - [x] Credit referral earnings from successful real payments exactly once
 - [x] Update Earn balances and payment earnings live
 - [x] Run end-to-end referral/payment and track-generation checks
+- [x] Add the Privacy Policy link to the signed-in home page
+- [x] Keep Messenger conversations and composers visible above mobile keyboards
