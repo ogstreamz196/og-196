@@ -18,6 +18,7 @@ import { Route as PolicyRouteImport } from './routes/policy'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as MPreviewRouteImport } from './routes/m-preview'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AppReturnRouteImport } from './routes/app-return'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as RCodeRouteImport } from './routes/r.$code'
@@ -97,6 +98,11 @@ const MPreviewRoute = MPreviewRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppReturnRoute = AppReturnRouteImport.update({
+  id: '/app-return',
+  path: '/app-return',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
@@ -337,6 +343,7 @@ const AuthenticatedAdminUsersUserIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
+  '/app-return': typeof AppReturnRoute
   '/auth': typeof AuthRoute
   '/m-preview': typeof MPreviewRoute
   '/mcp': typeof McpRoute
@@ -386,6 +393,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
 export interface FileRoutesByTo {
+  '/app-return': typeof AppReturnRoute
   '/auth': typeof AuthRoute
   '/m-preview': typeof MPreviewRoute
   '/mcp': typeof McpRoute
@@ -438,6 +446,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/app-return': typeof AppReturnRoute
   '/auth': typeof AuthRoute
   '/m-preview': typeof MPreviewRoute
   '/mcp': typeof McpRoute
@@ -491,6 +500,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/app-return'
     | '/auth'
     | '/m-preview'
     | '/mcp'
@@ -540,6 +550,7 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/app-return'
     | '/auth'
     | '/m-preview'
     | '/mcp'
@@ -591,6 +602,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_authenticated'
+    | '/app-return'
     | '/auth'
     | '/m-preview'
     | '/mcp'
@@ -643,6 +655,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AppReturnRoute: typeof AppReturnRoute
   AuthRoute: typeof AuthRoute
   MPreviewRoute: typeof MPreviewRoute
   McpRoute: typeof McpRoute
@@ -711,6 +724,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app-return': {
+      id: '/app-return'
+      path: '/app-return'
+      fullPath: '/app-return'
+      preLoaderRoute: typeof AppReturnRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -1095,6 +1115,7 @@ const AuthenticatedRouteRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AppReturnRoute: AppReturnRoute,
   AuthRoute: AuthRoute,
   MPreviewRoute: MPreviewRoute,
   McpRoute: McpRoute,
