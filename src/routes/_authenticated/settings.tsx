@@ -19,6 +19,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { PreferencesPanel } from "@/components/settings/PreferencesPanel";
 import { VipStatusCard } from "@/components/settings/VipStatusCard";
+import { Paywall } from "@/components/revenuecat/Paywall";
 
 import { getMyTelegramLinkToken, rotateMyTelegramLinkToken, getMyTelegramStatus } from "@/lib/telegram-admin.functions";
 import { TelegramLinkStatus } from "@/components/dashboard/TelegramLinkStatus";
@@ -234,6 +235,7 @@ function SettingsPage() {
 
         {/* Preferences — assistant, music, appearance */}
         <VipStatusCard />
+        <Paywall />
         <PreferencesPanel />
 
 
