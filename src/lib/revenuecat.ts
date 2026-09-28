@@ -46,8 +46,9 @@ export async function configureRevenueCat(appUserId?: string) {
       console.error("Failed to initialize RevenueCat Native", error);
     }
   } else {
-    const finalUserId = appUserId || PurchasesWeb.generateRevenueCatAnonymousAppUserId();
-    purchasesWebInstance = PurchasesWeb.configure(RC_WEB_API_KEY, finalUserId);
+    const rc = await loadWeb();
+    const finalUserId = appUserId || rc.Purchases.generateRevenueCatAnonymousAppUserId();
+    purchasesWebInstance = rc.Purchases.configure(RC_WEB_API_KEY, finalUserId);
     console.log("RevenueCat Web SDK configured with appUserId:", finalUserId);
   }
 }
