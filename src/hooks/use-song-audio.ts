@@ -38,7 +38,6 @@ export function useSongAudio({
   const [loadingUrl, setLoadingUrl] = useState(false);
   const [progress, setProgress] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const lastPlayLogRef = useRef(0);
 
   async function ensureUrl(): Promise<string | null> {
     if (signedUrl) return signedUrl;
