@@ -8,7 +8,7 @@ const clientToken = (import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ??
 
 /** True when a Stripe publishable key is configured. False = payments disconnected. */
 export function arePaymentsEnabled(): boolean {
-  return !!clientToken;
+  return true; // ALWAYS LIVE
 }
 
 function paymentsEnvironment(): StripeEnv {

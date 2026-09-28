@@ -3,6 +3,9 @@ import { Check, Crown, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useRevenueCat } from "./RevenueCatProvider";
 import { showCustomerCenter } from "@/lib/revenuecat";
+import { useServerFn } from "@tanstack/react-start";
+import { createVipCheckoutSession } from "@/lib/payments.functions";
+import { Capacitor } from "@capacitor/core";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +29,7 @@ export function Paywall() {
 
   const { offerings, loading, purchasePackage, isVip } = useRevenueCat();
   const [purchasing, setPurchasing] = useState<string | null>(null);
+  const createVipCheckout = useServerFn(createVipCheckoutSession);
 
   const currentOffering = offerings?.current;
 
@@ -75,6 +79,19 @@ export function Paywall() {
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Purchase failed or cancelled.");
     } finally {
+      setPurchasing(null);
+    }
+  };
+
+  const handleStripeFallback = async () => {
+    setPurchasing("stripe_fallback");
+    try {
+      const returnUrl = `${window.location.origin}/buy-coins/return?session_id={CHECKOUT_SESSION_ID}&pack=vip_monthly`;
+      const res = await createVipCheckout({ data: { returnUrl, environment: "live" } });
+      if (res.error) throw new Error(res.error);
+      if (res.url) window.location.href = res.url;
+    } catch (e: any) {
+      toast.error(e.message || "Failed to start Stripe checkout.");
       setPurchasing(null);
     }
   };
@@ -133,6 +150,23 @@ export function Paywall() {
             );
           })}
         </div>
+
+        {Capacitor.isNativePlatform() && (
+          <div className="mt-6 border-t pt-4 text-center">
+            <p className="text-sm text-muted-foreground mb-3">Google Play Billing unavailable?</p>
+            <Button
+              disabled={purchasing !== null}
+              onClick={handleStripeFallback}
+              variant="outline"
+              className="w-full sm:w-auto"
+            >
+              {purchasing === "stripe_fallback" ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : null}
+              Alternative: Checkout with Card (Stripe)
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

@@ -6,7 +6,11 @@ import { Input } from "@/components/ui/input";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { EditableContent } from "@/components/admin/EditableContent";
 import { useAdminEditMode, AdminEditModeToggle } from "@/components/admin/AdminEditMode";
-import { useProfile } from "@/hooks/use-profile";
+import { useServerFn } from "@tanstack/react-start";
+import { createCoinCheckoutSession, createVipCheckoutSession, createCustomCoinCheckoutSession } from "@/lib/payments.functions";
+import { Capacitor } from "@capacitor/core";
+import { useRevenueCat } from "@/components/revenuecat/RevenueCatProvider";
+import { findCoinPackByBundleId, VIP_PLAN } from "@/lib/coin-packs";
 import { useRole } from "@/hooks/use-role";
 import { useSiteContent, useSetSiteContent } from "@/hooks/use-site-content";
 import { cn } from "@/lib/utils";
@@ -278,13 +282,68 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
             ) : (
               <div className="p-4 sm:p-5">
                 <div className="flex flex-col items-center justify-center p-8 bg-muted/30 rounded-xl border border-border">
-                    <p className="text-center text-muted-foreground mb-4">Google Play Billing is being configured.</p>
-                    <Button disabled>
-                        Purchase via Google Play
-                    </Button>
+                  {checkoutLoading ? (
+                    <div className="flex flex-col items-center text-muted-foreground gap-3">
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                      <p>Redirecting to checkout...</p>
+                    </div>
+                  ) : (
+                    <>
+                      {Capacitor.isNativePlatform() && (
+                        <Button
+                          className="w-full mb-3"
+                          size="lg"
+                          onClick={async () => {
+                            // This would ideally map to RevenueCat offerings.
+                            // Ensure you have identical product identifiers set up in RevenueCat.
+                            toast.error("Please configure RevenueCat products first, or use Web Checkout.");
+                          }}
+                        >
+                          Purchase via Google Play
+                        </Button>
+                      )}
+
+                      <Button
+                        variant={Capacitor.isNativePlatform() ? "outline" : "default"}
+                        className="w-full"
+                        size="lg"
+                        onClick={async () => {
+                          setCheckoutLoading(true);
+                          try {
+                            const returnUrlPack = isVipFlow
+                              ? VIP_PLAN.bundleId
+                              : isCustomFlow
+                              ? "coins_custom"
+                              : selected.pack.bundleId;
+
+                            const returnUrl = `${window.location.origin}/buy-coins/return?session_id={CHECKOUT_SESSION_ID}&pack=${returnUrlPack}`;
+
+                            let res;
+                            if (isVipFlow) {
+                              res = await createVipCheckout({ data: { returnUrl, environment: "live" } });
+                            } else if (isCustomFlow) {
+                              res = await createCustomCheckout({ data: { units: coinsForOrder / CUSTOM_COIN_UNIT.coins, returnUrl, environment: "live" } });
+                            } else {
+                              res = await createCoinCheckout({ data: { priceId: selected.pack.priceId, returnUrl, environment: "live" } });
+                            }
+
+                            if (res.error) throw new Error(res.error);
+                            if (res.url) window.location.href = res.url;
+                          } catch (e: any) {
+                            toast.error(e.message || "Failed to start checkout.");
+                            setCheckoutLoading(false);
+                          }
+                        }}
+                      >
+                        <CreditCard className="mr-2 h-4 w-4" />
+                        {Capacitor.isNativePlatform() ? "Alternative: Pay with Card (Stripe)" : "Checkout securely with Stripe"}
+                      </Button>
+                    </>
+                  )}
                 </div>
                 <button
                   type="button"
+                  disabled={checkoutLoading}
                   onClick={() => setStage("confirm")}
                   className="mt-3 text-xs font-medium text-muted-foreground underline-offset-4 hover:underline"
                 >
@@ -501,6 +560,11 @@ function PackCard({
   const { enabled } = useAdminEditMode();
   const { get } = useSiteContent();
   const setMut = useSetSiteContent();
+  const { isConfigured, loading: rcLoading, purchasePackage: rcPurchase } = useRevenueCat();
+  const createCoinCheckout = useServerFn(createCoinCheckoutSession);
+  const createVipCheckout = useServerFn(createVipCheckoutSession);
+  const createCustomCheckout = useServerFn(createCustomCoinCheckoutSession);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
   const canEdit = isAdmin && enabled;
 
   const raw = get(packOverrideKey(pack.bundleId), "");
