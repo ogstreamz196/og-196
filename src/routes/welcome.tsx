@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Capacitor } from "@capacitor/core";
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactElement } from "react";
 import {
   Music2,
@@ -79,9 +80,9 @@ export const Route = createFileRoute("/welcome")({
 type OAuthProvider = "google" | "apple";
 
 function useIsNativeApp() {
-  const [native, setNative] = useState(false);
+  const [native, setNative] = useState(() => Capacitor.isNativePlatform());
   useEffect(() => {
-    setNative(Boolean((window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.()));
+    setNative(Capacitor.isNativePlatform());
   }, []);
   return native;
 }
@@ -483,7 +484,7 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
       >
         <div className="space-y-2">
 
-          <Label htmlFor="wc-email" className="ml-0.5 block text-sm font-semibold text-foreground">
+          <Label htmlFor="wc-email" className="ml-0.5 block text-left text-sm font-semibold text-foreground">
             {mode === "reset" ? "Email" : "Username"}
           </Label>
           <Input
@@ -502,7 +503,7 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
         </div>
         {mode !== "reset" && (
           <div className="space-y-2">
-            <Label htmlFor="wc-password" className="ml-0.5 block text-sm font-semibold text-foreground">
+            <Label htmlFor="wc-password" className="ml-0.5 block text-left text-sm font-semibold text-foreground">
               Password
             </Label>
 
