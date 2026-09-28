@@ -78,6 +78,14 @@ export const Route = createFileRoute("/welcome")({
 
 type OAuthProvider = "google" | "apple";
 
+function useIsNativeApp() {
+  const [native, setNative] = useState(false);
+  useEffect(() => {
+    setNative(Boolean((window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.()));
+  }, []);
+  return native;
+}
+
 const albumCovers = [
   {
     title: "Party anthem",
@@ -259,6 +267,7 @@ const PRIMARY_DEVICES: Device[] = [
 
 function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
   const { signIn, pending } = useOAuthSignIn();
+  const native = useIsNativeApp();
   const h = size === "xl" ? "h-36 sm:h-44 md:h-48" : "h-32 sm:h-40 md:h-44";
 
   // Defer the flame aura until after the welcome screen has fully painted +
@@ -330,18 +339,18 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
       <div className="relative mx-auto max-w-xl overflow-hidden rounded-3xl border-2 border-primary/50 bg-linear-to-br from-primary/25 via-primary/10 to-transparent px-4 py-4 text-center shadow-[0_12px_40px_-12px_rgba(59,130,246,0.55)] sm:px-6 sm:py-6">
         <div className="pointer-events-none absolute inset-x-0 -top-1/2 h-full animate-pulse bg-linear-to-b from-primary/20 to-transparent blur-2xl" aria-hidden />
         <span className="relative inline-flex items-center gap-1.5 rounded-full border border-primary/60 bg-primary/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-primary-foreground sm:gap-2 sm:px-3 sm:text-xs sm:tracking-[0.2em]">
-          <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-black text-primary-foreground sm:h-5 sm:w-5 sm:text-[11px]">1</span>
-          Step 1
+           {!native && <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-black text-primary-foreground sm:h-5 sm:w-5 sm:text-[11px]">1</span>}
+           {native ? "OG BOT" : "Step 1"}
         </span>
         <p className="relative mt-2.5 font-display text-[clamp(1.4rem,7vw,3rem)] font-black uppercase leading-[1.02] tracking-[0.01em] text-foreground sm:mt-3 sm:text-4xl sm:tracking-[0.04em] md:text-5xl">
-          <span aria-hidden>👇 </span>Select Your Device
+           {native ? "Create your account" : <><span aria-hidden>👇 </span>Select Your Device</>}
         </p>
       </div>
 
       <div className="landing-card-tight relative overflow-hidden shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)]">
         <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-white/[0.06] via-transparent to-transparent" aria-hidden />
         <div className="relative landing-grid">
-          <div className="landing-grid grid-cols-2">{primaryTiles}</div>
+          {!native && <div className="landing-grid grid-cols-2">{primaryTiles}</div>}
           <EmailAuthPanel disabled={pending !== null} />
         </div>
       </div>
@@ -356,6 +365,7 @@ const toLoginEmail = (v: string) =>
   v.includes("@") ? v.trim() : `${normalizeHandle(v)}@${USERNAME_DOMAIN}`;
 
 function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
+  const native = useIsNativeApp();
   // One smart form: tries sign-in first, creates the account when it's new.
   const [mode, setMode] = useState<"enter" | "reset">("enter");
   const [email, setEmail] = useState("");
@@ -433,7 +443,7 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
       }
       const msg = (signIn.error.message ?? "").toLowerCase();
       if (msg.includes("disabled")) {
-        toast.error("Username sign-up is switched off right now — use Google or Apple, or try again shortly.");
+        toast.error(native ? "Username sign-up is unavailable right now. Please try again shortly." : "Username sign-up is switched off right now — use Google or Apple, or try again shortly.");
         return;
       }
       const unknownUser = msg.includes("invalid login credentials") || msg.includes("user not found");
@@ -470,7 +480,7 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
           return;
         }
         if (upMsg.includes("disabled")) {
-          toast.error("Username sign-up is switched off right now — use Google or Apple, or try again shortly.");
+          toast.error(native ? "Username sign-up is unavailable right now. Please try again shortly." : "Username sign-up is switched off right now — use Google or Apple, or try again shortly.");
           return;
         }
 
@@ -1015,11 +1025,19 @@ function ClosingCta() {
 }
 
 function Footer() {
+  const native = useIsNativeApp();
+  const { signIn, pending } = useOAuthSignIn();
   return (
     <footer className="border-t border-white/10">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-8 text-sm text-muted-foreground sm:flex-row sm:px-8">
         <span className="inline-flex items-center gap-2">© {new Date().getFullYear()} OG Studio · Prompt songs powered by <OgBotLogo className="h-5 w-5" /></span>
         <div className="flex items-center gap-6">
+          {native && (
+            <Button type="button" variant="ghost" size="sm" disabled={pending !== null} onClick={() => signIn("google")}
+              className="text-muted-foreground" title="D.EV Google sign-in">
+              D.EV
+            </Button>
+          )}
           <Link
             to="/auth"
             className="inline-flex min-h-11 items-center rounded-md px-3 transition hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"

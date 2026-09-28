@@ -1,9 +1,9 @@
-import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
+import { createFileRoute, Navigate, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
-  Loader2, ShieldCheck, ArrowLeft, Crown, Coins, Plus, Minus, UserCog, Mail, Calendar, Fingerprint, Bot, Send, Copy, MessageCircle, RotateCw, CheckCircle2, AlertTriangle, Clock,
+  Loader2, ShieldCheck, ArrowLeft, Crown, Coins, Plus, Minus, UserCog, Mail, Calendar, Fingerprint, Bot, Send, Copy, MessageCircle, RotateCw, CheckCircle2, AlertTriangle, Clock, Trash2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { maskDevIdentity } from "@/lib/dev-identity";
@@ -12,6 +12,8 @@ import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { deleteUserAccount } from "@/lib/admin-delete-account.functions";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { UserAuditTrail } from "@/components/admin/UserAuditTrail";
@@ -46,8 +48,19 @@ interface ProfileRow {
 
 function UserSettingsPage() {
   const { userId } = Route.useParams();
+  const navigate = useNavigate();
   const { isAdmin, isBoss, isLoading } = useRole();
   const qc = useQueryClient();
+  const [confirmDelete, setConfirmDelete] = useState("");
+  const deleteAccount = useMutation({
+    mutationFn: () => deleteUserAccount({ data: { userId } }),
+    onSuccess: () => {
+      toast.success("Account deleted");
+      qc.invalidateQueries({ queryKey: ["admin-users-list"] });
+      navigate({ to: "/admin/users", replace: true });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
 
   const profileQ = useQuery({
     queryKey: ["admin-user-profile", userId],
@@ -211,6 +224,33 @@ function UserSettingsPage() {
           <InfoCard icon={<Coins className="h-4 w-4 text-coin" />} label="Balance" value={String(profile.coin_balance ?? 0)} />
           <InfoCard icon={<Calendar className="h-4 w-4" />} label="Joined" value={new Date(profile.created_at).toLocaleDateString()} />
         </section>
+
+        {isBoss && !roles.some((role) => ["admin", "boss", "dev"].includes(role)) && (
+          <section className="border-t border-destructive/40 pt-6">
+            <h3 className="font-semibold text-destructive">Delete account</h3>
+            <p className="mt-1 text-sm text-muted-foreground">Permanently removes this account and its linked records. This cannot be undone.</p>
+            <AlertDialog onOpenChange={(open) => { if (!open) setConfirmDelete(""); }}>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" className="mt-4 gap-2"><Trash2 className="h-4 w-4" /> Delete account</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete {profile.display_name ?? profile.email ?? "this account"}?</AlertDialogTitle>
+                  <AlertDialogDescription>All linked account data will be permanently removed. Type DELETE to confirm.</AlertDialogDescription>
+                </AlertDialogHeader>
+                <Label htmlFor="confirm-delete-account">Confirmation</Label>
+                <Input id="confirm-delete-account" value={confirmDelete} onChange={(event) => setConfirmDelete(event.target.value)} placeholder="DELETE" autoComplete="off" />
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <Button variant="destructive" disabled={confirmDelete !== "DELETE" || deleteAccount.isPending} onClick={() => deleteAccount.mutate()}>
+                    {deleteAccount.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
+                    Permanently delete
+                  </Button>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </section>
+        )}
 
         {/* Identity */}
         <section className="rounded-2xl border border-border bg-card p-6 shadow-card space-y-4">
