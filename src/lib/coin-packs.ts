@@ -21,8 +21,8 @@ export const CURRENCY_SYMBOL = "£";
 // pre-promo amount (coins / 2) crossed out next to the doubled amount.
 export const COIN_PACKS: readonly CoinPack[] = [
   {
-    bundleId: "coins_25",
-    priceId: "coins_25_gbp",
+    bundleId: "coins_50",
+    priceId: "coins_50_gbp",
     coins: 50,
     priceCents: 499,
     currency: "gbp",
@@ -30,8 +30,8 @@ export const COIN_PACKS: readonly CoinPack[] = [
     description: "Just enough to try things out and play around.",
   },
   {
-    bundleId: "coins_50",
-    priceId: "coins_50_gbp",
+    bundleId: "coins_100",
+    priceId: "coins_100_gbp",
     coins: 100,
     priceCents: 999,
     currency: "gbp",
@@ -39,8 +39,8 @@ export const COIN_PACKS: readonly CoinPack[] = [
     description: "Casual chats and a handful of generations.",
   },
   {
-    bundleId: "coins_120",
-    priceId: "coins_120_gbp",
+    bundleId: "coins_240",
+    priceId: "coins_240_gbp",
     coins: 240,
     priceCents: 1999,
     currency: "gbp",
@@ -49,8 +49,8 @@ export const COIN_PACKS: readonly CoinPack[] = [
     popular: true,
   },
   {
-    bundleId: "coins_300",
-    priceId: "coins_300_gbp",
+    bundleId: "coins_600",
+    priceId: "coins_600_gbp",
     coins: 600,
     priceCents: 3999,
     currency: "gbp",
@@ -59,6 +59,21 @@ export const COIN_PACKS: readonly CoinPack[] = [
     bestValue: true,
   },
 ] as const;
+
+/** Legacy bundle/price identifiers → current ones. Old Stripe sessions, stored
+ *  selections and webhook replays still reference these, so keep resolving them. */
+const LEGACY_BUNDLE_ALIASES: Record<string, string> = {
+  coins_25: "coins_50",
+  coins_50_legacy: "coins_100",
+  coins_120: "coins_240",
+  coins_300: "coins_600",
+};
+
+const LEGACY_PRICE_ALIASES: Record<string, string> = {
+  coins_25_gbp: "coins_50_gbp",
+  coins_120_gbp: "coins_240_gbp",
+  coins_300_gbp: "coins_600_gbp",
+};
 
 // Custom pack — 5 coins per £0.99 unit, configurable in the UI.
 export const CUSTOM_COIN_UNIT = {
