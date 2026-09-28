@@ -4,7 +4,7 @@ import { Capacitor } from "@capacitor/core";
 
 // RevenueCat Keys
 const RC_WEB_API_KEY = "test_UFDSOGyDTSPOjElYUXAqieTfcny";
-const RC_ANDROID_API_KEY = "test_UFDSOGyDTSPOjElYUXAqieTfcny"; // TODO: Replace with Android API Key from RevenueCat Dashboard
+const RC_ANDROID_API_KEY = "goog_dIqlVeXWmOVtTicDbLnkWOkNUTb"; // Android public SDK key from RevenueCat
 const RC_IOS_API_KEY = "test_UFDSOGyDTSPOjElYUXAqieTfcny"; // TODO: Replace with iOS API Key from RevenueCat Dashboard
 
 let purchasesWebInstance: PurchasesWeb | null = null;
