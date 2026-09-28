@@ -5,3 +5,4 @@
 ## Coin integrity
 
 - Issue welcome and Battle rewards only through service-only atomic database functions because retries, concurrency, and client calls must not duplicate coins.
+- Keep browser OAuth return separate from Android App Links and offer an explicit package-targeted return; this bypasses verification only when the installed APK already handles /app-return.

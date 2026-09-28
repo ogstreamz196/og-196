@@ -11,3 +11,4 @@
 - [x] Run end-to-end referral/payment and track-generation checks
 - [x] Add the Privacy Policy link to the signed-in home page
 - [x] Keep Messenger conversations and composers visible above mobile keyboards
+- [x] Add an explicit browser-to-Android sign-in return for installed builds with /app-return support (no website-link verification needed)
