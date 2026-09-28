@@ -1778,6 +1778,10 @@ export type Database = {
       gen_og_referral_code: { Args: never; Returns: string }
       get_my_referrer: { Args: never; Returns: Json }
       get_referral_summary: { Args: never; Returns: Json }
+      grant_welcome_bonus: {
+        Args: { _eligible: boolean; _user_id: string }
+        Returns: Json
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
