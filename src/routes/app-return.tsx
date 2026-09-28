@@ -28,10 +28,16 @@ export function AppReturn() {
     const isNative = Boolean((window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.());
     setNative(isNative);
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      if (session) setSessionReady(true);
+      if (session) {
+        setSessionReady(true);
+        setError("");
+      }
     });
     void supabase.auth.getSession().then(({ data }) => {
-      if (data.session) setSessionReady(true);
+      if (data.session) {
+        setSessionReady(true);
+        setError("");
+      }
       else setError("Sign-in did not finish. Please try again.");
     });
     return () => {
