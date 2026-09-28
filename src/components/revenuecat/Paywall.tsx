@@ -42,7 +42,7 @@ export function Paywall() {
     );
   }
 
-  if (!currentOffering || currentOffering.packages.length === 0) {
+  if (!currentOffering || currentOffering.availablePackages.length === 0) {
     return (
       <Card>
         <CardContent className="py-8 text-center text-sm text-muted-foreground">
@@ -52,7 +52,7 @@ export function Paywall() {
     );
   }
 
-  const handlePurchase = async (pkg: (typeof currentOffering.packages)[number]) => {
+  const handlePurchase = async (pkg: (typeof currentOffering.availablePackages)[number]) => {
     setPurchasing(pkg.identifier);
     try {
       const success = await purchasePackage(pkg);
@@ -74,7 +74,7 @@ export function Paywall() {
       </CardHeader>
       <CardContent>
         <div className="grid gap-4 sm:grid-cols-2">
-          {currentOffering.packages.map((pkg) => {
+          {currentOffering.availablePackages.map((pkg) => {
             const isYearly = pkg.identifier === "yearly";
             const busy = purchasing === pkg.identifier;
             const price = pkg.product.currentPrice;

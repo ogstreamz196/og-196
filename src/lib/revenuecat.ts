@@ -1,4 +1,4 @@
-import { Purchases, CustomerInfo, Offerings, PurchasesPackage } from "@revenuecat/purchases-js";
+import { Purchases, CustomerInfo, Offerings, Package } from "@revenuecat/purchases-js";
 
 // RevenueCat Web SDK Key
 const RC_WEB_API_KEY = "test_UFDSOGyDTSPOjElYUXAqieTfcny";
@@ -72,7 +72,7 @@ export async function getOfferings(): Promise<Offerings | null> {
 /**
  * Purchase a specific package
  */
-export async function purchasePackage(rcPackage: PurchasesPackage): Promise<CustomerInfo | null> {
+export async function purchasePackage(rcPackage: Package): Promise<CustomerInfo | null> {
   try {
     const rc = getPurchases();
     const result = await rc.purchasePackage(rcPackage);
