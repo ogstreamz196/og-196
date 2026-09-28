@@ -11,8 +11,8 @@ const RevenueCatProvider = lazy(() =>
 export function RevenueCatBridge({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   return (
-    <ClientOnly fallback={<>{children}</>}>
-      <Suspense fallback={<>{children}</>}>
+    <ClientOnly fallback={null}>
+      <Suspense fallback={null}>
         <RevenueCatProvider userId={user?.id}>{children}</RevenueCatProvider>
       </Suspense>
     </ClientOnly>
