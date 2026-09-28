@@ -62,7 +62,7 @@ export function RevenueCatProvider({
     try {
       const updatedInfo = await rcPurchasePackage(pkg);
       if (updatedInfo) {
-        setCustomerInfo(updatedInfo);
+        setCustomerInfo(updatedInfo as any);
         const vipStatus = updatedInfo.entitlements.active["og_vip_pass"] !== undefined;
         setIsVip(vipStatus);
         return true;
