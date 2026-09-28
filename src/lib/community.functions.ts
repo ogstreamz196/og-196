@@ -310,18 +310,19 @@ export const postCommunityMessage = createServerFn({ method: "POST" })
       const judgedScore = apiKey ? await scoreRoast(apiKey, data.content, botReply) : 0;
       const raw = Math.max(judgedScore, estimateRoastFloor(data.content));
       earnedTenths = calibrateAward(raw, data.content, avgTenths, isRepeat);
-      pendingTenths += earnedTenths;
-      rounds += 1;
-
-      await supabaseAdmin.from("battle_tallies").upsert(
-        {
-          user_id: context.userId,
-          pending_tenths: pendingTenths,
-          rounds,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "user_id" },
+      const { data: rewardResult, error: rewardError } = await supabaseAdmin.rpc(
+        "add_battle_reward",
+        { _user_id: context.userId, _earned_tenths: earnedTenths },
       );
+      if (rewardError) throw rewardError;
+      const applied = rewardResult as {
+        earned_tenths?: number;
+        pending_tenths?: number;
+        rounds?: number;
+      } | null;
+      earnedTenths = Number(applied?.earned_tenths ?? 0);
+      pendingTenths = Number(applied?.pending_tenths ?? pendingTenths);
+      rounds = Number(applied?.rounds ?? rounds);
     } catch (err) {
       console.warn("battle scoring failed:", (err as Error).message);
     }
