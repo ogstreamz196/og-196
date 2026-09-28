@@ -10,8 +10,10 @@ let purchasesInstance: Purchases | null = null;
  */
 export function configureRevenueCat(appUserId?: string) {
   if (typeof window !== "undefined") {
-    purchasesInstance = Purchases.configure(RC_WEB_API_KEY, appUserId);
-    console.log("RevenueCat Web SDK configured with appUserId:", appUserId);
+    // If no specific user ID is provided, generate an anonymous one using the correct Web SDK method
+    const finalUserId = appUserId || Purchases.generateRevenueCatAnonymousAppUserId();
+    purchasesInstance = Purchases.configure(RC_WEB_API_KEY, finalUserId);
+    console.log("RevenueCat Web SDK configured with appUserId:", finalUserId);
   }
 }
 
