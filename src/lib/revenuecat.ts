@@ -1,5 +1,5 @@
 import { Purchases as PurchasesWeb, CustomerInfo as CustomerInfoWeb, Offerings as OfferingsWeb, Package as PackageWeb } from "@revenuecat/purchases-js";
-import { Purchases as PurchasesCapacitor, CustomerInfo as CustomerInfoCap, PurchasesOfferings as OfferingsCap, PurchasesPackage as PackageCap } from "@revenuecat/purchases-capacitor";
+import type { CustomerInfo as CustomerInfoCap, PurchasesOfferings as OfferingsCap, PurchasesPackage as PackageCap } from "@revenuecat/purchases-capacitor";
 import { Capacitor } from "@capacitor/core";
 
 // RevenueCat Keys
@@ -10,6 +10,9 @@ const RC_IOS_API_KEY = "test_UFDSOGyDTSPOjElYUXAqieTfcny"; // TODO: Replace with
 let purchasesWebInstance: PurchasesWeb | null = null;
 let isNativeConfigured = false;
 
+// Native SDK is loaded lazily so the web server never evaluates it.
+const loadNative = () => import("@revenuecat/purchases-capacitor").then((m) => m.Purchases);
+
 /**
  * Configure and initialize RevenueCat for Web or Native
  */
@@ -18,14 +21,14 @@ export async function configureRevenueCat(appUserId?: string) {
 
   if (Capacitor.isNativePlatform()) {
     try {
-      await PurchasesCapacitor.setLogLevel({ level: "DEBUG" as any });
+      await (await loadNative()).setLogLevel({ level: "DEBUG" as any });
       const platform = Capacitor.getPlatform();
       const apiKey = platform === "ios" ? RC_IOS_API_KEY : RC_ANDROID_API_KEY;
 
       if (appUserId) {
-        await PurchasesCapacitor.configure({ apiKey, appUserID: appUserId });
+        await (await loadNative()).configure({ apiKey, appUserID: appUserId });
       } else {
-        await PurchasesCapacitor.configure({ apiKey });
+        await (await loadNative()).configure({ apiKey });
       }
       isNativeConfigured = true;
       console.log(`RevenueCat Native SDK configured for ${platform} with appUserId:`, appUserId || "anonymous");
@@ -58,7 +61,7 @@ export async function checkVipEntitlement(): Promise<boolean> {
 export async function getCustomerInfo(): Promise<CustomerInfoWeb | CustomerInfoCap | null> {
   try {
     if (Capacitor.isNativePlatform() && isNativeConfigured) {
-      const info = await PurchasesCapacitor.getCustomerInfo();
+      const info = await (await loadNative()).getCustomerInfo();
       return info.customerInfo;
     } else if (purchasesWebInstance) {
       return await purchasesWebInstance.getCustomerInfo();
@@ -76,7 +79,7 @@ export async function getCustomerInfo(): Promise<CustomerInfoWeb | CustomerInfoC
 export async function getOfferings(): Promise<OfferingsWeb | OfferingsCap | null> {
   try {
     if (Capacitor.isNativePlatform() && isNativeConfigured) {
-      const offerings = await PurchasesCapacitor.getOfferings();
+      const offerings = await (await loadNative()).getOfferings();
       return offerings as any;
     } else if (purchasesWebInstance) {
       return await purchasesWebInstance.getOfferings();
@@ -94,7 +97,7 @@ export async function getOfferings(): Promise<OfferingsWeb | OfferingsCap | null
 export async function purchasePackage(rcPackage: PackageWeb | PackageCap): Promise<CustomerInfoWeb | CustomerInfoCap | null> {
   try {
     if (Capacitor.isNativePlatform() && isNativeConfigured) {
-      const result = await PurchasesCapacitor.purchasePackage({
+      const result = await (await loadNative()).purchasePackage({
         aPackage: rcPackage as PackageCap
       });
       return result.customerInfo;
