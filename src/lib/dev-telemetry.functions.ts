@@ -78,26 +78,3 @@ export const notifyDevSignIn = createServerFn({ method: "POST" })
     return { ok: true, notified: targets?.length ?? 0 };
   });
 
-/**
- * Persist the last URL the signed-in user visited so devs can see it
- * on the admin user list / live-users panel.
- */
-export const updateLastPage = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((data: { path: string }) => {
-    const path = (data?.path ?? "").toString().slice(0, 300);
-    if (!path) throw new Error("path required");
-    return { path };
-  })
-  .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
-    const { error } = await supabase
-      .from("profiles")
-      .update({
-        last_page: data.path,
-        last_page_at: new Date().toISOString(),
-      })
-      .eq("id", userId);
-    if (error) throw new Error(error.message);
-    return { ok: true };
-  });
