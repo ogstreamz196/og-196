@@ -25,7 +25,7 @@ function DeleteAccountPage() {
         <li>Open <strong>Settings</strong>.</li>
         <li>Scroll to <strong>Delete account</strong>, tap <strong>Delete my account</strong>, type DELETE and confirm.</li>
       </ol>
-      <p className="mt-3 text-sm">Can't sign in? Email <a className="text-primary underline" href="mailto:support@ogbot.co.uk">support@ogbot.co.uk</a> from your account email and we'll delete it within 30 days.</p>
+      <p className="mt-3 text-sm">Can't sign in? Email <a className="text-primary underline" href="mailto:ogbot196@gmail.com">ogbot196@gmail.com</a> from your account email and we'll delete it within 30 days.</p>
       <h2 className="mt-8 text-xl font-semibold">What is deleted</h2>
       <p className="mt-2 text-sm">Your profile, sign-in details, songs, lyrics, messages, coin balance, referrals and settings are deleted immediately.</p>
       <h2 className="mt-8 text-xl font-semibold">What is kept</h2>

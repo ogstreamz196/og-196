@@ -1,19 +1,19 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, PackageOpen, X } from "lucide-react";
+import { Loader2, PackageOpen } from "lucide-react";
 import { toast } from "sonner";
 import { arePaymentsEnabled } from "@/lib/stripe";
 import { StoreItemCard } from "@/components/store/StoreItemCard";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   getSportsGuideAccessStatus,
   listStoreCatalog,
   purchaseSportsGuideAccess,
+  createStoreItemCheckoutSession,
 } from "@/lib/store.functions";
-import { getVipPassStatus, purchaseVipPass } from "@/lib/vip-pass.functions";
+import { StripeCheckoutDialog } from "@/components/payments/StripeCheckoutDialog";
+import { getStripeEnvironment } from "@/lib/stripe";
 
 const ALL_ITEMS = "all";
 
@@ -21,9 +21,9 @@ export function StoreItemsSection() {
   const queryClient = useQueryClient();
   const getAccessStatus = useServerFn(getSportsGuideAccessStatus);
   const purchaseAccess = useServerFn(purchaseSportsGuideAccess);
-  const getVipPass = useServerFn(getVipPassStatus);
-  const buyVipPass = useServerFn(purchaseVipPass);
-  const [checkoutItemId, setCheckoutItemId] = useState<string | null>(null);
+  const createCheckout = useServerFn(createStoreItemCheckoutSession);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [startingId, setStartingId] = useState<string | null>(null);
   const catalog = useQuery({
     queryKey: ["store-catalog"],
     queryFn: () => listStoreCatalog(),
@@ -31,10 +31,6 @@ export function StoreItemsSection() {
   const access = useQuery({
     queryKey: ["sports-guide-access"],
     queryFn: () => getAccessStatus(),
-  });
-  const vipPass = useQuery({
-    queryKey: ["vip-pass-status"],
-    queryFn: () => getVipPass(),
   });
   const categories = catalog.data?.categories ?? [];
   const allItems = useMemo(() => categories.flatMap((category) => category.items), [categories]);
@@ -56,35 +52,24 @@ export function StoreItemsSection() {
     onError: (error: Error) => toast.error(error.message),
   });
 
-  const vipPassPurchase = useMutation({
-    mutationFn: () => buyVipPass(),
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["vip-pass-status"] }),
-        queryClient.invalidateQueries({ queryKey: ["profile"] }),
-        queryClient.invalidateQueries({ queryKey: ["coin-transactions"] }),
-        queryClient.invalidateQueries({ queryKey: ["store-catalog"] }),
-      ]);
-      toast.success("OG Vault VIP Pass unlocked — your login details are on the card");
-    },
-    onError: (error: Error) => toast.error(error.message),
-  });
-
   const buy = (itemId: string) => {
     const item = allItems.find((candidate) => candidate.id === itemId);
     if (item?.slug === "og-sports-guide-access") {
       sportsGuide.mutate();
       return;
     }
-    if (item?.slug === "og-vip-pass") {
-      vipPassPurchase.mutate();
-      return;
-    }
     if (!arePaymentsEnabled()) {
       toast.info("This item can be bought on ogbot.co.uk.");
       return;
     }
-    setCheckoutItemId(itemId);
+    setStartingId(itemId);
+    createCheckout({ data: { itemId, returnUrl, environment: getStripeEnvironment() } })
+      .then((r) => {
+        if ("error" in r) throw new Error(r.error);
+        setClientSecret(r.clientSecret);
+      })
+      .catch((e: Error) => toast.error(e.message || "Checkout could not start."))
+      .finally(() => setStartingId(null));
   };
 
   const renderItem = (item: (typeof allItems)[number]) => (
@@ -93,10 +78,8 @@ export function StoreItemsSection() {
       item={item}
       onBuy={buy}
       buying={
-        (item.slug === "og-sports-guide-access" && sportsGuide.isPending) ||
-        (item.slug === "og-vip-pass" && vipPassPurchase.isPending)
+        (item.slug === "og-sports-guide-access" && sportsGuide.isPending) || startingId === item.id
       }
-      vipPass={item.slug === "og-vip-pass" ? vipPass.data : undefined}
       sportsGuideState={item.slug === "og-sports-guide-access" ? access.data?.status : undefined}
       sportsGuideInviteUrl={item.slug === "og-sports-guide-access" ? access.data?.inviteUrl ?? undefined : undefined}
     />
@@ -138,26 +121,7 @@ export function StoreItemsSection() {
         </Tabs>
       )}
 
-      <Dialog open={!!checkoutItemId} onOpenChange={(open) => !open && setCheckoutItemId(null)}>
-        <DialogContent className="max-w-lg p-0">
-          <DialogHeader className="border-b border-border p-4">
-            <DialogTitle className="flex items-center justify-between">
-              <span>Secure checkout</span>
-              <Button variant="ghost" size="icon" onClick={() => setCheckoutItemId(null)} aria-label="Close checkout"><X className="h-4 w-4" /></Button>
-            </DialogTitle>
-          </DialogHeader>
-          <div className="p-4">
-            {checkoutItemId ? (
-                <div className="flex flex-col items-center justify-center p-8 bg-muted/30 rounded-xl border border-border">
-                    <p className="text-center text-muted-foreground mb-4">Google Play Billing is being configured.</p>
-                    <Button disabled>
-                        Purchase via Google Play
-                    </Button>
-                </div>
-            ) : null}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <StripeCheckoutDialog clientSecret={clientSecret} onClose={() => setClientSecret(null)} />
     </section>
   );
 }

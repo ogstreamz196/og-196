@@ -10,6 +10,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { createCoinCheckoutSession, createVipCheckoutSession, createCustomCoinCheckoutSession } from "@/lib/payments.functions";
 import { Capacitor } from "@capacitor/core";
 import { useRevenueCat } from "@/components/revenuecat/RevenueCatProvider";
+import { StripeCheckoutDialog } from "@/components/payments/StripeCheckoutDialog";
+import { getStripeEnvironment } from "@/lib/stripe";
 import { useProfile } from "@/hooks/use-profile";
 import { useRole } from "@/hooks/use-role";
 import { useSiteContent, useSetSiteContent } from "@/hooks/use-site-content";
@@ -62,6 +64,7 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
   const rcLoading = rc.loading;
   const rcPurchase = rc.purchasePackage;
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
   const createVipCheckout = useServerFn(createVipCheckoutSession);
   const createCustomCheckout = useServerFn(createCustomCoinCheckoutSession);
   const createCoinCheckout = useServerFn(createCoinCheckoutSession);
@@ -147,6 +150,7 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
 
     return (
       <DashboardShell title={headline}>
+        <StripeCheckoutDialog clientSecret={clientSecret} onClose={() => { setClientSecret(null); setCheckoutLoading(false); }} />
         <PaymentTestModeBanner />
         <div className="mx-auto max-w-2xl">
           <Button variant="ghost" className="mb-4 -ml-2" onClick={clearSelection}>
@@ -354,16 +358,18 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
 
                               let res;
                               if (isVipFlow) {
-                                res = await createVipCheckout({ data: { returnUrl, environment: "live" } });
+                                res = await createVipCheckout({ data: { returnUrl, environment: getStripeEnvironment() } });
                               } else if (isCustomFlow) {
-                                res = await createCustomCheckout({ data: { units: coinsForOrder / CUSTOM_COIN_UNIT.coins, returnUrl, environment: "live" } });
+                                res = await createCustomCheckout({ data: { units: coinsForOrder / CUSTOM_COIN_UNIT.coins, returnUrl, environment: getStripeEnvironment() } });
                               } else {
-                                res = await createCoinCheckout({ data: { priceId: selected.pack.priceId, returnUrl, environment: "live" } });
+                                res = await createCoinCheckout({ data: { priceId: selected.pack.priceId, returnUrl, environment: getStripeEnvironment() } });
                               }
 
                               const r = res as any;
                               if (r.error) throw new Error(r.error);
                               if (r.url) window.location.href = r.url;
+                              else if (r.clientSecret) setClientSecret(r.clientSecret);
+                              else throw new Error("Checkout could not start.");
                             } catch (e: any) {
                               toast.error(e.message || "Failed to start checkout.");
                               setCheckoutLoading(false);

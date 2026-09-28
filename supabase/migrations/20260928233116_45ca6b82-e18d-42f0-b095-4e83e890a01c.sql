@@ -1,0 +1,1 @@
+update public.store_items set active = false where slug = 'og-vip-pass';
