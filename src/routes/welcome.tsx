@@ -61,7 +61,7 @@ export const Route = createFileRoute("/welcome")({
       {
         name: "description",
         content:
-          "Turn prompts, moods and memories into different song styles with album covers. Create your OG BOT account.",
+          "Turn prompts, moods and memories into different song styles with album covers. Sign in with Google or Apple.",
       },
       { property: "og:title", content: "OG Studio — Prompt Songs & Album Covers" },
       {
@@ -365,6 +365,7 @@ const toLoginEmail = (v: string) =>
   v.includes("@") ? v.trim() : `${normalizeHandle(v)}@${USERNAME_DOMAIN}`;
 
 function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
+  const native = useIsNativeApp();
   // One smart form: tries sign-in first, creates the account when it's new.
   const [mode, setMode] = useState<"enter" | "reset">("enter");
   const [email, setEmail] = useState("");
@@ -442,7 +443,7 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
       }
       const msg = (signIn.error.message ?? "").toLowerCase();
       if (msg.includes("disabled")) {
-        toast.error("Username sign-up is unavailable right now. Please try again shortly.");
+        toast.error(native ? "Username sign-up is unavailable right now. Please try again shortly." : "Username sign-up is switched off right now — use Google or Apple, or try again shortly.");
         return;
       }
       const unknownUser = msg.includes("invalid login credentials") || msg.includes("user not found");
@@ -479,7 +480,7 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
           return;
         }
         if (upMsg.includes("disabled")) {
-          toast.error("Username sign-up is unavailable right now. Please try again shortly.");
+          toast.error(native ? "Username sign-up is unavailable right now. Please try again shortly." : "Username sign-up is switched off right now — use Google or Apple, or try again shortly.");
           return;
         }
 
