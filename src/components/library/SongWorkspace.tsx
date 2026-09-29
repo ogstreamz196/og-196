@@ -1216,6 +1216,14 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
         songTitle={song.title ?? title}
         songId={song.id}
       />
+
+      <QuickTopUpSheet
+        open={topUp !== null}
+        onOpenChange={(v) => !v && setTopUp(null)}
+        needed={topUp?.needed ?? 0}
+        balance={balance}
+        reason={topUp?.reason}
+      />
     </div>
   );
 }
