@@ -410,7 +410,7 @@ Deno.serve(async (req) => {
       ? effectivePrompt
       : (limitText(
           acappella
-            ? `${effectivePrompt}\n\nInclude a clearly audible vocal tag, performed by voice alone with no instruments, saying "this track is made by O G Bot, don't forget to visit O G Streamz dot co dot uk" in English, about once every minute.`
+            ? `${effectivePrompt}\n\nInclude a clearly audible vocal tag, performed by voice alone with no instruments, saying "this track was made by O G Bot dot co dot uk" in English, about once every minute.`
             : withSignatureHint(effectivePrompt),
           MAX_PROMPT_CHARS,
         ) ?? effectivePrompt);

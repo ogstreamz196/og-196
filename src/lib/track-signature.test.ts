@@ -35,7 +35,8 @@ describe("track signature", () => {
 
   it("adds a hint to prompt-only generations", () => {
     const p = withSignatureHint("a sad drill song in Romanian");
-    expect(p.toLowerCase()).toContain("o g streamz dot co dot uk");
+    expect(p.toLowerCase()).toContain("this track was made by o g bot dot co dot uk");
+    expect(p.toLowerCase()).not.toContain("og streamz");
     expect(withSignatureHint(p)).toBe(p);
   });
 

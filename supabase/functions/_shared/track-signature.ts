@@ -12,15 +12,15 @@
 // Written as real lyric lines (not a parenthesised direction) so the engine
 // actually sings them — parenthesised text is treated as optional ad-libs.
 export const SIGNATURE_LINE =
-  "[Vocal tag]\nThis track was made by O G Bot\nDon't forget to visit O G Streamz dot co dot uk";
+  "[Vocal tag]\nThis track was made by O G Bot dot co dot uk";
 
 // A cappella variant: same sung words, voice only.
 export const SIGNATURE_LINE_ACAPPELLA =
-  "[Vocal tag, voice only]\nThis track was made by O G Bot\nDon't forget to visit O G Streamz dot co dot uk";
+  "[Vocal tag, voice only]\nThis track was made by O G Bot dot co dot uk";
 
 /** Instruction appended to prompt-only (non-custom) generations. */
 export const SIGNATURE_PROMPT_HINT =
-  "Include a clearly audible vocal tag saying \"this track is made by O G Bot, don't forget to visit O G Streamz dot co dot uk\" in English, lasting a few seconds, blended naturally with the lyrics and instrumental at a level everyone can hear, about once every minute and never in the chorus hook.";
+  "Include a clearly audible vocal tag saying \"this track was made by O G Bot dot co dot uk\" in English, lasting a few seconds, blended naturally with the lyrics and instrumental at a level everyone can hear, about once every minute and never in the chorus hook.";
 
 /** Rough lyric lines that fit into one minute of a typical song. */
 const LINES_PER_MINUTE = 14;
@@ -37,7 +37,7 @@ export function injectSignature(
 ): string | null {
   const text = (lyrics ?? "").trim();
   if (!text) return lyrics ?? null;
-  if (text.toLowerCase().includes("o g streamz dot co dot uk")) return text;
+  if (text.toLowerCase().includes("o g bot dot co dot uk")) return text;
   const tagLine = opts?.acappella ? SIGNATURE_LINE_ACAPPELLA : SIGNATURE_LINE;
 
   const lines = text.split("\n");
@@ -70,6 +70,6 @@ export function injectSignature(
 /** Append the signature hint to a free-form prompt (no lyric sheet supplied). */
 export function withSignatureHint(prompt: string): string {
   if (!prompt.trim()) return prompt;
-  if (prompt.toLowerCase().includes("o g streamz dot co dot uk")) return prompt;
+  if (prompt.toLowerCase().includes("o g bot dot co dot uk")) return prompt;
   return `${prompt}\n\n${SIGNATURE_PROMPT_HINT}`;
 }
