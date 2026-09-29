@@ -21,7 +21,10 @@ import {
   ExternalLink,
   X,
   Send,
+  Trash2,
 } from "lucide-react";
+import { deleteUserAccount } from "@/lib/admin-delete-account.functions";
+import { ConfirmAction } from "@/components/admin/ConfirmAction";
 import { listUsersPro } from "@/lib/sign-in-tracking.functions";
 import { getAllCoinPurchases, type AdminPurchaseTotals } from "@/lib/payments.functions";
 import { useServerFn } from "@tanstack/react-start";
