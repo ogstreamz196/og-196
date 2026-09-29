@@ -271,7 +271,9 @@ export const chatOgBot = createServerFn({ method: "POST" })
         console.error("Gemini API error", res.status, text);
         if (res.status === 429) throw new Error("OG Bot is rate-limited, try again soon.");
         if (res.status === 402)
-          throw new Error("Gemini account quota is exhausted — Boss needs to check Google AI billing.");
+          throw new Error(
+            "Gemini account quota is exhausted — Boss needs to check Google AI billing.",
+          );
         throw new Error(`OG Bot couldn't respond right now (HTTP ${res.status})`);
       }
 
