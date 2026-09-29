@@ -417,9 +417,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       return;
     }
     if (balance < lyricsCost) {
-      toast.error(
-        `Need ${lyricsCost} coin${lyricsCost === 1 ? "" : "s"} — current balance ${balance}`,
-      );
+      setTopUp({ needed: lyricsCost, reason: "write these lyrics" });
       return;
     }
     setGenLyrics(true);
