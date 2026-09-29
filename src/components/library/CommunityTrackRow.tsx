@@ -12,6 +12,8 @@ import {
   Share2,
   Trash2,
   Wand2,
+} from "lucide-react";
+
 
 import { toast } from "sonner";
 import { useSongAudio } from "@/hooks/use-song-audio";
