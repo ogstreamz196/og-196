@@ -436,7 +436,10 @@ export function CreateNowWizard({
                     htmlFor="wiz-title"
                     className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                   >
-                    Title of song
+                    Title of song{" "}
+                    <span className="normal-case tracking-normal text-muted-foreground/80">
+                      — optional, we'll name it for you
+                    </span>
                   </Label>
                   <Input
                     id="wiz-title"
@@ -444,8 +447,8 @@ export function CreateNowWizard({
                     value={title}
                     maxLength={120}
                     onChange={(e) => setTitle(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && next()}
-                    placeholder="e.g. Late night drive"
+                    onKeyDown={(e) => e.key === "Enter" && void next()}
+                    placeholder="Leave blank and OG Bot names it"
                     className="h-11 rounded-lg border border-border bg-background text-base font-semibold"
                   />
                 </div>
