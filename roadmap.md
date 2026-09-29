@@ -19,4 +19,4 @@
 - [x] Restore files lost in the workspace move (payments/store/PurchaseHistory/webhooks/onboarding/Stripe helpers) and wire the RevenueCat VIP paywall UI on Settings
 - [x] Vary song openings, enforce selected styles/languages and minimum length, and replace Any voice with Mix voice
 - [x] Route all app AI through the owner's Gemini account with no Lovable AI fallback
-- [ ] Share chat work between Gemini and ChatGPT, use Perplexity for live facts, and increase small Battle rewards
+- [x] Share chat work between Gemini and ChatGPT, use Perplexity for live facts, and increase small Battle rewards
