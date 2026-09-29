@@ -343,7 +343,7 @@ function RootComponent() {
           <NativeAppLinkBridge />
           <Outlet />
           <InstallAppPrompt />
-          <Toaster />
+          <Toaster position="top-center" offset={72} />
         </RevenueCatBridge>
       </AuthProvider>
     </QueryClientProvider>
