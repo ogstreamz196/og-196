@@ -1,21 +1,38 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
+# OG BOT ProGuard / R8 rules.
 #
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# Release builds run with minifyEnabled true so Google Play's DEX code
+# optimization threshold is met. These keep-rules protect the Capacitor
+# JavaScript bridge and the billing SDKs, which are reached by reflection
+# and would otherwise be stripped or renamed.
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Keep line numbers so Play Console crash reports stay readable.
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Annotations and generics used by the bridge and JSON parsing.
+-keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# --- Capacitor / Cordova bridge -------------------------------------------
+-keep class com.getcapacitor.** { *; }
+-keep @com.getcapacitor.annotation.CapacitorPlugin class * { *; }
+-keep class * extends com.getcapacitor.Plugin { *; }
+-keepclassmembers class * extends com.getcapacitor.Plugin {
+    @com.getcapacitor.PluginMethod public <methods>;
+}
+-keep class org.apache.cordova.** { *; }
+-keep class og.bot.** { *; }
+
+# Anything exposed to the WebView via @JavascriptInterface.
+-keepclassmembers class * {
+    @android.webkit.JavascriptInterface <methods>;
+}
+
+# --- RevenueCat / Google Play Billing -------------------------------------
+-keep class com.revenuecat.purchases.** { *; }
+-keep class com.android.billingclient.** { *; }
+-dontwarn com.revenuecat.purchases.**
+-dontwarn com.android.billingclient.**
+
+# --- Misc -----------------------------------------------------------------
+-dontwarn org.jetbrains.annotations.**
+-dontwarn javax.annotation.**
