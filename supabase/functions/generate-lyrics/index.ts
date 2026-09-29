@@ -1,11 +1,9 @@
-// Lyrics generation. Primary provider is the Lovable AI Gateway (always-current
-// models, no user key); the user's own Gemini key is kept as a fallback.
+// Lyrics generation using the user's own Gemini key (GEMINI_API_KEY).
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { handlePreflight, jsonResponse } from "../_shared/cors.ts";
 import { adminClient, requireUser } from "../_shared/clients.ts";
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY") ?? "";
-const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY") ?? "";
 const GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") ?? "gemini-2.5-flash";
 
 async function getSetting(admin: SupabaseClient, key: string, fallback: number): Promise<number> {
@@ -21,7 +19,7 @@ Deno.serve(async (req) => {
   if (pre) return pre;
 
   try {
-    if (!GEMINI_API_KEY && !LOVABLE_API_KEY)
+    if (!GEMINI_API_KEY)
       return jsonResponse({ error: "No lyrics model configured" }, 500);
 
     const auth = await requireUser(req);
@@ -348,39 +346,6 @@ Deno.serve(async (req) => {
     type Gen = { ok: boolean; status: number; text: string; detail?: string };
 
     // Primary: Lovable AI Gateway (no user key, current models).
-    const callGateway = async (contents: unknown[]): Promise<Gen | null> => {
-      if (!LOVABLE_API_KEY) return null;
-      for (const model of ["google/gemini-3.7-flash", "google/gemini-3.6-flash"]) {
-        try {
-          const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Lovable-API-Key": LOVABLE_API_KEY,
-            },
-            body: JSON.stringify({
-              model,
-              messages: toChatMessages(contents),
-              temperature: 0.9,
-            }),
-          });
-          if (res.ok) {
-            const data = await res.json();
-            const text = (data?.choices?.[0]?.message?.content ?? "").toString().trim();
-            if (text) return { ok: true, status: 200, text };
-            continue;
-          }
-          const detail = await res.text();
-          console.error("Lovable AI error", model, res.status, detail.slice(0, 300));
-          // 402/403 are terminal for the workspace — surface them.
-          if (res.status === 402 || res.status === 403) {
-            return { ok: false, status: res.status, text: "", detail };
-          }
-        } catch (e) {
-          console.error("Lovable AI request failed", model, e);
-        }
-      }
-      return null;
     };
 
     const postTo = (model: string, contents: unknown[]) =>
@@ -424,13 +389,7 @@ Deno.serve(async (req) => {
 
     // Boss's own Gemini key first (zero Lovable credits); gateway only as a
     // last-resort safety net if Gemini is missing or hard-failing.
-    const generate = async (contents: unknown[]): Promise<Gen> => {
-      const viaGemini = await callGemini(contents);
-      if (viaGemini.ok) return viaGemini;
-      const viaGateway = await callGateway(contents);
-      if (viaGateway?.ok) return viaGateway;
-      return viaGemini ?? viaGateway;
-    };
+    const generate = (contents: unknown[]): Promise<Gen> => callGemini(contents);
 
     const res = await generate([{ role: "user", parts: [{ text: userPrompt }] }]);
 
