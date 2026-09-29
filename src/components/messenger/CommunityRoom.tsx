@@ -294,17 +294,31 @@ export function CommunityRoom() {
       setText("");
       stickToBottomRef.current = true;
       const award = (
-        res as { award?: { earnedTenths: number; pendingTenths: number; rounds: number } }
+        res as {
+          award?: {
+            earnedTenths: number;
+            pendingTenths: number;
+            rounds: number;
+            streakDays?: number;
+            streakBonusTenths?: number;
+          };
+        }
       ).award;
       if (award) {
         qc.setQueryData(["battle-tally"], (prev: BattleTally | undefined) => ({
           pendingTenths: award.pendingTenths,
           rounds: award.rounds,
           totalAwardedCoins: prev?.totalAwardedCoins ?? 0,
+          streakDays: award.streakDays ?? prev?.streakDays ?? 0,
         }));
         if (award.earnedTenths > 0) {
           setLastEarned(award.earnedTenths);
           window.setTimeout(() => setLastEarned(null), 2500);
+        }
+        if ((award.streakBonusTenths ?? 0) > 0) {
+          toast.success(
+            `${award.streakDays}-day streak — bonus +${((award.streakBonusTenths ?? 0) / 10).toFixed(2)} OG`,
+          );
         }
       }
     },
