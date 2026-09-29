@@ -191,6 +191,32 @@ export function calibrateAward(
   return drops[index] ?? 0;
 }
 
+/** Today's date as YYYY-MM-DD (UTC) — streaks are counted per calendar day. */
+export function todayISO(now: Date = new Date()): string {
+  return now.toISOString().slice(0, 10);
+}
+
+/** Roll the daily streak forward: same day keeps it, yesterday extends it. */
+export function nextStreak(
+  current: number,
+  lastDate: string | null,
+  today: string = todayISO(),
+): { days: number } {
+  if (!lastDate) return { days: 1 };
+  if (lastDate === today) return { days: Math.max(1, current) };
+  const yesterday = new Date(`${today}T00:00:00Z`);
+  yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+  if (lastDate === yesterday.toISOString().slice(0, 10)) return { days: Math.max(1, current) + 1 };
+  return { days: 1 };
+}
+
+/** Bonus tenths for streak milestones — paid at most once a day. */
+export function streakBonus(days: number): number {
+  if (days >= 7) return 3;
+  if (days >= 3) return 2;
+  return 0;
+}
+
 /** Post a user message to the community + trigger a short OG Bot reply. */
 export const postCommunityMessage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -290,10 +316,12 @@ export const postCommunityMessage = createServerFn({ method: "POST" })
     let earnedTenths = 0;
     let pendingTenths = 0;
     let rounds = 0;
+    let streakDays = 0;
+    let streakBonusTenths = 0;
     try {
       const { data: tally } = await supabaseAdmin
         .from("battle_tallies")
-        .select("pending_tenths, rounds")
+        .select("pending_tenths, rounds, streak_days, last_battle_date, streak_bonus_date")
         .eq("user_id", context.userId)
         .maybeSingle();
       pendingTenths = tally?.pending_tenths ?? 0;
@@ -307,9 +335,18 @@ export const postCommunityMessage = createServerFn({ method: "POST" })
       const judgedScore = apiKey ? await scoreRoast(apiKey, data.content, botReply) : 0;
       const raw = Math.max(judgedScore, estimateRoastFloor(data.content));
       earnedTenths = calibrateAward(raw, data.content, avgTenths, isRepeat);
+
+      // Daily streak: showing up on consecutive days pays a small bonus,
+      // once per day, folded into this message's reward (still capped at 10).
+      const streak = nextStreak(tally?.streak_days ?? 0, tally?.last_battle_date ?? null);
+      streakDays = streak.days;
+      const bonusPaidToday = (tally?.streak_bonus_date ?? null) === todayISO();
+      streakBonusTenths = bonusPaidToday ? 0 : streakBonus(streak.days);
+      const requestTenths = Math.min(10, earnedTenths + streakBonusTenths);
+
       const { data: rewardResult, error: rewardError } = await supabaseAdmin.rpc(
         "add_battle_reward",
-        { _user_id: context.userId, _earned_tenths: earnedTenths },
+        { _user_id: context.userId, _earned_tenths: requestTenths },
       );
       if (rewardError) throw rewardError;
       const applied = rewardResult as {
@@ -320,13 +357,31 @@ export const postCommunityMessage = createServerFn({ method: "POST" })
       earnedTenths = Number(applied?.earned_tenths ?? 0);
       pendingTenths = Number(applied?.pending_tenths ?? pendingTenths);
       rounds = Number(applied?.rounds ?? rounds);
+      if (earnedTenths <= 0) streakBonusTenths = 0;
+
+      await supabaseAdmin
+        .from("battle_tallies")
+        .update({
+          streak_days: streakDays,
+          last_battle_date: todayISO(),
+          ...(streakBonusTenths > 0 ? { streak_bonus_date: todayISO() } : {}),
+        })
+        .eq("user_id", context.userId);
+
+      // Remember the score so the Battle Zone can crown a roast of the day.
+      if (earnedTenths > 0) {
+        await supabaseAdmin
+          .from("community_messages")
+          .update({ score_tenths: earnedTenths })
+          .eq("id", (userRow as { id: string }).id);
+      }
     } catch (err) {
       console.warn("battle scoring failed:", (err as Error).message);
     }
 
     return {
       message: userRow as CommunityMessage,
-      award: { earnedTenths, pendingTenths, rounds },
+      award: { earnedTenths, pendingTenths, rounds, streakDays, streakBonusTenths },
     };
   });
 
@@ -337,13 +392,43 @@ export const getBattleTally = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data } = await supabaseAdmin
       .from("battle_tallies")
-      .select("pending_tenths, rounds, total_awarded_coins")
+      .select("pending_tenths, rounds, total_awarded_coins, streak_days, last_battle_date")
       .eq("user_id", context.userId)
       .maybeSingle();
+    const streakLive =
+      data?.last_battle_date && nextStreak(data.streak_days ?? 0, data.last_battle_date).days;
     return {
       pendingTenths: data?.pending_tenths ?? 0,
       rounds: data?.rounds ?? 0,
       totalAwardedCoins: data?.total_awarded_coins ?? 0,
+      streakDays: typeof streakLive === "number" ? streakLive : 0,
+    };
+  });
+
+/** The highest-scoring roast of the last 24 hours — crowned in the Battle Zone. */
+export const getRoastOfTheDay = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { data } = await supabaseAdmin
+      .from("community_messages")
+      .select("id, content, display_name, score_tenths, created_at")
+      .eq("role", "user")
+      .gte("created_at", since)
+      .not("score_tenths", "is", null)
+      .order("score_tenths", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (!data) return { roast: null };
+    return {
+      roast: {
+        id: data.id as string,
+        content: data.content as string,
+        displayName: (data.display_name as string | null) ?? "OG member",
+        scoreTenths: Number(data.score_tenths ?? 0),
+      },
     };
   });
 

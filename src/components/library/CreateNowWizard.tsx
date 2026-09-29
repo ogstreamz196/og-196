@@ -44,6 +44,8 @@ import {
   useSetFoulIntensity,
 } from "@/hooks/use-foul-mouth";
 import { Slider } from "@/components/ui/slider";
+import { useServerFn } from "@tanstack/react-start";
+import { suggestTrackTitle } from "@/lib/track-title.functions";
 
 export type WizardResult = {
   title: string;
@@ -164,6 +166,8 @@ export function CreateNowWizard({
   const [uploadingBeat, setUploadingBeat] = useState(false);
   const [confirmClose, setConfirmClose] = useState(false);
   const wizardScrollRef = useRef<HTMLDivElement | null>(null);
+  const [naming, setNaming] = useState(false);
+  const suggestTitle = useServerFn(suggestTrackTitle);
 
   const toggle = (list: string[], v: string) =>
     list.includes(v) ? list.filter((x) => x !== v) : [...list, v];
@@ -250,12 +254,8 @@ export function CreateNowWizard({
   const stepValid = useMemo(() => {
     switch (step) {
       case 1:
-        // Name, who it's about and the story now live on one step.
-        return (
-          title.trim().length > 0 &&
-          subjectName.trim().length > 0 &&
-          description.trim().length >= 12
-        );
+        // Title is optional — left blank, OG Bot names the track for you.
+        return subjectName.trim().length > 0 && description.trim().length >= 12;
       case 2:
         return styles.length > 0;
       case 3:
@@ -266,14 +266,13 @@ export function CreateNowWizard({
         // (no additional languages) is a valid choice.
         return true;
     }
-  }, [step, title, subjectName, description, styles, languages, uploadingBeat]);
+  }, [step, subjectName, description, styles, languages, uploadingBeat]);
 
   const hint = useMemo(() => {
     if (stepValid) return null;
     switch (step) {
       case 1:
-        if (!title.trim() || !subjectName.trim())
-          return "Add a track name and who it's about to continue.";
+        if (!subjectName.trim()) return "Add who it's about to continue.";
         return "Add a few more words about the story or vibe.";
       case 2:
         return "Pick at least one style (you can stack a few).";
@@ -282,17 +281,41 @@ export function CreateNowWizard({
       default:
         return "Pick a language, or continue for English.";
     }
-  }, [step, stepValid, title, subjectName]);
+  }, [step, stepValid, subjectName]);
 
-  function next() {
-    if (!stepValid) return;
+  async function next() {
+    if (!stepValid || naming) return;
     if (step < TOTAL_STEPS) {
       setStep((s) => s + 1);
       return;
     }
+
+    // Blank title? Name the track from who it's about, the story and styles.
+    let finalTitle = title.trim();
+    if (!finalTitle) {
+      setNaming(true);
+      try {
+        const res = await suggestTitle({
+          data: {
+            subjectName: subjectName.trim(),
+            description: description.trim(),
+            style: styles.filter(Boolean).join(", "),
+          },
+        });
+        finalTitle = (res?.title ?? "").trim();
+        if (finalTitle) toast.success(`Named it "${finalTitle}"`);
+      } catch {
+        /* fall through to a safe default below */
+      } finally {
+        setNaming(false);
+      }
+      if (!finalTitle) finalTitle = `Song for ${subjectName.trim() || "you"}`;
+      setTitle(finalTitle);
+    }
+
     onComplete(
       {
-        title: title.trim(),
+        title: finalTitle,
         subjectName: subjectName.trim(),
         description: description.trim(),
         style: styles.filter(Boolean).join(", "),
@@ -306,7 +329,7 @@ export function CreateNowWizard({
         foulIntensity: isNasheed ? 0 : intensity,
       },
       {
-        title,
+        title: finalTitle,
         subjectName,
         description,
         styles,
@@ -413,7 +436,10 @@ export function CreateNowWizard({
                     htmlFor="wiz-title"
                     className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                   >
-                    Title of song
+                    Title of song{" "}
+                    <span className="normal-case tracking-normal text-muted-foreground/80">
+                      — optional, we'll name it for you
+                    </span>
                   </Label>
                   <Input
                     id="wiz-title"
@@ -421,8 +447,8 @@ export function CreateNowWizard({
                     value={title}
                     maxLength={120}
                     onChange={(e) => setTitle(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && next()}
-                    placeholder="e.g. Late night drive"
+                    onKeyDown={(e) => e.key === "Enter" && void next()}
+                    placeholder="Leave blank and OG Bot names it"
                     className="h-11 rounded-lg border border-border bg-background text-base font-semibold"
                   />
                 </div>
@@ -881,8 +907,8 @@ export function CreateNowWizard({
             {step < TOTAL_STEPS && (
               <Button
                 type="button"
-                onClick={next}
-                disabled={!stepValid}
+                onClick={() => void next()}
+                disabled={!stepValid || naming}
                 className="ml-auto min-h-11 min-w-0 flex-1 gap-1.5 whitespace-nowrap bg-gradient-brand font-black uppercase tracking-wide text-primary-foreground shadow-glow sm:flex-none"
               >
                 Next
@@ -895,12 +921,12 @@ export function CreateNowWizard({
             <div className="mt-2 grid grid-cols-[minmax(0,1fr)_7.25rem] gap-2">
               <Button
                 type="button"
-                onClick={next}
-                disabled={!stepValid}
+                onClick={() => void next()}
+                disabled={!stepValid || naming}
                 className="min-h-12 min-w-0 gap-2 bg-gradient-brand font-black uppercase tracking-wide text-primary-foreground shadow-glow"
               >
                 <Check className="h-4 w-4 shrink-0" />
-                <span className="truncate">{submitLabel}</span>
+                <span className="truncate">{naming ? "Naming your track…" : submitLabel}</span>
               </Button>
               <Button
                 type="button"

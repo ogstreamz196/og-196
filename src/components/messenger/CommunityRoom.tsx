@@ -11,6 +11,7 @@ import {
   postCommunityMessage,
   clearCommunityMessages,
   getBattleTally,
+  getRoastOfTheDay,
   endBattle,
   getBattleLeaderboard,
   type BattleLeaderboardRow,
@@ -44,7 +45,12 @@ function formatTime(iso: string) {
 
 const TYPING_TTL_MS = 4000;
 
-type BattleTally = { pendingTenths: number; rounds: number; totalAwardedCoins: number };
+type BattleTally = {
+  pendingTenths: number;
+  rounds: number;
+  totalAwardedCoins: number;
+  streakDays?: number;
+};
 
 export function CommunityRoom() {
   const { user } = useAuth();
@@ -69,6 +75,12 @@ export function CommunityRoom() {
     queryKey: ["battle-tally"],
     queryFn: () => tallyFn(),
     staleTime: 30_000,
+  });
+  const roastFn = useServerFn(getRoastOfTheDay);
+  const { data: roastOfDay } = useQuery({
+    queryKey: ["roast-of-the-day"],
+    queryFn: () => roastFn(),
+    staleTime: 120_000,
   });
   const boardFn = useServerFn(getBattleLeaderboard);
   const [showBoard, setShowBoard] = useState(false);
@@ -282,17 +294,31 @@ export function CommunityRoom() {
       setText("");
       stickToBottomRef.current = true;
       const award = (
-        res as { award?: { earnedTenths: number; pendingTenths: number; rounds: number } }
+        res as {
+          award?: {
+            earnedTenths: number;
+            pendingTenths: number;
+            rounds: number;
+            streakDays?: number;
+            streakBonusTenths?: number;
+          };
+        }
       ).award;
       if (award) {
         qc.setQueryData(["battle-tally"], (prev: BattleTally | undefined) => ({
           pendingTenths: award.pendingTenths,
           rounds: award.rounds,
           totalAwardedCoins: prev?.totalAwardedCoins ?? 0,
+          streakDays: award.streakDays ?? prev?.streakDays ?? 0,
         }));
         if (award.earnedTenths > 0) {
           setLastEarned(award.earnedTenths);
           window.setTimeout(() => setLastEarned(null), 2500);
+        }
+        if ((award.streakBonusTenths ?? 0) > 0) {
+          toast.success(
+            `${award.streakDays}-day streak — bonus +${((award.streakBonusTenths ?? 0) / 10).toFixed(2)} OG`,
+          );
         }
       }
     },
@@ -359,6 +385,11 @@ export function CommunityRoom() {
             </p>
           </div>
         </div>
+        {(tally?.streakDays ?? 0) > 1 ? (
+          <span className="ml-2 inline-flex shrink-0 items-center gap-1 rounded-full border border-coin/40 bg-coin/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-coin">
+            🔥 {tally?.streakDays}-day streak
+          </span>
+        ) : null}
         <div className="ml-auto flex shrink-0 items-center gap-1">
           <Button
             type="button"
@@ -410,6 +441,20 @@ export function CommunityRoom() {
           )}
         </div>
       </div>
+
+      {roastOfDay?.roast ? (
+        <div className="flex items-start gap-2 rounded-lg border border-coin/40 bg-coin/10 px-2 py-1.5">
+          <span aria-hidden className="text-sm leading-none">
+            👑
+          </span>
+          <div className="min-w-0">
+            <p className="text-[9px] font-black uppercase tracking-wider text-coin">
+              Roast of the day — {roastOfDay.roast.displayName}
+            </p>
+            <p className="line-clamp-2 text-xs text-foreground">{roastOfDay.roast.content}</p>
+          </div>
+        </div>
+      ) : null}
 
       {showBoard && (
         <div className="rounded-xl border border-primary/25 bg-background/70 p-2">

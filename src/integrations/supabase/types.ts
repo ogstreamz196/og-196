@@ -34,22 +34,31 @@ export type Database = {
       }
       battle_tallies: {
         Row: {
+          last_battle_date: string | null
           pending_tenths: number
           rounds: number
+          streak_bonus_date: string | null
+          streak_days: number
           total_awarded_coins: number
           updated_at: string
           user_id: string
         }
         Insert: {
+          last_battle_date?: string | null
           pending_tenths?: number
           rounds?: number
+          streak_bonus_date?: string | null
+          streak_days?: number
           total_awarded_coins?: number
           updated_at?: string
           user_id: string
         }
         Update: {
+          last_battle_date?: string | null
           pending_tenths?: number
           rounds?: number
+          streak_bonus_date?: string | null
+          streak_days?: number
           total_awarded_coins?: number
           updated_at?: string
           user_id?: string
@@ -203,6 +212,7 @@ export type Database = {
           display_name: string | null
           id: string
           role: string
+          score_tenths: number | null
           user_id: string | null
         }
         Insert: {
@@ -211,6 +221,7 @@ export type Database = {
           display_name?: string | null
           id?: string
           role: string
+          score_tenths?: number | null
           user_id?: string | null
         }
         Update: {
@@ -219,6 +230,7 @@ export type Database = {
           display_name?: string | null
           id?: string
           role?: string
+          score_tenths?: number | null
           user_id?: string | null
         }
         Relationships: []

@@ -1,7 +1,9 @@
 import { memo } from "react";
-import { Play, Pause, Loader2, Music2, Download, AlertCircle, Lock } from "lucide-react";
+import { Play, Pause, Loader2, Music2, Download, AlertCircle, Lock, Share2 } from "lucide-react";
 import { useSettings } from "@/hooks/use-settings";
 import { useSongAudio } from "@/hooks/use-song-audio";
+import { useReferralUrl } from "@/hooks/use-referral-url";
+import { shareLyricClip } from "@/lib/share-clip";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -28,6 +30,7 @@ export interface Song {
 function SongCardImpl({ song }: { song: Song }) {
   const { data: settings } = useSettings();
   const sampleSeconds = settings?.sample_seconds ?? 60;
+  const referralUrl = useReferralUrl();
 
   const hasAudio = !!(song.audio_path || song.sample_path);
   // Already paid to unlock? Stream the complete master with no preview cap.
@@ -135,20 +138,45 @@ function SongCardImpl({ song }: { song: Song }) {
             )}
           </span>
           {isReady && (
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => download(`${song.title || "song"}.mp3`)}
-            >
-              <Download className="mr-2 h-3.5 w-3.5" />
-              <span className="min-[400px]:hidden">Download</span>
-              <span className="hidden min-[400px]:inline">Download (free)</span>
-            </Button>
+            <div className="flex items-center gap-1">
+              <Button
+                size="sm"
+                variant="ghost"
+                title="Share a lyric card"
+                onClick={() =>
+                  shareLyricClip({
+                    title: song.title || "OG track",
+                    lyrics: song.prompt,
+                    style: song.style,
+                    referralUrl,
+                  })
+                }
+              >
+                <Share2 className="mr-2 h-3.5 w-3.5" />
+                Share
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => download(`${song.title || "song"}.mp3`)}
+              >
+                <Download className="mr-2 h-3.5 w-3.5" />
+                <span className="min-[400px]:hidden">Download</span>
+                <span className="hidden min-[400px]:inline">Download (free)</span>
+              </Button>
+            </div>
           )}
         </div>
       </div>
 
-      <audio ref={audioRef} preload="auto" onEnded={handleEnded} className="hidden" />
+      <audio
+        ref={audioRef}
+        preload="auto"
+        onEnded={handleEnded}
+        className="hidden"
+        data-og-track={song.id}
+        data-og-title={song.title || "OG track"}
+      />
     </div>
   );
 }

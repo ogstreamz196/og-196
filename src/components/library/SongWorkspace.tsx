@@ -44,6 +44,7 @@ import { CoinPill } from "@/components/ui/coin-pill";
 import { StageStepper, type Stage } from "./song-workspace/StageStepper";
 import { VariationsCard } from "./song-workspace/VariationsCard";
 import { UnlockConfirmDialog } from "./UnlockConfirmDialog";
+import { QuickTopUpSheet } from "@/components/store/QuickTopUpSheet";
 import type { WorkspaceSong } from "./song-workspace/types";
 import {
   Select,
@@ -230,6 +231,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const [genPreview, setGenPreview] = useState(false);
   const [unlocking, setUnlocking] = useState(false);
   const [unlockDialogOpen, setUnlockDialogOpen] = useState(false);
+  const [topUp, setTopUp] = useState<{ needed: number; reason: string } | null>(null);
   const [missing, setMissing] = useState(false);
   const [recheckActive, setRecheckActive] = useState(false);
   const [recheckCount, setRecheckCount] = useState(0);
@@ -417,9 +419,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       return;
     }
     if (balance < lyricsCost) {
-      toast.error(
-        `Need ${lyricsCost} coin${lyricsCost === 1 ? "" : "s"} — current balance ${balance}`,
-      );
+      setTopUp({ needed: lyricsCost, reason: "write these lyrics" });
       return;
     }
     setGenLyrics(true);
@@ -488,7 +488,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       return;
     }
     if (balance < previewCost) {
-      toast.error(`Need ${previewCost} coins — current balance ${balance}`);
+      setTopUp({ needed: previewCost, reason: "finish this track" });
       return;
     }
     submitLockRef.current = true;
@@ -550,9 +550,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       return;
     }
     if (balance < fullUnlockCost) {
-      toast.error(
-        `Need ${fullUnlockCost} coins to unlock the HQ version — current balance ${balance}`,
-      );
+      setTopUp({ needed: fullUnlockCost, reason: "unlock the HQ version" });
       return;
     }
     setUnlockDialogOpen(true);
@@ -1219,6 +1217,14 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
         balance={balance}
         songTitle={song.title ?? title}
         songId={song.id}
+      />
+
+      <QuickTopUpSheet
+        open={topUp !== null}
+        onOpenChange={(v) => !v && setTopUp(null)}
+        needed={topUp?.needed ?? 0}
+        balance={balance}
+        reason={topUp?.reason}
       />
     </div>
   );

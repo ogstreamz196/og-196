@@ -20,3 +20,10 @@
 - [x] Vary song openings, enforce selected styles/languages and minimum length, and replace Any voice with Mix voice
 - [x] Route all app AI through the owner's Gemini account with no Lovable AI fallback
 - [x] Share chat work between Gemini and ChatGPT, use Perplexity for live facts, and increase small Battle rewards
+
+## App upgrades (Sep 2026)
+- [x] Auto-generate track titles when the title is left blank
+- [x] Persistent mini-player across every page
+- [x] Quick top-up sheet when coins run low mid-creation
+- [x] Battle Zone daily streak bonuses + Roast of the Day
+- [x] Shareable lyric card (9:16) stamped with the referral link
