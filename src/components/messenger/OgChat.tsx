@@ -266,7 +266,7 @@ export function OgChat({
     const el = scrollRef.current;
     if (!el) return;
     const reduce =
-...
+typeof window !== "undefined" &&
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     // Never animate while the user is typing — instant snap keeps taps responsive.
     const typing = document.activeElement === inputRef.current;
