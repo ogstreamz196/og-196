@@ -381,7 +381,7 @@ export const postCommunityMessage = createServerFn({ method: "POST" })
 
     return {
       message: userRow as CommunityMessage,
-      award: { earnedTenths, pendingTenths, rounds },
+      award: { earnedTenths, pendingTenths, rounds, streakDays, streakBonusTenths },
     };
   });
 
@@ -392,13 +392,43 @@ export const getBattleTally = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data } = await supabaseAdmin
       .from("battle_tallies")
-      .select("pending_tenths, rounds, total_awarded_coins")
+      .select("pending_tenths, rounds, total_awarded_coins, streak_days, last_battle_date")
       .eq("user_id", context.userId)
       .maybeSingle();
+    const streakLive =
+      data?.last_battle_date && nextStreak(data.streak_days ?? 0, data.last_battle_date).days;
     return {
       pendingTenths: data?.pending_tenths ?? 0,
       rounds: data?.rounds ?? 0,
       totalAwardedCoins: data?.total_awarded_coins ?? 0,
+      streakDays: typeof streakLive === "number" ? streakLive : 0,
+    };
+  });
+
+/** The highest-scoring roast of the last 24 hours — crowned in the Battle Zone. */
+export const getRoastOfTheDay = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { data } = await supabaseAdmin
+      .from("community_messages")
+      .select("id, content, display_name, score_tenths, created_at")
+      .eq("role", "user")
+      .gte("created_at", since)
+      .not("score_tenths", "is", null)
+      .order("score_tenths", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (!data) return { roast: null };
+    return {
+      roast: {
+        id: data.id as string,
+        content: data.content as string,
+        displayName: (data.display_name as string | null) ?? "OG member",
+        scoreTenths: Number(data.score_tenths ?? 0),
+      },
     };
   });
 
