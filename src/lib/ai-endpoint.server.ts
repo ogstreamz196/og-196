@@ -2,15 +2,15 @@
  * Central AI routing for the app.
  *
  * Everything text/vision related goes through the Boss's own Google Gemini
- * key (GEMINI_API_KEY) using Google's OpenAI-compatible endpoint, so the app
- * Only the Boss's own Gemini key is used.
+ * key (GEMINI_API_KEY) using Google's OpenAI-compatible endpoint. There is
+ * deliberately no Lovable AI fallback, so missing Gemini configuration fails closed.
  */
 
 export type AiChatTarget = {
   url: string;
   headers: Record<string, string>;
   model: string;
-  provider: "gemini" | "lovable";
+  provider: "gemini";
 };
 
 const GEMINI_OPENAI_URL =

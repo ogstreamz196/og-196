@@ -18,7 +18,8 @@ Deno.serve(async (req) => {
   const pre = handlePreflight(req);
   if (pre) return pre;
 
-    if (!GEMINI_API_KEY)      return jsonResponse({ error: "No lyrics model configured" }, 500);
+  try {
+    if (!GEMINI_API_KEY) return jsonResponse({ error: "Gemini is not configured" }, 500);
 
     const auth = await requireUser(req);
     if (auth.error) return auth.error;
@@ -331,16 +332,6 @@ Deno.serve(async (req) => {
 
     await updateProgress(40, "Writing verses…");
 
-    // Turn (role, parts) history into OpenAI-style chat messages for the gateway.
-    type Turn = { role: string; parts: Array<{ text: string }> };
-    const toChatMessages = (contents: unknown[]) => [
-      { role: "system", content: systemPrompt },
-      ...(contents as Turn[]).map((c) => ({
-        role: c.role === "model" ? "assistant" : "user",
-        content: (c.parts ?? []).map((p) => p?.text ?? "").join(""),
-      })),
-    ];
-
     type Gen = { ok: boolean; status: number; text: string; detail?: string };
 
     const postTo = (model: string, contents: unknown[]) =>
@@ -363,19 +354,19 @@ Deno.serve(async (req) => {
         .join("")
         .trim();
 
-        const FALLBACK_MODELS = [GEMINI_MODEL, GEMINI_MODEL, "gemini-2.0-flash"];
+    const GEMINI_MODELS = Array.from(new Set([GEMINI_MODEL, "gemini-2.0-flash"]));
     const callGemini = async (contents: unknown[]): Promise<Gen> => {
       if (!GEMINI_API_KEY) {
         return { ok: false, status: 503, text: "", detail: "No lyrics model available" };
       }
       let last: Gen = { ok: false, status: 503, text: "", detail: "No response" };
-      for (let i = 0; i < FALLBACK_MODELS.length; i++) {
-        const res = await postTo(FALLBACK_MODELS[i], contents);
+      for (let i = 0; i < GEMINI_MODELS.length; i++) {
+        const res = await postTo(GEMINI_MODELS[i], contents);
         if (res.ok) return { ok: true, status: 200, text: extractText(await res.json()) };
         const detail = await res.text();
         last = { ok: false, status: res.status, text: "", detail };
         if (res.status !== 429 && res.status < 500) return last;
-        console.error("Gemini transient error", FALLBACK_MODELS[i], res.status);
+        console.error("Gemini transient error", GEMINI_MODELS[i], res.status);
         await new Promise((r) => setTimeout(r, 1200 * (i + 1)));
       }
       return last;
@@ -391,8 +382,6 @@ Deno.serve(async (req) => {
 
       if (res.status === 429)
         return jsonResponse({ error: "AI is busy right now — try again shortly" }, 429);
-      if (res.status === 402)
-        return jsonResponse({ error: "AI credits exhausted — top up to keep creating" }, 402);
       const txt = res.detail ?? "";
       console.error("Lyrics model error", res.status, txt);
       return jsonResponse({ error: "Lyrics generation failed", detail: txt.slice(0, 500) }, 502);
