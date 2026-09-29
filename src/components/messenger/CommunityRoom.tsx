@@ -11,6 +11,7 @@ import {
   postCommunityMessage,
   clearCommunityMessages,
   getBattleTally,
+  getRoastOfTheDay,
   endBattle,
   getBattleLeaderboard,
   type BattleLeaderboardRow,
