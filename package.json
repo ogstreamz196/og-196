@@ -140,7 +140,6 @@
     "hono": "^4.12.34",
     "qs": "^6.16.0",
     "uuid": "^11.1.1",
-    "@hono/node-server": "^1.19.15",
-    "@tanstack/start-server-core": "^1.167.30"
+    "@hono/node-server": "^1.19.15"
   }
 }
