@@ -47,12 +47,16 @@ function CommunityTrackRowImpl({
   song,
   variant = "community",
   onDelete,
+  onRemix,
 }: {
   song: Song;
   /** "owned" rows link to the edit/regenerate workspace instead of charging coins. */
   variant?: "owned" | "community";
   onDelete?: (song: Song) => void;
+  /** Opens the creation wizard pre-loaded with this track's vibe. */
+  onRemix?: (song: Song) => void;
 }) {
+
   const owned = variant === "owned";
   const hasAudio = !!(song.audio_path || song.sample_path);
   const isReady = song.status === "completed" && hasAudio;
