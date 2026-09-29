@@ -51,6 +51,8 @@ import { cn } from "@/lib/utils";
 import { DodgyLogo } from "@/components/welcome/DodgyLogo";
 import { DodgyText } from "@/components/welcome/DodgyText";
 import { DashboardGenerationHistory } from "@/components/dashboard/DashboardGenerationHistory";
+import { DailyDrop } from "@/components/dashboard/DailyDrop";
+
 
 export const Route = createFileRoute("/_authenticated/")({
   component: DashboardHome,
