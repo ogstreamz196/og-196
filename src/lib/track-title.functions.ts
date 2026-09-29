@@ -53,6 +53,7 @@ export const suggestTrackTitle = createServerFn({ method: "POST" })
         "You name songs. Return ONE title only.",
         "Rules:",
         "- 2 to 5 words, max 40 characters.",
+        "- If a person's name is given, the title MUST include that name.",
         "- Match the genre and mood; make it feel like a real release.",
         "- Never wrap it in quotes, never add emojis, never explain.",
         "- Do not use the words 'song', 'track' or 'untitled'.",
@@ -83,7 +84,12 @@ export const suggestTrackTitle = createServerFn({ method: "POST" })
       const json = (await res.json().catch(() => ({}))) as {
         choices?: { message?: { content?: string } }[];
       };
-      const title = cleanTitle(json.choices?.[0]?.message?.content ?? "");
+      let title = cleanTitle(json.choices?.[0]?.message?.content ?? "");
+      // The name must headline the track — prepend it if the model dropped it.
+      const name = data.subjectName.trim();
+      if (title && name && !title.toLowerCase().includes(name.toLowerCase())) {
+        title = cleanTitle(`${name} — ${title}`);
+      }
       return { title: title || backup };
     } catch {
       return { title: backup };

@@ -312,13 +312,13 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
 
   return (
     <div className={`mx-auto w-full font-auth-body ${compact ? "max-w-md" : "max-w-lg"}`}>
-      <div className="relative overflow-hidden rounded-xl border border-border/80 bg-card/95 px-5 py-7 shadow-[0_24px_70px_-24px_hsl(var(--primary)/0.65)] backdrop-blur-xl sm:px-8 sm:py-9">
+      <div className="relative overflow-hidden rounded-xl border border-border/80 bg-card/95 px-5 py-6 shadow-[0_24px_70px_-24px_hsl(var(--primary)/0.65)] backdrop-blur-xl sm:px-7 sm:py-7">
         <div
           className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-destructive via-primary to-destructive"
           aria-hidden
         />
         <div className="text-center">
-          <OgBotLogo className="mx-auto h-32 w-32 rounded-2xl sm:h-40 sm:w-40" />
+          <OgBotLogo className="mx-auto h-24 w-24 rounded-2xl sm:h-28 sm:w-28" />
           <h2 className="mt-3 text-lg font-semibold text-foreground sm:text-xl">
             {native ? "Create your account" : "Sign in to your account"}
           </h2>
@@ -335,9 +335,9 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
 
         {!native && (
           <>
-            <div className="my-6 flex items-center gap-4" aria-hidden>
+            <div className="my-5 flex items-center gap-4" aria-hidden>
               <span className="h-px flex-1 bg-border" />
-              <span className="font-auth-display text-5xl font-black uppercase leading-none text-foreground sm:text-6xl">
+              <span className="font-auth-display text-3xl font-black uppercase leading-none text-foreground sm:text-4xl">
                 or
               </span>
               <span className="h-px flex-1 bg-border" />
@@ -719,7 +719,7 @@ function TopNav() {
 
 function Hero() {
   return (
-    <section className="relative mx-auto flex min-h-[calc(100dvh-4rem)] max-w-7xl flex-col justify-center px-3 pt-6 pb-10 sm:min-h-[calc(100vh-5rem)] sm:px-8 sm:pt-10 sm:pb-16">
+    <section className="relative mx-auto flex min-h-[calc(100dvh-4rem)] max-w-5xl flex-col justify-center px-3 pt-6 pb-10 sm:min-h-0 sm:px-8 sm:py-14">
       {/* Floating stickers */}
       <Sticker className="left-[4%] top-10 wc-float" rotate="-12">
         <Heart className="h-6 w-6 text-pink-400" />
@@ -734,7 +734,7 @@ function Hero() {
         <Mic2 className="h-6 w-6 text-violet-300" />
       </Sticker>
 
-      <div className="relative mx-auto w-full max-w-6xl text-center">
+      <div className="relative mx-auto w-full max-w-3xl text-center">
         <div className="mx-auto mb-3 inline-flex max-w-full flex-wrap items-center justify-center gap-2 rounded-full border-2 border-primary/40 bg-primary/15 px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-primary shadow-[0_0_28px_-8px_oklch(0.7_0.2_300_/_0.7)] sm:text-sm">
           <span>🎵 MusicHUB</span>
           <span aria-hidden className="text-primary/50">
@@ -747,7 +747,7 @@ function Hero() {
           </span>
         </div>
 
-        <h1 className="font-display mt-5 text-[clamp(2rem,9.5vw,12rem)] font-black leading-[0.92] tracking-[-0.045em] [text-wrap:balance] hyphens-none drop-shadow-[0_8px_30px_rgba(80,60,255,0.35)] sm:mt-10 sm:leading-[0.85] sm:tracking-[-0.055em]">
+        <h1 className="font-display mt-5 text-[clamp(2rem,9.5vw,5.5rem)] font-black leading-[0.92] tracking-[-0.045em] [text-wrap:balance] hyphens-none drop-shadow-[0_8px_30px_rgba(80,60,255,0.35)] sm:mt-8 sm:leading-[0.9] sm:tracking-[-0.05em]">
           <span className="wc-pop block">PROMPT IT.</span>
           <span className="wc-pop block" style={{ animationDelay: "0.15s" }}>
             MAKE A{" "}
@@ -763,7 +763,7 @@ function Hero() {
           </span>
         </h1>
 
-        <div id="sign-in" className="mx-auto mt-6 max-w-md scroll-mt-24 sm:mt-14 sm:max-w-3xl">
+        <div id="sign-in" className="mx-auto mt-6 max-w-md scroll-mt-24 sm:mt-10">
           <AuthButtons size="xl" />
           <p className="mt-3 text-center text-sm font-semibold tracking-wide text-muted-foreground sm:mt-6 sm:text-lg sm:font-bold sm:text-foreground">
             Free to start — no card required
@@ -964,7 +964,7 @@ function Pillars() {
 function FoulMouthHype() {
   return (
     <section className="relative border-t border-white/10">
-      <div className="relative mx-auto max-w-5xl px-4 py-16 sm:px-8 sm:py-24">
+      <div className="relative mx-auto max-w-4xl px-4 py-10 sm:px-8 sm:py-16">
         <div className="relative overflow-hidden rounded-[2.5rem] border-2 border-destructive/40 bg-gradient-to-br from-destructive/25 via-destructive/10 to-transparent p-6 shadow-[0_30px_80px_-30px_oklch(0.62_0.22_25_/_0.7)] sm:p-12">
           <div
             aria-hidden
@@ -992,7 +992,7 @@ function FoulMouthHype() {
               <p className="inline-flex items-center gap-2 rounded-full border border-destructive/60 bg-destructive/20 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-destructive sm:text-xs">
                 ⚠ Before you walk away
               </p>
-              <h2 className="font-display mt-4 text-balance text-4xl font-black leading-[0.95] tracking-[-0.03em] sm:text-6xl md:text-7xl">
+              <h2 className="font-display mt-4 text-balance text-3xl font-black leading-[0.95] tracking-[-0.03em] sm:text-5xl md:text-6xl">
                 Don't forget to flip <span className="italic text-destructive">Foul Mouth</span> ON.
               </h2>
               <p className="mt-4 text-lg leading-relaxed text-foreground/85 sm:text-2xl">
@@ -1026,7 +1026,7 @@ function FoulMouthHype() {
 function ClosingCta() {
   return (
     <section id="how" className="relative border-t border-white/10">
-      <div className="relative mx-auto max-w-4xl px-4 py-20 text-center sm:px-8 sm:py-28 lg:py-32">
+      <div className="relative mx-auto max-w-3xl px-4 py-14 text-center sm:px-8 sm:py-20">
         <CardEditBadge />
         <EditableContent
           as="p"
@@ -1039,7 +1039,7 @@ function ClosingCta() {
           contentKey="welcome.closing.title"
           defaultValue="Your next prompt could be a hit."
           multiline
-          className="font-display mt-4 block text-balance text-5xl font-semibold leading-[0.95] tracking-[-0.045em] sm:mt-5 sm:text-7xl md:text-8xl lg:text-9xl"
+          className="font-display mt-4 block text-balance text-4xl font-semibold leading-[0.95] tracking-[-0.045em] sm:mt-5 sm:text-6xl md:text-7xl"
         />
         <EditableContent
           as="p"
