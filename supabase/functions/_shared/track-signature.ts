@@ -11,8 +11,7 @@
 
 // Written as real lyric lines (not a parenthesised direction) so the engine
 // actually sings them — parenthesised text is treated as optional ad-libs.
-export const SIGNATURE_LINE =
-  "[Vocal tag]\nThis track was made by O G Bot dot co dot uk";
+export const SIGNATURE_LINE = "[Vocal tag]\nThis track was made by O G Bot dot co dot uk";
 
 // A cappella variant: same sung words, voice only.
 export const SIGNATURE_LINE_ACAPPELLA =
@@ -20,7 +19,7 @@ export const SIGNATURE_LINE_ACAPPELLA =
 
 /** Instruction appended to prompt-only (non-custom) generations. */
 export const SIGNATURE_PROMPT_HINT =
-  "Include a clearly audible vocal tag saying \"this track was made by O G Bot dot co dot uk\" in English, lasting a few seconds, blended naturally with the lyrics and instrumental at a level everyone can hear, about once every minute and never in the chorus hook.";
+  'Include a clearly audible vocal tag saying "this track was made by O G Bot dot co dot uk" in English, lasting a few seconds, blended naturally with the lyrics and instrumental at a level everyone can hear, about once every minute and never in the chorus hook.';
 
 /** Rough lyric lines that fit into one minute of a typical song. */
 const LINES_PER_MINUTE = 14;
