@@ -44,6 +44,7 @@ import { CoinPill } from "@/components/ui/coin-pill";
 import { StageStepper, type Stage } from "./song-workspace/StageStepper";
 import { VariationsCard } from "./song-workspace/VariationsCard";
 import { UnlockConfirmDialog } from "./UnlockConfirmDialog";
+import { QuickTopUpSheet } from "@/components/store/QuickTopUpSheet";
 import type { WorkspaceSong } from "./song-workspace/types";
 import {
   Select,
