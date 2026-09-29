@@ -606,7 +606,7 @@ export function CommunityRoom() {
           <Button
             type="button"
             size="sm"
-            onClick={jumpToBottom}
+            onClick={() => jumpToBottom()}
             aria-label={
               newCount > 0
                 ? `Jump to newest, ${newCount} new message${newCount === 1 ? "" : "s"}`
