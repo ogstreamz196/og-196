@@ -22,6 +22,7 @@
 - [x] Share chat work between Gemini and ChatGPT, use Perplexity for live facts, and increase small Battle rewards
 
 ## App upgrades (Sep 2026)
+
 - [x] Auto-generate track titles when the title is left blank
 - [x] Persistent mini-player across every page
 - [x] Quick top-up sheet when coins run low mid-creation
