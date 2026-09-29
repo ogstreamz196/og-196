@@ -269,7 +269,7 @@ export function CommunityRoom() {
     }
   }, [hasMore, loadingOlder, messages, olderFn, qc]);
 
-  const jumpToBottom = useCallback(() => {
+  const jumpToBottom = useCallback((quiet = false) => {
     stickToBottomRef.current = true;
     setShowJump(false);
     setNewCount(0);
@@ -286,6 +286,7 @@ export function CommunityRoom() {
         el.scrollTo({ top: el.scrollHeight, behavior: reduce ? "auto" : "smooth" });
       });
     }
+    if (quiet) return;
     // Announce arrival and hand focus to the composer so screen readers and
     // keyboard users regain reading context.
     setJumpAnnounce("Jumped to newest messages");
@@ -605,7 +606,7 @@ export function CommunityRoom() {
           <Button
             type="button"
             size="sm"
-            onClick={jumpToBottom}
+            onClick={() => jumpToBottom()}
             aria-label={
               newCount > 0
                 ? `Jump to newest, ${newCount} new message${newCount === 1 ? "" : "s"}`
@@ -654,7 +655,7 @@ export function CommunityRoom() {
             broadcastTyping();
           }}
           onFocus={() => {
-            window.setTimeout(() => jumpToBottom(), 120);
+            requestAnimationFrame(() => jumpToBottom(true));
           }}
           onKeyDown={(e) => {
             // On desktop: Enter sends, Shift+Enter newline.
