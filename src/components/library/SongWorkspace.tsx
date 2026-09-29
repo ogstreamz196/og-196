@@ -136,6 +136,7 @@ function splitStyles(style: string | null | undefined): { known: string[]; extra
   const known: string[] = [];
   const extra: string[] = [];
   for (const p of parts) {
+    if (/^(?:any voice|mix(?:ed)? voice|female vocal|male vocal|duo|duet)$/i.test(p)) continue;
     const match = STYLE_OPTIONS.find((s) => s.toLowerCase() === p.toLowerCase());
     if (match) {
       if (!known.includes(match)) known.push(match);
@@ -268,6 +269,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
     [styles, styleExtra],
   );
   const styleValue = styleTags.join(", ");
+  const savedStyleValue = [styleValue, vocal || "Mix voice"].filter(Boolean).join(", ");
   const isNasheed = styleTags.some((style) => style.toLowerCase() === "nasheed");
   const languageValue = useMemo(
     () => Array.from(new Set(languages.length ? languages : ["English"])).join(" + "),
@@ -365,7 +367,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const stage: Stage = isReady ? 3 : hasLyrics ? 2 : 1;
 
   const dirty =
-    styleValue !== (song.style ?? "") ||
+    savedStyleValue !== (song.style ?? "") ||
     nextBriefValue !== (song.prompt ?? "") ||
     lyrics !== (song.lyrics ?? "") ||
     vocalsOnly !== !!song.vocals_only ||
@@ -384,7 +386,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
     if (nextBriefValue !== brief) setBrief(nextBriefValue);
     await persist({
       prompt: nextBriefValue,
-      style: styleValue || null,
+      style: savedStyleValue || null,
       lyrics: lyrics.trim() || null,
       vocals_only: vocalsOnly,
       target_duration_sec: targetMinutes * 60,

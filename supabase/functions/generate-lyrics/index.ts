@@ -31,7 +31,9 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const songName = (body.songName ?? "").toString().trim().slice(0, 200);
     const description = (body.description ?? "").toString().trim().slice(0, 1000);
-    const styleTags = Array.isArray(body.styleTags) ? body.styleTags.slice(0, 10).map(String) : [];
+    const styleTags = Array.isArray(body.styleTags)
+      ? Array.from(new Set(body.styleTags.map((tag: unknown) => String(tag).trim().slice(0, 80)).filter(Boolean)))
+      : [];
     const language = (body.language ?? "English").toString().trim().slice(0, 200);
     const vocal = (body.vocal ?? "Mix voice").toString().trim().slice(0, 40);
     let personalDetails = (body.personalDetails ?? "").toString().trim().slice(0, 500);

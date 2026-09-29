@@ -825,7 +825,7 @@ export function CreateNowWizard({
                     {(languages.length ? languages : ["English"]).join(", ")}
                   </p>
                   <p className="text-muted-foreground">
-                    {gender || "Any voice"} ·{" "}
+                    {gender || "Mix voice"} ·{" "}
                     {isNasheed
                       ? "Nasheed, voice-only"
                       : vocalsOnly
