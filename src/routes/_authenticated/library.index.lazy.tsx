@@ -1786,8 +1786,10 @@ function LibraryPage() {
                         <CommunityTrackRow
                           key={s.id}
                           song={s}
+                          onRemix={remixFromSong}
                           onDelete={isBoss ? setPendingDelete : undefined}
                         />
+
                       ))}
                     </ul>
                     <div ref={communitySentinelRef} className="h-1" aria-hidden />
