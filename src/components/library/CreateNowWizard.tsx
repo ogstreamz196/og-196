@@ -166,6 +166,8 @@ export function CreateNowWizard({
   const [uploadingBeat, setUploadingBeat] = useState(false);
   const [confirmClose, setConfirmClose] = useState(false);
   const wizardScrollRef = useRef<HTMLDivElement | null>(null);
+  const [naming, setNaming] = useState(false);
+  const suggestTitle = useServerFn(suggestTrackTitle);
 
   const toggle = (list: string[], v: string) =>
     list.includes(v) ? list.filter((x) => x !== v) : [...list, v];
