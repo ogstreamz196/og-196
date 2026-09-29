@@ -594,7 +594,7 @@ export function OgChat({
           {/* Secondary controls row */}
           <div
             data-testid="ogchat-controls"
-            className="flex shrink-0 items-center justify-end gap-1 text-xs sm:w-[150px] sm:flex-col sm:items-stretch sm:justify-center"
+            className="flex shrink-0 items-center justify-end gap-1 text-xs sm:w-[180px] sm:shrink-0 sm:flex-col sm:items-stretch sm:justify-center"
           >
             <span className="hidden items-center gap-1.5 text-muted-foreground sm:mr-auto sm:inline-flex">
               <OgAvatar size={18} />
