@@ -391,11 +391,17 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                               return;
                             }
                             try {
+                              if (isCustomFlow && coinsForOrder !== 5) {
+                                toast.error(
+                                  "Custom amounts are only on ogbot.co.uk. In the app, pick one of the coin packs.",
+                                );
+                                return;
+                              }
                               setCheckoutLoading(true);
                               const targetId = isVipFlow
                                 ? VIP_PLAN.bundleId
                                 : isCustomFlow
-                                  ? "coins_custom"
+                                  ? "coins_5"
                                   : selected.pack.bundleId;
 
                               // Match by package id or Google Play product id (coins_50, coins_100, coins_240, coins_600).

@@ -35,9 +35,16 @@ export function RevenueCatProvider({
 
   useEffect(() => {
     // Configure RC when the component mounts or userId changes
-    configureRevenueCat(userId);
-    setIsConfigured(true);
-    refreshInfo();
+    let cancelled = false;
+    (async () => {
+      await configureRevenueCat(userId);
+      if (cancelled) return;
+      setIsConfigured(true);
+      await refreshInfo();
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [userId]);
 
   const refreshInfo = async () => {
