@@ -288,8 +288,14 @@ function RootComponent() {
     };
 
     bootstrap();
+    // Also run right after an in-page sign-in / sign-up (no reload happens),
+    // so welcome coins and pending referrals are claimed immediately.
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN") setTimeout(() => void bootstrap(), 0);
+    });
     return () => {
       active = false;
+      sub.subscription.unsubscribe();
     };
   }, [bootstrapUser, queryClient, router]);
 
