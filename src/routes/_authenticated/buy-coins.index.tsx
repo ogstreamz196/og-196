@@ -577,7 +577,7 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                     <h3 className="font-display text-lg font-black">
                       <EditableContent
                         contentKey="buyCoins.vip.heading"
-                        defaultValue="OG Vault VIP Pass"
+                        defaultValue="OG VIP Monthly"
                       />
                     </h3>
                     {isVip && (
@@ -609,7 +609,7 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                   <div className="min-w-0">
                     <div className="text-3xl font-black tabular-nums leading-none">
                       {CURRENCY_SYMBOL}
-                      {(VIP_PLAN.priceCents / 100).toFixed(0)}
+                      {(VIP_PLAN.priceCents / 100).toFixed(2)}
                     </div>
                     <div className="mt-1 text-xs font-semibold text-muted-foreground">/ month</div>
                   </div>

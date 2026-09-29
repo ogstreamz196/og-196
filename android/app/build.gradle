@@ -7,8 +7,8 @@ android {
         applicationId "og.bot"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 6
-        versionName "1.0.5"
+        versionCode 7
+        versionName "1.0.6"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     androidResources {
@@ -17,7 +17,9 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
+            // Google Play requires DEX obfuscation/optimization above 25% per category.
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
