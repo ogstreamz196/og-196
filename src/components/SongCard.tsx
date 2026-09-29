@@ -138,15 +138,33 @@ function SongCardImpl({ song }: { song: Song }) {
             )}
           </span>
           {isReady && (
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => download(`${song.title || "song"}.mp3`)}
-            >
-              <Download className="mr-2 h-3.5 w-3.5" />
-              <span className="min-[400px]:hidden">Download</span>
-              <span className="hidden min-[400px]:inline">Download (free)</span>
-            </Button>
+            <div className="flex items-center gap-1">
+              <Button
+                size="sm"
+                variant="ghost"
+                title="Share a lyric card"
+                onClick={() =>
+                  shareLyricClip({
+                    title: song.title || "OG track",
+                    lyrics: song.prompt,
+                    style: song.style,
+                    referralUrl,
+                  })
+                }
+              >
+                <Share2 className="mr-2 h-3.5 w-3.5" />
+                Share
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => download(`${song.title || "song"}.mp3`)}
+              >
+                <Download className="mr-2 h-3.5 w-3.5" />
+                <span className="min-[400px]:hidden">Download</span>
+                <span className="hidden min-[400px]:inline">Download (free)</span>
+              </Button>
+            </div>
           )}
         </div>
       </div>
