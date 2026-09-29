@@ -486,7 +486,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       return;
     }
     if (balance < previewCost) {
-      toast.error(`Need ${previewCost} coins — current balance ${balance}`);
+      setTopUp({ needed: previewCost, reason: "finish this track" });
       return;
     }
     submitLockRef.current = true;
