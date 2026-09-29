@@ -59,8 +59,9 @@ export const chatOgBot = createServerFn({ method: "POST" })
     },
   )
   .handler(async ({ data, context }): Promise<ChatReply> => {
-    const { aiChatTarget } = await import("@/lib/ai-endpoint.server");
-    const ai = aiChatTarget();
+    const { aiChatTarget, fetchAiChat, getLiveResearchContext, needsLiveResearch } =
+      await import("@/lib/ai-endpoint.server");
+    const ai = aiChatTarget(context.userId);
     if (!ai) throw new Error("AI not configured");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -197,56 +198,27 @@ export const chatOgBot = createServerFn({ method: "POST" })
       throw new Error(deductErr.message);
     }
 
-    // 3. Optional Firecrawl research prelude. If the latest user message
-    //    starts with "/research " or "research:" AND FIRECRAWL_API_KEY is
-    //    set, scrape the web and prepend findings as a RESEARCH block.
+    // 3. Use Perplexity only when the message clearly needs current web facts.
     const outgoing = [...data.messages];
     const last = outgoing[outgoing.length - 1];
-    if (last?.role === "user") {
-      const m = last.content.match(/^\s*(?:\/research|research:)\s+(.+)$/i);
-      const fcKey = process.env.FIRECRAWL_API_KEY;
-      if (m && fcKey) {
-        const query = m[1].trim().slice(0, 200);
-        try {
-          const r = await fetch("https://api.firecrawl.dev/v2/search", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${fcKey}`,
-            },
-            body: JSON.stringify({ query, limit: 5 }),
-            signal: AbortSignal.timeout(15000),
-          });
-          if (r.ok) {
-            const j = (await r.json().catch(() => ({}))) as {
-              data?: { web?: { url: string; title?: string; description?: string }[] };
-            };
-            const hits = j.data?.web ?? [];
-            if (hits.length) {
-              const block = hits
-                .map(
-                  (h, i) => `${i + 1}. [${h.title ?? h.url}](${h.url})\n   ${h.description ?? ""}`,
-                )
-                .join("\n");
-              outgoing[outgoing.length - 1] = {
-                role: "user",
-                content: `RESEARCH (web results for "${query}"):\n${block}\n\nUser question: ${last.content.replace(m[0], "").trim() || query}`,
-              };
-            }
-          }
-        } catch (e) {
-          console.warn("Firecrawl research failed (soft):", (e as Error).message);
+    if (last?.role === "user" && needsLiveResearch(last.content)) {
+      try {
+        const research = await getLiveResearchContext(last.content);
+        if (research) {
+          outgoing[outgoing.length - 1] = {
+            role: "user",
+            content: `CURRENT WEB SOURCES:\n${research}\n\nUSER QUESTION:\n${last.content}\n\nUse only relevant facts above and cite source URLs when making current claims.`,
+          };
         }
+      } catch (e) {
+        console.warn("Perplexity research failed (soft):", (e as Error).message);
       }
     }
 
-    // 4. Call the AI gateway.
+    // 4. Call Gemini or ChatGPT, with one retryable cross-provider fallback.
     try {
-      const res = await fetch(ai.url, {
-        method: "POST",
-        headers: ai.headers,
-        body: JSON.stringify({
-          model: ai.model,
+      const { response: res, provider } = await fetchAiChat(
+        {
           temperature: data.mode === "og" && foulMouth ? 0.9 : data.mode === "og" ? 0.75 : 0.6,
           messages: [
             { role: "system", content: system },
@@ -263,17 +235,16 @@ export const chatOgBot = createServerFn({ method: "POST" })
                 }
               : outgoing.at(-1)!,
           ],
-        }),
-      });
+        },
+        context.userId,
+      );
 
       if (!res.ok) {
         const text = await res.text().catch(() => "");
-        console.error("Gemini API error", res.status, text);
+        console.error(`${provider} API error`, res.status, text);
         if (res.status === 429) throw new Error("OG Bot is rate-limited, try again soon.");
         if (res.status === 402)
-          throw new Error(
-            "Gemini account quota is exhausted — Boss needs to check Google AI billing.",
-          );
+          throw new Error(`${provider === "gemini" ? "Gemini" : "ChatGPT"} account quota is exhausted.`);
         throw new Error(`OG Bot couldn't respond right now (HTTP ${res.status})`);
       }
 
