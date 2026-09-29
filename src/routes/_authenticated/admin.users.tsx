@@ -825,6 +825,18 @@ function EditUserPopover({ user, roles }: { user: ProfileRow; roles: string[] })
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const deleteAccount = useServerFn(deleteUserAccount);
+  const removeUser = useMutation({
+    mutationFn: () => deleteAccount({ data: { userId: user.id } }),
+    onSuccess: () => {
+      toast.success("Account deleted");
+      setOpen(false);
+      qc.invalidateQueries({ queryKey: ["admin-users-list"] });
+      qc.invalidateQueries({ queryKey: ["admin-users-roles"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const toggleOg = useMutation({
     mutationFn: async (next: boolean) => {
       const { error } = await supabase.rpc(
