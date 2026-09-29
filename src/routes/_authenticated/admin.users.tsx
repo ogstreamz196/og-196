@@ -21,7 +21,10 @@ import {
   ExternalLink,
   X,
   Send,
+  Trash2,
 } from "lucide-react";
+import { deleteUserAccount } from "@/lib/admin-delete-account.functions";
+import { ConfirmAction } from "@/components/admin/ConfirmAction";
 import { listUsersPro } from "@/lib/sign-in-tracking.functions";
 import { getAllCoinPurchases, type AdminPurchaseTotals } from "@/lib/payments.functions";
 import { useServerFn } from "@tanstack/react-start";
@@ -822,6 +825,18 @@ function EditUserPopover({ user, roles }: { user: ProfileRow; roles: string[] })
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const deleteAccount = useServerFn(deleteUserAccount);
+  const removeUser = useMutation({
+    mutationFn: () => deleteAccount({ data: { userId: user.id } }),
+    onSuccess: () => {
+      toast.success("Account deleted");
+      setOpen(false);
+      qc.invalidateQueries({ queryKey: ["admin-users-list"] });
+      qc.invalidateQueries({ queryKey: ["admin-users-roles"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const toggleOg = useMutation({
     mutationFn: async (next: boolean) => {
       const { error } = await supabase.rpc(
@@ -917,6 +932,36 @@ function EditUserPopover({ user, roles }: { user: ProfileRow; roles: string[] })
             <MoreHorizontal className="mr-1.5 h-3.5 w-3.5" /> Full settings & audit
           </Button>
         </Link>
+
+        <Separator />
+
+        <ConfirmAction
+          title={`Delete ${user.display_name ?? user.email ?? "this account"}?`}
+          description={
+            <p>
+              This permanently deletes the account, songs, coins and linked data. This cannot be
+              undone.
+            </p>
+          }
+          confirmLabel="Delete account"
+          tooltip="Permanently delete this user's account and all their data"
+          destructive
+          onConfirm={() => removeUser.mutateAsync().then(() => undefined)}
+        >
+          <Button
+            variant="destructive"
+            size="sm"
+            className="w-full"
+            disabled={removeUser.isPending}
+          >
+            {removeUser.isPending ? (
+              <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+            )}
+            Delete account
+          </Button>
+        </ConfirmAction>
       </PopoverContent>
     </Popover>
   );
