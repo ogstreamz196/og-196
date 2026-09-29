@@ -30,18 +30,6 @@ export function aiChatTarget(): AiChatTarget | null {
       provider: "gemini",
     };
   }
-  const lovable = process.env.LOVABLE_API_KEY;
-  if (lovable) {
-    return {
-      url: "https://ai.gateway.lovable.dev/v1/chat/completions",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${lovable}`,
-      },
-      model: "google/gemini-3.7-flash",
-      provider: "lovable",
-    };
-  }
   return null;
 }
 
