@@ -339,7 +339,7 @@ const SPECS: Spec[] = [
   {
     key: "lovable_ai",
     label: "LOVABLE_API_KEY (connected services only)",
-    group: "Connections",
+    group: "Core",
     required: true,
     run: checkLovable,
   },
