@@ -266,9 +266,11 @@ export function OgChat({
     const el = scrollRef.current;
     if (!el) return;
     const reduce =
-      typeof window !== "undefined" &&
+...
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    el.scrollTo({ top: el.scrollHeight, behavior: reduce ? "auto" : behavior });
+    // Never animate while the user is typing — instant snap keeps taps responsive.
+    const typing = document.activeElement === inputRef.current;
+    el.scrollTo({ top: el.scrollHeight, behavior: reduce || typing ? "auto" : behavior });
     setAtBottom(true);
     setHasNew(false);
     if (quiet) return;
