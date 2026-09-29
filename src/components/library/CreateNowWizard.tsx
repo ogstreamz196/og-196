@@ -254,12 +254,8 @@ export function CreateNowWizard({
   const stepValid = useMemo(() => {
     switch (step) {
       case 1:
-        // Name, who it's about and the story now live on one step.
-        return (
-          title.trim().length > 0 &&
-          subjectName.trim().length > 0 &&
-          description.trim().length >= 12
-        );
+        // Title is optional — left blank, OG Bot names the track for you.
+        return subjectName.trim().length > 0 && description.trim().length >= 12;
       case 2:
         return styles.length > 0;
       case 3:
@@ -270,14 +266,13 @@ export function CreateNowWizard({
         // (no additional languages) is a valid choice.
         return true;
     }
-  }, [step, title, subjectName, description, styles, languages, uploadingBeat]);
+  }, [step, subjectName, description, styles, languages, uploadingBeat]);
 
   const hint = useMemo(() => {
     if (stepValid) return null;
     switch (step) {
       case 1:
-        if (!title.trim() || !subjectName.trim())
-          return "Add a track name and who it's about to continue.";
+        if (!subjectName.trim()) return "Add who it's about to continue.";
         return "Add a few more words about the story or vibe.";
       case 2:
         return "Pick at least one style (you can stack a few).";
@@ -286,17 +281,41 @@ export function CreateNowWizard({
       default:
         return "Pick a language, or continue for English.";
     }
-  }, [step, stepValid, title, subjectName]);
+  }, [step, stepValid, subjectName]);
 
-  function next() {
-    if (!stepValid) return;
+  async function next() {
+    if (!stepValid || naming) return;
     if (step < TOTAL_STEPS) {
       setStep((s) => s + 1);
       return;
     }
+
+    // Blank title? Name the track from who it's about, the story and styles.
+    let finalTitle = title.trim();
+    if (!finalTitle) {
+      setNaming(true);
+      try {
+        const res = await suggestTitle({
+          data: {
+            subjectName: subjectName.trim(),
+            description: description.trim(),
+            style: styles.filter(Boolean).join(", "),
+          },
+        });
+        finalTitle = (res?.title ?? "").trim();
+        if (finalTitle) toast.success(`Named it "${finalTitle}"`);
+      } catch {
+        /* fall through to a safe default below */
+      } finally {
+        setNaming(false);
+      }
+      if (!finalTitle) finalTitle = `Song for ${subjectName.trim() || "you"}`;
+      setTitle(finalTitle);
+    }
+
     onComplete(
       {
-        title: title.trim(),
+        title: finalTitle,
         subjectName: subjectName.trim(),
         description: description.trim(),
         style: styles.filter(Boolean).join(", "),
@@ -310,7 +329,7 @@ export function CreateNowWizard({
         foulIntensity: isNasheed ? 0 : intensity,
       },
       {
-        title,
+        title: finalTitle,
         subjectName,
         description,
         styles,
