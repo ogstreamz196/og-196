@@ -442,6 +442,20 @@ export function CommunityRoom() {
         </div>
       </div>
 
+      {roastOfDay?.roast ? (
+        <div className="flex items-start gap-2 rounded-lg border border-coin/40 bg-coin/10 px-2 py-1.5">
+          <span aria-hidden className="text-sm leading-none">
+            👑
+          </span>
+          <div className="min-w-0">
+            <p className="text-[9px] font-black uppercase tracking-wider text-coin">
+              Roast of the day — {roastOfDay.roast.displayName}
+            </p>
+            <p className="line-clamp-2 text-xs text-foreground">{roastOfDay.roast.content}</p>
+          </div>
+        </div>
+      ) : null}
+
       {showBoard && (
         <div className="rounded-xl border border-primary/25 bg-background/70 p-2">
           <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
