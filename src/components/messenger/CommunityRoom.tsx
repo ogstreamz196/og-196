@@ -104,6 +104,13 @@ export function CommunityRoom() {
   const [showJump, setShowJump] = useState(false);
   const [newCount, setNewCount] = useState(0);
 
+  useLayoutEffect(() => {
+    const composer = composerRef.current;
+    if (!composer) return;
+    composer.style.height = "0px";
+    composer.style.height = `${Math.min(Math.max(composer.scrollHeight, 56), 144)}px`;
+  }, [text]);
+
   const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const lastTypingSentRef = useRef(0);
   const stickToBottomRef = useRef(true);
@@ -637,7 +644,7 @@ export function CommunityRoom() {
 
       <form
         onSubmit={submit}
-        className="sticky bottom-0 flex items-end gap-1.5 rounded-xl border border-border/40 bg-card/95 p-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-lg backdrop-blur-md sm:p-2"
+        className="sticky bottom-0 flex items-end gap-2 rounded-xl border border-border/60 bg-card/95 p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-lg backdrop-blur-md sm:p-2.5"
       >
         <Textarea
           ref={composerRef}
@@ -660,17 +667,17 @@ export function CommunityRoom() {
             }
           }}
           placeholder="Drop your bars — OG Bot will fire back…"
-          rows={1}
+          rows={2}
           maxLength={1000}
           enterKeyHint="send"
-          className="min-h-10 max-h-24 resize-none overflow-y-auto border-0 bg-transparent px-2 py-2 text-sm leading-snug focus-visible:ring-0"
+          className="min-h-14 max-h-36 resize-none overflow-y-auto border-0 bg-transparent px-2.5 py-2 text-base leading-5 shadow-none focus-visible:ring-0 md:text-[15px]"
           disabled={send.isPending}
         />
         <Button
           type="submit"
           size="icon"
           disabled={!text.trim() || send.isPending}
-          className="h-10 w-10 shrink-0 rounded-xl"
+          className="mb-1 h-11 w-11 shrink-0 rounded-xl"
           aria-label="Send message"
         >
           {send.isPending ? (

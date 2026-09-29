@@ -24,6 +24,7 @@ import {
 import { useFoulMouth } from "@/hooks/use-foul-mouth";
 import { useFillViewport } from "@/hooks/use-fill-viewport";
 import { useAuth } from "@/hooks/use-auth";
+import { modeHeading } from "@/lib/messenger-mode-labels";
 import {
   MessengerWelcomeDialog,
   markGreeted,
@@ -99,7 +100,7 @@ function MessengerPage() {
   const { ref: fillRef, height: fillHeight } = useFillViewport<HTMLDivElement>(0);
 
   return (
-    <DashboardShell title={isCommunity ? "OG Battle Zone" : "OG Bot Loner Mode"}>
+    <DashboardShell title={modeHeading(mode)}>
       <div
         ref={fillRef}
         style={fillHeight ? { height: fillHeight } : undefined}
@@ -149,7 +150,7 @@ function MessengerPage() {
 
             <div className="min-w-0 flex-1 basis-0">
               <h1 className="truncate text-[13px] font-extrabold leading-tight sm:text-base">
-                {isCommunity ? "OG Battle Zone" : "OG Bot Loner Mode"}
+                {modeHeading(mode)}
               </h1>
 
               <p className="flex items-center gap-1 truncate text-[9px] font-medium text-emerald-400 sm:text-[11px]">
