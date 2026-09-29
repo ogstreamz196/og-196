@@ -1,7 +1,9 @@
 import { memo } from "react";
-import { Play, Pause, Loader2, Music2, Download, AlertCircle, Lock } from "lucide-react";
+import { Play, Pause, Loader2, Music2, Download, AlertCircle, Lock, Share2 } from "lucide-react";
 import { useSettings } from "@/hooks/use-settings";
 import { useSongAudio } from "@/hooks/use-song-audio";
+import { useReferralUrl } from "@/hooks/use-referral-url";
+import { shareLyricClip } from "@/lib/share-clip";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
