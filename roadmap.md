@@ -27,3 +27,6 @@
 - [x] Quick top-up sheet when coins run low mid-creation
 - [x] Battle Zone daily streak bonuses + Roast of the Day
 - [x] Shareable lyric card (9:16) stamped with the referral link
+- [x] Daily free coin drop (1-3 coins, once per day, server-issued)
+- [x] "Use this vibe" remix button on library and global tracks
+- [x] Purchase-complete page after card checkout (/buy-coins/return)

@@ -1,6 +1,6 @@
 import { createLazyFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 
 /** Falling ember config for the hazard CREATE button — staggered so the shower looks random. */
 const SPARKS = [
@@ -168,6 +168,33 @@ function LibraryPage() {
   // Last raw wizard answers — kept so a retry (or reopening the wizard after a
   // failure) never loses what the user already typed.
   const [wizardDraft, setWizardDraft] = useState<WizardDraft>(EMPTY_DRAFT);
+
+  /**
+   * "Use this vibe" — open the wizard pre-loaded with a track's styles and
+   * languages so a new song only needs a name and a story.
+   */
+  const remixFromSong = useCallback((s: { style?: string | null }) => {
+    const parts = (s.style || "")
+      .split(",")
+      .map((p) => p.trim())
+      .filter(Boolean);
+    const match = (pool: string[]) =>
+      pool.filter((v) => parts.some((p) => p.toLowerCase() === v.toLowerCase()));
+    const styles = match(POOLS.genre);
+    const languages = match(POOLS.language);
+    setWizardDraft({
+      ...EMPTY_DRAFT,
+      styles,
+      languages,
+    });
+    setWizardOpen(true);
+    toast.success(
+      styles.length
+        ? `Vibe loaded: ${styles.join(", ")}. Add who it's about.`
+        : "Vibe loaded — pick your styles and go.",
+    );
+  }, []);
+
   const statusPanelRef = useRef<HTMLElement | null>(null);
   const libraryRef = useRef<HTMLElement | null>(null);
   // Track length is chosen in step 1 of the Create now wizard (3 min floor).
@@ -1678,6 +1705,7 @@ function LibraryPage() {
                           key={s.id}
                           song={s}
                           variant="owned"
+                          onRemix={remixFromSong}
                           onDelete={setPendingDelete}
                         />
                       ))}
@@ -1786,6 +1814,7 @@ function LibraryPage() {
                         <CommunityTrackRow
                           key={s.id}
                           song={s}
+                          onRemix={remixFromSong}
                           onDelete={isBoss ? setPendingDelete : undefined}
                         />
                       ))}

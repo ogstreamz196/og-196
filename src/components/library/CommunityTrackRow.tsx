@@ -11,7 +11,9 @@ import {
   Play,
   Share2,
   Trash2,
+  Wand2,
 } from "lucide-react";
+
 import { toast } from "sonner";
 import { useSongAudio } from "@/hooks/use-song-audio";
 import { useProfile } from "@/hooks/use-profile";
@@ -47,11 +49,14 @@ function CommunityTrackRowImpl({
   song,
   variant = "community",
   onDelete,
+  onRemix,
 }: {
   song: Song;
   /** "owned" rows link to the edit/regenerate workspace instead of charging coins. */
   variant?: "owned" | "community";
   onDelete?: (song: Song) => void;
+  /** Opens the creation wizard pre-loaded with this track's vibe. */
+  onRemix?: (song: Song) => void;
 }) {
   const owned = variant === "owned";
   const hasAudio = !!(song.audio_path || song.sample_path);
@@ -151,6 +156,17 @@ function CommunityTrackRowImpl({
 
   const actions = (
     <div className="flex shrink-0 items-center gap-1.5">
+      {onRemix && (
+        <button
+          type="button"
+          onClick={() => onRemix(song)}
+          aria-label={`Use this vibe from ${title}`}
+          title="Use this vibe"
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-amber-400/40 bg-amber-500/15 text-amber-300 transition-colors hover:bg-amber-500/25"
+        >
+          <Wand2 className="h-4 w-4" />
+        </button>
+      )}
       {owned && driveLink && (
         <a
           href={driveLink}

@@ -235,6 +235,33 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_drops: {
+        Row: {
+          coins: number
+          created_at: string
+          drop_date: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          coins: number
+          created_at?: string
+          drop_date?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          coins?: number
+          created_at?: string
+          drop_date?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       device_accounts: {
         Row: {
           created_at: string
@@ -1741,6 +1768,7 @@ export type Database = {
         Returns: number
       }
       check_generation_capacity: { Args: { p_user: string }; Returns: Json }
+      claim_daily_drop: { Args: never; Returns: Json }
       claim_referral: { Args: { p_referrer: string }; Returns: boolean }
       claim_referrer_permanent: {
         Args: { p_acknowledged: boolean; p_referrer: string }
