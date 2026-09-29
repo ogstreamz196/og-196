@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
@@ -178,6 +178,13 @@ export function OgChat({
   const [transcribing, setTranscribing] = useState(false);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const recordChunksRef = useRef<Blob[]>([]);
+
+  useLayoutEffect(() => {
+    const composer = inputRef.current;
+    if (!composer) return;
+    composer.style.height = "0px";
+    composer.style.height = `${Math.min(Math.max(composer.scrollHeight, 56), 144)}px`;
+  }, [input]);
 
   // Anti-flicker skeleton: stays visible at least 600ms once shown so quick
   // replies don't pop in and out (matches Suno-style "cooking" feel).
@@ -883,7 +890,7 @@ export function OgChat({
             disabled={!user || m.isPending}
             aria-label="Attach image"
             title="Attach image"
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-white/5 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 disabled:opacity-40 sm:h-11 sm:w-11"
+            className="mb-1 grid h-11 w-11 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-white/5 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 disabled:opacity-40"
           >
             <Paperclip className="h-5 w-5" />
           </button>
@@ -895,7 +902,7 @@ export function OgChat({
             aria-pressed={recording}
             title={recording ? "Stop recording" : "Voice input"}
             className={cn(
-              "grid h-9 w-9 shrink-0 place-items-center rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 disabled:opacity-40 sm:h-11 sm:w-11",
+              "mb-1 grid h-11 w-11 shrink-0 place-items-center rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 disabled:opacity-40",
               recording
                 ? "bg-destructive text-destructive-foreground hover:bg-destructive/90 animate-pulse"
                 : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
@@ -912,19 +919,14 @@ export function OgChat({
           <textarea
             ref={inputRef}
             value={input}
-            onChange={(e) => {
-              setInput(e.target.value);
-              const el = e.currentTarget;
-              el.style.height = "0px";
-              el.style.height = Math.min(el.scrollHeight, 180) + "px";
-            }}
+            onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 sendText(input);
               }
             }}
-            rows={1}
+            rows={2}
             placeholder={
               transcribing
                 ? "Transcribing…"
@@ -945,7 +947,7 @@ export function OgChat({
               // newest messages visible without scrolling the whole page.
               window.setTimeout(() => scrollToBottom("auto"), 120);
             }}
-            className="min-h-9 max-h-24 flex-1 resize-none bg-transparent px-1.5 py-1.5 text-sm leading-snug placeholder:text-muted-foreground/70 focus:outline-none disabled:cursor-not-allowed sm:max-h-32 sm:px-2 sm:text-[15px]"
+            className="min-h-14 max-h-36 flex-1 resize-none overflow-y-auto bg-transparent px-2 py-2 text-base leading-5 placeholder:text-muted-foreground/70 focus:outline-none disabled:cursor-not-allowed sm:px-2.5 sm:text-[15px]"
           />
           <button
             type="submit"
@@ -953,7 +955,7 @@ export function OgChat({
             aria-label="Send message"
             title="Send"
             data-testid="og-loner-send"
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-brand text-primary-foreground shadow-[0_8px_22px_-6px_hsl(var(--primary)/0.6)] ring-1 ring-primary/40 transition hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 disabled:bg-muted disabled:text-muted-foreground disabled:shadow-none disabled:ring-0 sm:h-11 sm:w-11"
+            className="mb-1 grid h-11 w-11 shrink-0 place-items-center rounded-full bg-gradient-brand text-primary-foreground shadow-[0_8px_22px_-6px_hsl(var(--primary)/0.6)] ring-1 ring-primary/40 transition hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 disabled:bg-muted disabled:text-muted-foreground disabled:shadow-none disabled:ring-0"
           >
             {m.isPending ? (
               <Loader2 className="h-5 w-5 animate-spin" />
