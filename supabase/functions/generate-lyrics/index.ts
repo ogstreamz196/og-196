@@ -8,7 +8,6 @@ const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY") ?? "";
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY") ?? "";
 const GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") ?? "gemini-2.5-flash";
 
-
 async function getSetting(admin: SupabaseClient, key: string, fallback: number): Promise<number> {
   const { data } = await admin.from("app_settings").select("value").eq("key", key).maybeSingle();
   const v = (data as { value?: unknown } | null)?.value;
@@ -22,7 +21,8 @@ Deno.serve(async (req) => {
   if (pre) return pre;
 
   try {
-    if (!GEMINI_API_KEY && !LOVABLE_API_KEY) return jsonResponse({ error: "No lyrics model configured" }, 500);
+    if (!GEMINI_API_KEY && !LOVABLE_API_KEY)
+      return jsonResponse({ error: "No lyrics model configured" }, 500);
 
     const auth = await requireUser(req);
     if (auth.error) return auth.error;
@@ -32,7 +32,11 @@ Deno.serve(async (req) => {
     const songName = (body.songName ?? "").toString().trim().slice(0, 200);
     const description = (body.description ?? "").toString().trim().slice(0, 1000);
     const styleTags = Array.isArray(body.styleTags)
-      ? Array.from(new Set(body.styleTags.map((tag: unknown) => String(tag).trim().slice(0, 80)).filter(Boolean))).slice(0, 10)
+      ? Array.from(
+          new Set(
+            body.styleTags.map((tag: unknown) => String(tag).trim().slice(0, 80)).filter(Boolean),
+          ),
+        ).slice(0, 10)
       : [];
     const language = (body.language ?? "English").toString().trim().slice(0, 200);
     const vocal = (body.vocal ?? "Mix voice").toString().trim().slice(0, 40);
@@ -60,7 +64,6 @@ Deno.serve(async (req) => {
     const mmss = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
     const targetLabel = `${mmss(targetSec)}–${mmss(targetSec + 30)}`;
 
-
     if (!songName && !description) {
       return jsonResponse({ error: "Provide a song name or description" }, 400);
     }
@@ -71,7 +74,10 @@ Deno.serve(async (req) => {
     // OG-mode value.
     if (body.mode !== undefined && body.mode !== "og" && body.mode !== "safe") {
       return jsonResponse(
-        { error: "Invalid mode — must be derived from Foul Mouth ('og' or 'safe')", code: "invalid_mode" },
+        {
+          error: "Invalid mode — must be derived from Foul Mouth ('og' or 'safe')",
+          code: "invalid_mode",
+        },
         400,
       );
     }
@@ -95,19 +101,29 @@ Deno.serve(async (req) => {
     const updateProgress = async (progress: number, stage: string) => {
       if (!songId) return;
       try {
-        await admin.from("songs").update({
-          lyrics_progress: progress,
-          lyrics_stage: stage,
-        }).eq("id", songId).eq("user_id", user.id);
-      } catch (_) { /* progress is best-effort */ }
+        await admin
+          .from("songs")
+          .update({
+            lyrics_progress: progress,
+            lyrics_stage: stage,
+          })
+          .eq("id", songId)
+          .eq("user_id", user.id);
+      } catch (_) {
+        /* progress is best-effort */
+      }
     };
 
     if (songId) {
-      await admin.from("songs").update({
-        lyrics_progress: 5,
-        lyrics_stage: "Reading your brief…",
-        lyrics_started_at: new Date().toISOString(),
-      }).eq("id", songId).eq("user_id", user.id);
+      await admin
+        .from("songs")
+        .update({
+          lyrics_progress: 5,
+          lyrics_stage: "Reading your brief…",
+          lyrics_started_at: new Date().toISOString(),
+        })
+        .eq("id", songId)
+        .eq("user_id", user.id);
     }
 
     const reference = songId ?? `lyrics:${crypto.randomUUID()}`;
@@ -123,7 +139,6 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: "Insufficient coins", code: "insufficient_coins" }, 402);
     }
     await updateProgress(20, "Finding the vibe…");
-
 
     // Per-request override wins; otherwise fall back to the user's saved preference.
     const { data: pref } = await admin
@@ -152,13 +167,15 @@ Deno.serve(async (req) => {
         .select("display_name, artist_bio")
         .eq("id", user.id)
         .maybeSingle();
-      const p = (prof ?? null) as { display_name?: string | null; artist_bio?: string | null } | null;
+      const p = (prof ?? null) as {
+        display_name?: string | null;
+        artist_bio?: string | null;
+      } | null;
       const parts: string[] = [];
       if (p?.display_name?.trim()) parts.push(`Artist name: ${p.display_name.trim()}`);
       if (p?.artist_bio?.trim()) parts.push(`Bio: ${p.artist_bio.trim().slice(0, 400)}`);
       personalDetails = parts.join(" · ");
     }
-
 
     // Languages arrive as a single field that may hold several picks
     // ("English + Turkish + Romanian" or a comma separated list).
@@ -183,27 +200,30 @@ Deno.serve(async (req) => {
       ? ` MULTILINGUAL REQUIREMENT (critical): the artist picked ${languageList.length} languages — ${languagesLabel}. EVERY one of them must actually be sung in the finished song, not just mentioned. Assign languages to whole sections and rotate through them in order so each language owns at least one full section (for example [Verse 1] in ${languageList[0]}, [Verse 2] in ${languageList[1]}${languageList[2] ? `, [Bridge] in ${languageList[2]}` : ""}), and mark each section's language on the marker line like "[Verse 2 – ${languageList[1]}]". The [Chorus] stays in ${languageList[0]} every time so the hook is recognisable, but add one repeated hook line in ${languageList[1]} inside each chorus. If there are more languages than sections, share sections by giving each language its own consecutive block of lines inside that section, still labelled.`
       : "";
 
-
     // English rides along as a REMIX feature ONLY when the artist actually
     // picked English alongside other languages. If English was not selected,
     // no English is sung anywhere in the track.
     const englishSelected = languageList.some((l) => l.toLowerCase() === "english");
-    const englishRemixRule = (!isEnglish && englishSelected)
-      ? ` ENGLISH REMIX REQUIREMENT (critical): English was picked alongside ${nonEnglish.join(" and ")}, so it is part of the remix. The [Intro] MUST be fully in English (a short hype intro naming the song/artist vibe). After that, the picked language(s) LEAD the song — most lines, and the main hook, stay in ${nonEnglish.join(" and ")} — but sprinkle English throughout like a remix feature: at least 2 English lines or ad-libs inside every verse and every chorus, an English line at the end of each hook repeat, and a mostly-English [Outro]. Roughly a quarter of all sung lines should be English, spread across the whole track, not clumped in one section. Never let English take over a full verse or the main chorus melody — it is the feature, not the lead.`
-      : (!isEnglish
-        ? ` NO-ENGLISH RULE (critical): English was NOT selected. Do not sing or speak any English anywhere in the song — no English intro, no English ad-libs, no English outro. Every sung line stays in the selected language(s) only. (Section markers stay in English brackets as usual, and any parenthetical translation lines are for reference only.)`
-        : "");
+    const englishRemixRule =
+      !isEnglish && englishSelected
+        ? ` ENGLISH REMIX REQUIREMENT (critical): English was picked alongside ${nonEnglish.join(" and ")}, so it is part of the remix. The [Intro] MUST be fully in English (a short hype intro naming the song/artist vibe). After that, the picked language(s) LEAD the song — most lines, and the main hook, stay in ${nonEnglish.join(" and ")} — but sprinkle English throughout like a remix feature: at least 2 English lines or ad-libs inside every verse and every chorus, an English line at the end of each hook repeat, and a mostly-English [Outro]. Roughly a quarter of all sung lines should be English, spread across the whole track, not clumped in one section. Never let English take over a full verse or the main chorus melody — it is the feature, not the lead.`
+        : !isEnglish
+          ? ` NO-ENGLISH RULE (critical): English was NOT selected. Do not sing or speak any English anywhere in the song — no English intro, no English ad-libs, no English outro. Every sung line stays in the selected language(s) only. (Section markers stay in English brackets as usual, and any parenthetical translation lines are for reference only.)`
+          : "";
 
     // One non-English pick: the whole song leads in it.
-    const singleLanguageRule = (!multiLanguage && !isEnglish)
-      ? ` SINGLE-LANGUAGE REQUIREMENT (critical): the artist picked ${languageList[0]}. Every sung line — every verse, every chorus, pre-chorus, bridge, intro, outro and ad-lib — must be written in ${languageList[0]}. Do NOT flip the balance: ${languageList[0]} is the lead language everywhere. The hook melody lines stay in ${languageList[0]}.`
-      : "";
+    const singleLanguageRule =
+      !multiLanguage && !isEnglish
+        ? ` SINGLE-LANGUAGE REQUIREMENT (critical): the artist picked ${languageList[0]}. Every sung line — every verse, every chorus, pre-chorus, bridge, intro, outro and ad-lib — must be written in ${languageList[0]}. Do NOT flip the balance: ${languageList[0]} is the lead language everywhere. The hook melody lines stay in ${languageList[0]}.`
+        : "";
 
     // Pick a full-song structure driven by the chosen style tags so the
     // output reads as a complete, performable track — not a few stray verses.
     const tagsLower = styleTags.map((t) => t.toLowerCase()).join(" ");
     const isRap = /(rap|hip[- ]?hop|drill|trap|grime|afro\s*drill)/.test(tagsLower);
-    const isBallad = /(ballad|acoustic|piano|folk|country|singer[- ]songwriter|slow jam)/.test(tagsLower);
+    const isBallad = /(ballad|acoustic|piano|folk|country|singer[- ]songwriter|slow jam)/.test(
+      tagsLower,
+    );
     const isDance = /(dance|edm|house|techno|club|electro|pop|k-pop|bhangra)/.test(tagsLower);
     const isRock = /(rock|metal|punk|indie|alt)/.test(tagsLower);
     const vocalsOnly = isNasheed || body.vocalsOnly === true || body.vocals_only === true;
@@ -211,18 +231,19 @@ Deno.serve(async (req) => {
     const structure = vocalsOnly
       ? "[Intro – hummed melody, voices only] (4 lines) → [Verse 1] (8 lines) → [Chorus] (6 lines, layered vocal harmonies) → [Verse 2] (8 lines) → [Chorus] (6 lines) → [Humming Interlude – voices only] (4 lines) → [Bridge] (6 lines, whispered then sung) → [Chorus] (x2, 12 lines) → [Outro – soft humming fades] (4 lines)"
       : isRap
-      ? "[Intro] (4 lines) → [Verse 1] (16 bars) → [Hook] (8 bars, catchy repeatable) → [Verse 2] (16 bars) → [Hook] → [Bridge] (8 bars) → [Verse 3] (12 bars) → [Hook] (x2) → [Outro] (4 lines, ad-libs ok)"
-      : isBallad
-      ? "[Intro] (4 lines, scene-setting) → [Verse 1] (8 lines) → [Chorus] (6 lines, memorable hook) → [Verse 2] (8 lines) → [Chorus] (6 lines) → [Bridge] (6 lines, emotional turn) → [Final Chorus] (8 lines, lifted, optional key change cue in parentheses) → [Outro] (4 lines)"
-      : isDance
-      ? "[Intro] (4 lines, vibe-setter) → [Verse 1] (8 lines) → [Pre-Chorus] (4 lines, build-up) → [Chorus] (6 lines, anthemic hook) → [Verse 2] (8 lines) → [Pre-Chorus] (4 lines) → [Chorus] (6 lines) → [Drop] (4 lines) → [Bridge] (6 lines) → [Chorus] (x2, 12 lines) → [Outro] (4 lines)"
-      : isRock
-      ? "[Intro] (4 lines) → [Verse 1] (8 lines) → [Chorus] (6 lines) → [Verse 2] (8 lines) → [Chorus] (6 lines) → [Bridge / Guitar Solo cue] (6 lines) → [Verse 3] (6 lines) → [Chorus] (x2, 12 lines) → [Outro] (4 lines)"
-      : "[Intro] (4 lines) → [Verse 1] (8 lines) → [Pre-Chorus] (4 lines) → [Chorus] (6 lines, hook) → [Verse 2] (8 lines) → [Pre-Chorus] (4 lines) → [Chorus] (6 lines) → [Bridge] (6 lines) → [Verse 3] (6 lines) → [Chorus] (final, lifted, 8 lines) → [Outro] (4 lines)";
+        ? "[Intro] (4 lines) → [Verse 1] (16 bars) → [Hook] (8 bars, catchy repeatable) → [Verse 2] (16 bars) → [Hook] → [Bridge] (8 bars) → [Verse 3] (12 bars) → [Hook] (x2) → [Outro] (4 lines, ad-libs ok)"
+        : isBallad
+          ? "[Intro] (4 lines, scene-setting) → [Verse 1] (8 lines) → [Chorus] (6 lines, memorable hook) → [Verse 2] (8 lines) → [Chorus] (6 lines) → [Bridge] (6 lines, emotional turn) → [Final Chorus] (8 lines, lifted, optional key change cue in parentheses) → [Outro] (4 lines)"
+          : isDance
+            ? "[Intro] (4 lines, vibe-setter) → [Verse 1] (8 lines) → [Pre-Chorus] (4 lines, build-up) → [Chorus] (6 lines, anthemic hook) → [Verse 2] (8 lines) → [Pre-Chorus] (4 lines) → [Chorus] (6 lines) → [Drop] (4 lines) → [Bridge] (6 lines) → [Chorus] (x2, 12 lines) → [Outro] (4 lines)"
+            : isRock
+              ? "[Intro] (4 lines) → [Verse 1] (8 lines) → [Chorus] (6 lines) → [Verse 2] (8 lines) → [Chorus] (6 lines) → [Bridge / Guitar Solo cue] (6 lines) → [Verse 3] (6 lines) → [Chorus] (x2, 12 lines) → [Outro] (4 lines)"
+              : "[Intro] (4 lines) → [Verse 1] (8 lines) → [Pre-Chorus] (4 lines) → [Chorus] (6 lines, hook) → [Verse 2] (8 lines) → [Pre-Chorus] (4 lines) → [Chorus] (6 lines) → [Bridge] (6 lines) → [Verse 3] (6 lines) → [Chorus] (final, lifted, 8 lines) → [Outro] (4 lines)";
 
-    const multiStyleRule = styleTags.length > 1
-      ? ` MULTI-STYLE REQUIREMENT (critical): the artist picked ${styleTags.length} styles — ${styleTags.join(", ")}. EVERY selected style must be used, with none treated as optional. Give each style a clearly labelled dedicated section, e.g. "[Verse 2 – ${styleTags[1]}]"; if there are more styles than normal sections, split a verse into consecutive labelled style passages. Match cadence, line length, rhyme density and vocabulary to each style, make deliberate transitions, then blend ALL selected styles in the final hook.`
-      : "";
+    const multiStyleRule =
+      styleTags.length > 1
+        ? ` MULTI-STYLE REQUIREMENT (critical): the artist picked ${styleTags.length} styles — ${styleTags.join(", ")}. EVERY selected style must be used, with none treated as optional. Give each style a clearly labelled dedicated section, e.g. "[Verse 2 – ${styleTags[1]}]"; if there are more styles than normal sections, split a verse into consecutive labelled style passages. Match cadence, line length, rhyme density and vocabulary to each style, make deliberate transitions, then blend ALL selected styles in the final hook.`
+        : "";
 
     const mixedVoice = !vocal || /^(?:any|mix)/i.test(vocal);
     const voiceRule = mixedVoice
@@ -239,9 +260,9 @@ Deno.serve(async (req) => {
       "open with a specific memory, place or object from the user's brief",
       "open cold with an unexpected but relevant statement, without announcing the genre or song",
     ];
-    const introApproach = introApproaches[crypto.getRandomValues(new Uint32Array(1))[0] % introApproaches.length];
-    const originalityRule =
-      ` ORIGINAL OPENING REQUIREMENT (critical): ${introApproach}. The first four lyric lines must be specific to this song and unlike generic AI lyrics. Never begin by announcing what the song is or is not. BANNED anywhere in the intro: “this ain't no lullaby”, “this is no lullaby”, “ain't no lullaby”, “this ain't no ordinary”, “listen up”, “yeah yeah”, “once upon a time”, “in a world”, and any close rewrite of those clichés. Do not use filler hype before the story starts.`;
+    const introApproach =
+      introApproaches[crypto.getRandomValues(new Uint32Array(1))[0] % introApproaches.length];
+    const originalityRule = ` ORIGINAL OPENING REQUIREMENT (critical): ${introApproach}. The first four lyric lines must be specific to this song and unlike generic AI lyrics. Never begin by announcing what the song is or is not. BANNED anywhere in the intro: “this ain't no lullaby”, “this is no lullaby”, “ain't no lullaby”, “this ain't no ordinary”, “listen up”, “yeah yeah”, “once upon a time”, “in a world”, and any close rewrite of those clichés. Do not use filler hype before the story starts.`;
 
     const vocalsOnlyRule = vocalsOnly
       ? ` VOCALS-ONLY REQUIREMENT (critical): this is a pure a cappella track — human voice and humming ONLY, zero instruments. Section markers must only ever describe vocal moments (e.g. [Verse], [Chorus], [Humming Interlude], [Whisper], [Ad-libs]). NEVER write [Drop], [Beat Drop], [Instrumental], [Guitar Solo], [Break] or any marker that names an instrument or production element — write "humming", "vocal run" or "layered harmonies" instead.`
@@ -255,8 +276,14 @@ Deno.serve(async (req) => {
       ` Use the bracketed section markers verbatim (e.g. [Verse 1], [Chorus], [Bridge], [Outro]), each on its own line, with a blank line between sections. Every section must have lyrics — no placeholders, no "(instrumental)" unless the structure explicitly says so.` +
       ` The [Chorus] must be written out IN FULL every time it appears (never write "repeat chorus" or "x2" as a shortcut) — it is the same repeatable hook tied to the song title or central theme.` +
       ` Do NOT cut the song short either — hit every section in the structure and stay inside the word range given.` +
-      multiStyleRule + multiLanguageRule + singleLanguageRule + englishRemixRule + voiceRule + originalityRule + vocalsOnlyRule + nasheedRule;
-
+      multiStyleRule +
+      multiLanguageRule +
+      singleLanguageRule +
+      englishRemixRule +
+      voiceRule +
+      originalityRule +
+      vocalsOnlyRule +
+      nasheedRule;
 
     // Four exact levels. Level zero always follows the clean PG prompt below.
     const intensityRule = [
@@ -275,11 +302,13 @@ Deno.serve(async (req) => {
         `Do NOT self-censor, do NOT use asterisks or bleeps, and do NOT add disclaimers. Avoid slurs, sexual content involving minors, and direct incitement to real-world violence — everything else is fair game.` +
         intensityRule +
         ` The INTENSITY DIAL overrides the general "liberally" guidance above — follow the dial exactly.` +
-        structureRule + bilingualRule +
+        structureRule +
+        bilingualRule +
         ` Target ${aimLow}–${aimHigh} words (never fewer than ${minWords}, never more than ${aimHigh}). Output ONLY the lyrics, no explanations.`
       : `You are a professional songwriter writing CLEAN, radio-friendly song lyrics in ${languagesLabel}. ` +
         `STRICT RULE: absolutely NO profanity, swear words, slurs, or vulgar terms in any language — no English swears, no swears in ${languagesLabel} either. No sexual content, no graphic violence, no drug references. If you need attitude, channel it through clever wordplay and metaphor — never through swearing. The result must be safe for radio, family streaming, and a children's playlist.` +
-        structureRule + bilingualRule +
+        structureRule +
+        bilingualRule +
         ` Target ${aimLow}–${aimHigh} words (never fewer than ${minWords}, never more than ${aimHigh}). Output ONLY the lyrics, no explanations.`;
 
     const subjectRule = subjectName
@@ -296,7 +325,9 @@ Deno.serve(async (req) => {
         ? `Artist profile (weave these into the lyrics naturally — reference the artist's name and a couple of personal details across the song so it feels personal, but DO NOT force them into every line, and never let them overpower the theme. Aim for the name/details to appear roughly 2–4 times total, ideally in the hook/chorus or a memorable line, spread across different sections — not back-to-back): ${personalDetails}\n`
         : "") +
       subjectRule +
-      (extraContext ? `Extra context from the artist (use these details literally in the lyrics): ${extraContext}\n` : "") +
+      (extraContext
+        ? `Extra context from the artist (use these details literally in the lyrics): ${extraContext}\n`
+        : "") +
       `\nWrite the FULL song now — about ${mmss(targetSec)} of singable material (${aimLow}–${aimHigh} words, ${minLines}–${aimLines} lyric lines, do not exceed that). Do not stop early, do not abbreviate repeated choruses, hit EVERY section in the structure, stay ruthlessly on-theme with the description above, and drop "${subjectName || "the subject"}" as often as the music allows.`;
 
     const modelUrl = (model: string) =>
@@ -364,8 +395,10 @@ Deno.serve(async (req) => {
       });
 
     const extractText = (data: unknown) =>
-      ((data as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> } | null)
-        ?.candidates?.[0]?.content?.parts ?? [])
+      (
+        (data as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> } | null)
+          ?.candidates?.[0]?.content?.parts ?? []
+      )
         .map((p) => p?.text ?? "")
         .join("")
         .trim();
@@ -401,13 +434,14 @@ Deno.serve(async (req) => {
 
     const res = await generate([{ role: "user", parts: [{ text: userPrompt }] }]);
 
-
     if (!res.ok) {
       // Creation is free, so there is no balance movement to reverse.
       await updateProgress(0, "");
 
-      if (res.status === 429) return jsonResponse({ error: "AI is busy right now — try again shortly" }, 429);
-      if (res.status === 402) return jsonResponse({ error: "AI credits exhausted — top up to keep creating" }, 402);
+      if (res.status === 429)
+        return jsonResponse({ error: "AI is busy right now — try again shortly" }, 429);
+      if (res.status === 402)
+        return jsonResponse({ error: "AI credits exhausted — top up to keep creating" }, 402);
       const txt = res.detail ?? "";
       console.error("Lyrics model error", res.status, txt);
       return jsonResponse({ error: "Lyrics generation failed", detail: txt.slice(0, 500) }, 502);
@@ -417,20 +451,32 @@ Deno.serve(async (req) => {
 
     let lyrics = res.text;
 
-
     // Quality guard: repair a banned generic opening, then enforce the minimum
     // target while preserving every requested style, language and vocal role.
     const wordCount = (t: string) => t.split(/\s+/).filter(Boolean).length;
     const hasBannedOpening = (t: string) => {
-      const opening = t.split("\n").filter((line) => line.trim() && !/^\s*\[/.test(line)).slice(0, 4).join(" ");
-      return /(?:this\s+(?:ain['’]?t|is)\s+no\s+lullaby|ain['’]?t\s+no\s+lullaby|this\s+ain['’]?t\s+no\s+ordinary|listen\s+up|yeah\s+yeah|once\s+upon\s+a\s+time|in\s+a\s+world)/i.test(opening);
+      const opening = t
+        .split("\n")
+        .filter((line) => line.trim() && !/^\s*\[/.test(line))
+        .slice(0, 4)
+        .join(" ");
+      return /(?:this\s+(?:ain['’]?t|is)\s+no\s+lullaby|ain['’]?t\s+no\s+lullaby|this\s+ain['’]?t\s+no\s+ordinary|listen\s+up|yeah\s+yeah|once\s+upon\s+a\s+time|in\s+a\s+world)/i.test(
+        opening,
+      );
     };
     if (lyrics && hasBannedOpening(lyrics)) {
       await updateProgress(84, "Refreshing the opening…");
       const revised = await generate([
         { role: "user", parts: [{ text: userPrompt }] },
         { role: "model", parts: [{ text: lyrics }] },
-        { role: "user", parts: [{ text: `Rewrite the COMPLETE same song because its opening uses a banned generic cliché. Replace only the opening concept with this direction: ${introApproach}. Preserve the title, story, hook, minimum length, every selected style (${styleTags.join(", ") || "the chosen style"}), every selected language (${languagesLabel}), and all vocal-role labels. Output ONLY the complete lyrics.` }] },
+        {
+          role: "user",
+          parts: [
+            {
+              text: `Rewrite the COMPLETE same song because its opening uses a banned generic cliché. Replace only the opening concept with this direction: ${introApproach}. Preserve the title, story, hook, minimum length, every selected style (${styleTags.join(", ") || "the chosen style"}), every selected language (${languagesLabel}), and all vocal-role labels. Output ONLY the complete lyrics.`,
+            },
+          ],
+        },
       ]);
       if (revised.ok && revised.text && !hasBannedOpening(revised.text)) lyrics = revised.text;
     }
@@ -442,10 +488,11 @@ Deno.serve(async (req) => {
           { role: "model", parts: [{ text: lyrics }] },
           {
             role: "user",
-            parts: [{
-              text:
-                 `This draft is too short for the requested MINIMUM of ${mmss(targetSec)}. Rewrite the SAME song, keeping its title, theme, hook and original opening, but expand it to ${aimLow}–${aimHigh} words and ${minLines}+ lyric lines. Preserve and clearly label EVERY selected style (${styleTags.join(", ") || "the chosen style"}), EVERY selected language (${languagesLabel}), and all ${mixedVoice ? "mixed vocal roles" : vocal} instructions. Add missing sections, write every chorus in full, and lengthen thin verses with new on-theme lines. Output ONLY the complete lyrics.`,
-            }],
+            parts: [
+              {
+                text: `This draft is too short for the requested MINIMUM of ${mmss(targetSec)}. Rewrite the SAME song, keeping its title, theme, hook and original opening, but expand it to ${aimLow}–${aimHigh} words and ${minLines}+ lyric lines. Preserve and clearly label EVERY selected style (${styleTags.join(", ") || "the chosen style"}), EVERY selected language (${languagesLabel}), and all ${mixedVoice ? "mixed vocal roles" : vocal} instructions. Add missing sections, write every chorus in full, and lengthen thin verses with new on-theme lines. Output ONLY the complete lyrics.`,
+              },
+            ],
           },
         ]);
         if (topUp.ok) {
@@ -453,7 +500,6 @@ Deno.serve(async (req) => {
           if (wordCount(extended) > wordCount(lyrics)) lyrics = extended;
           else break;
         } else break;
-
       } catch (e) {
         console.error("lyrics top-up failed", e);
         break;
@@ -464,13 +510,16 @@ Deno.serve(async (req) => {
     const estimatedSec = Math.max(targetSec, Math.round((words / WORDS_PER_MIN) * 60));
 
     if (songId) {
-      await admin.from("songs").update({
-        lyrics,
-        lyrics_progress: 100,
-        lyrics_stage: "Ready",
-      }).eq("id", songId).eq("user_id", user.id);
+      await admin
+        .from("songs")
+        .update({
+          lyrics,
+          lyrics_progress: 100,
+          lyrics_stage: "Ready",
+        })
+        .eq("id", songId)
+        .eq("user_id", user.id);
     }
-
 
     return jsonResponse({
       lyrics,

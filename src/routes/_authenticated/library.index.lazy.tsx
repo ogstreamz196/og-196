@@ -688,8 +688,7 @@ function LibraryPage() {
             .map((s) => s.trim())
             .filter(Boolean)
         : styleTags
-    )
-      .concat(vocalsOnlyTags);
+    ).concat(vocalsOnlyTags);
     pipelineLockRef.current = true;
     const runId = ++pipelineRunRef.current;
     const stale = () => pipelineRunRef.current !== runId;
@@ -727,13 +726,7 @@ function LibraryPage() {
       setLyrics(nextLyrics);
 
       advanceStage("saving");
-      const style = [
-        songStyle,
-        songVocal,
-        ...vocalsOnlyTags,
-      ]
-        .filter(Boolean)
-        .join(", ");
+      const style = [songStyle, songVocal, ...vocalsOnlyTags].filter(Boolean).join(", ");
       const promptText = [
         songTitle,
         songSubject ? `For: ${songSubject}` : null,

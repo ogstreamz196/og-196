@@ -36,16 +36,24 @@ const MAX_TITLE_CHARS = 80;
 
 const GENRE_STYLE_DETAILS: Record<string, string> = {
   pop: "polished modern chart pop, bright melodic topline, immediate singalong chorus, crisp radio-ready production, strong verse-pre-chorus-chorus lift",
-  "k-pop": "high-energy polished K-pop, dynamic section changes, glossy synth production, tight dance rhythm, layered group vocals, addictive hook and dramatic bridge",
-  "slow jam": "silky slow jam, warm R&B chords, unhurried groove, intimate expressive vocals, lush harmonies and a sensual late-night atmosphere",
-  bhangra: "high-energy Punjabi bhangra, driving dhol rhythm, bright tumbi phrases, celebratory call-and-response vocals and a huge dancefloor chorus",
-  "nursery rhyme": "simple playful nursery-rhyme melody, clear repetitive words, gentle rhythm, memorable singalong refrain and child-friendly musical phrasing",
-  "hip hop": "classic-meets-modern hip hop, head-nodding boom-bap and modern drums, punchy kick and snare, soulful sampled textures, confident rhythmic flow and a catchy hook",
+  "k-pop":
+    "high-energy polished K-pop, dynamic section changes, glossy synth production, tight dance rhythm, layered group vocals, addictive hook and dramatic bridge",
+  "slow jam":
+    "silky slow jam, warm R&B chords, unhurried groove, intimate expressive vocals, lush harmonies and a sensual late-night atmosphere",
+  bhangra:
+    "high-energy Punjabi bhangra, driving dhol rhythm, bright tumbi phrases, celebratory call-and-response vocals and a huge dancefloor chorus",
+  "nursery rhyme":
+    "simple playful nursery-rhyme melody, clear repetitive words, gentle rhythm, memorable singalong refrain and child-friendly musical phrasing",
+  "hip hop":
+    "classic-meets-modern hip hop, head-nodding boom-bap and modern drums, punchy kick and snare, soulful sampled textures, confident rhythmic flow and a catchy hook",
   rap: "rap-forward track, lead vocal rapped throughout with tight rhythmic flow, clear diction, internal rhymes and punchlines, minimal melodic singing, hard-hitting drums supporting the bars",
-  singing: "melodic sung vocal performance throughout, expressive lead singer, strong memorable melody, rich harmonies, no rapping, vocals front and centre",
+  singing:
+    "melodic sung vocal performance throughout, expressive lead singer, strong memorable melody, rich harmonies, no rapping, vocals front and centre",
   trap: "modern trap production, deep 808 bass, crisp rolling hi-hats, punchy kick, spacious dark melody and confident rhythmic vocal delivery",
-  "drum & bass": "high-energy drum and bass, rapid chopped breakbeats around 174 BPM, deep rolling sub-bass, sharp syncopation, rave momentum and fast precise vocal cadence",
-  nasheed: "strictly vocal-only nasheed, reverent unaccompanied lead voice, layered group responses and gentle human humming, every sound made only by human voices and mouths, absolutely no music or instruments",
+  "drum & bass":
+    "high-energy drum and bass, rapid chopped breakbeats around 174 BPM, deep rolling sub-bass, sharp syncopation, rave momentum and fast precise vocal cadence",
+  nasheed:
+    "strictly vocal-only nasheed, reverent unaccompanied lead voice, layered group responses and gentle human humming, every sound made only by human voices and mouths, absolutely no music or instruments",
 };
 
 function expandGenreStyles(raw: string): string {
@@ -83,7 +91,9 @@ Deno.serve(async (req) => {
     const supabaseUser = createClient(SUPABASE_URL, anonKey, {
       global: { headers: { Authorization: authHeader } },
     });
-    const { data: { user } } = await supabaseUser.auth.getUser();
+    const {
+      data: { user },
+    } = await supabaseUser.auth.getUser();
     if (!user) return json({ error: "Unauthorized" }, 401);
 
     const body = await req.json();
@@ -94,25 +104,29 @@ Deno.serve(async (req) => {
     const vocalGender = vocalLower.startsWith("female")
       ? "f"
       : vocalLower.startsWith("male")
-      ? "m"
-      : null;
+        ? "m"
+        : null;
     const vocalStyle = vocalLower.startsWith("female")
       ? "female vocals, female lead singer"
       : vocalLower.startsWith("male")
-      ? "male vocals, male lead singer"
-      : vocalLower.startsWith("duo")
-      ? "duet, male and female vocals trading lines"
-      : "mixed-voice mash-up with several clearly different singers, alternate male and female lead voices between sections, group vocals and layered harmonies in hooks, contrasting spoken and sung textures, do not use one lead voice for the whole track";
+        ? "male vocals, male lead singer"
+        : vocalLower.startsWith("duo")
+          ? "duet, male and female vocals trading lines"
+          : "mixed-voice mash-up with several clearly different singers, alternate male and female lead voices between sections, group vocals and layered harmonies in hooks, contrasting spoken and sung textures, do not use one lead voice for the whole track";
     const rawStyle = (body.style ?? "").toString().trim();
-    const isNasheed = rawStyle.split(/\s*,\s*/).some((name: string) => /^nasheed$/i.test(name.trim()));
+    const isNasheed = rawStyle
+      .split(/\s*,\s*/)
+      .some((name: string) => /^nasheed$/i.test(name.trim()));
     const detailedStyle = expandGenreStyles(rawStyle);
     const vocalsOnly = isNasheed || !!body.vocals_only;
-    const beatPath = isNasheed ? null : (body.beat_path ? String(body.beat_path) : null);
+    const beatPath = isNasheed ? null : body.beat_path ? String(body.beat_path) : null;
     // Vocals-only: sing over the uploaded beat, or fall back to a pure
     // a cappella with humming and zero instrumentation.
     const acappella = vocalsOnly && !beatPath;
     const vocalsOnlyStyle = vocalsOnly
-      ? (beatPath ? VOCALS_OVER_BEAT_STYLE : ACAPPELLA_STYLE)
+      ? beatPath
+        ? VOCALS_OVER_BEAT_STYLE
+        : ACAPPELLA_STYLE
       : null;
     // Requested track length. Suno exposes no hard duration field, so the
     // target is steered through the style prompt (clamped 3-10 minutes).
@@ -132,37 +146,47 @@ Deno.serve(async (req) => {
     // must be sung, and section markers in the lyrics say which is which.
     const languageList = Array.from(
       new Set(
-        (body.language ?? "").toString().trim().slice(0, 200)
+        (body.language ?? "")
+          .toString()
+          .trim()
+          .slice(0, 200)
           .split(/\s*(?:\+|,|\/|&|\band\b)\s*/i)
           .map((l: string) => l.trim())
           .filter(Boolean),
       ),
     );
     const languageStyleHint = languageList.length
-      ? (languageList.length > 1
+      ? languageList.length > 1
         ? `multilingual vocals sung in ${languageList.join(" and ")}, switch language per section exactly as the lyric section markers indicate, keep native pronunciation for each language`
-        : `vocals sung in ${languageList[0]} with native pronunciation`)
+        : `vocals sung in ${languageList[0]} with native pronunciation`
       : null;
     // Multiple styles: make the section-to-section genre changes explicit.
     const styleCount = rawStyle ? rawStyle.split(/\s*,\s*/).filter(Boolean).length : 0;
-    const multiStyleHint = styleCount > 1
-      ? `multi-genre mash-up using EVERY selected style: ${rawStyle}; give every style a clearly audible dedicated section, follow genre names in lyric section markers, blend all selected styles in the final hook, and use deliberate transitions so none are ignored`
-      : null;
+    const multiStyleHint =
+      styleCount > 1
+        ? `multi-genre mash-up using EVERY selected style: ${rawStyle}; give every style a clearly audible dedicated section, follow genre names in lyric section markers, blend all selected styles in the final hook, and use deliberate transitions so none are ignored`
+        : null;
     // For pure a cappella, genre names must only colour the vocal delivery —
     // naming genres outright makes the engine add backing instrumentation.
     const styleParts = acappella
       ? [
-        vocalsOnlyStyle,
-        detailedStyle ? `${detailedStyle} vocal delivery, cadence and phrasing performed by voice alone` : null,
-        languageStyleHint,
-        vocalStyle,
-        lengthStyleHint,
-      ]
-      : [detailedStyle, multiStyleHint, languageStyleHint, vocalStyle, vocalsOnlyStyle, lengthStyleHint];
-    const style = limitText(
-      styleParts.filter(Boolean).join(", ") || null,
-      MAX_STYLE_CHARS,
-    );
+          vocalsOnlyStyle,
+          detailedStyle
+            ? `${detailedStyle} vocal delivery, cadence and phrasing performed by voice alone`
+            : null,
+          languageStyleHint,
+          vocalStyle,
+          lengthStyleHint,
+        ]
+      : [
+          detailedStyle,
+          multiStyleHint,
+          languageStyleHint,
+          vocalStyle,
+          vocalsOnlyStyle,
+          lengthStyleHint,
+        ];
+    const style = limitText(styleParts.filter(Boolean).join(", ") || null, MAX_STYLE_CHARS);
     const lyrics = limitText((body.lyrics ?? "").toString().trim() || null, MAX_PROMPT_CHARS);
     const title = limitText((body.title ?? "").toString().trim() || null, MAX_TITLE_CHARS);
     const instrumental = !!body.instrumental;
@@ -175,12 +199,15 @@ Deno.serve(async (req) => {
 
     // Capacity gate: global + per-user concurrent caps (peak mode aware).
     {
-      const { data: cap, error: capErr } = await admin.rpc("check_generation_capacity", { p_user: user.id });
+      const { data: cap, error: capErr } = await admin.rpc("check_generation_capacity", {
+        p_user: user.id,
+      });
       if (capErr) return json({ error: capErr.message }, 500);
       if (cap && cap.ok === false) {
-        const msg = cap.reason === "global_capacity_full"
-          ? `Studio is at capacity (${cap.global_active}/${cap.global_cap} jobs running). Try again in a moment.`
-          : `You already have ${cap.user_active} song${cap.user_active === 1 ? "" : "s"} generating (limit ${cap.user_cap}${cap.peak ? ", peak mode" : ""}). Wait for one to finish.`;
+        const msg =
+          cap.reason === "global_capacity_full"
+            ? `Studio is at capacity (${cap.global_active}/${cap.global_cap} jobs running). Try again in a moment.`
+            : `You already have ${cap.user_active} song${cap.user_active === 1 ? "" : "s"} generating (limit ${cap.user_cap}${cap.peak ? ", peak mode" : ""}). Wait for one to finish.`;
         // Capacity is an expected, recoverable app state. Return a successful
         // transport response so the function client does not promote it to an
         // uncaught runtime error; callers inspect `accepted` and keep the UI open.
@@ -204,12 +231,10 @@ Deno.serve(async (req) => {
       portalLanguage = p.language ?? null;
       // Portal generations follow the same free-until-download rule.
     }
-    const effectiveLyrics = lyrics && portalLanguage
-      ? `[Language: ${portalLanguage}]\n${lyrics}`
-      : lyrics;
-    const effectivePrompt = !lyrics && portalLanguage
-      ? `[Language: ${portalLanguage}] ${prompt}`
-      : prompt;
+    const effectiveLyrics =
+      lyrics && portalLanguage ? `[Language: ${portalLanguage}]\n${lyrics}` : lyrics;
+    const effectivePrompt =
+      !lyrics && portalLanguage ? `[Language: ${portalLanguage}] ${prompt}` : prompt;
 
     const generationStartedAt = new Date().toISOString();
 
@@ -229,19 +254,33 @@ Deno.serve(async (req) => {
       if (!row) return json({ error: "Song not found" }, 404);
       if (row.user_id !== user.id) return json({ error: "Song not found" }, 404);
       if (row.status === "pending" || row.status === "processing") {
-        return json({ error: "Song is already generating", code: "already_generating", song_id: row.id }, 409);
+        return json(
+          { error: "Song is already generating", code: "already_generating", song_id: row.id },
+          409,
+        );
       }
       // Atomic claim — only one concurrent request wins.
       const { data: claimed, error: claimErr } = await admin
         .from("songs")
-        .update({ status: "pending", generation_started_at: generationStartedAt, error_message: null })
+        .update({
+          status: "pending",
+          generation_started_at: generationStartedAt,
+          error_message: null,
+        })
         .eq("id", existingSongId)
         .in("status", ["draft", "failed", "completed"])
         .select("id")
         .maybeSingle();
       if (claimErr) return json({ error: claimErr.message }, 500);
       if (!claimed) {
-        return json({ error: "Song is already generating", code: "already_generating", song_id: existingSongId }, 409);
+        return json(
+          {
+            error: "Song is already generating",
+            code: "already_generating",
+            song_id: existingSongId,
+          },
+          409,
+        );
       }
       existing = row;
     }
@@ -285,7 +324,16 @@ Deno.serve(async (req) => {
     } else {
       const { data: inserted, error: songErr } = await admin
         .from("songs")
-        .insert({ user_id: user.id, prompt: effectivePrompt, style, lyrics: effectiveLyrics, title, status: "pending", generation_started_at: generationStartedAt, portal_id: portalId })
+        .insert({
+          user_id: user.id,
+          prompt: effectivePrompt,
+          style,
+          lyrics: effectiveLyrics,
+          title,
+          status: "pending",
+          generation_started_at: generationStartedAt,
+          portal_id: portalId,
+        })
         .select("id")
         .single();
       if (songErr) {
@@ -301,14 +349,18 @@ Deno.serve(async (req) => {
     }
     const songId = song!.id;
 
-
     const encoder = new TextEncoder();
     const hmacKey = await crypto.subtle.importKey(
-      "raw", encoder.encode(SERVICE_ROLE),
-      { name: "HMAC", hash: "SHA-256" }, false, ["sign"],
+      "raw",
+      encoder.encode(SERVICE_ROLE),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"],
     );
     const sigBuf = await crypto.subtle.sign("HMAC", hmacKey, encoder.encode(songId));
-    const token = Array.from(new Uint8Array(sigBuf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+    const token = Array.from(new Uint8Array(sigBuf))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
     const callbackUrl = `${SUPABASE_URL}/functions/v1/suno-callback?song_id=${songId}&token=${token}`;
 
     // Sign the uploaded beat so Suno can fetch it (path is namespaced per user).
@@ -344,26 +396,31 @@ Deno.serve(async (req) => {
     // Pure a cappella: rewrite any production section markers (drops,
     // instrumental breaks, beat switches) as voice-only moments so the engine
     // never hears a word that invites instruments.
-    const voiceOnlyLyrics = acappella && effectiveLyrics
-      ? effectiveLyrics.replace(
-          /\[(?:[^\]]*\b(?:drop|instrumental|break|beat|bass|808|solo|interlude|outro beat|intro beat)\b[^\]]*)\]/gi,
-          "[Humming vocal interlude — voices only, no instruments]",
-        )
-      : effectiveLyrics;
+    const voiceOnlyLyrics =
+      acappella && effectiveLyrics
+        ? effectiveLyrics.replace(
+            /\[(?:[^\]]*\b(?:drop|instrumental|break|beat|bass|808|solo|interlude|outro beat|intro beat)\b[^\]]*)\]/gi,
+            "[Humming vocal interlude — voices only, no instruments]",
+          )
+        : effectiveLyrics;
     const signedLyrics = isInstrumental
       ? voiceOnlyLyrics
       : limitText(injectSignature(voiceOnlyLyrics, { acappella }), MAX_PROMPT_CHARS);
     const signedPrompt = isInstrumental
       ? effectivePrompt
-      : limitText(
+      : (limitText(
           acappella
             ? `${effectivePrompt}\n\nInclude a clearly audible vocal tag, performed by voice alone with no instruments, saying "this track is made by O G Bot, don't forget to visit O G Streamz dot co dot uk" in English, about once every minute.`
             : withSignatureHint(effectivePrompt),
           MAX_PROMPT_CHARS,
-        ) ?? effectivePrompt;
+        ) ?? effectivePrompt);
     // Submit to Suno. If the engine's moderation blocks the explicit lyrics we
     // soften the strongest words once and resubmit, instead of burning the job.
-    const submit = async (lyricsText: string | null, promptText: string | null, styleText: string | null) =>
+    const submit = async (
+      lyricsText: string | null,
+      promptText: string | null,
+      styleText: string | null,
+    ) =>
       await fetch(beatUrl ? SUNO_UPLOAD_COVER_URL : SUNO_API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${SUNO_API_KEY}` },
@@ -395,14 +452,22 @@ Deno.serve(async (req) => {
         sunoRes = await submit(attemptLyrics, attemptPrompt, attemptStyle);
       } catch (_e) {
         await refund(admin, user.id, songId, "Suno API unreachable", coinCost);
-        return json({ accepted: false, error: "The music engine is unreachable right now. Try again in a moment." });
+        return json({
+          accepted: false,
+          error: "The music engine is unreachable right now. Try again in a moment.",
+        });
       }
 
       const sunoText = await sunoRes.text();
       let sunoBody: any = {};
-      try { sunoBody = JSON.parse(sunoText); } catch { /* keep empty */ }
+      try {
+        sunoBody = JSON.parse(sunoText);
+      } catch {
+        /* keep empty */
+      }
 
-      const codeNum = typeof sunoBody?.code === "number" ? sunoBody.code : (sunoRes.ok ? 200 : sunoRes.status);
+      const codeNum =
+        typeof sunoBody?.code === "number" ? sunoBody.code : sunoRes.ok ? 200 : sunoRes.status;
       const reason = sunoBody?.msg || sunoBody?.message || `Suno API ${codeNum}`;
       taskId = sunoBody?.data?.taskId ?? sunoBody?.taskId ?? sunoBody?.task_id ?? null;
 
@@ -425,12 +490,24 @@ Deno.serve(async (req) => {
 
     if (!taskId) {
       await refund(admin, user.id, songId, "Suno did not return a task ID", coinCost);
-      return json({ accepted: false, error: "The music engine didn't accept the job. Your coins were refunded." });
+      return json({
+        accepted: false,
+        error: "The music engine didn't accept the job. Your coins were refunded.",
+      });
     }
 
-    await admin.from("songs").update({ status: "processing", suno_task_id: taskId }).eq("id", songId);
+    await admin
+      .from("songs")
+      .update({ status: "processing", suno_task_id: taskId })
+      .eq("id", songId);
 
-    return json({ accepted: true, song_id: songId, task_id: taskId, coin_balance: balance, gifted });
+    return json({
+      accepted: true,
+      song_id: songId,
+      task_id: taskId,
+      coin_balance: balance,
+      gifted,
+    });
   } catch (e) {
     console.error("Unhandled error", e);
     return json({ error: (e as Error).message }, 500);
@@ -438,11 +515,14 @@ Deno.serve(async (req) => {
 });
 
 async function refund(admin: any, userId: string, songId: string, reason: string, amount: number) {
-  await admin.from("songs").update({
-    status: "failed",
-    error_message: reason,
-    suno_task_id: null,
-  }).eq("id", songId);
+  await admin
+    .from("songs")
+    .update({
+      status: "failed",
+      error_message: reason,
+      suno_task_id: null,
+    })
+    .eq("id", songId);
   const { error } = await admin.rpc("refund_generation_charge", {
     p_user: userId,
     p_amount: amount,
