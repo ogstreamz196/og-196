@@ -921,12 +921,12 @@ export function CreateNowWizard({
             <div className="mt-2 grid grid-cols-[minmax(0,1fr)_7.25rem] gap-2">
               <Button
                 type="button"
-                onClick={next}
-                disabled={!stepValid}
+                onClick={() => void next()}
+                disabled={!stepValid || naming}
                 className="min-h-12 min-w-0 gap-2 bg-gradient-brand font-black uppercase tracking-wide text-primary-foreground shadow-glow"
               >
                 <Check className="h-4 w-4 shrink-0" />
-                <span className="truncate">{submitLabel}</span>
+                <span className="truncate">{naming ? "Naming your track…" : submitLabel}</span>
               </Button>
               <Button
                 type="button"
