@@ -18,3 +18,4 @@
 - [x] Make the D.EV browser return use a direct-tap Android intent on both sign-in return pages
 - [x] Restore files lost in the workspace move (payments/store/PurchaseHistory/webhooks/onboarding/Stripe helpers) and wire the RevenueCat VIP paywall UI on Settings
 - [x] Vary song openings, enforce selected styles/languages and minimum length, and replace Any voice with Mix voice
+- [x] Route all app AI through the owner's Gemini account with no Lovable AI fallback

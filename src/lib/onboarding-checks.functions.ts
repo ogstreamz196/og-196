@@ -80,7 +80,7 @@ async function runOne(key: string): Promise<CheckResult> {
     case "lovable_ai": {
       const miss = present("LOVABLE_API_KEY");
       if (miss) return miss;
-      return { ok: true, detail: "Key present — used by gateway calls." };
+      return { ok: true, detail: "Key present — connected services only, not app AI." };
     }
     case "telegram": {
       const miss = present("TELEGRAM_API_KEY");

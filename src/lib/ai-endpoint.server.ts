@@ -2,16 +2,15 @@
  * Central AI routing for the app.
  *
  * Everything text/vision related goes through the Boss's own Google Gemini
- * key (GEMINI_API_KEY) using Google's OpenAI-compatible endpoint, so the app
- * consumes ZERO Lovable AI credits. The Lovable gateway is only used as a
- * last-resort fallback if no Gemini key is configured.
+ * key (GEMINI_API_KEY) using Google's OpenAI-compatible endpoint. There is
+ * deliberately no Lovable AI fallback, so missing Gemini configuration fails closed.
  */
 
 export type AiChatTarget = {
   url: string;
   headers: Record<string, string>;
   model: string;
-  provider: "gemini" | "lovable";
+  provider: "gemini";
 };
 
 const GEMINI_OPENAI_URL =
@@ -28,18 +27,6 @@ export function aiChatTarget(): AiChatTarget | null {
       },
       model: process.env.GEMINI_MODEL || "gemini-2.5-flash",
       provider: "gemini",
-    };
-  }
-  const lovable = process.env.LOVABLE_API_KEY;
-  if (lovable) {
-    return {
-      url: "https://ai.gateway.lovable.dev/v1/chat/completions",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${lovable}`,
-      },
-      model: "google/gemini-3.7-flash",
-      provider: "lovable",
     };
   }
   return null;

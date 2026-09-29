@@ -53,7 +53,7 @@ export const improveLyricDescription = createServerFn({ method: "POST" })
 
     if (!res.ok) {
       if (res.status === 429) throw new Error("Rate limit — try again in a moment");
-      if (res.status === 402) throw new Error("AI credits exhausted");
+      if (res.status === 402) throw new Error("Gemini account quota is exhausted");
       throw new Error(`Improve failed (${res.status})`);
     }
     const json = (await res.json().catch(() => ({}))) as {

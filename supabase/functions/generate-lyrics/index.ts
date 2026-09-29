@@ -1,11 +1,9 @@
-// Lyrics generation. Primary provider is the Lovable AI Gateway (always-current
-// models, no user key); the user's own Gemini key is kept as a fallback.
+// Lyrics generation using the user's own Gemini key (GEMINI_API_KEY).
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { handlePreflight, jsonResponse } from "../_shared/cors.ts";
 import { adminClient, requireUser } from "../_shared/clients.ts";
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY") ?? "";
-const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY") ?? "";
 const GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") ?? "gemini-2.5-flash";
 
 async function getSetting(admin: SupabaseClient, key: string, fallback: number): Promise<number> {
@@ -21,8 +19,7 @@ Deno.serve(async (req) => {
   if (pre) return pre;
 
   try {
-    if (!GEMINI_API_KEY && !LOVABLE_API_KEY)
-      return jsonResponse({ error: "No lyrics model configured" }, 500);
+    if (!GEMINI_API_KEY) return jsonResponse({ error: "Gemini is not configured" }, 500);
 
     const auth = await requireUser(req);
     if (auth.error) return auth.error;
@@ -335,53 +332,7 @@ Deno.serve(async (req) => {
 
     await updateProgress(40, "Writing verses…");
 
-    // Turn (role, parts) history into OpenAI-style chat messages for the gateway.
-    type Turn = { role: string; parts: Array<{ text: string }> };
-    const toChatMessages = (contents: unknown[]) => [
-      { role: "system", content: systemPrompt },
-      ...(contents as Turn[]).map((c) => ({
-        role: c.role === "model" ? "assistant" : "user",
-        content: (c.parts ?? []).map((p) => p?.text ?? "").join(""),
-      })),
-    ];
-
     type Gen = { ok: boolean; status: number; text: string; detail?: string };
-
-    // Primary: Lovable AI Gateway (no user key, current models).
-    const callGateway = async (contents: unknown[]): Promise<Gen | null> => {
-      if (!LOVABLE_API_KEY) return null;
-      for (const model of ["google/gemini-3.7-flash", "google/gemini-3.6-flash"]) {
-        try {
-          const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Lovable-API-Key": LOVABLE_API_KEY,
-            },
-            body: JSON.stringify({
-              model,
-              messages: toChatMessages(contents),
-              temperature: 0.9,
-            }),
-          });
-          if (res.ok) {
-            const data = await res.json();
-            const text = (data?.choices?.[0]?.message?.content ?? "").toString().trim();
-            if (text) return { ok: true, status: 200, text };
-            continue;
-          }
-          const detail = await res.text();
-          console.error("Lovable AI error", model, res.status, detail.slice(0, 300));
-          // 402/403 are terminal for the workspace — surface them.
-          if (res.status === 402 || res.status === 403) {
-            return { ok: false, status: res.status, text: "", detail };
-          }
-        } catch (e) {
-          console.error("Lovable AI request failed", model, e);
-        }
-      }
-      return null;
-    };
 
     const postTo = (model: string, contents: unknown[]) =>
       fetch(modelUrl(model), {
@@ -403,34 +354,25 @@ Deno.serve(async (req) => {
         .join("")
         .trim();
 
-    // Fallback: the user's own Gemini key, retried across live model ids.
-    const FALLBACK_MODELS = [GEMINI_MODEL, GEMINI_MODEL, "gemini-2.0-flash"];
+    const GEMINI_MODELS = Array.from(new Set([GEMINI_MODEL, "gemini-2.0-flash"]));
     const callGemini = async (contents: unknown[]): Promise<Gen> => {
       if (!GEMINI_API_KEY) {
         return { ok: false, status: 503, text: "", detail: "No lyrics model available" };
       }
       let last: Gen = { ok: false, status: 503, text: "", detail: "No response" };
-      for (let i = 0; i < FALLBACK_MODELS.length; i++) {
-        const res = await postTo(FALLBACK_MODELS[i], contents);
+      for (let i = 0; i < GEMINI_MODELS.length; i++) {
+        const res = await postTo(GEMINI_MODELS[i], contents);
         if (res.ok) return { ok: true, status: 200, text: extractText(await res.json()) };
         const detail = await res.text();
         last = { ok: false, status: res.status, text: "", detail };
         if (res.status !== 429 && res.status < 500) return last;
-        console.error("Gemini transient error", FALLBACK_MODELS[i], res.status);
+        console.error("Gemini transient error", GEMINI_MODELS[i], res.status);
         await new Promise((r) => setTimeout(r, 1200 * (i + 1)));
       }
       return last;
     };
 
-    // Boss's own Gemini key first (zero Lovable credits); gateway only as a
-    // last-resort safety net if Gemini is missing or hard-failing.
-    const generate = async (contents: unknown[]): Promise<Gen> => {
-      const viaGemini = await callGemini(contents);
-      if (viaGemini.ok) return viaGemini;
-      const viaGateway = await callGateway(contents);
-      if (viaGateway?.ok) return viaGateway;
-      return viaGemini ?? viaGateway;
-    };
+    const generate = (contents: unknown[]): Promise<Gen> => callGemini(contents);
 
     const res = await generate([{ role: "user", parts: [{ text: userPrompt }] }]);
 
@@ -440,8 +382,6 @@ Deno.serve(async (req) => {
 
       if (res.status === 429)
         return jsonResponse({ error: "AI is busy right now — try again shortly" }, 429);
-      if (res.status === 402)
-        return jsonResponse({ error: "AI credits exhausted — top up to keep creating" }, 402);
       const txt = res.detail ?? "";
       console.error("Lyrics model error", res.status, txt);
       return jsonResponse({ error: "Lyrics generation failed", detail: txt.slice(0, 500) }, 502);

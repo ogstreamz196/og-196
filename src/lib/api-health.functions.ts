@@ -306,8 +306,8 @@ function checkMintSecret(): Partial_ {
 
 function checkLovable(): Partial_ {
   return process.env["LOVABLE_API_KEY"]
-    ? { status: "ok", detail: "Gateway key present." }
-    : missing("LOVABLE_API_KEY", "Re-enable the AI gateway so LOVABLE_API_KEY is re-issued.");
+    ? { status: "ok", detail: "Connected-service gateway key present; not used for AI." }
+    : missing("LOVABLE_API_KEY", "Reconnect the affected payment or service connection.");
 }
 
 type Spec = Pick<HealthCheck, "key" | "label" | "group" | "required"> & {
@@ -317,7 +317,7 @@ type Spec = Pick<HealthCheck, "key" | "label" | "group" | "required"> & {
 const SPECS: Spec[] = [
   {
     key: "gemini",
-    label: "GEMINI_API_KEY (lyrics)",
+    label: "GEMINI_API_KEY (all app AI)",
     group: "AI providers",
     required: true,
     run: checkGemini,
@@ -338,7 +338,7 @@ const SPECS: Spec[] = [
   },
   {
     key: "lovable_ai",
-    label: "LOVABLE_API_KEY (gateway)",
+    label: "LOVABLE_API_KEY (connected services only)",
     group: "Core",
     required: true,
     run: checkLovable,

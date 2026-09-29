@@ -570,7 +570,10 @@ async function runChatAI(
       if (res.status === 429) {
         await reply(chat_id, "⏱️ OG Bot is rate-limited, try again soon.");
       } else if (res.status === 402) {
-        await reply(chat_id, "💳 AI credits exhausted — Boss needs to top up Lovable AI.");
+        await reply(
+          chat_id,
+          "💳 Gemini account quota is exhausted — Boss needs to check Google AI billing.",
+        );
       } else {
         await reply(chat_id, `OG Bot couldn't respond right now (HTTP ${res.status}).`);
       }
