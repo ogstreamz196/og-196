@@ -851,7 +851,8 @@ export function OgChat({
           e.preventDefault();
           sendText(input);
         }}
-        className="sticky bottom-0 z-20 border-t border-border/80 bg-card/95 px-2 pb-[max(0.4rem,env(safe-area-inset-bottom))] pt-1.5 shadow-lg backdrop-blur transition-transform duration-150 supports-[backdrop-filter]:bg-card/75 sm:px-3 sm:py-2"
+        style={{ touchAction: "manipulation" }}
+        className="sticky bottom-0 z-40 border-t border-border/80 bg-card/95 px-2 pb-[max(0.4rem,env(safe-area-inset-bottom))] pt-1.5 shadow-lg backdrop-blur supports-[backdrop-filter]:bg-card/75 sm:px-3 sm:py-2"
       >
         {attachment && (
           <div className="mb-2 flex items-center gap-2 rounded-xl border border-border bg-muted/40 p-2">

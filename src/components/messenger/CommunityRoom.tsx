@@ -645,7 +645,8 @@ export function CommunityRoom() {
 
       <form
         onSubmit={submit}
-        className="sticky bottom-0 flex items-end gap-2 rounded-xl border border-border/60 bg-card/95 p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-lg backdrop-blur-md sm:p-2.5"
+        style={{ touchAction: "manipulation" }}
+        className="sticky bottom-0 z-40 flex items-end gap-2 rounded-xl border border-border/60 bg-card/95 p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-lg backdrop-blur-md sm:p-2.5"
       >
         <Textarea
           ref={composerRef}
@@ -654,9 +655,7 @@ export function CommunityRoom() {
             setText(e.target.value);
             broadcastTyping();
           }}
-          onFocus={() => {
-            requestAnimationFrame(() => jumpToBottom(true));
-          }}
+          style={{ touchAction: "manipulation" }}
           onKeyDown={(e) => {
             // On desktop: Enter sends, Shift+Enter newline.
             // On mobile (touch): Enter always inserts newline; tap Send to submit.
