@@ -21,8 +21,8 @@ export const improveLyricDescription = createServerFn({ method: "POST" })
     return { text, subjectName };
   })
   .handler(async ({ data, context }): Promise<{ improved: string; draftId: string | null }> => {
-    const { aiChatTarget } = await import("@/lib/ai-endpoint.server");
-    const ai = aiChatTarget();
+    const { aiChatTarget, fetchAiChat } = await import("@/lib/ai-endpoint.server");
+    const ai = aiChatTarget(context.userId);
     if (!ai) throw new Error("AI not configured");
 
     const system = [
@@ -36,24 +36,24 @@ export const improveLyricDescription = createServerFn({ method: "POST" })
       "- Output ONLY the rewritten description as plain prose.",
     ].join("\n");
 
-    const res = await fetch(ai.url, {
-      method: "POST",
-      headers: ai.headers,
-      body: JSON.stringify({
-        model: ai.model,
+    const { response: res, provider } = await fetchAiChat(
+      {
         temperature: 0.6,
         max_tokens: 220,
         messages: [
           { role: "system", content: system },
           { role: "user", content: data.text },
         ],
-      }),
-      signal: AbortSignal.timeout(15_000),
-    });
+      },
+      context.userId,
+    );
 
     if (!res.ok) {
       if (res.status === 429) throw new Error("Rate limit — try again in a moment");
-      if (res.status === 402) throw new Error("Gemini account quota is exhausted");
+      if (res.status === 402)
+        throw new Error(
+          `${provider === "gemini" ? "Gemini" : "ChatGPT"} account quota is exhausted`,
+        );
       throw new Error(`Improve failed (${res.status})`);
     }
     const json = (await res.json().catch(() => ({}))) as {

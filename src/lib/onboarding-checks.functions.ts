@@ -138,6 +138,8 @@ async function runOne(key: string): Promise<CheckResult> {
       );
     case "gemini":
       return present("GEMINI_API_KEY") ?? { ok: true, detail: "Key present." };
+    case "openai":
+      return present("OPENAI_API_KEY") ?? { ok: true, detail: "Key present." };
     case "perplexity":
       return present("PERPLEXITY_API_KEY") ?? { ok: true, detail: "Key present." };
     case "suno":

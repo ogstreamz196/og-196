@@ -9,6 +9,7 @@
 - On the native Capacitor welcome screen show only the manual account form and footer D.EV Google entry; leave web OAuth unchanged so existing website access remains intact.
 - Boss account deletion runs in an authenticated server function with a server-checked role and protected targets, because client-side role visibility must never authorize destructive actions.
 
-## AI provider
+## AI providers
 
-- Route all app AI inference through the owner's `GEMINI_API_KEY` with no Lovable AI fallback, so end-user AI activity never consumes Lovable AI credits.
+- Share ordinary chat inference between the owner's `GEMINI_API_KEY` and `OPENAI_API_KEY`, with one cross-provider fallback only for 429/5xx failures; use `PERPLEXITY_API_KEY` only for live web facts and never use Lovable AI for end-user inference.
+- Keep lyrics generation and audio transcription on Gemini because those flows use Gemini-specific media handling.

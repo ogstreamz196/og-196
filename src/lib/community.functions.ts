@@ -87,14 +87,9 @@ async function scoreRoast(
   botReply: string | null,
 ): Promise<number> {
   try {
-    const { aiChatTarget } = await import("@/lib/ai-endpoint.server");
-    const ai = aiChatTarget();
-    if (!ai) return 0;
-    const res = await fetch(ai.url, {
-      method: "POST",
-      headers: ai.headers,
-      body: JSON.stringify({
-        model: ai.model,
+    const { fetchAiChat } = await import("@/lib/ai-endpoint.server");
+    const { response: res } = await fetchAiChat(
+      {
         temperature: 0.2,
         messages: [
           {
@@ -120,9 +115,9 @@ async function scoreRoast(
               `CHALLENGER: ${content}` + (botReply ? `\n\nOG BOT CLAPBACK: ${botReply}` : ""),
           },
         ],
-      }),
-      signal: AbortSignal.timeout(15_000),
-    });
+      },
+      content,
+    );
     if (!res.ok) return 0;
     const json = (await res.json().catch(() => ({}))) as {
       choices?: { message?: { content?: string } }[];
@@ -181,9 +176,17 @@ export function calibrateAward(
   const trimmed = content.trim();
   if (!trimmed || isRepeat) return 0;
   const score = Math.max(0, Math.min(10, Math.round(rawScore)));
-  if (score < 3) return 0;
+  if (score < 2) return 0;
   const drops =
-    score <= 4 ? [1, 2] : score <= 6 ? [2, 3, 4] : score <= 8 ? [4, 5, 6, 7] : [7, 8, 9, 10];
+    score <= 2
+      ? [1]
+      : score <= 4
+        ? [1, 2]
+        : score <= 6
+          ? [2, 3, 4]
+          : score <= 8
+            ? [4, 5, 6, 7]
+            : [7, 8, 9, 10];
   const index = Math.min(drops.length - 1, Math.floor(random() * drops.length));
   return drops[index] ?? 0;
 }
@@ -237,8 +240,8 @@ export const postCommunityMessage = createServerFn({ method: "POST" })
     }[];
 
     // 3. Call the AI provider for a short reply (fire-and-forget; if it fails, just no reply)
-    const { aiChatTarget } = await import("@/lib/ai-endpoint.server");
-    const ai = aiChatTarget();
+    const { aiChatTarget, fetchAiChat } = await import("@/lib/ai-endpoint.server");
+    const ai = aiChatTarget(context.userId);
     const apiKey = ai ? "configured" : "";
     let botReply: string | null = null;
     if (ai) {
@@ -247,11 +250,8 @@ export const postCommunityMessage = createServerFn({ method: "POST" })
       // group room always leans savage unless the client explicitly opts out.
       const useFoul = data.foulMouth !== false;
       try {
-        const res = await fetch(ai.url, {
-          method: "POST",
-          headers: ai.headers,
-          body: JSON.stringify({
-            model: ai.model,
+        const { response: res } = await fetchAiChat(
+          {
             temperature: useFoul ? 1.05 : 0.85,
             messages: [
               { role: "system", content: useFoul ? FOUL_SYSTEM_PROMPT : SYSTEM_PROMPT },
@@ -263,9 +263,9 @@ export const postCommunityMessage = createServerFn({ method: "POST" })
                     : m.content,
               })),
             ],
-          }),
-          signal: AbortSignal.timeout(15_000),
-        });
+          },
+          context.userId,
+        );
         if (res.ok) {
           const json = (await res.json().catch(() => ({}))) as {
             choices?: { message?: { content?: string } }[];

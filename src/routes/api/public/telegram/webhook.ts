@@ -452,8 +452,9 @@ async function runChatAI(
   userText: string,
   roles: string[],
 ) {
-  const { aiChatTarget } = await import("@/lib/ai-endpoint.server");
-  const ai = aiChatTarget();
+  const { aiChatTarget, fetchAiChat, getLiveResearchContext, needsLiveResearch } =
+    await import("@/lib/ai-endpoint.server");
+  const ai = aiChatTarget(profileId);
   if (!ai) {
     await reply(chat_id, "AI not configured.");
     return;
@@ -545,19 +546,24 @@ async function runChatAI(
   });
 
   try {
-    const res = await fetch(ai.url, {
-      method: "POST",
-      headers: ai.headers,
-      body: JSON.stringify({
-        model: ai.model,
+    let currentUserText = userText;
+    if (needsLiveResearch(userText)) {
+      const research = await getLiveResearchContext(userText).catch(() => null);
+      if (research) {
+        currentUserText = `CURRENT WEB SOURCES:\n${research}\n\nUSER QUESTION:\n${userText}\n\nCite source URLs for current claims.`;
+      }
+    }
+    const { response: res, provider } = await fetchAiChat(
+      {
         temperature: foulMouth ? 0.9 : 0.75,
         messages: [
           { role: "system", content: system },
           ...history,
-          { role: "user", content: userText },
+          { role: "user", content: currentUserText },
         ],
-      }),
-    });
+      },
+      profileId,
+    );
 
     if (!res.ok) {
       if (!isAdminUser) {
@@ -572,7 +578,7 @@ async function runChatAI(
       } else if (res.status === 402) {
         await reply(
           chat_id,
-          "💳 Gemini account quota is exhausted — Boss needs to check Google AI billing.",
+          `💳 ${provider === "gemini" ? "Gemini" : "ChatGPT"} account quota is exhausted.`,
         );
       } else {
         await reply(chat_id, `OG Bot couldn't respond right now (HTTP ${res.status}).`);
