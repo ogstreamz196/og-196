@@ -191,6 +191,32 @@ export function calibrateAward(
   return drops[index] ?? 0;
 }
 
+/** Today's date as YYYY-MM-DD (UTC) — streaks are counted per calendar day. */
+export function todayISO(now: Date = new Date()): string {
+  return now.toISOString().slice(0, 10);
+}
+
+/** Roll the daily streak forward: same day keeps it, yesterday extends it. */
+export function nextStreak(
+  current: number,
+  lastDate: string | null,
+  today: string = todayISO(),
+): { days: number } {
+  if (!lastDate) return { days: 1 };
+  if (lastDate === today) return { days: Math.max(1, current) };
+  const yesterday = new Date(`${today}T00:00:00Z`);
+  yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+  if (lastDate === yesterday.toISOString().slice(0, 10)) return { days: Math.max(1, current) + 1 };
+  return { days: 1 };
+}
+
+/** Bonus tenths for streak milestones — paid at most once a day. */
+export function streakBonus(days: number): number {
+  if (days >= 7) return 3;
+  if (days >= 3) return 2;
+  return 0;
+}
+
 /** Post a user message to the community + trigger a short OG Bot reply. */
 export const postCommunityMessage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
