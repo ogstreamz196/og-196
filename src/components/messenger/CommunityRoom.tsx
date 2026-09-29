@@ -75,6 +75,12 @@ export function CommunityRoom() {
     queryFn: () => tallyFn(),
     staleTime: 30_000,
   });
+  const roastFn = useServerFn(getRoastOfTheDay);
+  const { data: roastOfDay } = useQuery({
+    queryKey: ["roast-of-the-day"],
+    queryFn: () => roastFn(),
+    staleTime: 120_000,
+  });
   const boardFn = useServerFn(getBattleLeaderboard);
   const [showBoard, setShowBoard] = useState(false);
   const { data: board, isLoading: boardLoading } = useQuery<{ rows: BattleLeaderboardRow[] }>({
