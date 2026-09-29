@@ -548,9 +548,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       return;
     }
     if (balance < fullUnlockCost) {
-      toast.error(
-        `Need ${fullUnlockCost} coins to unlock the HQ version — current balance ${balance}`,
-      );
+      setTopUp({ needed: fullUnlockCost, reason: "unlock the HQ version" });
       return;
     }
     setUnlockDialogOpen(true);
