@@ -148,7 +148,14 @@ function SongCardImpl({ song }: { song: Song }) {
         </div>
       </div>
 
-      <audio ref={audioRef} preload="auto" onEnded={handleEnded} className="hidden" />
+      <audio
+        ref={audioRef}
+        preload="auto"
+        onEnded={handleEnded}
+        className="hidden"
+        data-og-track={song.id}
+        data-og-title={song.title || "OG track"}
+      />
     </div>
   );
 }
