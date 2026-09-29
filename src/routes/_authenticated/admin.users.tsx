@@ -932,6 +932,36 @@ function EditUserPopover({ user, roles }: { user: ProfileRow; roles: string[] })
             <MoreHorizontal className="mr-1.5 h-3.5 w-3.5" /> Full settings & audit
           </Button>
         </Link>
+
+        <Separator />
+
+        <ConfirmAction
+          title={`Delete ${user.display_name ?? user.email ?? "this account"}?`}
+          description={
+            <p>
+              This permanently deletes the account, songs, coins and linked data. This cannot be
+              undone.
+            </p>
+          }
+          confirmLabel="Delete account"
+          tooltip="Permanently delete this user's account and all their data"
+          destructive
+          onConfirm={() => removeUser.mutateAsync().then(() => undefined)}
+        >
+          <Button
+            variant="destructive"
+            size="sm"
+            className="w-full"
+            disabled={removeUser.isPending}
+          >
+            {removeUser.isPending ? (
+              <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+            )}
+            Delete account
+          </Button>
+        </ConfirmAction>
       </PopoverContent>
     </Popover>
   );
