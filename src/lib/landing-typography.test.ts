@@ -46,8 +46,8 @@ describe("landing page typography parity", () => {
         expect(src).toContain(RULES.cardShadow);
       });
 
-      it("uses the home page max-w-7xl container", () => {
-        expect(src).toContain(RULES.container);
+      it("uses a centred landing container (max-w-5xl and up)", () => {
+        expect(src).toMatch(RULES.container);
       });
 
       it("uses the home page section rhythm (gap-14 or py-16+)", () => {
