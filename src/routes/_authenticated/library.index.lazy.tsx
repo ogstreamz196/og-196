@@ -1708,7 +1708,6 @@ function LibraryPage() {
                           onRemix={remixFromSong}
                           onDelete={setPendingDelete}
                         />
-
                       ))}
                     </ul>
                   </div>
@@ -1818,7 +1817,6 @@ function LibraryPage() {
                           onRemix={remixFromSong}
                           onDelete={isBoss ? setPendingDelete : undefined}
                         />
-
                       ))}
                     </ul>
                     <div ref={communitySentinelRef} className="h-1" aria-hidden />

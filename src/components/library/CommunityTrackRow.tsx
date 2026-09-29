@@ -14,7 +14,6 @@ import {
   Wand2,
 } from "lucide-react";
 
-
 import { toast } from "sonner";
 import { useSongAudio } from "@/hooks/use-song-audio";
 import { useProfile } from "@/hooks/use-profile";
@@ -59,7 +58,6 @@ function CommunityTrackRowImpl({
   /** Opens the creation wizard pre-loaded with this track's vibe. */
   onRemix?: (song: Song) => void;
 }) {
-
   const owned = variant === "owned";
   const hasAudio = !!(song.audio_path || song.sample_path);
   const isReady = song.status === "completed" && hasAudio;
@@ -170,7 +168,6 @@ function CommunityTrackRowImpl({
         </button>
       )}
       {owned && driveLink && (
-
         <a
           href={driveLink}
           target="_blank"
