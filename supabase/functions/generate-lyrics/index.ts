@@ -18,9 +18,7 @@ Deno.serve(async (req) => {
   const pre = handlePreflight(req);
   if (pre) return pre;
 
-  try {
-    if (!GEMINI_API_KEY)
-      return jsonResponse({ error: "No lyrics model configured" }, 500);
+    if (!GEMINI_API_KEY)      return jsonResponse({ error: "No lyrics model configured" }, 500);
 
     const auth = await requireUser(req);
     if (auth.error) return auth.error;
@@ -345,9 +343,6 @@ Deno.serve(async (req) => {
 
     type Gen = { ok: boolean; status: number; text: string; detail?: string };
 
-    // Primary: Lovable AI Gateway (no user key, current models).
-    };
-
     const postTo = (model: string, contents: unknown[]) =>
       fetch(modelUrl(model), {
         method: "POST",
@@ -368,8 +363,7 @@ Deno.serve(async (req) => {
         .join("")
         .trim();
 
-    // Fallback: the user's own Gemini key, retried across live model ids.
-    const FALLBACK_MODELS = [GEMINI_MODEL, GEMINI_MODEL, "gemini-2.0-flash"];
+        const FALLBACK_MODELS = [GEMINI_MODEL, GEMINI_MODEL, "gemini-2.0-flash"];
     const callGemini = async (contents: unknown[]): Promise<Gen> => {
       if (!GEMINI_API_KEY) {
         return { ok: false, status: 503, text: "", detail: "No lyrics model available" };
@@ -387,8 +381,6 @@ Deno.serve(async (req) => {
       return last;
     };
 
-    // Boss's own Gemini key first (zero Lovable credits); gateway only as a
-    // last-resort safety net if Gemini is missing or hard-failing.
     const generate = (contents: unknown[]): Promise<Gen> => callGemini(contents);
 
     const res = await generate([{ role: "user", parts: [{ text: userPrompt }] }]);
