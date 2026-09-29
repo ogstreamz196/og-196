@@ -314,7 +314,11 @@ function DashboardHome() {
         </div>
       </section>
 
+      {/* Daily free coin drop — one claim per day */}
+      <DailyDrop />
+
       {/* Primary CTAs — MusicHub + OG Bot at the top */}
+
       <section className="space-y-3">
         <div className="grid grid-cols-2 items-stretch gap-3 sm:gap-5">
           <PrimaryCard
