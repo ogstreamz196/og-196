@@ -55,6 +55,13 @@ export function useFillViewport<T extends HTMLElement>(bottomGutter = 0) {
       });
     }
 
+    // Keyboard slide-in: wait until the viewport stops moving, then commit once.
+    let settle = 0;
+    function measureSettled() {
+      window.clearTimeout(settle);
+      settle = window.setTimeout(measure, 120);
+    }
+
     compute();
     // Chrome above the panel (boss bar, earn strip, bottom nav) can mount late.
     const timers = [60, 250, 800].map((ms) => window.setTimeout(measure, ms));
@@ -63,17 +70,18 @@ export function useFillViewport<T extends HTMLElement>(bottomGutter = 0) {
     window.addEventListener("resize", measure);
     window.addEventListener("orientationchange", measure);
     window.addEventListener("pageshow", measure);
-    window.visualViewport?.addEventListener("resize", measure);
-    window.visualViewport?.addEventListener("scroll", measure);
+    window.visualViewport?.addEventListener("resize", measureSettled);
+    window.visualViewport?.addEventListener("scroll", measureSettled);
     return () => {
       if (frame) cancelAnimationFrame(frame);
+      window.clearTimeout(settle);
       timers.forEach(clearTimeout);
       ro.disconnect();
       window.removeEventListener("resize", measure);
       window.removeEventListener("orientationchange", measure);
       window.removeEventListener("pageshow", measure);
-      window.visualViewport?.removeEventListener("resize", measure);
-      window.visualViewport?.removeEventListener("scroll", measure);
+      window.visualViewport?.removeEventListener("resize", measureSettled);
+      window.visualViewport?.removeEventListener("scroll", measureSettled);
     };
   }, [bottomGutter]);
 
