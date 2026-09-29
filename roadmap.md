@@ -31,4 +31,4 @@
 - [x] Daily free coin drop (1-3 coins, once per day, server-issued)
 - [x] "Use this vibe" remix button on library and global tracks
 - [x] Purchase-complete page after card checkout (/buy-coins/return)
-- [ ] Enlarge and polish private and global Messenger typing areas, then verify phone behavior
+- [x] Enlarge and polish private and global Messenger typing areas, then verify phone behavior
