@@ -29,6 +29,7 @@ import { AppSidebar } from "./AppSidebar";
 import { HighContrastToggle } from "./HighContrastToggle";
 import { WelcomeBackdrop } from "./WelcomeBackdrop";
 import { MobileBottomNav } from "./MobileBottomNav";
+import { GlobalMiniPlayer } from "@/components/GlobalMiniPlayer";
 import { BackgroundMusicHeaderControl } from "@/components/PersistentBackgroundMusic";
 
 import ogStreamzLogo from "@/assets/ogstreamz-logo.jpg.asset.json";
