@@ -262,7 +262,7 @@ export function OgChat({
 
   const [jumpAnnounce, setJumpAnnounce] = useState("");
 
-  function scrollToBottom(behavior: ScrollBehavior = "smooth") {
+  function scrollToBottom(behavior: ScrollBehavior = "smooth", quiet = false) {
     const el = scrollRef.current;
     if (!el) return;
     const reduce =
@@ -271,6 +271,7 @@ export function OgChat({
     el.scrollTo({ top: el.scrollHeight, behavior: reduce ? "auto" : behavior });
     setAtBottom(true);
     setHasNew(false);
+    if (quiet) return;
     // Announce arrival + hand focus to composer so screen readers regain
     // context and keyboard users can immediately reply.
     setJumpAnnounce("Jumped to latest message");
@@ -945,7 +946,7 @@ export function OgChat({
             onFocus={() => {
               // The outer Messenger panel follows visualViewport. Keep the
               // newest messages visible without scrolling the whole page.
-              window.setTimeout(() => scrollToBottom("auto"), 120);
+              requestAnimationFrame(() => scrollToBottom("auto", true));
             }}
             className="min-h-14 max-h-36 flex-1 resize-none overflow-y-auto bg-transparent px-2 py-2 text-base leading-5 placeholder:text-muted-foreground/70 focus:outline-none disabled:cursor-not-allowed sm:px-2.5 sm:text-[15px]"
           />
