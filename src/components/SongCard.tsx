@@ -30,6 +30,7 @@ export interface Song {
 function SongCardImpl({ song }: { song: Song }) {
   const { data: settings } = useSettings();
   const sampleSeconds = settings?.sample_seconds ?? 60;
+  const referralUrl = useReferralUrl();
 
   const hasAudio = !!(song.audio_path || song.sample_path);
   // Already paid to unlock? Stream the complete master with no preview cap.
