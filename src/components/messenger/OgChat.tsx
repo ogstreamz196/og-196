@@ -305,9 +305,9 @@ export function OgChat({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages]);
 
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, [userId]);
+  // NOTE: no programmatic focus on mount. Mobile browsers refuse to open the
+  // keyboard for a focus() the user didn't trigger, but still mark the field as
+  // the active element — so the user's first real tap is swallowed as a no-op.
 
   // Apply seeded prompt (e.g. from "With OG" CTA on /library).
   useEffect(() => {
@@ -943,11 +943,7 @@ export function OgChat({
             enterKeyHint="send"
             aria-label="Message OG Bot in Loner Mode"
             data-testid="og-loner-composer"
-            onFocus={() => {
-              // The outer Messenger panel follows visualViewport. Keep the
-              // newest messages visible without scrolling the whole page.
-              requestAnimationFrame(() => scrollToBottom("auto", true));
-            }}
+            style={{ touchAction: "manipulation" }}
             className="min-h-14 max-h-36 flex-1 resize-none overflow-y-auto bg-transparent px-2 py-2 text-base leading-5 placeholder:text-muted-foreground/70 focus:outline-none disabled:cursor-not-allowed sm:px-2.5 sm:text-[15px]"
           />
           <button
