@@ -12,7 +12,10 @@ export const Route = createFileRoute("/_authenticated/buy-coins/return")({
   head: () => ({
     meta: [
       { title: "Purchase complete — OG BOT" },
-      { name: "description", content: "Your OG coin purchase is confirmed and your balance updated." },
+      {
+        name: "description",
+        content: "Your OG coin purchase is confirmed and your balance updated.",
+      },
       { property: "og:title", content: "Purchase complete — OG BOT" },
       { property: "og:description", content: "Your OG coin purchase is confirmed." },
       { property: "og:type", content: "website" },
@@ -60,7 +63,10 @@ function BuyCoinsReturn() {
           });
         await qc.invalidateQueries({ queryKey: ["profile"] });
       } catch (e) {
-        setState({ kind: "error", message: e instanceof Error ? e.message : "Payment check failed" });
+        setState({
+          kind: "error",
+          message: e instanceof Error ? e.message : "Payment check failed",
+        });
       }
     })();
   }, [qc]);
