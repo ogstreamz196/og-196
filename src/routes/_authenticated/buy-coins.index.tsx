@@ -422,7 +422,7 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
 
                               if (!pkg) {
                                 toast.error(
-                                  "Product not found in Google Play. Please configure RevenueCat products.",
+                                  "Google Play doesn't have this product yet — it becomes available once the app release is live on Play.",
                                 );
                                 setCheckoutLoading(false);
                                 return;
