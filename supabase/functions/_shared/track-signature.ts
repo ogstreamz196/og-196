@@ -9,12 +9,14 @@
 // - Clearly audible: a few seconds, blended with the lyrics and the backing.
 // - About once per minute of audio (and never twice in a row).
 
+// Written as real lyric lines (not a parenthesised direction) so the engine
+// actually sings them — parenthesised text is treated as optional ad-libs.
 export const SIGNATURE_LINE =
-  "(spoken/sung vocal tag, clearly audible and blended with the music, lasting a few seconds: this track is made by O G Bot, don't forget to visit O G Streamz dot co dot uk)";
+  "[Vocal tag]\nThis track was made by O G Bot\nDon't forget to visit O G Streamz dot co dot uk";
 
-// A cappella variant: no mention of "music" so the engine never adds backing.
+// A cappella variant: same sung words, voice only.
 export const SIGNATURE_LINE_ACAPPELLA =
-  "(spoken/sung vocal tag performed by voice alone, no instruments, lasting a few seconds: this track is made by O G Bot, don't forget to visit O G Streamz dot co dot uk)";
+  "[Vocal tag, voice only]\nThis track was made by O G Bot\nDon't forget to visit O G Streamz dot co dot uk";
 
 /** Instruction appended to prompt-only (non-custom) generations. */
 export const SIGNATURE_PROMPT_HINT =
