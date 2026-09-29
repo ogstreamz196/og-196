@@ -385,6 +385,11 @@ export function CommunityRoom() {
             </p>
           </div>
         </div>
+        {(tally?.streakDays ?? 0) > 1 ? (
+          <span className="ml-2 inline-flex shrink-0 items-center gap-1 rounded-full border border-coin/40 bg-coin/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-coin">
+            🔥 {tally?.streakDays}-day streak
+          </span>
+        ) : null}
         <div className="ml-auto flex shrink-0 items-center gap-1">
           <Button
             type="button"
