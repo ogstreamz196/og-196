@@ -1678,8 +1678,10 @@ function LibraryPage() {
                           key={s.id}
                           song={s}
                           variant="owned"
+                          onRemix={remixFromSong}
                           onDelete={setPendingDelete}
                         />
+
                       ))}
                     </ul>
                   </div>
