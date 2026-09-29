@@ -9,8 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 const MONTHLY_PLAN = {
-  title: "VIP Monthly",
-  price: "£5",
+  title: "OG VIP Monthly",
+  price: "£4.99",
   period: "/month",
   description: "Full VIP access, billed monthly. Cancel any time.",
 };

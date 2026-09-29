@@ -95,9 +95,9 @@ export interface VipPlan {
 export const VIP_PLAN: VipPlan = {
   bundleId: "og_vip_monthly",
   priceId: "og_vip_monthly",
-  priceCents: 500,
+  priceCents: 499,
   currency: "gbp",
-  label: "OG VIP — Monthly",
+  label: "OG VIP Monthly",
   cadence: "month",
 };
 
