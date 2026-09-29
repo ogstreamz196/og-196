@@ -269,32 +269,35 @@ export function CommunityRoom() {
     }
   }, [hasMore, loadingOlder, messages, olderFn, qc]);
 
-  const jumpToBottom = useCallback((quiet = false) => {
-    stickToBottomRef.current = true;
-    setShowJump(false);
-    setNewCount(0);
-    const el = scrollRef.current;
-    const reduce =
-      typeof window !== "undefined" &&
-      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    if (messages.length > 0) {
-      rowVirtualizer.scrollToIndex(messages.length - 1, { align: "end" });
-    }
-    // Smooth scroll on the container as a fallback (virtualizer jumps instantly).
-    if (el) {
-      requestAnimationFrame(() => {
-        el.scrollTo({ top: el.scrollHeight, behavior: reduce ? "auto" : "smooth" });
-      });
-    }
-    if (quiet) return;
-    // Announce arrival and hand focus to the composer so screen readers and
-    // keyboard users regain reading context.
-    setJumpAnnounce("Jumped to newest messages");
-    window.setTimeout(() => {
-      composerRef.current?.focus({ preventScroll: true });
-      setJumpAnnounce("");
-    }, 350);
-  }, [messages.length, rowVirtualizer]);
+  const jumpToBottom = useCallback(
+    (quiet = false) => {
+      stickToBottomRef.current = true;
+      setShowJump(false);
+      setNewCount(0);
+      const el = scrollRef.current;
+      const reduce =
+        typeof window !== "undefined" &&
+        window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+      if (messages.length > 0) {
+        rowVirtualizer.scrollToIndex(messages.length - 1, { align: "end" });
+      }
+      // Smooth scroll on the container as a fallback (virtualizer jumps instantly).
+      if (el) {
+        requestAnimationFrame(() => {
+          el.scrollTo({ top: el.scrollHeight, behavior: reduce ? "auto" : "smooth" });
+        });
+      }
+      if (quiet) return;
+      // Announce arrival and hand focus to the composer so screen readers and
+      // keyboard users regain reading context.
+      setJumpAnnounce("Jumped to newest messages");
+      window.setTimeout(() => {
+        composerRef.current?.focus({ preventScroll: true });
+        setJumpAnnounce("");
+      }, 350);
+    },
+    [messages.length, rowVirtualizer],
+  );
 
   const send = useMutation({
     mutationFn: (content: string) => postFn({ data: { content, foulMouth } }),
