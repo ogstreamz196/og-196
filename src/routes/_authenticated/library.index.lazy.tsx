@@ -387,6 +387,7 @@ function LibraryPage() {
           description,
           styleTags,
           language: selections.language,
+          vocal: "Mix voice",
           targetDurationSec,
           foulMouth,
           foulIntensity,
@@ -471,6 +472,7 @@ function LibraryPage() {
           title: title.trim() || null,
           style: style || null,
           language: selections.language || null,
+          vocal: "Mix voice",
           target_duration_sec: targetDurationSec,
         },
       });
@@ -649,7 +651,7 @@ function LibraryPage() {
     const songStyle = (override?.style ?? styleText).trim();
     const songLanguage = (override?.language ?? selections.language ?? "English").trim();
     const songDetails = (override?.description ?? personalDetails).trim();
-    const songVocal = (override?.vocal ?? "").trim();
+    const songVocal = (override?.vocal || "Mix voice").trim();
     const vocalsOnly = !!override?.vocalsOnly;
     const beatPath = (override?.beatPath ?? "").trim();
     const trackFoulIntensity = Math.max(
@@ -687,7 +689,6 @@ function LibraryPage() {
             .filter(Boolean)
         : styleTags
     )
-      .concat(songVocal && !/^any/i.test(songVocal) ? [songVocal] : [])
       .concat(vocalsOnlyTags);
     pipelineLockRef.current = true;
     const runId = ++pipelineRunRef.current;
@@ -707,6 +708,7 @@ function LibraryPage() {
             description,
             styleTags: songStyleTags,
             language: songLanguage,
+            vocal: songVocal,
             foulMouth: trackFoulMouth,
             foulIntensity: trackFoulIntensity,
             personalDetails: songDetails || undefined,
@@ -727,7 +729,7 @@ function LibraryPage() {
       advanceStage("saving");
       const style = [
         songStyle,
-        songVocal && !/^any/i.test(songVocal) ? songVocal : null,
+        songVocal,
         ...vocalsOnlyTags,
       ]
         .filter(Boolean)

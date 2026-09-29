@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
 
     const body = await req.json();
     const prompt = (body.prompt ?? "").toString().trim();
-    // Artist voice picked in the wizard ("Female vocal" | "Male vocal" | "Duo" | "Any voice").
+    // Artist voice picked in the wizard ("Female vocal" | "Male vocal" | "Duo" | "Mix voice").
     const vocal = (body.vocal ?? "").toString().trim().slice(0, 40);
     const vocalLower = vocal.toLowerCase();
     const vocalGender = vocalLower.startsWith("female")
@@ -102,7 +102,7 @@ Deno.serve(async (req) => {
       ? "male vocals, male lead singer"
       : vocalLower.startsWith("duo")
       ? "duet, male and female vocals trading lines"
-      : null;
+      : "mixed-voice mash-up with several clearly different singers, alternate male and female lead voices between sections, group vocals and layered harmonies in hooks, contrasting spoken and sung textures, do not use one lead voice for the whole track";
     const rawStyle = (body.style ?? "").toString().trim();
     const isNasheed = rawStyle.split(/\s*,\s*/).some((name: string) => /^nasheed$/i.test(name.trim()));
     const detailedStyle = expandGenreStyles(rawStyle);
@@ -122,10 +122,11 @@ Deno.serve(async (req) => {
       Math.max(180, Number.isFinite(rawTarget) ? Math.round(rawTarget) : 180),
     );
     const targetMinutes = Math.round(targetDurationSec / 60);
+    const minimumDuration = `${Math.floor(targetDurationSec / 60)}:${String(targetDurationSec % 60).padStart(2, "0")}`;
     const lengthStyleHint =
-      `full length track, approximately ${targetMinutes} minutes (${targetMinutes}:00 or longer), ` +
-      `complete arrangement with intro, verses, choruses, bridge and outro, no early fade out, ` +
-      `perform every lyric line provided`;
+      `minimum finished duration ${minimumDuration}, aim slightly longer than ${targetMinutes} minutes rather than shorter, ` +
+      `full-length complete arrangement, perform every lyric line and every written repeat, preserve all verses, choruses, bridges and the outro, ` +
+      `no shortened arrangement, no omitted sections, no early ending and no fade before ${minimumDuration}`;
     // Languages the artist picked. Suno has no language field, so the
     // requirement is steered through the style prompt: every picked language
     // must be sung, and section markers in the lyrics say which is which.
@@ -145,7 +146,7 @@ Deno.serve(async (req) => {
     // Multiple styles: make the section-to-section genre changes explicit.
     const styleCount = rawStyle ? rawStyle.split(/\s*,\s*/).filter(Boolean).length : 0;
     const multiStyleHint = styleCount > 1
-      ? `multi-genre arrangement blending ${rawStyle}, each section performed in the genre its lyric section marker names, deliberate transitions between sections`
+      ? `multi-genre mash-up using EVERY selected style: ${rawStyle}; give every style a clearly audible dedicated section, follow genre names in lyric section markers, blend all selected styles in the final hook, and use deliberate transitions so none are ignored`
       : null;
     // For pure a cappella, genre names must only colour the vocal delivery —
     // naming genres outright makes the engine add backing instrumentation.

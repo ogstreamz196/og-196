@@ -33,6 +33,7 @@ Deno.serve(async (req) => {
     const description = (body.description ?? "").toString().trim().slice(0, 1000);
     const styleTags = Array.isArray(body.styleTags) ? body.styleTags.slice(0, 10).map(String) : [];
     const language = (body.language ?? "English").toString().trim().slice(0, 200);
+    const vocal = (body.vocal ?? "Mix voice").toString().trim().slice(0, 40);
     let personalDetails = (body.personalDetails ?? "").toString().trim().slice(0, 500);
     const extraContext = (body.extraContext ?? "").toString().trim().slice(0, 1000);
     const subjectName = (body.subjectName ?? "").toString().trim().slice(0, 60);
@@ -46,17 +47,16 @@ Deno.serve(async (req) => {
       MIN_TARGET_SEC,
       Number.isFinite(requestedSec) ? Math.round(requestedSec) : MIN_TARGET_SEC,
     );
-    // ~170 sung words per minute of finished audio, measured against delivered
-    // tracks. Bounded on BOTH sides so a 4 minute request does not come back
-    // with 7 minutes of lyrics.
-    const WORDS_PER_MIN = 170;
+    // Aim beyond the requested floor because the audio model can sing quickly
+    // or compress transitions. The final track must not land under the choice.
+    const WORDS_PER_MIN = 165;
     const minWords = Math.round((targetSec / 60) * WORDS_PER_MIN);
     const aimLow = minWords;
-    const aimHigh = Math.round(minWords * 1.15);
+    const aimHigh = Math.round(minWords * 1.12);
     const minLines = Math.round(minWords / 7);
     const aimLines = Math.round(minLines * 1.2);
     const mmss = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
-    const targetLabel = `${mmss(Math.max(0, targetSec - 20))}–${mmss(targetSec + 20)}`;
+    const targetLabel = `${mmss(targetSec)}–${mmss(targetSec + 30)}`;
 
 
     if (!songName && !description) {
@@ -219,8 +219,27 @@ Deno.serve(async (req) => {
       : "[Intro] (4 lines) → [Verse 1] (8 lines) → [Pre-Chorus] (4 lines) → [Chorus] (6 lines, hook) → [Verse 2] (8 lines) → [Pre-Chorus] (4 lines) → [Chorus] (6 lines) → [Bridge] (6 lines) → [Verse 3] (6 lines) → [Chorus] (final, lifted, 8 lines) → [Outro] (4 lines)";
 
     const multiStyleRule = styleTags.length > 1
-      ? ` MULTI-STYLE REQUIREMENT (critical): the artist picked ${styleTags.length} styles — ${styleTags.join(", ")}. Every one must be audible in the finished track, so give each style its own section and note it on the marker line, e.g. "[Verse 2 – ${styleTags[1]}]". Match each section's cadence, line length, rhyme density and vocabulary to that style (rap sections in bars with tight internal rhyme, ballad sections in longer sung lines, dance sections in short chantable lines), and let the transitions feel deliberate rather than random. The hook blends the two lead styles (${styleTags.slice(0, 2).join(" + ")}).`
+      ? ` MULTI-STYLE REQUIREMENT (critical): the artist picked ${styleTags.length} styles — ${styleTags.join(", ")}. EVERY selected style must be used, with none treated as optional. Give each style a clearly labelled dedicated section, e.g. "[Verse 2 – ${styleTags[1]}]"; if there are more styles than normal sections, split a verse into consecutive labelled style passages. Match cadence, line length, rhyme density and vocabulary to each style, make deliberate transitions, then blend ALL selected styles in the final hook.`
       : "";
+
+    const mixedVoice = !vocal || /^(?:any|mix)/i.test(vocal);
+    const voiceRule = mixedVoice
+      ? ` MIX-VOICE REQUIREMENT (critical): make this a vocal mash-up with several clearly different performers. Label changing vocal roles in section markers: alternate male lead, female lead, contrasting character voices, spoken delivery, call-and-response group vocals and layered ensemble harmonies. No single singer may lead the whole song. Let voices trade lines inside at least one verse and combine in every chorus.`
+      : /^duo/i.test(vocal)
+        ? ` DUO REQUIREMENT: write for two contrasting singers who trade lines and join for every hook; label their hand-offs in section markers.`
+        : ` VOCAL REQUIREMENT: write the performance for ${vocal}, keeping that vocal identity consistent.`;
+
+    const introApproaches = [
+      "open mid-scene with one concrete sensory image from the user's brief",
+      "open with a short direct quote or question that could only belong to this story",
+      "open with the subject's name inside an immediate action line",
+      "open with a melodic fragment of the hook, then reveal the scene",
+      "open with a specific memory, place or object from the user's brief",
+      "open cold with an unexpected but relevant statement, without announcing the genre or song",
+    ];
+    const introApproach = introApproaches[crypto.getRandomValues(new Uint32Array(1))[0] % introApproaches.length];
+    const originalityRule =
+      ` ORIGINAL OPENING REQUIREMENT (critical): ${introApproach}. The first four lyric lines must be specific to this song and unlike generic AI lyrics. Never begin by announcing what the song is or is not. BANNED anywhere in the intro: “this ain't no lullaby”, “this is no lullaby”, “ain't no lullaby”, “this ain't no ordinary”, “listen up”, “yeah yeah”, “once upon a time”, “in a world”, and any close rewrite of those clichés. Do not use filler hype before the story starts.`;
 
     const vocalsOnlyRule = vocalsOnly
       ? ` VOCALS-ONLY REQUIREMENT (critical): this is a pure a cappella track — human voice and humming ONLY, zero instruments. Section markers must only ever describe vocal moments (e.g. [Verse], [Chorus], [Humming Interlude], [Whisper], [Ad-libs]). NEVER write [Drop], [Beat Drop], [Instrumental], [Guitar Solo], [Break] or any marker that names an instrument or production element — write "humming", "vocal run" or "layered harmonies" instead.`
@@ -230,11 +249,11 @@ Deno.serve(async (req) => {
       : "";
 
     const structureRule =
-      ` Deliver a COMPLETE, performable song that runs ${targetLabel} when sung — NOT longer. That means ${aimLow}–${aimHigh} words and ${minLines}–${aimLines} lyric lines (excluding section markers). Going over ${aimHigh} words is a failure: trim sections rather than exceed it. Follow this structure for the chosen style: ${structure}.` +
+      ` Deliver a COMPLETE, performable song that runs at least ${mmss(targetSec)} when sung, aiming for ${targetLabel}. That means ${aimLow}–${aimHigh} words and ${minLines}–${aimLines} lyric lines (excluding section markers). Never come in under ${aimLow} words; use the full structure rather than rushing lines. Follow this structure for the chosen style: ${structure}.` +
       ` Use the bracketed section markers verbatim (e.g. [Verse 1], [Chorus], [Bridge], [Outro]), each on its own line, with a blank line between sections. Every section must have lyrics — no placeholders, no "(instrumental)" unless the structure explicitly says so.` +
       ` The [Chorus] must be written out IN FULL every time it appears (never write "repeat chorus" or "x2" as a shortcut) — it is the same repeatable hook tied to the song title or central theme.` +
       ` Do NOT cut the song short either — hit every section in the structure and stay inside the word range given.` +
-      multiStyleRule + multiLanguageRule + singleLanguageRule + englishRemixRule + vocalsOnlyRule + nasheedRule;
+      multiStyleRule + multiLanguageRule + singleLanguageRule + englishRemixRule + voiceRule + originalityRule + vocalsOnlyRule + nasheedRule;
 
 
     // Four exact levels. Level zero always follows the clean PG prompt below.
@@ -397,9 +416,22 @@ Deno.serve(async (req) => {
     let lyrics = res.text;
 
 
-    // Length guard: enforce the minimum target. If the model came back short,
-    // ask it to extend the SAME song (never a new one), up to twice.
+    // Quality guard: repair a banned generic opening, then enforce the minimum
+    // target while preserving every requested style, language and vocal role.
     const wordCount = (t: string) => t.split(/\s+/).filter(Boolean).length;
+    const hasBannedOpening = (t: string) => {
+      const opening = t.split("\n").filter((line) => line.trim() && !/^\s*\[/.test(line)).slice(0, 4).join(" ");
+      return /(?:this\s+(?:ain['’]?t|is)\s+no\s+lullaby|ain['’]?t\s+no\s+lullaby|this\s+ain['’]?t\s+no\s+ordinary|listen\s+up|yeah\s+yeah|once\s+upon\s+a\s+time|in\s+a\s+world)/i.test(opening);
+    };
+    if (lyrics && hasBannedOpening(lyrics)) {
+      await updateProgress(84, "Refreshing the opening…");
+      const revised = await generate([
+        { role: "user", parts: [{ text: userPrompt }] },
+        { role: "model", parts: [{ text: lyrics }] },
+        { role: "user", parts: [{ text: `Rewrite the COMPLETE same song because its opening uses a banned generic cliché. Replace only the opening concept with this direction: ${introApproach}. Preserve the title, story, hook, minimum length, every selected style (${styleTags.join(", ") || "the chosen style"}), every selected language (${languagesLabel}), and all vocal-role labels. Output ONLY the complete lyrics.` }] },
+      ]);
+      if (revised.ok && revised.text && !hasBannedOpening(revised.text)) lyrics = revised.text;
+    }
     for (let attempt = 0; attempt < 2 && lyrics && wordCount(lyrics) < minWords; attempt++) {
       await updateProgress(88, "Extending to full length…");
       try {
@@ -410,7 +442,7 @@ Deno.serve(async (req) => {
             role: "user",
             parts: [{
               text:
-                `This draft is too short for a ${mmss(targetSec)} song. Rewrite the SAME song, keeping the existing title, theme, hook wording and section markers, but expand it to at least ${aimLow} words and ${minLines}+ lyric lines: add the missing sections from the structure, write every chorus out in full, and lengthen thin verses with new on-theme lines (no filler, no repetition beyond the hook). Output ONLY the complete lyrics.`,
+                 `This draft is too short for the requested MINIMUM of ${mmss(targetSec)}. Rewrite the SAME song, keeping its title, theme, hook and original opening, but expand it to ${aimLow}–${aimHigh} words and ${minLines}+ lyric lines. Preserve and clearly label EVERY selected style (${styleTags.join(", ") || "the chosen style"}), EVERY selected language (${languagesLabel}), and all ${mixedVoice ? "mixed vocal roles" : vocal} instructions. Add missing sections, write every chorus in full, and lengthen thin verses with new on-theme lines. Output ONLY the complete lyrics.`,
             }],
           },
         ]);

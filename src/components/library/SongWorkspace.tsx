@@ -101,7 +101,7 @@ const LANGUAGES = orderLanguages([
 
 const LANG_RE = /Language:\s*(?:write the lyrics in\s*)?([A-Za-z][A-Za-z\s+]{1,80})/i;
 
-const VOCALS = ["Any voice", "Female vocal", "Male vocal", "Duo"];
+const VOCALS = ["Mix voice", "Female vocal", "Male vocal", "Duo"];
 
 /** Styles offered as chips — curated first, then the rest of the pool. */
 const STYLE_OPTIONS: string[] = (() => {
@@ -147,10 +147,11 @@ function splitStyles(style: string | null | undefined): { known: string[]; extra
 /** Recover the voice choice from the saved style tags. */
 function detectVocal(style: string | null | undefined): string {
   const s = (style ?? "").toLowerCase();
+  if (s.includes("mix voice") || s.includes("mixed voice")) return "Mix voice";
   if (s.includes("duet") || s.includes("duo")) return "Duo";
   if (s.includes("female")) return "Female vocal";
   if (s.includes("male")) return "Male vocal";
-  return "Any voice";
+  return "Mix voice";
 }
 
 function detectLanguages(text: string | null | undefined): string[] {
@@ -429,9 +430,9 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
           songName: title.trim(),
           description: nextBriefValue.trim(),
           styleTags: styleTags,
-          vocal: vocal && vocal !== "Any voice" ? vocal : null,
+          vocal: vocal || "Mix voice",
           vocals_only: vocalsOnly,
-          target_duration_sec: targetMinutes * 60,
+          targetDurationSec: targetMinutes * 60,
           foulMouth: isNasheed ? false : foulMouth,
           foulIntensity: displayedFoulIntensity,
           language: languageValue,
@@ -506,7 +507,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
           title: title.trim() || null,
           style: styleValue || song.style || null,
           language: languageValue,
-          vocal: vocal && vocal !== "Any voice" ? vocal : null,
+          vocal: vocal || "Mix voice",
           vocals_only: vocalsOnly,
           beat_path: song.beat_path ?? null,
           target_duration_sec: targetMinutes * 60,
@@ -801,7 +802,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-1.5">
                     <Label htmlFor="song-vocal">Voice</Label>
-                    <Select value={vocal || "Any voice"} onValueChange={setVocal}>
+                    <Select value={vocal || "Mix voice"} onValueChange={setVocal}>
                       <SelectTrigger id="song-vocal">
                         <SelectValue />
                       </SelectTrigger>
