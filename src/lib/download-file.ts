@@ -33,7 +33,8 @@ async function nativeDownload(url: string, filename: string): Promise<boolean> {
       directory: Directory.Cache,
     });
     const { uri } = await Filesystem.getUri({ path: name, directory: Directory.Cache });
-    nativeSavedFiles.set(filename, cached.path ? uri : uri);
+    void cached;
+    nativeSavedFiles.set(filename, uri);
 
     // Best-effort permanent copy on the phone.
     try {
