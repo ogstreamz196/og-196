@@ -270,6 +270,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               </div>
             </main>
 
+            <GlobalMiniPlayer />
             <MobileBottomNav />
           </div>
         </div>
