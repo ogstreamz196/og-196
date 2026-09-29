@@ -244,7 +244,9 @@ export const chatOgBot = createServerFn({ method: "POST" })
         console.error(`${provider} API error`, res.status, text);
         if (res.status === 429) throw new Error("OG Bot is rate-limited, try again soon.");
         if (res.status === 402)
-          throw new Error(`${provider === "gemini" ? "Gemini" : "ChatGPT"} account quota is exhausted.`);
+          throw new Error(
+            `${provider === "gemini" ? "Gemini" : "ChatGPT"} account quota is exhausted.`,
+          );
         throw new Error(`OG Bot couldn't respond right now (HTTP ${res.status})`);
       }
 

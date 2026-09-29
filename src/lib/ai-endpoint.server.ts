@@ -94,7 +94,10 @@ export function needsLiveResearch(text: string): boolean {
 export async function getLiveResearchContext(query: string): Promise<string | null> {
   const key = process.env.PERPLEXITY_API_KEY;
   if (!key) return null;
-  const cleaned = query.replace(/^\s*(?:\/research|research:)\s*/i, "").trim().slice(0, 500);
+  const cleaned = query
+    .replace(/^\s*(?:\/research|research:)\s*/i, "")
+    .trim()
+    .slice(0, 500);
   if (!cleaned) return null;
   const response = await fetch("https://api.perplexity.ai/search", {
     method: "POST",
