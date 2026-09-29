@@ -907,8 +907,8 @@ export function CreateNowWizard({
             {step < TOTAL_STEPS && (
               <Button
                 type="button"
-                onClick={next}
-                disabled={!stepValid}
+                onClick={() => void next()}
+                disabled={!stepValid || naming}
                 className="ml-auto min-h-11 min-w-0 flex-1 gap-1.5 whitespace-nowrap bg-gradient-brand font-black uppercase tracking-wide text-primary-foreground shadow-glow sm:flex-none"
               >
                 Next
