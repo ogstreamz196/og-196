@@ -24,35 +24,48 @@ export async function shareTrack({
   const text = `🎧 "${title}" — made with OG Bot on OG Streamz`;
   const nav = typeof navigator !== "undefined" ? navigator : undefined;
 
-  // Inside the phone app the web share sheet can't send files, so save the MP3
-  // to the app cache and open the native Android/iOS share sheet with it.
-  if (blob) {
-    try {
-      const { Capacitor } = await import("@capacitor/core");
-      if (Capacitor.isNativePlatform() && Capacitor.isPluginAvailable("Share")) {
-        const [{ Filesystem, Directory }, { Share }] = await Promise.all([
+  // Inside the phone app the web share sheet can't send files, so share the MP3
+  // the native layer already downloaded (or write the bytes we have).
+  let isNative = false;
+  try {
+    const { Capacitor } = await import("@capacitor/core");
+    isNative = Capacitor.isNativePlatform();
+    if (isNative && Capacitor.isPluginAvailable("Share")) {
+      const [{ Filesystem, Directory }, { Share }, { nativeSavedFiles, safeFileName }] =
+        await Promise.all([
           import("@capacitor/filesystem"),
           import("@capacitor/share"),
+          import("@/lib/download-file"),
         ]);
+      let uri = nativeSavedFiles.get(filename);
+      if (!uri && blob) {
         const data = await new Promise<string>((resolve, reject) => {
           const r = new FileReader();
           r.onload = () => resolve(String(r.result).split(",")[1] ?? "");
           r.onerror = () => reject(r.error);
           r.readAsDataURL(blob);
         });
-        const safeName = filename.replace(/[^\w.\- ]+/g, "_") || "og-track.mp3";
         const saved = await Filesystem.writeFile({
-          path: safeName,
+          path: safeFileName(filename),
           data,
           directory: Directory.Cache,
         });
-        await Share.share({ title, text, files: [saved.uri], dialogTitle: "Share your track" });
+        uri = saved.uri;
+      }
+      if (uri) {
+        toast.success("Track saved to your phone (Documents › OG BOT)");
+        await Share.share({ title, text, files: [uri], dialogTitle: "Share your track" });
         return;
       }
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      if (/cancel/i.test(msg)) return;
     }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (/cancel/i.test(msg)) return;
+    console.warn("[shareTrack] native share failed", e);
+  }
+  if (isNative) {
+    toast.error("Couldn't save the track — check your connection and try again");
+    return;
   }
 
   try {
