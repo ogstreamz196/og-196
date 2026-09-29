@@ -230,6 +230,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const [genPreview, setGenPreview] = useState(false);
   const [unlocking, setUnlocking] = useState(false);
   const [unlockDialogOpen, setUnlockDialogOpen] = useState(false);
+  const [topUp, setTopUp] = useState<{ needed: number; reason: string } | null>(null);
   const [missing, setMissing] = useState(false);
   const [recheckActive, setRecheckActive] = useState(false);
   const [recheckCount, setRecheckCount] = useState(0);
