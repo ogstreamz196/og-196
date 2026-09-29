@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calibrateAward, estimateRoastFloor } from "./community.functions";
+import { calibrateAward, estimateRoastFloor, nextStreak, streakBonus } from "./community.functions";
 
 describe("estimateRoastFloor", () => {
   it("recognises clear insults even if the external judge returns zero", () => {
