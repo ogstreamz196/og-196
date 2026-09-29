@@ -15,7 +15,9 @@ const RULES = {
   // fluid clamp() pattern used on the home/portal heroes.
   cardTitle: /text-(?:3xl|4xl|5xl|6xl)\s+font-(?:black|semibold|bold)|text-\[clamp\(/,
   cardBody: /\btext-lg\b/,
-  container: "max-w-7xl",
+  // Welcome was deliberately tightened (max-w-5xl/6xl) so the hero stops
+  // looking stretched on phones; anything from 5xl up keeps the page centred.
+  container: /\bmax-w-(?:5xl|6xl|7xl)\b/,
   // Section rhythm: either the flex `gap-14` used on home/trust/portal main
   // wrappers, or section-level vertical padding for the long-form welcome page.
   sectionRhythm: /\bgap-14\b|\bpy-1[6-9]\b|\bpy-2[0-9]\b/,
@@ -44,8 +46,8 @@ describe("landing page typography parity", () => {
         expect(src).toContain(RULES.cardShadow);
       });
 
-      it("uses the home page max-w-7xl container", () => {
-        expect(src).toContain(RULES.container);
+      it("uses a centred landing container (max-w-5xl and up)", () => {
+        expect(src).toMatch(RULES.container);
       });
 
       it("uses the home page section rhythm (gap-14 or py-16+)", () => {

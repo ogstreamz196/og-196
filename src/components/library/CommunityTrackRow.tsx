@@ -157,15 +157,23 @@ function CommunityTrackRowImpl({
   const actions = (
     <div className="flex shrink-0 items-center gap-1.5">
       {onRemix && (
-        <button
-          type="button"
-          onClick={() => onRemix(song)}
-          aria-label={`Use this vibe from ${title}`}
-          title="Use this vibe"
-          className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-amber-400/40 bg-amber-500/15 text-amber-300 transition-colors hover:bg-amber-500/25"
-        >
-          <Wand2 className="h-4 w-4" />
-        </button>
+        <div className="flex shrink-0 flex-col items-center">
+          <span
+            aria-hidden
+            className="mb-0.5 text-[8px] font-black uppercase leading-none tracking-[0.12em] text-amber-300/90"
+          >
+            Remix
+          </span>
+          <button
+            type="button"
+            onClick={() => onRemix(song)}
+            aria-label={`Use this vibe from ${title}`}
+            title="Use this vibe"
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-amber-400/40 bg-amber-500/15 text-amber-300 transition-colors hover:bg-amber-500/25"
+          >
+            <Wand2 className="h-4 w-4" />
+          </button>
+        </div>
       )}
       {owned && driveLink && (
         <a

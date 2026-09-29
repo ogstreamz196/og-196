@@ -68,7 +68,17 @@ export function MessengerWelcomeDialog({
         if (!o) onDismiss();
       }}
     >
-      <DialogContent className="max-h-[calc(100dvh-1rem)] w-[calc(100vw-1rem)] max-w-md gap-3 overflow-y-auto bg-card/98 px-3 pb-3 pt-4 shadow-2xl backdrop-blur-xl sm:gap-4 sm:p-6">
+      <DialogContent
+        // Radix hands focus to the first field behind the dialog on close. On a
+        // phone that silently focuses the message box without opening the
+        // keyboard, so the user's next real tap does nothing. Leave focus on
+        // the page body instead and let the tap own it.
+        onCloseAutoFocus={(event) => {
+          event.preventDefault();
+          (document.activeElement as HTMLElement | null)?.blur?.();
+        }}
+        className="max-h-[calc(100dvh-1rem)] w-[calc(100vw-1rem)] max-w-md gap-3 overflow-y-auto bg-card/98 px-3 pb-3 pt-4 shadow-2xl backdrop-blur-xl sm:gap-4 sm:p-6"
+      >
         <DialogHeader className="items-center !text-center">
           <img
             src={ogBotAsset.url}

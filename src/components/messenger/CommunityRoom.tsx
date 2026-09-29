@@ -269,32 +269,35 @@ export function CommunityRoom() {
     }
   }, [hasMore, loadingOlder, messages, olderFn, qc]);
 
-  const jumpToBottom = useCallback((quiet = false) => {
-    stickToBottomRef.current = true;
-    setShowJump(false);
-    setNewCount(0);
-    const el = scrollRef.current;
-    const reduce =
-      typeof window !== "undefined" &&
-      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    if (messages.length > 0) {
-      rowVirtualizer.scrollToIndex(messages.length - 1, { align: "end" });
-    }
-    // Smooth scroll on the container as a fallback (virtualizer jumps instantly).
-    if (el) {
-      requestAnimationFrame(() => {
-        el.scrollTo({ top: el.scrollHeight, behavior: reduce ? "auto" : "smooth" });
-      });
-    }
-    if (quiet) return;
-    // Announce arrival and hand focus to the composer so screen readers and
-    // keyboard users regain reading context.
-    setJumpAnnounce("Jumped to newest messages");
-    window.setTimeout(() => {
-      composerRef.current?.focus({ preventScroll: true });
-      setJumpAnnounce("");
-    }, 350);
-  }, [messages.length, rowVirtualizer]);
+  const jumpToBottom = useCallback(
+    (quiet = false) => {
+      stickToBottomRef.current = true;
+      setShowJump(false);
+      setNewCount(0);
+      const el = scrollRef.current;
+      const reduce =
+        typeof window !== "undefined" &&
+        window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+      if (messages.length > 0) {
+        rowVirtualizer.scrollToIndex(messages.length - 1, { align: "end" });
+      }
+      // Smooth scroll on the container as a fallback (virtualizer jumps instantly).
+      if (el) {
+        requestAnimationFrame(() => {
+          el.scrollTo({ top: el.scrollHeight, behavior: reduce ? "auto" : "smooth" });
+        });
+      }
+      if (quiet) return;
+      // Announce arrival and hand focus to the composer so screen readers and
+      // keyboard users regain reading context.
+      setJumpAnnounce("Jumped to newest messages");
+      window.setTimeout(() => {
+        composerRef.current?.focus({ preventScroll: true });
+        setJumpAnnounce("");
+      }, 350);
+    },
+    [messages.length, rowVirtualizer],
+  );
 
   const send = useMutation({
     mutationFn: (content: string) => postFn({ data: { content, foulMouth } }),
@@ -645,7 +648,8 @@ export function CommunityRoom() {
 
       <form
         onSubmit={submit}
-        className="sticky bottom-0 flex items-end gap-2 rounded-xl border border-border/60 bg-card/95 p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-lg backdrop-blur-md sm:p-2.5"
+        style={{ touchAction: "manipulation" }}
+        className="sticky bottom-0 z-40 flex items-end gap-2 rounded-xl border border-border/60 bg-card/95 p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-lg backdrop-blur-md sm:p-2.5"
       >
         <Textarea
           ref={composerRef}
@@ -654,9 +658,7 @@ export function CommunityRoom() {
             setText(e.target.value);
             broadcastTyping();
           }}
-          onFocus={() => {
-            requestAnimationFrame(() => jumpToBottom(true));
-          }}
+          style={{ touchAction: "manipulation" }}
           onKeyDown={(e) => {
             // On desktop: Enter sends, Shift+Enter newline.
             // On mobile (touch): Enter always inserts newline; tap Send to submit.
