@@ -54,3 +54,23 @@ describe("calibrateAward", () => {
     ).toBe(10);
   });
 });
+
+describe("daily streaks", () => {
+  it("starts a streak on the first battle", () => {
+    expect(nextStreak(0, null, "2026-09-29").days).toBe(1);
+  });
+  it("extends on consecutive days", () => {
+    expect(nextStreak(2, "2026-09-28", "2026-09-29").days).toBe(3);
+  });
+  it("keeps the streak within the same day", () => {
+    expect(nextStreak(3, "2026-09-29", "2026-09-29").days).toBe(3);
+  });
+  it("resets after a missed day", () => {
+    expect(nextStreak(5, "2026-09-26", "2026-09-29").days).toBe(1);
+  });
+  it("pays bonuses at 3 and 7 days only", () => {
+    expect(streakBonus(2)).toBe(0);
+    expect(streakBonus(3)).toBe(2);
+    expect(streakBonus(7)).toBe(3);
+  });
+});
