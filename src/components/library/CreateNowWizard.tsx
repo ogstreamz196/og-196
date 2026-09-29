@@ -414,7 +414,7 @@ export function CreateNowWizard({
             {step === 3 && "Language & vocals"}
           </DialogTitle>
           <DialogDescription className="text-sm">
-            {step === 1 && "Name it, tell us who it's for, how long it runs, and what it's about."}
+            {step === 1 && "Tell us who it's for, how long it runs, and what it's about."}
             {step === 2 && "Stack as many styles as you like, then pick the voice."}
             {step === 3 &&
               "Pick the language it's sung in. Flip vocals only to sing over your own beat."}
@@ -433,35 +433,17 @@ export function CreateNowWizard({
               <div className="space-y-5">
                 <div className="space-y-3 rounded-xl border border-border bg-background/40 p-3">
                   <Label
-                    htmlFor="wiz-title"
-                    className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
-                  >
-                    Title of song{" "}
-                    <span className="normal-case tracking-normal text-muted-foreground/80">
-                      — optional, we'll name it for you
-                    </span>
-                  </Label>
-                  <Input
-                    id="wiz-title"
-                    autoFocus
-                    value={title}
-                    maxLength={120}
-                    onChange={(e) => setTitle(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && void next()}
-                    placeholder="Leave blank and OG Bot names it"
-                    className="h-11 rounded-lg border border-border bg-background text-base font-semibold"
-                  />
-                </div>
-
-                <div className="space-y-3 rounded-xl border border-border bg-background/40 p-3">
-                  <Label
                     htmlFor="wiz-subject"
                     className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                   >
-                    Name of person
+                    Name of person{" "}
+                    <span className="normal-case tracking-normal text-muted-foreground/80">
+                      — this headlines your track title
+                    </span>
                   </Label>
                   <Input
                     id="wiz-subject"
+                    autoFocus
                     value={subjectName}
                     maxLength={60}
                     onChange={(e) => setSubjectName(e.target.value)}
