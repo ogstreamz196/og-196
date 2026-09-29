@@ -24,9 +24,14 @@ describe("calibrateAward", () => {
     expect(calibrateAward(8, "same line", 0, true)).toBe(0);
   });
 
-  it("does not award random chat or generic insults", () => {
+  it("does not award random chat", () => {
     expect(calibrateAward(0, "how is everyone doing today?", 0, false, () => 0)).toBe(0);
-    expect(calibrateAward(2, "you are rubbish", 0, false, () => 0.9)).toBe(0);
+  });
+
+  it("makes small Battle wins easier", () => {
+    expect(calibrateAward(1, "you are rubbish", 0, false, () => 0.9)).toBe(0);
+    expect(calibrateAward(2, "you are rubbish", 0, false, () => 0)).toBe(1);
+    expect(calibrateAward(2, "you are rubbish", 0, false, () => 0.99)).toBe(1);
   });
 
   it("keeps one-word grunts at zero", () => {
