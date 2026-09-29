@@ -467,7 +467,14 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
         </div>
       </div>
 
-      <audio ref={audioRef} preload="auto" onEnded={() => setPlaying(false)} className="hidden" />
+      <audio
+        ref={audioRef}
+        preload="auto"
+        onEnded={() => setPlaying(false)}
+        className="hidden"
+        data-og-track={song.id}
+        data-og-title={song.title || "OG track"}
+      />
 
       <UnlockConfirmDialog
         open={unlockDialogOpen}
