@@ -11,7 +11,8 @@ import {
   Play,
   Share2,
   Trash2,
-} from "lucide-react";
+  Wand2,
+
 import { toast } from "sonner";
 import { useSongAudio } from "@/hooks/use-song-audio";
 import { useProfile } from "@/hooks/use-profile";
