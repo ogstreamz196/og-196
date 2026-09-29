@@ -3,8 +3,7 @@
  *
  * Everything text/vision related goes through the Boss's own Google Gemini
  * key (GEMINI_API_KEY) using Google's OpenAI-compatible endpoint, so the app
- * consumes ZERO Lovable AI credits. The Lovable gateway is only used as a
- * last-resort fallback if no Gemini key is configured.
+ * Only the Boss's own Gemini key is used.
  */
 
 export type AiChatTarget = {
