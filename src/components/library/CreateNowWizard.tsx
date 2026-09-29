@@ -44,6 +44,8 @@ import {
   useSetFoulIntensity,
 } from "@/hooks/use-foul-mouth";
 import { Slider } from "@/components/ui/slider";
+import { useServerFn } from "@tanstack/react-start";
+import { suggestTrackTitle } from "@/lib/track-title.functions";
 
 export type WizardResult = {
   title: string;
