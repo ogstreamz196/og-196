@@ -5,18 +5,36 @@ import { cn } from "@/lib/utils";
 
 export type LibraryFilterMode = "all" | "unlocked" | "styles";
 
+function CountBadge({ count, active }: { count: number; active: boolean }) {
+  return (
+    <span
+      className={cn(
+        "ml-1 inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-black tabular-nums",
+        active ? "bg-black/25 text-primary-foreground" : "bg-primary/15 text-primary",
+      )}
+    >
+      {count}
+    </span>
+  );
+}
+
 export function LibraryFilters({
   mode,
   onModeChange,
   styles,
   selectedStyle,
   onStyleChange,
+  allCount,
+  unlockedCount,
 }: {
   mode: LibraryFilterMode;
   onModeChange: (mode: LibraryFilterMode) => void;
   styles: string[];
   selectedStyle: string | null;
   onStyleChange: (style: string | null) => void;
+  /** Item counts shown as badges next to All / Unlocked. */
+  allCount?: number;
+  unlockedCount?: number;
 }) {
   return (
     <div aria-label="Filter tracks" className="grid grid-cols-3 gap-2">
