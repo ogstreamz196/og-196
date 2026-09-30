@@ -42,6 +42,8 @@ export function useSongAudio({
   // link for track 3 in a queue is often dead by the time we reach it, which
   // made the playlist silently stop — so refresh anything close to expiry.
   const fetchedAtRef = useRef(0);
+  const playlistTitleRef = useRef(playlistTitle);
+  playlistTitleRef.current = playlistTitle;
   const maxAgeMs = (mode === "full" ? 4 : 13) * 60 * 1000;
 
   async function ensureUrl(force = false): Promise<string | null> {
@@ -151,8 +153,6 @@ export function useSongAudio({
     };
   }, [playlist, playlistTitle, songId]);
 
-  const playlistTitleRef = useRef(playlistTitle);
-  playlistTitleRef.current = playlistTitle;
   const playRef = useRef<() => Promise<void>>(async () => {});
   const pauseRef = useRef<() => void>(() => {});
 
