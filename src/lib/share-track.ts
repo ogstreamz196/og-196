@@ -100,8 +100,48 @@ export async function shareTrack({
     return;
   }
 
+  // Browsers only open the share sheet straight after a tap. Preparing the MP3
+  // takes a moment, so if the tap has "expired" we offer a one-tap Share button.
+  const openSheet = async (): Promise<boolean> => {
+    if (!nav?.share) return false;
+    const file = blob ? new File([blob], filename, { type: blob.type || "audio/mpeg" }) : null;
+    const canFiles = (files: File[]) =>
+      typeof nav.canShare === "function" && nav.canShare({ files });
+    if (file && logoFile && canFiles([file, logoFile])) {
+      await nav.share({ files: [file, logoFile], title, text, url });
+    } else if (file && canFiles([file])) {
+      await nav.share({ files: [file], title, text, url });
+    } else {
+      await nav.share({ title, text, url });
+    }
+    return true;
+  };
+
   try {
-    if (blob && nav?.share && typeof nav.canShare === "function") {
+    if (await openSheet()) return;
+  } catch (e) {
+    if (e instanceof DOMException && e.name === "AbortError") return;
+    if (e instanceof DOMException && e.name === "NotAllowedError") {
+      toast("Your track is ready to share", {
+        duration: 15000,
+        action: {
+          label: "Share",
+          onClick: () => {
+            void openSheet().catch((err) => {
+              if (err instanceof DOMException && err.name === "AbortError") return;
+              void navigator.clipboard
+                .writeText(`${text} ${url}`)
+                .then(() => toast.success("Share link copied — paste it anywhere"));
+            });
+          },
+        },
+      });
+      return;
+    }
+  }
+
+  try {
+    if (false as boolean) {
       const file = new File([blob], filename, { type: blob.type || "audio/mpeg" });
       const files = logoFile ? [file, logoFile] : [file];
       if (nav.canShare({ files })) {
