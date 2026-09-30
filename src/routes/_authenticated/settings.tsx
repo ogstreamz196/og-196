@@ -772,7 +772,10 @@ function PrivacySection({ userId }: { userId: string }) {
 
       {/* Legal — required in-app links for the app stores */}
       <div className="flex flex-wrap gap-x-4 gap-y-2 pt-1 text-xs">
-        <Link to="/policy" className="font-semibold text-primary underline-offset-4 hover:underline">
+        <Link
+          to="/policy"
+          className="font-semibold text-primary underline-offset-4 hover:underline"
+        >
           Privacy Policy
         </Link>
         <Link to="/terms" className="font-semibold text-primary underline-offset-4 hover:underline">

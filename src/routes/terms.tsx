@@ -53,8 +53,8 @@ function TermsPage() {
         <Section title="1. Your account">
           <p>
             You must be 13 or older to hold an account. Keep your sign-in details secure; you are
-            responsible for activity on your account. We may suspend accounts used for abuse,
-            fraud, or to farm free credits.
+            responsible for activity on your account. We may suspend accounts used for abuse, fraud,
+            or to farm free credits.
           </p>
         </Section>
 
@@ -74,9 +74,9 @@ function TermsPage() {
             account is charged for renewal within 24 hours of the period ending.
           </p>
           <p>
-            Manage or cancel your subscription in your Apple ID settings or your Google Play
-            account settings after purchase. Purchases made on the website are handled by Stripe
-            and can be managed from the Store page.
+            Manage or cancel your subscription in your Apple ID settings or your Google Play account
+            settings after purchase. Purchases made on the website are handled by Stripe and can be
+            managed from the Store page.
           </p>
         </Section>
 
@@ -105,8 +105,8 @@ function TermsPage() {
         <Section title="6. Generated content disclaimer">
           <p>
             Songs, lyrics and replies are produced by automated systems and may be inaccurate or
-            unexpected. They are provided "as is" without warranty, and OG BOT is not liable for
-            how generated content is used.
+            unexpected. They are provided "as is" without warranty, and OG BOT is not liable for how
+            generated content is used.
           </p>
         </Section>
 

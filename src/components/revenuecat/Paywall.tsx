@@ -20,11 +20,11 @@ function SubscriptionLegal({ storeName }: { storeName: string }) {
   return (
     <div className="mt-5 space-y-2 border-t border-border/60 pt-4 text-[11px] leading-relaxed text-muted-foreground">
       <p>
-        Payment is charged to your {storeName} account at confirmation of purchase. The
-        subscription renews automatically at the same price unless you cancel at least 24 hours
-        before the end of the current period. Your account is charged for renewal within 24 hours
-        of the period ending. Manage or cancel your subscription in your {storeName} account
-        settings after purchase.
+        Payment is charged to your {storeName} account at confirmation of purchase. The subscription
+        renews automatically at the same price unless you cancel at least 24 hours before the end of
+        the current period. Your account is charged for renewal within 24 hours of the period
+        ending. Manage or cancel your subscription in your {storeName} account settings after
+        purchase.
       </p>
       <p className="flex flex-wrap gap-x-3 gap-y-1">
         <Link to="/terms" className="font-semibold text-primary underline-offset-4 hover:underline">
