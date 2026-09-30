@@ -1068,8 +1068,8 @@ export function CreateNowWizard({
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
-      </AlertDialogContent>
       </AlertDialog>
+
 
       <AlertDialog open={offerOpen} onOpenChange={setOfferOpen}>
         <AlertDialogContent>
