@@ -1083,9 +1083,12 @@ function LibraryPage() {
         for (const unlock of unlocks ?? []) unlockedIds.add(unlock.song_id);
       }
       // Merge the listener's unlock ledger into the safe public track fields.
+      // artistUnlocked mirrors the creator's unlock: once the artist unlocks a
+      // track, everyone can listen free — only download/share still costs coins.
       return rows.map((s) => ({
         prompt: "",
         ...s,
+        artistUnlocked: !!s.unlocked,
         unlocked: unlockedIds.has(String(s.id)),
       })) as unknown as Song[];
     },
@@ -1746,6 +1749,8 @@ function LibraryPage() {
               styles={yoursStyles}
               selectedStyle={yoursStyle}
               onStyleChange={setYoursStyle}
+              allCount={completedTracks.length}
+              unlockedCount={completedTracks.filter((s) => !!s.unlocked).length}
             />
 
             {completedTracks.length > 3 && (
@@ -1859,6 +1864,10 @@ function LibraryPage() {
               styles={communityStyles}
               selectedStyle={communityStyle}
               onStyleChange={setCommunityStyle}
+              allCount={communityTracks.length}
+              unlockedCount={
+                communityTracks.filter((s) => !!s.unlocked || !!s.artistUnlocked).length
+              }
             />
             {communityTracks.length > 3 && (
               <div className="relative">
@@ -1912,7 +1921,7 @@ function LibraryPage() {
                     (s.style || "").toLowerCase().includes(q);
                   const matchesMode =
                     communityFilter === "all" ||
-                    (communityFilter === "unlocked" && !!s.unlocked) ||
+                    (communityFilter === "unlocked" && (!!s.unlocked || !!s.artistUnlocked)) ||
                     (communityFilter === "styles" &&
                       !!communityStyle &&
                       (s.style || "").toLowerCase().includes(communityStyle.toLowerCase()));
