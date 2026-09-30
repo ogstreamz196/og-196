@@ -105,6 +105,7 @@ const YEARLY_PLAN = {
 export function Paywall() {
   const { offerings, loading, purchasePackage, isVip } = useRevenueCat();
   const [purchasing, setPurchasing] = useState<string | null>(null);
+  const storeName = useStoreName();
 
   const rawOffering = offerings?.current;
   // The Current offering also holds coin packs (coins_*, track_unlock_99p); the VIP paywall shows only subscriptions.
