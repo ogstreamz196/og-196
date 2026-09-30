@@ -24,6 +24,7 @@ import type { Song } from "@/components/SongCard";
 import { SongWorkspace } from "@/components/library/SongWorkspace";
 import { PublishToggle } from "@/components/library/PublishToggle";
 import { UnlockConfirmDialog } from "@/components/library/UnlockConfirmDialog";
+import { OwnerUnlockDialog } from "@/components/library/OwnerUnlockDialog";
 import { useProfile } from "@/hooks/use-profile";
 import { ensureFullUrlAllowed } from "@/lib/ensure-full-url-allowed";
 
