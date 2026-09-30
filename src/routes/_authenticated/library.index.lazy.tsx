@@ -1028,16 +1028,11 @@ function LibraryPage() {
   );
   const yoursStyles = useMemo(
     () =>
-      Array.from(
-        new Set(
-          completedTracks.flatMap((song) =>
-            (song.style || "")
-              .split(",")
-              .map((style) => style.trim())
-              .filter(Boolean),
-          ),
+      POOLS.genre.filter((genre) =>
+        completedTracks.some((song) =>
+          (song.style || "").toLowerCase().includes(genre.toLowerCase()),
         ),
-      ).sort((a, b) => a.localeCompare(b)),
+      ),
     [completedTracks],
   );
 
@@ -1100,16 +1095,11 @@ function LibraryPage() {
   const communityTracks = useMemo(() => community.data?.pages.flat() ?? [], [community.data]);
   const communityStyles = useMemo(
     () =>
-      Array.from(
-        new Set(
-          communityTracks.flatMap((song) =>
-            (song.style || "")
-              .split(",")
-              .map((style) => style.trim())
-              .filter(Boolean),
-          ),
+      POOLS.genre.filter((genre) =>
+        communityTracks.some((song) =>
+          (song.style || "").toLowerCase().includes(genre.toLowerCase()),
         ),
-      ).sort((a, b) => a.localeCompare(b)),
+      ),
     [communityTracks],
   );
   const communitySentinelRef = useRef<HTMLDivElement | null>(null);
@@ -1801,9 +1791,7 @@ function LibraryPage() {
                     (yoursFilter === "unlocked" && !!s.unlocked) ||
                     (yoursFilter === "styles" &&
                       !!yoursStyle &&
-                      (s.style || "")
-                        .split(",")
-                        .some((style) => style.trim() === yoursStyle));
+                      (s.style || "").toLowerCase().includes(yoursStyle.toLowerCase()));
                   return matchesSearch && matchesMode;
                 });
                 if (filtered.length === 0 && !genSong) {
@@ -1927,9 +1915,7 @@ function LibraryPage() {
                     (communityFilter === "unlocked" && !!s.unlocked) ||
                     (communityFilter === "styles" &&
                       !!communityStyle &&
-                      (s.style || "")
-                        .split(",")
-                        .some((style) => style.trim() === communityStyle));
+                      (s.style || "").toLowerCase().includes(communityStyle.toLowerCase()));
                   return matchesSearch && matchesMode;
                 });
                 if (filtered.length === 0) {

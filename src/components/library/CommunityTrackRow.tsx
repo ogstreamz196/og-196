@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { cn } from "@/lib/utils";
+import { POOLS } from "@/lib/library-utils";
 import type { Song } from "@/components/SongCard";
 
 export const COMMUNITY_DOWNLOAD_COST = 3;
@@ -53,11 +54,8 @@ function hueFor(id: string) {
 }
 
 function styleChips(style?: string | null) {
-  return (style || "")
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean)
-    .slice(0, 2);
+  const value = (style || "").toLowerCase();
+  return POOLS.genre.filter((genre) => value.includes(genre.toLowerCase())).slice(0, 2);
 }
 
 /**
