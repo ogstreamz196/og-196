@@ -846,44 +846,51 @@ export function CreateNowWizard({
                   )}
                 </div>
 
-                {/* Final review so nothing is a surprise before creating. */}
-                <div className="space-y-1 rounded-xl border border-border bg-background/60 p-3 text-xs">
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
-                    Review
-                  </p>
-                  <p className="font-semibold text-foreground">
-                    {title.trim() ||
-                      `For ${subjectName.trim().split(/\s+/)[0] || "you"} · OG Bot names it`}
-                  </p>
-                  <p className="text-muted-foreground">
-                    {styles.join(", ") || "No style"} · {targetMinutes} min ·{" "}
-                    {(languages.length ? languages : ["English"]).join(", ")}
-                  </p>
-                  <p className="text-muted-foreground">
-                    {gender || "Mix voice"} ·{" "}
-                    {isNasheed
-                      ? "Nasheed, voice-only"
-                      : vocalsOnly
-                        ? beatPath
-                          ? "Vocals over your beat"
-                          : "A cappella, no instruments"
-                        : "Full production"}{" "}
-                    ·{" "}
-                    {isNasheed
-                      ? "Strictly clean"
-                      : explicit
-                        ? `18+ · ${INTENSITY_LABELS[intensity]}`
-                        : "PG"}
-                  </p>
-                  <p className="flex items-center gap-1.5 font-semibold text-foreground">
-                    {isPublic ? (
-                      <Globe2 className="h-3.5 w-3.5 text-primary" />
-                    ) : (
-                      <Lock className="h-3.5 w-3.5 text-primary" />
-                    )}
-                    {isPublic ? "Global player" : "Private library"}
-                  </p>
+                {/* Compact track recipe so nothing is a surprise before creating. */}
+                <div className="rounded-xl border border-border bg-background/60 p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="min-w-0 truncate text-sm font-bold text-foreground">
+                      {title.trim() ||
+                        `For ${subjectName.trim().split(/\s+/)[0] || "you"} · OG Bot names it`}
+                    </p>
+                    <span className="flex shrink-0 items-center gap-1 text-[11px] font-semibold text-muted-foreground">
+                      {isPublic ? (
+                        <Globe2 className="h-3.5 w-3.5 text-primary" />
+                      ) : (
+                        <Lock className="h-3.5 w-3.5 text-primary" />
+                      )}
+                      {isPublic ? "Global" : "Private"}
+                    </span>
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {[
+                      styles.join(", ") || "No style",
+                      `${targetMinutes} min`,
+                      (languages.length ? languages : ["English"]).join(", "),
+                      gender || "Mix voice",
+                      isNasheed
+                        ? "Nasheed, voice-only"
+                        : vocalsOnly
+                          ? beatPath
+                            ? "Vocals over your beat"
+                            : "A cappella"
+                          : "Full production",
+                      isNasheed
+                        ? "Strictly clean"
+                        : explicit
+                          ? `18+ · ${INTENSITY_LABELS[intensity]}`
+                          : "PG",
+                    ].map((chip) => (
+                      <span
+                        key={chip}
+                        className="rounded-full border border-white/10 bg-card/60 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground"
+                      >
+                        {chip}
+                      </span>
+                    ))}
+                  </div>
                 </div>
+
               </div>
             )}
           </div>
