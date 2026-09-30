@@ -5,6 +5,7 @@ import {
   CloudDownload,
   Download,
   Loader2,
+  MoreVertical,
   Music2,
   Pause,
   Pencil,
@@ -22,6 +23,13 @@ import { downloadFile } from "@/lib/download-file";
 import { shareTrack } from "@/lib/share-track";
 import { UnlockConfirmDialog } from "@/components/library/UnlockConfirmDialog";
 import { CreatorTag } from "@/components/library/CreatorTag";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import { cn } from "@/lib/utils";
 import type { Song } from "@/components/SongCard";
@@ -177,30 +185,6 @@ function CommunityTrackRowImpl({
           </button>
         </div>
       )}
-      {owned && driveLink && (
-        <a
-          href={driveLink}
-          target="_blank"
-          rel="noreferrer"
-          aria-label={`Open ${title} backup in Google Drive`}
-          title="Saved to Google Drive"
-          className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-sky-400/40 bg-sky-500/15 text-sky-300 transition-colors hover:bg-sky-500/25"
-        >
-          <CloudDownload className="h-4 w-4" />
-        </a>
-      )}
-      {canShare && (
-        <button
-          type="button"
-          onClick={shareUnlocked}
-          disabled={busy}
-          aria-label={`Share ${title}`}
-          className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-emerald-400/40 bg-emerald-500/15 text-emerald-300 transition-colors hover:bg-emerald-500/25 disabled:opacity-40"
-        >
-          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />}
-        </button>
-      )}
-
       {owned ? (
         <Link
           to="/library/$songId"
@@ -226,21 +210,59 @@ function CommunityTrackRowImpl({
           <span className="sr-only">OG coins or 99p</span>
         </button>
       )}
-      {onDelete && (
-        <button
-          type="button"
-          onClick={() => onDelete(song)}
-          aria-label={`Delete ${title}`}
-          className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-destructive/40 bg-destructive/15 text-destructive transition-colors hover:bg-destructive/25"
-        >
-          <Trash2 className="h-4 w-4" />
-        </button>
+      {(canShare || (owned && driveLink) || onDelete) && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              aria-label={`More actions for ${title}`}
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-white/10 bg-white/[0.05] text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {busy ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <MoreVertical className="h-4 w-4" />
+              )}
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            {canShare && (
+              <DropdownMenuItem disabled={busy} onSelect={() => void shareUnlocked()}>
+                <Share2 className="mr-2 h-4 w-4" /> Share track
+              </DropdownMenuItem>
+            )}
+            {owned && driveLink && (
+              <DropdownMenuItem asChild>
+                <a href={driveLink} target="_blank" rel="noreferrer">
+                  <CloudDownload className="mr-2 h-4 w-4" /> Open Drive backup
+                </a>
+              </DropdownMenuItem>
+            )}
+            {onDelete && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onSelect={() => onDelete(song)}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete
+                </DropdownMenuItem>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       )}
     </div>
   );
 
   return (
-    <li className="group px-3 py-3 transition-colors hover:bg-primary/[0.06]">
+    <li
+      className={cn(
+        "group relative px-3 py-3 transition-colors hover:bg-primary/[0.06]",
+        playing &&
+          "bg-primary/[0.08] shadow-[inset_3px_0_0_var(--primary),0_0_24px_-12px_var(--primary)]",
+      )}
+    >
       {/* Row 1 — artwork + full-width title, so long names stay readable */}
       <div className="flex min-w-0 items-center gap-3">
         <div
