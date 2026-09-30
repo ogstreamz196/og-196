@@ -108,6 +108,12 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
   const rc = useRevenueCat();
   const rcLoading = rc.loading;
   const rcPurchase = rc.purchasePackage;
+  // Apple rejects any iOS build that mentions Google Play, so name the store the
+  // device actually bills through.
+  const [nativeStoreName, setNativeStoreName] = useState("the App Store");
+  useEffect(() => {
+    setNativeStoreName(Capacitor.getPlatform() === "ios" ? "the App Store" : "Google Play");
+  }, []);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const createVipCheckout = useServerFn(createVipCheckoutSession);
