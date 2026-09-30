@@ -1714,7 +1714,15 @@ function LibraryPage() {
           </div>
         )}
 
-        <Tabs defaultValue="yours" className="w-full">
+        <Tabs
+          defaultValue="yours"
+          className="w-full"
+          onValueChange={() =>
+            requestAnimationFrame(() =>
+              libraryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+            )
+          }
+        >
           <TabsList className="mb-5 grid h-auto w-full grid-cols-2 gap-2 rounded-none border-0 border-b border-white/[0.07] bg-transparent p-0">
             <TabsTrigger
               value="yours"
