@@ -387,7 +387,7 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                           size="lg"
                           onClick={async () => {
                             if (rcLoading) {
-                              toast.info("Connecting to Google Play...");
+                              toast.info(`Connecting to ${nativeStoreName}...`);
                               return;
                             }
                             try {
@@ -422,7 +422,7 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
 
                               if (!pkg) {
                                 toast.error(
-                                  "Google Play doesn't have this product yet — it becomes available once the app release is live on Play.",
+                                  `${nativeStoreName} doesn't have this product yet — it becomes available once the app release is live.`,
                                 );
                                 setCheckoutLoading(false);
                                 return;
@@ -442,7 +442,7 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                             }
                           }}
                         >
-                          Purchase via Google Play
+                          Purchase via {nativeStoreName}
                         </Button>
                       ) : (
                         <Button
