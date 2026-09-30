@@ -27,6 +27,8 @@ export interface Song {
   suno_task_id?: string | null;
   stream_audio_url?: string | null;
   unlocked?: boolean | null;
+  /** True when the track's creator unlocked the master — everyone can listen free. */
+  artistUnlocked?: boolean | null;
   is_variation?: boolean | null;
   revealed?: boolean | null;
   drive_audio_link?: string | null;
