@@ -32,3 +32,4 @@
 - [x] "Use this vibe" remix button on library and global tracks
 - [x] Purchase-complete page after card checkout (/buy-coins/return)
 - [x] Enlarge and polish private and global Messenger typing areas, then verify phone behavior
+- [x] Share tracks with audio, OG BOT branding, and a permanent track-specific listening link

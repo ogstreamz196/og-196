@@ -572,7 +572,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       const fileName = `${song.title || "song"}.mp3`;
       const blob = await downloadFile(urlData.url as string, fileName);
       setUnlockDialogOpen(false);
-      await shareTrack({ title: song.title || "My track", blob, filename: fileName });
+      await shareTrack({ title: song.title || "My track", blob, filename: fileName, songId: song.id });
       // Payment complete — refresh so the preview flips to the full track.
       refreshCoinBalance();
       onSaved?.();

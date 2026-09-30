@@ -13,3 +13,7 @@
 
 - Share ordinary chat inference between the owner's `GEMINI_API_KEY` and `OPENAI_API_KEY`, with one cross-provider fallback only for 429/5xx failures; use `PERPLEXITY_API_KEY` only for live web facts and never use Lovable AI for end-user inference.
 - Keep lyrics generation and audio transcription on Gemini because those flows use Gemini-specific media handling.
+
+## Public track sharing
+
+- Public share pages may serve only completed, public, revealed tracks through short-lived signed audio URLs, so private and hidden tracks cannot leak.

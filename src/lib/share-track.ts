@@ -1,6 +1,22 @@
 import { toast } from "sonner";
+import ogBotLogo from "@/assets/ogbot.png.asset.json";
 
-const SITE_URL = "https://www.ogstreamz.co.uk";
+const SITE_URL = "https://og-196.lovable.app";
+
+function trackShareUrl(songId?: string) {
+  return songId ? `${SITE_URL}/track/${encodeURIComponent(songId)}` : SITE_URL;
+}
+
+async function fetchLogoFile(): Promise<File | null> {
+  try {
+    const response = await fetch(ogBotLogo.url);
+    if (!response.ok) return null;
+    const logo = await response.blob();
+    return new File([logo], "og-bot.png", { type: logo.type || "image/png" });
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Open the device share sheet for a finished track.
@@ -14,15 +30,18 @@ export async function shareTrack({
   title,
   blob,
   filename,
-  url = SITE_URL,
+  songId,
+  url = trackShareUrl(songId),
 }: {
   title: string;
   blob?: Blob | null;
   filename: string;
+  songId?: string;
   url?: string;
 }): Promise<void> {
-  const text = `🎧 "${title}" — made with OG Bot on OG Streamz`;
+  const text = `🎧 “${title}” — made with OG BOT\nListen here: ${url}`;
   const nav = typeof navigator !== "undefined" ? navigator : undefined;
+  const logoFile = await fetchLogoFile();
 
   // Inside the phone app the web share sheet can't send files, so share the MP3
   // the native layer already downloaded (or write the bytes we have).
@@ -53,8 +72,22 @@ export async function shareTrack({
         uri = saved.uri;
       }
       if (uri) {
-        toast.success("Track saved to your phone (Documents › OG BOT)");
-        await Share.share({ title, text, files: [uri], dialogTitle: "Share your track" });
+        const files = [uri];
+        if (logoFile) {
+          const logoData = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(String(reader.result).split(",")[1] ?? "");
+            reader.onerror = () => reject(reader.error);
+            reader.readAsDataURL(logoFile);
+          });
+          const savedLogo = await Filesystem.writeFile({
+            path: "og-bot-share-logo.png",
+            data: logoData,
+            directory: Directory.Cache,
+          });
+          files.push(savedLogo.uri);
+        }
+        await Share.share({ title, text, url, files, dialogTitle: "Share your track" });
         return;
       }
     }
@@ -71,8 +104,13 @@ export async function shareTrack({
   try {
     if (blob && nav?.share && typeof nav.canShare === "function") {
       const file = new File([blob], filename, { type: blob.type || "audio/mpeg" });
+      const files = logoFile ? [file, logoFile] : [file];
+      if (nav.canShare({ files })) {
+        await nav.share({ files, title, text, url });
+        return;
+      }
       if (nav.canShare({ files: [file] })) {
-        await nav.share({ files: [file], title, text });
+        await nav.share({ files: [file], title, text, url });
         return;
       }
     }

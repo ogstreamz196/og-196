@@ -203,7 +203,7 @@ export function useSongAudio({
     const url = await ensureUrl();
     if (!url) return;
     const blob = await downloadFile(url, filename);
-    await shareTrack({ title: filename.replace(/\.mp3$/i, ""), blob, filename });
+    await shareTrack({ title: filename.replace(/\.mp3$/i, ""), blob, filename, songId });
   }
 
   function handleEnded() {
