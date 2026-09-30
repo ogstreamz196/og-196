@@ -24,6 +24,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppReturnRouteImport } from './routes/app-return'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as TrackSongIdRouteImport } from './routes/track.$songId'
 import { Route as RCodeRouteImport } from './routes/r.$code'
 import { Route as PortalSlugRouteImport } from './routes/portal.$slug'
 import { Route as AuthenticatedStoreRouteImport } from './routes/_authenticated/store'
@@ -131,6 +132,11 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const TrackSongIdRoute = TrackSongIdRouteImport.update({
+  id: '/track/$songId',
+  path: '/track/$songId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const RCodeRoute = RCodeRouteImport.update({
   id: '/r/$code',
@@ -385,6 +391,7 @@ export interface FileRoutesByFullPath {
   '/store': typeof AuthenticatedStoreRoute
   '/portal/$slug': typeof PortalSlugRoute
   '/r/$code': typeof RCodeRoute
+  '/track/$songId': typeof TrackSongIdRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/api-keys': typeof AuthenticatedAdminApiKeysRoute
@@ -438,6 +445,7 @@ export interface FileRoutesByTo {
   '/store': typeof AuthenticatedStoreRoute
   '/portal/$slug': typeof PortalSlugRoute
   '/r/$code': typeof RCodeRoute
+  '/track/$songId': typeof TrackSongIdRoute
   '/': typeof AuthenticatedIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -494,6 +502,7 @@ export interface FileRoutesById {
   '/_authenticated/store': typeof AuthenticatedStoreRoute
   '/portal/$slug': typeof PortalSlugRoute
   '/r/$code': typeof RCodeRoute
+  '/track/$songId': typeof TrackSongIdRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -551,6 +560,7 @@ export interface FileRouteTypes {
     | '/store'
     | '/portal/$slug'
     | '/r/$code'
+    | '/track/$songId'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/admin/api-keys'
@@ -604,6 +614,7 @@ export interface FileRouteTypes {
     | '/store'
     | '/portal/$slug'
     | '/r/$code'
+    | '/track/$songId'
     | '/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
@@ -659,6 +670,7 @@ export interface FileRouteTypes {
     | '/_authenticated/store'
     | '/portal/$slug'
     | '/r/$code'
+    | '/track/$songId'
     | '/_authenticated/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
@@ -706,6 +718,7 @@ export interface RootRouteChildren {
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   PortalSlugRoute: typeof PortalSlugRoute
   RCodeRoute: typeof RCodeRoute
+  TrackSongIdRoute: typeof TrackSongIdRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
@@ -806,6 +819,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/track/$songId': {
+      id: '/track/$songId'
+      path: '/track/$songId'
+      fullPath: '/track/$songId'
+      preLoaderRoute: typeof TrackSongIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/r/$code': {
       id: '/r/$code'
@@ -1191,6 +1211,7 @@ const rootRouteChildren: RootRouteChildren = {
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   PortalSlugRoute: PortalSlugRoute,
   RCodeRoute: RCodeRoute,
+  TrackSongIdRoute: TrackSongIdRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
