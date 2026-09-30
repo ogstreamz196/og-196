@@ -71,11 +71,13 @@ export function useVariations({
         });
         if (error) throw new Error(invokeError(error, "Reveal failed"));
         if (!data?.already)
-          toast.success(`Alt take revealed · -${data?.cost ?? variationCost} coins`);
+          toast.success(
+            `Remake ready! New version added to your library · -${data?.cost ?? variationCost} coins`,
+          );
         setVariations((vs) => vs.map((v) => (v.id === id ? { ...v, revealed: true } : v)));
         onChanged?.();
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "Reveal failed");
+        toast.error(e instanceof Error ? e.message : "Remake failed");
         throw e;
       } finally {
         setBusyVariation(null);
