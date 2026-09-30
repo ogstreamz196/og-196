@@ -76,6 +76,9 @@ export function PlaylistProvider({ children }: { children: ReactNode }) {
   const playId = useCallback((id: string) => {
     const c = registry.current.get(id);
     if (!c) return;
+    const previousId = currentRef.current;
+    if (previousId && previousId !== id) registry.current.get(previousId)?.pause();
+    currentRef.current = id;
     setCurrentId(id);
     void Promise.resolve(c.play()).catch(() => {});
   }, []);

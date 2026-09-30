@@ -78,6 +78,7 @@ import {
 } from "@/components/library/CreateNowWizard";
 import { CommunityTrackRow } from "@/components/library/CommunityTrackRow";
 import { MiniPlayer } from "@/components/library/MiniPlayer";
+import { LibraryFilters, type LibraryFilterMode } from "@/components/library/LibraryFilters";
 import { PlaylistProvider, PlaylistOrder, usePlaylist } from "@/hooks/use-playlist";
 import { peekFullTrackPlay, clearFullTrackPlay } from "@/lib/full-track-autoplay";
 import { useFoulIntensity, useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
@@ -338,6 +339,10 @@ function LibraryPage() {
   const [reviewOpen, setReviewOpen] = useState(false);
   const [yoursSearch, setYoursSearch] = useState("");
   const [communitySearch, setCommunitySearch] = useState("");
+  const [yoursFilter, setYoursFilter] = useState<LibraryFilterMode>("all");
+  const [communityFilter, setCommunityFilter] = useState<LibraryFilterMode>("all");
+  const [yoursStyle, setYoursStyle] = useState<string | null>(null);
+  const [communityStyle, setCommunityStyle] = useState<string | null>(null);
 
   // Build a human-readable line from language + freeform style text.
   const selectionsLine = useMemo(() => {

@@ -13,6 +13,8 @@ import {
   Share2,
   Trash2,
   Wand2,
+  LockKeyhole,
+  Radio,
 } from "lucide-react";
 
 import { toast } from "sonner";
@@ -48,6 +50,14 @@ function hueFor(id: string) {
   let h = 0;
   for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) % 360;
   return h;
+}
+
+function styleChips(style?: string | null) {
+  return (style || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .slice(0, 2);
 }
 
 /**
@@ -163,28 +173,10 @@ function CommunityTrackRowImpl({
 
   const canShare = isReady && !!song.unlocked;
   const driveLink = (song as unknown as { drive_audio_link?: string | null }).drive_audio_link;
+  const styles = styleChips(song.style);
 
   const actions = (
     <div className="flex shrink-0 items-center gap-1.5">
-      {onRemix && (
-        <div className="flex shrink-0 flex-col items-center">
-          <span
-            aria-hidden
-            className="mb-0.5 text-[8px] font-black uppercase leading-none tracking-[0.12em] text-amber-300/90"
-          >
-            Remix
-          </span>
-          <button
-            type="button"
-            onClick={() => onRemix(song)}
-            aria-label={`Use this vibe from ${title}`}
-            title="Use this vibe"
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-amber-400/40 bg-amber-500/15 text-amber-300 transition-colors hover:bg-amber-500/25"
-          >
-            <Wand2 className="h-4 w-4" />
-          </button>
-        </div>
-      )}
       {owned ? (
         <Link
           to="/library/$songId"
@@ -210,7 +202,7 @@ function CommunityTrackRowImpl({
           <span className="sr-only">OG coins or 99p</span>
         </button>
       )}
-      {(canShare || (owned && driveLink) || onDelete) && (
+      {(canShare || (owned && driveLink) || onDelete || onRemix) && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
@@ -226,6 +218,11 @@ function CommunityTrackRowImpl({
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
+            {onRemix && (
+              <DropdownMenuItem onSelect={() => onRemix(song)}>
+                <Wand2 className="mr-2 h-4 w-4" /> Remix vibe
+              </DropdownMenuItem>
+            )}
             {canShare && (
               <DropdownMenuItem disabled={busy} onSelect={() => void shareUnlocked()}>
                 <Share2 className="mr-2 h-4 w-4" /> Share track
@@ -263,8 +260,8 @@ function CommunityTrackRowImpl({
           "bg-primary/[0.08] shadow-[inset_3px_0_0_var(--primary),0_0_24px_-12px_var(--primary)]",
       )}
     >
-      {/* Row 1 — artwork + full-width title, so long names stay readable */}
-      <div className="flex min-w-0 items-center gap-3">
+      {/* Tier 1 — artwork, identity, metadata and primary actions. */}
+      <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
         <div
           className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-card"
           style={{
@@ -293,7 +290,7 @@ function CommunityTrackRowImpl({
           )}
         </div>
 
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0">
           {owned ? (
             <Link
               to="/library/$songId"
@@ -306,11 +303,36 @@ function CommunityTrackRowImpl({
             <p className="line-clamp-2 text-[15px] font-semibold leading-snug">{title}</p>
           )}
           <CreatorTag userId={song.user_id} className="mt-1" />
+          <div className="mt-1.5 flex min-w-0 flex-wrap gap-1.5">
+            {styles.map((style) => (
+              <span
+                key={style}
+                className="max-w-32 truncate rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary"
+              >
+                {style}
+              </span>
+            ))}
+            <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/60 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+              {song.unlocked ? <LockKeyhole className="h-2.5 w-2.5" /> : <Radio className="h-2.5 w-2.5" />}
+              {song.unlocked ? "Unlocked" : owned ? "Preview" : "Stream"}
+            </span>
+            {song.is_variation && (
+              <span className="rounded-full border border-amber-400/25 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-300">
+                Second take
+              </span>
+            )}
+            {duration > 0 && (
+              <span className="rounded-full border border-border bg-muted/60 px-2 py-0.5 text-[10px] font-semibold tabular-nums text-muted-foreground">
+                {fmt(duration)}
+              </span>
+            )}
+          </div>
         </div>
+        {actions}
       </div>
 
-      {/* Row 2 — transport: play, seek bar, time, quick actions */}
-      <div className="mt-2 flex items-center gap-2 pl-[3.5rem]">
+      {/* Tier 2 — transport and seek bar. */}
+      <div className="mt-3 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 pl-0 sm:pl-[3.5rem]">
         <button
           type="button"
           onClick={togglePlay}
@@ -351,7 +373,6 @@ function CommunityTrackRowImpl({
           {playing || progress > 0 ? `${fmt(progress)} / ` : ""}
           {fmt(duration)}
         </span>
-        {actions}
       </div>
 
       <audio
