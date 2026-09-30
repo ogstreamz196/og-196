@@ -144,9 +144,13 @@ export function Paywall() {
           <CardDescription>Enjoy your premium features.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Button variant="outline" onClick={() => void showCustomerCenter()}>
-            Manage subscription
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline" onClick={() => void showCustomerCenter()}>
+              Manage subscription
+            </Button>
+            <RestoreButton />
+          </div>
+          <SubscriptionLegal storeName={storeName} />
         </CardContent>
       </Card>
     );
@@ -155,8 +159,9 @@ export function Paywall() {
   if (!currentOffering || currentOffering.availablePackages.length === 0) {
     return (
       <Card>
-        <CardContent className="py-8 text-center text-sm text-muted-foreground">
-          No subscription packages available at the moment.
+        <CardContent className="space-y-3 py-8 text-center text-sm text-muted-foreground">
+          <p>No subscription packages available at the moment.</p>
+          <RestoreButton />
         </CardContent>
       </Card>
     );
