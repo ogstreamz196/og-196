@@ -146,13 +146,23 @@ export function CreateNowWizard({
   onComplete,
   initialDraft,
   submitLabel = "Create my song",
+  balance = 0,
+  secondVersionCost = 2,
+  onBuyCoins,
+  onEarnCoins,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   onComplete: (result: WizardResult, draft: WizardDraft) => void;
   initialDraft?: WizardDraft;
   submitLabel?: string;
+  /** Current coin balance, used by the extra-version offer. */
+  balance?: number;
+  secondVersionCost?: number;
+  onBuyCoins?: () => void;
+  onEarnCoins?: () => void;
 }) {
+
   const [step, setStep] = useState(1);
   const [title, setTitle] = useState("");
   const [subjectName, setSubjectName] = useState("");
@@ -175,6 +185,8 @@ export function CreateNowWizard({
   const [beatName, setBeatName] = useState("");
   const [uploadingBeat, setUploadingBeat] = useState(false);
   const [confirmClose, setConfirmClose] = useState(false);
+  const [offerOpen, setOfferOpen] = useState(false);
+
   const wizardScrollRef = useRef<HTMLDivElement | null>(null);
   const [naming, setNaming] = useState(false);
   const [showAllStyles, setShowAllStyles] = useState(false);
