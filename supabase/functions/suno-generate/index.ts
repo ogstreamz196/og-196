@@ -403,14 +403,22 @@ Deno.serve(async (req) => {
             "[Humming vocal interlude — voices only, no instruments]",
           )
         : effectiveLyrics;
-    const signedLyrics = isInstrumental
+    // VIP members (role or active subscription) get clean tracks: no signature.
+    const { data: isVipRole } = await admin.rpc("has_role", { _user_id: user.id, _role: "vip" });
+    const { count: activeSubs } = await admin
+      .from("subscriptions")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .in("status", ["active", "trialing"]);
+    const unsigned = isInstrumental || !!isVipRole || (activeSubs ?? 0) > 0;
+    const signedLyrics = unsigned
       ? voiceOnlyLyrics
       : limitText(injectSignature(voiceOnlyLyrics, { acappella }), MAX_PROMPT_CHARS);
-    const signedPrompt = isInstrumental
+    const signedPrompt = unsigned
       ? effectivePrompt
       : (limitText(
           acappella
-            ? `${effectivePrompt}\n\nInclude a clearly audible vocal tag, performed by voice alone with no instruments, saying "this track was made by O G Bot dot co dot uk" in English, about once every minute.`
+            ? `${effectivePrompt}\n\nInclude ONE clearly audible vocal tag, performed by voice alone with no instruments, saying "this track was made by O G Bot dot co dot uk" in English, only once, at the very end of the track.`
             : withSignatureHint(effectivePrompt),
           MAX_PROMPT_CHARS,
         ) ?? effectivePrompt);
