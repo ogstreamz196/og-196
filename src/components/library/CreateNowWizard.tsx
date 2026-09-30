@@ -3,13 +3,18 @@ import {
   ArrowLeft,
   ArrowRight,
   Check,
+  ChevronDown,
+  ChevronUp,
+  Coins,
   Globe2,
   Lock,
   Mic2,
   Music4,
   Sparkles,
+  Swords,
   X,
 } from "lucide-react";
+
 import ratingPgImg from "@/assets/rating-pg.png";
 import rating18Img from "@/assets/rating-18.png";
 import {
@@ -566,10 +571,26 @@ export function CreateNowWizard({
                 <button
                   type="button"
                   onClick={() => setShowAllStyles((v) => !v)}
-                  className="text-xs font-bold text-primary hover:underline"
+                  aria-expanded={showAllStyles}
+                  className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-primary/50 bg-primary/10 px-4 text-sm font-black uppercase tracking-wide text-primary transition hover:border-primary hover:bg-primary/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
-                  {showAllStyles ? "Show fewer styles" : `More styles (${STYLES.length - 12})`}
+                  {showAllStyles ? (
+                    <>
+                      <ChevronUp className="h-4 w-4" />
+                      Show fewer styles
+                    </>
+                  ) : (
+                    <>
+                      <Music4 className="h-4 w-4" />
+                      More styles
+                      <span className="rounded-full bg-primary/25 px-2 py-0.5 text-[11px] font-black tabular-nums">
+                        +{STYLES.length - 12}
+                      </span>
+                      <ChevronDown className="h-4 w-4" />
+                    </>
+                  )}
                 </button>
+
                 <div>
                   <p className="mb-2 text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
                     Artist voice
@@ -647,11 +668,27 @@ export function CreateNowWizard({
                     <button
                       type="button"
                       onClick={() => setShowAllLanguages((v) => !v)}
-                      className="text-xs font-bold text-primary hover:underline"
+                      aria-expanded={showAllLanguages}
+                      className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-primary/50 bg-primary/10 px-4 text-sm font-black uppercase tracking-wide text-primary transition hover:border-primary hover:bg-primary/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     >
-                      {showAllLanguages ? "Show fewer languages" : "More languages"}
+                      {showAllLanguages ? (
+                        <>
+                          <ChevronUp className="h-4 w-4" />
+                          Show fewer languages
+                        </>
+                      ) : (
+                        <>
+                          <Globe2 className="h-4 w-4" />
+                          More languages
+                          <span className="rounded-full bg-primary/25 px-2 py-0.5 text-[11px] font-black tabular-nums">
+                            +{POOLS.language.length - 8}
+                          </span>
+                          <ChevronDown className="h-4 w-4" />
+                        </>
+                      )}
                     </button>
                   )}
+
                 </div>
 
                 {lengthControl}
