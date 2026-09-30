@@ -32,21 +32,20 @@ Deno.serve(async (req) => {
   const raw = Number(map.get("coins_per_remake"));
   const cost = Number.isFinite(raw) && raw >= 1 ? Math.round(raw) : 2;
 
+  // Claim the reveal atomically first so double taps / retries can't charge twice.
+  const { data: claimed, error: claimErr } = await admin.from("songs")
+    .update({ revealed: true })
+    .eq("id", song_id).eq("user_id", user.id).eq("revealed", false)
+    .select("id");
+  if (claimErr) return jsonResponse({ error: claimErr.message }, 500);
+  if (!claimed || claimed.length === 0) return jsonResponse({ ok: true, already: true });
+
   const { error: deductErr } = await admin.rpc("deduct_coins", {
     p_user: user.id, p_amount: cost, p_reference: `variation:${song_id}`,
   });
-  if (deductErr) return jsonResponse({ error: deductErr.message, code: "insufficient_coins" }, 402);
-
-  const { error: upErr } = await admin.from("songs")
-    .update({ revealed: true }).eq("id", song_id);
-  if (upErr) {
-    // Best-effort refund — mirrors suno-callback pattern.
-    await admin.from("coin_transactions").insert({
-      user_id: user.id, amount: cost, type: "refund", reference: `variation_refund:${song_id}`,
-    });
-    const { data: prof } = await admin.from("profiles").select("coin_balance").eq("id", user.id).single();
-    await admin.from("profiles").update({ coin_balance: (prof?.coin_balance ?? 0) + cost }).eq("id", user.id);
-    return jsonResponse({ error: upErr.message }, 500);
+  if (deductErr) {
+    await admin.from("songs").update({ revealed: false }).eq("id", song_id);
+    return jsonResponse({ error: "Not enough coins for this remake", code: "insufficient_coins" }, 402);
   }
 
   return jsonResponse({ ok: true, cost });
