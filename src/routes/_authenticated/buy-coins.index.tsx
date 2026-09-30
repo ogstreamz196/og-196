@@ -113,8 +113,10 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
   // Apple rejects any iOS build that mentions Google Play, so name the store the
   // device actually bills through.
   const [nativeStoreName, setNativeStoreName] = useState("the App Store");
+  const [isNativeApp, setIsNativeApp] = useState(false);
   useEffect(() => {
     setNativeStoreName(Capacitor.getPlatform() === "ios" ? "the App Store" : "Google Play");
+    setIsNativeApp(Capacitor.isNativePlatform());
   }, []);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
