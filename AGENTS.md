@@ -17,3 +17,7 @@
 ## Public track sharing
 
 - Public share pages may serve only completed, public, revealed tracks through short-lived signed audio URLs, so private and hidden tracks cannot leak.
+
+## Library playback
+
+- The shared playlist controller exclusively switches tracks and pauses the previous audio element, preventing overlapping playback across rows and takes.

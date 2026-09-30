@@ -125,7 +125,7 @@ Deno.serve(async (req) => {
     }
   }
 
-  const path = mode === "full" ? song.audio_path! : song.sample_path;
+  const path = mode === "full" ? song.audio_path : song.sample_path;
   if (!path) {
     const code = mode === "full" ? "full_pending" : "sample_pending";
     log(code, { user_id: user.id, song_id, mode });
@@ -142,11 +142,23 @@ Deno.serve(async (req) => {
   const rawName = typeof body?.filename === "string" ? body.filename : "";
   const safeName = rawName.replace(/[^\w.\- ]+/g, "").slice(0, 120) || "track.mp3";
   const filename = safeName.toLowerCase().endsWith(".mp3") ? safeName : `${safeName}.mp3`;
-  const { data, error } = await admin.storage.from("song-files")
+  let { data, error } = await admin.storage.from("song-files")
     .createSignedUrl(path, ttl, forceAttachment ? { download: filename } : undefined);
+  if (error?.message.toLowerCase().includes("too many connections")) {
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    ({ data, error } = await admin.storage.from("song-files")
+      .createSignedUrl(path, ttl, forceAttachment ? { download: filename } : undefined));
+  }
   if (error) {
     log("sign_failed", { user_id: user.id, song_id, mode, error: error.message });
-    return jsonResponse({ error: error.message, code: "sign_failed" }, 500);
+    const overloaded = error.message.toLowerCase().includes("too many connections");
+    return jsonResponse(
+      {
+        error: overloaded ? "Track audio is temporarily busy. Please try again." : error.message,
+        code: overloaded ? "sign_busy" : "sign_failed",
+      },
+      overloaded ? 503 : 500,
+    );
   }
 
   log("ok", { user_id: user.id, song_id, mode, owner: isOwner });
