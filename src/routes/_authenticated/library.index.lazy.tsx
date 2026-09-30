@@ -1368,7 +1368,13 @@ function LibraryPage() {
         onOpenChange={setWizardOpen}
         initialDraft={wizardDraft}
         submitLabel="Create now"
+        balance={balance}
+        secondVersionCost={secondVersionCost}
+        onBuyCoins={() => void navigate({ to: "/buy-coins" })}
+        onEarnCoins={() => void navigate({ to: "/community" })}
         onComplete={(v, draft) => {
+          wantSecondTakeRef.current = !!v.wantSecondVersion;
+
           setWizardDraft(draft);
           setTitle(v.title);
           setSubjectName(v.subjectName);
