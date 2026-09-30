@@ -33,6 +33,9 @@ import { shareTrack } from "@/lib/share-track";
 import { invokeError } from "@/lib/invoke-error";
 import { deleteQueuedSong } from "@/lib/song-queue-actions";
 import { languageFromPrompt } from "@/lib/library-utils";
+import { useServerFn } from "@tanstack/react-start";
+import { recoverStuckSong } from "@/lib/suno-recover.functions";
+
 import { useSettings } from "@/hooks/use-settings";
 import { useProfile } from "@/hooks/use-profile";
 import type { Song } from "@/components/SongCard";
@@ -105,6 +108,8 @@ export function JobQueuePanel({ songs, onRemoved }: { songs: Song[]; onRemoved?:
   const [retrying, setRetrying] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [detailsSong, setDetailsSong] = useState<Song | null>(null);
+  const recoverSong = useServerFn(recoverStuckSong);
+
 
   // Tick once per second while there are in-flight jobs so the elapsed/stall
   // indicators stay accurate without forcing a parent refetch.
@@ -169,9 +174,33 @@ export function JobQueuePanel({ songs, onRemoved }: { songs: Song[]; onRemoved?:
     return c;
   }, [dedupedSongs]);
 
+  /**
+   * Retry = "fix this track".
+   *
+   * First we ask the music engine what actually happened to the existing job.
+   * When it already finished (a take's file was broken on the engine's CDN and
+   * jammed the delivery), we rebuild the track from the intact take — instant,
+   * free, no regeneration. Only when there's genuinely nothing to recover do we
+   * submit a fresh generation.
+   */
   async function retry(song: Song) {
     setRetrying(song.id);
     try {
+      try {
+        const recovery = await recoverSong({ data: { songId: song.id } });
+        if (recovery.outcome === "completed") {
+          toast.success(recovery.message);
+          onRemoved?.();
+          return;
+        }
+        if (recovery.outcome === "pending" || recovery.outcome === "unavailable") {
+          toast.info(recovery.message);
+          return;
+        }
+      } catch {
+        // Recovery is best-effort — fall through to a fresh generation.
+      }
+
       const { data, error } = await supabase.functions.invoke("suno-generate", {
         body: {
           song_id: song.id,
@@ -193,6 +222,7 @@ export function JobQueuePanel({ songs, onRemoved }: { songs: Song[]; onRemoved?:
       setRetrying(null);
     }
   }
+
 
   /** Remove a job from the queue — cancels + refunds it first when in flight. */
   async function removeJob(song: Song) {
