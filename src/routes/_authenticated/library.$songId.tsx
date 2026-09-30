@@ -24,6 +24,7 @@ import type { Song } from "@/components/SongCard";
 import { SongWorkspace } from "@/components/library/SongWorkspace";
 import { PublishToggle } from "@/components/library/PublishToggle";
 import { UnlockConfirmDialog } from "@/components/library/UnlockConfirmDialog";
+import { OwnerUnlockDialog } from "@/components/library/OwnerUnlockDialog";
 import { useProfile } from "@/hooks/use-profile";
 import { ensureFullUrlAllowed } from "@/lib/ensure-full-url-allowed";
 
@@ -142,6 +143,10 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
   const [progress, setProgress] = useState(0);
   const [downloading, setDownloading] = useState(false);
   const [unlockDialogOpen, setUnlockDialogOpen] = useState(false);
+  const [ownerUnlockOpen, setOwnerUnlockOpen] = useState(false);
+  const fullUnlockCost = settings?.coins_per_full_unlock ?? 5;
+  const secondTakeCost =
+    Number((settings as { coins_per_remake?: number } | undefined)?.coins_per_remake) || 2;
   const { data: profile } = useProfile();
   const balance = profile?.coin_balance ?? 0;
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -255,10 +260,45 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
       return;
     }
     if (!unlocked) {
-      toast.error("This track isn't unlocked. Purchase or unlock to download the full version.");
+      setOwnerUnlockOpen(true);
       return;
     }
     void downloadFull();
+  }
+
+  /** Owner padlock: unlock the full master, optionally bundling the hidden take. */
+  async function ownerUnlock(bundleBoth: boolean) {
+    setDownloading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("unlock-full-song", {
+        body: { song_id: song.id, bundle_both: bundleBoth },
+      });
+      if (error) {
+        throw new Error(
+          (error as { context?: { error?: string } })?.context?.error ||
+            error.message ||
+            "Could not unlock track",
+        );
+      }
+      if (!data?.already) {
+        toast.success(
+          bundleBoth && data?.second_take
+            ? `Both versions unlocked · -${data?.cost ?? fullUnlockCost + secondTakeCost} coins`
+            : `Full track unlocked · -${data?.cost ?? fullUnlockCost} coins`,
+        );
+      }
+      setOwnerUnlockOpen(false);
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ["profile"] }),
+        qc.invalidateQueries({ queryKey: ["song", song.id] }),
+        qc.invalidateQueries({ queryKey: ["songs"] }),
+      ]);
+      onRefresh();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Unlock failed");
+    } finally {
+      setDownloading(false);
+    }
   }
 
   async function downloadFull() {
@@ -424,7 +464,7 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
                 </Button>
                 <Button
                   onClick={requestDownload}
-                  disabled={downloading || (!communityMode && !unlocked)}
+                  disabled={downloading}
                   variant={communityMode || unlocked ? "default" : "outline"}
                   size="lg"
                   className="h-auto min-h-11 min-w-0 whitespace-normal px-3 py-2 text-center leading-tight sm:px-8"
@@ -436,7 +476,11 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
                   ) : (
                     <Lock className="h-5 w-5" />
                   )}
-                  {communityMode ? "Download · 3 coins" : unlocked ? "Download HQ" : "Locked"}
+                  {communityMode
+                    ? "Download · 3 coins"
+                    : unlocked
+                      ? "Download HQ"
+                      : `Unlock · ${fullUnlockCost} coins`}
                 </Button>
               </div>
 
@@ -486,6 +530,20 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
         balance={balance}
         songTitle={song.title}
       />
+
+      {!communityMode && (
+        <OwnerUnlockDialog
+          open={ownerUnlockOpen}
+          onOpenChange={setOwnerUnlockOpen}
+          songId={song.id}
+          songTitle={song.title}
+          balance={balance}
+          singleCost={fullUnlockCost}
+          secondTakeCost={secondTakeCost}
+          busy={downloading}
+          onConfirm={(bundle) => void ownerUnlock(bundle)}
+        />
+      )}
     </article>
   );
 }

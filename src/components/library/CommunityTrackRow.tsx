@@ -24,6 +24,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { downloadFile } from "@/lib/download-file";
 import { shareTrack } from "@/lib/share-track";
 import { UnlockConfirmDialog } from "@/components/library/UnlockConfirmDialog";
+import { OwnerUnlockDialog } from "@/components/library/OwnerUnlockDialog";
+import { useSettings } from "@/hooks/use-settings";
 import { CreatorTag } from "@/components/library/CreatorTag";
 import {
   DropdownMenu,
@@ -98,7 +100,46 @@ function CommunityTrackRowImpl({
   const [duration, setDuration] = useState<number>(song.duration_seconds ?? 0);
   const [coverFailed, setCoverFailed] = useState(false);
   const [unlockOpen, setUnlockOpen] = useState(false);
+  const [ownerUnlockOpen, setOwnerUnlockOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const { data: settings } = useSettings();
+  const fullUnlockCost = settings?.coins_per_full_unlock ?? 5;
+  const secondTakeCost =
+    Number((settings as { coins_per_remake?: number } | undefined)?.coins_per_remake) || 2;
+
+  /** Owner padlock: unlock the full master, optionally bundling the hidden take. */
+  async function ownerUnlock(bundleBoth: boolean) {
+    setBusy(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("unlock-full-song", {
+        body: { song_id: song.id, bundle_both: bundleBoth },
+      });
+      if (error) {
+        throw new Error(
+          (error as { context?: { error?: string } })?.context?.error ||
+            error.message ||
+            "Could not unlock track",
+        );
+      }
+      if (!data?.already) {
+        toast.success(
+          bundleBoth && data?.second_take
+            ? `Both versions unlocked · -${data?.cost ?? fullUnlockCost + secondTakeCost} coins`
+            : `Full track unlocked · -${data?.cost ?? fullUnlockCost} coins`,
+        );
+      }
+      setOwnerUnlockOpen(false);
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ["profile"] }),
+        qc.invalidateQueries({ queryKey: ["recent-songs"] }),
+        qc.invalidateQueries({ queryKey: ["songs"] }),
+      ]);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Unlock failed");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   useEffect(() => {
     if (song.duration_seconds) setDuration(song.duration_seconds);
@@ -175,6 +216,23 @@ function CommunityTrackRowImpl({
 
   const actions = (
     <div className="flex shrink-0 items-center gap-1.5">
+      {owned && !song.unlocked && isReady && (
+        <button
+          type="button"
+          onClick={() => setOwnerUnlockOpen(true)}
+          disabled={busy}
+          aria-label={`Unlock the full version of ${title}`}
+          className="inline-flex h-9 shrink-0 items-center gap-1 rounded-full border border-amber-400/40 bg-amber-500/15 px-2.5 text-xs font-black tabular-nums text-amber-300 transition-colors hover:bg-amber-500/25 disabled:opacity-40"
+        >
+          {busy ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <LockKeyhole className="h-4 w-4" />
+          )}
+          <span>{fullUnlockCost}</span>
+          <span className="sr-only">OG coins to unlock</span>
+        </button>
+      )}
       {owned ? (
         <Link
           to="/library/$songId"
@@ -395,6 +453,20 @@ function CommunityTrackRowImpl({
         songTitle={song.title}
         songId={song.id}
       />
+
+      {owned && (
+        <OwnerUnlockDialog
+          open={ownerUnlockOpen}
+          onOpenChange={setOwnerUnlockOpen}
+          songId={song.id}
+          songTitle={song.title}
+          balance={balance}
+          singleCost={fullUnlockCost}
+          secondTakeCost={secondTakeCost}
+          busy={busy}
+          onConfirm={(bundle) => void ownerUnlock(bundle)}
+        />
+      )}
     </li>
   );
 }
