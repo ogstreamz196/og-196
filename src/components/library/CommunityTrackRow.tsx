@@ -216,6 +216,23 @@ function CommunityTrackRowImpl({
 
   const actions = (
     <div className="flex shrink-0 items-center gap-1.5">
+      {owned && !song.unlocked && isReady && (
+        <button
+          type="button"
+          onClick={() => setOwnerUnlockOpen(true)}
+          disabled={busy}
+          aria-label={`Unlock the full version of ${title}`}
+          className="inline-flex h-9 shrink-0 items-center gap-1 rounded-full border border-amber-400/40 bg-amber-500/15 px-2.5 text-xs font-black tabular-nums text-amber-300 transition-colors hover:bg-amber-500/25 disabled:opacity-40"
+        >
+          {busy ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <LockKeyhole className="h-4 w-4" />
+          )}
+          <span>{fullUnlockCost}</span>
+          <span className="sr-only">OG coins to unlock</span>
+        </button>
+      )}
       {owned ? (
         <Link
           to="/library/$songId"
