@@ -12,9 +12,38 @@ export function cleanTitle(raw: string): string {
 }
 
 const STOPWORDS = new Set([
-  "this", "that", "with", "about", "from", "they", "them", "their", "have", "been", "were",
-  "when", "what", "will", "would", "just", "like", "really", "very", "into", "your", "song",
-  "track", "make", "made", "some", "always", "every", "because", "there", "where", "which",
+  "this",
+  "that",
+  "with",
+  "about",
+  "from",
+  "they",
+  "them",
+  "their",
+  "have",
+  "been",
+  "were",
+  "when",
+  "what",
+  "will",
+  "would",
+  "just",
+  "like",
+  "really",
+  "very",
+  "into",
+  "your",
+  "song",
+  "track",
+  "make",
+  "made",
+  "some",
+  "always",
+  "every",
+  "because",
+  "there",
+  "where",
+  "which",
 ]);
 
 /** First name only — titles never need someone's full name. */
@@ -24,16 +53,13 @@ export function firstName(subjectName: string): string {
 
 /** Deterministic fallback: a short natural phrase from the story, no full names. */
 export function fallbackTitle(subjectName: string, description: string): string {
-  const nameParts = new Set(
-    subjectName
-      .toLowerCase()
-      .split(/\s+/)
-      .filter(Boolean),
-  );
+  const nameParts = new Set(subjectName.toLowerCase().split(/\s+/).filter(Boolean));
   const words = description
     .replace(/[^\p{L}\p{N}\s']/gu, " ")
     .split(/\s+/)
-    .filter((w) => w.length > 3 && !STOPWORDS.has(w.toLowerCase()) && !nameParts.has(w.toLowerCase()))
+    .filter(
+      (w) => w.length > 3 && !STOPWORDS.has(w.toLowerCase()) && !nameParts.has(w.toLowerCase()),
+    )
     .slice(0, 3)
     .map((w) => w[0]!.toUpperCase() + w.slice(1).toLowerCase());
   if (words.length >= 2) return cleanTitle(words.join(" "));
@@ -111,7 +137,11 @@ export const suggestTrackTitle = createServerFn({ method: "POST" })
       // Strip any surname the model sneaked in — first name only.
       const parts = data.subjectName.trim().split(/\s+/).slice(1);
       for (const p of parts) {
-        if (p.length > 1) title = title.replace(new RegExp(`\\s*\\b${p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "gi"), "");
+        if (p.length > 1)
+          title = title.replace(
+            new RegExp(`\\s*\\b${p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "gi"),
+            "",
+          );
       }
       title = cleanTitle(title.replace(/^(song|ode)\s+(for|to)\s+/i, ""));
       return { title: title || backup };
@@ -119,4 +149,3 @@ export const suggestTrackTitle = createServerFn({ method: "POST" })
       return { title: backup };
     }
   });
-
