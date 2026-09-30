@@ -159,7 +159,13 @@ function LibraryPage() {
   const [autoUnlockPrompt, setAutoUnlockPrompt] = useState(false);
   // download cost is configured via settings.coins_per_full_unlock when needed
   const balance = profile?.coin_balance ?? 0;
-  const secondVersionCost = Math.max(1, Math.round(settings?.coins_per_remake ?? 2));
+  const secondVersionCost = Math.max(
+    1,
+    Math.round(
+      Number((settings as { coins_per_remake?: number } | undefined)?.coins_per_remake) || 2,
+    ),
+  );
+
 
   const firstName = useMemo(() => {
     if (dev.isDev) return "Developer";
