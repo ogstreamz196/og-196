@@ -167,6 +167,9 @@ export function CreateNowWizard({
   const [confirmClose, setConfirmClose] = useState(false);
   const wizardScrollRef = useRef<HTMLDivElement | null>(null);
   const [naming, setNaming] = useState(false);
+  const [showAllStyles, setShowAllStyles] = useState(false);
+  const [showAllLanguages, setShowAllLanguages] = useState(false);
+  const explicit = !isNasheed && intensity > 0;
   const suggestTitle = useServerFn(suggestTrackTitle);
 
   const toggle = (list: string[], v: string) =>
@@ -309,7 +312,7 @@ export function CreateNowWizard({
       } finally {
         setNaming(false);
       }
-      if (!finalTitle) finalTitle = `Song for ${subjectName.trim() || "you"}`;
+      if (!finalTitle) finalTitle = `All About ${subjectName.trim().split(/\s+/)[0] || "You"}`;
       setTitle(finalTitle);
     }
 
@@ -375,6 +378,45 @@ export function CreateNowWizard({
     }
   }
 
+  const lengthControl = (
+    <div className="space-y-2">
+      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        Length of track
+      </p>
+      <div className="flex items-center gap-3 rounded-lg border border-border bg-card/40 p-2">
+        <button
+          type="button"
+          aria-label="Shorter track"
+          disabled={targetMinutes <= MIN_LENGTH}
+          onClick={() => setTargetMinutes((m) => Math.max(MIN_LENGTH, m - 1))}
+          className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-border bg-background text-lg font-bold transition hover:border-primary/50 disabled:opacity-40"
+        >
+          −
+        </button>
+        <div className="min-w-0 flex-1 text-center">
+          <p className="text-xl font-bold tabular-nums leading-none">{targetMinutes} min</p>
+          <p className="mt-1 text-[11px] font-medium text-muted-foreground">
+            {targetMinutes > MIN_LENGTH
+              ? `+${targetMinutes - MIN_LENGTH} coin${targetMinutes - MIN_LENGTH === 1 ? "" : "s"}`
+              : "Included"}
+          </p>
+        </div>
+        <button
+          type="button"
+          aria-label="Longer track (1 extra coin)"
+          disabled={targetMinutes >= MAX_LENGTH}
+          onClick={() => setTargetMinutes((m) => Math.min(MAX_LENGTH, m + 1))}
+          className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-primary/40 bg-primary/15 text-lg font-bold text-primary transition hover:bg-primary/25 disabled:opacity-40"
+        >
+          +
+        </button>
+      </div>
+      <p className="text-[11px] text-muted-foreground">
+        Every length is free to create. Pay only when you download the full track.
+      </p>
+    </div>
+  );
+
   return (
     <Dialog open={open} onOpenChange={(v) => (v ? onOpenChange(true) : requestClose())}>
       <DialogContent
@@ -409,15 +451,14 @@ export function CreateNowWizard({
             />
           </div>
           <DialogTitle className="font-display text-2xl font-black leading-tight sm:text-3xl">
-            {step === 1 && "Your track"}
-            {step === 2 && "Choose a style"}
-            {step === 3 && "Language & vocals"}
+            {step === 1 && "Who's it for?"}
+            {step === 2 && "Pick the sound"}
+            {step === 3 && "Final touches"}
           </DialogTitle>
           <DialogDescription className="text-sm">
-            {step === 1 && "Tell us who it's for, how long it runs, and what it's about."}
-            {step === 2 && "Stack as many styles as you like, then pick the voice."}
-            {step === 3 &&
-              "Pick the language it's sung in. Flip vocals only to sing over your own beat."}
+            {step === 1 && "A name and a little story is all OG Bot needs."}
+            {step === 2 && "Mix styles if you like, then choose who sings."}
+            {step === 3 && "Language, length and rating — then create."}
           </DialogDescription>
         </DialogHeader>
 
@@ -436,10 +477,7 @@ export function CreateNowWizard({
                     htmlFor="wiz-subject"
                     className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                   >
-                    Name of person{" "}
-                    <span className="normal-case tracking-normal text-muted-foreground/80">
-                      — this headlines your track title
-                    </span>
+                    Their name
                   </Label>
                   <Input
                     id="wiz-subject"
@@ -458,7 +496,7 @@ export function CreateNowWizard({
                     htmlFor="wiz-desc"
                     className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                   >
-                    Short description
+                    The story
                   </Label>
                   <Textarea
                     id="wiz-desc"
@@ -473,45 +511,6 @@ export function CreateNowWizard({
                     {description.trim().length}/2000
                   </p>
                 </div>
-
-                <div className="space-y-2">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Length of track
-                  </p>
-                  <div className="flex items-center gap-3 rounded-lg border border-border bg-card/40 p-2">
-                    <button
-                      type="button"
-                      aria-label="Shorter track"
-                      disabled={targetMinutes <= MIN_LENGTH}
-                      onClick={() => setTargetMinutes((m) => Math.max(MIN_LENGTH, m - 1))}
-                      className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-border bg-background text-lg font-bold transition hover:border-primary/50 disabled:opacity-40"
-                    >
-                      −
-                    </button>
-                    <div className="min-w-0 flex-1 text-center">
-                      <p className="text-xl font-bold tabular-nums leading-none">
-                        {targetMinutes} min
-                      </p>
-                      <p className="mt-1 text-[11px] font-medium text-muted-foreground">
-                        {targetMinutes > MIN_LENGTH
-                          ? `+${targetMinutes - MIN_LENGTH} coin${targetMinutes - MIN_LENGTH === 1 ? "" : "s"}`
-                          : "Included"}
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      aria-label="Longer track (1 extra coin)"
-                      disabled={targetMinutes >= MAX_LENGTH}
-                      onClick={() => setTargetMinutes((m) => Math.min(MAX_LENGTH, m + 1))}
-                      className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-primary/40 bg-primary/15 text-lg font-bold text-primary transition hover:bg-primary/25 disabled:opacity-40"
-                    >
-                      +
-                    </button>
-                  </div>
-                  <p className="text-[11px] text-muted-foreground">
-                    Every length is free to create. Pay only when you download the full track.
-                  </p>
-                </div>
               </div>
             )}
 
@@ -522,7 +521,10 @@ export function CreateNowWizard({
                   aria-label="Track styles"
                   className="grid grid-cols-2 gap-2 sm:grid-cols-3"
                 >
-                  {STYLES.map((s) => {
+                  {(showAllStyles
+                    ? STYLES
+                    : STYLES.filter((x, i) => i < 12 || styles.includes(x))
+                  ).map((s) => {
                     const selected = styles.includes(s);
                     return (
                       <button
@@ -557,6 +559,13 @@ export function CreateNowWizard({
                     );
                   })}
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setShowAllStyles((v) => !v)}
+                  className="text-xs font-bold text-primary hover:underline"
+                >
+                  {showAllStyles ? "Show fewer styles" : `More styles (${STYLES.length - 12})`}
+                </button>
                 <div>
                   <p className="mb-2 text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
                     Artist voice
@@ -573,7 +582,7 @@ export function CreateNowWizard({
                           key={g}
                           type="button"
                           aria-pressed={selected}
-                          onClick={() => setGender((prev) => (prev === g ? "" : g))}
+                          onClick={() => setGender(g)}
                           className={cn(
                             "min-h-11 rounded-xl border px-3 py-2 text-xs font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                             selected
@@ -592,6 +601,57 @@ export function CreateNowWizard({
 
             {step === 3 && (
               <div className="space-y-5">
+                <div className="space-y-2">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
+                      Language
+                    </p>
+                    <p className="text-[11px] font-semibold text-muted-foreground">
+                      {languages.length ? `${languages.length} selected` : "English by default"}
+                    </p>
+                  </div>
+                  <div
+                    role="group"
+                    aria-label="Languages"
+                    style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
+                    className="grid grid-cols-2 gap-2 rounded-xl border border-border bg-background/40 p-2 sm:grid-cols-3"
+                  >
+                    {(showAllLanguages
+                      ? POOLS.language
+                      : POOLS.language.filter((x, i) => i < 8 || languages.includes(x))
+                    ).map((l) => {
+                      const selected = languages.includes(l);
+                      return (
+                        <button
+                          key={l}
+                          type="button"
+                          aria-pressed={selected}
+                          onClick={() => setLanguages((prev) => toggle(prev, l))}
+                          className={cn(
+                            "min-h-10 rounded-lg border px-3 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                            selected
+                              ? "border-primary bg-primary/20 text-foreground"
+                              : "border-border bg-card/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
+                          )}
+                        >
+                          {l}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {POOLS.language.length > 8 && (
+                    <button
+                      type="button"
+                      onClick={() => setShowAllLanguages((v) => !v)}
+                      className="text-xs font-bold text-primary hover:underline"
+                    >
+                      {showAllLanguages ? "Show fewer languages" : "More languages"}
+                    </button>
+                  )}
+                </div>
+
+                {lengthControl}
+
                 {/* Voice setup: vocals-only and, when on, the beat it rides. */}
                 <div className="space-y-2">
                   <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
@@ -782,52 +842,15 @@ export function CreateNowWizard({
                   )}
                 </div>
 
-                <div className="space-y-2">
-                  <div className="flex items-baseline justify-between gap-2">
-                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
-                      Language
-                    </p>
-                    <p className="text-[11px] font-semibold text-muted-foreground">
-                      {languages.length ? `${languages.length} selected` : "English by default"}
-                    </p>
-                  </div>
-                  <div
-                    role="group"
-                    aria-label="Languages"
-                    style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
-                    className="grid grid-cols-2 gap-2 rounded-xl border border-border bg-background/40 p-2 sm:max-h-[200px] sm:grid-cols-3 sm:overflow-y-auto sm:overscroll-contain sm:pr-1"
-                  >
-                    {POOLS.language.map((l) => {
-                      const selected = languages.includes(l);
-                      return (
-                        <button
-                          key={l}
-                          type="button"
-                          aria-pressed={selected}
-                          onClick={() => setLanguages((prev) => toggle(prev, l))}
-                          className={cn(
-                            "min-h-10 rounded-lg border px-3 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
-                            selected
-                              ? "border-primary bg-primary/20 text-foreground"
-                              : "border-border bg-card/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
-                          )}
-                        >
-                          {l}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <p className="text-[11px] text-muted-foreground">
-                    It's sung in exactly what you pick — nothing picked means English.
-                  </p>
-                </div>
-
                 {/* Final review so nothing is a surprise before creating. */}
                 <div className="space-y-1 rounded-xl border border-border bg-background/60 p-3 text-xs">
                   <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
                     Review
                   </p>
-                  <p className="font-semibold text-foreground">{title.trim() || "Untitled"}</p>
+                  <p className="font-semibold text-foreground">
+                    {title.trim() ||
+                      `For ${subjectName.trim().split(/\s+/)[0] || "you"} · OG Bot names it`}
+                  </p>
                   <p className="text-muted-foreground">
                     {styles.join(", ") || "No style"} · {targetMinutes} min ·{" "}
                     {(languages.length ? languages : ["English"]).join(", ")}
@@ -841,7 +864,12 @@ export function CreateNowWizard({
                           ? "Vocals over your beat"
                           : "A cappella, no instruments"
                         : "Full production"}{" "}
-                    · {isNasheed ? "Strictly clean" : foulMouth ? "18+" : "PG"}
+                    ·{" "}
+                    {isNasheed
+                      ? "Strictly clean"
+                      : explicit
+                        ? `18+ · ${INTENSITY_LABELS[intensity]}`
+                        : "PG"}
                   </p>
                   <p className="flex items-center gap-1.5 font-semibold text-foreground">
                     {isPublic ? (
