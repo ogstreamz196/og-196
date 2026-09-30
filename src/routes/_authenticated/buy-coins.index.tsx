@@ -239,7 +239,8 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                 ·
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <ShieldCheck className="h-3 w-3" /> Apple / Google Pay
+                <ShieldCheck className="h-3 w-3" />{" "}
+                {Capacitor.isNativePlatform() ? nativeStoreName : "Apple / Google Pay"}
               </span>
             </div>
             {stage === "confirm" ? (
