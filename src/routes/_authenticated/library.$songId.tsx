@@ -463,7 +463,7 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
                 </Button>
                 <Button
                   onClick={requestDownload}
-                  disabled={downloading || (!communityMode && !unlocked)}
+                  disabled={downloading}
                   variant={communityMode || unlocked ? "default" : "outline"}
                   size="lg"
                   className="h-auto min-h-11 min-w-0 whitespace-normal px-3 py-2 text-center leading-tight sm:px-8"
@@ -475,7 +475,11 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
                   ) : (
                     <Lock className="h-5 w-5" />
                   )}
-                  {communityMode ? "Download · 3 coins" : unlocked ? "Download HQ" : "Locked"}
+                  {communityMode
+                    ? "Download · 3 coins"
+                    : unlocked
+                      ? "Download HQ"
+                      : `Unlock · ${fullUnlockCost} coins`}
                 </Button>
               </div>
 
