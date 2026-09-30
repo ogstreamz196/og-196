@@ -141,28 +141,6 @@ export async function shareTrack({
   }
 
   try {
-    if (false as boolean) {
-      const file = new File([blob], filename, { type: blob.type || "audio/mpeg" });
-      const files = logoFile ? [file, logoFile] : [file];
-      if (nav.canShare({ files })) {
-        await nav.share({ files, title, text, url });
-        return;
-      }
-      if (nav.canShare({ files: [file] })) {
-        await nav.share({ files: [file], title, text, url });
-        return;
-      }
-    }
-    if (nav?.share) {
-      await nav.share({ title, text, url });
-      return;
-    }
-  } catch (e) {
-    // User dismissed the sheet — that is not an error worth shouting about.
-    if (e instanceof DOMException && e.name === "AbortError") return;
-  }
-
-  try {
     await navigator.clipboard.writeText(`${text} ${url}`);
     toast.success("Share link copied — paste it anywhere");
   } catch {
