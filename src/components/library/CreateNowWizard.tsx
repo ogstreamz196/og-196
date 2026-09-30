@@ -517,9 +517,26 @@ export function CreateNowWizard({
                     placeholder="Vibes, memories, inside jokes, the moment you want in the lyrics…"
                     className="min-h-[110px] resize-y rounded-lg border border-border bg-background text-sm leading-relaxed"
                   />
+                  <div className="flex flex-wrap gap-1.5" aria-label="Story ideas">
+                    {VIBE_IDEAS.map((idea) => (
+                      <button
+                        key={idea.label}
+                        type="button"
+                        onClick={() =>
+                          setDescription((prev) =>
+                            prev.trim() ? `${prev.trim()} ${idea.text}` : idea.text,
+                          )
+                        }
+                        className="min-h-9 rounded-full border border-white/10 bg-card/60 px-3 py-1.5 text-xs font-bold text-muted-foreground transition hover:border-primary/40 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                      >
+                        {idea.label}
+                      </button>
+                    ))}
+                  </div>
                   <p className="text-[11px] tabular-nums text-muted-foreground">
                     {description.trim().length}/2000
                   </p>
+
                 </div>
               </div>
             )}
