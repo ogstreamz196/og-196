@@ -47,6 +47,7 @@ export function LibraryFilters({
         className="min-w-0 rounded-full"
       >
         All
+        {typeof allCount === "number" && <CountBadge count={allCount} active={mode === "all"} />}
       </Button>
       <Button
         type="button"
@@ -57,6 +58,9 @@ export function LibraryFilters({
         className="min-w-0 rounded-full"
       >
         Unlocked
+        {typeof unlockedCount === "number" && (
+          <CountBadge count={unlockedCount} active={mode === "unlocked"} />
+        )}
       </Button>
       <Popover>
         <PopoverTrigger asChild>
