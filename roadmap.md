@@ -39,4 +39,4 @@
 - [x] Build two-tier track rows with metadata chips, seek bar, and action drawer
 - [x] Add All, Unlocked, and Styles Library filters
 - [ ] Walk generation, player, shuffle, and second-take playback end to end
-- [ ] Verify the finished Library experience on mobile
+- [x] Verify the finished Library experience on mobile
