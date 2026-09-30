@@ -5,6 +5,8 @@ import { useSongAudio } from "@/hooks/use-song-audio";
 import { useReferralUrl } from "@/hooks/use-referral-url";
 import { shareLyricClip } from "@/lib/share-clip";
 import { Button } from "@/components/ui/button";
+import { CreatorTag } from "@/components/library/CreatorTag";
+
 import { cn } from "@/lib/utils";
 
 export interface Song {
@@ -97,7 +99,9 @@ function SongCardImpl({ song }: { song: Song }) {
               {song.style}
             </span>
           )}
+          <CreatorTag userId={song.user_id} className="mt-1" />
         </div>
+
 
         {isReady && (
           <div className="mt-2">
