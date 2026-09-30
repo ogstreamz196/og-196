@@ -193,9 +193,12 @@ export function useSongAudio({
       setPlaying(false);
     } else {
       if (el.src !== url) el.src = url;
-      await el.play();
-      setPlaying(true);
-      if (playlistTitle) playlist?.markCurrent(songId);
+      if (playlistTitle && playlist) {
+        playlist.playId(songId);
+      } else {
+        await el.play();
+        setPlaying(true);
+      }
     }
   }
 

@@ -1026,6 +1026,20 @@ function LibraryPage() {
     () => versionedLibrary.filter((s) => s.status === "completed"),
     [versionedLibrary],
   );
+  const yoursStyles = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          completedTracks.flatMap((song) =>
+            (song.style || "")
+              .split(",")
+              .map((style) => style.trim())
+              .filter(Boolean),
+          ),
+        ),
+      ).sort((a, b) => a.localeCompare(b)),
+    [completedTracks],
+  );
 
   /** Live queue read-out that drives the console meter + status LEDs. */
   const queue = useMemo(() => {
@@ -1084,6 +1098,20 @@ function LibraryPage() {
       lastPage.length < COMMUNITY_PAGE_SIZE ? undefined : allPages.length,
   });
   const communityTracks = useMemo(() => community.data?.pages.flat() ?? [], [community.data]);
+  const communityStyles = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          communityTracks.flatMap((song) =>
+            (song.style || "")
+              .split(",")
+              .map((style) => style.trim())
+              .filter(Boolean),
+          ),
+        ),
+      ).sort((a, b) => a.localeCompare(b)),
+    [communityTracks],
+  );
   const communitySentinelRef = useRef<HTMLDivElement | null>(null);
   useInfiniteScrollSentinel(communitySentinelRef, {
     enabled: !!community.hasNextPage && !community.isFetchingNextPage,
@@ -1722,6 +1750,14 @@ function LibraryPage() {
               <span className="text-primary">Yours to play &amp; download</span>
             </p>
 
+            <LibraryFilters
+              mode={yoursFilter}
+              onModeChange={setYoursFilter}
+              styles={yoursStyles}
+              selectedStyle={yoursStyle}
+              onStyleChange={setYoursStyle}
+            />
+
             {completedTracks.length > 3 && (
               <div className="relative">
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -1754,18 +1790,26 @@ function LibraryPage() {
             ) : completedTracks.length > 0 || genSong ? (
               (() => {
                 const q = yoursSearch.trim().toLowerCase();
-                const filtered = q
-                  ? completedTracks.filter(
-                      (s) =>
+                const filtered = completedTracks.filter((s) => {
+                  const matchesSearch =
+                    !q ||
                         (s.title || "").toLowerCase().includes(q) ||
                         (s.prompt || "").toLowerCase().includes(q) ||
-                        (s.style || "").toLowerCase().includes(q),
-                    )
-                  : completedTracks;
+                    (s.style || "").toLowerCase().includes(q);
+                  const matchesMode =
+                    yoursFilter === "all" ||
+                    (yoursFilter === "unlocked" && !!s.unlocked) ||
+                    (yoursFilter === "styles" &&
+                      !!yoursStyle &&
+                      (s.style || "")
+                        .split(",")
+                        .some((style) => style.trim() === yoursStyle));
+                  return matchesSearch && matchesMode;
+                });
                 if (filtered.length === 0 && !genSong) {
                   return (
                     <p className="py-6 text-center text-sm text-muted-foreground">
-                      No tracks match "{yoursSearch}".
+                      No tracks match these filters.
                     </p>
                   );
                 }
@@ -1821,6 +1865,13 @@ function LibraryPage() {
           </TabsContent>
 
           <TabsContent value="community" className="mt-0 space-y-3">
+            <LibraryFilters
+              mode={communityFilter}
+              onModeChange={setCommunityFilter}
+              styles={communityStyles}
+              selectedStyle={communityStyle}
+              onStyleChange={setCommunityStyle}
+            />
             {communityTracks.length > 3 && (
               <div className="relative">
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -1865,18 +1916,26 @@ function LibraryPage() {
             ) : communityTracks.length > 0 ? (
               (() => {
                 const q = communitySearch.trim().toLowerCase();
-                const filtered = q
-                  ? communityTracks.filter(
-                      (s) =>
+                const filtered = communityTracks.filter((s) => {
+                  const matchesSearch =
+                    !q ||
                         (s.title || "").toLowerCase().includes(q) ||
                         (s.prompt || "").toLowerCase().includes(q) ||
-                        (s.style || "").toLowerCase().includes(q),
-                    )
-                  : communityTracks;
+                    (s.style || "").toLowerCase().includes(q);
+                  const matchesMode =
+                    communityFilter === "all" ||
+                    (communityFilter === "unlocked" && !!s.unlocked) ||
+                    (communityFilter === "styles" &&
+                      !!communityStyle &&
+                      (s.style || "")
+                        .split(",")
+                        .some((style) => style.trim() === communityStyle));
+                  return matchesSearch && matchesMode;
+                });
                 if (filtered.length === 0) {
                   return (
                     <p className="py-6 text-center text-sm text-muted-foreground">
-                      No community tracks match "{communitySearch}".
+                      No community tracks match these filters.
                     </p>
                   );
                 }

@@ -36,7 +36,7 @@
 
 ## Library Phase 2
 
-- [ ] Build two-tier track rows with metadata chips, seek bar, and action drawer
-- [ ] Add All, Unlocked, and Styles Library filters
+- [x] Build two-tier track rows with metadata chips, seek bar, and action drawer
+- [x] Add All, Unlocked, and Styles Library filters
 - [ ] Walk generation, player, shuffle, and second-take playback end to end
 - [ ] Verify the finished Library experience on mobile
