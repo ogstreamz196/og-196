@@ -30,10 +30,12 @@ export function useVariations({
   const [busyVariation, setBusyVariation] = useState<string | null>(null);
   const [checkingOut, setCheckingOut] = useState(false);
 
-  const variationDivisor = Math.max(1, settings?.coins_per_variation_divisor ?? 2);
+  // Flat remake price, mirrored from supabase/functions/reveal-variation.
+  const remakePrice = Number((settings as { coins_per_remake?: number } | undefined)
+    ?.coins_per_remake);
   const variationCost = useMemo(
-    () => Math.max(1, Math.ceil(previewCost / variationDivisor)),
-    [previewCost, variationDivisor],
+    () => (Number.isFinite(remakePrice) && remakePrice >= 1 ? Math.round(remakePrice) : 2),
+    [remakePrice],
   );
 
   useEffect(() => {
