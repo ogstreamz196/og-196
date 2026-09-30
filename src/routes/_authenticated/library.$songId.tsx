@@ -529,6 +529,20 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
         balance={balance}
         songTitle={song.title}
       />
+
+      {!communityMode && (
+        <OwnerUnlockDialog
+          open={ownerUnlockOpen}
+          onOpenChange={setOwnerUnlockOpen}
+          songId={song.id}
+          songTitle={song.title}
+          balance={balance}
+          singleCost={fullUnlockCost}
+          secondTakeCost={secondTakeCost}
+          busy={downloading}
+          onConfirm={(bundle) => void ownerUnlock(bundle)}
+        />
+      )}
     </article>
   );
 }
