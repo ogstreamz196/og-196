@@ -153,6 +153,8 @@ function LibraryPage() {
   const [autoUnlockPrompt, setAutoUnlockPrompt] = useState(false);
   // download cost is configured via settings.coins_per_full_unlock when needed
   const balance = profile?.coin_balance ?? 0;
+  const secondVersionCost = Math.max(1, Math.round(settings?.coins_per_remake ?? 2));
+
   const firstName = useMemo(() => {
     if (dev.isDev) return "Developer";
     const raw = profile?.display_name?.trim() || user?.email?.split("@")[0] || "";
@@ -554,6 +556,9 @@ function LibraryPage() {
   const pipelineLockRef = useRef(false);
   // The song we're watching in realtime while its audio renders.
   const [trackedSongId, setTrackedSongId] = useState<string | null>(null);
+  // Set when the user accepted the paid second version in the wizard.
+  const wantSecondTakeRef = useRef(false);
+
   const [freshTrack, setFreshTrack] = useState<Song | null>(null);
   // Finished-track player popup: takes over from the wizard/cooking popup.
   const [masterpieceOpen, setMasterpieceOpen] = useState(false);
@@ -784,6 +789,11 @@ function LibraryPage() {
         .single();
       if (stale()) return;
       if (insertErr || !row?.id) throw new Error(insertErr?.message || "Couldn't save song");
+      if (wantSecondTakeRef.current) {
+        markSecondTakeWanted(row.id);
+        wantSecondTakeRef.current = false;
+      }
+
 
       advanceStage("submitting");
       const { data: genData, error: genErr } = await supabase.functions.invoke("suno-generate", {
