@@ -167,6 +167,9 @@ export function CreateNowWizard({
   const [confirmClose, setConfirmClose] = useState(false);
   const wizardScrollRef = useRef<HTMLDivElement | null>(null);
   const [naming, setNaming] = useState(false);
+  const [showAllStyles, setShowAllStyles] = useState(false);
+  const [showAllLanguages, setShowAllLanguages] = useState(false);
+  const explicit = !isNasheed && intensity > 0;
   const suggestTitle = useServerFn(suggestTrackTitle);
 
   const toggle = (list: string[], v: string) =>
@@ -309,7 +312,7 @@ export function CreateNowWizard({
       } finally {
         setNaming(false);
       }
-      if (!finalTitle) finalTitle = `Song for ${subjectName.trim() || "you"}`;
+      if (!finalTitle) finalTitle = `All About ${subjectName.trim().split(/\s+/)[0] || "You"}`;
       setTitle(finalTitle);
     }
 
@@ -375,105 +378,7 @@ export function CreateNowWizard({
     }
   }
 
-  return (
-    <Dialog open={open} onOpenChange={(v) => (v ? onOpenChange(true) : requestClose())}>
-      <DialogContent
-        ref={wizardScrollRef}
-        onEscapeKeyDown={(e) => {
-          e.preventDefault();
-          requestClose();
-        }}
-        className="block h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom))] w-full max-w-none overflow-y-auto overscroll-y-contain rounded-none border-x-0 border-white/10 bg-card/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-4 backdrop-blur-2xl shadow-2xl sm:flex sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:w-[calc(100vw-1.5rem)] sm:max-w-lg sm:flex-col sm:gap-3 sm:overflow-hidden sm:rounded-2xl sm:border-x sm:px-6 sm:py-6"
-      >
-        <DialogHeader className="shrink-0 space-y-2 pb-3 text-left sm:pb-0">
-          <div className="flex items-center justify-between gap-3 pr-8">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/15 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-primary">
-              <Sparkles className="h-3 w-3" />
-              Create now
-            </span>
-            <span className="text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground">
-              Step {step} of {TOTAL_STEPS}
-            </span>
-          </div>
-          <div
-            className="h-1.5 w-full overflow-hidden rounded-full bg-white/10"
-            role="progressbar"
-            aria-valuemin={1}
-            aria-valuemax={TOTAL_STEPS}
-            aria-valuenow={step}
-            aria-label="Wizard progress"
-          >
-            <div
-              className="h-full bg-gradient-brand transition-all duration-300"
-              style={{ width: `${(step / TOTAL_STEPS) * 100}%` }}
-            />
-          </div>
-          <DialogTitle className="font-display text-2xl font-black leading-tight sm:text-3xl">
-            {step === 1 && "Your track"}
-            {step === 2 && "Choose a style"}
-            {step === 3 && "Language & vocals"}
-          </DialogTitle>
-          <DialogDescription className="text-sm">
-            {step === 1 && "Tell us who it's for, how long it runs, and what it's about."}
-            {step === 2 && "Stack as many styles as you like, then pick the voice."}
-            {step === 3 &&
-              "Pick the language it's sung in. Flip vocals only to sing over your own beat."}
-          </DialogDescription>
-        </DialogHeader>
-
-        <div
-          className="-mx-1 min-h-0 space-y-3 px-1 sm:flex-1 sm:overflow-y-auto sm:overscroll-contain"
-          style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
-        >
-          <div
-            key={step}
-            className="min-h-[168px] animate-in fade-in slide-in-from-right-4 py-1 duration-300"
-          >
-            {step === 1 && (
-              <div className="space-y-5">
-                <div className="space-y-3 rounded-xl border border-border bg-background/40 p-3">
-                  <Label
-                    htmlFor="wiz-subject"
-                    className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
-                  >
-                    Name of person{" "}
-                    <span className="normal-case tracking-normal text-muted-foreground/80">
-                      — this headlines your track title
-                    </span>
-                  </Label>
-                  <Input
-                    id="wiz-subject"
-                    autoFocus
-                    value={subjectName}
-                    maxLength={60}
-                    onChange={(e) => setSubjectName(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && next()}
-                    placeholder="e.g. Aaliyah, the crew, or yourself"
-                    className="h-11 rounded-lg border border-border bg-background text-base font-semibold"
-                  />
-                </div>
-
-                <div className="space-y-3 rounded-xl border border-border bg-background/40 p-3">
-                  <Label
-                    htmlFor="wiz-desc"
-                    className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
-                  >
-                    Short description
-                  </Label>
-                  <Textarea
-                    id="wiz-desc"
-                    rows={4}
-                    value={description}
-                    maxLength={2000}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Vibes, memories, inside jokes, the moment you want in the lyrics…"
-                    className="min-h-[110px] resize-y rounded-lg border border-border bg-background text-sm leading-relaxed"
-                  />
-                  <p className="text-[11px] tabular-nums text-muted-foreground">
-                    {description.trim().length}/2000
-                  </p>
-                </div>
-
+  const lengthControl = (
                 <div className="space-y-2">
                   <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     Length of track
@@ -512,6 +417,104 @@ export function CreateNowWizard({
                     Every length is free to create. Pay only when you download the full track.
                   </p>
                 </div>
+  );
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => (v ? onOpenChange(true) : requestClose())}>
+      <DialogContent
+        ref={wizardScrollRef}
+        onEscapeKeyDown={(e) => {
+          e.preventDefault();
+          requestClose();
+        }}
+        className="block h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom))] w-full max-w-none overflow-y-auto overscroll-y-contain rounded-none border-x-0 border-white/10 bg-card/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-4 backdrop-blur-2xl shadow-2xl sm:flex sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:w-[calc(100vw-1.5rem)] sm:max-w-lg sm:flex-col sm:gap-3 sm:overflow-hidden sm:rounded-2xl sm:border-x sm:px-6 sm:py-6"
+      >
+        <DialogHeader className="shrink-0 space-y-2 pb-3 text-left sm:pb-0">
+          <div className="flex items-center justify-between gap-3 pr-8">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/15 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-primary">
+              <Sparkles className="h-3 w-3" />
+              Create now
+            </span>
+            <span className="text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground">
+              Step {step} of {TOTAL_STEPS}
+            </span>
+          </div>
+          <div
+            className="h-1.5 w-full overflow-hidden rounded-full bg-white/10"
+            role="progressbar"
+            aria-valuemin={1}
+            aria-valuemax={TOTAL_STEPS}
+            aria-valuenow={step}
+            aria-label="Wizard progress"
+          >
+            <div
+              className="h-full bg-gradient-brand transition-all duration-300"
+              style={{ width: `${(step / TOTAL_STEPS) * 100}%` }}
+            />
+          </div>
+          <DialogTitle className="font-display text-2xl font-black leading-tight sm:text-3xl">
+            {step === 1 && "Who's it for?"}
+            {step === 2 && "Pick the sound"}
+            {step === 3 && "Final touches"}
+          </DialogTitle>
+          <DialogDescription className="text-sm">
+            {step === 1 && "A name and a little story is all OG Bot needs."}
+            {step === 2 && "Mix styles if you like, then choose who sings."}
+            {step === 3 &&
+              "Language, length and rating — then create."}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div
+          className="-mx-1 min-h-0 space-y-3 px-1 sm:flex-1 sm:overflow-y-auto sm:overscroll-contain"
+          style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
+        >
+          <div
+            key={step}
+            className="min-h-[168px] animate-in fade-in slide-in-from-right-4 py-1 duration-300"
+          >
+            {step === 1 && (
+              <div className="space-y-5">
+                <div className="space-y-3 rounded-xl border border-border bg-background/40 p-3">
+                  <Label
+                    htmlFor="wiz-subject"
+                    className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                  >
+                    Their name
+                  </Label>
+                  <Input
+                    id="wiz-subject"
+                    autoFocus
+                    value={subjectName}
+                    maxLength={60}
+                    onChange={(e) => setSubjectName(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && next()}
+                    placeholder="e.g. Aaliyah, the crew, or yourself"
+                    className="h-11 rounded-lg border border-border bg-background text-base font-semibold"
+                  />
+                </div>
+
+                <div className="space-y-3 rounded-xl border border-border bg-background/40 p-3">
+                  <Label
+                    htmlFor="wiz-desc"
+                    className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                  >
+                    The story
+                  </Label>
+                  <Textarea
+                    id="wiz-desc"
+                    rows={4}
+                    value={description}
+                    maxLength={2000}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Vibes, memories, inside jokes, the moment you want in the lyrics…"
+                    className="min-h-[110px] resize-y rounded-lg border border-border bg-background text-sm leading-relaxed"
+                  />
+                  <p className="text-[11px] tabular-nums text-muted-foreground">
+                    {description.trim().length}/2000
+                  </p>
+                </div>
+
               </div>
             )}
 
@@ -522,7 +525,7 @@ export function CreateNowWizard({
                   aria-label="Track styles"
                   className="grid grid-cols-2 gap-2 sm:grid-cols-3"
                 >
-                  {STYLES.map((s) => {
+                  {(showAllStyles ? STYLES : STYLES.filter((x, i) => i < 12 || styles.includes(x))).map((s) => {
                     const selected = styles.includes(s);
                     return (
                       <button
@@ -557,6 +560,13 @@ export function CreateNowWizard({
                     );
                   })}
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setShowAllStyles((v) => !v)}
+                  className="text-xs font-bold text-primary hover:underline"
+                >
+                  {showAllStyles ? "Show fewer styles" : `More styles (${STYLES.length - 12})`}
+                </button>
                 <div>
                   <p className="mb-2 text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
                     Artist voice
@@ -573,7 +583,7 @@ export function CreateNowWizard({
                           key={g}
                           type="button"
                           aria-pressed={selected}
-                          onClick={() => setGender((prev) => (prev === g ? "" : g))}
+                          onClick={() => setGender(g)}
                           className={cn(
                             "min-h-11 rounded-xl border px-3 py-2 text-xs font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                             selected
@@ -795,9 +805,9 @@ export function CreateNowWizard({
                     role="group"
                     aria-label="Languages"
                     style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
-                    className="grid grid-cols-2 gap-2 rounded-xl border border-border bg-background/40 p-2 sm:max-h-[200px] sm:grid-cols-3 sm:overflow-y-auto sm:overscroll-contain sm:pr-1"
+                    className="grid grid-cols-2 gap-2 rounded-xl border border-border bg-background/40 p-2 sm:grid-cols-3"
                   >
-                    {POOLS.language.map((l) => {
+                    {(showAllLanguages ? POOLS.language : POOLS.language.filter((x, i) => i < 8 || languages.includes(x))).map((l) => {
                       const selected = languages.includes(l);
                       return (
                         <button
@@ -817,9 +827,15 @@ export function CreateNowWizard({
                       );
                     })}
                   </div>
-                  <p className="text-[11px] text-muted-foreground">
-                    It's sung in exactly what you pick — nothing picked means English.
-                  </p>
+                  {POOLS.language.length > 8 && (
+                    <button
+                      type="button"
+                      onClick={() => setShowAllLanguages((v) => !v)}
+                      className="text-xs font-bold text-primary hover:underline"
+                    >
+                      {showAllLanguages ? "Show fewer languages" : "More languages"}
+                    </button>
+                  )}
                 </div>
 
                 {/* Final review so nothing is a surprise before creating. */}
@@ -827,7 +843,7 @@ export function CreateNowWizard({
                   <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
                     Review
                   </p>
-                  <p className="font-semibold text-foreground">{title.trim() || "Untitled"}</p>
+                  <p className="font-semibold text-foreground">{title.trim() || `For ${subjectName.trim().split(/\s+/)[0] || "you"} · OG Bot names it`}</p>
                   <p className="text-muted-foreground">
                     {styles.join(", ") || "No style"} · {targetMinutes} min ·{" "}
                     {(languages.length ? languages : ["English"]).join(", ")}
@@ -841,7 +857,7 @@ export function CreateNowWizard({
                           ? "Vocals over your beat"
                           : "A cappella, no instruments"
                         : "Full production"}{" "}
-                    · {isNasheed ? "Strictly clean" : foulMouth ? "18+" : "PG"}
+                    · {isNasheed ? "Strictly clean" : explicit ? `18+ · ${INTENSITY_LABELS[intensity]}` : "PG"}
                   </p>
                   <p className="flex items-center gap-1.5 font-semibold text-foreground">
                     {isPublic ? (
