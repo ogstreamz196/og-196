@@ -602,6 +602,54 @@ export function CreateNowWizard({
 
             {step === 3 && (
               <div className="space-y-5">
+                <div className="space-y-2">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
+                      Language
+                    </p>
+                    <p className="text-[11px] font-semibold text-muted-foreground">
+                      {languages.length ? `${languages.length} selected` : "English by default"}
+                    </p>
+                  </div>
+                  <div
+                    role="group"
+                    aria-label="Languages"
+                    style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
+                    className="grid grid-cols-2 gap-2 rounded-xl border border-border bg-background/40 p-2 sm:grid-cols-3"
+                  >
+                    {(showAllLanguages ? POOLS.language : POOLS.language.filter((x, i) => i < 8 || languages.includes(x))).map((l) => {
+                      const selected = languages.includes(l);
+                      return (
+                        <button
+                          key={l}
+                          type="button"
+                          aria-pressed={selected}
+                          onClick={() => setLanguages((prev) => toggle(prev, l))}
+                          className={cn(
+                            "min-h-10 rounded-lg border px-3 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                            selected
+                              ? "border-primary bg-primary/20 text-foreground"
+                              : "border-border bg-card/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
+                          )}
+                        >
+                          {l}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {POOLS.language.length > 8 && (
+                    <button
+                      type="button"
+                      onClick={() => setShowAllLanguages((v) => !v)}
+                      className="text-xs font-bold text-primary hover:underline"
+                    >
+                      {showAllLanguages ? "Show fewer languages" : "More languages"}
+                    </button>
+                  )}
+                </div>
+
+                {lengthControl}
+
                 {/* Voice setup: vocals-only and, when on, the beat it rides. */}
                 <div className="space-y-2">
                   <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
@@ -789,52 +837,6 @@ export function CreateNowWizard({
                         <span>Savage</span>
                       </div>
                     </div>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-baseline justify-between gap-2">
-                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
-                      Language
-                    </p>
-                    <p className="text-[11px] font-semibold text-muted-foreground">
-                      {languages.length ? `${languages.length} selected` : "English by default"}
-                    </p>
-                  </div>
-                  <div
-                    role="group"
-                    aria-label="Languages"
-                    style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
-                    className="grid grid-cols-2 gap-2 rounded-xl border border-border bg-background/40 p-2 sm:grid-cols-3"
-                  >
-                    {(showAllLanguages ? POOLS.language : POOLS.language.filter((x, i) => i < 8 || languages.includes(x))).map((l) => {
-                      const selected = languages.includes(l);
-                      return (
-                        <button
-                          key={l}
-                          type="button"
-                          aria-pressed={selected}
-                          onClick={() => setLanguages((prev) => toggle(prev, l))}
-                          className={cn(
-                            "min-h-10 rounded-lg border px-3 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
-                            selected
-                              ? "border-primary bg-primary/20 text-foreground"
-                              : "border-border bg-card/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
-                          )}
-                        >
-                          {l}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  {POOLS.language.length > 8 && (
-                    <button
-                      type="button"
-                      onClick={() => setShowAllLanguages((v) => !v)}
-                      className="text-xs font-bold text-primary hover:underline"
-                    >
-                      {showAllLanguages ? "Show fewer languages" : "More languages"}
-                    </button>
                   )}
                 </div>
 
