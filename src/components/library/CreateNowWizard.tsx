@@ -299,6 +299,13 @@ export function CreateNowWizard({
       setStep((s) => s + 1);
       return;
     }
+    // Last step: offer the cheap extra version before anything is created.
+    setOfferOpen(true);
+  }
+
+  async function finish(wantSecondVersion: boolean) {
+    if (naming) return;
+    setOfferOpen(false);
 
     // Blank title? Name the track from who it's about, the story and styles.
     let finalTitle = title.trim();
@@ -337,6 +344,7 @@ export function CreateNowWizard({
         isPublic,
         foulMouth: !isNasheed && intensity > 0,
         foulIntensity: isNasheed ? 0 : intensity,
+        wantSecondVersion,
       },
       {
         title: finalTitle,
@@ -354,6 +362,7 @@ export function CreateNowWizard({
     );
     onOpenChange(false);
   }
+
 
   async function uploadBeat(file: File) {
     if (!file.type.startsWith("audio/")) {
