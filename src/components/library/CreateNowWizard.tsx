@@ -72,7 +72,10 @@ export type WizardResult = {
   /** Exact per-track lyric rating selected in this wizard run. */
   foulMouth: boolean;
   foulIntensity: number;
+  /** User paid-in for the alternate take, revealed automatically when ready. */
+  wantSecondVersion: boolean;
 };
+
 
 /** Raw wizard inputs — kept by the parent so a retry never loses them. */
 export type WizardDraft = {
