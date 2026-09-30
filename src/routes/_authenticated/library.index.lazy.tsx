@@ -141,7 +141,7 @@ function LibraryPage() {
   const { user } = useAuth();
   const dev = useDevMode();
   const { isAdmin, isBoss } = useRole();
-  const { data: profile } = useProfile();
+  const { data: profile, refetch: refetchProfile } = useProfile();
   const { data: settings } = useSettings();
   const navigate = useNavigate();
 
