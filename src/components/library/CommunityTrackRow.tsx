@@ -281,7 +281,9 @@ function CommunityTrackRowImpl({
           ) : (
             <p className="line-clamp-2 text-[15px] font-semibold leading-snug">{title}</p>
           )}
+          <CreatorTag userId={song.user_id} className="mt-1" />
         </div>
+
       </div>
 
       {/* Row 2 — transport: play, seek bar, time, quick actions */}
