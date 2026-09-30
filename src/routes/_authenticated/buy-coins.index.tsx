@@ -108,6 +108,12 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
   const rc = useRevenueCat();
   const rcLoading = rc.loading;
   const rcPurchase = rc.purchasePackage;
+  // Apple rejects any iOS build that mentions Google Play, so name the store the
+  // device actually bills through.
+  const [nativeStoreName, setNativeStoreName] = useState("the App Store");
+  useEffect(() => {
+    setNativeStoreName(Capacitor.getPlatform() === "ios" ? "the App Store" : "Google Play");
+  }, []);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const createVipCheckout = useServerFn(createVipCheckoutSession);
@@ -233,7 +239,8 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                 ·
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <ShieldCheck className="h-3 w-3" /> Apple / Google Pay
+                <ShieldCheck className="h-3 w-3" />{" "}
+                {Capacitor.isNativePlatform() ? nativeStoreName : "Apple / Google Pay"}
               </span>
             </div>
             {stage === "confirm" ? (
@@ -335,7 +342,11 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                   <NextStep
                     n={1}
                     title="Continue to secure checkout"
-                    body="Pay with card, Apple Pay, or Google Pay. PCI-compliant via Stripe."
+                    body={
+                      Capacitor.isNativePlatform()
+                        ? `Billed securely through ${nativeStoreName}.`
+                        : "Pay with card, Apple Pay, or Google Pay. PCI-compliant via Stripe."
+                    }
                   />
                   <NextStep
                     n={2}
@@ -387,7 +398,7 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                           size="lg"
                           onClick={async () => {
                             if (rcLoading) {
-                              toast.info("Connecting to Google Play...");
+                              toast.info(`Connecting to ${nativeStoreName}...`);
                               return;
                             }
                             try {
@@ -422,7 +433,7 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
 
                               if (!pkg) {
                                 toast.error(
-                                  "Google Play doesn't have this product yet — it becomes available once the app release is live on Play.",
+                                  `${nativeStoreName} doesn't have this product yet — it becomes available once the app release is live.`,
                                 );
                                 setCheckoutLoading(false);
                                 return;
@@ -442,7 +453,7 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                             }
                           }}
                         >
-                          Purchase via Google Play
+                          Purchase via {nativeStoreName}
                         </Button>
                       ) : (
                         <Button

@@ -1082,6 +1082,18 @@ function Footer() {
             </Button>
           )}
           <Link
+            to="/policy"
+            className="inline-flex min-h-11 items-center rounded-md px-3 transition hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          >
+            Privacy
+          </Link>
+          <Link
+            to="/terms"
+            className="inline-flex min-h-11 items-center rounded-md px-3 transition hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          >
+            Terms
+          </Link>
+          <Link
             to="/auth"
             className="inline-flex min-h-11 items-center rounded-md px-3 transition hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
