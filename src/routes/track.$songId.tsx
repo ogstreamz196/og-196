@@ -1,11 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Headphones, Home, Music2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import ogBotAsset from "@/assets/ogbot.png.asset.json";
 import { getPublicSharedTrack } from "@/lib/public-track.functions";
 
 const SITE_URL = "https://og-196.lovable.app";
-const SHARE_IMAGE = `${SITE_URL}${ogBotAsset.url}`;
+const SHARE_IMAGE = `${SITE_URL}/share/og-bot-track.png`;
 
 export const Route = createFileRoute("/track/$songId")({
   loader: ({ params }) => getPublicSharedTrack({ data: { songId: params.songId } }),
@@ -43,11 +42,11 @@ function SharedTrackPage() {
     <main className="grid min-h-dvh place-items-center bg-background px-4 py-10 text-foreground">
       <section className="w-full max-w-lg text-center">
         <img
-          src={ogBotAsset.url}
+          src="/share/og-bot-track.png"
           alt="OG BOT"
-          width={104}
-          height={104}
-          className="mx-auto aspect-square w-24 rounded-2xl object-contain shadow-glow"
+          width={1200}
+          height={630}
+          className="mx-auto aspect-[1200/630] w-44 rounded-lg object-cover shadow-glow"
         />
 
         {track ? (

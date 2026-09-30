@@ -1,7 +1,6 @@
 import { toast } from "sonner";
-import ogBotLogo from "@/assets/ogbot.png.asset.json";
-
 const SITE_URL = "https://og-196.lovable.app";
+const SHARE_LOGO_URL = "/share/og-bot-track.png";
 
 function trackShareUrl(songId?: string) {
   return songId ? `${SITE_URL}/track/${encodeURIComponent(songId)}` : SITE_URL;
@@ -9,7 +8,7 @@ function trackShareUrl(songId?: string) {
 
 async function fetchLogoFile(): Promise<File | null> {
   try {
-    const response = await fetch(ogBotLogo.url);
+    const response = await fetch(SHARE_LOGO_URL);
     if (!response.ok) return null;
     const logo = await response.blob();
     return new File([logo], "og-bot.png", { type: logo.type || "image/png" });
