@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { Check, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -36,14 +37,22 @@ export function LibraryFilters({
   allCount?: number;
   unlockedCount?: number;
 }) {
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  // Always show the list from its first track after switching filters.
+  const changeMode = (next: LibraryFilterMode) => {
+    onModeChange(next);
+    requestAnimationFrame(() =>
+      rootRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+    );
+  };
   return (
-    <div aria-label="Filter tracks" className="grid grid-cols-3 gap-2">
+    <div ref={rootRef} aria-label="Filter tracks" className="grid scroll-mt-24 grid-cols-3 gap-2">
       <Button
         type="button"
         variant={mode === "all" ? "default" : "outline"}
         size="sm"
         aria-pressed={mode === "all"}
-        onClick={() => onModeChange("all")}
+        onClick={() => changeMode("all")}
         className="min-w-0 rounded-full"
       >
         All
@@ -54,7 +63,7 @@ export function LibraryFilters({
         variant={mode === "unlocked" ? "default" : "outline"}
         size="sm"
         aria-pressed={mode === "unlocked"}
-        onClick={() => onModeChange("unlocked")}
+        onClick={() => changeMode("unlocked")}
         className="min-w-0 rounded-full"
       >
         Unlocked
