@@ -142,6 +142,10 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
   const [progress, setProgress] = useState(0);
   const [downloading, setDownloading] = useState(false);
   const [unlockDialogOpen, setUnlockDialogOpen] = useState(false);
+  const [ownerUnlockOpen, setOwnerUnlockOpen] = useState(false);
+  const fullUnlockCost = settings?.coins_per_full_unlock ?? 5;
+  const secondTakeCost =
+    Number((settings as { coins_per_remake?: number } | undefined)?.coins_per_remake) || 2;
   const { data: profile } = useProfile();
   const balance = profile?.coin_balance ?? 0;
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -255,10 +259,45 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
       return;
     }
     if (!unlocked) {
-      toast.error("This track isn't unlocked. Purchase or unlock to download the full version.");
+      setOwnerUnlockOpen(true);
       return;
     }
     void downloadFull();
+  }
+
+  /** Owner padlock: unlock the full master, optionally bundling the hidden take. */
+  async function ownerUnlock(bundleBoth: boolean) {
+    setDownloading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("unlock-full-song", {
+        body: { song_id: song.id, bundle_both: bundleBoth },
+      });
+      if (error) {
+        throw new Error(
+          (error as { context?: { error?: string } })?.context?.error ||
+            error.message ||
+            "Could not unlock track",
+        );
+      }
+      if (!data?.already) {
+        toast.success(
+          bundleBoth && data?.second_take
+            ? `Both versions unlocked · -${data?.cost ?? fullUnlockCost + secondTakeCost} coins`
+            : `Full track unlocked · -${data?.cost ?? fullUnlockCost} coins`,
+        );
+      }
+      setOwnerUnlockOpen(false);
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ["profile"] }),
+        qc.invalidateQueries({ queryKey: ["song", song.id] }),
+        qc.invalidateQueries({ queryKey: ["songs"] }),
+      ]);
+      onRefresh();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Unlock failed");
+    } finally {
+      setDownloading(false);
+    }
   }
 
   async function downloadFull() {
