@@ -244,6 +244,10 @@ export function Paywall() {
             );
           })}
         </div>
+        <div className="mt-3 flex justify-center">
+          <RestoreButton />
+        </div>
+        <SubscriptionLegal storeName={storeName} />
       </CardContent>
     </Card>
   );
