@@ -342,7 +342,11 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                   <NextStep
                     n={1}
                     title="Continue to secure checkout"
-                    body="Pay with card, Apple Pay, or Google Pay. PCI-compliant via Stripe."
+                    body={
+                      Capacitor.isNativePlatform()
+                        ? `Billed securely through ${nativeStoreName}.`
+                        : "Pay with card, Apple Pay, or Google Pay. PCI-compliant via Stripe."
+                    }
                   />
                   <NextStep
                     n={2}
