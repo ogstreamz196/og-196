@@ -18,13 +18,13 @@ Deno.serve(async (req) => {
     if (auth.error) return auth.error;
     const { user } = auth;
 
-    const { song_id } = await req.json().catch(() => ({}));
+    const { song_id, bundle_both } = await req.json().catch(() => ({}));
     if (!song_id) return jsonResponse({ error: "Missing song_id" }, 400);
 
     const admin = adminClient();
     const { data: song } = await admin
       .from("songs")
-      .select("id, user_id, status, unlocked, audio_path, revealed, title")
+      .select("id, user_id, status, unlocked, audio_path, revealed, title, suno_task_id")
       .eq("id", song_id)
       .maybeSingle();
     if (!song) return jsonResponse({ error: "Not found" }, 404);
