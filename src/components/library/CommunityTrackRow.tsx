@@ -21,6 +21,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { downloadFile } from "@/lib/download-file";
 import { shareTrack } from "@/lib/share-track";
 import { UnlockConfirmDialog } from "@/components/library/UnlockConfirmDialog";
+import { CreatorTag } from "@/components/library/CreatorTag";
+
 import { cn } from "@/lib/utils";
 import type { Song } from "@/components/SongCard";
 
@@ -281,6 +283,7 @@ function CommunityTrackRowImpl({
           ) : (
             <p className="line-clamp-2 text-[15px] font-semibold leading-snug">{title}</p>
           )}
+          <CreatorTag userId={song.user_id} className="mt-1" />
         </div>
       </div>
 

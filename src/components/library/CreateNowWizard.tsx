@@ -3,13 +3,18 @@ import {
   ArrowLeft,
   ArrowRight,
   Check,
+  ChevronDown,
+  ChevronUp,
+  Coins,
   Globe2,
   Lock,
   Mic2,
   Music4,
   Sparkles,
+  Swords,
   X,
 } from "lucide-react";
+
 import ratingPgImg from "@/assets/rating-pg.png";
 import rating18Img from "@/assets/rating-18.png";
 import {
@@ -67,6 +72,8 @@ export type WizardResult = {
   /** Exact per-track lyric rating selected in this wizard run. */
   foulMouth: boolean;
   foulIntensity: number;
+  /** User paid-in for the alternate take, revealed automatically when ready. */
+  wantSecondVersion: boolean;
 };
 
 /** Raw wizard inputs — kept by the parent so a retry never loses them. */
@@ -130,20 +137,27 @@ const STYLES: string[] = (() => {
   return [...featured, ...rest];
 })();
 
-
-
 export function CreateNowWizard({
   open,
   onOpenChange,
   onComplete,
   initialDraft,
   submitLabel = "Create my song",
+  balance = 0,
+  secondVersionCost = 2,
+  onBuyCoins,
+  onEarnCoins,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   onComplete: (result: WizardResult, draft: WizardDraft) => void;
   initialDraft?: WizardDraft;
   submitLabel?: string;
+  /** Current coin balance, used by the extra-version offer. */
+  balance?: number;
+  secondVersionCost?: number;
+  onBuyCoins?: () => void;
+  onEarnCoins?: () => void;
 }) {
   const [step, setStep] = useState(1);
   const [title, setTitle] = useState("");
@@ -167,6 +181,8 @@ export function CreateNowWizard({
   const [beatName, setBeatName] = useState("");
   const [uploadingBeat, setUploadingBeat] = useState(false);
   const [confirmClose, setConfirmClose] = useState(false);
+  const [offerOpen, setOfferOpen] = useState(false);
+
   const wizardScrollRef = useRef<HTMLDivElement | null>(null);
   const [naming, setNaming] = useState(false);
   const [showAllStyles, setShowAllStyles] = useState(false);
@@ -294,6 +310,13 @@ export function CreateNowWizard({
       setStep((s) => s + 1);
       return;
     }
+    // Last step: offer the cheap extra version before anything is created.
+    setOfferOpen(true);
+  }
+
+  async function finish(wantSecondVersion: boolean) {
+    if (naming) return;
+    setOfferOpen(false);
 
     // Blank title? Name the track from who it's about, the story and styles.
     let finalTitle = title.trim();
@@ -332,6 +355,7 @@ export function CreateNowWizard({
         isPublic,
         foulMouth: !isNasheed && intensity > 0,
         foulIntensity: isNasheed ? 0 : intensity,
+        wantSecondVersion,
       },
       {
         title: finalTitle,
@@ -512,8 +536,6 @@ export function CreateNowWizard({
                   <p className="text-[11px] tabular-nums text-muted-foreground">
                     {description.trim().length}/2000
                   </p>
-
-
                 </div>
               </div>
             )}
@@ -566,10 +588,26 @@ export function CreateNowWizard({
                 <button
                   type="button"
                   onClick={() => setShowAllStyles((v) => !v)}
-                  className="text-xs font-bold text-primary hover:underline"
+                  aria-expanded={showAllStyles}
+                  className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-primary/50 bg-primary/10 px-4 text-sm font-black uppercase tracking-wide text-primary transition hover:border-primary hover:bg-primary/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
-                  {showAllStyles ? "Show fewer styles" : `More styles (${STYLES.length - 12})`}
+                  {showAllStyles ? (
+                    <>
+                      <ChevronUp className="h-4 w-4" />
+                      Show fewer styles
+                    </>
+                  ) : (
+                    <>
+                      <Music4 className="h-4 w-4" />
+                      More styles
+                      <span className="rounded-full bg-primary/25 px-2 py-0.5 text-[11px] font-black tabular-nums">
+                        +{STYLES.length - 12}
+                      </span>
+                      <ChevronDown className="h-4 w-4" />
+                    </>
+                  )}
                 </button>
+
                 <div>
                   <p className="mb-2 text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
                     Artist voice
@@ -647,9 +685,24 @@ export function CreateNowWizard({
                     <button
                       type="button"
                       onClick={() => setShowAllLanguages((v) => !v)}
-                      className="text-xs font-bold text-primary hover:underline"
+                      aria-expanded={showAllLanguages}
+                      className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-primary/50 bg-primary/10 px-4 text-sm font-black uppercase tracking-wide text-primary transition hover:border-primary hover:bg-primary/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     >
-                      {showAllLanguages ? "Show fewer languages" : "More languages"}
+                      {showAllLanguages ? (
+                        <>
+                          <ChevronUp className="h-4 w-4" />
+                          Show fewer languages
+                        </>
+                      ) : (
+                        <>
+                          <Globe2 className="h-4 w-4" />
+                          More languages
+                          <span className="rounded-full bg-primary/25 px-2 py-0.5 text-[11px] font-black tabular-nums">
+                            +{POOLS.language.length - 8}
+                          </span>
+                          <ChevronDown className="h-4 w-4" />
+                        </>
+                      )}
                     </button>
                   )}
                 </div>
@@ -890,7 +943,6 @@ export function CreateNowWizard({
                     ))}
                   </div>
                 </div>
-
               </div>
             )}
           </div>
@@ -1005,6 +1057,68 @@ export function CreateNowWizard({
             >
               Discard
             </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={offerOpen} onOpenChange={setOfferOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              Want a second version too?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {balance >= secondVersionCost
+                ? `For ${secondVersionCost} coins OG Bot cuts an extra version of this track — a different vocal take, flow and mix. It lands in your library right next to the first one.`
+                : `An extra version costs ${secondVersionCost} coins and you have ${balance}. Top up or win coins in Battle Zone, or carry on with one track for free.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col gap-2 sm:flex-col">
+            {balance >= secondVersionCost ? (
+              <Button
+                type="button"
+                onClick={() => void finish(true)}
+                className="min-h-12 w-full gap-2 bg-gradient-brand font-black uppercase tracking-wide text-primary-foreground shadow-glow"
+              >
+                <Coins className="h-4 w-4" />
+                Yes — add 2nd version · {secondVersionCost} coins
+              </Button>
+            ) : (
+              <>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setOfferOpen(false);
+                    onBuyCoins?.();
+                  }}
+                  className="min-h-12 w-full gap-2 bg-gradient-brand font-black uppercase tracking-wide text-primary-foreground shadow-glow"
+                >
+                  <Coins className="h-4 w-4" />
+                  Buy coins
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setOfferOpen(false);
+                    onEarnCoins?.();
+                  }}
+                  className="min-h-12 w-full gap-2 font-black uppercase tracking-wide"
+                >
+                  <Swords className="h-4 w-4" />
+                  Earn in Battle Zone
+                </Button>
+              </>
+            )}
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => void finish(false)}
+              className="min-h-11 w-full font-bold"
+            >
+              No thanks — just 1 track (free)
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
