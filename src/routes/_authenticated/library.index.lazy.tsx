@@ -906,8 +906,53 @@ function LibraryPage() {
     },
   });
 
+  // Paid-in second version: as soon as the track lands, unlock its alternate
+  // take (coins are only taken at this point, by the atomic backend function).
+  useEffect(() => {
+    const pending = pendingSecondTakes();
+    if (!pending.length) return;
+    const ready = (library.data ?? []).filter(
+      (s) => pending.includes(s.id) && s.status === "completed",
+    );
+    if (!ready.length) return;
+    void (async () => {
+      for (const song of ready) {
+        clearSecondTake(song.id);
+        const { data: parent } = await supabase
+          .from("songs")
+          .select("suno_task_id")
+          .eq("id", song.id)
+          .maybeSingle();
+        const taskId = (parent as { suno_task_id?: string | null } | null)?.suno_task_id;
+        if (!taskId) continue;
+        const { data: siblings } = await supabase
+          .from("songs")
+          .select("id")
+          .eq("suno_task_id", taskId)
+          .eq("is_variation", true)
+          .eq("revealed", false)
+          .neq("id", song.id)
+          .limit(1);
+        const sibling = (siblings ?? [])[0] as { id: string } | undefined;
+        if (!sibling) continue;
+        const { error } = await supabase.functions.invoke("reveal-variation", {
+          body: { song_id: sibling.id },
+        });
+        if (error) {
+          toast.error("Couldn't add the second version — your coins weren't taken");
+          continue;
+        }
+        toast.success("Second version added to your library");
+        void library.refetch();
+        void refetchProfile?.();
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [library.data]);
+
   // After an unlock, start the full (not sample) version of that track.
   useEffect(() => {
+
     const id = peekFullTrackPlay();
     if (!id || !playlist) return;
     const row = (library.data ?? []).find((s) => s.id === id) as
