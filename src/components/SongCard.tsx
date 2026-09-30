@@ -102,7 +102,6 @@ function SongCardImpl({ song }: { song: Song }) {
           <CreatorTag userId={song.user_id} className="mt-1" />
         </div>
 
-
         {isReady && (
           <div className="mt-2">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">

@@ -61,11 +61,7 @@ import {
   type Category,
   type Selections,
 } from "@/lib/library-utils";
-import {
-  clearSecondTake,
-  markSecondTakeWanted,
-  pendingSecondTakes,
-} from "@/lib/second-take";
+import { clearSecondTake, markSecondTakeWanted, pendingSecondTakes } from "@/lib/second-take";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { Disc3, Flame } from "lucide-react";
@@ -165,7 +161,6 @@ function LibraryPage() {
       Number((settings as { coins_per_remake?: number } | undefined)?.coins_per_remake) || 2,
     ),
   );
-
 
   const firstName = useMemo(() => {
     if (dev.isDev) return "Developer";
@@ -806,7 +801,6 @@ function LibraryPage() {
         wantSecondTakeRef.current = false;
       }
 
-
       advanceStage("submitting");
       const { data: genData, error: genErr } = await supabase.functions.invoke("suno-generate", {
         body: {
@@ -964,7 +958,6 @@ function LibraryPage() {
 
   // After an unlock, start the full (not sample) version of that track.
   useEffect(() => {
-
     const id = peekFullTrackPlay();
     if (!id || !playlist) return;
     const row = (library.data ?? []).find((s) => s.id === id) as

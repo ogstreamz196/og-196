@@ -84,7 +84,6 @@ export const POOLS: Record<Category, string[]> = {
     "Hausa",
   ]),
 
-
   genre: [
     "Hip Hop",
     "Rap",

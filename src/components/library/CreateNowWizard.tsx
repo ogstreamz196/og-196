@@ -76,7 +76,6 @@ export type WizardResult = {
   wantSecondVersion: boolean;
 };
 
-
 /** Raw wizard inputs — kept by the parent so a retry never loses them. */
 export type WizardDraft = {
   title: string;
@@ -138,8 +137,6 @@ const STYLES: string[] = (() => {
   return [...featured, ...rest];
 })();
 
-
-
 export function CreateNowWizard({
   open,
   onOpenChange,
@@ -162,7 +159,6 @@ export function CreateNowWizard({
   onBuyCoins?: () => void;
   onEarnCoins?: () => void;
 }) {
-
   const [step, setStep] = useState(1);
   const [title, setTitle] = useState("");
   const [subjectName, setSubjectName] = useState("");
@@ -378,7 +374,6 @@ export function CreateNowWizard({
     onOpenChange(false);
   }
 
-
   async function uploadBeat(file: File) {
     if (!file.type.startsWith("audio/")) {
       toast.error("Please choose an audio file (MP3, WAV, M4A…)");
@@ -541,8 +536,6 @@ export function CreateNowWizard({
                   <p className="text-[11px] tabular-nums text-muted-foreground">
                     {description.trim().length}/2000
                   </p>
-
-
                 </div>
               </div>
             )}
@@ -712,7 +705,6 @@ export function CreateNowWizard({
                       )}
                     </button>
                   )}
-
                 </div>
 
                 {lengthControl}
@@ -951,7 +943,6 @@ export function CreateNowWizard({
                     ))}
                   </div>
                 </div>
-
               </div>
             )}
           </div>
@@ -1070,7 +1061,6 @@ export function CreateNowWizard({
         </AlertDialogContent>
       </AlertDialog>
 
-
       <AlertDialog open={offerOpen} onOpenChange={setOfferOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -1132,7 +1122,6 @@ export function CreateNowWizard({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
     </Dialog>
   );
 }

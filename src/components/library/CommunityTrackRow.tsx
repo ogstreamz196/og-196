@@ -285,7 +285,6 @@ function CommunityTrackRowImpl({
           )}
           <CreatorTag userId={song.user_id} className="mt-1" />
         </div>
-
       </div>
 
       {/* Row 2 — transport: play, seek bar, time, quick actions */}
