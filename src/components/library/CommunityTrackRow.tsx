@@ -136,7 +136,7 @@ function CommunityTrackRowImpl({
       }
       const blob = await downloadFile(data.url as string, `${title}.mp3`);
       setUnlockOpen(false);
-      await shareTrack({ title, blob, filename: `${title}.mp3` });
+      await shareTrack({ title, blob, filename: `${title}.mp3`, songId: song.id });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Download failed");
     } finally {
@@ -153,7 +153,7 @@ function CommunityTrackRowImpl({
       });
       if (error || !data?.url) throw new Error("Could not prepare the track");
       const blob = await downloadFile(data.url as string, `${title}.mp3`);
-      await shareTrack({ title, blob, filename: `${title}.mp3` });
+      await shareTrack({ title, blob, filename: `${title}.mp3`, songId: song.id });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Share failed");
     } finally {

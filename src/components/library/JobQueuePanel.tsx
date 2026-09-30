@@ -542,7 +542,7 @@ function JobDetailsDrawer({
       }
       const fileName = `${song.title || "song"}.mp3`;
       const blob = await downloadFile(url!, fileName);
-      await shareTrack({ title: song.title || "My track", blob, filename: fileName });
+      await shareTrack({ title: song.title || "My track", blob, filename: fileName, songId: song.id });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Download failed");
     } finally {

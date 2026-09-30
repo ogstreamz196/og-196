@@ -166,7 +166,7 @@ export function FreshTrackCard({
       if (error) throw new Error(error.message || "Download failed");
       const blob = await downloadFile(data.url as string, `${title}.mp3`);
       setUnlockOpen(false);
-      await shareTrack({ title, blob, filename: `${title}.mp3` });
+      await shareTrack({ title, blob, filename: `${title}.mp3`, songId: song.id });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Unlock failed");
     } finally {
@@ -183,7 +183,7 @@ export function FreshTrackCard({
       });
       if (error || !data?.url) throw new Error("Could not prepare the track");
       const blob = await downloadFile(data.url as string, `${title}.mp3`);
-      await shareTrack({ title, blob, filename: `${title}.mp3` });
+      await shareTrack({ title, blob, filename: `${title}.mp3`, songId: song.id });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Share failed");
     } finally {
