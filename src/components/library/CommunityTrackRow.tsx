@@ -24,6 +24,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { downloadFile } from "@/lib/download-file";
 import { shareTrack } from "@/lib/share-track";
 import { UnlockConfirmDialog } from "@/components/library/UnlockConfirmDialog";
+import { OwnerUnlockDialog } from "@/components/library/OwnerUnlockDialog";
+import { useSettings } from "@/hooks/use-settings";
 import { CreatorTag } from "@/components/library/CreatorTag";
 import {
   DropdownMenu,
@@ -98,7 +100,46 @@ function CommunityTrackRowImpl({
   const [duration, setDuration] = useState<number>(song.duration_seconds ?? 0);
   const [coverFailed, setCoverFailed] = useState(false);
   const [unlockOpen, setUnlockOpen] = useState(false);
+  const [ownerUnlockOpen, setOwnerUnlockOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const { data: settings } = useSettings();
+  const fullUnlockCost = settings?.coins_per_full_unlock ?? 5;
+  const secondTakeCost =
+    Number((settings as { coins_per_remake?: number } | undefined)?.coins_per_remake) || 2;
+
+  /** Owner padlock: unlock the full master, optionally bundling the hidden take. */
+  async function ownerUnlock(bundleBoth: boolean) {
+    setBusy(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("unlock-full-song", {
+        body: { song_id: song.id, bundle_both: bundleBoth },
+      });
+      if (error) {
+        throw new Error(
+          (error as { context?: { error?: string } })?.context?.error ||
+            error.message ||
+            "Could not unlock track",
+        );
+      }
+      if (!data?.already) {
+        toast.success(
+          bundleBoth && data?.second_take
+            ? `Both versions unlocked · -${data?.cost ?? fullUnlockCost + secondTakeCost} coins`
+            : `Full track unlocked · -${data?.cost ?? fullUnlockCost} coins`,
+        );
+      }
+      setOwnerUnlockOpen(false);
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ["profile"] }),
+        qc.invalidateQueries({ queryKey: ["recent-songs"] }),
+        qc.invalidateQueries({ queryKey: ["songs"] }),
+      ]);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Unlock failed");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   useEffect(() => {
     if (song.duration_seconds) setDuration(song.duration_seconds);
