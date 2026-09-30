@@ -130,6 +130,16 @@ const STYLES: string[] = (() => {
   return [...featured, ...rest];
 })();
 
+/** One-tap story starters so nobody faces a blank box. */
+const VIBE_IDEAS: { label: string; text: string }[] = [
+  { label: "🎂 Birthday roast", text: "It's their birthday — roast them with love, " },
+  { label: "🥊 Battle diss", text: "A battle diss aimed straight at them, " },
+  { label: "❤️ Love song", text: "A love song about how they make me feel, " },
+  { label: "🔥 Gym hype", text: "Pure gym hype to push through the last rep, " },
+  { label: "🌴 Summer anthem", text: "A summer anthem full of sun, sea and good times, " },
+];
+
+
 export function CreateNowWizard({
   open,
   onOpenChange,
