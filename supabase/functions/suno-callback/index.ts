@@ -12,36 +12,10 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { isModerationRejection, MODERATION_MESSAGE } from "../_shared/moderation-safe.ts";
+import { hostAllowed, materialiseClips } from "../_shared/suno-materialise.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
-// ~1 MB sample — covers >30s of mp3 audio at typical Suno bitrates.
-const SAMPLE_BYTES = 1_048_576;
-
-// Allow-list of hostnames we'll fetch audio from (defence-in-depth SSRF guard).
-const AUDIO_HOST_ALLOWLIST = [
-  "apibox.erweima.ai",
-  "cdn1.suno.ai",
-  "cdn2.suno.ai",
-  "audiopipe.suno.ai",
-  "mfile.erweima.ai",
-  "sunoapi.org",
-  "tempfile.aiquickdraw.com",
-  "aiquickdraw.com",
-  "musicfile.removeai.ai",
-  "removeai.ai",
-  // Live stream host used by the early "first"/"text" callback.
-  "audiostream.api.box",
-  "api.box",
-];
-
-function hostAllowed(u: string): boolean {
-  try {
-    const h = new URL(u).hostname.toLowerCase();
-    return AUDIO_HOST_ALLOWLIST.some((d) => h === d || h.endsWith("." + d));
-  } catch { return false; }
-}
 
 async function expectedToken(songId: string): Promise<string> {
   const enc = new TextEncoder();
@@ -60,10 +34,6 @@ function timingSafeEq(a: string, b: string): boolean {
   return r === 0;
 }
 
-// Owner-tagged storage metadata so every object can be traced back to its user.
-function ownerMeta(userId: string, songId: string, kind: "sample" | "full") {
-  return { user_id: userId, song_id: songId, kind, uploaded_at: new Date().toISOString() };
-}
 
 Deno.serve(async (req) => {
   const url = new URL(req.url);
