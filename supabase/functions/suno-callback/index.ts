@@ -167,4 +167,3 @@ Deno.serve(async (req) => {
     return new Response("error", { status: 500 });
   }
 });
-});

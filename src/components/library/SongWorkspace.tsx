@@ -283,17 +283,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   );
   const languageChanged = languageValue !== detectLanguages(song.prompt).join(" + ");
 
-  const {
-    variations,
-    basket,
-    busyVariation,
-    checkingOut,
-    variationCost,
-    revealOne,
-    toggleBasket,
-    clearBasket,
-    checkoutBasket,
-  } = useVariations({
+  const { variations, busyVariation, variationCost, revealOne } = useVariations({
     songId: song.id,
     songStatus: song.status,
     balance,
@@ -1196,14 +1186,9 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
         <VariationsCard
           variations={variations}
           variationCost={variationCost}
-          basket={basket}
           busyVariation={busyVariation}
-          checkingOut={checkingOut}
           balance={balance}
-          onToggleBasket={toggleBasket}
           onRevealOne={revealOne}
-          onClearBasket={clearBasket}
-          onCheckoutBasket={checkoutBasket}
         />
       </div>
 

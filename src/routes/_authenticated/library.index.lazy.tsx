@@ -923,7 +923,11 @@ function LibraryPage() {
   }, [library.data, playlist]);
 
   const versionedLibrary = useMemo(() => {
-    const list = library.data ?? [];
+    // Hidden alt-takes stay out of the library until the user pays to remake.
+    const list = (library.data ?? []).filter((s) => {
+      const row = s as Song & { is_variation?: boolean | null; revealed?: boolean | null };
+      return !row.is_variation || !!row.revealed;
+    });
     const sortedAsc = [...list].sort(
       (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
     );

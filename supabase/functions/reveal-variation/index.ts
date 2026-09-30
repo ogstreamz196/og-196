@@ -25,13 +25,12 @@ Deno.serve(async (req) => {
   if (!song.is_variation) return jsonResponse({ error: "Not a variation" }, 400);
   if (song.revealed) return jsonResponse({ ok: true, already: true });
 
-  // Pricing: ceil(coins_per_generation / coins_per_variation_divisor)
+  // Pricing: flat "remake" price (app_settings.coins_per_remake, default 2).
   const { data: rows } = await admin.from("app_settings")
-    .select("key, value").in("key", ["coins_per_generation", "coins_per_variation_divisor"]);
+    .select("key, value").in("key", ["coins_per_remake"]);
   const map = new Map((rows ?? []).map((r: { key: string; value: unknown }) => [r.key, r.value]));
-  const base = Number(map.get("coins_per_generation") ?? 4);
-  const div = Math.max(1, Number(map.get("coins_per_variation_divisor") ?? 2));
-  const cost = Math.max(1, Math.ceil(base / div));
+  const raw = Number(map.get("coins_per_remake"));
+  const cost = Number.isFinite(raw) && raw >= 1 ? Math.round(raw) : 2;
 
   const { error: deductErr } = await admin.rpc("deduct_coins", {
     p_user: user.id, p_amount: cost, p_reference: `variation:${song_id}`,
