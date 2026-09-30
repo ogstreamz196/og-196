@@ -108,6 +108,8 @@ export function JobQueuePanel({ songs, onRemoved }: { songs: Song[]; onRemoved?:
   const [retrying, setRetrying] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [detailsSong, setDetailsSong] = useState<Song | null>(null);
+  const recoverSong = useServerFn(recoverStuckSong);
+
 
   // Tick once per second while there are in-flight jobs so the elapsed/stall
   // indicators stay accurate without forcing a parent refetch.
