@@ -5,6 +5,7 @@ import {
   findCoinPackByPriceId,
   findCoinPackByBundleId,
   isVipBundle,
+  getVipPlan,
   VIP_PLAN,
   CUSTOM_COIN_UNIT,
   applyPackOverride,
@@ -161,18 +162,24 @@ export const createCoinCheckoutSession = createServerFn({ method: "POST" })
 
 export const createVipCheckoutSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { returnUrl: string; environment: StripeEnv }) => {
-    if (data.environment !== "sandbox" && data.environment !== "live") {
-      throw new Error("Invalid environment");
-    }
-    if (!/^https?:\/\//.test(data.returnUrl)) throw new Error("Invalid returnUrl");
-    return data;
-  })
+  .inputValidator(
+    (data: { returnUrl: string; environment: StripeEnv; plan?: "monthly" | "yearly" }) => {
+      if (data.environment !== "sandbox" && data.environment !== "live") {
+        throw new Error("Invalid environment");
+      }
+      if (!/^https?:\/\//.test(data.returnUrl)) throw new Error("Invalid returnUrl");
+      if (data.plan !== undefined && data.plan !== "monthly" && data.plan !== "yearly") {
+        throw new Error("Invalid plan");
+      }
+      return data;
+    },
+  )
   .handler(async ({ data, context }): Promise<CheckoutSessionResult> => {
     const { userId, supabase } = context;
+    const plan = getVipPlan(data.plan);
     try {
       const stripe = createStripeClient(data.environment);
-      const prices = await stripe.prices.list({ lookup_keys: [VIP_PLAN.priceId] });
+      const prices = await stripe.prices.list({ lookup_keys: [plan.priceId], active: true });
       if (!prices.data.length) throw new Error("VIP price not found");
       const stripePrice = prices.data[0];
 
@@ -198,13 +205,13 @@ export const createVipCheckoutSession = createServerFn({ method: "POST" })
         customer: customerId,
         metadata: {
           userId,
-          bundleId: VIP_PLAN.bundleId,
+          bundleId: plan.bundleId,
           environment: data.environment,
         },
         subscription_data: {
           metadata: {
             userId,
-            bundleId: VIP_PLAN.bundleId,
+            bundleId: plan.bundleId,
           },
         },
       });

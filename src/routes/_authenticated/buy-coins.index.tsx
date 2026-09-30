@@ -52,6 +52,8 @@ import {
   COIN_PACKS,
   CURRENCY_SYMBOL,
   VIP_PLAN,
+  VIP_PLAN_YEARLY,
+  getVipPlan,
   CUSTOM_COIN_UNIT,
   applyPackOverride,
   parsePackOverride,
@@ -165,6 +167,8 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
 
   if (selected) {
     const isVipFlow = selected.type === "vip";
+    const vipPlan = getVipPlan(selected.type === "vip" ? selected.plan : undefined);
+    const vipYearly = vipPlan.cadence === "year";
     const isCustomFlow = selected.type === "custom";
     const coinsForOrder = isVipFlow
       ? 0
@@ -172,17 +176,17 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
         ? selected.units * CUSTOM_COIN_UNIT.coins
         : selected.pack.coins;
     const labelForOrder = isVipFlow
-      ? VIP_PLAN.label
+      ? vipPlan.label
       : isCustomFlow
         ? `Custom · ${coinsForOrder} OG Coins`
         : `${selected.pack.coins} OG Coins · ${selected.pack.label}`;
     const totalCents = isVipFlow
-      ? VIP_PLAN.priceCents
+      ? vipPlan.priceCents
       : isCustomFlow
         ? selected.units * CUSTOM_COIN_UNIT.priceCents
         : selected.pack.priceCents;
     const returnUrlPack = isVipFlow
-      ? VIP_PLAN.bundleId
+      ? vipPlan.bundleId
       : isCustomFlow
         ? "coins_custom"
         : selected.pack.bundleId;
@@ -227,7 +231,7 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                   {(totalCents / 100).toFixed(2)}
                 </div>
                 <div className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  {isVipFlow ? "billed yearly" : "one-time"}
+                  {isVipFlow ? (vipYearly ? "billed yearly" : "billed monthly") : "one-time"}
                 </div>
               </div>
             </div>
@@ -280,7 +284,7 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                       </p>
                       <p className="mt-0.5 truncate font-display text-lg font-black text-white sm:text-xl">
                         {isVipFlow
-                          ? VIP_PLAN.label
+                          ? vipPlan.label
                           : isCustomFlow
                             ? `${coinsForOrder} OG Coins`
                             : `${(selected as { pack: CoinPack }).pack.coins} OG Coins · ${(selected as { pack: CoinPack }).pack.label}`}
@@ -305,7 +309,7 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                     label={isVipFlow ? "Plan" : "Pack"}
                     value={
                       isVipFlow
-                        ? VIP_PLAN.label
+                        ? vipPlan.label
                         : isCustomFlow
                           ? "Custom"
                           : (selected as { pack: CoinPack }).pack.label
@@ -321,7 +325,7 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                   )}
                   <Row
                     label="Billing"
-                    value={isVipFlow ? "Yearly subscription" : "One-time payment"}
+                    value={isVipFlow ? (vipYearly ? "Yearly subscription" : "Monthly subscription") : "One-time payment"}
                   />
                   <div className="mt-1 flex items-baseline justify-between border-t border-border/60 pt-3">
                     <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
@@ -410,7 +414,7 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                               }
                               setCheckoutLoading(true);
                               const targetId = isVipFlow
-                                ? VIP_PLAN.bundleId
+                                ? vipPlan.bundleId
                                 : isCustomFlow
                                   ? "coins_5"
                                   : selected.pack.bundleId;
@@ -463,7 +467,7 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                             setCheckoutLoading(true);
                             try {
                               const returnUrlPack = isVipFlow
-                                ? VIP_PLAN.bundleId
+                                ? vipPlan.bundleId
                                 : isCustomFlow
                                   ? "coins_custom"
                                   : selected.pack.bundleId;
@@ -473,7 +477,11 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                               let res;
                               if (isVipFlow) {
                                 res = await createVipCheckout({
-                                  data: { returnUrl, environment: getStripeEnvironment() },
+                                  data: {
+                                    returnUrl,
+                                    environment: getStripeEnvironment(),
+                                    plan: vipYearly ? "yearly" : "monthly",
+                                  },
                                 });
                               } else if (isCustomFlow) {
                                 res = await createCustomCheckout({
@@ -633,7 +641,7 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                   <Button
                     size="lg"
                     disabled={isVip}
-                    onClick={() => pickSelection({ type: "vip" })}
+                    onClick={() => pickSelection({ type: "vip", plan: "monthly" })}
                     className="h-11 w-full font-bold min-[400px]:w-auto sm:min-w-32"
                   >
                     {isVip ? (
@@ -644,6 +652,21 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                       </>
                     )}
                   </Button>
+                  {!isVip && !isNativeApp && (
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      onClick={() => pickSelection({ type: "vip", plan: "yearly" })}
+                      className="h-11 w-full font-bold min-[400px]:w-auto sm:min-w-32"
+                    >
+                      Yearly {CURRENCY_SYMBOL}
+                      {(VIP_PLAN_YEARLY.priceCents / 100).toFixed(0)} · save{" "}
+                      {Math.round(
+                        (1 - VIP_PLAN_YEARLY.priceCents / (VIP_PLAN.priceCents * 12)) * 100,
+                      )}
+                      %
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
