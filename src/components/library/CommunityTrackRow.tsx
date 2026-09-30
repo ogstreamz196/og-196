@@ -369,8 +369,12 @@ function CommunityTrackRowImpl({
               </span>
             ))}
             <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/60 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
-              {song.unlocked ? <LockKeyhole className="h-2.5 w-2.5" /> : <Radio className="h-2.5 w-2.5" />}
-              {song.unlocked ? "Unlocked" : owned ? "Preview" : "Stream"}
+              {song.unlocked || song.artistUnlocked ? (
+                <LockKeyhole className="h-2.5 w-2.5" />
+              ) : (
+                <Radio className="h-2.5 w-2.5" />
+              )}
+              {song.unlocked || song.artistUnlocked ? "Unlocked" : owned ? "Preview" : "Stream"}
             </span>
             {song.is_variation && (
               <span className="rounded-full border border-amber-400/25 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-300">
