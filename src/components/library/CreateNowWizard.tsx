@@ -130,14 +130,6 @@ const STYLES: string[] = (() => {
   return [...featured, ...rest];
 })();
 
-/** One-tap story starters so nobody faces a blank box. */
-const VIBE_IDEAS: { label: string; text: string }[] = [
-  { label: "🎂 Birthday roast", text: "It's their birthday — roast them with love, " },
-  { label: "🥊 Battle diss", text: "A battle diss aimed straight at them, " },
-  { label: "❤️ Love song", text: "A love song about how they make me feel, " },
-  { label: "🔥 Gym hype", text: "Pure gym hype to push through the last rep, " },
-  { label: "🌴 Summer anthem", text: "A summer anthem full of sun, sea and good times, " },
-];
 
 
 export function CreateNowWizard({
@@ -517,25 +509,10 @@ export function CreateNowWizard({
                     placeholder="Vibes, memories, inside jokes, the moment you want in the lyrics…"
                     className="min-h-[110px] resize-y rounded-lg border border-border bg-background text-sm leading-relaxed"
                   />
-                  <div className="flex flex-wrap gap-1.5" aria-label="Story ideas">
-                    {VIBE_IDEAS.map((idea) => (
-                      <button
-                        key={idea.label}
-                        type="button"
-                        onClick={() =>
-                          setDescription((prev) =>
-                            prev.trim() ? `${prev.trim()} ${idea.text}` : idea.text,
-                          )
-                        }
-                        className="min-h-9 rounded-full border border-white/10 bg-card/60 px-3 py-1.5 text-xs font-bold text-muted-foreground transition hover:border-primary/40 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                      >
-                        {idea.label}
-                      </button>
-                    ))}
-                  </div>
                   <p className="text-[11px] tabular-nums text-muted-foreground">
                     {description.trim().length}/2000
                   </p>
+
 
                 </div>
               </div>
@@ -836,7 +813,7 @@ export function CreateNowWizard({
                     </button>
                   </div>
 
-                  {!isNasheed && (
+                  {!isNasheed && foulMouth && (
                     <div className="space-y-2 rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-3">
                       <div className="flex items-baseline justify-between gap-2">
                         <label
@@ -869,44 +846,51 @@ export function CreateNowWizard({
                   )}
                 </div>
 
-                {/* Final review so nothing is a surprise before creating. */}
-                <div className="space-y-1 rounded-xl border border-border bg-background/60 p-3 text-xs">
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
-                    Review
-                  </p>
-                  <p className="font-semibold text-foreground">
-                    {title.trim() ||
-                      `For ${subjectName.trim().split(/\s+/)[0] || "you"} · OG Bot names it`}
-                  </p>
-                  <p className="text-muted-foreground">
-                    {styles.join(", ") || "No style"} · {targetMinutes} min ·{" "}
-                    {(languages.length ? languages : ["English"]).join(", ")}
-                  </p>
-                  <p className="text-muted-foreground">
-                    {gender || "Mix voice"} ·{" "}
-                    {isNasheed
-                      ? "Nasheed, voice-only"
-                      : vocalsOnly
-                        ? beatPath
-                          ? "Vocals over your beat"
-                          : "A cappella, no instruments"
-                        : "Full production"}{" "}
-                    ·{" "}
-                    {isNasheed
-                      ? "Strictly clean"
-                      : explicit
-                        ? `18+ · ${INTENSITY_LABELS[intensity]}`
-                        : "PG"}
-                  </p>
-                  <p className="flex items-center gap-1.5 font-semibold text-foreground">
-                    {isPublic ? (
-                      <Globe2 className="h-3.5 w-3.5 text-primary" />
-                    ) : (
-                      <Lock className="h-3.5 w-3.5 text-primary" />
-                    )}
-                    {isPublic ? "Global player" : "Private library"}
-                  </p>
+                {/* Compact track recipe so nothing is a surprise before creating. */}
+                <div className="rounded-xl border border-border bg-background/60 p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="min-w-0 truncate text-sm font-bold text-foreground">
+                      {title.trim() ||
+                        `For ${subjectName.trim().split(/\s+/)[0] || "you"} · OG Bot names it`}
+                    </p>
+                    <span className="flex shrink-0 items-center gap-1 text-[11px] font-semibold text-muted-foreground">
+                      {isPublic ? (
+                        <Globe2 className="h-3.5 w-3.5 text-primary" />
+                      ) : (
+                        <Lock className="h-3.5 w-3.5 text-primary" />
+                      )}
+                      {isPublic ? "Global" : "Private"}
+                    </span>
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {[
+                      styles.join(", ") || "No style",
+                      `${targetMinutes} min`,
+                      (languages.length ? languages : ["English"]).join(", "),
+                      gender || "Mix voice",
+                      isNasheed
+                        ? "Nasheed, voice-only"
+                        : vocalsOnly
+                          ? beatPath
+                            ? "Vocals over your beat"
+                            : "A cappella"
+                          : "Full production",
+                      isNasheed
+                        ? "Strictly clean"
+                        : explicit
+                          ? `18+ · ${INTENSITY_LABELS[intensity]}`
+                          : "PG",
+                    ].map((chip) => (
+                      <span
+                        key={chip}
+                        className="rounded-full border border-white/10 bg-card/60 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground"
+                      >
+                        {chip}
+                      </span>
+                    ))}
+                  </div>
                 </div>
+
               </div>
             )}
           </div>
