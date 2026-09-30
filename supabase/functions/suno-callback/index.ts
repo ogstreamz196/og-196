@@ -147,129 +147,54 @@ Deno.serve(async (req) => {
     return new Response("streaming", { status: 200 });
   }
 
-  let clips = clipsRaw.filter((c) => !!c.audioUrl && hostAllowed(c.audioUrl!));
+  const clips = clipsRaw.filter((c) => !!c.audioUrl && hostAllowed(c.audioUrl!));
 
   if (clips.length === 0) {
     console.log("No audio clips ready yet (or all rejected by host allow-list)");
     return new Response("waiting", { status: 200 });
   }
 
-  // Respect admin "songs per generation" setting (default 1). Suno always returns
-  // 2 clips per task, but we only materialise as many song rows as the boss allows.
-  let maxVariants = 1;
   try {
-    const { data: vs } = await admin.from("app_settings").select("value").eq("key", "songs_per_generation").maybeSingle();
-    const v = vs?.value;
-    const n = typeof v === "number" ? v : typeof v === "string" ? parseInt(v, 10) : NaN;
-    if (Number.isFinite(n) && n >= 1 && n <= 4) maxVariants = n;
-  } catch { /* default to 1 */ }
-  if (clips.length > maxVariants) clips = clips.slice(0, maxVariants);
-
-  try {
-    for (let i = 0; i < clips.length; i++) {
-      const clip = clips[i];
-
-      // Idempotency: if we've already materialised a row for this Suno clip
-      // (parent or sibling), skip — repeated callbacks must not duplicate.
-      if (clip.clipId) {
-        const { data: existing } = await admin
-          .from("songs").select("id").eq("suno_clip_id", clip.clipId).maybeSingle();
-        if (existing) {
-          console.log("Skipping duplicate clip", clip.clipId, "→ existing song", existing.id);
-          continue;
+    const result = await materialiseClips(admin, parentSong, clips, {
+      scheduleBackground: (task) => {
+        // @ts-ignore Deno Edge Runtime
+        if (typeof EdgeRuntime !== "undefined" && EdgeRuntime?.waitUntil) {
+          // @ts-ignore
+          EdgeRuntime.waitUntil(task);
+        } else {
+          task.catch(() => {});
         }
-      }
+      },
+    });
 
-      // --- Phase 1: short sample (fast) ---
-      const sampleRes = await fetch(clip.audioUrl!, { headers: { Range: `bytes=0-${SAMPLE_BYTES - 1}` } });
-      if (!sampleRes.ok && sampleRes.status !== 206) {
-        throw new Error(`Sample download failed: ${sampleRes.status}`);
-      }
-      const sampleBuf = new Uint8Array(await sampleRes.arrayBuffer());
+    console.log("Materialise result for", songId, JSON.stringify(result));
 
-      let targetId: string | null = i === 0 ? songId : null;
-      if (!targetId) {
-        const { data: sib, error: sibErr } = await admin.from("songs").insert({
-          user_id: parentSong.user_id,
-          prompt: parentSong.prompt,
-          style: parentSong.style,
-          lyrics: parentSong.lyrics,
-          title: clip.title ?? parentSong.title,
-          status: "processing",
-          suno_task_id: parentSong.suno_task_id,
-          suno_clip_id: clip.clipId ?? null,
-          portal_id: parentSong.portal_id ?? null,
-          is_variation: true,
-          revealed: false,
-        }).select("id").single();
-        if (sibErr) {
-          // Unique-index race: another concurrent callback already inserted this clip.
-          if ((sibErr as { code?: string }).code === "23505") {
-            console.log("Sibling insert race for clip", clip.clipId, "— already exists, skipping");
-            continue;
-          }
-          throw sibErr;
-        }
-        targetId = sib.id;
-      }
-
-      const samplePath = `${parentSong.user_id}/${targetId}.sample.mp3`;
-      const { error: sampleUpErr } = await admin.storage.from("song-files").upload(samplePath, sampleBuf, {
-        contentType: "audio/mpeg",
-        upsert: true,
-        metadata: ownerMeta(parentSong.user_id, targetId, "sample"),
-      } as any);
-      if (sampleUpErr) throw sampleUpErr;
-
-      // Mark completed now — UI can play the sample immediately.
-      await admin.from("songs").update({
-        status: "completed",
-        sample_path: samplePath,
-        cover_url: clip.coverUrl ?? null,
-        title: clip.title ?? parentSong.title,
-        suno_clip_id: clip.clipId ?? null,
-        duration_seconds: clip.duration ?? null,
-        completed_at: new Date().toISOString(),
-      }).eq("id", targetId);
-
-      // --- Phase 2: full download in background ---
-      const finalId = targetId;
-      const audioUrl = clip.audioUrl!;
-      const bgTask = (async () => {
-        try {
-          const fullRes = await fetch(audioUrl);
-          if (!fullRes.ok) throw new Error(`Full download failed: ${fullRes.status}`);
-          const fullBuf = new Uint8Array(await fullRes.arrayBuffer());
-          const fullPath = `${parentSong.user_id}/${finalId}.mp3`;
-          const { error: fullUpErr } = await admin.storage.from("song-files").upload(fullPath, fullBuf, {
-            contentType: "audio/mpeg",
-            upsert: true,
-            metadata: ownerMeta(parentSong.user_id, finalId, "full"),
-          } as any);
-          if (fullUpErr) throw fullUpErr;
-          await admin.from("songs").update({ audio_path: fullPath }).eq("id", finalId);
-          console.log("Full track stored for", finalId);
-        } catch (e) {
-          console.error("Background full-download failed for", finalId, e);
-        }
-      })();
-      // @ts-ignore Deno Edge Runtime
-      if (typeof EdgeRuntime !== "undefined" && EdgeRuntime?.waitUntil) {
-        // @ts-ignore
-        EdgeRuntime.waitUntil(bgTask);
-      } else {
-        // Fallback: don't block the response, but we have no waitUntil guarantee.
-        bgTask.catch(() => {});
-      }
+    // Every take Suno produced was broken on their CDN and nothing landed.
+    // Mark the row failed with a recoverable message so the retry button can
+    // re-check the same task later (the CDN usually heals within minutes).
+    if (!result.parentCompleted && result.completed === 0 && result.skipped.length === 0) {
+      await admin
+        .from("songs")
+        .update({
+          status: "failed",
+          error_message:
+            "The music engine's file server stalled while sending this track. Tap retry — it usually recovers the finished song without using coins.",
+        })
+        .eq("id", songId);
+      return new Response("clip-download-failed", { status: 200 });
     }
 
     return new Response("ok", { status: 200 });
   } catch (e) {
     console.error("Audio processing failed", e);
-    await admin.from("songs").update({
-      status: "failed",
-      error_message: `Audio processing failed: ${(e as Error).message}`,
-    }).eq("id", songId);
+    await admin
+      .from("songs")
+      .update({
+        status: "failed",
+        error_message: `Audio processing failed: ${(e as Error).message}`,
+      })
+      .eq("id", songId);
     return new Response("error", { status: 500 });
   }
+});
 });
