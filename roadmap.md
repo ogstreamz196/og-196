@@ -33,3 +33,10 @@
 - [x] Purchase-complete page after card checkout (/buy-coins/return)
 - [x] Enlarge and polish private and global Messenger typing areas, then verify phone behavior
 - [x] Share tracks with audio, OG BOT branding, and a permanent track-specific listening link
+
+## Library Phase 2
+
+- [ ] Build two-tier track rows with metadata chips, seek bar, and action drawer
+- [ ] Add All, Unlocked, and Styles Library filters
+- [ ] Walk generation, player, shuffle, and second-take playback end to end
+- [ ] Verify the finished Library experience on mobile
