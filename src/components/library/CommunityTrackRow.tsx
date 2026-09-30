@@ -453,6 +453,20 @@ function CommunityTrackRowImpl({
         songTitle={song.title}
         songId={song.id}
       />
+
+      {owned && (
+        <OwnerUnlockDialog
+          open={ownerUnlockOpen}
+          onOpenChange={setOwnerUnlockOpen}
+          songId={song.id}
+          songTitle={song.title}
+          balance={balance}
+          singleCost={fullUnlockCost}
+          secondTakeCost={secondTakeCost}
+          busy={busy}
+          onConfirm={(bundle) => void ownerUnlock(bundle)}
+        />
+      )}
     </li>
   );
 }
