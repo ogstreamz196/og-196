@@ -1186,14 +1186,9 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
         <VariationsCard
           variations={variations}
           variationCost={variationCost}
-          basket={basket}
           busyVariation={busyVariation}
-          checkingOut={checkingOut}
           balance={balance}
-          onToggleBasket={toggleBasket}
           onRevealOne={revealOne}
-          onClearBasket={clearBasket}
-          onCheckoutBasket={checkoutBasket}
         />
       </div>
 
