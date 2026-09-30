@@ -151,7 +151,8 @@ export async function materialiseClips(
   const usable = allClips.filter((c) => !!c.audioUrl && hostAllowed(c.audioUrl!));
   if (usable.length === 0) return out;
 
-  const maxVariants = await maxVariantsFor(admin);
+  // Keep at least 2 takes so the hidden alt-take stays available to unlock.
+  const maxVariants = Math.max(2, await maxVariantsFor(admin));
   let parentTaken = !!parentSong.sample_path || !!parentSong.audio_path;
 
   for (const clip of usable) {

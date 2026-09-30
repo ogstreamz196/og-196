@@ -159,7 +159,9 @@ export async function materialiseClips(
   const usable = allClips.filter((c) => !!c.audioUrl && hostAllowed(c.audioUrl!));
   if (usable.length === 0) return result;
 
-  const maxVariants = await maxVariantsFor(admin);
+  // Always keep at least 2 takes: the visible one plus a hidden alt-take the
+  // user can unlock later as a discounted "remake".
+  const maxVariants = Math.max(2, await maxVariantsFor(admin));
 
   // Has the parent row already been filled (by an earlier callback/reconcile)?
   let parentTaken = !!parentSong.sample_path || !!parentSong.audio_path;
