@@ -61,6 +61,12 @@ import {
   type Category,
   type Selections,
 } from "@/lib/library-utils";
+import {
+  clearSecondTake,
+  markSecondTakeWanted,
+  pendingSecondTakes,
+} from "@/lib/second-take";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import { Disc3, Flame } from "lucide-react";
 
