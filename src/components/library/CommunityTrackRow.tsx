@@ -233,14 +233,15 @@ function CommunityTrackRowImpl({
         >
 
           {busy ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
           ) : (
-            <LockKeyhole className="h-4 w-4" />
+            <LockKeyhole className="h-3.5 w-3.5" />
           )}
           <span>{fullUnlockCost}</span>
           <span className="sr-only">OG coins to unlock</span>
         </button>
       )}
+
       {owned ? (
         <Link
           to="/library/$songId"
