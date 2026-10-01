@@ -2061,6 +2061,7 @@ export type Database = {
         Args: { p_origin: string; p_token: string }
         Returns: boolean
       }
+      verify_song_retry_token: { Args: { p_token: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "user" | "vip" | "og_bot" | "dev" | "boss"
