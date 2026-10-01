@@ -231,7 +231,6 @@ function CommunityTrackRowImpl({
           aria-label={`Unlock the full version of ${title}`}
           className="inline-flex h-8 shrink-0 items-center gap-0.5 whitespace-nowrap rounded-full border border-amber-400/40 bg-amber-500/15 px-2 text-[11px] font-black tabular-nums leading-none text-amber-300 transition-colors hover:bg-amber-500/25 disabled:opacity-40"
         >
-
           {busy ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
           ) : (
@@ -241,8 +240,8 @@ function CommunityTrackRowImpl({
           <span className="sr-only">OG coins to unlock</span>
         </button>
       )}
-
       {owned ? (
+
         <Link
           to="/library/$songId"
           params={{ songId: song.id }}
