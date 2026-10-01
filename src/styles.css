@@ -1639,3 +1639,14 @@ button.graffiti-accent:hover {
   animation-timing-function: linear;
   animation-iteration-count: infinite;
 }
+
+/* Library row equaliser bars */
+@keyframes eqbar {
+  0%, 100% { transform: scaleY(0.35); }
+  50% { transform: scaleY(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-\[eqbar_0\.9s_ease-in-out_infinite\],
+  .animate-\[eqbar_0\.7s_ease-in-out_infinite\],
+  .animate-\[eqbar_1\.1s_ease-in-out_infinite\] { animation: none; }
+}
