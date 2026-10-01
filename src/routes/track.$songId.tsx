@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Headphones, Home, Music2 } from "lucide-react";
+import { Headphones, Home } from "lucide-react";
+import ogBotAsset from "@/assets/ogbot.png.asset.json";
 import { Button } from "@/components/ui/button";
 import { getPublicSharedTrack } from "@/lib/public-track.functions";
 
@@ -37,39 +38,47 @@ export const Route = createFileRoute("/track/$songId")({
 
 function SharedTrackPage() {
   const track = Route.useLoaderData();
+  const lyrics = track?.lyrics?.trim();
 
   return (
-    <main className="grid min-h-dvh place-items-center bg-background px-4 py-10 text-foreground">
-      <section className="w-full max-w-lg text-center">
+    <main className="min-h-dvh bg-background px-4 py-10 text-foreground sm:py-14">
+      <section className="mx-auto w-full max-w-2xl text-center">
         <img
-          src="/share/og-bot-track.png"
+          src={ogBotAsset.url}
           alt="OG BOT"
-          width={1200}
-          height={630}
-          className="mx-auto aspect-[1200/630] w-44 rounded-lg object-cover shadow-glow"
+          width={512}
+          height={512}
+          className="mx-auto aspect-square w-52 rounded-2xl object-cover shadow-glow sm:w-64"
         />
 
         {track ? (
           <>
-            <div className="mx-auto mt-8 aspect-square w-full max-w-sm overflow-hidden rounded-2xl border border-border bg-card shadow-card">
-              {track.coverUrl ? (
-                <img src={track.coverUrl} alt="" className="h-full w-full object-cover" />
-              ) : (
-                <div className="grid h-full place-items-center bg-gradient-brand-soft">
-                  <Music2 className="h-20 w-20 text-primary" />
-                </div>
-              )}
-            </div>
-            <h1 className="mt-7 font-display text-3xl text-foreground">{track.title}</h1>
-            {track.style && <p className="mt-2 text-sm text-muted-foreground">{track.style}</p>}
-            <audio className="mt-6 w-full" controls preload="metadata" src={track.audioUrl}>
+            <h1 className="mt-8 text-balance font-display text-3xl text-foreground sm:text-4xl">
+              {track.title}
+            </h1>
+            <audio
+              className="mx-auto mt-7 w-full max-w-xl accent-primary"
+              controls
+              controlsList="nodownload"
+              preload="metadata"
+              src={track.audioUrl}
+            >
               Your browser does not support audio playback.
             </audio>
-            <Button asChild size="lg" className="mt-7 w-full">
+            <Button asChild size="lg" className="mt-7 w-full max-w-xl">
               <Link to="/welcome">
                 <Headphones className="h-5 w-5" /> Make a track with OG BOT
               </Link>
             </Button>
+
+            {lyrics && (
+              <section className="mx-auto mt-12 max-w-xl border-t border-border pt-9 text-left">
+                <h2 className="font-display text-2xl text-foreground">Lyrics</h2>
+                <div className="mt-5 whitespace-pre-wrap text-pretty text-base leading-8 text-muted-foreground">
+                  {lyrics}
+                </div>
+              </section>
+            )}
           </>
         ) : (
           <>

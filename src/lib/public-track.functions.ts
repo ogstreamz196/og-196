@@ -4,9 +4,7 @@ import { z } from "zod";
 export type PublicSharedTrack = {
   id: string;
   title: string;
-  style: string | null;
-  coverUrl: string | null;
-  durationSeconds: number | null;
+  lyrics: string | null;
   audioUrl: string;
 };
 
@@ -16,7 +14,7 @@ export const getPublicSharedTrack = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: song, error } = await supabaseAdmin
       .from("songs")
-      .select("id,title,style,cover_url,duration_seconds,audio_path,status,is_public,revealed")
+      .select("id,title,lyrics,audio_path,status,is_public,revealed")
       .eq("id", data.songId)
       .eq("status", "completed")
       .eq("is_public", true)
@@ -33,9 +31,7 @@ export const getPublicSharedTrack = createServerFn({ method: "GET" })
     return {
       id: song.id,
       title: song.title || "OG BOT track",
-      style: song.style,
-      coverUrl: song.cover_url,
-      durationSeconds: song.duration_seconds,
+      lyrics: song.lyrics,
       audioUrl: signed.signedUrl,
     };
   });
