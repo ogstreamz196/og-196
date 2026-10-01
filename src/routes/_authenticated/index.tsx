@@ -23,6 +23,7 @@ import {
   Smartphone,
   Globe,
   ShieldCheck,
+  Crown,
 } from "lucide-react";
 import { useRef, useState, useCallback, type PointerEvent as ReactPointerEvent } from "react";
 import {
@@ -113,7 +114,7 @@ function DashboardHome() {
   const { user } = useAuth();
   const dev = useDevMode();
   const { data: profile } = useProfile();
-  const { isVip } = useRole();
+  const { isVip, hasVipRole } = useRole();
   const { data: recentSongs = [] } = useRecentSongs(user?.id);
 
   const displayName =
@@ -185,10 +186,6 @@ function DashboardHome() {
                 </span>
                 <span className="opacity-40">✦</span>
                 <span className="inline-flex items-center gap-2">
-                  <Radio className="h-4 w-4 text-accent" /> OG Bot online
-                </span>
-                <span className="opacity-40">✦</span>
-                <span className="inline-flex items-center gap-2">
                   <AudioLines className="h-4 w-4 text-primary" /> Beats ready
                 </span>
                 <span className="opacity-40">✦</span>
@@ -202,15 +199,23 @@ function DashboardHome() {
         </div>
 
         <div className="relative flex flex-col gap-3 sm:flex sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-4">
-          <div className="order-2 flex w-full flex-row items-center gap-2 sm:order-none sm:w-auto sm:flex-row sm:items-center sm:text-lg">
-            {isVip && (
-              <Badge
-                variant="secondary"
-                className="justify-center gap-1 rounded-full border-2 border-white/20 px-3 py-1.5 text-xs shadow-glow wc-bounce-soft sm:gap-1.5 sm:px-5 sm:py-2.5 sm:text-lg"
+          <div className="order-2 flex w-full flex-row flex-wrap items-center gap-2 sm:order-none sm:w-auto sm:flex-row sm:items-center sm:text-lg">
+            {hasVipRole ? (
+              <Link
+                to="/settings"
+                aria-label="You are an OG VIP member"
+                className="inline-flex items-center gap-2 rounded-full border-2 border-amber-300/80 bg-gradient-to-r from-amber-500 via-yellow-300 to-amber-500 px-4 py-1.5 text-sm font-black uppercase tracking-wider text-black shadow-[0_0_24px_rgba(251,191,36,0.6)] wc-bounce-soft sm:px-6 sm:py-2.5 sm:text-lg"
               >
-                <Sparkles className="h-4 w-4 animate-[wiggle_2s_ease-in-out_infinite] sm:h-6 sm:w-6" />{" "}
-                VIP
-              </Badge>
+                <Crown className="h-5 w-5 sm:h-6 sm:w-6" />
+                OG VIP
+              </Link>
+            ) : (
+              <Link
+                to="/store"
+                className="inline-flex items-center gap-1.5 rounded-full border-2 border-white/20 bg-white/5 px-3 py-1.5 text-xs font-semibold text-foreground/80 hover:bg-white/10 sm:px-5 sm:py-2.5 sm:text-lg"
+              >
+                <Crown className="h-4 w-4 text-amber-300" /> Get VIP
+              </Link>
             )}
             <Badge
               variant="outline"
@@ -270,23 +275,8 @@ function DashboardHome() {
               <DodgyText dodgeRadius={160} maxDrift={28} className="w-full">
                 <h1 className="font-display flex min-w-0 flex-col items-center gap-1 text-[clamp(1.5rem,3.2vw+0.75rem,3.75rem)] font-black leading-[1.05] tracking-[-0.02em] text-foreground [text-shadow:0_4px_28px_rgba(0,0,0,0.75)] [overflow-wrap:anywhere] [text-wrap:balance] [font-variant-ligatures:none] sm:gap-2">
                   <span className="block wc-pop">Hello,</span>
-                  <span className="paint-drip font-display block max-w-full not-italic font-black uppercase tracking-tight text-gradient-red [overflow-wrap:anywhere] text-[clamp(1.5rem,2.6vw+0.75rem,3rem)]">
-                    {displayName.split("").map((ch, i) => (
-                      <span
-                        key={`${ch}-${i}`}
-                        className="inline-block wc-pop hover:animate-[wiggle_0.6s_ease-in-out]"
-                        style={{
-                          animationDelay: `${0.25 + i * 0.05}s`,
-                          whiteSpace: ch === " " ? "pre" : undefined,
-                          background: "inherit",
-                          WebkitBackgroundClip: "text",
-                          backgroundClip: "text",
-                          color: "transparent",
-                        }}
-                      >
-                        {ch}
-                      </span>
-                    ))}
+                  <span className="paint-drip font-display block max-w-full pb-2 not-italic font-black uppercase tracking-tight text-gradient-red [overflow-wrap:anywhere] text-[clamp(1.5rem,2.6vw+0.75rem,3rem)]">
+                    {displayName}
                   </span>
                 </h1>
               </DodgyText>

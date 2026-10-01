@@ -623,7 +623,7 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
             setResetSent(false);
             setMode("reset");
           }}
-          className="mt-5 w-full text-center text-sm font-medium text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground"
+          className="mt-4 h-12 w-full rounded-lg border-2 border-border bg-secondary/60 text-center text-base font-semibold text-foreground transition-colors hover:border-primary/60"
         >
           Forgot password?
         </button>
@@ -1062,8 +1062,6 @@ function ClosingCta() {
 }
 
 function Footer() {
-  const native = useIsNativeApp();
-  const { signIn, pending } = useOAuthSignIn();
   return (
     <footer className="border-t border-white/10">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-8 text-sm text-muted-foreground sm:flex-row sm:px-8">
@@ -1072,19 +1070,6 @@ function Footer() {
           <OgBotLogo className="h-5 w-5" />
         </span>
         <div className="flex items-center gap-6">
-          {native && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              disabled={pending !== null}
-              onClick={() => signIn("google")}
-              className="text-muted-foreground"
-              title="D.EV Google sign-in"
-            >
-              D.EV
-            </Button>
-          )}
           <Link
             to="/policy"
             className="inline-flex min-h-11 items-center rounded-md px-3 transition hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"

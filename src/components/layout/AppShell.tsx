@@ -120,7 +120,12 @@ export function AppShell({ children }: { children: ReactNode }) {
                 paddingRight: "max(0.75rem, env(safe-area-inset-right))",
               }}
             >
-              <SidebarTrigger className="shrink-0" />
+              <SidebarTrigger
+                aria-label="Open menu"
+                className="h-11 w-auto shrink-0 gap-1.5 rounded-xl border-2 border-primary/50 bg-primary/10 px-3 text-sm font-black uppercase tracking-wider text-foreground hover:bg-primary/20 [&_svg]:!h-5 [&_svg]:!w-5"
+              >
+                Menu
+              </SidebarTrigger>
 
               <div className="flex min-w-0 items-center gap-2 sm:gap-3">
                 {!pathname.startsWith("/messenger") && (
