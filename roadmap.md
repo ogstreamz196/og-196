@@ -40,3 +40,8 @@
 - [x] Add All, Unlocked, and Styles Library filters
 - [ ] Walk generation, player, shuffle, and second-take playback end to end
 - [x] Verify the finished Library experience on mobile
+
+## Generation reliability (Oct 2026)
+
+- [ ] Automatically recover or retry failed track generations in the background without charging coins
+- [ ] Verify retry scheduling, terminal failures, and clean app build

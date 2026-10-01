@@ -276,8 +276,12 @@ export function JobQueuePanel({ songs, onRemoved }: { songs: Song[]; onRemoved?:
           const m = META[kind];
           const Icon = m.icon;
           const showRetry = kind === "failed" || stuck;
+          const autoRetrying =
+            kind === "failed" && !!song.next_retry_at && song.failure_class !== "terminal";
           const subline =
-            kind === "failed"
+            autoRetrying
+              ? "Retrying automatically in the background"
+              : kind === "failed"
               ? friendlyError(song.error_message)
               : inFlight
                 ? `${m.label} · ${formatElapsed(elapsed)}${stuck ? " · looks stuck" : slow ? " · taking longer than usual" : ""}`
@@ -321,7 +325,7 @@ export function JobQueuePanel({ songs, onRemoved }: { songs: Song[]; onRemoved?:
                   {subline}
                 </p>
               </div>
-              {showRetry && (
+              {showRetry && !autoRetrying && (
                 <Button
                   size="icon"
                   variant="secondary"

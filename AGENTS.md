@@ -21,3 +21,7 @@
 ## Library playback
 
 - The shared playlist controller exclusively switches tracks and pauses the previous audio element, preventing overlapping playback across rows and takes.
+
+## Generation recovery
+
+- Failed music jobs use database-claimed, bounded background retries that recover an existing provider task before resubmitting the saved payload, preventing duplicate work or coin charges.
