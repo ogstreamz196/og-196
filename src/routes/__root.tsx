@@ -27,6 +27,7 @@ import { PersistentBackgroundMusic } from "@/components/PersistentBackgroundMusi
 import { TrackUnlockReturnHandler } from "@/components/library/TrackUnlockReturnHandler";
 import { NativeAppLinkBridge } from "@/components/NativeAppLinkBridge";
 import { RevenueCatBridge } from "@/components/revenuecat/RevenueCatBridge";
+import { registerAppServiceWorker } from "@/lib/register-sw";
 
 function NotFoundComponent() {
   return (
@@ -228,6 +229,10 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
   const bootstrapUser = useServerFn(ensureCurrentUserBootstrap);
+
+  useEffect(() => {
+    registerAppServiceWorker();
+  }, []);
 
   useEffect(() => {
     let active = true;
