@@ -381,51 +381,45 @@ function CommunityTrackRowImpl({
           </span>
         </button>
 
-        <div className="min-w-0">
+        <div className="min-w-0 overflow-hidden">
           {owned ? (
             <Link
               to="/library/$songId"
               params={{ songId: song.id }}
-              className="line-clamp-1 text-[15px] font-semibold leading-snug hover:text-primary focus:outline-none focus-visible:underline"
+              className="block truncate text-[15px] font-semibold leading-snug hover:text-primary focus:outline-none focus-visible:underline"
             >
               {title}
             </Link>
           ) : (
-            <p className="line-clamp-1 text-[15px] font-semibold leading-snug">{title}</p>
+            <p className="truncate text-[15px] font-semibold leading-snug">{title}</p>
           )}
 
           {/* One quiet metadata line: creator · styles · duration. */}
-          <div className="mt-0.5 flex min-w-0 items-center gap-1.5 text-[11px] text-muted-foreground">
-            <CreatorTag userId={song.user_id} />
-            {styles.length > 0 && (
-              <span className="truncate">
-                {styles.join(", ")}
-              </span>
-            )}
+          <div className="mt-1 flex min-w-0 items-center gap-1.5 text-[11px] leading-none text-muted-foreground">
+            <CreatorTag userId={song.user_id} className="max-w-[88px] shrink-0" />
+            {styles.length > 0 && <span className="min-w-0 truncate">{styles.join(", ")}</span>}
             {duration > 0 && (
-              <>
-                <span aria-hidden>·</span>
-                <span className="tabular-nums">{fmt(duration)}</span>
-              </>
+              <span className="shrink-0 whitespace-nowrap tabular-nums">{fmt(duration)}</span>
             )}
           </div>
 
           {(song.is_variation || !(song.unlocked || song.artistUnlocked)) && (
-            <div className="mt-1 flex flex-wrap items-center gap-1.5">
+            <div className="mt-1 flex items-center gap-1.5 overflow-hidden">
               {song.is_variation && (
-                <span className="rounded-full border border-amber-400/25 bg-amber-500/10 px-1.5 py-px text-[10px] font-semibold text-amber-300">
+                <span className="shrink-0 whitespace-nowrap rounded-full border border-amber-400/25 bg-amber-500/10 px-1.5 py-px text-[10px] font-semibold leading-tight text-amber-300">
                   Second take
                 </span>
               )}
               {!(song.unlocked || song.artistUnlocked) && (
-                <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/50 px-1.5 py-px text-[10px] font-semibold text-muted-foreground">
-                  <Radio className="h-2.5 w-2.5" />
+                <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-border bg-muted/50 px-1.5 py-px text-[10px] font-semibold leading-tight text-muted-foreground">
+                  <Radio className="h-2.5 w-2.5 shrink-0" />
                   {owned ? "Preview" : "Stream"}
                 </span>
               )}
             </div>
           )}
         </div>
+
         {actions}
       </div>
 
