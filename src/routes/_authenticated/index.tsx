@@ -15,7 +15,6 @@ import {
   Mic2,
   Radio,
   Bot,
-  AudioLines,
   Gift,
   Infinity as InfinityIcon,
   Share2,
@@ -175,27 +174,12 @@ function DashboardHome() {
           ))}
         </div>
 
-        {/* Top marquee status strip */}
-        <div className="relative -mx-4 -mt-4 mb-2 overflow-hidden border-b border-white/10 bg-white/[0.03] py-2 sm:-mx-12 sm:-mt-12 sm:mb-4">
-          <div className="flex animate-[wc-shimmer_22s_linear_infinite] whitespace-nowrap text-xs font-bold uppercase tracking-[0.3em] text-foreground/70 [background:linear-gradient(90deg,transparent,oklch(1_0_0/0.15),transparent)] [background-size:200%_100%] sm:text-sm">
-            {Array.from({ length: 2 }).map((_, k) => (
-              <div key={k} className="flex shrink-0 items-center gap-6 px-6">
-                <span className="inline-flex items-center gap-2">
-                  <Disc3 className="h-4 w-4 animate-[spin_4s_linear_infinite] text-primary" /> Live
-                  studio
-                </span>
-                <span className="opacity-40">✦</span>
-                <span className="inline-flex items-center gap-2">
-                  <AudioLines className="h-4 w-4 text-primary" /> Beats ready
-                </span>
-                <span className="opacity-40">✦</span>
-                <span className="inline-flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-accent" /> Mint a hit
-                </span>
-                <span className="opacity-40">✦</span>
-              </div>
-            ))}
-          </div>
+        {/* Top studio status strip */}
+        <div className="relative -mx-4 -mt-4 mb-2 flex justify-center border-b border-white/10 bg-white/[0.03] py-2 sm:-mx-12 sm:-mt-12 sm:mb-4">
+          <span className="inline-flex items-center gap-2 whitespace-nowrap text-xs font-black uppercase tracking-[0.22em] text-foreground/80 sm:text-sm">
+            <Disc3 className="h-4 w-4 animate-[spin_4s_linear_infinite] text-primary" />
+            OG Live Studio
+          </span>
         </div>
 
         <div className="relative flex flex-col gap-3 sm:flex sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-4">

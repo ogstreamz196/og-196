@@ -20,7 +20,6 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -276,11 +275,11 @@ export function AppSidebar() {
           </div>
           <Button
             variant="outline"
-            size="sm"
+            size="lg"
             onClick={handleSignOut}
-            className="w-full justify-center gap-2 text-xs font-semibold"
+            className="h-12 w-full justify-center gap-3 border-2 text-sm font-black uppercase"
           >
-            <LogOut className="h-3.5 w-3.5" /> Sign out
+            <LogOut className="h-5 w-5" /> Sign out
           </Button>
         </div>
       </SidebarFooter>
