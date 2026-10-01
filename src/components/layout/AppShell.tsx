@@ -64,6 +64,7 @@ const routeTitles: Record<string, string> = {
   "/messenger": "OG Bot",
   "/buy-coins": "Buy Coins",
   "/settings": "Settings",
+  "/profile": "Profile",
   "/admin": "Admin Controls",
 };
 

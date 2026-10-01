@@ -36,6 +36,7 @@ import { Route as AuthenticatedCommunityRouteImport } from './routes/_authentica
 import { Route as AuthenticatedDeveloperRouteImport } from './routes/_authenticated/developer'
 import { Route as AuthenticatedMessengerRouteImport } from './routes/_authenticated/messenger'
 import { Route as AuthenticatedPortalsRouteImport } from './routes/_authenticated/portals'
+import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedPurchaseHistoryRouteImport } from './routes/_authenticated/purchase-history'
 import { Route as AuthenticatedReferralsRouteImport } from './routes/_authenticated/referrals'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
@@ -201,6 +202,11 @@ const AuthenticatedMessengerRoute = AuthenticatedMessengerRouteImport.update({
 const AuthenticatedPortalsRoute = AuthenticatedPortalsRouteImport.update({
   id: '/portals',
   path: '/portals',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPurchaseHistoryRoute =
@@ -432,6 +438,7 @@ export interface FileRoutesByFullPath {
   '/developer': typeof AuthenticatedDeveloperRoute
   '/messenger': typeof AuthenticatedMessengerRoute
   '/portals': typeof AuthenticatedPortalsRoute
+  '/profile': typeof AuthenticatedProfileRoute
   '/purchase-history': typeof AuthenticatedPurchaseHistoryRoute
   '/referrals': typeof AuthenticatedReferralsRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -493,6 +500,7 @@ export interface FileRoutesByTo {
   '/developer': typeof AuthenticatedDeveloperRoute
   '/messenger': typeof AuthenticatedMessengerRoute
   '/portals': typeof AuthenticatedPortalsRoute
+  '/profile': typeof AuthenticatedProfileRoute
   '/purchase-history': typeof AuthenticatedPurchaseHistoryRoute
   '/referrals': typeof AuthenticatedReferralsRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -557,6 +565,7 @@ export interface FileRoutesById {
   '/_authenticated/developer': typeof AuthenticatedDeveloperRoute
   '/_authenticated/messenger': typeof AuthenticatedMessengerRoute
   '/_authenticated/portals': typeof AuthenticatedPortalsRoute
+  '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/purchase-history': typeof AuthenticatedPurchaseHistoryRoute
   '/_authenticated/referrals': typeof AuthenticatedReferralsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
@@ -622,6 +631,7 @@ export interface FileRouteTypes {
     | '/developer'
     | '/messenger'
     | '/portals'
+    | '/profile'
     | '/purchase-history'
     | '/referrals'
     | '/settings'
@@ -683,6 +693,7 @@ export interface FileRouteTypes {
     | '/developer'
     | '/messenger'
     | '/portals'
+    | '/profile'
     | '/purchase-history'
     | '/referrals'
     | '/settings'
@@ -746,6 +757,7 @@ export interface FileRouteTypes {
     | '/_authenticated/developer'
     | '/_authenticated/messenger'
     | '/_authenticated/portals'
+    | '/_authenticated/profile'
     | '/_authenticated/purchase-history'
     | '/_authenticated/referrals'
     | '/_authenticated/settings'
@@ -993,6 +1005,13 @@ declare module '@tanstack/react-router' {
       path: '/portals'
       fullPath: '/portals'
       preLoaderRoute: typeof AuthenticatedPortalsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/purchase-history': {
@@ -1270,6 +1289,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDeveloperRoute: typeof AuthenticatedDeveloperRoute
   AuthenticatedMessengerRoute: typeof AuthenticatedMessengerRoute
   AuthenticatedPortalsRoute: typeof AuthenticatedPortalsRoute
+  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedPurchaseHistoryRoute: typeof AuthenticatedPurchaseHistoryRoute
   AuthenticatedReferralsRoute: typeof AuthenticatedReferralsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
@@ -1303,6 +1323,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDeveloperRoute: AuthenticatedDeveloperRoute,
   AuthenticatedMessengerRoute: AuthenticatedMessengerRoute,
   AuthenticatedPortalsRoute: AuthenticatedPortalsRoute,
+  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedPurchaseHistoryRoute: AuthenticatedPurchaseHistoryRoute,
   AuthenticatedReferralsRoute: AuthenticatedReferralsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
