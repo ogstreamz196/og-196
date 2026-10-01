@@ -428,16 +428,29 @@ Deno.serve(async (req) => {
       lyricsText: string | null,
       promptText: string | null,
       styleText: string | null,
-    ) =>
-      await fetch(beatUrl ? SUNO_UPLOAD_COVER_URL : SUNO_API_URL, {
+    ) => {
+      const retryPayload = {
+        prompt: lyricsText || promptText,
+        style: styleText || undefined,
+        title: customMode ? sunoTitle : undefined,
+        customMode,
+        instrumental: vocalsOnly ? false : instrumental,
+        usesUploadedBeat: !!beatUrl,
+        ...(vocalGender ? { vocalGender } : {}),
+        model: "V5",
+        negativeTags: acappella
+          ? `low quality, muddy mix, distorted, lo-fi, amateur, bad vocals, ${NO_INSTRUMENT_NEGATIVES}`
+          : "low quality, muddy mix, distorted, lo-fi, amateur, bad vocals",
+      };
+      // Keep the exact provider request for service-only retries. This contains
+      // generated lyrics/settings, never credentials or user account details.
+      await admin.from("songs").update({ retry_payload: retryPayload }).eq("id", songId);
+      const { usesUploadedBeat: _usesUploadedBeat, ...providerPayload } = retryPayload;
+      return await fetch(beatUrl ? SUNO_UPLOAD_COVER_URL : SUNO_API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${SUNO_API_KEY}` },
         body: JSON.stringify({
-          prompt: lyricsText || promptText,
-          style: styleText || undefined,
-          title: customMode ? sunoTitle : undefined,
-          customMode,
-          instrumental: vocalsOnly ? false : instrumental,
+          ...providerPayload,
           ...(beatUrl ? { uploadUrl: beatUrl } : {}),
           ...(vocalGender ? { vocalGender } : {}),
           model: "V5",
@@ -447,6 +460,7 @@ Deno.serve(async (req) => {
           callBackUrl: callbackUrl,
         }),
       });
+    };
 
     let attemptLyrics = signedLyrics;
     let attemptPrompt = signedPrompt;
@@ -506,7 +520,12 @@ Deno.serve(async (req) => {
 
     await admin
       .from("songs")
-      .update({ status: "processing", suno_task_id: taskId })
+      .update({
+        status: "processing",
+        suno_task_id: taskId,
+        failure_class: "retryable",
+        next_retry_at: new Date(Date.now() + 8 * 60_000).toISOString(),
+      })
       .eq("id", songId);
 
     return json({
@@ -523,12 +542,15 @@ Deno.serve(async (req) => {
 });
 
 async function refund(admin: any, userId: string, songId: string, reason: string, amount: number) {
+  const terminal = isModerationRejection(reason);
   await admin
     .from("songs")
     .update({
       status: "failed",
       error_message: reason,
       suno_task_id: null,
+      failure_class: terminal ? "terminal" : "retryable",
+      next_retry_at: terminal ? null : new Date(Date.now() + 60_000).toISOString(),
     })
     .eq("id", songId);
   const { error } = await admin.rpc("refund_generation_charge", {

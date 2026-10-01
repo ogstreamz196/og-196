@@ -65,9 +65,12 @@ Deno.serve(async (req) => {
     }
     const refundAmt = 0;
     const rawReason = payload?.msg || payload?.message || "Suno reported failure";
+    const terminal = isModerationRejection(rawReason);
     await admin.from("songs").update({
       status: "failed",
-      error_message: isModerationRejection(rawReason) ? MODERATION_MESSAGE : rawReason,
+      error_message: terminal ? MODERATION_MESSAGE : "Retrying automatically after a temporary music-engine problem.",
+      failure_class: terminal ? "terminal" : "retryable",
+      next_retry_at: terminal ? null : new Date(Date.now() + 60_000).toISOString(),
     }).eq("id", songId);
     if (refundAmt > 0) {
       await admin.from("coin_transactions").insert({
@@ -147,8 +150,9 @@ Deno.serve(async (req) => {
         .from("songs")
         .update({
           status: "failed",
-          error_message:
-            "The music engine's file server stalled while sending this track. Tap retry — it usually recovers the finished song without using coins.",
+          error_message: "Retrying automatically while the music engine's file server recovers.",
+          failure_class: "recoverable_cdn",
+          next_retry_at: new Date(Date.now() + 60_000).toISOString(),
         })
         .eq("id", songId);
       return new Response("clip-download-failed", { status: 200 });
@@ -162,6 +166,8 @@ Deno.serve(async (req) => {
       .update({
         status: "failed",
         error_message: `Audio processing failed: ${(e as Error).message}`,
+        failure_class: "retryable",
+        next_retry_at: new Date(Date.now() + 60_000).toISOString(),
       })
       .eq("id", songId);
     return new Response("error", { status: 500 });

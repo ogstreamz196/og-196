@@ -32,6 +32,9 @@ export interface Song {
   is_variation?: boolean | null;
   revealed?: boolean | null;
   drive_audio_link?: string | null;
+  retry_count?: number | null;
+  next_retry_at?: string | null;
+  failure_class?: "recoverable_cdn" | "retryable" | "terminal" | null;
 }
 
 function SongCardImpl({ song }: { song: Song }) {
