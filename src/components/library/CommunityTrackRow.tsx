@@ -7,7 +7,6 @@ import {
   Loader2,
   MoreVertical,
   Music2,
-  Pause,
   Pencil,
   Play,
   Share2,
@@ -319,15 +318,22 @@ function CommunityTrackRowImpl({
   return (
     <li
       className={cn(
-        "group relative px-3 py-3 transition-colors hover:bg-primary/[0.06]",
-        playing &&
-          "bg-primary/[0.08] shadow-[inset_3px_0_0_var(--primary),0_0_24px_-12px_var(--primary)]",
+        "group relative px-3 py-2.5 transition-colors hover:bg-primary/[0.06]",
+        playing && "bg-primary/[0.08] shadow-[inset_3px_0_0_var(--primary)]",
       )}
     >
-      {/* Tier 1 — artwork, identity, metadata and primary actions. */}
       <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
-        <div
-          className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-card"
+        {/* Artwork doubles as the play / pause control. */}
+        <button
+          type="button"
+          onClick={togglePlay}
+          disabled={!isReady}
+          aria-label={`${playing ? "Pause" : "Play"} ${title}`}
+          className={cn(
+            "relative h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-card transition-transform",
+            isReady ? "hover:scale-[1.04] active:scale-95" : "opacity-50",
+            playing && "border-primary/60 shadow-[0_0_18px_-6px_var(--primary)]",
+          )}
           style={{
             backgroundImage: showCover
               ? undefined
@@ -340,108 +346,93 @@ function CommunityTrackRowImpl({
               alt=""
               loading="lazy"
               decoding="async"
-              width={44}
-              height={44}
+              width={48}
+              height={48}
               onError={() => setCoverFailed(true)}
               className="h-full w-full object-cover"
             />
           ) : (
-            <div className="grid h-full w-full place-items-center">
-              <span className="font-display text-base font-black uppercase text-white/85">
-                {title.trim().charAt(0) || <Music2 className="h-5 w-5 text-white/70" />}
-              </span>
-            </div>
+            <span className="grid h-full w-full place-items-center font-display text-base font-black uppercase text-white/85">
+              {title.trim().charAt(0) || <Music2 className="h-5 w-5 text-white/70" />}
+            </span>
           )}
-        </div>
+          <span
+            className={cn(
+              "absolute inset-0 grid place-items-center bg-background/55 text-primary-foreground transition-opacity",
+              playing || loadingUrl ? "opacity-100" : "opacity-0 group-hover:opacity-100",
+            )}
+          >
+            {loadingUrl ? (
+              <Loader2 className="h-5 w-5 animate-spin text-primary" />
+            ) : playing ? (
+              <span className="flex h-4 items-end gap-[3px]" aria-hidden>
+                <i className="h-2 w-[3px] animate-[eqbar_0.9s_ease-in-out_infinite] rounded-full bg-primary" />
+                <i className="h-4 w-[3px] animate-[eqbar_0.7s_ease-in-out_infinite] rounded-full bg-primary" />
+                <i className="h-3 w-[3px] animate-[eqbar_1.1s_ease-in-out_infinite] rounded-full bg-primary" />
+              </span>
+            ) : (
+              <Play className="h-5 w-5 translate-x-[1px] text-primary" />
+            )}
+          </span>
+        </button>
 
         <div className="min-w-0">
           {owned ? (
             <Link
               to="/library/$songId"
               params={{ songId: song.id }}
-              className="line-clamp-2 text-[15px] font-semibold leading-snug hover:text-primary focus:outline-none focus-visible:underline"
+              className="line-clamp-1 text-[15px] font-semibold leading-snug hover:text-primary focus:outline-none focus-visible:underline"
             >
               {title}
             </Link>
           ) : (
-            <p className="line-clamp-2 text-[15px] font-semibold leading-snug">{title}</p>
+            <p className="line-clamp-1 text-[15px] font-semibold leading-snug">{title}</p>
           )}
-          <CreatorTag userId={song.user_id} className="mt-1" />
-          <div className="mt-1.5 flex min-w-0 flex-wrap gap-1.5">
-            {styles.map((style) => (
-              <span
-                key={style}
-                className="max-w-32 truncate rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary"
-              >
-                {style}
-              </span>
-            ))}
-            <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/60 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
-              {song.unlocked || song.artistUnlocked ? (
-                <LockKeyhole className="h-2.5 w-2.5" />
-              ) : (
-                <Radio className="h-2.5 w-2.5" />
-              )}
-              {song.unlocked || song.artistUnlocked ? "Unlocked" : owned ? "Preview" : "Stream"}
-            </span>
-            {song.is_variation && (
-              <span className="rounded-full border border-amber-400/25 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-300">
-                Second take
+
+          {/* One quiet metadata line: creator · styles · duration. */}
+          <div className="mt-0.5 flex min-w-0 items-center gap-1.5 text-[11px] text-muted-foreground">
+            <CreatorTag userId={song.user_id} />
+            {styles.length > 0 && (
+              <span className="truncate">
+                {styles.join(", ")}
               </span>
             )}
             {duration > 0 && (
-              <span className="rounded-full border border-border bg-muted/60 px-2 py-0.5 text-[10px] font-semibold tabular-nums text-muted-foreground">
-                {fmt(duration)}
-              </span>
+              <>
+                <span aria-hidden>·</span>
+                <span className="tabular-nums">{fmt(duration)}</span>
+              </>
             )}
           </div>
+
+          {(song.is_variation || !(song.unlocked || song.artistUnlocked)) && (
+            <div className="mt-1 flex flex-wrap items-center gap-1.5">
+              {song.is_variation && (
+                <span className="rounded-full border border-amber-400/25 bg-amber-500/10 px-1.5 py-px text-[10px] font-semibold text-amber-300">
+                  Second take
+                </span>
+              )}
+              {!(song.unlocked || song.artistUnlocked) && (
+                <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/50 px-1.5 py-px text-[10px] font-semibold text-muted-foreground">
+                  <Radio className="h-2.5 w-2.5" />
+                  {owned ? "Preview" : "Stream"}
+                </span>
+              )}
+            </div>
+          )}
         </div>
         {actions}
       </div>
 
-      {/* Tier 2 — transport and seek bar. */}
-      <div className="mt-3 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 pl-0 sm:pl-[3.5rem]">
-        <button
-          type="button"
-          onClick={togglePlay}
-          disabled={!isReady}
-          aria-label={`${playing ? "Pause" : "Play"} ${title}`}
-          className={cn(
-            "grid h-9 w-9 shrink-0 place-items-center rounded-full border border-primary/40 bg-primary/15 text-primary transition-colors",
-            isReady ? "hover:bg-primary/25" : "opacity-40",
-          )}
-        >
-          {loadingUrl ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : playing ? (
-            <Pause className="h-4 w-4" />
-          ) : (
-            <Play className="h-4 w-4 translate-x-[1px]" />
-          )}
-        </button>
-
-        <input
-          type="range"
-          min={0}
-          max={Math.max(1, Math.round(duration))}
-          step={1}
-          value={Math.min(Math.round(progress), Math.max(1, Math.round(duration)))}
-          onChange={(e) => {
-            const el = audioRef.current;
-            if (el) el.currentTime = Number(e.target.value);
-          }}
-          disabled={!isReady || duration <= 0}
-          aria-label={`Seek ${title}`}
-          className="h-1.5 min-w-0 flex-1 cursor-pointer appearance-none rounded-full bg-muted accent-primary disabled:cursor-default"
-          style={{
-            background: `linear-gradient(to right, var(--primary) ${pct}%, var(--muted) ${pct}%)`,
-          }}
-        />
-        <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">
-          {playing || progress > 0 ? `${fmt(progress)} / ` : ""}
-          {fmt(duration)}
-        </span>
-      </div>
+      {/* Ultra-thin progress line, only for the track that's playing. */}
+      {(playing || progress > 0) && duration > 0 && (
+        <div className="mt-2 h-[2px] w-full overflow-hidden rounded-full bg-white/10">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-primary to-fuchsia-400 transition-[width] duration-300"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+      )}
 
       <audio
         ref={audioRef}
@@ -453,6 +444,7 @@ function CommunityTrackRowImpl({
         }}
         className="hidden"
       />
+
 
       <UnlockConfirmDialog
         open={unlockOpen}
