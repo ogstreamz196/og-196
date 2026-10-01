@@ -222,15 +222,16 @@ function CommunityTrackRowImpl({
   const styles = styleChips(song.style);
 
   const actions = (
-    <div className="flex shrink-0 items-center gap-1.5">
+    <div className="flex shrink-0 items-center gap-1">
       {owned && !song.unlocked && isReady && (
         <button
           type="button"
           onClick={() => setOwnerUnlockOpen(true)}
           disabled={busy}
           aria-label={`Unlock the full version of ${title}`}
-          className="inline-flex h-9 shrink-0 items-center gap-1 rounded-full border border-amber-400/40 bg-amber-500/15 px-2.5 text-xs font-black tabular-nums text-amber-300 transition-colors hover:bg-amber-500/25 disabled:opacity-40"
+          className="inline-flex h-8 shrink-0 items-center gap-0.5 whitespace-nowrap rounded-full border border-amber-400/40 bg-amber-500/15 px-2 text-[11px] font-black tabular-nums leading-none text-amber-300 transition-colors hover:bg-amber-500/25 disabled:opacity-40"
         >
+
           {busy ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
