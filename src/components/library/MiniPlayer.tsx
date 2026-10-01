@@ -52,7 +52,9 @@ export function MiniPlayer() {
     return () => window.clearInterval(t);
   }, [controls, currentId]);
 
-  if (!playlist) return null;
+  // Stay out of the way until something is actually playing, so the track
+  // list is the first thing on screen.
+  if (!playlist || !controls) return null;
 
   const title = controls?.title || "Nothing playing";
   const hasTrack = !!controls;
