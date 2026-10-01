@@ -14,12 +14,17 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AppReturnRouteImport } from './routes/app-return'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as DeleteAccountRouteImport } from './routes/delete-account'
+import { Route as HomeRouteImport } from './routes/home'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as MPreviewRouteImport } from './routes/m-preview'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as PolicyRouteImport } from './routes/policy'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SignInReturnRouteImport } from './routes/sign-in-return'
+import { Route as SigninRouteImport } from './routes/signin'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TrustRouteImport } from './routes/trust'
 import { Route as WelcomeRouteImport } from './routes/welcome'
@@ -35,6 +40,7 @@ import { Route as AuthenticatedPurchaseHistoryRouteImport } from './routes/_auth
 import { Route as AuthenticatedReferralsRouteImport } from './routes/_authenticated/referrals'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedStoreRouteImport } from './routes/_authenticated/store'
+import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
 import { Route as PortalSlugRouteImport } from './routes/portal.$slug'
 import { Route as RCodeRouteImport } from './routes/r.$code'
 import { Route as TrackSongIdRouteImport } from './routes/track.$songId'
@@ -84,9 +90,24 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DeleteAccountRoute = DeleteAccountRouteImport.update({
   id: '/delete-account',
   path: '/delete-account',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomeRoute = HomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MPreviewRoute = MPreviewRouteImport.update({
@@ -112,6 +133,16 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const SignInReturnRoute = SignInReturnRouteImport.update({
   id: '/sign-in-return',
   path: '/sign-in-return',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SigninRoute = SigninRouteImport.update({
+  id: '/signin',
+  path: '/signin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermsRoute = TermsRouteImport.update({
@@ -192,6 +223,11 @@ const AuthenticatedStoreRoute = AuthenticatedStoreRouteImport.update({
   id: '/store',
   path: '/store',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth_/callback',
+  path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PortalSlugRoute = PortalSlugRouteImport.update({
   id: '/portal/$slug',
@@ -375,12 +411,17 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/app-return': typeof AppReturnRoute
   '/auth': typeof AuthRoute
+  '/dashboard': typeof DashboardRoute
   '/delete-account': typeof DeleteAccountRoute
+  '/home': typeof HomeRoute
+  '/login': typeof LoginRoute
   '/m-preview': typeof MPreviewRoute
   '/mcp': typeof McpRoute
   '/policy': typeof PolicyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in-return': typeof SignInReturnRoute
+  '/signin': typeof SigninRoute
+  '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
   '/trust': typeof TrustRoute
   '/welcome': typeof WelcomeRoute
@@ -395,6 +436,7 @@ export interface FileRoutesByFullPath {
   '/referrals': typeof AuthenticatedReferralsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/store': typeof AuthenticatedStoreRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/portal/$slug': typeof PortalSlugRoute
   '/r/$code': typeof RCodeRoute
   '/track/$songId': typeof TrackSongIdRoute
@@ -430,12 +472,17 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/app-return': typeof AppReturnRoute
   '/auth': typeof AuthRoute
+  '/dashboard': typeof DashboardRoute
   '/delete-account': typeof DeleteAccountRoute
+  '/home': typeof HomeRoute
+  '/login': typeof LoginRoute
   '/m-preview': typeof MPreviewRoute
   '/mcp': typeof McpRoute
   '/policy': typeof PolicyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in-return': typeof SignInReturnRoute
+  '/signin': typeof SigninRoute
+  '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
   '/trust': typeof TrustRoute
   '/welcome': typeof WelcomeRoute
@@ -450,6 +497,7 @@ export interface FileRoutesByTo {
   '/referrals': typeof AuthenticatedReferralsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/store': typeof AuthenticatedStoreRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/portal/$slug': typeof PortalSlugRoute
   '/r/$code': typeof RCodeRoute
   '/track/$songId': typeof TrackSongIdRoute
@@ -488,12 +536,17 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/app-return': typeof AppReturnRoute
   '/auth': typeof AuthRoute
+  '/dashboard': typeof DashboardRoute
   '/delete-account': typeof DeleteAccountRoute
+  '/home': typeof HomeRoute
+  '/login': typeof LoginRoute
   '/m-preview': typeof MPreviewRoute
   '/mcp': typeof McpRoute
   '/policy': typeof PolicyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in-return': typeof SignInReturnRoute
+  '/signin': typeof SigninRoute
+  '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
   '/trust': typeof TrustRoute
   '/welcome': typeof WelcomeRoute
@@ -508,6 +561,7 @@ export interface FileRoutesById {
   '/_authenticated/referrals': typeof AuthenticatedReferralsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/store': typeof AuthenticatedStoreRoute
+  '/auth_/callback': typeof AuthCallbackRoute
   '/portal/$slug': typeof PortalSlugRoute
   '/r/$code': typeof RCodeRoute
   '/track/$songId': typeof TrackSongIdRoute
@@ -547,12 +601,17 @@ export interface FileRouteTypes {
     | '/'
     | '/app-return'
     | '/auth'
+    | '/dashboard'
     | '/delete-account'
+    | '/home'
+    | '/login'
     | '/m-preview'
     | '/mcp'
     | '/policy'
     | '/reset-password'
     | '/sign-in-return'
+    | '/signin'
+    | '/signup'
     | '/terms'
     | '/trust'
     | '/welcome'
@@ -567,6 +626,7 @@ export interface FileRouteTypes {
     | '/referrals'
     | '/settings'
     | '/store'
+    | '/auth/callback'
     | '/portal/$slug'
     | '/r/$code'
     | '/track/$songId'
@@ -602,12 +662,17 @@ export interface FileRouteTypes {
   to:
     | '/app-return'
     | '/auth'
+    | '/dashboard'
     | '/delete-account'
+    | '/home'
+    | '/login'
     | '/m-preview'
     | '/mcp'
     | '/policy'
     | '/reset-password'
     | '/sign-in-return'
+    | '/signin'
+    | '/signup'
     | '/terms'
     | '/trust'
     | '/welcome'
@@ -622,6 +687,7 @@ export interface FileRouteTypes {
     | '/referrals'
     | '/settings'
     | '/store'
+    | '/auth/callback'
     | '/portal/$slug'
     | '/r/$code'
     | '/track/$songId'
@@ -659,12 +725,17 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/app-return'
     | '/auth'
+    | '/dashboard'
     | '/delete-account'
+    | '/home'
+    | '/login'
     | '/m-preview'
     | '/mcp'
     | '/policy'
     | '/reset-password'
     | '/sign-in-return'
+    | '/signin'
+    | '/signup'
     | '/terms'
     | '/trust'
     | '/welcome'
@@ -679,6 +750,7 @@ export interface FileRouteTypes {
     | '/_authenticated/referrals'
     | '/_authenticated/settings'
     | '/_authenticated/store'
+    | '/auth_/callback'
     | '/portal/$slug'
     | '/r/$code'
     | '/track/$songId'
@@ -717,17 +789,23 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AppReturnRoute: typeof AppReturnRoute
   AuthRoute: typeof AuthRoute
+  DashboardRoute: typeof DashboardRoute
   DeleteAccountRoute: typeof DeleteAccountRoute
+  HomeRoute: typeof HomeRoute
+  LoginRoute: typeof LoginRoute
   MPreviewRoute: typeof MPreviewRoute
   McpRoute: typeof McpRoute
   PolicyRoute: typeof PolicyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignInReturnRoute: typeof SignInReturnRoute
+  SigninRoute: typeof SigninRoute
+  SignupRoute: typeof SignupRoute
   TermsRoute: typeof TermsRoute
   TrustRoute: typeof TrustRoute
   WelcomeRoute: typeof WelcomeRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
   PortalSlugRoute: typeof PortalSlugRoute
   RCodeRoute: typeof RCodeRoute
   TrackSongIdRoute: typeof TrackSongIdRoute
@@ -763,11 +841,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/delete-account': {
       id: '/delete-account'
       path: '/delete-account'
       fullPath: '/delete-account'
       preLoaderRoute: typeof DeleteAccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/home': {
+      id: '/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof HomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/m-preview': {
@@ -803,6 +902,20 @@ declare module '@tanstack/react-router' {
       path: '/sign-in-return'
       fullPath: '/sign-in-return'
       preLoaderRoute: typeof SignInReturnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signin': {
+      id: '/signin'
+      path: '/signin'
+      fullPath: '/signin'
+      preLoaderRoute: typeof SigninRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms': {
@@ -909,6 +1022,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/store'
       preLoaderRoute: typeof AuthenticatedStoreRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/auth_/callback': {
+      id: '/auth_/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/portal/$slug': {
       id: '/portal/$slug'
@@ -1217,18 +1337,24 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AppReturnRoute: AppReturnRoute,
   AuthRoute: AuthRoute,
+  DashboardRoute: DashboardRoute,
   DeleteAccountRoute: DeleteAccountRoute,
+  HomeRoute: HomeRoute,
+  LoginRoute: LoginRoute,
   MPreviewRoute: MPreviewRoute,
   McpRoute: McpRoute,
   PolicyRoute: PolicyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignInReturnRoute: SignInReturnRoute,
+  SigninRoute: SigninRoute,
+  SignupRoute: SignupRoute,
   TermsRoute: TermsRoute,
   TrustRoute: TrustRoute,
   WelcomeRoute: WelcomeRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
   PortalSlugRoute: PortalSlugRoute,
   RCodeRoute: RCodeRoute,
   TrackSongIdRoute: TrackSongIdRoute,

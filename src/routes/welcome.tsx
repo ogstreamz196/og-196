@@ -127,6 +127,10 @@ function safeRelativeNext(): string | null {
   if (!raw) return null;
   // Same-origin relative path only.
   if (!raw.startsWith("/") || raw.startsWith("//")) return null;
+  // Legacy or auth-only paths would 404 or loop after sign-in — send home.
+  const path = raw.split(/[?#]/)[0].replace(/\/+$/, "").toLowerCase();
+  const legacy = ["", "/dashboard", "/home", "/welcome", "/login", "/signin", "/signup", "/auth", "/auth/callback"];
+  if (legacy.includes(path)) return null;
   return raw;
 }
 
