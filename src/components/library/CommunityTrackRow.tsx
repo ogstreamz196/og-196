@@ -241,14 +241,13 @@ function CommunityTrackRowImpl({
         </button>
       )}
       {owned ? (
-
         <Link
           to="/library/$songId"
           params={{ songId: song.id }}
           aria-label={`Edit ${title}`}
-          className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-primary/40 bg-primary/15 text-primary transition-colors hover:bg-primary/25"
+          className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-primary/40 bg-primary/15 text-primary transition-colors hover:bg-primary/25"
         >
-          <Pencil className="h-4 w-4" />
+          <Pencil className="h-3.5 w-3.5" />
         </Link>
       ) : (
         <button
@@ -257,11 +256,15 @@ function CommunityTrackRowImpl({
           disabled={!isReady || busy}
           aria-label={`Download ${title} for ${COMMUNITY_DOWNLOAD_COST} OG coins or 99p`}
           className={cn(
-            "inline-flex h-9 shrink-0 items-center gap-1 rounded-full border border-primary/40 bg-primary/15 px-2.5 text-xs font-black tabular-nums text-primary transition-colors",
+            "inline-flex h-8 shrink-0 items-center gap-0.5 whitespace-nowrap rounded-full border border-primary/40 bg-primary/15 px-2 text-[11px] font-black tabular-nums leading-none text-primary transition-colors",
             isReady && !busy ? "hover:bg-primary/25" : "opacity-40",
           )}
         >
-          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+          {busy ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Download className="h-3.5 w-3.5" />
+          )}
           <span>{COMMUNITY_DOWNLOAD_COST}</span>
           <span className="sr-only">OG coins or 99p</span>
         </button>
@@ -272,15 +275,16 @@ function CommunityTrackRowImpl({
             <button
               type="button"
               aria-label={`More actions for ${title}`}
-              className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-white/10 bg-white/[0.05] text-muted-foreground transition-colors hover:text-foreground"
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-white/10 bg-white/[0.05] text-muted-foreground transition-colors hover:text-foreground"
             >
               {busy ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
               ) : (
-                <MoreVertical className="h-4 w-4" />
+                <MoreVertical className="h-3.5 w-3.5" />
               )}
             </button>
           </DropdownMenuTrigger>
+
           <DropdownMenuContent align="end" className="w-48">
             {onRemix && (
               <DropdownMenuItem onSelect={() => onRemix(song)}>
