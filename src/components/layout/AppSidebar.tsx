@@ -173,33 +173,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="border-b border-sidebar-border">
-        <div className="flex items-center gap-3 px-2 py-2.5">
-          <img
-            src={ogStreamzLogo.url}
-            alt="OG Streamz"
-            draggable={false}
-            onContextMenu={(e) => e.preventDefault()}
-            className="h-11 w-11 shrink-0 rounded-xl object-cover ring-1 ring-white/10 shadow-glow pointer-events-none select-none"
-          />
-          <div className="flex min-w-0 flex-col leading-tight">
-            <span className="font-display truncate text-base tracking-tight">OG STREAMZ</span>
-            <span className="mt-0.5 inline-flex items-center gap-1 truncate text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-              Powered by
-              <img
-                src={ogBotAsset.url}
-                alt="OG Bot"
-                draggable={false}
-                onContextMenu={(e) => e.preventDefault()}
-                className="h-3.5 w-3.5 rounded-full object-cover pointer-events-none select-none"
-              />
-              <span className="font-bold tracking-wider text-foreground/80">OG Bot</span>
-            </span>
-          </div>
-        </div>
-      </SidebarHeader>
-
-      <SidebarContent>
+      <SidebarContent className="justify-center">
         <SidebarGroup>
           <SidebarGroupLabel>Workspace</SidebarGroupLabel>
           <SidebarGroupContent>
