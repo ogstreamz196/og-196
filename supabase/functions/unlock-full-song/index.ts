@@ -110,7 +110,8 @@ Deno.serve(async (req) => {
     const remakeRaw = Number(settings.get("coins_per_remake"));
     const remakeCost = Number.isFinite(remakeRaw) && remakeRaw >= 1 ? Math.round(remakeRaw) : 2;
 
-    // Optional second take: the hidden sibling clip from the same generation.
+    // Optional second take: the paired clip from the same generation. It counts
+    // whether or not it was already revealed — only "still locked" matters.
     let sibling: { id: string } | null = null;
     if (bundle_both && song.suno_task_id) {
       const { data: sibs } = await admin
@@ -118,8 +119,7 @@ Deno.serve(async (req) => {
         .select("id")
         .eq("suno_task_id", song.suno_task_id)
         .eq("user_id", user.id)
-        .eq("is_variation", true)
-        .eq("revealed", false)
+        .eq("unlocked", false)
         .neq("id", song_id)
         .limit(1);
       sibling = (sibs ?? [])[0] ?? null;
@@ -129,12 +129,12 @@ Deno.serve(async (req) => {
     const cost = (alreadyUnlocked ? 0 : unlockCost) + (sibling ? remakeCost : 0);
     if (cost === 0) return jsonResponse({ ok: true, already: true });
 
-    // Claim the sibling reveal atomically before charging so retries can't double up.
+    // Claim the sibling unlock atomically before charging so retries can't double up.
     if (sibling) {
       const { data: claimed } = await admin
         .from("songs")
-        .update({ revealed: true })
-        .eq("id", sibling.id).eq("user_id", user.id).eq("revealed", false)
+        .update({ unlocked: true, revealed: true })
+        .eq("id", sibling.id).eq("user_id", user.id).eq("unlocked", false)
         .select("id");
       if (!claimed || claimed.length === 0) sibling = null;
     }
@@ -147,7 +147,7 @@ Deno.serve(async (req) => {
     });
     if (dErr) {
       if (sibling) {
-        await admin.from("songs").update({ revealed: false }).eq("id", sibling.id);
+        await admin.from("songs").update({ unlocked: false }).eq("id", sibling.id);
       }
       return jsonResponse({ error: "Insufficient coins", code: "insufficient_coins" }, 402);
     }

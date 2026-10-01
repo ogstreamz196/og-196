@@ -57,12 +57,13 @@ export function OwnerUnlockDialog({
         if (!cancelled) setHasSecondTake(false);
         return;
       }
+      // The paired take counts whether or not it was already revealed —
+      // what matters is that it is still locked to a sample.
       const { data: sibs } = await supabase
         .from("songs")
         .select("id")
         .eq("suno_task_id", task)
-        .eq("is_variation", true)
-        .eq("revealed", false)
+        .eq("unlocked", false)
         .neq("id", songId)
         .limit(1);
       if (!cancelled) setHasSecondTake((sibs ?? []).length > 0);
