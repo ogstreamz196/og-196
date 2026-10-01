@@ -1723,24 +1723,24 @@ function LibraryPage() {
             )
           }
         >
-          <TabsList className="mb-5 grid h-auto w-full grid-cols-2 gap-2 rounded-none border-0 border-b border-white/[0.07] bg-transparent p-0">
+          <TabsList className="mb-5 grid h-auto w-full grid-cols-2 gap-1.5 rounded-2xl border border-border/60 bg-surface p-1.5 shadow-card">
             <TabsTrigger
               value="yours"
-              className="group flex min-w-0 items-center gap-2 rounded-none border-b-2 border-transparent bg-transparent px-1 pb-3 pt-0 text-sm font-bold text-muted-foreground shadow-none transition-colors data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none"
+              className="group flex min-w-0 items-center justify-center gap-2 rounded-xl border border-transparent bg-white/[0.04] px-2 py-3 text-sm font-black uppercase tracking-wide text-muted-foreground shadow-none transition-all hover:bg-white/[0.08] hover:text-foreground data-[state=active]:border-primary/50 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow"
             >
-              <Crown className="h-4 w-4 text-primary" />
+              <Crown className="h-4 w-4 shrink-0 text-primary group-data-[state=active]:text-primary-foreground" />
               <span className="truncate">Mine</span>
-              <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-black tabular-nums text-foreground/90">
+              <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-black tabular-nums text-foreground/90 group-data-[state=active]:bg-black/25 group-data-[state=active]:text-primary-foreground">
                 {completedTracks.length}
               </span>
             </TabsTrigger>
             <TabsTrigger
               value="community"
-              className="group flex min-w-0 items-center gap-2 rounded-none border-b-2 border-transparent bg-transparent px-1 pb-3 pt-0 text-sm font-bold text-muted-foreground shadow-none transition-colors data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none"
+              className="group flex min-w-0 items-center justify-center gap-2 rounded-xl border border-transparent bg-white/[0.04] px-2 py-3 text-sm font-black uppercase tracking-wide text-muted-foreground shadow-none transition-all hover:bg-white/[0.08] hover:text-foreground data-[state=active]:border-fuchsia-400/50 data-[state=active]:bg-fuchsia-500/90 data-[state=active]:text-white data-[state=active]:shadow-glow"
             >
-              <Users className="h-4 w-4 text-fuchsia-300" />
+              <Users className="h-4 w-4 shrink-0 text-fuchsia-300 group-data-[state=active]:text-white" />
               <span className="truncate">Global</span>
-              <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-black tabular-nums text-foreground/90">
+              <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-black tabular-nums text-foreground/90 group-data-[state=active]:bg-black/25 group-data-[state=active]:text-white">
                 {communityTracks.length}
               </span>
             </TabsTrigger>
