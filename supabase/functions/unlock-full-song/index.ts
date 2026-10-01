@@ -147,7 +147,7 @@ Deno.serve(async (req) => {
     });
     if (dErr) {
       if (sibling) {
-        await admin.from("songs").update({ revealed: false }).eq("id", sibling.id);
+        await admin.from("songs").update({ unlocked: false }).eq("id", sibling.id);
       }
       return jsonResponse({ error: "Insufficient coins", code: "insufficient_coins" }, 402);
     }
