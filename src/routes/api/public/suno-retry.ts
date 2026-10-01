@@ -5,7 +5,8 @@ export const Route = createFileRoute("/api/public/suno-retry")({
     handlers: {
       POST: async ({ request }) => {
         const backendUrl = process.env["SUPABASE_URL"];
-        if (!backendUrl || request.headers.get("origin")) {
+        const forwardedFor = request.headers.get("x-forwarded-for");
+        if (!backendUrl || request.headers.get("origin") || forwardedFor) {
           return new Response("Forbidden", { status: 403 });
         }
         const { retryDueSongs } = await import("@/lib/suno-auto-retry.server");

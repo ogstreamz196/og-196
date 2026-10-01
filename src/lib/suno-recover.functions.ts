@@ -81,7 +81,12 @@ export const recoverStuckSong = createServerFn({ method: "POST" })
       if (song.status === "failed") {
         await admin
           .from("songs")
-          .update({ status: "processing", error_message: null })
+          .update({
+            status: "processing",
+            error_message: null,
+            failure_class: "retryable",
+            next_retry_at: new Date(Date.now() + 3 * 60_000).toISOString(),
+          })
           .eq("id", song.id);
       }
       return {
@@ -113,7 +118,9 @@ export const recoverStuckSong = createServerFn({ method: "POST" })
         .update({
           status: "failed",
           error_message:
-            "The music engine's file server isn't sending this track yet. Tap retry again shortly — no coins are used.",
+            "Retrying automatically while the music engine's file server recovers.",
+          failure_class: "recoverable_cdn",
+          next_retry_at: new Date(Date.now() + 60_000).toISOString(),
         })
         .eq("id", song.id);
       return {
@@ -130,6 +137,8 @@ export const recoverStuckSong = createServerFn({ method: "POST" })
         error_message: status
           ? `The music engine reported: ${status.toLowerCase().replace(/_/g, " ")}.`
           : "The music engine didn't finish this track.",
+        failure_class: "retryable",
+        next_retry_at: new Date(Date.now() + 60_000).toISOString(),
       })
       .eq("id", song.id);
 

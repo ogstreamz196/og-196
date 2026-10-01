@@ -43,5 +43,5 @@
 
 ## Generation reliability (Oct 2026)
 
-- [ ] Automatically recover or retry failed track generations in the background without charging coins
-- [ ] Verify retry scheduling, terminal failures, and clean app build
+- [x] Automatically recover or retry failed track generations in the background without charging coins
+- [x] Verify retry scheduling, terminal failures, and clean app build

@@ -442,13 +442,15 @@ Deno.serve(async (req) => {
           ? `low quality, muddy mix, distorted, lo-fi, amateur, bad vocals, ${NO_INSTRUMENT_NEGATIVES}`
           : "low quality, muddy mix, distorted, lo-fi, amateur, bad vocals",
       };
+      // Keep the exact provider request for service-only retries. This contains
+      // generated lyrics/settings, never credentials or user account details.
       await admin.from("songs").update({ retry_payload: retryPayload }).eq("id", songId);
+      const { usesUploadedBeat: _usesUploadedBeat, ...providerPayload } = retryPayload;
       return await fetch(beatUrl ? SUNO_UPLOAD_COVER_URL : SUNO_API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${SUNO_API_KEY}` },
         body: JSON.stringify({
-          ...retryPayload,
-          usesUploadedBeat: undefined,
+          ...providerPayload,
           ...(beatUrl ? { uploadUrl: beatUrl } : {}),
           ...(vocalGender ? { vocalGender } : {}),
           model: "V5",
