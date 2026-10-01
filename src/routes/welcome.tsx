@@ -322,7 +322,10 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
           aria-hidden
         />
         <div className="text-center">
-          <OgBotLogo className="mx-auto h-24 w-24 rounded-2xl sm:h-28 sm:w-28" />
+          <p className="font-display text-sm font-black uppercase tracking-[0.3em] text-foreground sm:text-base">
+            OG Streamz Presentz
+          </p>
+          <OgBotLogo className="mx-auto mt-3 h-36 w-36 rounded-3xl shadow-glow sm:h-44 sm:w-44" />
           <h2 className="mt-3 text-lg font-semibold text-foreground sm:text-xl">
             {native ? "Create your account" : "Sign in to your account"}
           </h2>
@@ -698,19 +701,19 @@ function TopNav() {
           aria-label="OG Streamz — home"
           className="group flex min-w-0 items-center gap-3"
         >
-          <span
+          <img
+            src={ogStreamzLogo.url}
+            alt=""
             aria-hidden
-            className="wc-wiggle grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-gradient-brand text-primary-foreground shadow-glow sm:h-11 sm:w-11"
-          >
-            <Sparkles className="h-5 w-5" />
-          </span>
+            className="h-12 w-12 shrink-0 rounded-2xl object-cover shadow-glow ring-1 ring-white/15 sm:h-14 sm:w-14"
+          />
           <div className="min-w-0 leading-none">
             <p className="font-display truncate text-lg font-black uppercase tracking-tight sm:text-xl">
               OG Streamz
             </p>
             <p className="mt-1 inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:text-[11px]">
               <span>Powered by</span>
-              <OgBotLogo className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
+              <OgBotLogo className="h-6 w-6 sm:h-7 sm:w-7" />
               <span>OG Bot</span>
             </p>
           </div>
@@ -746,7 +749,7 @@ function Hero() {
           </span>
           <span className="inline-flex items-center gap-1.5 normal-case tracking-normal text-foreground">
             Powered by
-            <OgBotLogo className="h-5 w-5 sm:h-6 sm:w-6" />
+            <OgBotLogo className="h-7 w-7 sm:h-8 sm:w-8" />
             <span className="font-black uppercase tracking-tight">OG Bot</span>
           </span>
         </div>
@@ -756,7 +759,7 @@ function Hero() {
           <span className="wc-pop block" style={{ animationDelay: "0.15s" }}>
             MAKE A{" "}
             <span
-              className="italic text-gradient-brand wc-bounce-soft inline-block"
+              className="italic wc-bounce-soft inline-block text-accent [text-shadow:0_0_18px_var(--primary),0_2px_0_var(--primary)]"
               style={{ animationDelay: "0.3s" }}
             >
               PERSONAL
