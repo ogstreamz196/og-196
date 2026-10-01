@@ -8,6 +8,7 @@ import {
   LogOut,
   Gift,
   Sparkles,
+  UserRound,
   type LucideIcon,
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -17,6 +18,7 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarHeader,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -41,6 +43,7 @@ type AppRoute =
   | "/settings"
   | "/developer"
   | "/admin"
+  | "/profile"
   | "/referrals";
 type NavItem = {
   title: string;
@@ -73,6 +76,7 @@ const primaryNav: NavItem[] = [
 ];
 
 const accountNav: NavItem[] = [
+  { title: "Profile", url: "/profile", icon: UserRound, accent: "from-cyan-400/30 to-blue-500/30" },
   { title: "Earnings", url: "/referrals", icon: Gift, accent: "from-pink-500/30 to-rose-400/30" },
   { title: "Store", url: "/store", icon: Coins, accent: "from-amber-400/40 to-yellow-300/40" },
   {
@@ -172,9 +176,39 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
+      <SidebarHeader
+        className="border-b border-sidebar-border"
+        style={{ paddingTop: "max(1.25rem, calc(env(safe-area-inset-top) + 0.75rem))" }}
+      >
+        <div className="flex flex-col items-center gap-1 px-2 pb-2 text-center">
+          <img
+            src={ogStreamzLogo.url}
+            alt="OG Streamz"
+            draggable={false}
+            onContextMenu={(e) => e.preventDefault()}
+            className="h-12 w-12 shrink-0 rounded-xl object-cover ring-1 ring-white/10 shadow-glow pointer-events-none select-none"
+          />
+          {!collapsed && (
+            <>
+              <span className="font-display text-sm font-bold uppercase tracking-[0.2em] text-foreground">
+                OG STREAMZ
+              </span>
+              <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                Powered by
+                <img
+                  src={ogBotAsset.url}
+                  alt="OG Bot"
+                  draggable={false}
+                  className="h-3.5 w-3.5 rounded-full object-cover pointer-events-none select-none"
+                />
+                <span className="font-bold tracking-wider text-foreground/80">OG Bot</span>
+              </span>
+            </>
+          )}
+        </div>
+      </SidebarHeader>
       <SidebarContent className="justify-center">
         <SidebarGroup>
-          <SidebarGroupLabel>Workspace</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>{renderItems(primaryNav)}</SidebarMenu>
           </SidebarGroupContent>
@@ -237,33 +271,6 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border">
-        <div className="flex flex-col items-center gap-1 px-2 pb-1 pt-3 text-center">
-          <img
-            src={ogStreamzLogo.url}
-            alt="OG Streamz"
-            draggable={false}
-            onContextMenu={(e) => e.preventDefault()}
-            className="h-12 w-12 shrink-0 rounded-xl object-cover ring-1 ring-white/10 shadow-glow pointer-events-none select-none"
-          />
-          {!collapsed && (
-            <>
-              <span className="font-display text-sm font-bold uppercase tracking-[0.2em] text-foreground">
-                OG STREAMZ
-              </span>
-              <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-                Powered by
-                <img
-                  src={ogBotAsset.url}
-                  alt="OG Bot"
-                  draggable={false}
-                  onContextMenu={(e) => e.preventDefault()}
-                  className="h-3.5 w-3.5 rounded-full object-cover pointer-events-none select-none"
-                />
-                <span className="font-bold tracking-wider text-foreground/80">OG Bot</span>
-              </span>
-            </>
-          )}
-        </div>
         <div className="flex min-w-0 flex-col gap-2 px-2 py-2">
           <div className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
             <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-muted text-[10px] font-bold uppercase">
