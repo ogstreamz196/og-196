@@ -361,23 +361,21 @@ function CommunityTrackRowImpl({
               {title.trim().charAt(0) || <Music2 className="h-5 w-5 text-white/70" />}
             </span>
           )}
-          <span
-            className={cn(
-              "absolute inset-0 grid place-items-center bg-background/55 text-primary-foreground transition-opacity",
-              playing || loadingUrl ? "opacity-100" : "opacity-0 group-hover:opacity-100",
-            )}
-          >
-            {loadingUrl ? (
-              <Loader2 className="h-5 w-5 animate-spin text-primary" />
-            ) : playing ? (
-              <span className="flex h-4 items-end gap-[3px]" aria-hidden>
-                <i className="h-2 w-[3px] animate-[eqbar_0.9s_ease-in-out_infinite] rounded-full bg-primary" />
-                <i className="h-4 w-[3px] animate-[eqbar_0.7s_ease-in-out_infinite] rounded-full bg-primary" />
-                <i className="h-3 w-[3px] animate-[eqbar_1.1s_ease-in-out_infinite] rounded-full bg-primary" />
-              </span>
-            ) : (
-              <Play className="h-5 w-5 translate-x-[1px] text-primary" />
-            )}
+          {/* Always-visible play badge so it's obvious the artwork is tappable. */}
+          <span className="absolute inset-0 grid place-items-center bg-background/45 transition-colors group-hover:bg-background/60">
+            <span className="grid h-7 w-7 place-items-center rounded-full bg-background/85 ring-1 ring-primary/60 shadow-[0_0_14px_-4px_var(--primary)]">
+              {loadingUrl ? (
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+              ) : playing ? (
+                <span className="flex h-3.5 items-end gap-[2px]" aria-hidden>
+                  <i className="h-1.5 w-[3px] animate-[eqbar_0.9s_ease-in-out_infinite] rounded-full bg-primary" />
+                  <i className="h-3.5 w-[3px] animate-[eqbar_0.7s_ease-in-out_infinite] rounded-full bg-primary" />
+                  <i className="h-2.5 w-[3px] animate-[eqbar_1.1s_ease-in-out_infinite] rounded-full bg-primary" />
+                </span>
+              ) : (
+                <Play className="h-4 w-4 translate-x-[1px] fill-primary text-primary" />
+              )}
+            </span>
           </span>
         </button>
 
