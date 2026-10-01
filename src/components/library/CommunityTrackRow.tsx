@@ -222,19 +222,19 @@ function CommunityTrackRowImpl({
   const styles = styleChips(song.style);
 
   const actions = (
-    <div className="flex shrink-0 items-center gap-1.5">
+    <div className="flex shrink-0 items-center gap-1">
       {owned && !song.unlocked && isReady && (
         <button
           type="button"
           onClick={() => setOwnerUnlockOpen(true)}
           disabled={busy}
           aria-label={`Unlock the full version of ${title}`}
-          className="inline-flex h-9 shrink-0 items-center gap-1 rounded-full border border-amber-400/40 bg-amber-500/15 px-2.5 text-xs font-black tabular-nums text-amber-300 transition-colors hover:bg-amber-500/25 disabled:opacity-40"
+          className="inline-flex h-8 shrink-0 items-center gap-0.5 whitespace-nowrap rounded-full border border-amber-400/40 bg-amber-500/15 px-2 text-[11px] font-black tabular-nums leading-none text-amber-300 transition-colors hover:bg-amber-500/25 disabled:opacity-40"
         >
           {busy ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
           ) : (
-            <LockKeyhole className="h-4 w-4" />
+            <LockKeyhole className="h-3.5 w-3.5" />
           )}
           <span>{fullUnlockCost}</span>
           <span className="sr-only">OG coins to unlock</span>
@@ -245,9 +245,9 @@ function CommunityTrackRowImpl({
           to="/library/$songId"
           params={{ songId: song.id }}
           aria-label={`Edit ${title}`}
-          className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-primary/40 bg-primary/15 text-primary transition-colors hover:bg-primary/25"
+          className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-primary/40 bg-primary/15 text-primary transition-colors hover:bg-primary/25"
         >
-          <Pencil className="h-4 w-4" />
+          <Pencil className="h-3.5 w-3.5" />
         </Link>
       ) : (
         <button
@@ -256,11 +256,15 @@ function CommunityTrackRowImpl({
           disabled={!isReady || busy}
           aria-label={`Download ${title} for ${COMMUNITY_DOWNLOAD_COST} OG coins or 99p`}
           className={cn(
-            "inline-flex h-9 shrink-0 items-center gap-1 rounded-full border border-primary/40 bg-primary/15 px-2.5 text-xs font-black tabular-nums text-primary transition-colors",
+            "inline-flex h-8 shrink-0 items-center gap-0.5 whitespace-nowrap rounded-full border border-primary/40 bg-primary/15 px-2 text-[11px] font-black tabular-nums leading-none text-primary transition-colors",
             isReady && !busy ? "hover:bg-primary/25" : "opacity-40",
           )}
         >
-          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+          {busy ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Download className="h-3.5 w-3.5" />
+          )}
           <span>{COMMUNITY_DOWNLOAD_COST}</span>
           <span className="sr-only">OG coins or 99p</span>
         </button>
@@ -271,15 +275,16 @@ function CommunityTrackRowImpl({
             <button
               type="button"
               aria-label={`More actions for ${title}`}
-              className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-white/10 bg-white/[0.05] text-muted-foreground transition-colors hover:text-foreground"
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-white/10 bg-white/[0.05] text-muted-foreground transition-colors hover:text-foreground"
             >
               {busy ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
               ) : (
-                <MoreVertical className="h-4 w-4" />
+                <MoreVertical className="h-3.5 w-3.5" />
               )}
             </button>
           </DropdownMenuTrigger>
+
           <DropdownMenuContent align="end" className="w-48">
             {onRemix && (
               <DropdownMenuItem onSelect={() => onRemix(song)}>
@@ -322,7 +327,7 @@ function CommunityTrackRowImpl({
         playing && "bg-primary/[0.08] shadow-[inset_3px_0_0_var(--primary)]",
       )}
     >
-      <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
+      <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2.5">
         {/* Artwork doubles as the play / pause control. */}
         <button
           type="button"
@@ -376,51 +381,45 @@ function CommunityTrackRowImpl({
           </span>
         </button>
 
-        <div className="min-w-0">
+        <div className="min-w-0 overflow-hidden">
           {owned ? (
             <Link
               to="/library/$songId"
               params={{ songId: song.id }}
-              className="line-clamp-1 text-[15px] font-semibold leading-snug hover:text-primary focus:outline-none focus-visible:underline"
+              className="block truncate text-[15px] font-semibold leading-snug hover:text-primary focus:outline-none focus-visible:underline"
             >
               {title}
             </Link>
           ) : (
-            <p className="line-clamp-1 text-[15px] font-semibold leading-snug">{title}</p>
+            <p className="truncate text-[15px] font-semibold leading-snug">{title}</p>
           )}
 
           {/* One quiet metadata line: creator · styles · duration. */}
-          <div className="mt-0.5 flex min-w-0 items-center gap-1.5 text-[11px] text-muted-foreground">
-            <CreatorTag userId={song.user_id} />
-            {styles.length > 0 && (
-              <span className="truncate">
-                {styles.join(", ")}
-              </span>
-            )}
+          <div className="mt-1 flex min-w-0 items-center gap-1.5 text-[11px] leading-none text-muted-foreground">
+            <CreatorTag userId={song.user_id} className="max-w-[88px] shrink-0" />
+            {styles.length > 0 && <span className="min-w-0 truncate">{styles.join(", ")}</span>}
             {duration > 0 && (
-              <>
-                <span aria-hidden>·</span>
-                <span className="tabular-nums">{fmt(duration)}</span>
-              </>
+              <span className="shrink-0 whitespace-nowrap tabular-nums">{fmt(duration)}</span>
             )}
           </div>
 
           {(song.is_variation || !(song.unlocked || song.artistUnlocked)) && (
-            <div className="mt-1 flex flex-wrap items-center gap-1.5">
+            <div className="mt-1 flex items-center gap-1.5 overflow-hidden">
               {song.is_variation && (
-                <span className="rounded-full border border-amber-400/25 bg-amber-500/10 px-1.5 py-px text-[10px] font-semibold text-amber-300">
+                <span className="shrink-0 whitespace-nowrap rounded-full border border-amber-400/25 bg-amber-500/10 px-1.5 py-px text-[10px] font-semibold leading-tight text-amber-300">
                   Second take
                 </span>
               )}
               {!(song.unlocked || song.artistUnlocked) && (
-                <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/50 px-1.5 py-px text-[10px] font-semibold text-muted-foreground">
-                  <Radio className="h-2.5 w-2.5" />
+                <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-border bg-muted/50 px-1.5 py-px text-[10px] font-semibold leading-tight text-muted-foreground">
+                  <Radio className="h-2.5 w-2.5 shrink-0" />
                   {owned ? "Preview" : "Stream"}
                 </span>
               )}
             </div>
           )}
         </div>
+
         {actions}
       </div>
 
