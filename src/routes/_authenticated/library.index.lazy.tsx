@@ -1664,16 +1664,15 @@ function LibraryPage() {
               className="flex min-w-0 items-center gap-2 font-display text-2xl font-black tracking-tight sm:text-3xl"
             >
               <Disc3 className="h-5 w-5 shrink-0 text-primary" />
-              <span className="truncate">Tape vault</span>
+              <span className="truncate">Music Library</span>
             </h2>
+            <p className="mt-0.5 truncate text-xs text-muted-foreground">
+              Your tapes and community sounds
+            </p>
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
-            {versionedLibrary.length > 0 && (
-              <span className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-primary">
-                {versionedLibrary.length} track{versionedLibrary.length === 1 ? "" : "s"}
-              </span>
-            )}
+
             <Button
               type="button"
               size="sm"
@@ -1723,33 +1722,31 @@ function LibraryPage() {
             )
           }
         >
-          <TabsList className="mb-5 grid h-auto w-full grid-cols-2 gap-1.5 rounded-2xl border border-border/60 bg-surface p-1.5 shadow-card">
+          <TabsList className="mb-4 grid h-auto w-full grid-cols-2 gap-1.5 rounded-2xl border border-border/60 bg-surface p-1.5 shadow-card">
             <TabsTrigger
               value="yours"
-              className="group flex min-w-0 items-center justify-center gap-2 rounded-xl border border-transparent bg-white/[0.04] px-2 py-3 text-sm font-black uppercase tracking-wide text-muted-foreground shadow-none transition-all hover:bg-white/[0.08] hover:text-foreground data-[state=active]:border-primary/50 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow"
+              className="group flex min-w-0 items-center justify-center gap-1.5 rounded-xl border border-transparent bg-white/[0.04] px-1.5 py-3 text-[13px] font-black tracking-tight text-muted-foreground shadow-none transition-all hover:bg-white/[0.08] hover:text-foreground data-[state=active]:border-primary/50 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow"
             >
               <Crown className="h-4 w-4 shrink-0 text-primary group-data-[state=active]:text-primary-foreground" />
-              <span className="truncate">Mine</span>
-              <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-black tabular-nums text-foreground/90 group-data-[state=active]:bg-black/25 group-data-[state=active]:text-primary-foreground">
+              <span>My Library</span>
+              <span className="rounded-full bg-white/10 px-1.5 py-0.5 text-[10px] font-black tabular-nums text-foreground/90 group-data-[state=active]:bg-black/25 group-data-[state=active]:text-primary-foreground">
                 {completedTracks.length}
               </span>
             </TabsTrigger>
             <TabsTrigger
               value="community"
-              className="group flex min-w-0 items-center justify-center gap-2 rounded-xl border border-transparent bg-white/[0.04] px-2 py-3 text-sm font-black uppercase tracking-wide text-muted-foreground shadow-none transition-all hover:bg-white/[0.08] hover:text-foreground data-[state=active]:border-fuchsia-400/50 data-[state=active]:bg-fuchsia-500/90 data-[state=active]:text-white data-[state=active]:shadow-glow"
+              className="group flex min-w-0 items-center justify-center gap-1.5 rounded-xl border border-transparent bg-white/[0.04] px-1.5 py-3 text-[13px] font-black tracking-tight text-muted-foreground shadow-none transition-all hover:bg-white/[0.08] hover:text-foreground data-[state=active]:border-fuchsia-400/50 data-[state=active]:bg-fuchsia-500/90 data-[state=active]:text-white data-[state=active]:shadow-glow"
             >
               <Users className="h-4 w-4 shrink-0 text-fuchsia-300 group-data-[state=active]:text-white" />
-              <span className="truncate">Global</span>
-              <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-black tabular-nums text-foreground/90 group-data-[state=active]:bg-black/25 group-data-[state=active]:text-white">
+              <span>Global</span>
+              <span className="rounded-full bg-white/10 px-1.5 py-0.5 text-[10px] font-black tabular-nums text-foreground/90 group-data-[state=active]:bg-black/25 group-data-[state=active]:text-white">
                 {communityTracks.length}
               </span>
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="yours" className="mt-0 space-y-3">
-            <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-              <span className="text-primary">Yours to play &amp; download</span>
-            </p>
+
 
             <LibraryFilters
               mode={yoursFilter}
