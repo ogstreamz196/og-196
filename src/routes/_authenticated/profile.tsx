@@ -70,7 +70,8 @@ function txLabel(type: string, ref: string | null): string {
 function ProfilePage() {
   const { user } = useAuth();
   const { data: profile } = useProfile();
-  const { hasVipRole, hasBossRole } = useRole();
+  const { hasVipRole, roles } = useRole();
+  const hasBossRole = (roles as string[] | undefined)?.includes("boss") ?? false;
   const qc = useQueryClient();
 
   const [name, setName] = useState("");
