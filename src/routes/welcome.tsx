@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import ogStreamzLogo from "@/assets/ogstreamz-logo.jpg.asset.json";
 import { Capacitor } from "@capacitor/core";
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactElement } from "react";
 import {
