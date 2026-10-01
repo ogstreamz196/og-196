@@ -7,7 +7,6 @@ import {
   Loader2,
   MoreVertical,
   Music2,
-  Pause,
   Pencil,
   Play,
   Share2,
