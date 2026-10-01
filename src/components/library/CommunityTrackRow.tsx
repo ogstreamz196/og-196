@@ -327,7 +327,7 @@ function CommunityTrackRowImpl({
         playing && "bg-primary/[0.08] shadow-[inset_3px_0_0_var(--primary)]",
       )}
     >
-      <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
+      <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2.5">
         {/* Artwork doubles as the play / pause control. */}
         <button
           type="button"
