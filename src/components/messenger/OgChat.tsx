@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
 import { chatOgBot, type OgChatMessage } from "@/lib/og-messenger.functions";
+import { editChatImage, getImageEditStatus } from "@/lib/og-image-edit.functions";
+import { useQuery } from "@tanstack/react-query";
 import { transcribeOgAudio } from "@/lib/og-transcribe.functions";
 import { postCommunityMessage } from "@/lib/community.functions";
 import { QUICK_STARTS } from "@/lib/og-persona-public";
@@ -173,6 +175,42 @@ export function OgChat({
 
   // Attachment + mic state
   const [attachment, setAttachment] = useState<{ dataUrl: string; name: string } | null>(null);
+  const [editMode, setEditMode] = useState(false);
+  const [noCoinsOpen, setNoCoinsOpen] = useState(false);
+  const fetchEditStatus = useServerFn(getImageEditStatus);
+  const runImageEdit = useServerFn(editChatImage);
+  const editStatus = useQuery({
+    queryKey: ["image-edit-status", user?.id],
+    queryFn: () => fetchEditStatus(),
+    enabled: !!user && !!attachment,
+    refetchInterval: 60_000,
+  });
+  const imageEdit = useMutation({
+    mutationFn: (args: { prompt: string; imageDataUrl: string }) => runImageEdit({ data: args }),
+    onSuccess: (res) => {
+      if (!res.ok) {
+        setMessages((cur) => [
+          ...cur,
+          { role: "assistant", content: "⚠️ You've used your free image for now — you need 2 coins for another edit." },
+        ]);
+        setNoCoinsOpen(true);
+        return;
+      }
+      const note = res.free ? "Free edit used — next free one in 4 hours." : "Edit done · -2 coins.";
+      setMessages((cur) => [
+        ...cur,
+        { role: "assistant", content: `Here's your edit 🔥\n\n![Edited image](${res.url})\n\n[⬇ Download image](${res.url})\n\n_${note}_` },
+      ]);
+      selfSyncRef.current = true;
+      window.dispatchEvent(new Event(SYNC_EVENT));
+      qc.invalidateQueries({ queryKey: ["profile"] });
+      qc.invalidateQueries({ queryKey: ["image-edit-status"] });
+    },
+    onError: (err: Error) => {
+      setMessages((cur) => [...cur, { role: "assistant", content: `⚠️ ${err.message}` }]);
+      qc.invalidateQueries({ queryKey: ["image-edit-status"] });
+    },
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [recording, setRecording] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
@@ -400,6 +438,17 @@ typeof window !== "undefined" &&
           });
         })
         .catch((e: Error) => toast.error(e.message));
+      return;
+    }
+
+    if (att && editMode) {
+      if (imageEdit.isPending) return;
+      if (!t) return toast.error("Type how you want the image edited.");
+      setMessages((cur) => [...cur, { role: "user", content: `🎨 Edit image: ${t}` }]);
+      setInput("");
+      setAttachment(null);
+      setEditMode(false);
+      imageEdit.mutate({ prompt: t, imageDataUrl: att.dataUrl });
       return;
     }
 
@@ -853,18 +902,68 @@ typeof window !== "undefined" &&
         style={{ touchAction: "manipulation" }}
         className="sticky bottom-0 z-40 border-t border-border/80 bg-card/95 px-2 pb-[max(0.4rem,env(safe-area-inset-bottom))] pt-1.5 shadow-lg backdrop-blur supports-[backdrop-filter]:bg-card/75 sm:px-3 sm:py-2"
       >
+        {imageEdit.isPending && (
+          <div className="mb-2 flex items-center gap-2 rounded-xl border border-primary/40 bg-primary/10 p-2 text-xs font-semibold text-primary">
+            <Loader2 className="h-4 w-4 animate-spin" /> OG Bot is editing your image…
+          </div>
+        )}
+        {noCoinsOpen && (
+          <div className="mb-2 flex flex-wrap items-center gap-2 rounded-xl border border-border bg-muted/40 p-2 text-xs">
+            <span className="flex-1">Out of coins for image edits.</span>
+            <Link to="/store" className="rounded-md bg-primary px-2 py-1 font-bold text-primary-foreground">Buy coins</Link>
+            <Link to="/messenger" search={{ live: 1 } as never} className="rounded-md border border-border px-2 py-1 font-bold">Earn in Battle Zone</Link>
+            <button type="button" onClick={() => setNoCoinsOpen(false)} aria-label="Close" className="p-1"><X className="h-4 w-4" /></button>
+          </div>
+        )}
         {attachment && (
-          <div className="mb-2 flex items-center gap-2 rounded-xl border border-border bg-muted/40 p-2">
-            <img src={attachment.dataUrl} alt="" className="h-10 w-10 rounded-md object-cover" />
-            <span className="flex-1 truncate text-xs text-muted-foreground">{attachment.name}</span>
-            <button
-              type="button"
-              onClick={() => setAttachment(null)}
-              className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-              aria-label="Remove attachment"
-            >
-              <X className="h-4 w-4" />
-            </button>
+          <div className="mb-2 space-y-2 rounded-xl border border-border bg-muted/40 p-2">
+            <div className="flex items-center gap-2">
+              <img src={attachment.dataUrl} alt="" className="h-10 w-10 rounded-md object-cover" />
+              <span className="flex-1 truncate text-xs text-muted-foreground">{attachment.name}</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setAttachment(null);
+                  setEditMode(false);
+                }}
+                className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                aria-label="Remove attachment"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setEditMode(false)}
+                aria-pressed={!editMode}
+                className={cn(
+                  "flex-1 rounded-lg border px-2 py-1.5 text-xs font-bold",
+                  !editMode ? "border-primary bg-primary/15 text-foreground" : "border-border text-muted-foreground",
+                )}
+              >
+                💬 Ask about it
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditMode(true)}
+                aria-pressed={editMode}
+                className={cn(
+                  "flex-1 rounded-lg border px-2 py-1.5 text-xs font-bold",
+                  editMode ? "border-primary bg-primary/15 text-foreground" : "border-border text-muted-foreground",
+                )}
+              >
+                🎨 Edit image ·{" "}
+                {editStatus.data?.freeAvailable !== false
+                  ? "Free"
+                  : `2 coins (free in ${Math.max(1, Math.ceil((editStatus.data.nextFreeAt - Date.now()) / 60000))}m)`}
+              </button>
+            </div>
+            {editMode && (
+              <p className="text-[11px] text-muted-foreground">
+                Type what to change, e.g. "make it an anime poster" or "add neon lights".
+              </p>
+            )}
           </div>
         )}
         <input
