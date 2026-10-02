@@ -709,7 +709,7 @@ function MobileUserCard({
         </p>
       )}
 
-      <div className="flex items-center justify-between gap-2 border-t border-border pt-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
         <VipQuickToggle userId={user.id} checked={isVip} />
         <div className="flex items-center gap-1">
           <CoinsPopover userId={user.id} balance={user.coin_balance ?? 0} />
@@ -753,11 +753,11 @@ function VipQuickToggle({ userId, checked }: { userId: string; checked: boolean 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <label className="flex h-9 cursor-pointer items-center gap-2 rounded-md border border-border bg-background/40 px-2.5 text-sm">
+        <label className="flex h-9 shrink-0 cursor-pointer items-center gap-2 rounded-md border border-border bg-background/40 px-2.5 text-sm">
           <Crown
             className={`h-4 w-4 ${checked ? "text-amber-500" : "text-muted-foreground"}`}
           />
-          <span className={checked ? "text-amber-400" : "text-muted-foreground"}>VIP</span>
+          <span className={`whitespace-nowrap ${checked ? "text-amber-400" : "text-muted-foreground"}`}>VIP</span>
           <Switch
             checked={checked}
             disabled={mut.isPending}

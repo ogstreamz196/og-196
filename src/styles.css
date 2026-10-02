@@ -1686,3 +1686,8 @@ main:has(.boss-ui) .bg-card\/70,
 main:has(.boss-ui) .bg-card\/90 {
   background-color: var(--card);
 }
+.boss-ui {
+  background-color: var(--background);
+  box-shadow: 0 0 0 100vmax var(--background);
+  clip-path: inset(-100vmax -100vmax -100vmax -100vmax);
+}
