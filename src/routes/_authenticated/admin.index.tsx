@@ -90,11 +90,12 @@ function AdminPanel() {
 
   return (
     <DashboardShell title="Admin Controls">
+      <div className="boss-ui">
       <BossNav />
       <div className="mx-auto mt-4 w-full min-w-0 max-w-5xl space-y-4">
         <header className="min-w-0">
-          <h1 className="font-display text-xl font-black leading-tight sm:text-2xl">
-            Boss Control Center
+          <h1 className="text-xl leading-tight sm:text-2xl">
+            Overview
           </h1>
           <p className="text-sm text-muted-foreground">
             Tap a section to open it. Only one stays open at a time.
@@ -179,6 +180,7 @@ function AdminPanel() {
             <BossAuditLog />
           </Section>
         </div>
+      </div>
       </div>
     </DashboardShell>
   );

@@ -1650,3 +1650,19 @@ button.graffiti-accent:hover {
   .animate-\[eqbar_0\.7s_ease-in-out_infinite\],
   .animate-\[eqbar_1\.1s_ease-in-out_infinite\] { animation: none; }
 }
+
+/* Boss dashboard: clean, neutral admin typography (Roboto) — colours untouched. */
+@utility boss-ui {
+  font-family: "Roboto", "Segoe UI", system-ui, sans-serif;
+  letter-spacing: 0.005em;
+  & :where(*) {
+    font-family: inherit;
+  }
+  & :where(.font-mono, .tabular-nums) {
+    font-variant-numeric: tabular-nums;
+  }
+  & :where(h1, h2, h3) {
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+}

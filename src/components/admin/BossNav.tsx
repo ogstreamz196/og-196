@@ -13,7 +13,7 @@ import {
 import { cn } from "@/lib/utils";
 
 const LINKS = [
-  { to: "/admin", label: "Control Center", icon: ShieldCheck },
+  { to: "/admin", label: "Overview", icon: ShieldCheck },
   { to: "/admin/users", label: "Users", icon: Users },
   { to: "/admin/system", label: "System", icon: Activity },
   { to: "/admin/audit", label: "Audit", icon: Scale },
@@ -24,31 +24,38 @@ const LINKS = [
 ] as const;
 
 /**
- * Sticky in-page nav for the Boss-only admin surface — the single place every
- * admin tool is reachable from, with the current page highlighted.
+ * Boss header + underline tab bar shared by every admin page.
  */
 export function BossNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   return (
-    <div className="sticky top-16 z-10 mb-6 -mx-4 md:-mx-8">
-      <div className="glass-panel-strong border-y border-primary/30 px-4 py-2.5 md:px-8">
-        <div className="mx-auto flex max-w-6xl items-center gap-2 overflow-x-auto whitespace-nowrap text-sm [scrollbar-width:none]">
-          <span className="mr-1 inline-flex items-center gap-1.5 rounded-full bg-gradient-brand px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-primary-foreground shadow-glow">
-            <ShieldCheck className="h-3 w-3" /> Boss
-          </span>
+    <div className="boss-ui mb-5 space-y-3">
+      <div className="flex min-w-0 items-center gap-3">
+        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-border bg-card">
+          <ShieldCheck className="h-5 w-5 text-primary" />
+        </div>
+        <div className="min-w-0 leading-none">
+          <p className="truncate text-xl font-bold uppercase tracking-wide">Boss</p>
+          <p className="mt-1 truncate text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+            Control panel
+          </p>
+        </div>
+      </div>
+      <nav className="sticky top-16 z-10 rounded-xl border border-border bg-card/90 backdrop-blur">
+        <div className="flex items-stretch overflow-x-auto whitespace-nowrap px-1 text-sm [scrollbar-width:none]">
           {LINKS.map(({ to, label, icon: Icon }) => {
-            const active = pathname === to;
+            const active = pathname === to || (to === "/admin" && pathname === "/admin/");
             return (
               <Link
                 key={to}
                 to={to}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-medium transition",
+                  "inline-flex items-center gap-1.5 border-b-2 px-3.5 py-3 font-normal transition",
                   active
-                    ? "border-primary/50 bg-primary/20 text-primary"
-                    : "border-border bg-card/60 text-foreground/80 hover:bg-card",
+                    ? "border-primary text-foreground"
+                    : "border-transparent text-muted-foreground hover:text-foreground",
                 )}
               >
                 <Icon className="h-3.5 w-3.5" /> {label}
@@ -59,12 +66,12 @@ export function BossNav() {
             href="/auth"
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/60 px-3 py-1 font-medium text-foreground/80 transition hover:bg-card"
+            className="inline-flex items-center gap-1.5 border-b-2 border-transparent px-3.5 py-3 text-muted-foreground transition hover:text-foreground"
           >
             <Globe2 className="h-3.5 w-3.5" /> Public view
           </a>
         </div>
-      </div>
+      </nav>
     </div>
   );
 }

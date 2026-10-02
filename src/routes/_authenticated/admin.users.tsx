@@ -49,6 +49,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AdminEditModeToggle } from "@/components/admin/AdminEditMode";
 import { BulkReconcilePanel } from "@/components/admin/BulkReconcilePanel";
+import { BossNav } from "@/components/admin/BossNav";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/users")({
@@ -201,19 +202,15 @@ function AdminUsersPage() {
   return (
     <TooltipProvider delayDuration={200}>
       <DashboardShell title="Users">
-        <div className="mx-auto max-w-7xl space-y-6">
+        <div className="boss-ui mx-auto max-w-7xl space-y-5">
+          <BossNav />
           {/* Header */}
-          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-border bg-card p-4 sm:flex sm:flex-wrap">
-            <div className="flex min-w-0 items-center gap-3">
-              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-brand">
-                <ShieldCheck className="h-5 w-5 text-primary-foreground" />
-              </div>
-              <div className="min-w-0">
-                <h2 className="truncate font-semibold">User control panel</h2>
-                <p className="truncate text-xs text-muted-foreground">
-                  Manage members, balances, roles, and audits — all from one place.
-                </p>
-              </div>
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+            <div className="min-w-0">
+              <h2 className="truncate text-xl">User Management</h2>
+              <p className="truncate text-xs text-muted-foreground">
+                Members, balances, roles and audits in one place.
+              </p>
             </div>
             <div className="flex items-center gap-2">
               <AdminEditModeToggle />
@@ -226,7 +223,7 @@ function AdminUsersPage() {
           </div>
 
           {/* Stats */}
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             <StatCard
               icon={<UserCog className="h-4 w-4" />}
               label="Total users"
@@ -1127,15 +1124,15 @@ function StatCard({
     amber: "bg-amber-500/15 text-amber-400",
   };
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-card">
-      <div className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${ring[accent]}`}>
-        {icon}
-      </div>
-      <div className="min-w-0">
-        <div className="truncate text-xs text-muted-foreground">{label}</div>
-        <div className="text-2xl font-bold tabular-nums leading-tight">
-          {value.toLocaleString()}
+    <div className="min-w-0 rounded-xl border border-border bg-card px-4 py-3">
+      <div className="flex items-center justify-between gap-2">
+        <div className="truncate text-sm text-muted-foreground">{label}:</div>
+        <div className={`grid h-6 w-6 shrink-0 place-items-center rounded-md ${ring[accent]}`}>
+          {icon}
         </div>
+      </div>
+      <div className="mt-1 text-2xl font-normal tabular-nums leading-tight sm:text-3xl">
+        {value.toLocaleString()}
       </div>
     </div>
   );
