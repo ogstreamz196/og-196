@@ -106,7 +106,8 @@ const HELP_USER = `🤖 <b>OG Bot menu</b>
 Tap a button below or use a command:
 
 /balance — your OG coin balance
-/library — jump into your song library
+/tracks — your latest tracks to play and share
+/library — same as /tracks
 /buy — top up OG coins
 /me — your linked profile
 /help — this menu
@@ -740,12 +741,29 @@ async function handleTelegramUpdate(
       });
       return Response.json({ ok: true, balance: true });
     }
-    if (/^\/library\b/i.test(trimmed)) {
-      await reply(chat_id, "🎧 <b>Your library</b>", {
-        reply_markup: {
-          inline_keyboard: [[{ text: "Open Library", url: "https://og-196.lovable.app/library" }]],
-        },
-      });
+    if (/^\/(library|tracks)\b/i.test(trimmed)) {
+      const { data: songs } = await admin
+        .from("songs")
+        .select("id, title, style, is_public, revealed")
+        .eq("user_id", linkedProfile.id)
+        .eq("status", "completed")
+        .order("created_at", { ascending: false })
+        .limit(5);
+      const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      const list = songs ?? [];
+      const body = list.length
+        ? "🎧 <b>Your latest tracks</b>\n\n" +
+          list.map((s, i) => `${i + 1}. <b>${esc(s.title || "Untitled")}</b>${s.style ? ` — ${esc(String(s.style).slice(0, 40))}` : ""}`).join("\n") +
+          "\n\nTap a track to listen. Make it public in the app to share the link."
+        : "🎧 No finished tracks yet — go make one!";
+      const rows = list.map((s) => [
+        { text: `▶️ ${(s.title || "Untitled").slice(0, 30)}`, url: `https://ogbot.co.uk/library/${s.id}` },
+        ...((s as { is_public?: boolean }).is_public
+          ? [{ text: "🔗 Share", url: `https://t.me/share/url?url=${encodeURIComponent(`https://ogbot.co.uk/track/${s.id}`)}` }]
+          : []),
+      ]);
+      rows.push([{ text: "Open full library", url: "https://ogbot.co.uk/library" }]);
+      await reply(chat_id, body, { reply_markup: { inline_keyboard: rows } });
       return Response.json({ ok: true, library: true });
     }
     if (/^\/buy\b/i.test(trimmed)) {
