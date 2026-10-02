@@ -31,7 +31,7 @@ const TX_LABEL: Record<string, string> = {
 
 export async function loadUserDossier(admin: AnyClient, userId: string): Promise<string> {
   const [prof, roles, subs, songs, inflight, txs, totals] = await Promise.all([
-    admin.from("profiles").select("display_name, email, coin_balance, created_at, referral_code, telegram_username, telegram_linked_at").eq("id", userId).maybeSingle(),
+    admin.from("profiles").select("display_name, email, coin_balance, created_at, referral_code, telegram_username, telegram_linked_at, og_vip_id").eq("id", userId).maybeSingle(),
     admin.from("user_roles").select("role").eq("user_id", userId),
     admin.from("subscriptions").select("status, price_id, current_period_end, cancel_at_period_end, environment").eq("user_id", userId).eq("environment", "live").order("created_at", { ascending: false }).limit(1),
     admin.from("songs").select("id, title, style, created_at, is_public, revealed, unlocked, is_variation, lyrics").eq("user_id", userId).eq("status", "completed").order("created_at", { ascending: false }).limit(5),
@@ -47,6 +47,8 @@ export async function loadUserDossier(admin: AnyClient, userId: string): Promise
   lines.push(`- Name: ${p.display_name ?? "unknown"} · Member since ${fmtDate(p.created_at)}`);
   lines.push(`- Recovery email on file: ${p.email && !String(p.email).endsWith("@ogstreamz.app") ? "yes" : "no — suggest adding one in Profile"}`);
   lines.push(`- OG Coins balance: ${p.coin_balance ?? 0}`);
+  if (p.og_vip_id) lines.push(`- OG VIP ID (their yearly VIP verification code): ${p.og_vip_id}`);
+  lines.push("- VIP cancellation rule: cancelling any time only stops auto-renew; VIP stays active until the paid month/year ends.");
 
   // VIP
   const sub = subs.data?.[0];

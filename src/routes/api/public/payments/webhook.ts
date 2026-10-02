@@ -202,19 +202,34 @@ async function upsertSubscriptionRow(subscription: any, env: StripeEnv) {
   return userId;
 }
 
+async function assignOgVipId(userId: string, ctx: Record<string, unknown>) {
+  const supabase = await getAdminClient();
+  const { data, error } = await (supabase as any).rpc("assign_og_vip_id", { p_user: userId });
+  if (error) log("error", "OG VIP ID assign failed", { userId, err: error.message, ...ctx });
+  else log("info", "OG VIP ID ready", { userId, ogVipId: data, ...ctx });
+}
+
+function isYearlyPrice(priceId: unknown) {
+  return /year/i.test(String(priceId ?? ""));
+}
+
 async function syncVipFromSubscription(subscription: any, env: StripeEnv) {
   const userId = await upsertSubscriptionRow(subscription, env);
   if (!userId) return;
   const status = subscription?.status as string | undefined;
   const cancelAtPeriodEnd = !!subscription?.cancel_at_period_end;
-  // Active / trialing / past_due (grace) keep VIP. Per product decision:
-  // when the user requests cancellation (cancel_at_period_end=true), revoke
-  // VIP perks immediately rather than waiting for period end.
-  const keep =
-    !cancelAtPeriodEnd && (status === "active" || status === "trialing" || status === "past_due");
+  // Cancelling only turns off auto-renew: members keep VIP until the paid
+  // period ends. Stripe sends status "canceled" / subscription.deleted then.
+  const keep = status === "active" || status === "trialing" || status === "past_due";
   const ctx = { subId: subscription.id, status, cancelAtPeriodEnd, env };
-  if (keep) await grantVipRole(userId, ctx);
-  else await revokeVipRole(userId, ctx);
+  if (keep) {
+    await grantVipRole(userId, ctx);
+    const item = subscription.items?.data?.[0];
+    const priceId = item?.price?.lookup_key || item?.price?.metadata?.lovable_external_id || item?.price?.id;
+    if (isYearlyPrice(priceId) || isYearlyPrice(subscription?.metadata?.bundleId)) {
+      await assignOgVipId(userId, ctx);
+    }
+  } else await revokeVipRole(userId, ctx);
 }
 
 async function handleSubscriptionDeleted(subscription: any, env: StripeEnv) {
@@ -239,6 +254,9 @@ async function grantVipFromCheckout(session: any, env: StripeEnv) {
     return;
   }
   await grantVipRole(userId, { sessionId: session.id, env, source: "checkout" });
+  if (isYearlyPrice(session?.metadata?.bundleId)) {
+    await assignOgVipId(userId, { sessionId: session.id, env });
+  }
   await creditPaymentReferral(userId, paidAmountReward(session), `stripe:${env}:vip:${session.id}`);
 }
 
