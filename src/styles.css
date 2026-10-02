@@ -1678,16 +1678,15 @@ main:has(.boss-ui) :is(h1, h2, h3) {
   text-transform: none;
 }
 /* Solid, calm surface behind Boss pages so text never fights the wallpaper art. */
-main:has(.boss-ui) {
-  background-color: var(--background);
-}
 main:has(.boss-ui) .bg-card\/60,
 main:has(.boss-ui) .bg-card\/70,
-main:has(.boss-ui) .bg-card\/90 {
-  background-color: var(--card);
+main:has(.boss-ui) .bg-card\/90,
+main:has(.boss-ui) .bg-card {
+  background-color: oklch(from var(--card) l c h / 1);
 }
 .boss-ui {
-  background-color: var(--background);
-  box-shadow: 0 0 0 100vmax var(--background);
+  --boss-solid: oklch(from var(--card) calc(l * 0.85) c h / 1);
+  background-color: var(--boss-solid);
+  box-shadow: 0 0 0 100vmax var(--boss-solid);
   clip-path: inset(-100vmax -100vmax -100vmax -100vmax);
 }
