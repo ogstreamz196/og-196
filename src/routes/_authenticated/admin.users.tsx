@@ -1,4 +1,5 @@
 import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
+import { VipAcknowledgements } from "@/components/admin/VipAcknowledgements";
 import { useMemo, useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
