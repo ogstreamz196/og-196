@@ -204,6 +204,7 @@ function AdminUsersPage() {
       <DashboardShell title="Users">
         <div className="boss-ui mx-auto max-w-7xl space-y-5">
           <BossNav />
+          <VipAcknowledgements />
           {/* Header */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
