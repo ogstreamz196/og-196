@@ -640,6 +640,7 @@ export type Database = {
           last_page_at: string | null
           last_path: string | null
           last_sign_in_at: string | null
+          og_vip_id: string | null
           referral_code: string | null
           sign_in_count: number
           telegram_chat_id: number | null
@@ -670,6 +671,7 @@ export type Database = {
           last_page_at?: string | null
           last_path?: string | null
           last_sign_in_at?: string | null
+          og_vip_id?: string | null
           referral_code?: string | null
           sign_in_count?: number
           telegram_chat_id?: number | null
@@ -700,6 +702,7 @@ export type Database = {
           last_page_at?: string | null
           last_path?: string | null
           last_sign_in_at?: string | null
+          og_vip_id?: string | null
           referral_code?: string | null
           sign_in_count?: number
           telegram_chat_id?: number | null
@@ -1801,6 +1804,7 @@ export type Database = {
         }
         Returns: string
       }
+      assign_og_vip_id: { Args: { p_user: string }; Returns: string }
       boss_burn_coins: {
         Args: { amount: number; boss_notes?: string; target_user_id: string }
         Returns: number
