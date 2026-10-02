@@ -72,6 +72,49 @@ async function tg(method: string, body: Record<string, unknown>) {
   return payload;
 }
 
+// Boss taps "✅ Acknowledge" on a new yearly VIP DM.
+async function handleCallbackQuery(cq: {
+  id: string;
+  data?: string;
+  from?: { id?: number };
+  message?: { chat?: { id?: number }; message_id?: number; text?: string };
+}) {
+  const answer = (text: string) => tg("answerCallbackQuery", { callback_query_id: cq.id, text });
+  const m = /^vipack:([0-9a-f-]{36})$/.exec(cq.data ?? "");
+  if (!m) {
+    await answer("Unknown action");
+    return Response.json({ ok: true });
+  }
+  const admin = await loadAdmin();
+  const fromId = Number(cq.from?.id);
+  const { data: me } = await admin
+    .from("profiles")
+    .select("id")
+    .eq("telegram_chat_id", fromId)
+    .maybeSingle();
+  const { data: roles } = me
+    ? await admin.from("user_roles").select("role").eq("user_id", me.id).in("role", ["admin", "boss"])
+    : { data: [] };
+  if (!me || !roles?.length) {
+    await answer("Boss only");
+    return Response.json({ ok: true });
+  }
+  await admin
+    .from("vip_acknowledgements")
+    .update({ acknowledged_at: new Date().toISOString(), acknowledged_by: me.id })
+    .eq("user_id", m[1])
+    .is("acknowledged_at", null);
+  await answer("Added to verified OG VIPs ✅");
+  if (cq.message?.chat?.id && cq.message.message_id) {
+    await tg("editMessageReplyMarkup", {
+      chat_id: cq.message.chat.id,
+      message_id: cq.message.message_id,
+      reply_markup: { inline_keyboard: [[{ text: "✅ Acknowledged", callback_data: "noop" }]] },
+    });
+  }
+  return Response.json({ ok: true });
+}
+
 async function reply(chat_id: number, text: string, extra?: Record<string, unknown>) {
   await tg("sendMessage", {
     chat_id,
@@ -650,6 +693,9 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
         const update = await request.json().catch(() => null);
         const updateId: number | undefined =
           typeof update?.update_id === "number" ? update.update_id : undefined;
+        if (update?.callback_query) {
+          return await handleCallbackQuery(update.callback_query);
+        }
         const msg = update?.message ?? update?.edited_message;
         const chat_id: number | undefined = msg?.chat?.id;
         const text: string | undefined = msg?.text;
