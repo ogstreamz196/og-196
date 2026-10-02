@@ -205,14 +205,14 @@ function AdminUsersPage() {
         <div className="boss-ui mx-auto max-w-7xl space-y-5">
           <BossNav />
           {/* Header */}
-          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
-              <h2 className="truncate text-xl">User Management</h2>
-              <p className="truncate text-xs text-muted-foreground">
+              <h2 className="text-xl">User Management</h2>
+              <p className="text-xs text-muted-foreground">
                 Members, balances, roles and audits in one place.
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex shrink-0 items-center gap-2">
               <AdminEditModeToggle />
               <Link to="/admin">
                 <Button variant="outline" size="sm">
