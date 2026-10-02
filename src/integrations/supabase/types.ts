@@ -178,6 +178,24 @@ export type Database = {
           },
         ]
       }
+      chat_image_allowance: {
+        Row: {
+          last_free_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          last_free_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          last_free_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       coin_transactions: {
         Row: {
           amount: number
@@ -1851,6 +1869,10 @@ export type Database = {
         Args: { p_acknowledged: boolean; p_referrer: string }
         Returns: Json
       }
+      consume_chat_image_edit: {
+        Args: { p_reference: string; p_user: string }
+        Returns: Json
+      }
       create_og_bot_invite: {
         Args: {
           p_claim_expires_at?: string
@@ -1992,6 +2014,15 @@ export type Database = {
       purchase_vip: { Args: never; Returns: number }
       purchase_vip_pass_for_user: { Args: { p_user: string }; Returns: Json }
       redeem_og_bot_invite: { Args: { p_code: string }; Returns: string }
+      refund_chat_image_edit: {
+        Args: {
+          p_free: boolean
+          p_prev: string
+          p_reference: string
+          p_user: string
+        }
+        Returns: undefined
+      }
       refund_generation_charge: {
         Args: { p_amount: number; p_reference: string; p_user: string }
         Returns: number
