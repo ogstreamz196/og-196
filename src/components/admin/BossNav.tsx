@@ -33,7 +33,7 @@ export function BossNav() {
   return (
     <div className="sticky top-16 z-10 mb-6 -mx-4 md:-mx-8">
       <div className="glass-panel-strong border-y border-primary/30 px-4 py-2.5 md:px-8">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-2 text-sm">
+        <div className="mx-auto flex max-w-6xl items-center gap-2 overflow-x-auto whitespace-nowrap text-sm [scrollbar-width:none]">
           <span className="mr-1 inline-flex items-center gap-1.5 rounded-full bg-gradient-brand px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-primary-foreground shadow-glow">
             <ShieldCheck className="h-3 w-3" /> Boss
           </span>
