@@ -758,7 +758,7 @@ async function handleTelegramUpdate(
         : "🎧 No finished tracks yet — go make one!";
       const rows = list.map((s) => [
         { text: `▶️ ${(s.title || "Untitled").slice(0, 30)}`, url: `https://ogbot.co.uk/library/${s.id}` },
-        ...((s as { is_public?: boolean }).is_public
+        ...(s.is_public && s.revealed
           ? [{ text: "🔗 Share", url: `https://t.me/share/url?url=${encodeURIComponent(`https://ogbot.co.uk/track/${s.id}`)}` }]
           : []),
       ]);
