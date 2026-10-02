@@ -25,3 +25,7 @@
 ## Generation recovery
 
 - Failed music jobs use database-claimed, bounded background retries that recover an existing provider task before resubmitting the saved payload, preventing duplicate work or coin charges.
+
+## Chat image edits
+
+- Private-chat image edits charge through the service-only consume_chat_image_edit function (one free slot per rolling window, then coins) and refund on failure, so retries cannot double-charge; edits use Gemini image first, OpenAI fallback only on 429/5xx.
