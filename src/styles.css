@@ -1666,3 +1666,14 @@ button.graffiti-accent:hover {
     letter-spacing: -0.01em;
   }
 }
+
+/* Every Boss page (anything rendering BossNav) gets the clean admin font. */
+main:has(.boss-ui),
+main:has(.boss-ui) *:not(svg):not(svg *) {
+  font-family: "Roboto", "Segoe UI", system-ui, sans-serif;
+}
+main:has(.boss-ui) :is(h1, h2, h3) {
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-transform: none;
+}
