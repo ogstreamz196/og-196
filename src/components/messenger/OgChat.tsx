@@ -403,8 +403,7 @@ typeof window !== "undefined" &&
       return;
     }
 
-    // private
-    }
+    // private — free, no coin check
     const visibleText = t || (att ? `📎 ${att.name}` : "");
     const next = [...messages, { role: "user" as const, content: visibleText }];
     setMessages(next);
