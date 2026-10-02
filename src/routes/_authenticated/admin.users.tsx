@@ -326,10 +326,19 @@ function AdminUsersPage() {
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
             ) : filtered.length > 0 ? (
-              <div
-                className="-mx-px overflow-x-auto touch-pan-x touch-pan-y"
-                style={{ WebkitOverflowScrolling: "touch", overscrollBehaviorX: "contain" }}
-              >
+              <>
+              <ul className="divide-y divide-border sm:hidden">
+                {filtered.map((u) => (
+                  <MobileUserCard
+                    key={u.id}
+                    user={u}
+                    roles={rolesByUser.get(u.id) ?? []}
+                    pro={proByUser.get(u.id)}
+                    spend={spendByUser[u.id]}
+                  />
+                ))}
+              </ul>
+              <div className="hidden overflow-x-auto sm:block">
                 <div className="min-w-[640px]">
                   <Table>
                     <TableHeader>
@@ -384,6 +393,7 @@ function AdminUsersPage() {
                   </Table>
                 </div>
               </div>
+              </>
             ) : (
               <div className="grid place-items-center gap-2 py-16 text-muted-foreground">
                 <UsersIcon className="h-8 w-8" />
@@ -640,7 +650,86 @@ function UserRow({
   );
 }
 
+/* ---------- Mobile card ---------- */
+
+function MobileUserCard({
+  user,
+  roles,
+  pro,
+  spend,
+}: {
+  user: ProfileRow;
+  roles: string[];
+  pro?: ProUserRow;
+  spend?: { totalCoins: number; purchaseCount: number };
+}) {
+  const isVip = roles.includes("vip");
+  const isOgBot = roles.includes("og_bot");
+  const isAdminUser = roles.includes("admin");
+  return (
+    <li className="space-y-3 p-4">
+      <div className="flex min-w-0 items-start gap-3">
+        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-brand text-sm font-semibold text-primary-foreground">
+          {(user.display_name ?? user.email ?? "?").slice(0, 1).toUpperCase()}
+        </div>
+        <div className="min-w-0 flex-1">
+          <InlineNameEdit user={user} />
+          <p className="truncate text-xs text-muted-foreground">{user.email ?? "—"}</p>
+          <div className="mt-1.5 flex flex-wrap gap-1">
+            {isAdminUser && <RoleChip label="Admin" tone="primary" />}
+            {isVip && <RoleChip label="VIP" tone="amber" />}
+            {isOgBot && <RoleChip label="Bot" tone="primary-soft" />}
+            {!isAdminUser && !isVip && !isOgBot && <RoleChip label="User" tone="muted" />}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2 text-center">
+        <div className="rounded-lg border border-border bg-background/40 px-2 py-1.5">
+          <p className="text-[10px] uppercase text-muted-foreground">Balance</p>
+          <p className="font-mono text-sm font-bold tabular-nums text-coin">
+            {(user.coin_balance ?? 0).toLocaleString()}
+          </p>
+        </div>
+        <div className="rounded-lg border border-border bg-background/40 px-2 py-1.5">
+          <p className="text-[10px] uppercase text-muted-foreground">Spent</p>
+          <p className="font-mono text-sm font-bold tabular-nums text-amber-300">
+            {(spend?.totalCoins ?? 0).toLocaleString()}
+          </p>
+        </div>
+        <div className="rounded-lg border border-border bg-background/40 px-2 py-1.5">
+          <p className="text-[10px] uppercase text-muted-foreground">Joined</p>
+          <p className="text-xs font-semibold">{new Date(user.created_at).toLocaleDateString()}</p>
+        </div>
+      </div>
+
+      {pro && (pro.last_sign_in_at || pro.telegram_chat_id) && (
+        <p className="text-[11px] text-muted-foreground">
+          {pro.last_sign_in_at
+            ? `Last sign-in ${new Date(pro.last_sign_in_at).toLocaleDateString()}${pro.sign_in_count ? ` · ${pro.sign_in_count} total` : ""}`
+            : ""}
+          {pro.telegram_chat_id ? " · Telegram linked" : " · No Telegram"}
+        </p>
+      )}
+
+      <div className="flex items-center justify-between gap-2 border-t border-border pt-3">
+        <VipQuickToggle userId={user.id} checked={isVip} />
+        <div className="flex items-center gap-1">
+          <CoinsPopover userId={user.id} balance={user.coin_balance ?? 0} />
+          <EditUserPopover user={user} roles={roles} />
+          <Link to="/admin/users/$userId" params={{ userId: user.id }}>
+            <Button size="sm" variant="outline" className="h-8">
+              Open <ExternalLink className="ml-1 h-3.5 w-3.5" />
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </li>
+  );
+}
+
 /* ---------- Inline actions ---------- */
+
 
 function VipQuickToggle({ userId, checked }: { userId: string; checked: boolean }) {
   const qc = useQueryClient();
