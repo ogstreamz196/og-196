@@ -57,7 +57,7 @@ export const editChatImage = createServerFn({ method: "POST" })
       await supabase.rpc("refund_chat_image_edit", {
         p_user: context.userId,
         p_free: c.free,
-        p_prev: c.prev_free_at,
+        p_prev: (c.prev_free_at ?? null) as string,
         p_reference: ref,
       });
       const s = e instanceof ImageEditError ? e.status : 500;
