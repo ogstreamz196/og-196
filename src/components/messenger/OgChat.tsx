@@ -404,8 +404,6 @@ typeof window !== "undefined" &&
     }
 
     // private
-    if ((profile?.coin_balance ?? 0) <= 0) {
-      return toast.error("Out of OG coins — resets to 5 tomorrow, or top up to keep going.");
     }
     const visibleText = t || (att ? `📎 ${att.name}` : "");
     const next = [...messages, { role: "user" as const, content: visibleText }];
@@ -522,7 +520,7 @@ typeof window !== "undefined" &&
   }
 
   const balance = profile?.coin_balance ?? 0;
-  const isOut = balance <= 0;
+  const isOut = false;
   const foulActive = foulMouth;
   const mode = foulMouth ? "og" : "safe";
 
@@ -676,7 +674,7 @@ typeof window !== "undefined" &&
                     Message <span className="text-gradient-brand">OG Bot</span>
                   </h2>
                   <p className="text-xs text-muted-foreground sm:text-base">
-                    Ask anything. Replies cost 1 coin.
+                    Ask anything. Private chat is free.
                   </p>
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary/80">
                     {balance} coins left
