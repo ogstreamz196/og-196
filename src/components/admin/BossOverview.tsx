@@ -42,16 +42,16 @@ export function BossKpiStrip() {
 
   const d = kpis.data;
   const cards = [
-    { label: "New users · 24h", value: d?.signups, Icon: UserPlus, tone: "text-primary" },
+    { label: "New today", value: d?.signups, Icon: UserPlus, tone: "text-primary" },
     {
-      label: "Tracks made · 24h",
+      label: "Tracks today",
       value: d?.tracks,
       Icon: Music2,
       tone: "text-primary",
       sub: d && d.failed > 0 ? `${d.failed} failed` : undefined,
     },
-    { label: "Coins in circulation", value: d?.coins, Icon: Coins, tone: "text-coin" },
-    { label: "VIP members", value: d?.vips, Icon: Crown, tone: "text-coin" },
+    { label: "Coins held", value: d?.coins, Icon: Coins, tone: "text-coin" },
+    { label: "VIPs", value: d?.vips, Icon: Crown, tone: "text-coin" },
   ];
 
   return (

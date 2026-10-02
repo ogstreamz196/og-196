@@ -58,7 +58,7 @@ function AdminPanel() {
   return (
     <DashboardShell title="Admin Controls">
       <BossNav />
-      <div className="mx-auto max-w-6xl space-y-5">
+      <div className="mx-auto mt-4 max-w-6xl space-y-5">
         <header>
           <h1 className="font-display text-2xl font-black">Boss Control Center</h1>
           <p className="text-sm text-muted-foreground">Live pulse, music, coins, bot and system.</p>

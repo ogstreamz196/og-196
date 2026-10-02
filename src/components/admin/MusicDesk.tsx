@@ -227,7 +227,7 @@ export function MusicDesk() {
                     <span className="truncate font-semibold">{s.title || "Untitled"}</span>
                     <StatusPill status={s.status} />
                     {s.unlocked && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                      <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary">
                         <Unlock className="h-3 w-3" /> Unlocked
                       </span>
                     )}
