@@ -753,17 +753,18 @@ function VipQuickToggle({ userId, checked }: { userId: string; checked: boolean 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <div className="flex h-8 items-center rounded-md border border-border bg-background/40 px-2">
+        <label className="flex h-9 cursor-pointer items-center gap-2 rounded-md border border-border bg-background/40 px-2.5 text-sm">
           <Crown
-            className={`mr-1.5 h-3.5 w-3.5 ${checked ? "text-amber-500" : "text-muted-foreground"}`}
+            className={`h-4 w-4 ${checked ? "text-amber-500" : "text-muted-foreground"}`}
           />
+          <span className={checked ? "text-amber-400" : "text-muted-foreground"}>VIP</span>
           <Switch
             checked={checked}
             disabled={mut.isPending}
             onCheckedChange={(v) => mut.mutate(v)}
             aria-label="Toggle VIP"
-            className="scale-75"
           />
+        </label>
         </div>
       </TooltipTrigger>
       <TooltipContent>{checked ? "Revoke VIP" : "Grant VIP"}</TooltipContent>
