@@ -314,7 +314,7 @@ export const createCustomCoinCheckoutSession = createServerFn({ method: "POST" }
 type ReconcileResult =
   | { status: "credited"; coins: number; balance: number }
   | { status: "already_credited"; coins: number; balance: number }
-  | { status: "vip_granted" }
+  | { status: "vip_granted"; ogVipId?: string | null }
   | { status: "pending"; reason: string }
   | { error: string };
 
@@ -354,7 +354,15 @@ export const reconcileCoinSession = createServerFn({ method: "POST" })
           .from("user_roles")
           .upsert({ user_id: userId, role: "vip" }, { onConflict: "user_id,role" });
         if (error) return { error: error.message };
-        return { status: "vip_granted" };
+        let ogVipId: string | null = null;
+        if (/year/i.test(bundleId)) {
+          const { data: id, error: idErr } = await (supabaseAdmin as any).rpc("assign_og_vip_id", {
+            p_user: userId,
+          });
+          if (idErr) console.error("assign_og_vip_id failed", idErr);
+          else ogVipId = (id as string | null) ?? null;
+        }
+        return { status: "vip_granted", ogVipId };
       }
 
       const metaCoins = meta.coins ? Number(meta.coins) : 0;

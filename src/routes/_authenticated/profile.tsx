@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { OgVipIdCard } from "@/components/vip/OgVipIdCard";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -96,7 +97,7 @@ function ProfilePage() {
       const [p, songs] = await Promise.all([
         supabase
           .from("profiles")
-          .select("referral_code, telegram_username, telegram_linked_at, created_at")
+          .select("referral_code, telegram_username, telegram_linked_at, created_at, og_vip_id")
           .eq("id", user!.id)
           .maybeSingle(),
         supabase
@@ -110,6 +111,7 @@ function ProfilePage() {
         telegram_username?: string | null;
         telegram_linked_at?: string | null;
         created_at?: string;
+        og_vip_id?: string | null;
         trackCount: number;
       };
     },
@@ -247,6 +249,8 @@ function ProfilePage() {
             </Button>
           </div>
         </section>
+
+        {extras.data?.og_vip_id && <OgVipIdCard id={extras.data.og_vip_id} />}
 
         <TelegramConnectCard />
 

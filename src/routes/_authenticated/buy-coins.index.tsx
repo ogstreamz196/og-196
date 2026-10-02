@@ -340,6 +340,19 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                   </div>
                 </div>
 
+                {isVipFlow && (
+                  <div className="mt-4 rounded-2xl border-2 border-coin/50 bg-coin/10 p-4 text-sm">
+                    <p className="flex items-center gap-2 font-bold text-coin">
+                      <ShieldCheck className="h-4 w-4" /> Cancel anytime
+                    </p>
+                    <p className="mt-1 text-foreground/90">
+                      {vipYearly
+                        ? `Cancel whenever you like. You'll still keep VIP and every perk until your full year is up (${new Date(Date.now() + 365 * 864e5).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}). Renews yearly unless cancelled. You'll also get your own OG VIP ID.`
+                        : "Cancel whenever you like. You'll keep VIP until the end of the month you've paid for. Renews monthly unless cancelled."}
+                    </p>
+                  </div>
+                )}
+
                 {/* Next steps — clear what happens next */}
                 <p className="mt-5 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                   What happens next
