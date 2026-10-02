@@ -290,7 +290,40 @@ export const postCommunityMessage = createServerFn({ method: "POST" })
       const useFoul = data.foulMouth !== false;
       const lex = await import("@/lib/battle-lexicon.server");
       void lex.learnBattleWords(supabaseAdmin as never, data.content);
-      const slang = useFoul ? await lex.learnedSlangBlock(supabaseAdmin as never) : "";
+      let slang = useFoul ? await lex.learnedSlangBlock(supabaseAdmin as never) : "";
+      // Personal memory: remember this player's own insults + battle record.
+      try {
+        const { extractInsults } = await import("@/lib/insult-learner.server");
+        for (const phrase of extractInsults(data.content)) {
+          void supabaseAdmin.rpc("og_learn_insult", { p_user_id: context.userId, p_phrase: phrase });
+        }
+        const [{ data: mine }, { data: rec }] = await Promise.all([
+          supabaseAdmin
+            .from("og_learned_insults")
+            .select("phrase")
+            .eq("user_id", context.userId)
+            .order("uses", { ascending: false })
+            .limit(12),
+          supabaseAdmin
+            .from("battle_tallies")
+            .select("rounds, streak_days, total_awarded_coins")
+            .eq("user_id", context.userId)
+            .maybeSingle(),
+        ]);
+        const lines: string[] = [];
+        if (rec?.rounds)
+          lines.push(
+            `${displayName} has fought ${rec.rounds} rounds, ${rec.streak_days ?? 0}-day streak, won ${rec.total_awarded_coins ?? 0} coins off you. Use it — veteran = respect-roast, rookie = fresh meat.`,
+          );
+        const phrases = (mine ?? []).map((r) => r.phrase).filter(Boolean);
+        if (phrases.length && useFoul)
+          lines.push(
+            `${displayName}'s signature insults (they've thrown these before — at most one per reply, flip it back on them to show you remember): ${phrases.join("; ")}`,
+          );
+        if (lines.length) slang += `\n\nPLAYER MEMORY:\n${lines.join("\n")}`;
+      } catch (e) {
+        console.warn("battle memory failed", (e as Error).message);
+      }
       try {
         const { response: res } = await fetchAiChat(
           {
