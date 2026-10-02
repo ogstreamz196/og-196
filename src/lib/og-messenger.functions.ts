@@ -100,9 +100,6 @@ export const chatOgBot = createServerFn({ method: "POST" })
     if (!rawProfile) throw new Error("Profile not found");
     const { maskDevIdentity } = await import("@/lib/dev-identity");
     const profile = maskDevIdentity(rawProfile)!;
-    if ((profile.coin_balance ?? 0) <= 0) {
-      throw new Error("Out of OG coins. Top up from Buy OG Coins or grab VIP to keep chatting.");
-    }
 
     const roles = (rolesRes.data ?? []).map((r) => r.role);
     const personaMap = new Map<string, string>(
@@ -185,18 +182,8 @@ export const chatOgBot = createServerFn({ method: "POST" })
       }
     }
 
-    // 2. Deduct 1 coin atomically BEFORE the AI call to avoid double-spend on retry.
-    const { data: newBalance, error: deductErr } = await supabaseAdmin.rpc("deduct_coins", {
-      p_user: context.userId,
-      p_amount: 1,
-      p_reference: "og_messenger_chat",
-    });
-    if (deductErr) {
-      if (/insufficient_coins/i.test(deductErr.message)) {
-        throw new Error("Out of OG coins. Top up to keep chatting.");
-      }
-      throw new Error(deductErr.message);
-    }
+    // 2. Private mode is free — no coins are charged.
+    const newBalance: number | null = profile.coin_balance ?? 0;
 
     // 3. Use Perplexity only when the message clearly needs current web facts.
     const outgoing = [...data.messages];
@@ -242,11 +229,11 @@ export const chatOgBot = createServerFn({ method: "POST" })
       if (!res.ok) {
         const text = await res.text().catch(() => "");
         console.error(`${provider} API error`, res.status, text);
-        if (res.status === 429) throw new Error("OG Bot is rate-limited, try again soon.");
-        if (res.status === 402)
-          throw new Error(
-            `${provider === "gemini" ? "Gemini" : "ChatGPT"} account quota is exhausted.`,
-          );
+        if (res.status === 429 || res.status === 402) {
+          if (/quota|credit|billing/i.test(text))
+            throw new Error("OG Bot is taking a break right now — please try again later.");
+          throw new Error("OG Bot is rate-limited, try again soon.");
+        }
         throw new Error(`OG Bot couldn't respond right now (HTTP ${res.status})`);
       }
 
@@ -257,20 +244,10 @@ export const chatOgBot = createServerFn({ method: "POST" })
 
       return {
         reply,
-        coin_balance: (newBalance as number | null) ?? userCtx.coin_balance - 1,
+        coin_balance: newBalance ?? userCtx.coin_balance,
         learned_insults: newlyLearned,
       };
     } catch (err) {
-      // Refund the coin on hard AI failure so the user isn't charged for nothing.
-      try {
-        await supabaseAdmin.rpc("mint_coins_admin", {
-          target_user_id: context.userId,
-          amount: 1,
-          admin_notes: "og_messenger_chat_refund",
-        });
-      } catch {
-        // best-effort refund; do not mask the original failure
-      }
       throw err;
     }
   });
