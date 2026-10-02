@@ -27,6 +27,8 @@ import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TelegramConnectCard } from "@/components/profile/TelegramConnectCard";
 
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({
@@ -240,11 +242,25 @@ function ProfilePage() {
             <Button asChild className="flex-1">
               <Link to="/store">Top up coins</Link>
             </Button>
+            <Button asChild variant="outline" className="flex-1">
+              <Link to="/library">My tracks</Link>
+            </Button>
           </div>
         </section>
 
+        <TelegramConnectCard />
+
+        <Tabs defaultValue="account" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="account">Account</TabsTrigger>
+            <TabsTrigger value="coins">Coins</TabsTrigger>
+            <TabsTrigger value="security">Security</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="account" className="space-y-5">
         {/* Username */}
         <Card icon={<UserRound className="h-5 w-5" />} title="Username" hint="Shown on your tracks and in chat.">
+
           <form
             className="flex gap-2"
             onSubmit={(e: FormEvent) => {
@@ -311,8 +327,30 @@ function ProfilePage() {
           </form>
         </Card>
 
+        {referralLink && (
+          <Card icon={<Copy className="h-5 w-5" />} title="Invite friends" hint="Earn coins when friends join.">
+            <div className="flex gap-2">
+              <Input readOnly value={referralLink} aria-label="Invite link" />
+              <Button
+                variant="outline"
+                size="icon"
+                aria-label="Copy invite link"
+                onClick={() => {
+                  navigator.clipboard.writeText(referralLink);
+                  toast.success("Invite link copied");
+                }}
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+          </Card>
+        )}
+          </TabsContent>
+
+          <TabsContent value="coins" className="space-y-5">
         {/* Coin activity */}
         <Card icon={<Coins className="h-5 w-5 text-coin" />} title="Coin activity" hint="Where your coins came from and went.">
+
           <div className="grid grid-cols-2 gap-2">
             <div className="rounded-xl border border-border bg-background/40 p-3">
               <p className="text-[11px] uppercase text-muted-foreground">Earned & bought</p>
@@ -380,42 +418,9 @@ function ProfilePage() {
             </Button>
           )}
         </Card>
+          </TabsContent>
 
-        {/* Connections */}
-        <Card icon={<Send className="h-5 w-5" />} title="Connections & sharing">
-          <div className="flex items-center justify-between gap-2 text-sm">
-            <span>Telegram</span>
-            {extras.data?.telegram_linked_at ? (
-              <span className="text-emerald-400">
-                Linked{extras.data.telegram_username ? ` · @${extras.data.telegram_username}` : ""}
-              </span>
-            ) : (
-              <Link to="/settings" className="font-medium text-primary underline">
-                Connect
-              </Link>
-            )}
-          </div>
-          {referralLink && (
-            <div className="space-y-1">
-              <p className="text-sm">Your invite link — earn coins when friends join</p>
-              <div className="flex gap-2">
-                <Input readOnly value={referralLink} aria-label="Invite link" />
-                <Button
-                  variant="outline"
-                  size="icon"
-                  aria-label="Copy invite link"
-                  onClick={() => {
-                    navigator.clipboard.writeText(referralLink);
-                    toast.success("Invite link copied");
-                  }}
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          )}
-        </Card>
-
+          <TabsContent value="security" className="space-y-5">
         {/* Security */}
         <Card icon={<KeyRound className="h-5 w-5" />} title="Account & security">
           <div className="grid gap-2 sm:grid-cols-2">
@@ -437,6 +442,8 @@ function ProfilePage() {
             </Button>
           </div>
         </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </DashboardShell>
   );

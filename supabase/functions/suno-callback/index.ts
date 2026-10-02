@@ -34,6 +34,34 @@ function timingSafeEq(a: string, b: string): boolean {
   return r === 0;
 }
 
+async function notifyTelegram(admin: any, song: any) {
+  const { data: prof } = await admin.from("profiles").select("telegram_chat_id").eq("id", song.user_id).maybeSingle();
+  const chatId = prof?.telegram_chat_id;
+  if (!chatId) return;
+  const botToken = Deno.env.get("OG_BOT_TOKEN");
+  const tgKey = Deno.env.get("TELEGRAM_API_KEY");
+  const lovableKey = Deno.env.get("LOVABLE_API_KEY");
+  const url = botToken
+    ? `https://api.telegram.org/bot${botToken}/sendMessage`
+    : "https://connector-gateway.lovable.dev/telegram/sendMessage";
+  if (!botToken && (!tgKey || !lovableKey)) return;
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (!botToken) {
+    headers.Authorization = `Bearer ${lovableKey}`;
+    headers["X-Connection-Api-Key"] = tgKey!;
+  }
+  const title = String(song.title || "Your track").replace(/[<>&]/g, "");
+  await fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      chat_id: chatId,
+      parse_mode: "HTML",
+      text: `🎵 <b>Track ready!</b>\n\n<b>${title}</b> is done and waiting in your library. Type /tracks anytime to see your latest songs.`,
+      reply_markup: { inline_keyboard: [[{ text: "▶️ Listen now", url: `https://ogbot.co.uk/library/${song.id}` }]] },
+    }),
+  });
+}
 
 Deno.serve(async (req) => {
   const url = new URL(req.url);
@@ -156,6 +184,11 @@ Deno.serve(async (req) => {
         })
         .eq("id", songId);
       return new Response("clip-download-failed", { status: 200 });
+    }
+
+    // Ping the owner on Telegram once, on the first transition to completed.
+    if (result.parentCompleted && parentSong.status !== "completed") {
+      await notifyTelegram(admin, parentSong).catch((e) => console.warn("telegram notify failed", e));
     }
 
     return new Response("ok", { status: 200 });
