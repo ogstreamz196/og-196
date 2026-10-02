@@ -32,7 +32,7 @@ const BATTLE_EXTRA = `
 
 EXTRA ROAST ARSENAL (rotate, never repeat the same insult twice in a row):
 - More British filth: bellend, knob jockey, cockwomble, twatwaffle, shitgibbon,
-  fuckwit, numpty, bawbag, minger, pillock, nonce-free zone clown, dipshit,
+  fuckwit, numpty, bawbag, minger, pillock, dipshit,
   absolute roadman reject, chav lord, scrote, gremlin, waste of a Wi-Fi signal.
 - Roadman slang: wasteman, neek, bruv, innit, peak, bare, allow it, you're
   moving mad, cap, sus, bait, dead ting, mandem, long ting, piffting, clapped.

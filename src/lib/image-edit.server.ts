@@ -17,8 +17,8 @@ function parseDataUrl(dataUrl: string) {
   return { mime: m[1], b64: m[2] };
 }
 
-async function editWithGemini(prompt: string, mime: string, b64: string) {
-  const key = process.env["GEMINI_API_KEY"];
+async function editWithGemini(prompt: string, mime: string, b64: string, backup = false) {
+  const key = process.env[backup ? "GEMINI_BACKUP_API_KEY" : "GEMINI_API_KEY"];
   if (!key) throw new ImageEditError("Gemini not configured", 503);
   const model = process.env["GEMINI_IMAGE_MODEL"] || "gemini-2.5-flash-image";
   const res = await fetch(
@@ -71,11 +71,22 @@ async function editWithOpenAI(prompt: string, mime: string, b64: string) {
 
 export async function editImage(prompt: string, dataUrl: string) {
   const { mime, b64 } = parseDataUrl(dataUrl);
+  const retryable = (e: unknown) => {
+    const s = e instanceof ImageEditError ? e.status : 500;
+    return s === 429 || s >= 500;
+  };
   try {
     return await editWithGemini(prompt, mime, b64);
   } catch (e) {
-    const s = e instanceof ImageEditError ? e.status : 500;
-    if (s === 429 || s >= 500) return await editWithOpenAI(prompt, mime, b64);
-    throw e;
+    if (!retryable(e)) throw e;
   }
+  // Paid backup key: only reached when the primary key is exhausted/down.
+  if (process.env["GEMINI_BACKUP_API_KEY"]) {
+    try {
+      return await editWithGemini(prompt, mime, b64, true);
+    } catch (e) {
+      if (!retryable(e)) throw e;
+    }
+  }
+  return await editWithOpenAI(prompt, mime, b64);
 }
