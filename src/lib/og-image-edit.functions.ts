@@ -54,7 +54,7 @@ export const editChatImage = createServerFn({ method: "POST" })
       if (signed.error || !signed.data) throw new Error("sign failed");
       return { ok: true as const, url: signed.data.signedUrl, free: c.free, cost: c.cost };
     } catch (e) {
-      await rpc("refund_chat_image_edit", {
+      await supabase.rpc("refund_chat_image_edit", {
         p_user: context.userId,
         p_free: c.free,
         p_prev: c.prev_free_at,
