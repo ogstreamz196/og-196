@@ -9,13 +9,13 @@ interface Props {
   defaultOpen?: boolean;
   subtitle?: ReactNode;
   className?: string;
+  /** Sections sharing a group close each other when opened. */
+  group?: string;
   children: ReactNode;
 }
 
 /**
- * Lightweight collapsible wrapper used to make every Admin Console panel
- * expandable/collapsible. Persists the open/closed state per `storageKey`
- * so the dashboard remembers each section between visits.
+ * Collapsible admin panel. Opening one closes the others in the same group.
  */
 export function AdminCollapsible({
   title,
@@ -23,6 +23,7 @@ export function AdminCollapsible({
   defaultOpen = false,
   subtitle,
   className,
+  group = "default",
   children,
 }: Props) {
   const key = `admin-collapsible:${storageKey}`;
@@ -53,10 +54,10 @@ export function AdminCollapsible({
       const detail = (e as CustomEvent<{ open: boolean }>).detail;
       if (detail && typeof detail.open === "boolean") setOpen(detail.open);
     };
-    // Accordion: opening one section collapses the others.
+    // Accordion: opening one section collapses the others in the same group.
     const exclusive = (e: Event) => {
-      const detail = (e as CustomEvent<{ key: string }>).detail;
-      if (detail?.key && detail.key !== key) setOpen(false);
+      const detail = (e as CustomEvent<{ key: string; group: string }>).detail;
+      if (detail?.key && detail.key !== key && detail.group === group) setOpen(false);
     };
     window.addEventListener("admin-collapsible:set-all", handler);
     window.addEventListener("admin-collapsible:opened", exclusive);
@@ -64,13 +65,15 @@ export function AdminCollapsible({
       window.removeEventListener("admin-collapsible:set-all", handler);
       window.removeEventListener("admin-collapsible:opened", exclusive);
     };
-  }, [key]);
+  }, [key, group]);
 
   function toggle() {
     setOpen((v) => {
       const next = !v;
       if (next) {
-        window.dispatchEvent(new CustomEvent("admin-collapsible:opened", { detail: { key } }));
+        window.dispatchEvent(
+          new CustomEvent("admin-collapsible:opened", { detail: { key, group } }),
+        );
       }
       return next;
     });
@@ -79,7 +82,7 @@ export function AdminCollapsible({
   return (
     <section
       className={cn(
-        "mb-4 overflow-hidden rounded-2xl border border-border bg-card/60 shadow-card",
+        "mb-3 overflow-hidden rounded-xl border border-border bg-card/60 shadow-card",
         className,
       )}
     >
@@ -89,9 +92,11 @@ export function AdminCollapsible({
         aria-expanded={open}
         className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition hover:bg-muted/40"
       >
-        <div className="min-w-0">
-          <div className="truncate font-semibold leading-tight">{title}</div>
-          {subtitle && <div className="truncate text-xs text-muted-foreground">{subtitle}</div>}
+        <div className="min-w-0 flex-1">
+          <div className="break-words font-semibold leading-snug">{title}</div>
+          {subtitle && (
+            <div className="break-words text-xs leading-snug text-muted-foreground">{subtitle}</div>
+          )}
         </div>
         <ChevronDown
           className={cn(
@@ -100,16 +105,11 @@ export function AdminCollapsible({
           )}
         />
       </button>
-      <div
-        className={cn(
-          "grid transition-all duration-300 ease-out",
-          open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
-        )}
-      >
-        <div className="overflow-hidden">
-          <div className="border-t border-border/60 p-2 sm:p-3">{children}</div>
+      {open && (
+        <div className="min-w-0 overflow-x-auto border-t border-border/60 p-2 sm:p-3">
+          {children}
         </div>
-      </div>
+      )}
     </section>
   );
 }
