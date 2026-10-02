@@ -314,7 +314,7 @@ export const createCustomCoinCheckoutSession = createServerFn({ method: "POST" }
 type ReconcileResult =
   | { status: "credited"; coins: number; balance: number }
   | { status: "already_credited"; coins: number; balance: number }
-  | { status: "vip_granted" }
+  | { status: "vip_granted"; ogVipId?: string | null }
   | { status: "pending"; reason: string }
   | { error: string };
 
