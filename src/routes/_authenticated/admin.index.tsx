@@ -1,9 +1,8 @@
-import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
+import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, RefreshCw, Lock, Unlock, Music2, Save, Coins } from "lucide-react";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
+import { Activity, Bot, Coins, Loader2, Music2, Save, Settings2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { maskDevIdentity } from "@/lib/dev-identity";
 import { useRole } from "@/hooks/use-role";
 import { useSettings } from "@/hooks/use-settings";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
@@ -12,30 +11,21 @@ import { MintCoinsPanel } from "@/components/admin/MintCoinsPanel";
 import { OgCoinsPanel } from "@/components/admin/OgCoinsPanel";
 import { BossAuditLog } from "@/components/admin/BossAuditLog";
 import { BossNav } from "@/components/admin/BossNav";
-
 import { HardwiredCapabilities } from "@/components/admin/HardwiredCapabilities";
 import { AppToggles } from "@/components/admin/AppToggles";
 import { OgBotPing } from "@/components/admin/OgBotPing";
 import { TelegramWebhookStatus } from "@/components/admin/TelegramWebhookStatus";
 import { BossNotificationsPanel } from "@/components/admin/BossNotificationsPanel";
-import { FlameHeading } from "@/components/ui/flame-heading";
 import { TelegramSmokeTest } from "@/components/admin/TelegramSmokeTest";
 import { E2ESmokeTest } from "@/components/admin/E2ESmokeTest";
 import { FoulMouthSmokeTest } from "@/components/admin/FoulMouthSmokeTest";
-
 import { AdminCollapsible } from "@/components/admin/AdminCollapsible";
-import { AdminEditableLabel, AdminEditableBalance } from "@/components/admin/AdminEditMode";
+import { BossKpiStrip, ProviderPulse } from "@/components/admin/BossOverview";
+import { MusicDesk } from "@/components/admin/MusicDesk";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -43,103 +33,16 @@ export const Route = createFileRoute("/_authenticated/admin/")({
   component: AdminPanel,
 });
 
-interface AdminSong {
-  id: string;
-  user_id: string;
-  title: string | null;
-  prompt: string;
-  status: string;
-  unlocked: boolean;
-  error_message: string | null;
-  created_at: string;
-}
+const TABS = [
+  { value: "music", label: "Music desk", Icon: Music2 },
+  { value: "economy", label: "Coins & pricing", Icon: Coins },
+  { value: "bot", label: "Bot & Telegram", Icon: Bot },
+  { value: "system", label: "App & diagnostics", Icon: Settings2 },
+  { value: "activity", label: "Audit log", Icon: Activity },
+] as const;
 
 function AdminPanel() {
   const { isAdmin, isLoading: roleLoading } = useRole();
-  const qc = useQueryClient();
-
-  const songsQuery = useQuery({
-    queryKey: ["admin-songs"],
-    enabled: isAdmin,
-    queryFn: async (): Promise<
-      (AdminSong & { email: string | null; display_name: string | null; coin_balance: number })[]
-    > => {
-      const { data: songs, error } = await supabase
-        .from("songs")
-        .select("id, user_id, title, prompt, status, unlocked, error_message, created_at")
-        .order("created_at", { ascending: false })
-        .limit(100);
-      if (error) throw error;
-      const list = (songs ?? []) as AdminSong[];
-      const userIds = Array.from(new Set(list.map((s) => s.user_id)));
-      let map = new Map<
-        string,
-        { email: string | null; display_name: string | null; coin_balance: number }
-      >();
-      if (userIds.length) {
-        const { data: profs } = await supabase
-          .from("profiles")
-          .select("id, email, display_name, coin_balance")
-          .in("id", userIds);
-        map = new Map(
-          (profs ?? []).map((p: any) => {
-            const m = maskDevIdentity({ email: p.email, display_name: p.display_name });
-            return [
-              p.id,
-              { email: m.email, display_name: m.display_name, coin_balance: p.coin_balance },
-            ];
-          }),
-        );
-      }
-      return list.map((s) => ({
-        ...s,
-        email: map.get(s.user_id)?.email ?? null,
-        display_name: map.get(s.user_id)?.display_name ?? null,
-        coin_balance: map.get(s.user_id)?.coin_balance ?? 0,
-      }));
-    },
-  });
-
-  useEffect(() => {
-    if (!isAdmin) return;
-    const channel = supabase
-      .channel("admin-songs-feed")
-      .on("postgres_changes", { event: "*", schema: "public", table: "songs" }, () =>
-        songsQuery.refetch(),
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAdmin]);
-
-  const toggleUnlock = useMutation({
-    mutationFn: async ({ id, unlocked }: { id: string; unlocked: boolean }) => {
-      const { error } = await supabase.from("songs").update({ unlocked }).eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin-songs"] });
-      toast.success("Song updated");
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const reprocess = useMutation({
-    mutationFn: async (id: string) => {
-      const { data, error } = await supabase.functions.invoke("admin-reprocess", {
-        body: { song_id: id },
-      });
-      if (error) throw new Error(error.message);
-      if (data?.error) throw new Error(data.error);
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin-songs"] });
-      toast.success("Reprocessing started");
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
 
   if (roleLoading) {
     return (
@@ -155,300 +58,100 @@ function AdminPanel() {
   return (
     <DashboardShell title="Admin Controls">
       <BossNav />
-      <div className="mx-auto max-w-6xl space-y-8 rounded-3xl border border-border/60 bg-background/95 p-4 backdrop-blur-xl sm:p-6">
-        {/* Expand/collapse master controls */}
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-            Sections
-          </h2>
-          <div className="flex gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() =>
-                window.dispatchEvent(
-                  new CustomEvent("admin-collapsible:set-all", { detail: { open: true } }),
-                )
-              }
-            >
-              Expand all
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() =>
-                window.dispatchEvent(
-                  new CustomEvent("admin-collapsible:set-all", { detail: { open: false } }),
-                )
-              }
-            >
-              Collapse all
-            </Button>
-          </div>
-        </div>
+      <div className="mx-auto mt-4 max-w-6xl space-y-5">
+        <header>
+          <h1 className="font-display text-2xl font-black">Boss Control Center</h1>
+          <p className="text-sm text-muted-foreground">Live pulse, music, coins, bot and system.</p>
+        </header>
 
-        {/* Group: Coins & Pricing */}
-        <section className="space-y-3">
-          <FlameHeading as="h3" size="md">
-            Coins & Pricing
-          </FlameHeading>
-          <AdminCollapsible
-            storageKey="og-coins"
-            title="OG Coins"
-            subtitle="Boss coin operations"
-            defaultOpen
-          >
-            <OgCoinsPanel />
-          </AdminCollapsible>
-          <AdminCollapsible
-            storageKey="mint-coins"
-            title="Mint coins"
-            subtitle="Grant or deduct user balance"
-          >
-            <MintCoinsPanel />
-          </AdminCollapsible>
-          <AdminCollapsible
-            storageKey="pricing"
-            title="Pricing & limits"
-            subtitle="Generation, unlock and signup costs"
-          >
-            <PricingControls />
-          </AdminCollapsible>
-        </section>
+        <BossKpiStrip />
+        <ProviderPulse />
 
-        {/* Group: App Configuration */}
-        <section className="space-y-3">
-          <FlameHeading as="h3" size="md">
-            App Configuration
-          </FlameHeading>
-          <AdminCollapsible
-            storageKey="app-toggles"
-            title="App toggles"
-            subtitle="Global feature flags"
-          >
-            <AppToggles />
-          </AdminCollapsible>
-          <AdminCollapsible
-            storageKey="portals"
-            title="Portals"
-            subtitle="Manage portal definitions"
-          >
-            <PortalManager />
-          </AdminCollapsible>
-          <AdminCollapsible
-            storageKey="capabilities"
-            title="Hardwired capabilities"
-            subtitle="Connector & runtime status"
-          >
-            <HardwiredCapabilities />
-          </AdminCollapsible>
-        </section>
+        <Tabs defaultValue="music" className="w-full">
+          <TabsList className="mb-5 flex h-auto w-full justify-start gap-1 overflow-x-auto rounded-2xl border border-border bg-card/70 p-1">
+            {TABS.map(({ value, label, Icon }) => (
+              <TabsTrigger
+                key={value}
+                value={value}
+                className="flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold sm:text-sm data-[state=active]:bg-primary/20 data-[state=active]:text-primary"
+              >
+                <Icon className="h-4 w-4" />
+                {label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-        {/* Group: Telegram — everything OG Bot / Telegram-related in one place */}
-        <section className="space-y-3">
-          <FlameHeading as="h3" size="md">
-            Telegram
-          </FlameHeading>
-          <AdminCollapsible
-            storageKey="og-bot-ping"
-            title="OG Bot ping"
-            subtitle="Verify OG Bot connectivity"
-          >
-            <OgBotPing />
-          </AdminCollapsible>
-          <AdminCollapsible
-            storageKey="telegram-webhook"
-            title="Telegram webhook"
-            subtitle="Live delivery status"
-          >
-            <TelegramWebhookStatus />
-          </AdminCollapsible>
-          <AdminCollapsible
-            storageKey="telegram-smoke"
-            title="Telegram smoke test"
-            subtitle="getMe + webhook check"
-          >
-            <TelegramSmokeTest />
-          </AdminCollapsible>
-          <AdminCollapsible
-            storageKey="boss-notifs"
-            title="Boss DM notifications"
-            subtitle="Telegram DM preferences"
-          >
-            <BossNotificationsPanel />
-          </AdminCollapsible>
-        </section>
+          <TabsContent value="music" className="mt-0">
+            <MusicDesk />
+          </TabsContent>
 
-        {/* Group: Diagnostics — non-Telegram smoke tests only */}
-        <section className="space-y-3">
-          <FlameHeading as="h3" size="md">
-            Diagnostics
-          </FlameHeading>
-          <AdminCollapsible
-            storageKey="e2e-smoke"
-            title="End-to-end smoke test"
-            subtitle="Full stack flow"
-          >
-            <E2ESmokeTest />
-          </AdminCollapsible>
-          <AdminCollapsible
-            storageKey="foul-smoke"
-            title="Foul-mouth smoke test"
-            subtitle="Live Chat VIP gating + reply quality"
-          >
-            <FoulMouthSmokeTest />
-          </AdminCollapsible>
-        </section>
-
-        {/* Group: Activity */}
-        <section className="space-y-3">
-          <FlameHeading as="h3" size="md">
-            Activity
-          </FlameHeading>
-          <AdminCollapsible
-            storageKey="boss-audit"
-            title="Boss audit log"
-            subtitle="Recent admin actions"
-          >
-            <BossAuditLog />
-          </AdminCollapsible>
-          <AdminCollapsible
-            storageKey="recent-songs"
-            title="Recent generations"
-            subtitle="Unlock, lock, retry"
-            defaultOpen
-          >
-            <div className="rounded-2xl border border-border bg-card shadow-card">
-              {songsQuery.isLoading ? (
-                <div className="grid place-items-center py-16">
-                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                </div>
-              ) : songsQuery.data && songsQuery.data.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <div className="min-w-[720px]">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Song</TableHead>
-                          <TableHead>User</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead>Unlocked</TableHead>
-                          <TableHead>Created</TableHead>
-                          <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {songsQuery.data.map((s) => (
-                          <TableRow key={s.id}>
-                            <TableCell className="max-w-[260px]">
-                              <div className="truncate font-medium">{s.title || "Untitled"}</div>
-                              <div className="truncate text-xs text-muted-foreground">
-                                {s.prompt}
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-sm">
-                              <div className="text-muted-foreground">
-                                {s.email ?? s.user_id.slice(0, 8)}
-                              </div>
-                              <div className="mt-0.5 flex items-center gap-2 text-xs">
-                                <AdminEditableLabel
-                                  userId={s.user_id}
-                                  value={s.display_name}
-                                  fallback="No label"
-                                />
-                                <AdminEditableBalance userId={s.user_id} value={s.coin_balance} />
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <span
-                                className={cn(
-                                  "rounded-full px-2 py-0.5 text-xs font-medium",
-                                  s.status === "completed" && "bg-primary/15 text-primary",
-                                  (s.status === "pending" || s.status === "processing") &&
-                                    "bg-muted text-muted-foreground",
-                                  s.status === "failed" && "bg-destructive/15 text-destructive",
-                                )}
-                              >
-                                {s.status}
-                              </span>
-                              {s.status === "failed" && s.error_message && (
-                                <div className="mt-1 max-w-[200px] truncate text-xs text-destructive/80">
-                                  {s.error_message}
-                                </div>
-                              )}
-                            </TableCell>
-                            <TableCell>
-                              <span
-                                className={cn(
-                                  "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs",
-                                  s.unlocked
-                                    ? "bg-primary/15 text-primary"
-                                    : "bg-muted text-muted-foreground",
-                                )}
-                              >
-                                {s.unlocked ? (
-                                  <Unlock className="h-3 w-3" />
-                                ) : (
-                                  <Lock className="h-3 w-3" />
-                                )}
-                                {s.unlocked ? "Unlocked" : "Locked"}
-                              </span>
-                            </TableCell>
-                            <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
-                              {new Date(s.created_at).toLocaleString()}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <div className="flex justify-end gap-2">
-                                <Button
-                                  size="sm"
-                                  variant={s.unlocked ? "outline" : "default"}
-                                  disabled={toggleUnlock.isPending}
-                                  onClick={() =>
-                                    toggleUnlock.mutate({ id: s.id, unlocked: !s.unlocked })
-                                  }
-                                >
-                                  {s.unlocked ? (
-                                    <Lock className="h-3.5 w-3.5" />
-                                  ) : (
-                                    <Unlock className="h-3.5 w-3.5" />
-                                  )}
-                                  <span className="ml-1.5">{s.unlocked ? "Lock" : "Unlock"}</span>
-                                </Button>
-                                {s.status === "failed" && (
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    disabled={reprocess.isPending}
-                                    onClick={() => reprocess.mutate(s.id)}
-                                  >
-                                    <RefreshCw
-                                      className={cn(
-                                        "h-3.5 w-3.5",
-                                        reprocess.isPending && "animate-spin",
-                                      )}
-                                    />
-                                    <span className="ml-1.5">Retry</span>
-                                  </Button>
-                                )}
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </div>
-              ) : (
-                <div className="grid place-items-center gap-2 py-16 text-muted-foreground">
-                  <Music2 className="h-8 w-8" />
-                  <p>No songs yet.</p>
-                </div>
-              )}
+          <TabsContent value="economy" className="mt-0 space-y-4">
+            <div className="grid gap-4 lg:grid-cols-2">
+              <OgCoinsPanel />
+              <MintCoinsPanel />
             </div>
-          </AdminCollapsible>
-        </section>
+            <PricingControls />
+          </TabsContent>
+
+          <TabsContent value="bot" className="mt-0 space-y-3">
+            <Panel k="og-bot-ping" title="OG Bot ping" subtitle="Verify OG Bot connectivity" open>
+              <OgBotPing />
+            </Panel>
+            <Panel k="telegram-webhook" title="Telegram webhook" subtitle="Live delivery status" open>
+              <TelegramWebhookStatus />
+            </Panel>
+            <Panel k="telegram-smoke" title="Telegram smoke test" subtitle="getMe + webhook check">
+              <TelegramSmokeTest />
+            </Panel>
+            <Panel k="boss-notifs" title="Boss DM notifications" subtitle="Telegram DM preferences">
+              <BossNotificationsPanel />
+            </Panel>
+          </TabsContent>
+
+          <TabsContent value="system" className="mt-0 space-y-3">
+            <Panel k="app-toggles" title="App toggles" subtitle="Global feature flags" open>
+              <AppToggles />
+            </Panel>
+            <Panel k="portals" title="Portals" subtitle="Manage portal definitions">
+              <PortalManager />
+            </Panel>
+            <Panel k="e2e-smoke" title="End-to-end smoke test" subtitle="Full stack flow">
+              <E2ESmokeTest />
+            </Panel>
+            <Panel k="foul-smoke" title="Foul-mouth smoke test" subtitle="VIP gating + reply quality">
+              <FoulMouthSmokeTest />
+            </Panel>
+            <Panel k="capabilities" title="Hardwired capabilities" subtitle="Runtime status">
+              <HardwiredCapabilities />
+            </Panel>
+          </TabsContent>
+
+          <TabsContent value="activity" className="mt-0">
+            <BossAuditLog />
+          </TabsContent>
+        </Tabs>
       </div>
     </DashboardShell>
+  );
+}
+
+function Panel({
+  k,
+  title,
+  subtitle,
+  open,
+  children,
+}: {
+  k: string;
+  title: string;
+  subtitle: string;
+  open?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <AdminCollapsible storageKey={k} title={title} subtitle={subtitle} defaultOpen={open}>
+      {children}
+    </AdminCollapsible>
   );
 }
 
