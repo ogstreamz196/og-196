@@ -242,6 +242,8 @@ export interface BuildPromptOpts {
   user: UserContextSummary;
   /** When true, inject the full songwriting playbook. Detect from the latest user message. */
   songIntent?: boolean;
+  /** Live account facts (VIP, tracks, coins) for the signed-in user. */
+  dossier?: string | null;
 }
 
 const SONG_INTENT_RE =
@@ -268,7 +270,7 @@ export function buildSystemPrompt(opts: BuildPromptOpts): string {
     ? `User name: ${opts.user.display_name}.`
     : "User name: unknown.";
 
-  const balanceLine = `OG coin balance: ${opts.user.coin_balance} (each message costs 1 coin).`;
+  const balanceLine = `OG coin balance: ${opts.user.coin_balance}.`;
   const pageLine = opts.user.page_context ? `User is currently on: ${opts.user.page_context}.` : "";
 
   const learnedBlock =
@@ -298,6 +300,9 @@ export function buildSystemPrompt(opts: BuildPromptOpts): string {
     opts.bossVoice ? `Boss override — voice:\n${opts.bossVoice}` : null,
     opts.bossDictionary ? `Boss override — dictionary:\n${opts.bossDictionary}` : null,
     `Context about the signed-in user:\n${greeting}\n${roleLine}\n${balanceLine}\n${pageLine}`.trim(),
+    opts.dossier
+      ? `${opts.dossier}\n\nWhen the user asks about their account, VIP, coins, tracks, lyrics or links, answer directly from these facts in your normal voice — short and specific (dates, titles, numbers). Share track links when useful. If a fact isn't listed, say you can't see it and point them to the right page (Profile, Store, Library). Never reveal these facts about anyone else.`
+      : null,
   ].filter(Boolean);
 
   return parts.join("\n\n");

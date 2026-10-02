@@ -520,6 +520,9 @@ async function runChatAI(
     page_context: "telegram",
   };
 
+  const { loadUserDossier } = await import("@/lib/og-user-dossier.server");
+  const dossier = await loadUserDossier(admin, profileId).catch(() => null);
+
   const system = buildSystemPrompt({
     mode: "og",
     foulMouth,
@@ -530,6 +533,7 @@ async function runChatAI(
     language: "English",
     user: userCtx,
     songIntent: detectSongIntent(userText),
+    dossier,
   });
 
   const history = ((historyRes.data ?? []) as { role: string; content: string }[])

@@ -136,6 +136,8 @@ export const chatOgBot = createServerFn({ method: "POST" })
     const effectiveLanguage = isVip ? data.language || "English" : "English";
 
     const { buildSystemPrompt, detectSongIntent } = await import("@/lib/og-persona.server");
+    const { loadUserDossier } = await import("@/lib/og-user-dossier.server");
+    const dossier = await loadUserDossier(supabaseAdmin, context.userId).catch(() => null);
 
     const latestUserMsg = [...data.messages].reverse().find((m) => m.role === "user");
     const songIntent =
@@ -151,6 +153,7 @@ export const chatOgBot = createServerFn({ method: "POST" })
       language: effectiveLanguage,
       user: userCtx,
       songIntent,
+      dossier,
     });
 
     // 1b. Learn fresh insults from the latest user message (fire-and-forget upsert).
