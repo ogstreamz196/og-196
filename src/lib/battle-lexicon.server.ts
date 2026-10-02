@@ -2,7 +2,10 @@
  * Battle Zone slang learning. OG Bot picks up words players use in roast
  * battles and recycles the popular ones. Only words are stored (no user ids).
  */
-type Admin = { rpc: (fn: string, args: Record<string, unknown>) => PromiseLike<unknown>; from: (t: string) => any };
+type Admin = {
+  rpc: (fn: string, args: Record<string, unknown>) => PromiseLike<unknown>;
+  from: (t: string) => any;
+};
 
 // Common English words we never "learn" — keeps the list to genuine slang.
 const STOP = new Set(
@@ -18,7 +21,8 @@ const STOP = new Set(
 );
 
 // Hard blocklist — slurs aimed at protected groups are never learned.
-const BLOCK = /(nigg|fag|retard|tranny|paki|chink|spic|kike|gook|wetback|coon|dyke|raghead|towelhead|spastic|spaz)/i;
+const BLOCK =
+  /(nigg|fag|retard|tranny|paki|chink|spic|kike|gook|wetback|coon|dyke|raghead|towelhead|spastic|spaz)/i;
 
 export function extractLearnableWords(text: string): string[] {
   const words = text
@@ -48,7 +52,9 @@ export async function learnedSlangBlock(admin: Admin): Promise<string> {
       .gte("uses", 6)
       .order("last_seen", { ascending: false })
       .limit(40);
-    const words = ((data ?? []) as { word: string }[]).map((r) => r.word).filter((w) => !BLOCK.test(w));
+    const words = ((data ?? []) as { word: string }[])
+      .map((r) => r.word)
+      .filter((w) => !BLOCK.test(w));
     if (!words.length) return "";
     return `\nSTREET SLANG LEARNED FROM THE BATTLE ZONE (players use these — weave a couple in naturally when they fit, never slurs): ${words.join(", ")}.`;
   } catch {

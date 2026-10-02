@@ -190,15 +190,23 @@ export function OgChat({
       if (!res.ok) {
         setMessages((cur) => [
           ...cur,
-          { role: "assistant", content: "⚠️ You've used your free image for now — you need 2 coins for another edit." },
+          {
+            role: "assistant",
+            content: "⚠️ You've used your free image for now — you need 2 coins for another edit.",
+          },
         ]);
         setNoCoinsOpen(true);
         return;
       }
-      const note = res.free ? "Free edit used — next free one in 4 hours." : "Edit done · -2 coins.";
+      const note = res.free
+        ? "Free edit used — next free one in 4 hours."
+        : "Edit done · -2 coins.";
       setMessages((cur) => [
         ...cur,
-        { role: "assistant", content: `Here's your edit 🔥\n\n![Edited image](${res.url})\n\n[⬇ Download image](${res.url})\n\n_${note}_` },
+        {
+          role: "assistant",
+          content: `Here's your edit 🔥\n\n![Edited image](${res.url})\n\n[⬇ Download image](${res.url})\n\n_${note}_`,
+        },
       ]);
       selfSyncRef.current = true;
       window.dispatchEvent(new Event(SYNC_EVENT));
@@ -303,7 +311,7 @@ export function OgChat({
     const el = scrollRef.current;
     if (!el) return;
     const reduce =
-typeof window !== "undefined" &&
+      typeof window !== "undefined" &&
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     // Never animate while the user is typing — instant snap keeps taps responsive.
     const typing = document.activeElement === inputRef.current;
@@ -445,7 +453,7 @@ typeof window !== "undefined" &&
     const wantsEdit = !!att && (editMode || EDIT_INTENT.test(t));
     if (att && wantsEdit) {
       if (imageEdit.isPending) return;
-      if (!t) return toast.error("Type how you want the image changed, e.g. \"make it anime\".");
+      if (!t) return toast.error('Type how you want the image changed, e.g. "make it anime".');
       setMessages((cur) => [...cur, { role: "user", content: `🎨 Edit image: ${t}` }]);
       setInput("");
       setAttachment(null);
@@ -914,16 +922,36 @@ typeof window !== "undefined" &&
         {noCoinsOpen && (
           <div className="mb-2 flex flex-wrap items-center gap-2 rounded-xl border border-border bg-muted/40 p-2 text-xs">
             <span className="flex-1">Out of coins for image edits.</span>
-            <Link to="/store" className="rounded-md bg-primary px-2 py-1 font-bold text-primary-foreground">Buy coins</Link>
-            <Link to="/messenger" search={{ live: 1 } as never} className="rounded-md border border-border px-2 py-1 font-bold">Earn in Battle Zone</Link>
-            <button type="button" onClick={() => setNoCoinsOpen(false)} aria-label="Close" className="p-1"><X className="h-4 w-4" /></button>
+            <Link
+              to="/store"
+              className="rounded-md bg-primary px-2 py-1 font-bold text-primary-foreground"
+            >
+              Buy coins
+            </Link>
+            <Link
+              to="/messenger"
+              search={{ live: 1 } as never}
+              className="rounded-md border border-border px-2 py-1 font-bold"
+            >
+              Earn in Battle Zone
+            </Link>
+            <button
+              type="button"
+              onClick={() => setNoCoinsOpen(false)}
+              aria-label="Close"
+              className="p-1"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
         )}
         {attachment && (
           <div className="mb-2 space-y-2 rounded-xl border border-border bg-muted/40 p-2">
             <div className="flex items-center gap-2">
               <img src={attachment.dataUrl} alt="" className="h-10 w-10 rounded-md object-cover" />
-              <span className="flex-1 truncate text-xs text-muted-foreground">{attachment.name}</span>
+              <span className="flex-1 truncate text-xs text-muted-foreground">
+                {attachment.name}
+              </span>
               <button
                 type="button"
                 onClick={() => {
@@ -943,7 +971,9 @@ typeof window !== "undefined" &&
                 aria-pressed={!editMode}
                 className={cn(
                   "flex-1 rounded-lg border px-2 py-1.5 text-xs font-bold",
-                  !editMode ? "border-primary bg-primary/15 text-foreground" : "border-border text-muted-foreground",
+                  !editMode
+                    ? "border-primary bg-primary/15 text-foreground"
+                    : "border-border text-muted-foreground",
                 )}
               >
                 💬 Ask about it
@@ -954,7 +984,9 @@ typeof window !== "undefined" &&
                 aria-pressed={editMode}
                 className={cn(
                   "flex-1 rounded-lg border px-2 py-1.5 text-xs font-bold",
-                  editMode ? "border-primary bg-primary/15 text-foreground" : "border-border text-muted-foreground",
+                  editMode
+                    ? "border-primary bg-primary/15 text-foreground"
+                    : "border-border text-muted-foreground",
                 )}
               >
                 🎨 Edit image ·{" "}

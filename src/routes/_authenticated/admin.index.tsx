@@ -61,7 +61,12 @@ const PAGE_LINKS = [
   { to: "/admin/health", label: "API health", desc: "Provider checks", Icon: HeartPulse },
   { to: "/admin/webhooks", label: "Webhooks", desc: "Delivery logs", Icon: Webhook },
   { to: "/admin/coin-audit", label: "Coin audit", desc: "Coin ledger checks", Icon: Coins },
-  { to: "/admin/referrals-audit", label: "Referrals audit", desc: "Commission checks", Icon: Share2 },
+  {
+    to: "/admin/referrals-audit",
+    label: "Referrals audit",
+    desc: "Commission checks",
+    Icon: Share2,
+  },
   { to: "/admin/audit", label: "Audit", desc: "Boss actions", Icon: Scale },
   { to: "/admin/api-keys", label: "API keys", desc: "Key status", Icon: KeyRound },
   { to: "/admin/route-map", label: "Route map", desc: "All app pages", Icon: Map },
@@ -69,12 +74,48 @@ const PAGE_LINKS = [
 ] as const;
 
 const DESKS = [
-  { id: "music", label: "Music", title: "Music desk", desc: "Live tracks, retries and locks", Icon: Music2 },
-  { id: "economy", label: "Coins", title: "Coins & pricing", desc: "Balances, minting and pricing rules", Icon: Coins },
-  { id: "bot", label: "Bot", title: "Bot & Telegram", desc: "OG Bot, webhook and your DMs", Icon: Bot },
-  { id: "system", label: "App", title: "App & diagnostics", desc: "Feature switches and tests", Icon: Settings2 },
-  { id: "pages", label: "Tools", title: "Users, store & tools", desc: "Every other Boss page", Icon: Users },
-  { id: "activity", label: "Audit", title: "Audit log", desc: "Recent Boss actions", Icon: Activity },
+  {
+    id: "music",
+    label: "Music",
+    title: "Music desk",
+    desc: "Live tracks, retries and locks",
+    Icon: Music2,
+  },
+  {
+    id: "economy",
+    label: "Coins",
+    title: "Coins & pricing",
+    desc: "Balances, minting and pricing rules",
+    Icon: Coins,
+  },
+  {
+    id: "bot",
+    label: "Bot",
+    title: "Bot & Telegram",
+    desc: "OG Bot, webhook and your DMs",
+    Icon: Bot,
+  },
+  {
+    id: "system",
+    label: "App",
+    title: "App & diagnostics",
+    desc: "Feature switches and tests",
+    Icon: Settings2,
+  },
+  {
+    id: "pages",
+    label: "Tools",
+    title: "Users, store & tools",
+    desc: "Every other Boss page",
+    Icon: Users,
+  },
+  {
+    id: "activity",
+    label: "Audit",
+    title: "Audit log",
+    desc: "Recent Boss actions",
+    Icon: Activity,
+  },
 ] as const;
 type DeskId = (typeof DESKS)[number]["id"];
 
@@ -139,7 +180,10 @@ function AdminPanel() {
               })}
             </div>
 
-            <div role="tabpanel" className="min-w-0 rounded-xl border border-border bg-card/60 p-3 sm:p-4">
+            <div
+              role="tabpanel"
+              className="min-w-0 rounded-xl border border-border bg-card/60 p-3 sm:p-4"
+            >
               <div className="mb-3 flex min-w-0 items-center gap-3 border-b border-border pb-3">
                 <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/15 text-primary">
                   <current.Icon className="h-4 w-4" />
@@ -155,13 +199,29 @@ function AdminPanel() {
 
                 {desk === "economy" && (
                   <>
-                    <Panel group="economy" k="og-coins" title="OG Coins overview" subtitle="Balances in circulation" open>
+                    <Panel
+                      group="economy"
+                      k="og-coins"
+                      title="OG Coins overview"
+                      subtitle="Balances in circulation"
+                      open
+                    >
                       <OgCoinsPanel />
                     </Panel>
-                    <Panel group="economy" k="mint" title="Mint coins" subtitle="Grant coins to a user">
+                    <Panel
+                      group="economy"
+                      k="mint"
+                      title="Mint coins"
+                      subtitle="Grant coins to a user"
+                    >
                       <MintCoinsPanel />
                     </Panel>
-                    <Panel group="economy" k="pricing" title="Pricing & limits" subtitle="Generation and unlock costs">
+                    <Panel
+                      group="economy"
+                      k="pricing"
+                      title="Pricing & limits"
+                      subtitle="Generation and unlock costs"
+                    >
                       <PricingControls />
                     </Panel>
                   </>
@@ -169,16 +229,37 @@ function AdminPanel() {
 
                 {desk === "bot" && (
                   <>
-                    <Panel group="bot" k="og-bot-ping" title="OG Bot ping" subtitle="Check OG Bot is reachable" open>
+                    <Panel
+                      group="bot"
+                      k="og-bot-ping"
+                      title="OG Bot ping"
+                      subtitle="Check OG Bot is reachable"
+                      open
+                    >
                       <OgBotPing />
                     </Panel>
-                    <Panel group="bot" k="telegram-webhook" title="Telegram webhook" subtitle="Live delivery status">
+                    <Panel
+                      group="bot"
+                      k="telegram-webhook"
+                      title="Telegram webhook"
+                      subtitle="Live delivery status"
+                    >
                       <TelegramWebhookStatus />
                     </Panel>
-                    <Panel group="bot" k="telegram-smoke" title="Telegram smoke test" subtitle="Bot + webhook check">
+                    <Panel
+                      group="bot"
+                      k="telegram-smoke"
+                      title="Telegram smoke test"
+                      subtitle="Bot + webhook check"
+                    >
                       <TelegramSmokeTest />
                     </Panel>
-                    <Panel group="bot" k="boss-notifs" title="Boss DM notifications" subtitle="What gets sent to you">
+                    <Panel
+                      group="bot"
+                      k="boss-notifs"
+                      title="Boss DM notifications"
+                      subtitle="What gets sent to you"
+                    >
                       <BossNotificationsPanel />
                     </Panel>
                   </>
@@ -186,19 +267,45 @@ function AdminPanel() {
 
                 {desk === "system" && (
                   <>
-                    <Panel group="system" k="app-toggles" title="App toggles" subtitle="Global feature switches" open>
+                    <Panel
+                      group="system"
+                      k="app-toggles"
+                      title="App toggles"
+                      subtitle="Global feature switches"
+                      open
+                    >
                       <AppToggles />
                     </Panel>
-                    <Panel group="system" k="portals" title="Portals" subtitle="Manage portal definitions">
+                    <Panel
+                      group="system"
+                      k="portals"
+                      title="Portals"
+                      subtitle="Manage portal definitions"
+                    >
                       <PortalManager />
                     </Panel>
-                    <Panel group="system" k="e2e-smoke" title="End-to-end test" subtitle="Full app flow">
+                    <Panel
+                      group="system"
+                      k="e2e-smoke"
+                      title="End-to-end test"
+                      subtitle="Full app flow"
+                    >
                       <E2ESmokeTest />
                     </Panel>
-                    <Panel group="system" k="foul-smoke" title="Foul-mouth test" subtitle="VIP gating + reply quality">
+                    <Panel
+                      group="system"
+                      k="foul-smoke"
+                      title="Foul-mouth test"
+                      subtitle="VIP gating + reply quality"
+                    >
                       <FoulMouthSmokeTest />
                     </Panel>
-                    <Panel group="system" k="capabilities" title="Hardwired capabilities" subtitle="Runtime status">
+                    <Panel
+                      group="system"
+                      k="capabilities"
+                      title="Hardwired capabilities"
+                      subtitle="Runtime status"
+                    >
                       <HardwiredCapabilities />
                     </Panel>
                   </>
@@ -261,7 +368,13 @@ function Panel({
   children: React.ReactNode;
 }) {
   return (
-    <AdminCollapsible storageKey={k} group={group} title={title} subtitle={subtitle} defaultOpen={open}>
+    <AdminCollapsible
+      storageKey={k}
+      group={group}
+      title={title}
+      subtitle={subtitle}
+      defaultOpen={open}
+    >
       {children}
     </AdminCollapsible>
   );

@@ -110,7 +110,6 @@ export function JobQueuePanel({ songs, onRemoved }: { songs: Song[]; onRemoved?:
   const [detailsSong, setDetailsSong] = useState<Song | null>(null);
   const recoverSong = useServerFn(recoverStuckSong);
 
-
   // Tick once per second while there are in-flight jobs so the elapsed/stall
   // indicators stay accurate without forcing a parent refetch.
   const hasActive = useMemo(
@@ -223,7 +222,6 @@ export function JobQueuePanel({ songs, onRemoved }: { songs: Song[]; onRemoved?:
     }
   }
 
-
   /** Remove a job from the queue — cancels + refunds it first when in flight. */
   async function removeJob(song: Song) {
     if (!window.confirm(`Remove "${song.title || "Untitled"}" from the queue?`)) return;
@@ -278,10 +276,9 @@ export function JobQueuePanel({ songs, onRemoved }: { songs: Song[]; onRemoved?:
           const showRetry = kind === "failed" || stuck;
           const autoRetrying =
             kind === "failed" && !!song.next_retry_at && song.failure_class !== "terminal";
-          const subline =
-            autoRetrying
-              ? "Retrying automatically in the background"
-              : kind === "failed"
+          const subline = autoRetrying
+            ? "Retrying automatically in the background"
+            : kind === "failed"
               ? friendlyError(song.error_message)
               : inFlight
                 ? `${m.label} · ${formatElapsed(elapsed)}${stuck ? " · looks stuck" : slow ? " · taking longer than usual" : ""}`
@@ -546,7 +543,12 @@ function JobDetailsDrawer({
       }
       const fileName = `${song.title || "song"}.mp3`;
       const blob = await downloadFile(url!, fileName);
-      await shareTrack({ title: song.title || "My track", blob, filename: fileName, songId: song.id });
+      await shareTrack({
+        title: song.title || "My track",
+        blob,
+        filename: fileName,
+        songId: song.id,
+      });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Download failed");
     } finally {

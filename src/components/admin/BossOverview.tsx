@@ -16,14 +16,23 @@ export function BossKpiStrip() {
     queryFn: async () => {
       const since = new Date(Date.now() - DAY_MS).toISOString();
       const [signups, tracks, failed, vips, balances] = await Promise.all([
-        supabase.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", since),
-        supabase.from("songs").select("id", { count: "exact", head: true }).gte("created_at", since),
+        supabase
+          .from("profiles")
+          .select("id", { count: "exact", head: true })
+          .gte("created_at", since),
+        supabase
+          .from("songs")
+          .select("id", { count: "exact", head: true })
+          .gte("created_at", since),
         supabase
           .from("songs")
           .select("id", { count: "exact", head: true })
           .eq("status", "failed")
           .gte("created_at", since),
-        supabase.from("user_roles").select("user_id", { count: "exact", head: true }).eq("role", "vip"),
+        supabase
+          .from("user_roles")
+          .select("user_id", { count: "exact", head: true })
+          .eq("role", "vip"),
         supabase.from("profiles").select("coin_balance").limit(5000),
       ]);
       const coins = (balances.data ?? []).reduce(
@@ -105,9 +114,7 @@ export function ProviderPulse() {
         Providers
       </span>
       {report.isLoading && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
-      {report.isError && (
-        <span className="text-xs text-destructive">Couldn't run the check</span>
-      )}
+      {report.isError && <span className="text-xs text-destructive">Couldn't run the check</span>}
       {checks.map((c) => {
         const ok = c.status === "ok";
         const warn = c.status === "degraded";

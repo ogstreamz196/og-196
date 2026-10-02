@@ -10,7 +10,12 @@ type Row = {
   og_vip_id: string | null;
   acknowledged_at: string | null;
   created_at: string;
-  profile?: { display_name: string | null; email: string | null; telegram_username: string | null; telegram_chat_id: number | null };
+  profile?: {
+    display_name: string | null;
+    email: string | null;
+    telegram_username: string | null;
+    telegram_chat_id: number | null;
+  };
 };
 
 export function VipAcknowledgements() {
@@ -69,7 +74,9 @@ export function VipAcknowledgements() {
     return (
       <li className="flex min-w-0 flex-wrap items-center gap-3 border-t border-border px-3 py-3 first:border-t-0">
         <div className="min-w-0 flex-1">
-          <p className="truncate font-medium">{r.profile?.display_name || r.profile?.email || r.user_id.slice(0, 8)}</p>
+          <p className="truncate font-medium">
+            {r.profile?.display_name || r.profile?.email || r.user_id.slice(0, 8)}
+          </p>
           <p className="text-xs text-muted-foreground">
             <span className="font-mono text-coin">{r.og_vip_id ?? "—"}</span>
             {" · "}
@@ -101,7 +108,9 @@ export function VipAcknowledgements() {
       <h2 className="flex items-center gap-2 text-lg">
         <Crown className="h-5 w-5 text-coin" /> Yearly VIPs to acknowledge
         {pending.length > 0 && (
-          <span className="rounded-full bg-destructive px-2 text-xs text-destructive-foreground">{pending.length}</span>
+          <span className="rounded-full bg-destructive px-2 text-xs text-destructive-foreground">
+            {pending.length}
+          </span>
         )}
       </h2>
       {q.isLoading ? (
@@ -111,14 +120,22 @@ export function VipAcknowledgements() {
           {pending.length === 0 ? (
             <p className="mt-2 text-sm text-muted-foreground">All caught up — nothing waiting.</p>
           ) : (
-            <ul className="mt-3 rounded-lg border border-border">{pending.map((r) => <Item key={r.user_id} r={r} />)}</ul>
+            <ul className="mt-3 rounded-lg border border-border">
+              {pending.map((r) => (
+                <Item key={r.user_id} r={r} />
+              ))}
+            </ul>
           )}
           {verified.length > 0 && (
             <details className="mt-3">
               <summary className="cursor-pointer text-sm text-muted-foreground">
                 Verified OG VIP list ({verified.length})
               </summary>
-              <ul className="mt-2 rounded-lg border border-border">{verified.map((r) => <Item key={r.user_id} r={r} />)}</ul>
+              <ul className="mt-2 rounded-lg border border-border">
+                {verified.map((r) => (
+                  <Item key={r.user_id} r={r} />
+                ))}
+              </ul>
             </details>
           )}
         </>

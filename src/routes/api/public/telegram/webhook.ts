@@ -93,7 +93,11 @@ async function handleCallbackQuery(cq: {
     .eq("telegram_chat_id", fromId)
     .maybeSingle();
   const { data: roles } = me
-    ? await admin.from("user_roles").select("role").eq("user_id", me.id).in("role", ["admin", "boss"])
+    ? await admin
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", me.id)
+        .in("role", ["admin", "boss"])
     : { data: [] };
   if (!me || !roles?.length) {
     await answer("Boss only");
@@ -799,17 +803,31 @@ async function handleTelegramUpdate(
         .eq("status", "completed")
         .order("created_at", { ascending: false })
         .limit(5);
-      const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      const esc = (s: string) =>
+        s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
       const list = songs ?? [];
       const body = list.length
         ? "🎧 <b>Your latest tracks</b>\n\n" +
-          list.map((s, i) => `${i + 1}. <b>${esc(s.title || "Untitled")}</b>${s.style ? ` — ${esc(String(s.style).slice(0, 40))}` : ""}`).join("\n") +
+          list
+            .map(
+              (s, i) =>
+                `${i + 1}. <b>${esc(s.title || "Untitled")}</b>${s.style ? ` — ${esc(String(s.style).slice(0, 40))}` : ""}`,
+            )
+            .join("\n") +
           "\n\nTap a track to listen. Make it public in the app to share the link."
         : "🎧 No finished tracks yet — go make one!";
       const rows = list.map((s) => [
-        { text: `▶️ ${(s.title || "Untitled").slice(0, 30)}`, url: `https://ogbot.co.uk/library/${s.id}` },
+        {
+          text: `▶️ ${(s.title || "Untitled").slice(0, 30)}`,
+          url: `https://ogbot.co.uk/library/${s.id}`,
+        },
         ...(s.is_public && s.revealed
-          ? [{ text: "🔗 Share", url: `https://t.me/share/url?url=${encodeURIComponent(`https://ogbot.co.uk/track/${s.id}`)}` }]
+          ? [
+              {
+                text: "🔗 Share",
+                url: `https://t.me/share/url?url=${encodeURIComponent(`https://ogbot.co.uk/track/${s.id}`)}`,
+              },
+            ]
           : []),
       ]);
       rows.push([{ text: "Open full library", url: "https://ogbot.co.uk/library" }]);

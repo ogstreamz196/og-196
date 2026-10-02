@@ -18,7 +18,9 @@ async function callbackToken(songId: string, serviceRole: string): Promise<strin
     ["sign"],
   );
   const buf = await crypto.subtle.sign("HMAC", key, enc.encode(songId));
-  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+  return Array.from(new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 function scheduledFailure(song: RetrySong, reason: string) {
@@ -88,7 +90,9 @@ async function resubmit(song: RetrySong, apiKey: string, serviceRole: string, ba
       };
 
   if (saved.usesUploadedBeat && song.beat_path) {
-    const { data } = await supabaseAdmin.storage.from("beats").createSignedUrl(song.beat_path, 3600);
+    const { data } = await supabaseAdmin.storage
+      .from("beats")
+      .createSignedUrl(song.beat_path, 3600);
     if (!data?.signedUrl) throw new Error("the uploaded beat could not be read");
     payload.uploadUrl = data.signedUrl;
     endpoint = UPLOAD_URL;
@@ -131,7 +135,9 @@ export async function retryDueSongs() {
   const backendUrl = process.env["SUPABASE_URL"];
   if (!apiKey || !serviceRole || !backendUrl) throw new Error("Music recovery is not configured");
 
-  const { data, error } = await (supabaseAdmin as any).rpc("claim_due_song_retries", { p_limit: 3 });
+  const { data, error } = await (supabaseAdmin as any).rpc("claim_due_song_retries", {
+    p_limit: 3,
+  });
   if (error) throw new Error(error.message);
   const results: Array<{ id: string; outcome: string }> = [];
   for (const song of (data ?? []) as RetrySong[]) {

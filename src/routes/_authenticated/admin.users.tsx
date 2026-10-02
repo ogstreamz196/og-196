@@ -326,72 +326,72 @@ function AdminUsersPage() {
               </div>
             ) : filtered.length > 0 ? (
               <>
-              <ul className="divide-y divide-border sm:hidden">
-                {filtered.map((u) => (
-                  <MobileUserCard
-                    key={u.id}
-                    user={u}
-                    roles={rolesByUser.get(u.id) ?? []}
-                    pro={proByUser.get(u.id)}
-                    spend={spendByUser[u.id]}
-                  />
-                ))}
-              </ul>
-              <div className="hidden overflow-x-auto sm:block">
-                <div className="min-w-[640px]">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-muted/30 hover:bg-muted/30">
-                        <SortableHead
-                          label="User"
-                          active={sort === "name"}
-                          dir={sortDir}
-                          onClick={() => toggleSort("name")}
-                        />
-                        <TableHead>Roles</TableHead>
-                        <SortableHead
-                          label="Balance"
-                          align="right"
-                          active={sort === "balance"}
-                          dir={sortDir}
-                          onClick={() => toggleSort("balance")}
-                        />
-                        <SortableHead
-                          label="Spent"
-                          align="right"
-                          active={sort === "spend"}
-                          dir={sortDir}
-                          onClick={() => toggleSort("spend")}
-                        />
-                        <SortableHead
-                          label="Buys"
-                          align="right"
-                          active={sort === "buys"}
-                          dir={sortDir}
-                          onClick={() => toggleSort("buys")}
-                        />
-                        <SortableHead
-                          label="Joined"
-                          active={sort === "joined"}
-                          dir={sortDir}
-                          onClick={() => toggleSort("joined")}
-                        />
-                        <TableHead className="text-right">Quick actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filtered.map((u) => {
-                        const roles = rolesByUser.get(u.id) ?? [];
-                        const pro = proByUser.get(u.id);
-                        const spend = spendByUser[u.id];
-                        return (
-                          <UserRow key={u.id} user={u} roles={roles} pro={pro} spend={spend} />
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
+                <ul className="divide-y divide-border sm:hidden">
+                  {filtered.map((u) => (
+                    <MobileUserCard
+                      key={u.id}
+                      user={u}
+                      roles={rolesByUser.get(u.id) ?? []}
+                      pro={proByUser.get(u.id)}
+                      spend={spendByUser[u.id]}
+                    />
+                  ))}
+                </ul>
+                <div className="hidden overflow-x-auto sm:block">
+                  <div className="min-w-[640px]">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-muted/30 hover:bg-muted/30">
+                          <SortableHead
+                            label="User"
+                            active={sort === "name"}
+                            dir={sortDir}
+                            onClick={() => toggleSort("name")}
+                          />
+                          <TableHead>Roles</TableHead>
+                          <SortableHead
+                            label="Balance"
+                            align="right"
+                            active={sort === "balance"}
+                            dir={sortDir}
+                            onClick={() => toggleSort("balance")}
+                          />
+                          <SortableHead
+                            label="Spent"
+                            align="right"
+                            active={sort === "spend"}
+                            dir={sortDir}
+                            onClick={() => toggleSort("spend")}
+                          />
+                          <SortableHead
+                            label="Buys"
+                            align="right"
+                            active={sort === "buys"}
+                            dir={sortDir}
+                            onClick={() => toggleSort("buys")}
+                          />
+                          <SortableHead
+                            label="Joined"
+                            active={sort === "joined"}
+                            dir={sortDir}
+                            onClick={() => toggleSort("joined")}
+                          />
+                          <TableHead className="text-right">Quick actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filtered.map((u) => {
+                          const roles = rolesByUser.get(u.id) ?? [];
+                          const pro = proByUser.get(u.id);
+                          const spend = spendByUser[u.id];
+                          return (
+                            <UserRow key={u.id} user={u} roles={roles} pro={pro} spend={spend} />
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </div>
-              </div>
               </>
             ) : (
               <div className="grid place-items-center gap-2 py-16 text-muted-foreground">
@@ -729,7 +729,6 @@ function MobileUserCard({
 
 /* ---------- Inline actions ---------- */
 
-
 function VipQuickToggle({ userId, checked }: { userId: string; checked: boolean }) {
   const qc = useQueryClient();
   const mut = useMutation({
@@ -756,10 +755,12 @@ function VipQuickToggle({ userId, checked }: { userId: string; checked: boolean 
     <Tooltip>
       <TooltipTrigger asChild>
         <label className="flex h-9 shrink-0 cursor-pointer items-center gap-2 rounded-md border border-border bg-background/40 px-2.5 text-sm">
-          <Crown
-            className={`h-4 w-4 ${checked ? "text-amber-500" : "text-muted-foreground"}`}
-          />
-          <span className={`whitespace-nowrap ${checked ? "text-amber-400" : "text-muted-foreground"}`}>VIP</span>
+          <Crown className={`h-4 w-4 ${checked ? "text-amber-500" : "text-muted-foreground"}`} />
+          <span
+            className={`whitespace-nowrap ${checked ? "text-amber-400" : "text-muted-foreground"}`}
+          >
+            VIP
+          </span>
           <Switch
             checked={checked}
             disabled={mut.isPending}

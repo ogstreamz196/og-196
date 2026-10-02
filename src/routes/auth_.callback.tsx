@@ -62,7 +62,9 @@ function AuthCallback() {
       <div className="flex max-w-sm flex-col items-center gap-3">
         {error ? (
           <>
-            <p role="alert" className="text-destructive">{error}</p>
+            <p role="alert" className="text-destructive">
+              {error}
+            </p>
             <a href="/welcome" className="text-sm text-muted-foreground underline">
               Try signing in again
             </a>

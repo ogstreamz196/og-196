@@ -295,7 +295,10 @@ export const postCommunityMessage = createServerFn({ method: "POST" })
       try {
         const { extractInsults } = await import("@/lib/insult-learner.server");
         for (const phrase of extractInsults(data.content)) {
-          void supabaseAdmin.rpc("og_learn_insult", { p_user_id: context.userId, p_phrase: phrase });
+          void supabaseAdmin.rpc("og_learn_insult", {
+            p_user_id: context.userId,
+            p_phrase: phrase,
+          });
         }
         const [{ data: mine }, { data: rec }] = await Promise.all([
           supabaseAdmin

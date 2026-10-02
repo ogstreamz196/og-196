@@ -183,7 +183,11 @@ function SharedTrackPlayer({ src, title }: { src: string; title: string }) {
           aria-label={playing ? `Pause ${title}` : `Play ${title}`}
           className="h-16 w-16 shrink-0 rounded-full shadow-glow sm:h-20 sm:w-20"
         >
-          {playing ? <Pause className="h-7 w-7 sm:h-9 sm:w-9" /> : <Play className="h-7 w-7 translate-x-0.5 sm:h-9 sm:w-9" />}
+          {playing ? (
+            <Pause className="h-7 w-7 sm:h-9 sm:w-9" />
+          ) : (
+            <Play className="h-7 w-7 translate-x-0.5 sm:h-9 sm:w-9" />
+          )}
         </Button>
 
         <div className="min-w-0 flex-1">
@@ -215,7 +219,13 @@ function SharedTrackPlayer({ src, title }: { src: string; title: string }) {
 
       <div className="mt-4 flex min-h-6 items-center justify-center gap-2 text-center text-sm text-muted-foreground">
         <Volume2 className="h-4 w-4 shrink-0" />
-        <span>{autoplayBlocked ? "Tap anywhere to start listening" : playing ? "Now playing" : "Ready to play"}</span>
+        <span>
+          {autoplayBlocked
+            ? "Tap anywhere to start listening"
+            : playing
+              ? "Now playing"
+              : "Ready to play"}
+        </span>
       </div>
     </div>
   );

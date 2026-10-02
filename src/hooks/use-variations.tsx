@@ -31,8 +31,9 @@ export function useVariations({
   const [checkingOut, setCheckingOut] = useState(false);
 
   // Flat remake price, mirrored from supabase/functions/reveal-variation.
-  const remakePrice = Number((settings as { coins_per_remake?: number } | undefined)
-    ?.coins_per_remake);
+  const remakePrice = Number(
+    (settings as { coins_per_remake?: number } | undefined)?.coins_per_remake,
+  );
   const variationCost = useMemo(
     () => (Number.isFinite(remakePrice) && remakePrice >= 1 ? Math.round(remakePrice) : 2),
     [remakePrice],

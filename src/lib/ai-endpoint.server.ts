@@ -65,9 +65,24 @@ function keyed(
  */
 export function freeFallbackTargets(): AiChatTarget[] {
   const list = [
-    keyed("GROQ_API_KEY", "groq", "https://api.groq.com/openai/v1/chat/completions", "llama-3.3-70b-versatile"),
-    keyed("CEREBRAS_API_KEY", "cerebras", "https://api.cerebras.ai/v1/chat/completions", "llama-3.3-70b"),
-    keyed("MISTRAL_API_KEY", "mistral", "https://api.mistral.ai/v1/chat/completions", "mistral-small-latest"),
+    keyed(
+      "GROQ_API_KEY",
+      "groq",
+      "https://api.groq.com/openai/v1/chat/completions",
+      "llama-3.3-70b-versatile",
+    ),
+    keyed(
+      "CEREBRAS_API_KEY",
+      "cerebras",
+      "https://api.cerebras.ai/v1/chat/completions",
+      "llama-3.3-70b",
+    ),
+    keyed(
+      "MISTRAL_API_KEY",
+      "mistral",
+      "https://api.mistral.ai/v1/chat/completions",
+      "mistral-small-latest",
+    ),
     keyed(
       "OPENROUTER_API_KEY",
       "openrouter",
@@ -117,7 +132,9 @@ function freeBody(body: Record<string, unknown>): Record<string, unknown> {
     if (typeof m.content === "string") return { role: m.role, content: m.content };
     if (Array.isArray(m.content)) {
       const text = (m.content as { type?: string; text?: string }[])
-        .map((p) => (p.type === "text" ? p.text ?? "" : p.type === "image_url" ? "[image attached]" : ""))
+        .map((p) =>
+          p.type === "text" ? (p.text ?? "") : p.type === "image_url" ? "[image attached]" : "",
+        )
         .filter(Boolean)
         .join("\n");
       return { role: m.role, content: text };

@@ -182,7 +182,11 @@ export async function materialiseClips(
       if (buf.byteLength === 0) throw new Error("empty body");
       sampleBuf = buf;
     } catch (e) {
-      console.error("[suno-recover] take unreadable, trying next:", clip.clipId, (e as Error).message);
+      console.error(
+        "[suno-recover] take unreadable, trying next:",
+        clip.clipId,
+        (e as Error).message,
+      );
       out.broken += 1;
       continue;
     }
