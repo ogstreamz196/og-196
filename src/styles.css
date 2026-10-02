@@ -1688,5 +1688,4 @@ main:has(.boss-ui) .bg-card {
   --boss-solid: oklch(0.15 0.03 275);
   background-color: var(--boss-solid);
   box-shadow: 0 0 0 100vmax var(--boss-solid);
-  clip-path: inset(-100vmax -100vmax -100vmax -100vmax);
 }
