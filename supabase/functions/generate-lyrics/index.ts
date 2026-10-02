@@ -5,6 +5,9 @@ import { adminClient, requireUser } from "../_shared/clients.ts";
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY") ?? "";
 const GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") ?? "gemini-2.5-flash";
+// Paid emergency key — used once, only after the primary key is exhausted.
+const GEMINI_BACKUP_API_KEY = Deno.env.get("GEMINI_BACKUP_API_KEY") ?? "";
+const GEMINI_BACKUP_MODEL = Deno.env.get("GEMINI_BACKUP_MODEL") ?? "gemini-flash-latest";
 
 async function getSetting(admin: SupabaseClient, key: string, fallback: number): Promise<number> {
   const { data } = await admin.from("app_settings").select("value").eq("key", key).maybeSingle();
@@ -327,15 +330,15 @@ Deno.serve(async (req) => {
         : "") +
       `\nWrite the FULL song now — about ${mmss(targetSec)} of singable material (${aimLow}–${aimHigh} words, ${minLines}–${aimLines} lyric lines, do not exceed that). Do not stop early, do not abbreviate repeated choruses, hit EVERY section in the structure, stay ruthlessly on-theme with the description above, and drop "${subjectName || "the subject"}" as often as the music allows.`;
 
-    const modelUrl = (model: string) =>
-      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${GEMINI_API_KEY}`;
+    const modelUrl = (model: string, key = GEMINI_API_KEY) =>
+      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${key}`;
 
     await updateProgress(40, "Writing verses…");
 
     type Gen = { ok: boolean; status: number; text: string; detail?: string };
 
-    const postTo = (model: string, contents: unknown[]) =>
-      fetch(modelUrl(model), {
+    const postTo = (model: string, contents: unknown[], key = GEMINI_API_KEY) =>
+      fetch(modelUrl(model, key), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -372,7 +375,15 @@ Deno.serve(async (req) => {
       return last;
     };
 
-    const generate = (contents: unknown[]): Promise<Gen> => callGemini(contents);
+    const generate = async (contents: unknown[]): Promise<Gen> => {
+      const first = await callGemini(contents);
+      if (first.ok || !GEMINI_BACKUP_API_KEY) return first;
+      if (first.status !== 429 && first.status < 500) return first;
+      console.warn("Primary Gemini exhausted — using backup key once");
+      const r = await postTo(GEMINI_BACKUP_MODEL, contents, GEMINI_BACKUP_API_KEY);
+      if (r.ok) return { ok: true, status: 200, text: extractText(await r.json()) };
+      return { ok: false, status: r.status, text: "", detail: await r.text() };
+    };
 
     const res = await generate([{ role: "user", parts: [{ text: userPrompt }] }]);
 

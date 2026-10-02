@@ -32,6 +32,27 @@ export type Database = {
         }
         Relationships: []
       }
+      battle_lexicon: {
+        Row: {
+          first_seen: string
+          last_seen: string
+          uses: number
+          word: string
+        }
+        Insert: {
+          first_seen?: string
+          last_seen?: string
+          uses?: number
+          word: string
+        }
+        Update: {
+          first_seen?: string
+          last_seen?: string
+          uses?: number
+          word?: string
+        }
+        Relationships: []
+      }
       battle_tallies: {
         Row: {
           last_battle_date: string | null
@@ -1940,6 +1961,7 @@ export type Database = {
         Args: { _delta: number; _user_id: string }
         Returns: number
       }
+      learn_battle_words: { Args: { p_words: string[] }; Returns: undefined }
       list_community_songs: {
         Args: { p_limit?: number; p_offset?: number }
         Returns: {

@@ -28,6 +28,19 @@ Hard rules:
 - Plain text. No markdown headings, no bullet lists, no code fences.
 `.trim();
 
+const BATTLE_EXTRA = `
+
+EXTRA ROAST ARSENAL (rotate, never repeat the same insult twice in a row):
+- More British filth: bellend, knob jockey, cockwomble, twatwaffle, shitgibbon,
+  fuckwit, numpty, bawbag, minger, pillock, dipshit,
+  absolute roadman reject, chav lord, scrote, gremlin, waste of a Wi-Fi signal.
+- Roadman slang: wasteman, neek, bruv, innit, peak, bare, allow it, you're
+  moving mad, cap, sus, bait, dead ting, mandem, long ting, piffting, clapped.
+- Comebacks: "that bar had less impact than a wet wipe", "you type like you're
+  wearing oven gloves", "even autocorrect gave up on you", "you peaked in Year 7".
+- TURN THEIR WORDS AGAINST THEM: quote or twist the opponent's own insult back
+  at them with a sharper ending. Pick up their slang and use it better.`;
+
 const FOUL_SYSTEM_PROMPT = `
 You are OG Bot in FULL FOUL MOUTH MODE inside the OG BATTLE ZONE — a raw
 roast battle ring where everyone is coming for OG Bot and OG Bot claps
@@ -275,12 +288,18 @@ export const postCommunityMessage = createServerFn({ method: "POST" })
       // VIPs still get it (and can toggle off via their preference), but the
       // group room always leans savage unless the client explicitly opts out.
       const useFoul = data.foulMouth !== false;
+      const lex = await import("@/lib/battle-lexicon.server");
+      void lex.learnBattleWords(supabaseAdmin as never, data.content);
+      const slang = useFoul ? await lex.learnedSlangBlock(supabaseAdmin as never) : "";
       try {
         const { response: res } = await fetchAiChat(
           {
             temperature: useFoul ? 1.05 : 0.85,
             messages: [
-              { role: "system", content: useFoul ? FOUL_SYSTEM_PROMPT : SYSTEM_PROMPT },
+              {
+                role: "system",
+                content: useFoul ? FOUL_SYSTEM_PROMPT + BATTLE_EXTRA + slang : SYSTEM_PROMPT,
+              },
               ...history.map((m) => ({
                 role: m.role === "bot" ? ("assistant" as const) : ("user" as const),
                 content:
