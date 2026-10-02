@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -28,26 +28,7 @@ export function AdminCollapsible({
 }: Props) {
   const key = `admin-collapsible:${storageKey}`;
   const [open, setOpen] = useState<boolean>(defaultOpen);
-  const hydrated = useRef(false);
 
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(key);
-      if (saved !== null) setOpen(saved === "1");
-    } catch {
-      /* ignore */
-    }
-    hydrated.current = true;
-  }, [key]);
-
-  useEffect(() => {
-    if (!hydrated.current) return;
-    try {
-      localStorage.setItem(key, open ? "1" : "0");
-    } catch {
-      /* ignore */
-    }
-  }, [key, open]);
 
   useEffect(() => {
     const handler = (e: Event) => {
