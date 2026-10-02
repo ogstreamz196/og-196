@@ -31,12 +31,8 @@ export const editChatImage = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { editImage, ImageEditError } = await import("@/lib/image-edit.server");
     const ref = `chat_image_edit:${crypto.randomUUID()}`;
-    const rpc = supabaseAdmin.rpc as unknown as (
-      fn: string,
-      args: Record<string, unknown>,
-    ) => Promise<{ data: unknown; error: { message: string } | null }>;
-
-    const charge = await rpc("consume_chat_image_edit", { p_user: context.userId, p_reference: ref });
+    const supabase = supabaseAdmin;
+    const charge = await supabase.rpc("consume_chat_image_edit", { p_user: context.userId, p_reference: ref });
     if (charge.error) {
       if (/insufficient|balance|not enough/i.test(charge.error.message))
         return { ok: false as const, reason: "no_coins" as const };
