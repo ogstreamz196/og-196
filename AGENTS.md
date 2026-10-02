@@ -11,7 +11,7 @@
 
 ## AI providers
 
-- Share ordinary chat inference between the owner's `GEMINI_API_KEY` and `OPENAI_API_KEY`, with one cross-provider fallback only for 429/5xx failures; use `PERPLEXITY_API_KEY` only for live web facts and never use Lovable AI for end-user inference.
+- Share ordinary chat inference between the owner's `GEMINI_API_KEY` and `OPENAI_API_KEY`; on 429/402/401/403/5xx cascade to free text-only tiers (Groq, Cerebras, Mistral, OpenRouter when keyed, then keyless Pollinations) so chat never dies when premium quota runs out; use `PERPLEXITY_API_KEY` only for live web facts and never use Lovable AI for end-user inference.
 - Keep lyrics generation and audio transcription on Gemini because those flows use Gemini-specific media handling.
 
 ## Public track sharing
