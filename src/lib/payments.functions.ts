@@ -361,6 +361,12 @@ export const reconcileCoinSession = createServerFn({ method: "POST" })
           });
           if (idErr) console.error("assign_og_vip_id failed", idErr);
           else ogVipId = (id as string | null) ?? null;
+          try {
+            const { queueYearlyVipAck } = await import("@/lib/vip-ack.server");
+            await queueYearlyVipAck(supabaseAdmin, userId, ogVipId);
+          } catch (e) {
+            console.error("vip ack notify failed", e);
+          }
         }
         return { status: "vip_granted", ogVipId };
       }
