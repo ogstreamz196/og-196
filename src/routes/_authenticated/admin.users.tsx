@@ -232,7 +232,7 @@ function AdminUsersPage() {
             />
             <StatCard
               icon={<Coins className="h-4 w-4" />}
-              label="Coins in circulation"
+              label="Coins held"
               value={totalCoins}
               accent="coin"
             />
