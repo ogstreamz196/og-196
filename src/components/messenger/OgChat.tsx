@@ -440,9 +440,12 @@ typeof window !== "undefined" &&
       return;
     }
 
-    if (att && editMode) {
+    const EDIT_INTENT =
+      /\b(edit|change|turn (it|this|me|him|her|them)|make (it|this|me|him|her|them)|add|remove|replace|swap|put|convert|transform|restyle|style|cartoon|anime|pixar|sketch|paint|draw|colou?ri[sz]e|background|filter|enhance|upscale|blur|brighten|darken|into a|as a|look like)\b/i;
+    const wantsEdit = !!att && (editMode || EDIT_INTENT.test(t));
+    if (att && wantsEdit) {
       if (imageEdit.isPending) return;
-      if (!t) return toast.error("Type how you want the image edited.");
+      if (!t) return toast.error("Type how you want the image changed, e.g. \"make it anime\".");
       setMessages((cur) => [...cur, { role: "user", content: `🎨 Edit image: ${t}` }]);
       setInput("");
       setAttachment(null);
@@ -506,6 +509,8 @@ typeof window !== "undefined" &&
       r.readAsDataURL(file);
     });
     setAttachment({ dataUrl, name: file.name });
+    // Most people attach a photo to change it — default to the image editor.
+    setEditMode(true);
   }
 
   async function startRecording() {
@@ -1044,20 +1049,42 @@ typeof window !== "undefined" &&
             style={{ touchAction: "manipulation" }}
             className="min-h-14 max-h-36 flex-1 resize-none overflow-y-auto bg-transparent px-2 py-2 text-base leading-5 placeholder:text-muted-foreground/70 focus:outline-none disabled:cursor-not-allowed sm:px-2.5 sm:text-[15px]"
           />
-          <button
-            type="submit"
-            disabled={m.isPending || (!input.trim() && !attachment) || isOut || !user}
-            aria-label="Send message"
-            title="Send"
-            data-testid="og-loner-send"
-            className="mb-1 grid h-11 w-11 shrink-0 place-items-center rounded-full bg-gradient-brand text-primary-foreground shadow-[0_8px_22px_-6px_hsl(var(--primary)/0.6)] ring-1 ring-primary/40 transition hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 disabled:bg-muted disabled:text-muted-foreground disabled:shadow-none disabled:ring-0"
-          >
-            {m.isPending ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              <Send className="h-5 w-5" />
-            )}
-          </button>
+          {attachment && editMode ? (
+            <button
+              type="submit"
+              disabled={imageEdit.isPending || !input.trim() || !user}
+              aria-label="Edit image"
+              title={!input.trim() ? "Type what to change first" : "Edit image"}
+              data-testid="og-loner-send"
+              className="mb-1 flex h-11 shrink-0 items-center gap-1 rounded-full bg-gradient-brand px-3 text-xs font-bold text-primary-foreground shadow-[0_8px_22px_-6px_hsl(var(--primary)/0.6)] ring-1 ring-primary/40 transition hover:scale-105 active:scale-95 disabled:bg-muted disabled:text-muted-foreground disabled:shadow-none disabled:ring-0"
+            >
+              {imageEdit.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  🎨 Edit
+                  <span className="opacity-80">
+                    · {editStatus.data?.freeAvailable !== false ? "Free" : "2🪙"}
+                  </span>
+                </>
+              )}
+            </button>
+          ) : (
+            <button
+              type="submit"
+              disabled={m.isPending || (!input.trim() && !attachment) || isOut || !user}
+              aria-label="Send message"
+              title="Send"
+              data-testid="og-loner-send"
+              className="mb-1 grid h-11 w-11 shrink-0 place-items-center rounded-full bg-gradient-brand text-primary-foreground shadow-[0_8px_22px_-6px_hsl(var(--primary)/0.6)] ring-1 ring-primary/40 transition hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 disabled:bg-muted disabled:text-muted-foreground disabled:shadow-none disabled:ring-0"
+            >
+              {m.isPending ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <Send className="h-5 w-5" />
+              )}
+            </button>
+          )}
         </div>
         <p
           className="mt-1 flex items-center justify-between gap-2 px-1 text-[10px] font-medium text-muted-foreground/80 sm:mt-2.5 sm:flex-wrap sm:justify-start sm:px-2 sm:text-xs"

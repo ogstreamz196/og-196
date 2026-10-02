@@ -45,3 +45,7 @@
 
 - [x] Automatically recover or retry failed track generations in the background without charging coins
 - [x] Verify retry scheduling, terminal failures, and clean app build
+
+## Pending
+
+- [ ] Free AI fallback cascade (Groq, OpenRouter) — waiting on user to add GROQ_API_KEY and OPENROUTER_API_KEY
