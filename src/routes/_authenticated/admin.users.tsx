@@ -205,14 +205,14 @@ function AdminUsersPage() {
         <div className="boss-ui mx-auto max-w-7xl space-y-5">
           <BossNav />
           {/* Header */}
-          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
-              <h2 className="truncate text-xl">User Management</h2>
-              <p className="truncate text-xs text-muted-foreground">
+              <h2 className="text-xl">User Management</h2>
+              <p className="text-xs text-muted-foreground">
                 Members, balances, roles and audits in one place.
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex shrink-0 items-center gap-2">
               <AdminEditModeToggle />
               <Link to="/admin">
                 <Button variant="outline" size="sm">
@@ -232,7 +232,7 @@ function AdminUsersPage() {
             />
             <StatCard
               icon={<Coins className="h-4 w-4" />}
-              label="Coins in circulation"
+              label="Coins held"
               value={totalCoins}
               accent="coin"
             />
@@ -709,7 +709,7 @@ function MobileUserCard({
         </p>
       )}
 
-      <div className="flex items-center justify-between gap-2 border-t border-border pt-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
         <VipQuickToggle userId={user.id} checked={isVip} />
         <div className="flex items-center gap-1">
           <CoinsPopover userId={user.id} balance={user.coin_balance ?? 0} />
@@ -753,18 +753,18 @@ function VipQuickToggle({ userId, checked }: { userId: string; checked: boolean 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <div className="flex h-8 items-center rounded-md border border-border bg-background/40 px-2">
+        <label className="flex h-9 shrink-0 cursor-pointer items-center gap-2 rounded-md border border-border bg-background/40 px-2.5 text-sm">
           <Crown
-            className={`mr-1.5 h-3.5 w-3.5 ${checked ? "text-amber-500" : "text-muted-foreground"}`}
+            className={`h-4 w-4 ${checked ? "text-amber-500" : "text-muted-foreground"}`}
           />
+          <span className={`whitespace-nowrap ${checked ? "text-amber-400" : "text-muted-foreground"}`}>VIP</span>
           <Switch
             checked={checked}
             disabled={mut.isPending}
             onCheckedChange={(v) => mut.mutate(v)}
             aria-label="Toggle VIP"
-            className="scale-75"
           />
-        </div>
+        </label>
       </TooltipTrigger>
       <TooltipContent>{checked ? "Revoke VIP" : "Grant VIP"}</TooltipContent>
     </Tooltip>

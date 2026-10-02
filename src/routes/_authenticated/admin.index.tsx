@@ -68,9 +68,19 @@ const PAGE_LINKS = [
   { to: "/developer", label: "Live users", desc: "Who's online", Icon: Radio },
 ] as const;
 
+const DESKS = [
+  { id: "music", label: "Music", title: "Music desk", desc: "Live tracks, retries and locks", Icon: Music2 },
+  { id: "economy", label: "Coins", title: "Coins & pricing", desc: "Balances, minting and pricing rules", Icon: Coins },
+  { id: "bot", label: "Bot", title: "Bot & Telegram", desc: "OG Bot, webhook and your DMs", Icon: Bot },
+  { id: "system", label: "App", title: "App & diagnostics", desc: "Feature switches and tests", Icon: Settings2 },
+  { id: "pages", label: "Tools", title: "Users, store & tools", desc: "Every other Boss page", Icon: Users },
+  { id: "activity", label: "Audit", title: "Audit log", desc: "Recent Boss actions", Icon: Activity },
+] as const;
+type DeskId = (typeof DESKS)[number]["id"];
+
 function AdminPanel() {
   const { isAdmin, isLoading: roleLoading } = useRole();
-  const [openSection, setOpenSection] = useState<string | null>("music");
+  const [desk, setDesk] = useState<DeskId>("music");
 
   if (roleLoading) {
     return (
@@ -83,165 +93,155 @@ function AdminPanel() {
   }
   if (!isAdmin) return <Navigate to="/" />;
 
-  const section = (id: string) => ({
-    open: openSection === id,
-    onToggle: () => setOpenSection((cur) => (cur === id ? null : id)),
-  });
+  const current = DESKS.find((d) => d.id === desk)!;
 
   return (
     <DashboardShell title="Admin Controls">
-      <div className="boss-ui">
-      <BossNav />
-      <div className="mx-auto mt-4 w-full min-w-0 max-w-5xl space-y-4">
-        <header className="min-w-0">
-          <h1 className="text-xl leading-tight sm:text-2xl">
-            Overview
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Tap a section to open it. Only one stays open at a time.
-          </p>
-        </header>
+      <div className="boss-ui mx-auto w-full min-w-0 max-w-5xl">
+        <BossNav />
 
-        <BossKpiStrip />
-        <ProviderPulse />
+        <div className="space-y-6">
+          {/* Overview */}
+          <section className="space-y-3">
+            <SectionHeading title="Overview" desc="Live numbers, refreshed every minute" />
+            <BossKpiStrip />
+            <ProviderPulse />
+          </section>
 
-        <div className="space-y-3">
-          <Section id="music" title="Music desk" desc="Live tracks, retries, locks" Icon={Music2} {...section("music")}>
-            <MusicDesk />
-          </Section>
-
-          <Section id="economy" title="Coins & pricing" desc="Balances, minting, pricing rules" Icon={Coins} {...section("economy")}>
-            <Panel group="economy" k="og-coins" title="OG Coins overview" subtitle="Balances in circulation" open>
-              <OgCoinsPanel />
-            </Panel>
-            <Panel group="economy" k="mint" title="Mint coins" subtitle="Grant coins to a user">
-              <MintCoinsPanel />
-            </Panel>
-            <Panel group="economy" k="pricing" title="Pricing & limits" subtitle="Generation and unlock costs">
-              <PricingControls />
-            </Panel>
-          </Section>
-
-          <Section id="bot" title="Bot & Telegram" desc="OG Bot, webhook, DMs" Icon={Bot} {...section("bot")}>
-            <Panel group="bot" k="og-bot-ping" title="OG Bot ping" subtitle="Check OG Bot is reachable" open>
-              <OgBotPing />
-            </Panel>
-            <Panel group="bot" k="telegram-webhook" title="Telegram webhook" subtitle="Live delivery status">
-              <TelegramWebhookStatus />
-            </Panel>
-            <Panel group="bot" k="telegram-smoke" title="Telegram smoke test" subtitle="Bot + webhook check">
-              <TelegramSmokeTest />
-            </Panel>
-            <Panel group="bot" k="boss-notifs" title="Boss DM notifications" subtitle="What gets sent to you">
-              <BossNotificationsPanel />
-            </Panel>
-          </Section>
-
-          <Section id="system" title="App & diagnostics" desc="Feature switches and tests" Icon={Settings2} {...section("system")}>
-            <Panel group="system" k="app-toggles" title="App toggles" subtitle="Global feature switches" open>
-              <AppToggles />
-            </Panel>
-            <Panel group="system" k="portals" title="Portals" subtitle="Manage portal definitions">
-              <PortalManager />
-            </Panel>
-            <Panel group="system" k="e2e-smoke" title="End-to-end test" subtitle="Full app flow">
-              <E2ESmokeTest />
-            </Panel>
-            <Panel group="system" k="foul-smoke" title="Foul-mouth test" subtitle="VIP gating + reply quality">
-              <FoulMouthSmokeTest />
-            </Panel>
-            <Panel group="system" k="capabilities" title="Hardwired capabilities" subtitle="Runtime status">
-              <HardwiredCapabilities />
-            </Panel>
-          </Section>
-
-          <Section id="pages" title="Users, store & tools" desc="Every other admin page" Icon={Users} {...section("pages")}>
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {PAGE_LINKS.map(({ to, label, desc, Icon }) => (
-                <Link
-                  key={to}
-                  to={to}
-                  className="flex min-w-0 items-center gap-3 rounded-xl border border-border bg-background/40 px-3 py-2.5 transition hover:border-primary/50 hover:bg-primary/5"
-                >
-                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/15 text-primary">
-                    <Icon className="h-4 w-4" />
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block font-semibold leading-tight">{label}</span>
-                    <span className="block text-xs leading-snug text-muted-foreground">{desc}</span>
-                  </span>
-                  <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
-                </Link>
-              ))}
+          {/* Desks */}
+          <section className="space-y-3">
+            <SectionHeading title="Management" desc="Pick an area to manage" />
+            <div
+              role="tablist"
+              aria-label="Boss areas"
+              className="grid grid-cols-3 gap-2 sm:grid-cols-6"
+            >
+              {DESKS.map(({ id, label, Icon }) => {
+                const active = id === desk;
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    role="tab"
+                    aria-selected={active}
+                    onClick={() => setDesk(id)}
+                    className={cn(
+                      "flex min-h-[64px] flex-col items-center justify-center gap-1 rounded-xl border px-2 py-2 text-sm transition",
+                      active
+                        ? "border-primary bg-primary/15 text-foreground"
+                        : "border-border bg-card text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    <Icon className={cn("h-5 w-5", active && "text-primary")} />
+                    <span className="leading-none">{label}</span>
+                  </button>
+                );
+              })}
             </div>
-          </Section>
 
-          <Section id="activity" title="Audit log" desc="Recent Boss actions" Icon={Activity} {...section("activity")}>
-            <BossAuditLog />
-          </Section>
+            <div role="tabpanel" className="min-w-0 rounded-xl border border-border bg-card/60 p-3 sm:p-4">
+              <div className="mb-3 flex min-w-0 items-center gap-3 border-b border-border pb-3">
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/15 text-primary">
+                  <current.Icon className="h-4 w-4" />
+                </span>
+                <div className="min-w-0">
+                  <h2 className="text-lg leading-tight">{current.title}</h2>
+                  <p className="text-xs text-muted-foreground">{current.desc}</p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {desk === "music" && <MusicDesk />}
+
+                {desk === "economy" && (
+                  <>
+                    <Panel group="economy" k="og-coins" title="OG Coins overview" subtitle="Balances in circulation" open>
+                      <OgCoinsPanel />
+                    </Panel>
+                    <Panel group="economy" k="mint" title="Mint coins" subtitle="Grant coins to a user">
+                      <MintCoinsPanel />
+                    </Panel>
+                    <Panel group="economy" k="pricing" title="Pricing & limits" subtitle="Generation and unlock costs">
+                      <PricingControls />
+                    </Panel>
+                  </>
+                )}
+
+                {desk === "bot" && (
+                  <>
+                    <Panel group="bot" k="og-bot-ping" title="OG Bot ping" subtitle="Check OG Bot is reachable" open>
+                      <OgBotPing />
+                    </Panel>
+                    <Panel group="bot" k="telegram-webhook" title="Telegram webhook" subtitle="Live delivery status">
+                      <TelegramWebhookStatus />
+                    </Panel>
+                    <Panel group="bot" k="telegram-smoke" title="Telegram smoke test" subtitle="Bot + webhook check">
+                      <TelegramSmokeTest />
+                    </Panel>
+                    <Panel group="bot" k="boss-notifs" title="Boss DM notifications" subtitle="What gets sent to you">
+                      <BossNotificationsPanel />
+                    </Panel>
+                  </>
+                )}
+
+                {desk === "system" && (
+                  <>
+                    <Panel group="system" k="app-toggles" title="App toggles" subtitle="Global feature switches" open>
+                      <AppToggles />
+                    </Panel>
+                    <Panel group="system" k="portals" title="Portals" subtitle="Manage portal definitions">
+                      <PortalManager />
+                    </Panel>
+                    <Panel group="system" k="e2e-smoke" title="End-to-end test" subtitle="Full app flow">
+                      <E2ESmokeTest />
+                    </Panel>
+                    <Panel group="system" k="foul-smoke" title="Foul-mouth test" subtitle="VIP gating + reply quality">
+                      <FoulMouthSmokeTest />
+                    </Panel>
+                    <Panel group="system" k="capabilities" title="Hardwired capabilities" subtitle="Runtime status">
+                      <HardwiredCapabilities />
+                    </Panel>
+                  </>
+                )}
+
+                {desk === "pages" && (
+                  <div className="overflow-hidden rounded-xl border border-border bg-card">
+                    {PAGE_LINKS.map(({ to, label, desc, Icon }, i) => (
+                      <Link
+                        key={to}
+                        to={to}
+                        className={cn(
+                          "flex min-h-[56px] min-w-0 items-center gap-3 px-4 py-2.5 transition hover:bg-muted/30",
+                          i > 0 && "border-t border-border",
+                        )}
+                      >
+                        <Icon className="h-4 w-4 shrink-0 text-primary" />
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-[15px] leading-tight">{label}</span>
+                          <span className="block text-xs text-muted-foreground">{desc}</span>
+                        </span>
+                        <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                      </Link>
+                    ))}
+                  </div>
+                )}
+
+                {desk === "activity" && <BossAuditLog />}
+              </div>
+            </div>
+          </section>
         </div>
-      </div>
       </div>
     </DashboardShell>
   );
 }
 
-function Section({
-  id,
-  title,
-  desc,
-  Icon,
-  open,
-  onToggle,
-  children,
-}: {
-  id: string;
-  title: string;
-  desc: string;
-  Icon: React.ComponentType<{ className?: string }>;
-  open: boolean;
-  onToggle: () => void;
-  children: React.ReactNode;
-}) {
+function SectionHeading({ title, desc }: { title: string; desc: string }) {
   return (
-    <section
-      id={`boss-${id}`}
-      className={cn(
-        "min-w-0 overflow-hidden rounded-2xl border bg-card/70 shadow-card transition-colors",
-        open ? "border-primary/50" : "border-border",
-      )}
-    >
-      <button
-        type="button"
-        onClick={() => {
-          onToggle();
-          if (!open) {
-            requestAnimationFrame(() =>
-              document.getElementById(`boss-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" }),
-            );
-          }
-        }}
-        aria-expanded={open}
-        className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition hover:bg-muted/40"
-      >
-        <span
-          className={cn(
-            "grid h-10 w-10 shrink-0 place-items-center rounded-xl",
-            open ? "bg-primary text-primary-foreground" : "bg-primary/15 text-primary",
-          )}
-        >
-          <Icon className="h-5 w-5" />
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block font-display text-base font-bold leading-tight">{title}</span>
-          <span className="block text-xs leading-snug text-muted-foreground">{desc}</span>
-        </span>
-        <ChevronDown
-          className={cn("h-5 w-5 shrink-0 text-muted-foreground transition-transform", open && "rotate-180")}
-        />
-      </button>
-      {open && <div className="min-w-0 border-t border-border/60 p-2 sm:p-4">{children}</div>}
-    </section>
+    <div className="min-w-0">
+      <h2 className="text-lg leading-tight sm:text-xl">{title}</h2>
+      <p className="text-xs text-muted-foreground">{desc}</p>
+    </div>
   );
 }
 

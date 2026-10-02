@@ -63,7 +63,8 @@ export function AdminCollapsible({
   return (
     <section
       className={cn(
-        "mb-3 overflow-hidden rounded-xl border border-border bg-card/60 shadow-card",
+        "overflow-hidden rounded-xl border bg-card transition-colors",
+        open ? "border-primary/40" : "border-border",
         className,
       )}
     >
@@ -71,23 +72,25 @@ export function AdminCollapsible({
         type="button"
         onClick={toggle}
         aria-expanded={open}
-        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition hover:bg-muted/40"
+        className="flex min-h-[56px] w-full items-center justify-between gap-3 px-4 py-3 text-left transition hover:bg-muted/30"
       >
         <div className="min-w-0 flex-1">
-          <div className="break-words font-semibold leading-snug">{title}</div>
+          <div className="break-words text-[15px] font-medium leading-snug">{title}</div>
           {subtitle && (
-            <div className="break-words text-xs leading-snug text-muted-foreground">{subtitle}</div>
+            <div className="mt-0.5 break-words text-xs leading-snug text-muted-foreground">
+              {subtitle}
+            </div>
           )}
         </div>
         <ChevronDown
           className={cn(
             "h-4 w-4 shrink-0 text-muted-foreground transition-transform",
-            open && "rotate-180",
+            open && "rotate-180 text-primary",
           )}
         />
       </button>
       {open && (
-        <div className="min-w-0 overflow-x-auto border-t border-border/60 p-2 sm:p-3">
+        <div className="min-w-0 overflow-x-auto border-t border-border p-3 sm:p-4">
           {children}
         </div>
       )}
