@@ -31,12 +31,8 @@ export const editChatImage = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { editImage, ImageEditError } = await import("@/lib/image-edit.server");
     const ref = `chat_image_edit:${crypto.randomUUID()}`;
-    const rpc = supabaseAdmin.rpc as unknown as (
-      fn: string,
-      args: Record<string, unknown>,
-    ) => Promise<{ data: unknown; error: { message: string } | null }>;
-
-    const charge = await rpc("consume_chat_image_edit", { p_user: context.userId, p_reference: ref });
+    const supabase = supabaseAdmin;
+    const charge = await supabase.rpc("consume_chat_image_edit", { p_user: context.userId, p_reference: ref });
     if (charge.error) {
       if (/insufficient|balance|not enough/i.test(charge.error.message))
         return { ok: false as const, reason: "no_coins" as const };
@@ -58,10 +54,10 @@ export const editChatImage = createServerFn({ method: "POST" })
       if (signed.error || !signed.data) throw new Error("sign failed");
       return { ok: true as const, url: signed.data.signedUrl, free: c.free, cost: c.cost };
     } catch (e) {
-      await rpc("refund_chat_image_edit", {
+      await supabase.rpc("refund_chat_image_edit", {
         p_user: context.userId,
         p_free: c.free,
-        p_prev: c.prev_free_at,
+        p_prev: (c.prev_free_at ?? null) as string,
         p_reference: ref,
       });
       const s = e instanceof ImageEditError ? e.status : 500;
