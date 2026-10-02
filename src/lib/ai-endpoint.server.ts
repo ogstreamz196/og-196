@@ -10,7 +10,9 @@ export type AiChatTarget = {
   url: string;
   headers: Record<string, string>;
   model: string;
-  provider: "gemini" | "openai";
+  provider: "gemini" | "openai" | "groq" | "openrouter" | "cerebras" | "mistral" | "pollinations";
+  /** Free fallback tiers get text-only messages and no provider-specific params. */
+  free?: boolean;
 };
 
 const GEMINI_OPENAI_URL =
@@ -39,6 +41,51 @@ function openAiTarget(): AiChatTarget | null {
   };
 }
 
+function keyed(
+  envKey: string,
+  provider: AiChatTarget["provider"],
+  url: string,
+  model: string,
+  extra: Record<string, string> = {},
+): AiChatTarget | null {
+  const key = process.env[envKey];
+  if (!key) return null;
+  return {
+    url,
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}`, ...extra },
+    model,
+    provider,
+    free: true,
+  };
+}
+
+/**
+ * Free-tier fallbacks, tried in order only after the premium providers fail.
+ * Keyed tiers are skipped when their secret is missing; Pollinations needs no key.
+ */
+export function freeFallbackTargets(): AiChatTarget[] {
+  const list = [
+    keyed("GROQ_API_KEY", "groq", "https://api.groq.com/openai/v1/chat/completions", "llama-3.3-70b-versatile"),
+    keyed("CEREBRAS_API_KEY", "cerebras", "https://api.cerebras.ai/v1/chat/completions", "llama-3.3-70b"),
+    keyed("MISTRAL_API_KEY", "mistral", "https://api.mistral.ai/v1/chat/completions", "mistral-small-latest"),
+    keyed(
+      "OPENROUTER_API_KEY",
+      "openrouter",
+      "https://openrouter.ai/api/v1/chat/completions",
+      "meta-llama/llama-3.3-70b-instruct:free",
+      { "HTTP-Referer": "https://ogbot.co.uk", "X-Title": "OG BOT" },
+    ),
+    {
+      url: "https://text.pollinations.ai/openai",
+      headers: { "Content-Type": "application/json" },
+      model: "openai",
+      provider: "pollinations" as const,
+      free: true,
+    },
+  ];
+  return list.filter((t): t is AiChatTarget => t !== null);
+}
+
 function stableBucket(value: string): number {
   let hash = 2166136261;
   for (let i = 0; i < value.length; i += 1) {
@@ -61,27 +108,62 @@ export function aiChatTarget(affinity = "default"): AiChatTarget | null {
   return aiChatTargets(affinity)[0] ?? null;
 }
 
+type Msg = { role: string; content: unknown };
+
+/** Flatten multimodal content to plain text so any free model accepts it. */
+function freeBody(body: Record<string, unknown>): Record<string, unknown> {
+  const messages = Array.isArray(body.messages) ? (body.messages as Msg[]) : [];
+  const flat = messages.map((m) => {
+    if (typeof m.content === "string") return { role: m.role, content: m.content };
+    if (Array.isArray(m.content)) {
+      const text = (m.content as { type?: string; text?: string }[])
+        .map((p) => (p.type === "text" ? p.text ?? "" : p.type === "image_url" ? "[image attached]" : ""))
+        .filter(Boolean)
+        .join("\n");
+      return { role: m.role, content: text };
+    }
+    return { role: m.role, content: String(m.content ?? "") };
+  });
+  const out: Record<string, unknown> = { messages: flat };
+  if (body.stream) out.stream = true;
+  if (typeof body.temperature === "number") out.temperature = body.temperature;
+  return out;
+}
+
+function shouldFallThrough(status: number): boolean {
+  return status === 429 || status === 402 || status === 401 || status === 403 || status >= 500;
+}
+
 export async function fetchAiChat(
   body: Record<string, unknown>,
   affinity = "default",
 ): Promise<{ response: Response; provider: AiChatTarget["provider"] }> {
-  const targets = aiChatTargets(affinity);
-  if (!targets.length) throw new Error("AI not configured");
+  const targets = [...aiChatTargets(affinity), ...freeFallbackTargets()];
+  let last: { response: Response; provider: AiChatTarget["provider"] } | null = null;
 
   for (let index = 0; index < targets.length; index += 1) {
     const target = targets[index];
-    const response = await fetch(target.url, {
-      method: "POST",
-      headers: target.headers,
-      body: JSON.stringify({ ...body, model: target.model }),
-    });
-    const retryable = response.status === 429 || response.status >= 500;
-    if (!retryable || index === targets.length - 1) {
+    let response: Response;
+    try {
+      response = await fetch(target.url, {
+        method: "POST",
+        headers: target.headers,
+        body: JSON.stringify({ ...(target.free ? freeBody(body) : body), model: target.model }),
+        signal: AbortSignal.timeout(45_000),
+      });
+    } catch (e) {
+      console.warn(`AI ${target.provider} network error`, e);
+      continue;
+    }
+    if (!shouldFallThrough(response.status) || index === targets.length - 1) {
       return { response, provider: target.provider };
     }
-    await new Promise((resolve) => setTimeout(resolve, 350 + Math.floor(Math.random() * 250)));
+    console.warn(`AI ${target.provider} returned ${response.status}, falling back`);
+    last = { response, provider: target.provider };
+    await new Promise((resolve) => setTimeout(resolve, 250 + Math.floor(Math.random() * 200)));
   }
 
+  if (last) return last;
   throw new Error("AI not configured");
 }
 
