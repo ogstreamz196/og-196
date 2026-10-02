@@ -398,12 +398,12 @@ function PricingControls() {
   };
 
   return (
-    <div className="mb-6 rounded-2xl border border-border bg-card p-5 shadow-card">
+    <div className="min-w-0 p-1 sm:p-2">
       <div className="mb-3 flex items-center gap-2">
         <Coins className="h-4 w-4 text-coin" />
         <h3 className="font-semibold">Pricing & limits</h3>
       </div>
-      <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-3 py-2 text-xs">
+      <div className="mb-4 flex flex-wrap items-center gap-2 break-all rounded-xl border border-primary/30 bg-primary/5 px-3 py-2 text-xs">
         <span className="font-bold uppercase tracking-wider text-primary">Live</span>
         <code className="rounded bg-background/60 px-1.5 py-0.5 font-mono">
           app_settings.songs_per_generation
