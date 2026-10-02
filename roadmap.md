@@ -48,4 +48,4 @@
 
 ## Pending
 
-- [ ] Free AI fallback cascade (Groq, OpenRouter) — waiting on user to add GROQ_API_KEY and OPENROUTER_API_KEY
+- [x] Free AI fallback cascade (Groq, OpenRouter) — waiting on user to add GROQ_API_KEY and OPENROUTER_API_KEY
