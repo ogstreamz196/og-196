@@ -20,7 +20,9 @@ export const getImageEditStatus = createServerFn({ method: "GET" })
 export const editChatImage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { prompt: string; imageDataUrl: string }) => {
-    const prompt = String(d?.prompt ?? "").trim().slice(0, 1000);
+    const prompt = String(d?.prompt ?? "")
+      .trim()
+      .slice(0, 1000);
     if (!prompt) throw new Error("Tell OG Bot how to edit the image.");
     if (typeof d.imageDataUrl !== "string" || !d.imageDataUrl.startsWith("data:image/"))
       throw new Error("Attach an image first.");
@@ -32,7 +34,10 @@ export const editChatImage = createServerFn({ method: "POST" })
     const { editImage, ImageEditError } = await import("@/lib/image-edit.server");
     const ref = `chat_image_edit:${crypto.randomUUID()}`;
     const supabase = supabaseAdmin;
-    const charge = await supabase.rpc("consume_chat_image_edit", { p_user: context.userId, p_reference: ref });
+    const charge = await supabase.rpc("consume_chat_image_edit", {
+      p_user: context.userId,
+      p_reference: ref,
+    });
     if (charge.error) {
       if (/insufficient|balance|not enough/i.test(charge.error.message))
         return { ok: false as const, reason: "no_coins" as const };
@@ -62,7 +67,9 @@ export const editChatImage = createServerFn({ method: "POST" })
       });
       const s = e instanceof ImageEditError ? e.status : 500;
       if (s === 429 || s === 402)
-        throw new Error("OG Bot's image studio is taking a break — try again later. You weren't charged.");
+        throw new Error(
+          "OG Bot's image studio is taking a break — try again later. You weren't charged.",
+        );
       if (s === 422 || s === 400)
         throw new Error("OG Bot couldn't make that edit. You weren't charged.");
       console.error("image edit failed", e);

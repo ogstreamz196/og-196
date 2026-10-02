@@ -58,7 +58,10 @@ export function MusicDesk() {
       if (error) throw error;
       const list = songs ?? [];
       const ids = Array.from(new Set(list.map((s) => s.user_id)));
-      const map = new Map<string, { email: string | null; display_name: string | null; coin_balance: number }>();
+      const map = new Map<
+        string,
+        { email: string | null; display_name: string | null; coin_balance: number }
+      >();
       if (ids.length) {
         const { data: profs } = await supabase
           .from("profiles")
@@ -66,7 +69,11 @@ export function MusicDesk() {
           .in("id", ids);
         for (const p of profs ?? []) {
           const m = maskDevIdentity({ email: p.email, display_name: p.display_name });
-          map.set(p.id, { email: m.email, display_name: m.display_name, coin_balance: Number(p.coin_balance) });
+          map.set(p.id, {
+            email: m.email,
+            display_name: m.display_name,
+            coin_balance: Number(p.coin_balance),
+          });
         }
       }
       return list.map((s) => ({
@@ -221,7 +228,10 @@ export function MusicDesk() {
         ) : (
           <ul className="divide-y divide-border">
             {visible.map((s) => (
-              <li key={s.id} className="flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:gap-4">
+              <li
+                key={s.id}
+                className="flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:gap-4"
+              >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <span className="truncate font-semibold">{s.title || "Untitled"}</span>
@@ -238,9 +248,15 @@ export function MusicDesk() {
                   )}
                   <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                     <span className="truncate">{s.email ?? s.user_id.slice(0, 8)}</span>
-                    <AdminEditableLabel userId={s.user_id} value={s.display_name} fallback="No label" />
+                    <AdminEditableLabel
+                      userId={s.user_id}
+                      value={s.display_name}
+                      fallback="No label"
+                    />
                     <AdminEditableBalance userId={s.user_id} value={s.coin_balance} />
-                    <span className="whitespace-nowrap">{new Date(s.created_at).toLocaleString()}</span>
+                    <span className="whitespace-nowrap">
+                      {new Date(s.created_at).toLocaleString()}
+                    </span>
                   </div>
                 </div>
                 <div className="flex shrink-0 gap-2">
@@ -250,7 +266,11 @@ export function MusicDesk() {
                     disabled={toggleUnlock.isPending}
                     onClick={() => toggleUnlock.mutate({ id: s.id, unlocked: !s.unlocked })}
                   >
-                    {s.unlocked ? <Lock className="h-3.5 w-3.5" /> : <Unlock className="h-3.5 w-3.5" />}
+                    {s.unlocked ? (
+                      <Lock className="h-3.5 w-3.5" />
+                    ) : (
+                      <Unlock className="h-3.5 w-3.5" />
+                    )}
                     <span className="ml-1.5">{s.unlocked ? "Lock" : "Unlock"}</span>
                   </Button>
                   {s.status === "failed" && (
@@ -260,7 +280,9 @@ export function MusicDesk() {
                       disabled={reprocess.isPending || retryAll.isPending}
                       onClick={() => reprocess.mutate(s.id)}
                     >
-                      <RefreshCw className={cn("h-3.5 w-3.5", reprocess.isPending && "animate-spin")} />
+                      <RefreshCw
+                        className={cn("h-3.5 w-3.5", reprocess.isPending && "animate-spin")}
+                      />
                       <span className="ml-1.5">Retry</span>
                     </Button>
                   )}

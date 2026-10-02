@@ -38,7 +38,9 @@ async function editWithGemini(prompt: string, mime: string, b64: string, backup 
     throw new ImageEditError(t, res.status);
   }
   const json = (await res.json()) as {
-    candidates?: { content?: { parts?: { inlineData?: { mimeType?: string; data?: string } }[] } }[];
+    candidates?: {
+      content?: { parts?: { inlineData?: { mimeType?: string; data?: string } }[] };
+    }[];
   };
   const part = json.candidates?.[0]?.content?.parts?.find((p) => p.inlineData?.data);
   if (!part?.inlineData?.data) throw new ImageEditError("No image returned (refused).", 422);

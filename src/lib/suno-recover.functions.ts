@@ -31,9 +31,8 @@ export const recoverStuckSong = createServerFn({ method: "POST" })
   })
   .handler(async ({ data, context }): Promise<RecoverResult> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { fetchTask, materialiseClips, backfillFullAudio } = await import(
-      "./suno-recover.server"
-    );
+    const { fetchTask, materialiseClips, backfillFullAudio } =
+      await import("./suno-recover.server");
     const admin = supabaseAdmin as unknown as {
       from: (t: string) => any;
       storage: { from: (b: string) => any };
@@ -117,8 +116,7 @@ export const recoverStuckSong = createServerFn({ method: "POST" })
         .from("songs")
         .update({
           status: "failed",
-          error_message:
-            "Retrying automatically while the music engine's file server recovers.",
+          error_message: "Retrying automatically while the music engine's file server recovers.",
           failure_class: "recoverable_cdn",
           next_retry_at: new Date(Date.now() + 60_000).toISOString(),
         })

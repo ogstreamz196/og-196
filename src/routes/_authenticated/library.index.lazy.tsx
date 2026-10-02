@@ -1672,7 +1672,6 @@ function LibraryPage() {
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
-
             <Button
               type="button"
               size="sm"
@@ -1746,8 +1745,6 @@ function LibraryPage() {
           </TabsList>
 
           <TabsContent value="yours" className="mt-0 space-y-3">
-
-
             <LibraryFilters
               mode={yoursFilter}
               onModeChange={setYoursFilter}
@@ -1793,8 +1790,8 @@ function LibraryPage() {
                 const filtered = completedTracks.filter((s) => {
                   const matchesSearch =
                     !q ||
-                        (s.title || "").toLowerCase().includes(q) ||
-                        (s.prompt || "").toLowerCase().includes(q) ||
+                    (s.title || "").toLowerCase().includes(q) ||
+                    (s.prompt || "").toLowerCase().includes(q) ||
                     (s.style || "").toLowerCase().includes(q);
                   const matchesMode =
                     yoursFilter === "all" ||
@@ -1921,8 +1918,8 @@ function LibraryPage() {
                 const filtered = communityTracks.filter((s) => {
                   const matchesSearch =
                     !q ||
-                        (s.title || "").toLowerCase().includes(q) ||
-                        (s.prompt || "").toLowerCase().includes(q) ||
+                    (s.title || "").toLowerCase().includes(q) ||
+                    (s.prompt || "").toLowerCase().includes(q) ||
                     (s.style || "").toLowerCase().includes(q);
                   const matchesMode =
                     communityFilter === "all" ||

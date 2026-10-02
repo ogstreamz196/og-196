@@ -442,7 +442,6 @@ function CommunityTrackRowImpl({
         className="hidden"
       />
 
-
       <UnlockConfirmDialog
         open={unlockOpen}
         onOpenChange={setUnlockOpen}

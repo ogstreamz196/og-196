@@ -33,9 +33,12 @@ export function UsernamePrompt() {
   const [busy, setBusy] = useState(false);
 
   const provider = (user?.app_metadata as { provider?: string } | undefined)?.provider;
-  const providers = ((user?.app_metadata as { providers?: string[] } | undefined)?.providers ?? []);
+  const providers = (user?.app_metadata as { providers?: string[] } | undefined)?.providers ?? [];
   const isSocial =
-    provider === "google" || provider === "apple" || providers.includes("google") || providers.includes("apple");
+    provider === "google" ||
+    provider === "apple" ||
+    providers.includes("google") ||
+    providers.includes("apple");
   const current = profile.data?.display_name ?? "";
   const needsName = isSocial && profile.isSuccess && !isValidUsername(current);
   const key = user ? `og-username-dismissed:${user.id}` : "";
@@ -60,7 +63,10 @@ export function UsernamePrompt() {
       return;
     }
     setBusy(true);
-    const { error } = await supabase.from("profiles").update({ display_name: value }).eq("id", user!.id);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ display_name: value })
+      .eq("id", user!.id);
     setBusy(false);
     if (error) {
       toast.error(error.message.includes("duplicate") ? "That username is taken." : error.message);
@@ -81,8 +87,8 @@ export function UsernamePrompt() {
             <AtSign className="h-5 w-5 text-primary" /> Pick your username
           </DialogTitle>
           <DialogDescription>
-            This is your name across OG BOT. Letters and numbers only, at least 5 characters,
-            with at least one number.
+            This is your name across OG BOT. Letters and numbers only, at least 5 characters, with
+            at least one number.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="space-y-3">

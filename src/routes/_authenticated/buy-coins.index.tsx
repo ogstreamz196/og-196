@@ -327,7 +327,13 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                   )}
                   <Row
                     label="Billing"
-                    value={isVipFlow ? (vipYearly ? "Yearly subscription" : "Monthly subscription") : "One-time payment"}
+                    value={
+                      isVipFlow
+                        ? vipYearly
+                          ? "Yearly subscription"
+                          : "Monthly subscription"
+                        : "One-time payment"
+                    }
                   />
                   <div className="mt-1 flex items-baseline justify-between border-t border-border/60 pt-3">
                     <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
@@ -595,7 +601,6 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
           <CustomPackCard onBuy={(units) => pickSelection({ type: "custom", units })} />
         </section>
 
-
         <section aria-labelledby="section-bundles" className="scroll-mt-24">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <div className="min-w-0">
@@ -655,7 +660,8 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
           <div className="rounded-xl border border-primary/30 bg-store-card p-4 shadow-card sm:p-5">
             <ul className="grid gap-2 text-sm text-muted-foreground min-[440px]:grid-cols-2">
               <li className="flex items-start gap-2">
-                <Star className="mt-0.5 h-3.5 w-3.5 shrink-0 text-coin" /> Foul-mouth OG Bot unlocked
+                <Star className="mt-0.5 h-3.5 w-3.5 shrink-0 text-coin" /> Foul-mouth OG Bot
+                unlocked
               </li>
               <li className="flex items-start gap-2">
                 <Star className="mt-0.5 h-3.5 w-3.5 shrink-0 text-coin" /> Priority OG Bot replies
@@ -685,14 +691,23 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                   onClick={() => pickSelection({ type: "vip", plan: "monthly" })}
                   className="h-11 w-full font-bold"
                 >
-                  {isVip ? "You're VIP" : (<><Crown className="mr-2 h-4 w-4" /> Join monthly</>)}
+                  {isVip ? (
+                    "You're VIP"
+                  ) : (
+                    <>
+                      <Crown className="mr-2 h-4 w-4" /> Join monthly
+                    </>
+                  )}
                 </Button>
               </div>
               {!isNativeApp && (
                 <div className="relative flex flex-col justify-between gap-3 rounded-xl border-2 border-coin/60 bg-background/40 p-4">
                   <span className="absolute -top-2.5 right-3 rounded-full bg-coin px-2 py-0.5 text-[10px] font-black uppercase text-background">
                     Save{" "}
-                    {Math.round((1 - VIP_PLAN_YEARLY.priceCents / (VIP_PLAN.priceCents * 12)) * 100)}%
+                    {Math.round(
+                      (1 - VIP_PLAN_YEARLY.priceCents / (VIP_PLAN.priceCents * 12)) * 100,
+                    )}
+                    %
                   </span>
                   <div>
                     <h3 className="font-display text-base font-black">{VIP_PLAN_YEARLY.label}</h3>
@@ -712,7 +727,13 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                     onClick={() => pickSelection({ type: "vip", plan: "yearly" })}
                     className="h-11 w-full font-bold"
                   >
-                    {isVip ? "You're VIP" : (<><Crown className="mr-2 h-4 w-4" /> Join yearly</>)}
+                    {isVip ? (
+                      "You're VIP"
+                    ) : (
+                      <>
+                        <Crown className="mr-2 h-4 w-4" /> Join yearly
+                      </>
+                    )}
                   </Button>
                 </div>
               )}

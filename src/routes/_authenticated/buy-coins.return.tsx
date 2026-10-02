@@ -112,7 +112,6 @@ function BuyCoinsReturn() {
           </p>
           {state.kind === "vip" && state.ogVipId && <OgVipIdCard id={state.ogVipId} />}
 
-
           <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:justify-center">
             <Button asChild className="font-black uppercase tracking-[0.1em]">
               <Link to="/library">Make a track</Link>

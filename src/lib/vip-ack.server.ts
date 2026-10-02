@@ -17,7 +17,9 @@ async function tgCall(method: string, body: Record<string, unknown>) {
         "X-Connection-Api-Key": tgKey as string,
         "Content-Type": "application/json",
       };
-  const r = await fetch(url, { method: "POST", headers, body: JSON.stringify(body) }).catch(() => null);
+  const r = await fetch(url, { method: "POST", headers, body: JSON.stringify(body) }).catch(
+    () => null,
+  );
   if (!r) return null;
   const j = (await r.json().catch(() => null)) as { ok?: boolean; description?: string } | null;
   if (!r.ok || j?.ok === false) console.error(`[vip-ack] ${method} failed`, j?.description);
@@ -33,7 +35,10 @@ function esc(s: string) {
 export async function queueYearlyVipAck(admin: any, userId: string, ogVipId: string | null) {
   const { data: inserted, error } = await admin
     .from("vip_acknowledgements")
-    .upsert({ user_id: userId, og_vip_id: ogVipId, plan: "yearly" }, { onConflict: "user_id", ignoreDuplicates: true })
+    .upsert(
+      { user_id: userId, og_vip_id: ogVipId, plan: "yearly" },
+      { onConflict: "user_id", ignoreDuplicates: true },
+    )
     .select("user_id");
   if (error) {
     console.error("[vip-ack] insert failed", error.message);
@@ -47,10 +52,18 @@ export async function queueYearlyVipAck(admin: any, userId: string, ogVipId: str
     .eq("id", userId)
     .maybeSingle();
 
-  const { data: roleRows } = await admin.from("user_roles").select("user_id").in("role", ["admin", "boss"]);
-  const bossIds = Array.from(new Set(((roleRows ?? []) as { user_id: string }[]).map((r) => r.user_id)));
+  const { data: roleRows } = await admin
+    .from("user_roles")
+    .select("user_id")
+    .in("role", ["admin", "boss"]);
+  const bossIds = Array.from(
+    new Set(((roleRows ?? []) as { user_id: string }[]).map((r) => r.user_id)),
+  );
   if (!bossIds.length) return;
-  const { data: bosses } = await admin.from("profiles").select("telegram_chat_id").in("id", bossIds);
+  const { data: bosses } = await admin
+    .from("profiles")
+    .select("telegram_chat_id")
+    .in("id", bossIds);
 
   const tgUser = member?.telegram_username as string | null;
   const text =

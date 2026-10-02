@@ -1,14 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  Pause,
-  Play,
-  Repeat,
-  Repeat1,
-  Shuffle,
-  SkipBack,
-  SkipForward,
-  Music2,
-} from "lucide-react";
+import { Pause, Play, Repeat, Repeat1, Shuffle, SkipBack, SkipForward, Music2 } from "lucide-react";
 import { usePlaylist } from "@/hooks/use-playlist";
 import { cn } from "@/lib/utils";
 

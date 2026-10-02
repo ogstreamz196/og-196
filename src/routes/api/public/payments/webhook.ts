@@ -231,7 +231,8 @@ async function syncVipFromSubscription(subscription: any, env: StripeEnv) {
   if (keep) {
     await grantVipRole(userId, ctx);
     const item = subscription.items?.data?.[0];
-    const priceId = item?.price?.lookup_key || item?.price?.metadata?.lovable_external_id || item?.price?.id;
+    const priceId =
+      item?.price?.lookup_key || item?.price?.metadata?.lovable_external_id || item?.price?.id;
     if (isYearlyPrice(priceId) || isYearlyPrice(subscription?.metadata?.bundleId)) {
       await assignOgVipId(userId, ctx);
     }

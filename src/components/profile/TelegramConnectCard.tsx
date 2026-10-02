@@ -10,9 +10,17 @@ const BOT = "OGStreamzBot";
 
 const PERKS = [
   { icon: Bell, title: "Track ready alerts", text: "Get a ping the moment your song finishes." },
-  { icon: Share2, title: "View & share tracks", text: "Type /tracks to see and share your latest songs." },
+  {
+    icon: Share2,
+    title: "View & share tracks",
+    text: "Type /tracks to see and share your latest songs.",
+  },
   { icon: Coins, title: "Wallet on the go", text: "Check your balance and top up in one tap." },
-  { icon: MessageCircle, title: "OG Bot in your pocket", text: "Chat with the same OG Bot brain anywhere." },
+  {
+    icon: MessageCircle,
+    title: "OG Bot in your pocket",
+    text: "Chat with the same OG Bot brain anywhere.",
+  },
 ];
 
 export function TelegramConnectCard() {
@@ -21,7 +29,11 @@ export function TelegramConnectCard() {
   const qc = useQueryClient();
   const launched = useRef(false);
 
-  const status = useQuery({ queryKey: ["my-telegram-status"], queryFn: () => statusFn(), staleTime: 30_000 });
+  const status = useQuery({
+    queryKey: ["my-telegram-status"],
+    queryFn: () => statusFn(),
+    staleTime: 30_000,
+  });
   const linked = status.data?.state === "verified";
 
   // Pre-fetch the token so the button is a real link — phones block pop-ups opened after a wait.
@@ -67,7 +79,10 @@ export function TelegramConnectCard() {
 
       <ul className="relative mt-4 grid gap-2 sm:grid-cols-2">
         {PERKS.map(({ icon: Icon, title, text }) => (
-          <li key={title} className="flex gap-2.5 rounded-xl border border-border bg-background/40 p-3">
+          <li
+            key={title}
+            className="flex gap-2.5 rounded-xl border border-border bg-background/40 p-3"
+          >
             <Icon className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
             <div>
               <p className="text-sm font-semibold leading-tight">{title}</p>
@@ -98,10 +113,16 @@ export function TelegramConnectCard() {
                     return;
                   }
                   launched.current = true;
-                  toast.message("Opening Telegram…", { description: "Tap START to finish connecting." });
+                  toast.message("Opening Telegram…", {
+                    description: "Tap START to finish connecting.",
+                  });
                 }}
               >
-                {href ? <Send className="mr-2 h-4 w-4" /> : <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {href ? (
+                  <Send className="mr-2 h-4 w-4" />
+                ) : (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
                 Connect Telegram
               </a>
             </Button>

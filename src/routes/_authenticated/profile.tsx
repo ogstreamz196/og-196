@@ -37,7 +37,10 @@ export const Route = createFileRoute("/_authenticated/profile")({
       { title: "My Profile — OG BOT" },
       { name: "description", content: "Manage your OG BOT username, email, coins and activity." },
       { property: "og:title", content: "My Profile — OG BOT" },
-      { property: "og:description", content: "Manage your OG BOT username, email, coins and activity." },
+      {
+        property: "og:description",
+        content: "Manage your OG BOT username, email, coins and activity.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -47,26 +50,44 @@ export const Route = createFileRoute("/_authenticated/profile")({
 
 const USERNAME_DOMAIN = "@ogstreamz.app";
 
-type Tx = { id: string; amount: number; type: string; reference: string | null; created_at: string };
+type Tx = {
+  id: string;
+  amount: number;
+  type: string;
+  reference: string | null;
+  created_at: string;
+};
 
 function txLabel(type: string, ref: string | null): string {
   const t = `${type} ${ref ?? ""}`.toLowerCase();
-  if (t.includes("remake") || t.includes("variation") || t.includes("reveal")) return "Remade track";
+  if (t.includes("remake") || t.includes("variation") || t.includes("reveal"))
+    return "Remade track";
   if (t.includes("unlock")) return "Unlocked a track";
   if (t.includes("generat") || t.includes("song")) return "Created a track";
   if (t.includes("refund")) return "Refund";
   if (t.includes("daily")) return "Daily Drop";
   if (t.includes("battle")) return "Battle Zone reward";
   if (t.includes("welcome")) return "Welcome bonus";
-  if (t.includes("referral") || t.includes("royalty") || t.includes("cashback") || t.includes("commission"))
+  if (
+    t.includes("referral") ||
+    t.includes("royalty") ||
+    t.includes("cashback") ||
+    t.includes("commission")
+  )
     return "Earnings";
-  if (t.includes("stripe") || t.includes("purchase") || t.includes("revenuecat") || t.includes("pack"))
+  if (
+    t.includes("stripe") ||
+    t.includes("purchase") ||
+    t.includes("revenuecat") ||
+    t.includes("pack")
+  )
     return "Bought coins";
   if (t.includes("vip")) return "VIP";
   if (t.includes("sports")) return "OG Sports Guide";
   if (t.includes("vault")) return "OG Vault pass";
   if (t.includes("download") || t.includes("community")) return "Global track download";
-  if (t.includes("mint") || t.includes("admin") || t.includes("boss")) return "Adjustment by OG team";
+  if (t.includes("mint") || t.includes("admin") || t.includes("boss"))
+    return "Adjustment by OG team";
   return type.replace(/_/g, " ");
 }
 
@@ -151,7 +172,10 @@ function ProfilePage() {
       const v = name.trim();
       if (v.length < 2) throw new Error("Username must be at least 2 characters");
       if (v.length > 30) throw new Error("Username must be 30 characters or less");
-      const { error } = await supabase.from("profiles").update({ display_name: v }).eq("id", user!.id);
+      const { error } = await supabase
+        .from("profiles")
+        .update({ display_name: v })
+        .eq("id", user!.id);
       if (error) throw new Error(error.message);
     },
     onSuccess: () => {
@@ -236,9 +260,21 @@ function ProfilePage() {
           </div>
 
           <div className="relative mt-4 grid grid-cols-3 gap-2">
-            <Stat icon={<Coins className="h-4 w-4 text-coin" />} label="Balance" value={profile?.coin_balance ?? 0} />
-            <Stat icon={<Music2 className="h-4 w-4 text-primary" />} label="Tracks" value={extras.data?.trackCount ?? 0} />
-            <Stat icon={<ArrowDownRight className="h-4 w-4 text-destructive" />} label="Spent" value={totals.spent} />
+            <Stat
+              icon={<Coins className="h-4 w-4 text-coin" />}
+              label="Balance"
+              value={profile?.coin_balance ?? 0}
+            />
+            <Stat
+              icon={<Music2 className="h-4 w-4 text-primary" />}
+              label="Tracks"
+              value={extras.data?.trackCount ?? 0}
+            />
+            <Stat
+              icon={<ArrowDownRight className="h-4 w-4 text-destructive" />}
+              label="Spent"
+              value={totals.spent}
+            />
           </div>
           <div className="relative mt-3 flex gap-2">
             <Button asChild className="flex-1">
@@ -262,190 +298,220 @@ function ProfilePage() {
           </TabsList>
 
           <TabsContent value="account" className="space-y-5">
-        {/* Username */}
-        <Card icon={<UserRound className="h-5 w-5" />} title="Username" hint="Shown on your tracks and in chat.">
-
-          <form
-            className="flex gap-2"
-            onSubmit={(e: FormEvent) => {
-              e.preventDefault();
-              saveName.mutate();
-            }}
-          >
-            <Input
-              aria-label="Username"
-              value={name}
-              maxLength={30}
-              onChange={(e) => {
-                setName(e.target.value);
-                setDirty(true);
-              }}
-              placeholder="Your username"
-            />
-            <Button type="submit" disabled={!dirty || saveName.isPending}>
-              {saveName.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Save
-            </Button>
-          </form>
-        </Card>
-
-        {/* Email */}
-        <Card
-          icon={<Mail className="h-5 w-5" />}
-          title="Linked email"
-          hint="Used only to reset your password if you forget it."
-        >
-          <p className="text-sm">
-            {displayEmail ? (
-              <span className="font-medium">{displayEmail}</span>
-            ) : (
-              <span className="text-amber-300">No recovery email yet — add one so you never lose your account.</span>
-            )}
-          </p>
-          {pendingEmail && (
-            <p className="text-xs text-muted-foreground">
-              Waiting for you to confirm <span className="font-medium">{pendingEmail}</span> — check your inbox.
-            </p>
-          )}
-          <form
-            className="space-y-2"
-            onSubmit={(e: FormEvent) => {
-              e.preventDefault();
-              saveEmail.mutate();
-            }}
-          >
-            <Label htmlFor="new-email" className="text-xs text-muted-foreground">
-              {displayEmail ? "Change email" : "Add email"}
-            </Label>
-            <div className="flex gap-2">
-              <Input
-                id="new-email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-              />
-              <Button type="submit" disabled={!email || saveEmail.isPending}>
-                {saveEmail.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Send link
-              </Button>
-            </div>
-          </form>
-        </Card>
-
-        {referralLink && (
-          <Card icon={<Copy className="h-5 w-5" />} title="Invite friends" hint="Earn coins when friends join.">
-            <div className="flex gap-2">
-              <Input readOnly value={referralLink} aria-label="Invite link" />
-              <Button
-                variant="outline"
-                size="icon"
-                aria-label="Copy invite link"
-                onClick={() => {
-                  navigator.clipboard.writeText(referralLink);
-                  toast.success("Invite link copied");
+            {/* Username */}
+            <Card
+              icon={<UserRound className="h-5 w-5" />}
+              title="Username"
+              hint="Shown on your tracks and in chat."
+            >
+              <form
+                className="flex gap-2"
+                onSubmit={(e: FormEvent) => {
+                  e.preventDefault();
+                  saveName.mutate();
                 }}
               >
-                <Copy className="h-4 w-4" />
-              </Button>
-            </div>
-          </Card>
-        )}
+                <Input
+                  aria-label="Username"
+                  value={name}
+                  maxLength={30}
+                  onChange={(e) => {
+                    setName(e.target.value);
+                    setDirty(true);
+                  }}
+                  placeholder="Your username"
+                />
+                <Button type="submit" disabled={!dirty || saveName.isPending}>
+                  {saveName.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Save
+                </Button>
+              </form>
+            </Card>
+
+            {/* Email */}
+            <Card
+              icon={<Mail className="h-5 w-5" />}
+              title="Linked email"
+              hint="Used only to reset your password if you forget it."
+            >
+              <p className="text-sm">
+                {displayEmail ? (
+                  <span className="font-medium">{displayEmail}</span>
+                ) : (
+                  <span className="text-amber-300">
+                    No recovery email yet — add one so you never lose your account.
+                  </span>
+                )}
+              </p>
+              {pendingEmail && (
+                <p className="text-xs text-muted-foreground">
+                  Waiting for you to confirm <span className="font-medium">{pendingEmail}</span> —
+                  check your inbox.
+                </p>
+              )}
+              <form
+                className="space-y-2"
+                onSubmit={(e: FormEvent) => {
+                  e.preventDefault();
+                  saveEmail.mutate();
+                }}
+              >
+                <Label htmlFor="new-email" className="text-xs text-muted-foreground">
+                  {displayEmail ? "Change email" : "Add email"}
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="new-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                  />
+                  <Button type="submit" disabled={!email || saveEmail.isPending}>
+                    {saveEmail.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Send
+                    link
+                  </Button>
+                </div>
+              </form>
+            </Card>
+
+            {referralLink && (
+              <Card
+                icon={<Copy className="h-5 w-5" />}
+                title="Invite friends"
+                hint="Earn coins when friends join."
+              >
+                <div className="flex gap-2">
+                  <Input readOnly value={referralLink} aria-label="Invite link" />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    aria-label="Copy invite link"
+                    onClick={() => {
+                      navigator.clipboard.writeText(referralLink);
+                      toast.success("Invite link copied");
+                    }}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="coins" className="space-y-5">
-        {/* Coin activity */}
-        <Card icon={<Coins className="h-5 w-5 text-coin" />} title="Coin activity" hint="Where your coins came from and went.">
-
-          <div className="grid grid-cols-2 gap-2">
-            <div className="rounded-xl border border-border bg-background/40 p-3">
-              <p className="text-[11px] uppercase text-muted-foreground">Earned & bought</p>
-              <p className="text-lg font-bold text-emerald-400">+{totals.earned}</p>
-            </div>
-            <div className="rounded-xl border border-border bg-background/40 p-3">
-              <p className="text-[11px] uppercase text-muted-foreground">Spent</p>
-              <p className="text-lg font-bold text-destructive">-{totals.spent}</p>
-            </div>
-          </div>
-          <div className="flex gap-1.5" role="tablist">
-            {(["all", "spent", "earned"] as const).map((f) => (
-              <button
-                key={f}
-                role="tab"
-                aria-selected={filter === f}
-                onClick={() => setFilter(f)}
-                className={`rounded-full border px-3 py-1 text-xs font-semibold capitalize transition ${
-                  filter === f ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted-foreground"
-                }`}
-              >
-                {f}
-              </button>
-            ))}
-          </div>
-          {txs.isLoading ? (
-            <div className="grid place-items-center py-6">
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-            </div>
-          ) : filtered.length === 0 ? (
-            <p className="py-4 text-center text-sm text-muted-foreground">Nothing here yet.</p>
-          ) : (
-            <ul className="divide-y divide-border">
-              {filtered.slice(0, limit).map((t) => (
-                <li key={t.id} className="flex items-center gap-3 py-2.5">
-                  <span
-                    className={`grid h-8 w-8 shrink-0 place-items-center rounded-full ${
-                      t.amount < 0 ? "bg-destructive/15 text-destructive" : "bg-emerald-500/15 text-emerald-400"
+            {/* Coin activity */}
+            <Card
+              icon={<Coins className="h-5 w-5 text-coin" />}
+              title="Coin activity"
+              hint="Where your coins came from and went."
+            >
+              <div className="grid grid-cols-2 gap-2">
+                <div className="rounded-xl border border-border bg-background/40 p-3">
+                  <p className="text-[11px] uppercase text-muted-foreground">Earned & bought</p>
+                  <p className="text-lg font-bold text-emerald-400">+{totals.earned}</p>
+                </div>
+                <div className="rounded-xl border border-border bg-background/40 p-3">
+                  <p className="text-[11px] uppercase text-muted-foreground">Spent</p>
+                  <p className="text-lg font-bold text-destructive">-{totals.spent}</p>
+                </div>
+              </div>
+              <div className="flex gap-1.5" role="tablist">
+                {(["all", "spent", "earned"] as const).map((f) => (
+                  <button
+                    key={f}
+                    role="tab"
+                    aria-selected={filter === f}
+                    onClick={() => setFilter(f)}
+                    className={`rounded-full border px-3 py-1 text-xs font-semibold capitalize transition ${
+                      filter === f
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border text-muted-foreground"
                     }`}
                   >
-                    {t.amount < 0 ? <ArrowDownRight className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium">{txLabel(t.type, t.reference)}</p>
-                    <p className="text-[11px] text-muted-foreground">
-                      {new Date(t.created_at).toLocaleString(undefined, {
-                        day: "numeric",
-                        month: "short",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </p>
-                  </div>
-                  <span className={`text-sm font-bold ${t.amount < 0 ? "text-destructive" : "text-emerald-400"}`}>
-                    {t.amount > 0 ? "+" : ""}
-                    {t.amount}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-          {filtered.length > limit && (
-            <Button variant="outline" className="w-full" onClick={() => setLimit((l) => l + 20)}>
-              Show more
-            </Button>
-          )}
-        </Card>
+                    {f}
+                  </button>
+                ))}
+              </div>
+              {txs.isLoading ? (
+                <div className="grid place-items-center py-6">
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                </div>
+              ) : filtered.length === 0 ? (
+                <p className="py-4 text-center text-sm text-muted-foreground">Nothing here yet.</p>
+              ) : (
+                <ul className="divide-y divide-border">
+                  {filtered.slice(0, limit).map((t) => (
+                    <li key={t.id} className="flex items-center gap-3 py-2.5">
+                      <span
+                        className={`grid h-8 w-8 shrink-0 place-items-center rounded-full ${
+                          t.amount < 0
+                            ? "bg-destructive/15 text-destructive"
+                            : "bg-emerald-500/15 text-emerald-400"
+                        }`}
+                      >
+                        {t.amount < 0 ? (
+                          <ArrowDownRight className="h-4 w-4" />
+                        ) : (
+                          <ArrowUpRight className="h-4 w-4" />
+                        )}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium">
+                          {txLabel(t.type, t.reference)}
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">
+                          {new Date(t.created_at).toLocaleString(undefined, {
+                            day: "numeric",
+                            month: "short",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </p>
+                      </div>
+                      <span
+                        className={`text-sm font-bold ${t.amount < 0 ? "text-destructive" : "text-emerald-400"}`}
+                      >
+                        {t.amount > 0 ? "+" : ""}
+                        {t.amount}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {filtered.length > limit && (
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => setLimit((l) => l + 20)}
+                >
+                  Show more
+                </Button>
+              )}
+            </Card>
           </TabsContent>
 
           <TabsContent value="security" className="space-y-5">
-        {/* Security */}
-        <Card icon={<KeyRound className="h-5 w-5" />} title="Account & security">
-          <div className="grid gap-2 sm:grid-cols-2">
-            <Button asChild variant="outline">
-              <Link to="/change-password">
-                <KeyRound className="mr-2 h-4 w-4" /> Change password
-              </Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link to="/purchase-history">
-                <Receipt className="mr-2 h-4 w-4" /> Purchase history
-              </Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link to="/settings">More settings</Link>
-            </Button>
-            <Button variant="outline" onClick={signOut}>
-              <LogOut className="mr-2 h-4 w-4" /> Sign out
-            </Button>
-          </div>
-        </Card>
+            {/* Security */}
+            <Card icon={<KeyRound className="h-5 w-5" />} title="Account & security">
+              <div className="grid gap-2 sm:grid-cols-2">
+                <Button asChild variant="outline">
+                  <Link to="/change-password">
+                    <KeyRound className="mr-2 h-4 w-4" /> Change password
+                  </Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link to="/purchase-history">
+                    <Receipt className="mr-2 h-4 w-4" /> Purchase history
+                  </Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link to="/settings">More settings</Link>
+                </Button>
+                <Button variant="outline" onClick={signOut}>
+                  <LogOut className="mr-2 h-4 w-4" /> Sign out
+                </Button>
+              </div>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
@@ -477,7 +543,9 @@ function Card({
   return (
     <section className="space-y-3 rounded-2xl border border-border bg-card p-5 shadow-card">
       <header className="flex items-center gap-3">
-        <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary/15 text-primary">{icon}</div>
+        <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary/15 text-primary">
+          {icon}
+        </div>
         <div className="min-w-0">
           <h2 className="font-semibold leading-tight">{title}</h2>
           {hint && <p className="text-xs text-muted-foreground">{hint}</p>}

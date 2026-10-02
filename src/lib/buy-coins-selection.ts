@@ -17,7 +17,8 @@ export function loadStoredSelection(): Selection | null {
     const raw = sessionStorage.getItem(SELECTION_STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as StoredSelection;
-    if (parsed.type === "vip") return { type: "vip", plan: parsed.plan === "yearly" ? "yearly" : "monthly" };
+    if (parsed.type === "vip")
+      return { type: "vip", plan: parsed.plan === "yearly" ? "yearly" : "monthly" };
     if (parsed.type === "coins") {
       const pack = findCoinPackByBundleId(parsed.bundleId);
       return pack ? { type: "coins", pack } : null;

@@ -29,7 +29,6 @@ export function AdminCollapsible({
   const key = `admin-collapsible:${storageKey}`;
   const [open, setOpen] = useState<boolean>(defaultOpen);
 
-
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent<{ open: boolean }>).detail;
@@ -90,9 +89,7 @@ export function AdminCollapsible({
         />
       </button>
       {open && (
-        <div className="min-w-0 overflow-x-auto border-t border-border p-3 sm:p-4">
-          {children}
-        </div>
+        <div className="min-w-0 overflow-x-auto border-t border-border p-3 sm:p-4">{children}</div>
       )}
     </section>
   );
