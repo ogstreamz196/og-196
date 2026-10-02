@@ -765,7 +765,6 @@ function VipQuickToggle({ userId, checked }: { userId: string; checked: boolean 
             aria-label="Toggle VIP"
           />
         </label>
-        </div>
       </TooltipTrigger>
       <TooltipContent>{checked ? "Revoke VIP" : "Grant VIP"}</TooltipContent>
     </Tooltip>
