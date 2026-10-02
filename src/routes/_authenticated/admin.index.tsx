@@ -181,6 +181,7 @@ function AdminPanel() {
           </Section>
         </div>
       </div>
+      </div>
     </DashboardShell>
   );
 }
