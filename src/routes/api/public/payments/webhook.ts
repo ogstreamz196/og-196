@@ -207,6 +207,12 @@ async function assignOgVipId(userId: string, ctx: Record<string, unknown>) {
   const { data, error } = await (supabase as any).rpc("assign_og_vip_id", { p_user: userId });
   if (error) log("error", "OG VIP ID assign failed", { userId, err: error.message, ...ctx });
   else log("info", "OG VIP ID ready", { userId, ogVipId: data, ...ctx });
+  try {
+    const { queueYearlyVipAck } = await import("@/lib/vip-ack.server");
+    await queueYearlyVipAck(supabase, userId, (data as string | null) ?? null);
+  } catch (e) {
+    log("error", "VIP ack notify failed", { userId, err: String(e) });
+  }
 }
 
 function isYearlyPrice(priceId: unknown) {

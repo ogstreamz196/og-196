@@ -61,7 +61,7 @@ export const setTelegramWebhook = createServerFn({ method: "POST" })
         url,
         secret_token: secret,
         drop_pending_updates: true,
-        allowed_updates: ["message", "edited_message"],
+        allowed_updates: ["message", "edited_message", "callback_query"],
       }),
     });
     const setJson = (await setRes.json().catch(() => null)) as {
