@@ -240,13 +240,6 @@ function ProfilePage() {
             <Button asChild className="flex-1">
               <Link to="/store">Top up coins</Link>
             </Button>
-            {!hasVipRole && (
-              <Button asChild variant="outline" className="flex-1">
-                <Link to="/store">
-                  <Crown className="mr-1 h-4 w-4" /> Get VIP
-                </Link>
-              </Button>
-            )}
           </div>
         </section>
 

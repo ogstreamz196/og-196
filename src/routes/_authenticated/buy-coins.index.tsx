@@ -572,108 +572,16 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
           ) : null}
         </section>
 
-        <div className="grid gap-4 lg:grid-cols-2">
-          <section aria-labelledby="section-custom" className="scroll-mt-24">
-            <div className="mb-3 flex items-center gap-2">
-              <SlidersHorizontal className="h-4 w-4 text-primary" />
-              <h2 id="section-custom" className="font-display text-lg font-black">
-                Custom coin pack
-              </h2>
-            </div>
-            <CustomPackCard onBuy={(units) => pickSelection({ type: "custom", units })} />
-          </section>
+        <section aria-labelledby="section-custom" className="scroll-mt-24">
+          <div className="mb-3 flex items-center gap-2">
+            <SlidersHorizontal className="h-4 w-4 text-primary" />
+            <h2 id="section-custom" className="font-display text-lg font-black">
+              Custom coin pack
+            </h2>
+          </div>
+          <CustomPackCard onBuy={(units) => pickSelection({ type: "custom", units })} />
+        </section>
 
-          <section aria-labelledby="section-vip" className="scroll-mt-24">
-            <div className="mb-3 flex items-center gap-2">
-              <Crown className="h-4 w-4 text-primary" />
-              <h2 id="section-vip" className="font-display text-lg font-black">
-                VIP membership
-              </h2>
-            </div>
-            <div className="flex h-[calc(100%-2.25rem)] min-h-0 flex-col rounded-xl border border-primary/30 bg-store-card p-4 shadow-card sm:p-5">
-              <p className="text-sm leading-relaxed text-muted-foreground">
-                <EditableContent
-                  contentKey="buyCoins.vip.subtitle"
-                  defaultValue="Unlock exclusive privileges across OG Streamz — billed monthly, cancel anytime."
-                  multiline
-                />
-              </p>
-              <div className="mt-4 grid flex-1 gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="font-display text-lg font-black">
-                      <EditableContent
-                        contentKey="buyCoins.vip.heading"
-                        defaultValue="OG VIP Monthly"
-                      />
-                    </h3>
-                    {isVip && (
-                      <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400 ring-1 ring-emerald-500/30">
-                        Active
-                      </span>
-                    )}
-                  </div>
-                  <ul className="mt-3 grid gap-2 text-sm text-muted-foreground min-[440px]:grid-cols-2">
-                    <li className="flex items-start gap-2">
-                      <Star className="mt-0.5 h-3.5 w-3.5 shrink-0 text-coin" />{" "}
-                      <span className="min-w-0">Foul-mouth OG Bot unlocked</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Star className="mt-0.5 h-3.5 w-3.5 shrink-0 text-coin" />{" "}
-                      <span className="min-w-0">Priority OG Bot replies</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Star className="mt-0.5 h-3.5 w-3.5 shrink-0 text-coin" />{" "}
-                      <span className="min-w-0">VIP badge across the hub</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Gift className="mt-0.5 h-3.5 w-3.5 shrink-0 text-coin" />{" "}
-                      <span className="min-w-0">Daily 10-coin safety net</span>
-                    </li>
-                  </ul>
-                </div>
-                <div className="flex flex-col gap-3 border-t border-border pt-4 min-[400px]:flex-row min-[400px]:items-end min-[400px]:justify-between sm:flex-col sm:items-end sm:justify-center sm:border-t-0 sm:pt-0">
-                  <div className="min-w-0">
-                    <div className="text-3xl font-black tabular-nums leading-none">
-                      {CURRENCY_SYMBOL}
-                      {(VIP_PLAN.priceCents / 100).toFixed(2)}
-                    </div>
-                    <div className="mt-1 text-xs font-semibold text-muted-foreground">/ month</div>
-                  </div>
-                  <Button
-                    size="lg"
-                    disabled={isVip}
-                    onClick={() => pickSelection({ type: "vip", plan: "monthly" })}
-                    className="h-11 w-full font-bold min-[400px]:w-auto sm:min-w-32"
-                  >
-                    {isVip ? (
-                      "You're VIP"
-                    ) : (
-                      <>
-                        <Crown className="mr-2 h-4 w-4" /> Join VIP
-                      </>
-                    )}
-                  </Button>
-                  {!isVip && !isNativeApp && (
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      onClick={() => pickSelection({ type: "vip", plan: "yearly" })}
-                      className="h-11 w-full font-bold min-[400px]:w-auto sm:min-w-32"
-                    >
-                      Yearly {CURRENCY_SYMBOL}
-                      {(VIP_PLAN_YEARLY.priceCents / 100).toFixed(0)} · save{" "}
-                      {Math.round(
-                        (1 - VIP_PLAN_YEARLY.priceCents / (VIP_PLAN.priceCents * 12)) * 100,
-                      )}
-                      %
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </div>
-          </section>
-        </div>
 
         <section aria-labelledby="section-bundles" className="scroll-mt-24">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
@@ -718,6 +626,87 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
           </div>
         </section>
         <StoreItemsSection />
+
+        <section aria-labelledby="section-vip" className="scroll-mt-24">
+          <div className="mb-3 flex items-center gap-2">
+            <Crown className="h-4 w-4 text-primary" />
+            <h2 id="section-vip" className="font-display text-lg font-black">
+              VIP memberships
+            </h2>
+            {isVip && (
+              <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400 ring-1 ring-emerald-500/30">
+                Active
+              </span>
+            )}
+          </div>
+          <div className="rounded-xl border border-primary/30 bg-store-card p-4 shadow-card sm:p-5">
+            <ul className="grid gap-2 text-sm text-muted-foreground min-[440px]:grid-cols-2">
+              <li className="flex items-start gap-2">
+                <Star className="mt-0.5 h-3.5 w-3.5 shrink-0 text-coin" /> Foul-mouth OG Bot unlocked
+              </li>
+              <li className="flex items-start gap-2">
+                <Star className="mt-0.5 h-3.5 w-3.5 shrink-0 text-coin" /> Priority OG Bot replies
+              </li>
+              <li className="flex items-start gap-2">
+                <Star className="mt-0.5 h-3.5 w-3.5 shrink-0 text-coin" /> VIP badge across the hub
+              </li>
+              <li className="flex items-start gap-2">
+                <Gift className="mt-0.5 h-3.5 w-3.5 shrink-0 text-coin" /> Daily 10-coin safety net
+              </li>
+            </ul>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <div className="flex flex-col justify-between gap-3 rounded-xl border border-border bg-background/40 p-4">
+                <div>
+                  <h3 className="font-display text-base font-black">{VIP_PLAN.label}</h3>
+                  <div className="mt-2 text-3xl font-black tabular-nums leading-none">
+                    {CURRENCY_SYMBOL}
+                    {(VIP_PLAN.priceCents / 100).toFixed(2)}
+                  </div>
+                  <p className="mt-1 text-xs font-semibold text-muted-foreground">
+                    per month · cancel anytime
+                  </p>
+                </div>
+                <Button
+                  size="lg"
+                  disabled={isVip}
+                  onClick={() => pickSelection({ type: "vip", plan: "monthly" })}
+                  className="h-11 w-full font-bold"
+                >
+                  {isVip ? "You're VIP" : (<><Crown className="mr-2 h-4 w-4" /> Join monthly</>)}
+                </Button>
+              </div>
+              {!isNativeApp && (
+                <div className="relative flex flex-col justify-between gap-3 rounded-xl border-2 border-coin/60 bg-background/40 p-4">
+                  <span className="absolute -top-2.5 right-3 rounded-full bg-coin px-2 py-0.5 text-[10px] font-black uppercase text-background">
+                    Save{" "}
+                    {Math.round((1 - VIP_PLAN_YEARLY.priceCents / (VIP_PLAN.priceCents * 12)) * 100)}%
+                  </span>
+                  <div>
+                    <h3 className="font-display text-base font-black">{VIP_PLAN_YEARLY.label}</h3>
+                    <div className="mt-2 text-3xl font-black tabular-nums leading-none">
+                      {CURRENCY_SYMBOL}
+                      {(VIP_PLAN_YEARLY.priceCents / 100).toFixed(0)}
+                    </div>
+                    <p className="mt-1 text-xs font-semibold text-muted-foreground">
+                      per year · about {CURRENCY_SYMBOL}
+                      {(VIP_PLAN_YEARLY.priceCents / 1200).toFixed(2)}/month
+                    </p>
+                  </div>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    disabled={isVip}
+                    onClick={() => pickSelection({ type: "vip", plan: "yearly" })}
+                    className="h-11 w-full font-bold"
+                  >
+                    {isVip ? "You're VIP" : (<><Crown className="mr-2 h-4 w-4" /> Join yearly</>)}
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
         <PurchaseHistory />
       </div>
     </DashboardShell>
