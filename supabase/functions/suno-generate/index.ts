@@ -7,6 +7,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { injectSignature, withSignatureHint } from "../_shared/track-signature.ts";
+import { sanitizeLyrics } from "../_shared/lyrics-sanitize.ts";
 import {
   isModerationRejection,
   MODERATION_MESSAGE,
