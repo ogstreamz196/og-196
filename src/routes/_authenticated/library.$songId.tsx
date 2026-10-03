@@ -417,9 +417,9 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
               </p>
             )}
             {song.style && (
-              <span className="mt-3 inline-block max-w-full break-words rounded-lg bg-secondary px-2.5 py-1 text-xs leading-relaxed text-secondary-foreground">
+              <p className="mt-2 line-clamp-2 break-words text-xs leading-relaxed text-muted-foreground">
                 {song.style}
-              </span>
+              </p>
             )}
           </div>
 
