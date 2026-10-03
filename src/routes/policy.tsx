@@ -79,10 +79,10 @@ function PolicyPage() {
               OG BOT is operated by the OG Studio team. For any privacy question, request, or
               complaint, contact us at{" "}
               <a
-                href="mailto:ogstreamz196@gmail.com"
+                href="mailto:ogbot196@gmail.com"
                 className="font-semibold text-primary underline-offset-4 hover:underline"
               >
-                ogstreamz196@gmail.com
+                ogbot196@gmail.com
               </a>
               . We aim to respond to privacy requests within 30 days.
             </p>
@@ -169,10 +169,10 @@ function PolicyPage() {
               We keep your songs, ledger, and account data while your account is active. You can
               request export or deletion of your account and associated content any time by emailing{" "}
               <a
-                href="mailto:ogstreamz196@gmail.com"
+                href="mailto:ogbot196@gmail.com"
                 className="font-semibold text-primary underline-offset-4 hover:underline"
               >
-                ogstreamz196@gmail.com
+                ogbot196@gmail.com
               </a>
               . Deletion requests are actioned within 30 days, except records we must retain for
               tax, fraud prevention, or legal reasons (for example payment history).
@@ -222,10 +222,10 @@ function PolicyPage() {
         <p className="text-sm text-muted-foreground sm:text-base">
           Questions about anything above? Email{" "}
           <a
-            href="mailto:ogstreamz196@gmail.com"
+            href="mailto:ogbot196@gmail.com"
             className="font-semibold text-primary underline-offset-4 hover:underline"
           >
-            ogstreamz196@gmail.com
+            ogbot196@gmail.com
           </a>
           .
         </p>
