@@ -295,9 +295,9 @@ function ReferralsPage() {
               onClick={() =>
                 document.getElementById("bind-referrer")?.scrollIntoView({ behavior: "smooth" })
               }
-              className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-amber-300 transition hover:bg-amber-500/20"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border-2 border-amber-400 bg-amber-500/20 px-4 py-2.5 text-xs font-black uppercase tracking-wider text-amber-200 shadow-lg transition hover:bg-amber-500/30 sm:w-auto"
             >
-              <ShieldAlert className="h-3 w-3" /> Bind your OG Leader
+              <ShieldAlert className="h-4 w-4" /> Got invited? Tap here to bind your OG Leader →
             </button>
           )}
         </div>
@@ -438,6 +438,35 @@ function ReferralsPage() {
               </div>
             )}
           </div>
+
+          {myCode && (
+            <div className="mt-3 rounded-2xl border border-amber-400/30 bg-amber-500/5 p-3">
+              <p className="text-[11px] font-black uppercase tracking-wider text-amber-300">
+                How friends bind you as their OG Leader
+              </p>
+              <ol className="mt-1.5 list-decimal space-y-0.5 pl-4 text-xs text-muted-foreground">
+                <li>Open your link above (or scan your QR) and sign up — done automatically.</li>
+                <li>
+                  Already signed up? Go to the <b>Earn</b> tab, tap “Bind your OG Leader” and enter{" "}
+                  <b className="text-foreground">{myCode}</b>.
+                </li>
+              </ol>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="mt-2 h-8 gap-1.5 text-xs"
+                onClick={async () => {
+                  const msg = `Join me on OG Streamz to make AI music! Sign up with my link ${link} — or open the Earn tab, tap "Bind your OG Leader" and enter my code ${myCode}.`;
+                  const ok = await copyTextWithFallback(msg);
+                  if (ok) toast.success("Invite message copied");
+                  else toast.error("Couldn't copy");
+                }}
+              >
+                <Copy className="h-3 w-3" /> Copy invite message
+              </Button>
+            </div>
+          )}
         </section>
 
         {/* 3. YOUR NUMBERS — one row */}

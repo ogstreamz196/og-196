@@ -504,10 +504,6 @@ export function OgChat({
   }
 
   async function pickIntensity(level: number) {
-    if (!isVip && level > 1) {
-      setVipPromoOpen(true);
-      return;
-    }
     if (!isVip) {
       setVipPromoOpen(true);
       return;
