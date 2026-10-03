@@ -666,10 +666,9 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
         </div>
       )}
       <Tabs value={tab} onValueChange={setTab} className="space-y-4">
-        <TabsList className="grid h-auto w-full grid-cols-4 p-1">
+        <TabsList className="grid h-auto w-full grid-cols-3 p-1">
           <TabsTrigger value="lyrics" className="text-xs sm:text-sm">Edit</TabsTrigger>
           <TabsTrigger value="preview" className="text-xs sm:text-sm">Preview</TabsTrigger>
-          <TabsTrigger value="hq" className="text-xs sm:text-sm">Full HQ</TabsTrigger>
           <TabsTrigger value="takes" className="text-xs sm:text-sm">Takes</TabsTrigger>
         </TabsList>
 
@@ -1144,31 +1143,31 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                   </div>
                 )}
 
-                <div className="flex flex-wrap justify-end gap-2">
-                  <Button
-                    onClick={unlockFull}
-                    disabled={unlocking || (!song.unlocked && balance < unlockCost)}
-                    className="gap-2"
-                    aria-live="polite"
-                  >
-                    {unlocking ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        {song.unlocked ? "Preparing download…" : "Processing payment…"}
-                      </>
-                    ) : (
-                      <>
-                        <Music2 className="h-4 w-4" />
-                        {song.unlocked
-                          ? "Download full HQ"
-                          : `Unlock & download · ${unlockCost} coins`}
-                      </>
-                    )}
-                  </Button>
-                </div>
+                <Button
+                  onClick={unlockFull}
+                  disabled={unlocking || (!song.unlocked && balance < unlockCost)}
+                  variant={song.unlocked ? "default" : "outline"}
+                  className="h-12 w-full gap-2"
+                  aria-live="polite"
+                >
+                  {unlocking ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      {song.unlocked ? "Preparing download…" : "Processing payment…"}
+                    </>
+                  ) : song.unlocked ? (
+                    <>
+                      <Download className="h-4 w-4" /> Download to device
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="h-4 w-4" /> Unlock full track · {unlockCost} coins
+                    </>
+                  )}
+                </Button>
               </>
-            )}
           </CardContent>
+          )}
         </Card>
         </TabsContent>
 
