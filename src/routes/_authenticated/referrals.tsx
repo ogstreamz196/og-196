@@ -652,7 +652,7 @@ function Mission({
   tone: "primary" | "fuchsia" | "destructive";
   n: number;
   icon: React.ReactNode;
-  title: string;
+  title: React.ReactNode;
   body: string;
 }) {
   const tones = {
