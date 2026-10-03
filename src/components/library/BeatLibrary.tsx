@@ -241,7 +241,7 @@ export function BeatLibrary({
           <div className="min-w-0">
             <h2
               className={cn(
-                "font-display font-black tracking-tight",
+                "whitespace-nowrap font-display font-black tracking-tight",
                 isEmpty ? "text-base" : "text-xl sm:text-2xl",
               )}
             >

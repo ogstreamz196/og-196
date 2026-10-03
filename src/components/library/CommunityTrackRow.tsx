@@ -406,8 +406,8 @@ function CommunityTrackRowImpl({
 
           {/* Row 2: quiet info on the left, actions on the right. */}
           <div className="mt-1 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
-            <div className="flex min-w-0 items-center gap-1.5 text-[11px] leading-none text-muted-foreground">
-              <CreatorTag userId={song.user_id} className="max-w-[80px] shrink-0" />
+            <div className="flex min-w-0 items-center gap-1.5 overflow-hidden text-[11px] leading-none text-muted-foreground">
+              <CreatorTag userId={song.user_id} className="min-w-0 max-w-[80px] shrink" />
               {styles.length > 0 && <span className="min-w-0 truncate">{styles[0]}</span>}
               {duration > 0 && (
                 <span className="shrink-0 whitespace-nowrap tabular-nums">{fmt(duration)}</span>
