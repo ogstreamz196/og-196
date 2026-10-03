@@ -195,9 +195,9 @@ Deno.serve(async (req) => {
   try {
     const result = await materialiseClips(admin, parentSong, clips, {
       scheduleBackground: (task) => {
-        // @ts-ignore Deno Edge Runtime
+        // @ts-expect-error Deno Edge Runtime
         if (typeof EdgeRuntime !== "undefined" && EdgeRuntime?.waitUntil) {
-          // @ts-ignore
+          // @ts-expect-error Deno global
           EdgeRuntime.waitUntil(task);
         } else {
           task.catch(() => {});

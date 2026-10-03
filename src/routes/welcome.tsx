@@ -815,7 +815,9 @@ function AlbumCoverShowcase() {
           if ((count ?? 0) > 0) {
             try {
               localStorage.setItem(PERSONAL_BANNER_KEY, "1");
-            } catch {}
+            } catch {
+      // storage may be blocked (private mode)
+    }
             return;
           }
         }
@@ -827,7 +829,9 @@ function AlbumCoverShowcase() {
     const onGenerate = () => {
       try {
         localStorage.setItem(PERSONAL_BANNER_KEY, "1");
-      } catch {}
+      } catch {
+      // storage may be blocked (private mode)
+    }
       setHidden(true);
     };
     window.addEventListener("og:generate-start", onGenerate);
@@ -840,7 +844,9 @@ function AlbumCoverShowcase() {
   const dismiss = useCallback(() => {
     try {
       localStorage.setItem(PERSONAL_BANNER_KEY, "1");
-    } catch {}
+    } catch {
+      // storage may be blocked (private mode)
+    }
     setHidden(true);
   }, []);
 

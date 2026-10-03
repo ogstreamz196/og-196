@@ -489,10 +489,14 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
     setGenPreview(true);
     try {
       localStorage.setItem("welcome.personal_banner.dismissed", "1");
-    } catch {}
+    } catch {
+      // storage may be blocked (private mode)
+    }
     try {
       window.dispatchEvent(new CustomEvent("og:generate-start"));
-    } catch {}
+    } catch {
+      // storage may be blocked (private mode)
+    }
     try {
       if (dirty) await saveSettingsPatch();
       const { data, error } = await supabase.functions.invoke("suno-generate", {

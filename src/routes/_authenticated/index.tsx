@@ -419,7 +419,9 @@ function AskOgCta() {
           "og:pending-prompt",
           JSON.stringify({ service, text, at: Date.now() }),
         );
-      } catch {}
+      } catch {
+      // storage may be blocked (private mode)
+    }
     }
     setOpen(false);
     navigate({ to: service === "musichub" ? "/library" : "/messenger" });
