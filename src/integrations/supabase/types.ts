@@ -1697,18 +1697,21 @@ export type Database = {
       user_roles: {
         Row: {
           created_at: string
+          expires_at: string | null
           id: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
           created_at?: string
+          expires_at?: string | null
           id?: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
           created_at?: string
+          expires_at?: string | null
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
@@ -2108,6 +2111,7 @@ export type Database = {
       }
       purchase_vip: { Args: never; Returns: number }
       purchase_vip_pass_for_user: { Args: { p_user: string }; Returns: Json }
+      purge_expired_vip_roles: { Args: never; Returns: number }
       redeem_og_bot_invite: { Args: { p_code: string }; Returns: string }
       referral_rate_pct: { Args: { p_user: string }; Returns: number }
       refund_chat_image_edit: {
@@ -2179,6 +2183,14 @@ export type Database = {
           target_user_id: string
         }
         Returns: boolean
+      }
+      set_vip_expiry_admin: {
+        Args: {
+          admin_notes?: string
+          new_expires_at: string
+          target_user_id: string
+        }
+        Returns: string
       }
       start_vip_trial_once: { Args: never; Returns: Json }
       unrevoke_og_bot_token: {
