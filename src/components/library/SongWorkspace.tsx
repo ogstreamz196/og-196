@@ -13,6 +13,8 @@ import {
   AlertCircle,
   Play,
   RefreshCw,
+  Download,
+  Lock,
 } from "lucide-react";
 
 import { toast } from "sonner";
