@@ -1,5 +1,6 @@
 // Lyrics generation using the user's own Gemini key (GEMINI_API_KEY).
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { geminiUsage, logAiUsage } from "../_shared/ai-usage.ts";
 import { handlePreflight, jsonResponse } from "../_shared/cors.ts";
 import { adminClient, requireUser } from "../_shared/clients.ts";
 
