@@ -471,8 +471,8 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                                 );
                                 navigate({ to: "/store" });
                               }
-                            } catch (e: any) {
-                              toast.error(e.message || "Purchase failed or cancelled.");
+                            } catch (e) {
+                              toast.error((e as Error).message || "Purchase failed or cancelled.");
                             } finally {
                               setCheckoutLoading(false);
                             }
@@ -522,13 +522,14 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                                 });
                               }
 
+                              // eslint-disable-next-line @typescript-eslint/no-explicit-any -- untyped table/SDK shape
                               const r = res as any;
                               if (r.error) throw new Error(r.error);
                               if (r.url) window.location.href = r.url;
                               else if (r.clientSecret) setClientSecret(r.clientSecret);
                               else throw new Error("Checkout could not start.");
-                            } catch (e: any) {
-                              toast.error(e.message || "Failed to start checkout.");
+                            } catch (e) {
+                              toast.error((e as Error).message || "Failed to start checkout.");
                               setCheckoutLoading(false);
                             }
                           }}
