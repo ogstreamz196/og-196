@@ -221,7 +221,6 @@ function ReferralsPage() {
   };
 
   const copy = () => handleCopy("Referral link copied");
-  const inviteAgain = () => handleCopy("Link copied — paste it to invite again 🎁");
 
   const share = async () => {
     if (typeof navigator !== "undefined" && "share" in navigator) {
@@ -489,11 +488,8 @@ function ReferralsPage() {
                 </div>
                 <div className="text-sm font-bold">No cashback yet</div>
                 <div className="max-w-xs text-xs text-muted-foreground">
-                  Share your OG Link — the first burn from a referee lands here.
+                  When a friend you invited spends coins, your reward shows up here.
                 </div>
-                <Button size="sm" onClick={share} className="mt-2 gap-2">
-                  <Share2 className="h-3.5 w-3.5" /> Share your link
-                </Button>
               </div>
             )}
             {summary.recent.map((tx) => {
@@ -533,6 +529,17 @@ function ReferralsPage() {
               );
             })}
           </div>
+        </section>
+
+        {/* 5. CONNECT YOUR LEADER — for people invited by someone else */}
+        <section
+          id="bind-referrer"
+          className="scroll-mt-24 rounded-3xl border border-white/10 bg-card/60 p-5 backdrop-blur-xl sm:p-6"
+        >
+          <div className="mb-3 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] text-rose-300">
+            <KeyRound className="h-3.5 w-3.5" /> Were you invited? Connect your OG Leader
+          </div>
+          <BindReferrerCard />
         </section>
 
         <AllPurchasesPanel />
