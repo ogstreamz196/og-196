@@ -30,6 +30,7 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useVipSubscription } from "@/hooks/use-vip-subscription";
 import { useRole } from "@/hooks/use-role";
 import { useAuth } from "@/hooks/use-auth";
 import { useDevMode } from "@/hooks/use-dev-mode";
@@ -96,6 +97,7 @@ export function AppSidebar() {
   const { user } = useAuth();
   const dev = useDevMode();
   const { isAdmin, isTrial, trialEndsAt, hasVipRole } = useRole();
+  const { data: vipSub } = useVipSubscription();
   const qc = useQueryClient();
 
   const handleSignOut = async () => {
@@ -278,6 +280,8 @@ export function AppSidebar() {
             isTrial={isTrial}
             endsAt={trialEndsAt}
             paid={hasVipRole}
+            paidEndsAt={vipSub?.currentPeriodEnd ?? null}
+            paidRenews={!!vipSub && !vipSub.cancelAtPeriodEnd}
             onNavigate={() => isMobile && setOpenMobile(false)}
           />
         )}
@@ -313,11 +317,15 @@ function VipTrialCountdown({
   isTrial,
   endsAt,
   paid,
+  paidEndsAt,
+  paidRenews,
   onNavigate,
 }: {
   isTrial: boolean;
   endsAt: string | null;
   paid: boolean;
+  paidEndsAt: string | null;
+  paidRenews: boolean;
   onNavigate: () => void;
 }) {
   const [now, setNow] = useState(() => Date.now());
@@ -325,7 +333,26 @@ function VipTrialCountdown({
     const t = setInterval(() => setNow(Date.now()), 60_000);
     return () => clearInterval(t);
   }, []);
-  if (paid) return null;
+  const paidEnd = paidEndsAt ? new Date(paidEndsAt).getTime() - now : 0;
+  if (paid) {
+    const d = Math.floor(paidEnd / 86_400_000);
+    const h = Math.floor((paidEnd % 86_400_000) / 3_600_000);
+    const m = Math.floor((paidEnd % 3_600_000) / 60_000);
+    return (
+      <Link
+        to="/buy-coins"
+        onClick={onNavigate}
+        className="mx-2 mt-2 block rounded-xl border border-coin/40 bg-coin/10 px-3 py-2 text-left transition hover:bg-coin/15"
+      >
+        <span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-coin">
+          <Crown className="h-3.5 w-3.5" /> OG VIP {paidRenews ? "renews in" : paidEndsAt ? "ends in" : "active"}
+        </span>
+        <span className="mt-0.5 block font-mono text-sm font-black tabular-nums text-foreground">
+          {paidEnd > 0 ? `${d}d ${h}h ${m}m` : "Lifetime perks on"}
+        </span>
+      </Link>
+    );
+  }
   const ms = endsAt ? new Date(endsAt).getTime() - now : 0;
   const active = isTrial && ms > 0;
   const days = Math.floor(ms / 86_400_000);
