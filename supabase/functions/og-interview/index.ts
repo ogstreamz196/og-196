@@ -3,6 +3,7 @@
 // call (no coin deduction) — short responses, rate-limited by Gemini.
 import { handlePreflight, jsonResponse } from "../_shared/cors.ts";
 import { requireUser } from "../_shared/clients.ts";
+import { geminiUsage, logAiUsage } from "../_shared/ai-usage.ts";
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!;
 const GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") ?? "gemini-3.8-flash";
@@ -56,7 +57,12 @@ function buildTranscript(history: Turn[]): string {
     .join("\n");
 }
 
-async function callGemini(system: string, user: string, maxTokens: number): Promise<string> {
+async function callGemini(
+  system: string,
+  user: string,
+  maxTokens: number,
+  feature: string,
+): Promise<string> {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent?key=${GEMINI_API_KEY}`;
   const res = await fetch(url, {
     method: "POST",
@@ -72,6 +78,7 @@ async function callGemini(system: string, user: string, maxTokens: number): Prom
     throw new Error(`Gemini ${res.status}: ${txt.slice(0, 300)}`);
   }
   const data = await res.json();
+  logAiUsage({ feature, provider: "gemini", model: GEMINI_MODEL, ...geminiUsage(data) });
   return ((data?.candidates?.[0]?.content?.parts ?? []) as Array<{ text?: string }>)
     .map((p) => p?.text ?? "")
     .join("")
