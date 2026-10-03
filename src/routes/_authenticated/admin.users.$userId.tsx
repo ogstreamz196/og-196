@@ -445,13 +445,15 @@ function UserSettingsPage() {
           <header>
             <h3 className="font-semibold">Coin balance</h3>
             <p className="text-sm text-muted-foreground">
-              Set an exact balance, or adjust by a delta. All changes are audited.
+              Balance now: <b className="font-mono">{(profile.coin_balance ?? 0).toLocaleString()}</b>.
+              Every change is logged.
             </p>
           </header>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="set-balance">Set exact balance</Label>
+              <Label htmlFor="set-balance">Replace total balance with</Label>
+              <p className="text-[11px] text-muted-foreground">Overwrites the balance — does not add.</p>
               <div className="flex gap-2">
                 <Input
                   id="set-balance"
@@ -469,13 +471,16 @@ function UserSettingsPage() {
                   disabled={!balanceDirty || saveBalance.isPending}
                 >
                   {saveBalance.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Save
+                  Replace
                 </Button>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="adjust-balance">Adjust by amount</Label>
+              <Label htmlFor="adjust-balance">Add or take away coins</Label>
+              <p className="text-[11px] text-muted-foreground">
+                + adds this many to the balance, − takes this many away.
+              </p>
               <div className="flex gap-2">
                 <Input
                   id="adjust-balance"

@@ -844,20 +844,40 @@ function CoinsPopover({ userId, balance }: { userId: string; balance: number }) 
         <TooltipContent>Grant or remove coins</TooltipContent>
       </Tooltip>
       <PopoverContent align="end" className="w-72 space-y-3">
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-semibold">Adjust coins</p>
-          <span className="text-xs text-muted-foreground">
-            current: <span className="font-mono">{balance.toLocaleString()}</span>
-          </span>
+        <div>
+          <p className="text-sm font-semibold">Add or take away coins</p>
+          <p className="text-xs text-muted-foreground">
+            The number you type is added to (or taken from) their balance.
+          </p>
+        </div>
+        <div className="rounded-md border border-border bg-background/40 px-3 py-2 text-xs">
+          Balance now: <span className="font-mono font-semibold">{balance.toLocaleString()}</span>
         </div>
         <Input
           type="number"
           min={1}
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
-          placeholder="Amount"
+          placeholder="How many coins?"
+          aria-label="How many coins to add or take away"
           autoFocus
         />
+        {valid && (
+          <div className="space-y-0.5 text-xs text-muted-foreground">
+            <p>
+              Add → balance becomes{" "}
+              <span className="font-mono font-semibold text-foreground">
+                {(balance + n).toLocaleString()}
+              </span>
+            </p>
+            <p>
+              Take away → balance becomes{" "}
+              <span className="font-mono font-semibold text-foreground">
+                {Math.max(0, balance - n).toLocaleString()}
+              </span>
+            </p>
+          </div>
+        )}
         <div className="grid grid-cols-2 gap-2">
           <Button
             onClick={() => mut.mutate(n)}
@@ -868,7 +888,7 @@ function CoinsPopover({ userId, balance }: { userId: string; balance: number }) 
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <>
-                <Plus className="mr-1 h-4 w-4" /> Grant
+                <Plus className="mr-1 h-4 w-4" /> Add {valid ? n : ""}
               </>
             )}
           </Button>
@@ -877,10 +897,10 @@ function CoinsPopover({ userId, balance }: { userId: string; balance: number }) 
             onClick={() => mut.mutate(-n)}
             disabled={!valid || mut.isPending}
           >
-            <Minus className="mr-1 h-4 w-4" /> Remove
+            <Minus className="mr-1 h-4 w-4" /> Take {valid ? n : ""}
           </Button>
         </div>
-        <p className="text-[11px] text-muted-foreground">All adjustments are audited.</p>
+        <p className="text-[11px] text-muted-foreground">Every change is logged.</p>
       </PopoverContent>
     </Popover>
   );
@@ -1006,7 +1026,7 @@ function EditUserPopover({ user, roles }: { user: ProfileRow; roles: string[] })
 
         <div className="space-y-1.5">
           <Label htmlFor={`bal-${user.id}`} className="text-xs">
-            Set balance
+            Replace total balance with (overwrites, does not add)
           </Label>
           <div className="flex gap-1.5">
             <Input
@@ -1017,7 +1037,7 @@ function EditUserPopover({ user, roles }: { user: ProfileRow; roles: string[] })
               onChange={(e) => setBalance(e.target.value)}
             />
             <Button size="sm" onClick={() => saveBalance.mutate()} disabled={saveBalance.isPending}>
-              {saveBalance.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Set"}
+              {saveBalance.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Replace"}
             </Button>
           </div>
         </div>
