@@ -762,7 +762,12 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                       (mix as many as you like)
                     </span>
                   </Label>
-                  <div className="flex flex-wrap gap-1.5">
+                  <details className="group rounded-xl border border-border/60 bg-muted/20 px-3 py-2">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-sm font-semibold">
+                    <span className="truncate">{languages.join(" + ")}</span>
+                    <ChevronDown className="h-4 w-4 shrink-0 transition-transform group-open:rotate-180" />
+                  </summary>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
                     {LANGUAGES.map((l) => {
                       const on = languages.includes(l);
                       return (
@@ -788,6 +793,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                       );
                     })}
                   </div>
+                  </details>
                 </div>
 
                 {/* Voice + length */}
