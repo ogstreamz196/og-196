@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, PackageOpen } from "lucide-react";
@@ -38,6 +38,19 @@ export function StoreItemsSection() {
   const vipStatus = useQuery({ queryKey: ["vip-pass-status"], queryFn: () => getVipStatus() });
   const categories = catalog.data?.categories ?? [];
   const allItems = useMemo(() => categories.flatMap((category) => category.items), [categories]);
+  useEffect(() => {
+    if (allItems.length === 0 || typeof window === "undefined") return;
+    const hash = window.location.hash.slice(1);
+    if (!hash.startsWith("item-")) return;
+    const t = setTimeout(() => {
+      const el = document.getElementById(hash);
+      if (!el) return;
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      el.classList.add("ring-4", "ring-coin");
+      setTimeout(() => el.classList.remove("ring-4", "ring-coin"), 2500);
+    }, 300);
+    return () => clearTimeout(t);
+  }, [allItems.length]);
   const returnUrl = useMemo(
     () =>
       `${typeof window === "undefined" ? "" : window.location.origin}/buy-coins/return?session_id={CHECKOUT_SESSION_ID}`,
