@@ -151,11 +151,45 @@ function shouldFallThrough(status: number): boolean {
   return status === 429 || status === 402 || status === 401 || status === 403 || status >= 500;
 }
 
+export type AiRoutingMode = "paid_first" | "free_first";
+let routingCache: { mode: AiRoutingMode; at: number } | null = null;
+
+/** Boss-controlled order (app_settings.ai_routing_mode). Cached 30s; defaults to paid_first. */
+export async function getAiRoutingMode(): Promise<AiRoutingMode> {
+  if (routingCache && Date.now() - routingCache.at < 30_000) return routingCache.mode;
+  let mode: AiRoutingMode = "paid_first";
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin
+      .from("app_settings")
+      .select("value")
+      .eq("key", "ai_routing_mode")
+      .maybeSingle();
+    if (data?.value === "free_first") mode = "free_first";
+  } catch (e) {
+    console.warn("ai_routing_mode read failed", e);
+  }
+  routingCache = { mode, at: Date.now() };
+  return mode;
+}
+
+function hasMedia(body: Record<string, unknown>): boolean {
+  const messages = Array.isArray(body.messages) ? (body.messages as Msg[]) : [];
+  return messages.some(
+    (m) => Array.isArray(m.content) && (m.content as { type?: string }[]).some((p) => p.type !== "text"),
+  );
+}
+
 export async function fetchAiChat(
   body: Record<string, unknown>,
   affinity = "default",
 ): Promise<{ response: Response; provider: AiChatTarget["provider"] }> {
-  const targets = [...aiChatTargets(affinity), ...freeFallbackTargets()];
+  const mode = await getAiRoutingMode();
+  // Images/voice always need a premium (vision) model first.
+  const targets =
+    mode === "free_first" && !hasMedia(body)
+      ? [...freeFallbackTargets(), ...aiChatTargets(affinity)]
+      : [...aiChatTargets(affinity), ...freeFallbackTargets()];
   let last: { response: Response; provider: AiChatTarget["provider"] } | null = null;
 
   for (let index = 0; index < targets.length; index += 1) {
