@@ -5,7 +5,7 @@ import { handlePreflight, jsonResponse } from "../_shared/cors.ts";
 import { requireUser } from "../_shared/clients.ts";
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!;
-const GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") ?? "gemini-2.5-flash";
+const GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") ?? "gemini-3.8-flash";
 
 type Turn = { role: "bot" | "user"; text: string };
 
