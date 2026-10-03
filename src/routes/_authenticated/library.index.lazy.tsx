@@ -1745,7 +1745,7 @@ function LibraryPage() {
               className="group flex min-w-0 items-center justify-center gap-1.5 rounded-xl border border-transparent bg-white/[0.04] px-1.5 py-3 text-[13px] font-black tracking-tight text-muted-foreground shadow-none transition-all hover:bg-white/[0.08] hover:text-foreground data-[state=active]:border-primary/50 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow"
             >
               <Crown className="h-4 w-4 shrink-0 text-primary group-data-[state=active]:text-primary-foreground" />
-              <span>My Library</span>
+              <span>My Songs</span>
               <span className="rounded-full bg-white/10 px-1.5 py-0.5 text-[10px] font-black tabular-nums text-foreground/90 group-data-[state=active]:bg-black/25 group-data-[state=active]:text-primary-foreground">
                 {completedTracks.length}
               </span>
@@ -1755,7 +1755,7 @@ function LibraryPage() {
               className="group flex min-w-0 items-center justify-center gap-1.5 rounded-xl border border-transparent bg-white/[0.04] px-1.5 py-3 text-[13px] font-black tracking-tight text-muted-foreground shadow-none transition-all hover:bg-white/[0.08] hover:text-foreground data-[state=active]:border-fuchsia-400/50 data-[state=active]:bg-fuchsia-500/90 data-[state=active]:text-white data-[state=active]:shadow-glow"
             >
               <Users className="h-4 w-4 shrink-0 text-fuchsia-300 group-data-[state=active]:text-white" />
-              <span>Global</span>
+              <span>Community</span>
               <span className="rounded-full bg-white/10 px-1.5 py-0.5 text-[10px] font-black tabular-nums text-foreground/90 group-data-[state=active]:bg-black/25 group-data-[state=active]:text-white">
                 {communityTracks.length}
               </span>
