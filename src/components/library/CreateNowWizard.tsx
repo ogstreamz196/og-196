@@ -74,6 +74,8 @@ export type WizardResult = {
   foulIntensity: number;
   /** User paid-in for the alternate take, revealed automatically when ready. */
   wantSecondVersion: boolean;
+  /** AI-suggested title still resolving in the background (blank-title runs). */
+  titlePromise?: Promise<string>;
 };
 
 /** Raw wizard inputs — kept by the parent so a retry never loses them. */

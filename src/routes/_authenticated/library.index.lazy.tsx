@@ -672,6 +672,8 @@ function LibraryPage() {
     /** Exact lyric rating captured when this track was submitted. */
     foulMouth?: boolean;
     foulIntensity?: number;
+    /** AI title resolving in the background; awaited only before saving. */
+    titlePromise?: Promise<string>;
   };
 
   // Keeps the exact payload of the last run so "Try again" reuses it verbatim.
@@ -690,7 +692,7 @@ function LibraryPage() {
       return;
     }
 
-    const songTitle = (override?.title ?? title).trim();
+    let songTitle = (override?.title ?? title).trim();
     const songSubject = (override?.subjectName ?? subjectName).trim();
     const songStyle = (override?.style ?? styleText).trim();
     const songLanguage = (override?.language ?? selections.language ?? "English").trim();
@@ -770,6 +772,14 @@ function LibraryPage() {
       setLyrics(nextLyrics);
 
       advanceStage("saving");
+      if (override?.titlePromise) {
+        const named = (await override.titlePromise).trim();
+        if (stale()) return;
+        if (named) {
+          songTitle = named;
+          setTitle(named);
+        }
+      }
       const style = [songStyle, songVocal, ...vocalsOnlyTags].filter(Boolean).join(", ");
       const promptText = [
         songTitle,
