@@ -432,7 +432,10 @@ Deno.serve(async (req) => {
     ) => {
       const retryPayload = {
         prompt: lyricsText || promptText,
-        style: styleText || undefined,
+        style:
+          (portalLanguage && lyricsText
+            ? [`sung entirely in ${portalLanguage}`, styleText].filter(Boolean).join(", ")
+            : styleText) || undefined,
         title: customMode ? sunoTitle : undefined,
         customMode,
         instrumental: vocalsOnly ? false : instrumental,
