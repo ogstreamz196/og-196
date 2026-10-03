@@ -303,6 +303,63 @@ function ReferralsPage() {
           )}
         </div>
 
+        {/* THE SCHEME — explained first */}
+        <section
+          data-testid="earn-scheme"
+          className="relative overflow-hidden rounded-3xl border border-primary/30 bg-card/70 p-5 backdrop-blur-2xl sm:p-8"
+        >
+          <p className="text-[10px] font-black uppercase tracking-[0.25em] text-amber-300">
+            OG Partner Scheme · 10% lifetime
+          </p>
+          <h2 className="mt-2 font-bungee text-2xl leading-tight sm:text-4xl">
+            Invite your crew. Get 10% of every coin they spend — forever.
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Free to join. Rewards land in your wallet automatically as OG Coins.
+          </p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            <Mission
+              tone="primary"
+              n={1}
+              icon={<Link2 className="h-5 w-5" />}
+              title="Share your link or code"
+              body="Group chats, bio, DMs — one link works everywhere."
+            />
+            <Mission
+              tone="fuchsia"
+              n={2}
+              icon={<UserPlus className="h-5 w-5" />}
+              title="They sign up & make songs"
+              body="Your link locks them to you for life."
+            />
+            <Mission
+              tone="destructive"
+              n={3}
+              icon={<Flame className="h-5 w-5" />}
+              title="You get 10% automatically"
+              body="Every time they buy or use coins, your share drops in."
+            />
+          </div>
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+            <Button
+              onClick={share}
+              size="lg"
+              className="h-12 w-full gap-2 bg-gradient-to-r from-primary to-fuchsia-500 font-black uppercase tracking-wider sm:w-auto"
+            >
+              <Share2 className="h-4 w-4" /> Share my link
+            </Button>
+            <Button
+              onClick={copy}
+              variant="secondary"
+              size="lg"
+              className="h-12 w-full gap-2 font-bold sm:w-auto"
+            >
+              {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              {copied ? "Copied" : "Copy link"}
+            </Button>
+          </div>
+        </section>
+
         <section aria-label="Earn dashboard" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           <DashboardMetric
             icon={<Coins className="h-4 w-4" />}
@@ -522,29 +579,30 @@ function ReferralsPage() {
           </div>
         </section>
 
-        {/* EARNING MISSIONS — How it works as gamified tiles */}
-        <section className="grid gap-3 sm:grid-cols-3">
-          <Mission
-            tone="primary"
-            n={1}
-            icon={<Link2 className="h-5 w-5" />}
-            title="Drop your link"
-            body="Group chats, bio, DMs — one link works everywhere."
-          />
-          <Mission
-            tone="fuchsia"
-            n={2}
-            icon={<UserPlus className="h-5 w-5" />}
-            title="Crew signs up"
-            body="They open it, register, and start cooking on MusicHub."
-          />
-          <Mission
-            tone="destructive"
-            n={3}
-            icon={<Flame className="h-5 w-5" />}
-            title="You bank 10% forever"
-            body="Their successful payments and coin use reward your wallet automatically."
-          />
+        {/* WHAT YOU EARN — simple examples */}
+        <section className="rounded-3xl border border-white/10 bg-card/60 p-5 backdrop-blur-xl sm:p-6">
+          <div className="mb-3 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] text-amber-300">
+            <PiggyBank className="h-3.5 w-3.5" /> What you could earn
+          </div>
+          <div className="grid gap-2 sm:grid-cols-3">
+            {[
+              { a: "A friend uses 10 coins", b: "+1 OG to you" },
+              { a: "A friend uses 100 coins", b: "+10 OG to you" },
+              { a: "10 friends use 100 each", b: "+100 OG to you" },
+            ].map((x) => (
+              <div
+                key={x.a}
+                className="rounded-2xl border border-white/10 bg-background/50 p-3 text-sm"
+              >
+                <div className="text-muted-foreground">{x.a}</div>
+                <div className="mt-1 font-black text-primary">{x.b}</div>
+              </div>
+            ))}
+          </div>
+          <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <InfinityIcon className="h-3.5 w-3.5" /> No limit, no expiry — paid automatically for
+            as long as they use OG BOT.
+          </p>
         </section>
 
         {/* BIND LEADER — kept anchor */}
