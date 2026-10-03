@@ -695,7 +695,7 @@ export function OgChat({
               <Link
                 to="/buy-coins"
                 search={{ flow: "vip" } as never}
-                className="hidden items-center gap-1.5 rounded-lg border-2 border-border bg-muted px-3 py-1.5 text-[12px] font-bold text-muted-foreground transition hover:bg-muted/80 sm:inline-flex"
+                className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border bg-muted px-2 text-[10px] font-bold text-muted-foreground transition hover:bg-muted/80 sm:h-auto sm:border-2 sm:px-3 sm:py-1.5 sm:text-[12px]"
                 title="VIP unlocks any language"
               >
                 🌐 English <Crown className="h-3.5 w-3.5 text-amber-500" />
