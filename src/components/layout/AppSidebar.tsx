@@ -328,7 +328,7 @@ function VipTrialCountdown({
       className="mx-2 mt-2 block rounded-xl border border-coin/40 bg-coin/10 px-3 py-2 text-left transition hover:bg-coin/15"
     >
       <span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-coin">
-        <Crown className="h-3.5 w-3.5" /> {active ? "Free VIP trial" : "VIP trial ended"}
+        <Crown className="h-3.5 w-3.5" /> {active ? "Free VIP trial" : endsAt ? "VIP trial ended" : "Unlock OG VIP"}
       </span>
       {active ? (
         <span className="mt-0.5 block font-mono text-sm font-black tabular-nums text-foreground">
