@@ -392,7 +392,7 @@ export function OgChat({
           messages: args.history,
           mode,
           attachmentDataUrl: args.attachmentDataUrl,
-          language: isVip ? language : "English",
+          language,
         },
       }),
     onSuccess: (res) => {
@@ -677,30 +677,19 @@ export function OgChat({
               </span>
             </span>
             {/* OG/Safe mode toggle removed — Foul Mouth is the single tone control. */}
-            {isVip ? (
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-                className="h-8 max-w-[88px] rounded-lg border border-amber-400/50 bg-amber-400/10 px-1.5 text-[10px] font-bold text-amber-600 transition hover:bg-amber-400/20 focus:outline-none focus:ring-2 focus:ring-amber-400/50 dark:text-amber-300 sm:h-auto sm:max-w-none sm:border-2 sm:px-3 sm:py-1.5 sm:text-[12px]"
-                title="Reply language (VIP)"
-                aria-label="Reply language"
-              >
-                {OG_LANGUAGES.map((l) => (
-                  <option key={l} value={l}>
-                    🌐 {l}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <Link
-                to="/buy-coins"
-                search={{ flow: "vip" } as never}
-                className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border bg-muted px-2 text-[10px] font-bold text-muted-foreground transition hover:bg-muted/80 sm:h-auto sm:border-2 sm:px-3 sm:py-1.5 sm:text-[12px]"
-                title="VIP unlocks any language"
-              >
-                🌐 English <Crown className="h-3.5 w-3.5 text-amber-500" />
-              </Link>
-            )}
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+              className="h-8 max-w-[88px] rounded-lg border border-amber-400/50 bg-amber-400/10 px-1.5 text-[10px] font-bold text-amber-600 transition hover:bg-amber-400/20 focus:outline-none focus:ring-2 focus:ring-amber-400/50 dark:text-amber-300 sm:h-auto sm:max-w-none sm:border-2 sm:px-3 sm:py-1.5 sm:text-[12px]"
+              title="Reply language"
+              aria-label="Reply language"
+            >
+              {OG_LANGUAGES.map((l) => (
+                <option key={l} value={l}>
+                  🌐 {l}
+                </option>
+              ))}
+            </select>
             {messages.length > 0 && (
               <button
                 type="button"
