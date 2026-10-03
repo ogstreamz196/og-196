@@ -682,6 +682,7 @@ export type Database = {
           telegram_username: string | null
           total_bot_interactions: number
           updated_at: string
+          vip_trial_ends_at: string | null
           widget_deployed_domains: string[]
         }
         Insert: {
@@ -713,6 +714,7 @@ export type Database = {
           telegram_username?: string | null
           total_bot_interactions?: number
           updated_at?: string
+          vip_trial_ends_at?: string | null
           widget_deployed_domains?: string[]
         }
         Update: {
@@ -744,6 +746,7 @@ export type Database = {
           telegram_username?: string | null
           total_bot_interactions?: number
           updated_at?: string
+          vip_trial_ends_at?: string | null
           widget_deployed_domains?: string[]
         }
         Relationships: []
