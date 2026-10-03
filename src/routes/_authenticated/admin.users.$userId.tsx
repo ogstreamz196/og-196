@@ -374,6 +374,7 @@ function UserSettingsPage() {
             role="vip"
             rpc="set_vip_admin"
             paramKey="make_vip"
+            vipExpiry
           />
 
           <RoleToggleRow

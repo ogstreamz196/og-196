@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { deleteUserAccount } from "@/lib/admin-delete-account.functions";
 import { ConfirmAction } from "@/components/admin/ConfirmAction";
+import { VipExpiryDialog, useVipExpiry, formatVipExpiry } from "@/components/admin/VipExpiryDialog";
 import { listUsersPro } from "@/lib/sign-in-tracking.functions";
 import { getAllCoinPurchases, type AdminPurchaseTotals } from "@/lib/payments.functions";
 import { useServerFn } from "@tanstack/react-start";
@@ -731,6 +732,8 @@ function MobileUserCard({
 
 function VipQuickToggle({ userId, checked }: { userId: string; checked: boolean }) {
   const qc = useQueryClient();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const expiry = useVipExpiry(userId, checked);
   const mut = useMutation({
     mutationFn: async (next: boolean) => {
       const { error } = await supabase.rpc(
@@ -764,12 +767,32 @@ function VipQuickToggle({ userId, checked }: { userId: string; checked: boolean 
           <Switch
             checked={checked}
             disabled={mut.isPending}
-            onCheckedChange={(v) => mut.mutate(v)}
+            onCheckedChange={(v) => (v ? setDialogOpen(true) : mut.mutate(false))}
             aria-label="Toggle VIP"
           />
+          {checked && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                setDialogOpen(true);
+              }}
+              className="text-xs text-amber-400 underline-offset-2 hover:underline"
+              title="Adjust VIP expiry"
+            >
+              {expiry.isLoading ? "…" : formatVipExpiry(expiry.data)}
+            </button>
+          )}
         </label>
       </TooltipTrigger>
-      <TooltipContent>{checked ? "Revoke VIP" : "Grant VIP"}</TooltipContent>
+      <TooltipContent>{checked ? "Revoke VIP or tap date to adjust" : "Grant VIP"}</TooltipContent>
+      <VipExpiryDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        userId={userId}
+        isVip={checked}
+        currentExpiry={expiry.data}
+      />
     </Tooltip>
   );
 }
