@@ -265,6 +265,10 @@ export const postCommunityMessage = createServerFn({ method: "POST" })
       .select("id, user_id, role, content, display_name, created_at")
       .single();
     if (insertErr) throw new Error(insertErr.message);
+    {
+      const { alertBossPresence } = await import("@/lib/presence-alert.server");
+      void alertBossPresence(context.userId, "battle");
+    }
 
     // 2. Build short context: last ~20 messages including the one just posted
     const { data: recent } = await supabaseAdmin

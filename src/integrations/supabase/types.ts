@@ -194,6 +194,24 @@ export type Database = {
         }
         Relationships: []
       }
+      boss_presence_alerts: {
+        Row: {
+          kind: string
+          last_sent_at: string
+          user_id: string
+        }
+        Insert: {
+          kind: string
+          last_sent_at?: string
+          user_id: string
+        }
+        Update: {
+          kind?: string
+          last_sent_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bot_tokens: {
         Row: {
           allowed_domain: string | null
@@ -1963,6 +1981,10 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      claim_presence_alert: {
+        Args: { p_cooldown_minutes: number; p_kind: string; p_user: string }
+        Returns: boolean
       }
       claim_referral: { Args: { p_referrer: string }; Returns: boolean }
       claim_referrer_permanent: {
