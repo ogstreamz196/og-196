@@ -31,8 +31,6 @@ import { useRole } from "@/hooks/use-role";
 import {
   useFoulMouth,
   useSetFoulMouth,
-  useFoulIntensity,
-  useSetFoulIntensity,
 } from "@/hooks/use-foul-mouth";
 // useShareLive intentionally removed — Loner/Community is page-level now.
 import { cn } from "@/lib/utils";

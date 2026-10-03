@@ -124,11 +124,8 @@ export const chatOgBot = createServerFn({ method: "POST" })
 
     const foulMouth = isVip ? (prefRes.data?.foul_mouth ?? true) : false;
 
-    const rawIntensity = Number(
-      (prefRes.data as { foul_intensity?: number } | null)?.foul_intensity ?? 1,
-    );
-    // Levels above Mild (1) are VIP-only.
-    const foulIntensity = isVip ? Math.max(1, Math.min(3, rawIntensity || 1)) : 1;
+    // The messenger has no level selector — VIP chat always runs at full DEMON intensity.
+    const foulIntensity = isVip ? 3 : 1;
 
     const userCtx: UserContextSummary = {
       display_name: profile.display_name,
