@@ -29,12 +29,26 @@ export async function alertBossPresence(userId: string, kind: "app" | "battle") 
       supabaseAdmin.from("profiles").select("telegram_chat_id").in("id", bossIds),
     ]);
     const name = esc(who?.display_name || "An OG member");
-    const text =
-      kind === "battle"
-        ? `<b>⚔️ ${name} is in Battle Zone</b>\nJump in and have some fun!`
-        : `<b>🟢 ${name} just opened OG BOT</b>`;
-    const chats = [...new Set((bosses ?? []).map((b) => b.telegram_chat_id).filter(Boolean))];
     const { vipAckTelegram } = await import("@/lib/vip-ack.server");
+
+    if (kind === "battle") {
+      // Battle Zone alerts go to every Telegram-linked member (not just Boss),
+      // with a link straight into the Battle Zone so they can jump in.
+      const text = `<b>⚔️ ${name} is in Battle Zone</b>\n<a href="https://www.ogbot.co.uk/messenger">Jump in and have some fun!</a>`;
+      const { data: linked } = await supabaseAdmin
+        .from("profiles")
+        .select("telegram_chat_id")
+        .not("telegram_chat_id", "is", null)
+        .neq("id", userId);
+      const chats = [...new Set((linked ?? []).map((p) => p.telegram_chat_id).filter(Boolean))];
+      await Promise.all(
+        chats.map((chat_id) => vipAckTelegram("sendMessage", { chat_id, text, parse_mode: "HTML" })),
+      );
+      return;
+    }
+
+    const text = `<b>🟢 ${name} just opened OG BOT</b>`;
+    const chats = [...new Set((bosses ?? []).map((b) => b.telegram_chat_id).filter(Boolean))];
     await Promise.all(
       chats.map((chat_id) => vipAckTelegram("sendMessage", { chat_id, text, parse_mode: "HTML" })),
     );
