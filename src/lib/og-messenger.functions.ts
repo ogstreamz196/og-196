@@ -70,7 +70,7 @@ export const chatOgBot = createServerFn({ method: "POST" })
     const [profileRes, rolesRes, prefRes, siteRes, learnedRes, freeRes] = await Promise.all([
       supabaseAdmin
         .from("profiles")
-        .select("display_name, email, coin_balance")
+        .select("display_name, email, coin_balance, vip_trial_ends_at")
         .eq("id", context.userId)
         .maybeSingle(),
       supabaseAdmin.from("user_roles").select("role").eq("user_id", context.userId),
@@ -118,7 +118,9 @@ export const chatOgBot = createServerFn({ method: "POST" })
         ? new Date(freeExpRaw).getTime() <= Date.now()
         : false;
     const freeAccess = (freeRaw === true || freeRaw === "true") && !freeExpired;
-    const isVip = roles.includes("vip") || roles.includes("admin") || freeAccess;
+    const trialEnds = (rawProfile as { vip_trial_ends_at?: string | null }).vip_trial_ends_at;
+    const onTrial = !!trialEnds && new Date(trialEnds).getTime() > Date.now();
+    const isVip = roles.includes("vip") || roles.includes("admin") || freeAccess || onTrial;
 
     const foulMouth = isVip ? (prefRes.data?.foul_mouth ?? true) : false;
 
@@ -133,7 +135,7 @@ export const chatOgBot = createServerFn({ method: "POST" })
 
     const learnedInsults = (learnedRes.data ?? []).map((r: { phrase: string }) => r.phrase);
 
-    const effectiveLanguage = isVip ? data.language || "English" : "English";
+    const effectiveLanguage = data.language || "English";
 
     const { buildSystemPrompt, detectSongIntent } = await import("@/lib/og-persona.server");
     const { loadUserDossier } = await import("@/lib/og-user-dossier.server");
