@@ -164,7 +164,7 @@ Deno.serve(async (req) => {
           user_id: user.id,
           song_id: id,
           source: "coins",
-          cost_coins: id === song_id ? unlockCost : remakeCost,
+          cost_coins: id === song_id ? ownCost : remakeCost,
           reference: `unlock:${id}`,
         });
         if (lErr && !String(lErr.message).includes("duplicate")) {
