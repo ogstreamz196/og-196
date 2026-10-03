@@ -97,7 +97,6 @@ function CommunityTrackRowImpl({
   });
 
   const [duration, setDuration] = useState<number>(song.duration_seconds ?? 0);
-  const [coverFailed, setCoverFailed] = useState(false);
   const [unlockOpen, setUnlockOpen] = useState(false);
   const [ownerUnlockOpen, setOwnerUnlockOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -146,9 +145,7 @@ function CommunityTrackRowImpl({
 
   const pct = duration > 0 ? Math.min(100, (progress / duration) * 100) : 0;
   const title = song.title || "Untitled track";
-  // Album art hidden in rows so the play button is always clear.
-  const showCover = false && !coverFailed;
-  const hue = hueFor(song.id);
+  // Album art removed from rows so the play button is always clear.
 
   async function confirmDownload() {
     setBusy(true);
