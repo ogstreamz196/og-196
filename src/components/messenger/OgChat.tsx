@@ -190,6 +190,7 @@ export function OgChat({
   const [attachment, setAttachment] = useState<{ dataUrl: string; name: string } | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [noCoinsOpen, setNoCoinsOpen] = useState(false);
+  const [vipPromoOpen, setVipPromoOpen] = useState(false);
   const fetchEditStatus = useServerFn(getImageEditStatus);
   const runImageEdit = useServerFn(editChatImage);
   const editStatus = useQuery({
@@ -496,14 +497,7 @@ export function OgChat({
 
   async function toggleFoul() {
     if (!isVip) {
-      toast.message("Foul-mouth is a VIP perk — grab OG VIP for £5/month.", {
-        action: {
-          label: "Get VIP",
-          onClick: () => {
-            window.location.href = "/buy-coins?flow=vip";
-          },
-        },
-      });
+      setVipPromoOpen(true);
       return;
     }
     try {
@@ -606,6 +600,7 @@ export function OgChat({
         compact ? "" : "rounded-xl border border-border bg-card",
       )}
     >
+      <VipFoulPromo open={vipPromoOpen} onOpenChange={setVipPromoOpen} />
       {showHeader && (
         <div
           data-testid="ogchat-header"
@@ -1141,6 +1136,50 @@ export function OgChat({
           </span>
         </p>
       </form>
+    </div>
+  );
+}
+
+function VipFoulPromo({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
+  if (!open) return null;
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Unlock Foul Mouth with OG VIP"
+      className="fixed inset-0 z-50 grid place-items-center bg-background/80 p-4 backdrop-blur-sm"
+      onClick={() => onOpenChange(false)}
+    >
+      <div
+        className="w-full max-w-sm rounded-2xl border-2 border-destructive/50 bg-card p-5 text-center shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="text-4xl" aria-hidden>🤬</div>
+        <h3 className="mt-2 font-display text-lg font-black">Unlock Foul Mouth</h3>
+        <p className="mt-1 text-sm text-muted-foreground">
+          OG Bot goes unfiltered — savage roasts, UK street slang, no holding back.
+        </p>
+        <ul className="mt-3 space-y-1 text-left text-xs text-foreground/90">
+          <li>🔥 Unfiltered OG Bot persona</li>
+          <li>👑 Your own OG VIP ID and gold badge</li>
+          <li>⚡ Priority replies + daily 10-coin safety net</li>
+        </ul>
+        <div className="mt-4 grid gap-2">
+          <a
+            href="/buy-coins?flow=vip"
+            className="inline-flex h-11 items-center justify-center rounded-xl bg-gradient-brand font-bold text-primary-foreground"
+          >
+            Get OG VIP · from £4.99
+          </a>
+          <button
+            type="button"
+            onClick={() => onOpenChange(false)}
+            className="h-9 text-xs font-semibold text-muted-foreground"
+          >
+            Maybe later
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
