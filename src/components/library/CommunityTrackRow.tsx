@@ -336,48 +336,26 @@ function CommunityTrackRowImpl({
           disabled={!isReady}
           aria-label={`${playing ? "Pause" : "Play"} ${title}`}
           className={cn(
-            "relative h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-card transition-transform",
-            isReady ? "hover:scale-[1.04] active:scale-95" : "opacity-50",
-            playing && "border-primary/60 shadow-[0_0_18px_-6px_var(--primary)]",
+            "relative grid h-12 w-12 shrink-0 place-items-center transition-transform",
+            isReady ? "hover:scale-110 active:scale-95" : "opacity-50",
           )}
-          style={{
-            backgroundImage: showCover
-              ? undefined
-              : `linear-gradient(140deg, oklch(0.32 0.13 ${hue}), oklch(0.18 0.06 ${(hue + 40) % 360}))`,
-          }}
         >
-          {showCover ? (
-            <img
-              src={song.cover_url!}
-              alt=""
-              loading="lazy"
-              decoding="async"
-              width={48}
-              height={48}
-              onError={() => setCoverFailed(true)}
-              className="h-full w-full object-cover"
-            />
+          {/* Bright yellow play button — no artwork or background behind it. */}
+          {loadingUrl ? (
+            <Loader2 className="h-8 w-8 animate-spin text-yellow-400" />
+          ) : playing ? (
+            <span className="grid h-9 w-9 place-items-center rounded-full bg-yellow-400 shadow-[0_0_16px_-2px_rgba(250,204,21,0.7)]">
+              <span className="flex h-3.5 items-end gap-[2px]" aria-hidden>
+                <i className="h-1.5 w-[3px] animate-[eqbar_0.9s_ease-in-out_infinite] rounded-full bg-black" />
+                <i className="h-3.5 w-[3px] animate-[eqbar_0.7s_ease-in-out_infinite] rounded-full bg-black" />
+                <i className="h-2.5 w-[3px] animate-[eqbar_1.1s_ease-in-out_infinite] rounded-full bg-black" />
+              </span>
+            </span>
           ) : (
-            <span className="grid h-full w-full place-items-center font-display text-base font-black uppercase text-white/85">
-              {title.trim().charAt(0) || <Music2 className="h-5 w-5 text-white/70" />}
+            <span className="grid h-9 w-9 place-items-center rounded-full bg-yellow-400 shadow-[0_0_16px_-2px_rgba(250,204,21,0.7)]">
+              <Play className="h-4.5 w-4.5 translate-x-[1px] fill-black text-black" />
             </span>
           )}
-          {/* Always-visible play badge so it's obvious the artwork is tappable. */}
-          <span className="absolute inset-0 grid place-items-center bg-background/45 transition-colors group-hover:bg-background/60">
-            <span className="grid h-7 w-7 place-items-center rounded-full bg-background/85 ring-1 ring-primary/60 shadow-[0_0_14px_-4px_var(--primary)]">
-              {loadingUrl ? (
-                <Loader2 className="h-4 w-4 animate-spin text-primary" />
-              ) : playing ? (
-                <span className="flex h-3.5 items-end gap-[2px]" aria-hidden>
-                  <i className="h-1.5 w-[3px] animate-[eqbar_0.9s_ease-in-out_infinite] rounded-full bg-primary" />
-                  <i className="h-3.5 w-[3px] animate-[eqbar_0.7s_ease-in-out_infinite] rounded-full bg-primary" />
-                  <i className="h-2.5 w-[3px] animate-[eqbar_1.1s_ease-in-out_infinite] rounded-full bg-primary" />
-                </span>
-              ) : (
-                <Play className="h-4 w-4 translate-x-[1px] fill-primary text-primary" />
-              )}
-            </span>
-          </span>
         </button>
 
         <div className="min-w-0 overflow-hidden">
