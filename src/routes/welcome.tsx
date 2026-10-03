@@ -816,8 +816,8 @@ function AlbumCoverShowcase() {
             try {
               localStorage.setItem(PERSONAL_BANNER_KEY, "1");
             } catch {
-      // storage may be blocked (private mode)
-    }
+              // storage may be blocked (private mode)
+            }
             return;
           }
         }
@@ -830,8 +830,8 @@ function AlbumCoverShowcase() {
       try {
         localStorage.setItem(PERSONAL_BANNER_KEY, "1");
       } catch {
-      // storage may be blocked (private mode)
-    }
+        // storage may be blocked (private mode)
+      }
       setHidden(true);
     };
     window.addEventListener("og:generate-start", onGenerate);

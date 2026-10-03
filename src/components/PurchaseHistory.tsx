@@ -406,8 +406,8 @@ function RefundsPanel() {
       try {
         window.localStorage.setItem(EMAIL_OPT_IN_KEY, next ? "1" : "0");
       } catch {
-      // storage may be blocked (private mode)
-    }
+        // storage may be blocked (private mode)
+      }
       toast(next ? "Email alerts on for refund status changes" : "Email alerts off");
       return next;
     });

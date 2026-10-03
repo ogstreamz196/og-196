@@ -31,7 +31,6 @@ function esc(s: string) {
   return s.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function queueYearlyVipAck(admin: any, userId: string, ogVipId: string | null) {
   const { data: inserted, error } = await admin
     .from("vip_acknowledgements")
