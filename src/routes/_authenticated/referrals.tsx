@@ -25,6 +25,7 @@ import {
 import { QRCodeSVG } from "qrcode.react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { useRole } from "@/hooks/use-role";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { AllPurchasesPanel } from "@/components/admin/AllPurchasesPanel";
 import { Button } from "@/components/ui/button";
@@ -95,6 +96,8 @@ async function copyTextWithFallback(text: string): Promise<boolean> {
 
 function ReferralsPage() {
   const { user } = useAuth();
+  const { isVip } = useRole();
+  const ratePct = isVip ? 13 : 6;
   const qc = useQueryClient();
   const [copied, setCopied] = useState(false);
 
@@ -284,7 +287,7 @@ function ReferralsPage() {
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-destructive" /> Live
           </span>
           <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-black shadow-lg shadow-orange-900/30">
-            <Sparkles className="h-3 w-3" /> 10% Lifetime
+            <Sparkles className="h-3 w-3" /> {ratePct}% Lifetime{isVip ? " · VIP" : ""}
           </span>
           {myRefQ.data?.has_referrer ? (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-300">
@@ -311,7 +314,12 @@ function ReferralsPage() {
             OG Partner Scheme
           </p>
           <h2 className="mt-2 font-bungee text-2xl leading-tight sm:text-4xl">
-            Get 10% of every coin your friends spend — forever.
+            Get {ratePct}% of every coin your friends spend — forever.
+            {!isVip && (
+              <span className="mt-1 block text-sm font-sans font-bold text-amber-300">
+                OG VIPs earn 13% — upgrade to boost your cut.
+              </span>
+            )}
           </h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
             <Mission
@@ -345,13 +353,13 @@ function ReferralsPage() {
               tone="destructive"
               n={3}
               icon={<Flame className="h-5 w-5" />}
-              title="You earn 10%"
+              title={`You earn ${ratePct}%`}
               body="Paid automatically in OG Coins. No limit, no expiry."
             />
           </div>
           <p className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
             <PiggyBank className="h-3.5 w-3.5 text-amber-300" />
-            Example: a friend uses 100 coins → you get +10 OG.
+            Example: a friend uses 100 coins → you get +{ratePct} OG{isVip ? "" : " (+13 as VIP)"}.
           </p>
         </section>
 
@@ -555,7 +563,7 @@ function ReferralsPage() {
                         {isPayment ? (
                           <>Successful payment reward = </>
                         ) : burned > 0 ? (
-                          <>{burned} used × 10% = </>
+                          <>{burned} used → </>
                         ) : (
                           <>Cashback = </>
                         )}

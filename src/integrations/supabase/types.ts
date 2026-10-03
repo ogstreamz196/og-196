@@ -2109,6 +2109,7 @@ export type Database = {
       purchase_vip: { Args: never; Returns: number }
       purchase_vip_pass_for_user: { Args: { p_user: string }; Returns: Json }
       redeem_og_bot_invite: { Args: { p_code: string }; Returns: string }
+      referral_rate_pct: { Args: { p_user: string }; Returns: number }
       refund_chat_image_edit: {
         Args: {
           p_free: boolean
