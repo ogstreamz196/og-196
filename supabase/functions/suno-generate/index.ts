@@ -231,8 +231,8 @@ Deno.serve(async (req) => {
       portalLanguage = p.language ?? null;
       // Portal generations follow the same free-until-download rule.
     }
-    const effectiveLyrics =
-      lyrics && portalLanguage ? `[Language: ${portalLanguage}]\n${lyrics}` : lyrics;
+    // Language goes in the style hint only — never into sung lyrics.
+    const effectiveLyrics = lyrics ? sanitizeLyrics(lyrics) || lyrics : lyrics;
     const effectivePrompt =
       !lyrics && portalLanguage ? `[Language: ${portalLanguage}] ${prompt}` : prompt;
 
