@@ -38,7 +38,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { POOLS } from "@/lib/library-utils";
+import { POOLS, isFreeStyle } from "@/lib/library-utils";
+import { useRole } from "@/hooks/use-role";
+import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -124,16 +126,16 @@ const STYLES: string[] = (() => {
   const featured = [
     "Hip Hop",
     "Rap",
+    "Pop",
+    "R&B",
     "Singing",
     "Drill",
     "Trap",
-    "Drum & Bass",
-    "Pop",
-    "K-Pop",
-    "Slow Jam",
     "Bhangra",
+    "Lo-fi",
+    "Drum & Bass",
+    "Afrobeats",
     "Nasheed",
-    "Nursery Rhyme",
   ];
   const rest = POOLS.genre.filter((g) => !featured.includes(g));
   return [...featured, ...rest];
@@ -162,6 +164,8 @@ export function CreateNowWizard({
   onEarnCoins?: () => void;
 }) {
   const [step, setStep] = useState(1);
+  const { isVip } = useRole();
+  const navigateVip = useNavigate();
   const [title, setTitle] = useState("");
   const [subjectName, setSubjectName] = useState("");
   const [description, setDescription] = useState("");
@@ -549,12 +553,20 @@ export function CreateNowWizard({
                     : STYLES.filter((x, i) => i < 12 || styles.includes(x))
                   ).map((s) => {
                     const selected = styles.includes(s);
+                    const locked = !isVip && !isFreeStyle(s) && !selected;
                     return (
                       <button
                         key={s}
                         type="button"
                         aria-pressed={selected}
                         onClick={() => {
+                          if (locked) {
+                            toast(`👑 ${s} is an OG VIP style`, {
+                              description: "Unlock all 50+ styles & moods, plus custom style and language requests.",
+                              action: { label: "Get VIP", onClick: () => void navigateVip({ to: "/buy-coins" }) },
+                            });
+                            return;
+                          }
                           if (s === "Nasheed") {
                             setStyles(selected ? [] : ["Nasheed"]);
                             setVocalsOnly(!selected);
@@ -574,9 +586,16 @@ export function CreateNowWizard({
                           "min-h-11 rounded-xl border px-3 py-2.5 text-sm font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                           selected
                             ? "border-primary bg-primary/20 text-foreground shadow-glow"
-                            : "border-white/10 bg-card/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
+                            : locked
+                              ? "border-coin/30 bg-coin/5 text-muted-foreground/70"
+                              : "border-white/10 bg-card/60 text-muted-foreground hover:border-primary/40 hover:text-foreground",
                         )}
                       >
+                        {locked && (
+                          <span aria-label="VIP only" className="mr-1 inline-flex items-end text-[11px]">
+                            <span className="relative">🔒<span className="absolute -top-2 left-0.5 text-[9px]">👑</span></span>
+                          </span>
+                        )}
                         {s}
                       </button>
                     );

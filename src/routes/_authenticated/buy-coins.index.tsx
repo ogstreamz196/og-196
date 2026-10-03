@@ -695,6 +695,8 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                   {[
                     ["Chat with OG Bot", "✓", "✓"],
                     ["29 reply languages", "✓", "✓"],
+                    ["Music styles & moods", "6 core", "All 50+"],
+                    ["Request styles or languages", "—", "✓"],
                     ["Foul-mouth mode", "—", "✓"],
                     ["Priority replies", "—", "✓"],
                     ["OG VIP ID + gold badge", "—", "✓"],
