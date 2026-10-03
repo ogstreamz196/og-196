@@ -13,6 +13,8 @@ import {
   AlertCircle,
   Play,
   RefreshCw,
+  Download,
+  Lock,
 } from "lucide-react";
 
 import { toast } from "sonner";
@@ -666,10 +668,9 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
         </div>
       )}
       <Tabs value={tab} onValueChange={setTab} className="space-y-4">
-        <TabsList className="grid h-auto w-full grid-cols-4 p-1">
+        <TabsList className="grid h-auto w-full grid-cols-3 p-1">
           <TabsTrigger value="lyrics" className="text-xs sm:text-sm">Edit</TabsTrigger>
           <TabsTrigger value="preview" className="text-xs sm:text-sm">Preview</TabsTrigger>
-          <TabsTrigger value="hq" className="text-xs sm:text-sm">Full HQ</TabsTrigger>
           <TabsTrigger value="takes" className="text-xs sm:text-sm">Takes</TabsTrigger>
         </TabsList>
 
@@ -1121,30 +1122,10 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
               </CardContent>
             </CollapsibleContent>
           </Collapsible>
-        </Card>
-        </TabsContent>
-
-        <TabsContent value="hq" className="mt-0">
-        {/* Stage 3 — Final song */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Music2 className="h-4 w-4 text-primary" />Full HQ
-            </CardTitle>
-            <CardDescription>{fullUnlockCost} coins to unlock.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {!isReady ? (
-              <p className="text-sm text-muted-foreground">
-                Once the preview is ready, the full track unlocks here.
-              </p>
-            ) : (
+          {isReady && (
+          <CardContent className="space-y-3 border-t border-border/50 pt-4">
               <>
-                <p className="text-sm text-muted-foreground">
-                  {song.unlocked
-                    ? "Full HQ unlocked. Download as many times as you like."
-                    : "Unlock once to download the full HQ track."}
-                </p>
+
 
                 {!song.unlocked && balance < unlockCost && (
                   <div className="flex items-start gap-3 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
@@ -1164,31 +1145,31 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                   </div>
                 )}
 
-                <div className="flex flex-wrap justify-end gap-2">
-                  <Button
-                    onClick={unlockFull}
-                    disabled={unlocking || (!song.unlocked && balance < unlockCost)}
-                    className="gap-2"
-                    aria-live="polite"
-                  >
-                    {unlocking ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        {song.unlocked ? "Preparing download…" : "Processing payment…"}
-                      </>
-                    ) : (
-                      <>
-                        <Music2 className="h-4 w-4" />
-                        {song.unlocked
-                          ? "Download full HQ"
-                          : `Unlock & download · ${unlockCost} coins`}
-                      </>
-                    )}
-                  </Button>
-                </div>
+                <Button
+                  onClick={unlockFull}
+                  disabled={unlocking || (!song.unlocked && balance < unlockCost)}
+                  variant={song.unlocked ? "default" : "outline"}
+                  className="h-12 w-full gap-2"
+                  aria-live="polite"
+                >
+                  {unlocking ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      {song.unlocked ? "Preparing download…" : "Processing payment…"}
+                    </>
+                  ) : song.unlocked ? (
+                    <>
+                      <Download className="h-4 w-4" /> Download to device
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="h-4 w-4" /> Unlock full track · {unlockCost} coins
+                    </>
+                  )}
+                </Button>
               </>
-            )}
           </CardContent>
+          )}
         </Card>
         </TabsContent>
 
