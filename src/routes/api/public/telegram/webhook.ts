@@ -158,6 +158,7 @@ Tap a button below or use a command:
 /library — same as /tracks
 /buy — top up OG coins
 /me — your linked profile
+/vip — your VIP status and expiry date
 /help — this menu
 
 Just type anything else and I'll answer — same brain as the in-app messenger.`;
@@ -773,6 +774,7 @@ async function handleTelegramUpdate(
       "🎧 Library": "/library",
       "🛒 Buy Coins": "/buy",
       "👤 My Profile": "/me",
+      "👑 VIP Status": "/vip",
       "❓ Help": "/help",
       "📊 Stats": "/stats",
       "👥 Users": "/users",
