@@ -203,6 +203,10 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const lyricsCost = settings?.coins_per_lyrics_generation ?? 0;
   const previewCost = settings?.coins_per_generation ?? 0;
   const fullUnlockCost = settings?.coins_per_full_unlock ?? 5;
+  const remakeCost =
+    Number((settings as { coins_per_remake?: number } | undefined)?.coins_per_remake) || 2;
+  // Second takes (variations) unlock at the cheaper remake price.
+  const unlockCost = song.is_variation ? remakeCost : fullUnlockCost;
   const balance = profile?.coin_balance ?? 0;
   const isOwner = !!profile?.id && song.user_id === profile.id;
 
