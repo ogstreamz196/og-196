@@ -318,8 +318,21 @@ function ReferralsPage() {
               tone="primary"
               n={1}
               icon={<Link2 className="h-5 w-5" />}
-              title="Share your link"
-              body="Send it anywhere, or let them scan your QR."
+              title={
+                <button
+                  type="button"
+                  onClick={() => {
+                    document
+                      .querySelector('[data-testid="share-hub"]')
+                      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    void handleCopy("Link copied — paste it anywhere to share");
+                  }}
+                  className="text-left underline decoration-primary/60 underline-offset-4 hover:text-primary"
+                >
+                  Share your link
+                </button>
+              }
+              body="Tap above to copy your link. Or let them scan your QR."
             />
             <Mission
               tone="fuchsia"
