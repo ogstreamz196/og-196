@@ -17,11 +17,14 @@ export async function alertBossPresence(userId: string, kind: "app" | "battle") 
     const bossIds = [...new Set((roleRows ?? []).map((r: { user_id: string }) => r.user_id))];
     if (!bossIds.length || bossIds.includes(userId)) return; // don't alert about yourself
 
-    const { data: claimed } = await supabaseAdmin.rpc("claim_presence_alert" as never, {
-      p_user: userId,
-      p_kind: kind,
-      p_cooldown_minutes: COOLDOWN_MIN[kind],
-    } as never);
+    const { data: claimed } = await supabaseAdmin.rpc(
+      "claim_presence_alert" as never,
+      {
+        p_user: userId,
+        p_kind: kind,
+        p_cooldown_minutes: COOLDOWN_MIN[kind],
+      } as never,
+    );
     if (!claimed) return;
 
     const [{ data: who }, { data: bosses }] = await Promise.all([
@@ -42,7 +45,9 @@ export async function alertBossPresence(userId: string, kind: "app" | "battle") 
         .neq("id", userId);
       const chats = [...new Set((linked ?? []).map((p) => p.telegram_chat_id).filter(Boolean))];
       await Promise.all(
-        chats.map((chat_id) => vipAckTelegram("sendMessage", { chat_id, text, parse_mode: "HTML" })),
+        chats.map((chat_id) =>
+          vipAckTelegram("sendMessage", { chat_id, text, parse_mode: "HTML" }),
+        ),
       );
       return;
     }

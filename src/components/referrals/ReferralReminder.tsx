@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 
 /**
  * Compact, share-first reminder: shows the user's OG referral code and the
- * 10% commission promise. Drop it anywhere coins are being spent or bought
+ * 6%–13% commission promise. Drop it anywhere coins are being spent or bought
  * so the cashback loop stays top-of-mind.
  */
 export function ReferralReminder({ className }: { className?: string }) {
