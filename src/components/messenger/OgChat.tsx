@@ -163,13 +163,26 @@ export function OgChat({
   // shareLive removed: Loner Mode is enforced by the page mounting OgChat.
   const postCommunity = useServerFn(postCommunityMessage);
   const transcribe = useServerFn(transcribeOgAudio);
-  const [language, setLanguage] = useState<string>(() => {
-    if (typeof window === "undefined") return "English";
-    return window.localStorage.getItem(LANG_KEY) || "English";
-  });
+  // Private/incognito browsers can block or throw on storage — the chosen
+  // language must still work for the session, so storage is best-effort only.
+  const [language, setLanguage] = useState<string>("English");
+  const langLoaded = useRef(false);
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    window.localStorage.setItem(LANG_KEY, language);
+    try {
+      const saved = window.localStorage.getItem(LANG_KEY);
+      if (saved && OG_LANGUAGES.includes(saved as (typeof OG_LANGUAGES)[number])) setLanguage(saved);
+    } catch {
+      /* storage blocked in private mode */
+    }
+    langLoaded.current = true;
+  }, []);
+  useEffect(() => {
+    if (!langLoaded.current) return;
+    try {
+      window.localStorage.setItem(LANG_KEY, language);
+    } catch {
+      /* storage blocked in private mode — keep in-memory choice */
+    }
   }, [language]);
 
   // Attachment + mic state
