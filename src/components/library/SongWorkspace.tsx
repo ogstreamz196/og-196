@@ -1056,7 +1056,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                         size="sm"
                         variant="outline"
                         onClick={() => {
-                          setStep1Open(true);
+                          setTab("lyrics");
                           setLyricsOpen(true);
                           requestAnimationFrame(() =>
                             lyricsRef.current?.scrollIntoView({
