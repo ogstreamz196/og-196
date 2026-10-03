@@ -50,9 +50,9 @@ export function logAiUsage(entry: AiUsageEntry): void {
       console.warn("ai_usage_log insert failed", e);
     }
   };
-  // @ts-ignore EdgeRuntime is available in the edge function runtime.
+  // @ts-expect-error EdgeRuntime is available in the edge function runtime.
   if (typeof EdgeRuntime !== "undefined" && EdgeRuntime.waitUntil) {
-    // @ts-ignore see above
+    // @ts-expect-error see above
     EdgeRuntime.waitUntil(run());
   } else {
     void run();

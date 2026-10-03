@@ -36,7 +36,9 @@ export function GeminiUsagePanel() {
     queryFn: async (): Promise<Row[]> => {
       const { data, error } = await supabase
         .from("ai_usage_log")
-        .select("feature, provider, model, prompt_tokens, completion_tokens, total_tokens, created_at")
+        .select(
+          "feature, provider, model, prompt_tokens, completion_tokens, total_tokens, created_at",
+        )
         .gte("created_at", since(30))
         .order("created_at", { ascending: false })
         .limit(5000);
@@ -71,8 +73,7 @@ export function GeminiUsagePanel() {
     }, {}),
   ).sort((a, b) => b[1] - a[1]);
 
-  const money = (usd: number) =>
-    usd < 0.01 && usd > 0 ? "<$0.01" : `$${usd.toFixed(2)}`;
+  const money = (usd: number) => (usd < 0.01 && usd > 0 ? "<$0.01" : `$${usd.toFixed(2)}`);
 
   return (
     <section className="mb-6 rounded-2xl border border-border bg-card/70 p-5">
@@ -81,9 +82,9 @@ export function GeminiUsagePanel() {
         Gemini usage
       </h2>
       <p className="mb-4 text-sm text-muted-foreground">
-        Live count of every AI call the app makes. Google doesn't share your key's remaining
-        balance with apps, so this is our own meter — the cost is an estimate, your Google
-        invoice is the exact figure.
+        Live count of every AI call the app makes. Google doesn't share your key's remaining balance
+        with apps, so this is our own meter — the cost is an estimate, your Google invoice is the
+        exact figure.
       </p>
 
       {q.isLoading ? (
@@ -98,7 +99,10 @@ export function GeminiUsagePanel() {
                 { label: "30 days", s: m },
               ] as const
             ).map(({ label, s }) => (
-              <div key={label} className="rounded-xl border border-border bg-background/60 p-3 text-center">
+              <div
+                key={label}
+                className="rounded-xl border border-border bg-background/60 p-3 text-center"
+              >
                 <p className="text-xs font-bold uppercase text-muted-foreground">{label}</p>
                 <p className="mt-1 font-display text-2xl font-black">{s.calls}</p>
                 <p className="text-xs text-muted-foreground">calls</p>
