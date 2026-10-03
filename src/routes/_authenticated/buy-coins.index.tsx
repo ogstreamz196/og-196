@@ -702,7 +702,7 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                     ["OG VIP ID + gold badge", "—", "✓"],
                     ["Referral code = your name", "—", "✓"],
                     ["Daily 10-coin safety net", "—", "✓"],
-                    ["10% referral cashback", "✓", "✓"],
+                    ["Referral cashback", "6%", "13%"],
                   ].map(([f, a, b]) => (
                     <tr key={f}>
                       <td className="px-3 py-1.5 font-medium">{f}</td>

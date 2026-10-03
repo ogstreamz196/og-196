@@ -109,7 +109,7 @@ export function BindReferrerCard() {
             </div>
             <div className="mt-1 text-sm text-muted-foreground">
               <span className="font-semibold text-foreground">{mineQ.data.referrer_name}</span> now
-              owns your life in their hands. They earn 10% of every OG Coin you burn — forever.
+              owns your life in their hands. They earn up to 13% of every OG Coin you burn — forever.
             </div>
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
               {code && (
@@ -288,7 +288,7 @@ export function BindReferrerCard() {
       <p className="text-sm text-muted-foreground">
         Paste the <span className="font-semibold text-foreground">OG Leader code</span> (
         <span className="font-mono">OG-XXXXXX</span>), ID, or referral link of the person who
-        brought you in. Once locked, 10% of every OG Coin you ever burn goes to their OG Vault —
+        brought you in. Once locked, up to 13% of every OG Coin you ever burn goes to their OG Vault —
         automatically, for life. You can only do this once.
       </p>
 
@@ -359,7 +359,7 @@ export function BindReferrerCard() {
                   </>
                 ) : null}{" "}
                 the keys. They now own your life in their hands — they can rinse you completely.{" "}
-                <span className="font-semibold text-foreground">10% of every OG Coin</span> you burn
+                <span className="font-semibold text-foreground">up to 13% of every OG Coin</span> you burn
                 from this moment on flows into{" "}
                 <span className="font-semibold">{lookup.name}'s</span> OG Vault. This decision is
                 permanent. It cannot be undone, swapped, or reset by anyone, ever.
@@ -374,7 +374,7 @@ export function BindReferrerCard() {
               className="mt-0.5"
             />
             <span>
-              I understand. {lookup.name} now owns my life in their hands and earns 10% of every OG
+              I understand. {lookup.name} now owns my life in their hands and earns up to 13% of every OG
               Coin I burn — forever.
             </span>
           </label>
