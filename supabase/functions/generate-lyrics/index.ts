@@ -22,7 +22,8 @@ Deno.serve(async (req) => {
   if (pre) return pre;
 
   try {
-    if (!GEMINI_API_KEY) return jsonResponse({ error: "Gemini is not configured" }, 500);
+    if (!GEMINI_API_KEY && !Deno.env.get("OPENAI_API_KEY"))
+      return jsonResponse({ error: "No lyrics writer is configured" }, 500);
 
     const auth = await requireUser(req);
     if (auth.error) return auth.error;
