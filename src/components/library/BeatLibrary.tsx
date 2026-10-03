@@ -268,10 +268,10 @@ export function BeatLibrary({
           variant="secondary"
           disabled={uploading || !userId}
           onClick={() => fileRef.current?.click()}
-          className="shrink-0 gap-1.5 font-black uppercase tracking-wide"
+          className="shrink-0 gap-1 px-2.5 text-xs font-black uppercase tracking-wide"
         >
           {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-          Add beat
+          Add
         </Button>
       </div>
 
