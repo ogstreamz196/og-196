@@ -265,10 +265,10 @@ export function AppShell({ children }: { children: ReactNode }) {
               </div>
             </header>
 
-            {!roleLoading && isAdmin && (
-              <div className="flex items-center justify-center gap-2 border-b border-primary/40 bg-gradient-brand px-4 py-1.5 text-xs font-semibold uppercase text-primary-foreground shadow-glow">
-                <ShieldCheck className="h-3.5 w-3.5" />
-                Boss mode active
+            {!roleLoading && isAdmin && !pathname.startsWith("/messenger") && (
+              <div className="flex items-center justify-center gap-1.5 border-b border-primary/30 bg-primary/10 px-4 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary md:hidden">
+                <ShieldCheck className="h-3 w-3" />
+                Boss mode
               </div>
             )}
             <AdminEditHint />
