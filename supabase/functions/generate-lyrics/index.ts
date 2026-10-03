@@ -3,6 +3,7 @@ import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0
 import { geminiUsage, logAiUsage } from "../_shared/ai-usage.ts";
 import { handlePreflight, jsonResponse } from "../_shared/cors.ts";
 import { adminClient, requireUser } from "../_shared/clients.ts";
+import { sanitizeLyrics } from "../_shared/lyrics-sanitize.ts";
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY") ?? "";
 const GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") ?? "gemini-3.8-flash";
@@ -210,7 +211,7 @@ Deno.serve(async (req) => {
       !isEnglish && englishSelected
         ? ` ENGLISH REMIX REQUIREMENT (critical): English was picked alongside ${nonEnglish.join(" and ")}, so it is part of the remix. The [Intro] MUST be fully in English (a short hype intro naming the song/artist vibe). After that, the picked language(s) LEAD the song — most lines, and the main hook, stay in ${nonEnglish.join(" and ")} — but sprinkle English throughout like a remix feature: at least 2 English lines or ad-libs inside every verse and every chorus, an English line at the end of each hook repeat, and a mostly-English [Outro]. Roughly a quarter of all sung lines should be English, spread across the whole track, not clumped in one section. Never let English take over a full verse or the main chorus melody — it is the feature, not the lead.`
         : !isEnglish
-          ? ` NO-ENGLISH RULE (critical): English was NOT selected. Do not sing or speak any English anywhere in the song — no English intro, no English ad-libs, no English outro. Every sung line stays in the selected language(s) only. (Section markers stay in English brackets as usual, and any parenthetical translation lines are for reference only.)`
+          ? ` LANGUAGE LOCK (critical, never write this instruction into the lyrics): every sung or spoken line — intro, verses, choruses, ad-libs, outro — is written only in ${nonEnglish.join(" and ")}. Only the bracketed section markers use English words. Never mention language choices, rules, settings or instructions anywhere in the lyrics.`
           : "";
 
     // One non-English pick: the whole song leads in it.
@@ -547,6 +548,7 @@ Deno.serve(async (req) => {
       }
     }
 
+    lyrics = sanitizeLyrics(lyrics);
     const words = wordCount(lyrics);
     const estimatedSec = Math.max(targetSec, Math.round((words / WORDS_PER_MIN) * 60));
 

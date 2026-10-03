@@ -7,6 +7,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { injectSignature, withSignatureHint } from "../_shared/track-signature.ts";
+import { sanitizeLyrics } from "../_shared/lyrics-sanitize.ts";
 import {
   isModerationRejection,
   MODERATION_MESSAGE,
@@ -231,8 +232,8 @@ Deno.serve(async (req) => {
       portalLanguage = p.language ?? null;
       // Portal generations follow the same free-until-download rule.
     }
-    const effectiveLyrics =
-      lyrics && portalLanguage ? `[Language: ${portalLanguage}]\n${lyrics}` : lyrics;
+    // Language goes in the style hint only — never into sung lyrics.
+    const effectiveLyrics = lyrics ? sanitizeLyrics(lyrics) || lyrics : lyrics;
     const effectivePrompt =
       !lyrics && portalLanguage ? `[Language: ${portalLanguage}] ${prompt}` : prompt;
 
@@ -431,7 +432,10 @@ Deno.serve(async (req) => {
     ) => {
       const retryPayload = {
         prompt: lyricsText || promptText,
-        style: styleText || undefined,
+        style:
+          (portalLanguage && lyricsText
+            ? [`sung entirely in ${portalLanguage}`, styleText].filter(Boolean).join(", ")
+            : styleText) || undefined,
         title: customMode ? sunoTitle : undefined,
         customMode,
         instrumental: vocalsOnly ? false : instrumental,
