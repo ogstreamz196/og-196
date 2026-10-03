@@ -25,7 +25,7 @@ function geminiTarget(): AiChatTarget | null {
   return {
     url: GEMINI_OPENAI_URL,
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${gemini}` },
-    model: process.env.GEMINI_MODEL || "gemini-2.5-flash",
+    model: process.env.GEMINI_MODEL || "gemini-3.8-flash",
     provider: "gemini",
   };
 }
@@ -224,7 +224,7 @@ export async function getLiveResearchContext(query: string): Promise<string | nu
 export async function transcribeWithGemini(audioBase64: string, mime: string): Promise<string> {
   const key = process.env.GEMINI_API_KEY;
   if (!key) throw new Error("Speech-to-text not configured (GEMINI_API_KEY missing)");
-  const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+  const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
   const res = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
       model,

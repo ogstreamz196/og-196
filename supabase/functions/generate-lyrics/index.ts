@@ -430,7 +430,7 @@ Deno.serve(async (req) => {
           GEMINI_BACKUP_MODEL,
           "gemini-3.8-flash",
           "gemini-flash-lite-latest",
-          "gemini-2.5-flash-lite",
+          "gemini-3.5-flash-lite",
         ]),
       );
       let lastFail: Gen = { ok: false, status: 503, text: "", detail: "No response" };
