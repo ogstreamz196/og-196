@@ -659,21 +659,52 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
             )}
           </div>
           <div className="rounded-xl border border-primary/30 bg-store-card p-4 shadow-card sm:p-5">
-            <ul className="grid gap-2 text-sm text-muted-foreground min-[440px]:grid-cols-2">
-              <li className="flex items-start gap-2">
-                <Star className="mt-0.5 h-3.5 w-3.5 shrink-0 text-coin" /> Foul-mouth OG Bot
-                unlocked
-              </li>
-              <li className="flex items-start gap-2">
-                <Star className="mt-0.5 h-3.5 w-3.5 shrink-0 text-coin" /> Priority OG Bot replies
-              </li>
-              <li className="flex items-start gap-2">
-                <Star className="mt-0.5 h-3.5 w-3.5 shrink-0 text-coin" /> VIP badge across the hub
-              </li>
-              <li className="flex items-start gap-2">
-                <Gift className="mt-0.5 h-3.5 w-3.5 shrink-0 text-coin" /> Daily 10-coin safety net
-              </li>
-            </ul>
+            <div className="grid gap-2 sm:grid-cols-3">
+              {[
+                { icon: "⚡", t: "Creative power", d: "Priority replies, daily 10-coin safety net, free image edit every 4h" },
+                { icon: "👑", t: "Street status", d: "Your own OG VIP ID, gold crown & badge everywhere" },
+                { icon: "🔥", t: "Unfiltered", d: "Foul-mouth OG Bot — savage roasts & UK slang" },
+              ].map((p) => (
+                <div key={p.t} className="rounded-lg border border-border bg-background/40 p-3">
+                  <p className="text-sm font-black">
+                    <span aria-hidden>{p.icon}</span> {p.t}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">{p.d}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 overflow-hidden rounded-lg border border-border">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-muted/40 text-[10px] uppercase tracking-wider text-muted-foreground">
+                  <tr>
+                    <th className="px-3 py-2 font-bold">Feature</th>
+                    <th className="px-2 py-2 text-center font-bold">Free</th>
+                    <th className="px-2 py-2 text-center font-bold text-coin">
+                      <Crown className="mr-1 inline h-3 w-3" />
+                      VIP
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {[
+                    ["Chat with OG Bot", "✓", "✓"],
+                    ["29 reply languages", "✓", "✓"],
+                    ["Foul-mouth mode", "—", "✓"],
+                    ["Priority replies", "—", "✓"],
+                    ["OG VIP ID + gold badge", "—", "✓"],
+                    ["Referral code = your name", "—", "✓"],
+                    ["Daily 10-coin safety net", "—", "✓"],
+                    ["10% referral cashback", "✓", "✓"],
+                  ].map(([f, a, b]) => (
+                    <tr key={f}>
+                      <td className="px-3 py-1.5 font-medium">{f}</td>
+                      <td className="px-2 py-1.5 text-center text-muted-foreground">{a}</td>
+                      <td className="px-2 py-1.5 text-center font-black text-coin">{b}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               <div className="flex flex-col justify-between gap-3 rounded-xl border border-border bg-background/40 p-4">
                 <div>
