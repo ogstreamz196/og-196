@@ -1301,7 +1301,7 @@ function LibraryPage() {
             <p className="text-[9px] font-black uppercase tracking-[0.34em] text-primary/80">
               OG Studio · Live desk
             </p>
-            <h1 className="font-display text-3xl font-black leading-[1.05] tracking-[-0.02em] break-words sm:text-4xl">
+            <h1 className="truncate font-display text-2xl font-black leading-[1.1] tracking-[-0.02em] sm:text-4xl">
               Hey <span className="text-gradient-brand">{firstName}</span>
             </h1>
           </div>

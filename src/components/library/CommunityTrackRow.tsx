@@ -182,6 +182,23 @@ function CommunityTrackRowImpl({
     }
   }
 
+  /** Save an unlocked owned track straight to the device. */
+  async function downloadOwned() {
+    setBusy(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("song-url", {
+        body: { song_id: song.id, mode: "full", purpose: "download", filename: `${title}.mp3` },
+      });
+      if (error || !data?.url) throw new Error("Could not prepare the download");
+      await downloadFile(data.url as string, `${title}.mp3`);
+      toast.success("Saved to your device");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Download failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   /** Re-download an already-paid track and hand it to the share sheet. */
   async function shareUnlocked() {
     setBusy(true);
@@ -231,14 +248,31 @@ function CommunityTrackRowImpl({
         </button>
       )}
       {owned ? (
-        <Link
-          to="/library/$songId"
-          params={{ songId: song.id }}
-          aria-label={`Edit ${title}`}
-          className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-primary/40 bg-primary/15 text-primary transition-colors hover:bg-primary/25"
-        >
-          <Pencil className="h-3.5 w-3.5" />
-        </Link>
+        <>
+          <Link
+            to="/library/$songId"
+            params={{ songId: song.id }}
+            aria-label={`Edit ${title}`}
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-primary/40 bg-primary/15 text-primary transition-colors hover:bg-primary/25"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </Link>
+          {song.unlocked && isReady && (
+            <button
+              type="button"
+              onClick={() => void downloadOwned()}
+              disabled={busy}
+              aria-label={`Download ${title} to device`}
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-primary/40 bg-primary/15 text-primary transition-colors hover:bg-primary/25 disabled:opacity-40"
+            >
+              {busy ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Download className="h-3.5 w-3.5" />
+              )}
+            </button>
+          )}
+        </>
       ) : (
         <button
           type="button"
@@ -317,7 +351,7 @@ function CommunityTrackRowImpl({
         playing && "bg-primary/[0.08] shadow-[inset_3px_0_0_var(--primary)]",
       )}
     >
-      <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2.5">
+      <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-2.5">
         {/* Artwork doubles as the play / pause control. */}
         <button
           type="button"
@@ -347,46 +381,44 @@ function CommunityTrackRowImpl({
           )}
         </button>
 
-        <div className="min-w-0 overflow-hidden">
-          {owned ? (
-            <Link
-              to="/library/$songId"
-              params={{ songId: song.id }}
-              className="block truncate text-[15px] font-semibold leading-snug hover:text-primary focus:outline-none focus-visible:underline"
-            >
-              {title}
-            </Link>
-          ) : (
-            <p className="truncate text-[15px] font-semibold leading-snug">{title}</p>
-          )}
-
-          {/* One quiet metadata line: creator · styles · duration. */}
-          <div className="mt-1 flex min-w-0 items-center gap-1.5 text-[11px] leading-none text-muted-foreground">
-            <CreatorTag userId={song.user_id} className="max-w-[88px] shrink-0" />
-            {styles.length > 0 && <span className="min-w-0 truncate">{styles.join(", ")}</span>}
-            {duration > 0 && (
-              <span className="shrink-0 whitespace-nowrap tabular-nums">{fmt(duration)}</span>
+        <div className="min-w-0">
+          {/* Row 1: title gets the full width. */}
+          <div className="flex min-w-0 items-center gap-1.5">
+            {owned ? (
+              <Link
+                to="/library/$songId"
+                params={{ songId: song.id }}
+                className="min-w-0 flex-1 truncate text-[15px] font-semibold leading-snug hover:text-primary focus:outline-none focus-visible:underline"
+              >
+                {title}
+              </Link>
+            ) : (
+              <p className="min-w-0 flex-1 truncate text-[15px] font-semibold leading-snug">
+                {title}
+              </p>
+            )}
+            {song.is_variation && (
+              <span className="shrink-0 whitespace-nowrap rounded-full border border-amber-400/25 bg-amber-500/10 px-1.5 py-px text-[10px] font-semibold leading-tight text-amber-300">
+                Take 2
+              </span>
             )}
           </div>
 
-          {(song.is_variation || !(song.unlocked || song.artistUnlocked)) && (
-            <div className="mt-1 flex items-center gap-1.5 overflow-hidden">
-              {song.is_variation && (
-                <span className="shrink-0 whitespace-nowrap rounded-full border border-amber-400/25 bg-amber-500/10 px-1.5 py-px text-[10px] font-semibold leading-tight text-amber-300">
-                  Second take
-                </span>
+          {/* Row 2: quiet info on the left, actions on the right. */}
+          <div className="mt-1 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
+            <div className="flex min-w-0 items-center gap-1.5 overflow-hidden text-[11px] leading-none text-muted-foreground">
+              {!owned && <CreatorTag userId={song.user_id} className="max-w-[72px] shrink-0" />}
+              {styles.length > 0 && <span className="min-w-0 truncate">{styles[0]}</span>}
+              {duration > 0 && (
+                <span className="shrink-0 whitespace-nowrap tabular-nums">{fmt(duration)}</span>
               )}
               {!(song.unlocked || song.artistUnlocked) && (
-                <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-border bg-muted/50 px-1.5 py-px text-[10px] font-semibold leading-tight text-muted-foreground">
-                  <Radio className="h-2.5 w-2.5 shrink-0" />
-                  {owned ? "Preview" : "Stream"}
-                </span>
+                <Radio className="h-3 w-3 shrink-0" aria-label={owned ? "Preview" : "Stream"} />
               )}
             </div>
-          )}
+            {actions}
+          </div>
         </div>
-
-        {actions}
       </div>
 
       {/* Ultra-thin progress line, only for the track that's playing. */}
