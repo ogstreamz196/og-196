@@ -41,7 +41,8 @@ import { useVariations } from "@/hooks/use-variations";
 import { invokeError } from "@/lib/invoke-error";
 import { cn } from "@/lib/utils";
 import { CoinPill } from "@/components/ui/coin-pill";
-import { StageStepper, type Stage } from "./song-workspace/StageStepper";
+import { type Stage } from "./song-workspace/StageStepper";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { VariationsCard } from "./song-workspace/VariationsCard";
 import { UnlockConfirmDialog } from "./UnlockConfirmDialog";
 import { QuickTopUpSheet } from "@/components/store/QuickTopUpSheet";
@@ -361,6 +362,9 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   }, [isPending, song.generation_started_at]);
 
   const stage: Stage = isReady ? 3 : hasLyrics ? 2 : 1;
+  const [tab, setTab] = useState<string>(
+    isReady ? "preview" : hasLyrics ? "preview" : "lyrics",
+  );
 
   const dirty =
     savedStyleValue !== (song.style ?? "") ||
@@ -659,57 +663,30 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
           />
         </div>
       )}
-      <StageStepper current={stage} sampleSeconds={settings?.sample_seconds ?? 60} />
+      <Tabs value={tab} onValueChange={setTab} className="space-y-4">
+        <TabsList className="grid h-auto w-full grid-cols-4 p-1">
+          <TabsTrigger value="lyrics" className="text-xs sm:text-sm">Edit</TabsTrigger>
+          <TabsTrigger value="preview" className="text-xs sm:text-sm">Preview</TabsTrigger>
+          <TabsTrigger value="hq" className="text-xs sm:text-sm">Full HQ</TabsTrigger>
+          <TabsTrigger value="takes" className="text-xs sm:text-sm">Takes</TabsTrigger>
+        </TabsList>
 
-      {/* Compact summary bar — replaces the old side rail */}
-      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-border bg-card/70 px-3 py-3 sm:px-4">
-        <div className="min-w-0">
-          <p className="line-clamp-2 break-words text-sm font-semibold leading-snug">
-            {title.trim() || "Untitled track"}
-          </p>
-          <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-muted-foreground sm:text-xs">
-            Create free · Download {fullUnlockCost} credits or 99p
-          </p>
-        </div>
-        <div className="grid shrink-0 gap-1.5 min-[380px]:grid-cols-2 min-[380px]:items-center">
-          <span className="inline-flex min-h-8 items-center justify-center gap-1.5 rounded-full border border-border bg-background/60 px-2.5 py-1 text-sm font-bold tabular-nums">
-            <Coins className="h-4 w-4 text-coin" /> {balance.toLocaleString()}
-          </span>
-          <Button asChild variant="outline" size="sm" className="px-2.5">
-            <Link to="/buy-coins">Top up</Link>
-          </Button>
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        {/* Step 1 — Details & lyrics */}
-        <Card className={cn(stage > 1 && !dirty && "border-primary/30")}>
-          <Collapsible open={step1Open} onOpenChange={setStep1Open}>
-            <CollapsibleTrigger className="flex w-full items-center justify-between gap-3 p-4 text-left sm:p-5">
+        <TabsContent value="lyrics" className="mt-0">
+        <Card>
+          <Collapsible open>
+            <CollapsibleTrigger className="pointer-events-none flex w-full items-center justify-between gap-3 p-4 text-left sm:p-5 [&>svg]:hidden">
               <div className="min-w-0">
                 <span className="flex items-center gap-2 text-lg font-semibold">
-                  <FileText className="h-4 w-4 shrink-0 text-primary" />1 · Lyrics
+                  <FileText className="h-4 w-4 shrink-0 text-primary" />Lyrics & vibe
                 </span>
                 <span className="mt-0.5 block truncate text-xs text-muted-foreground">
-                  {hasLyrics ? "Ready — tap to edit" : "Write the lyrics · Free"}
+                  {hasLyrics ? "Tweak, save, re-cook" : "Write the lyrics · Free"}
                 </span>
               </div>
-              <ChevronDown
-                className={cn("h-5 w-5 shrink-0 transition-transform", step1Open && "rotate-180")}
-              />
+              <ChevronDown className="h-5 w-5 shrink-0" />
             </CollapsibleTrigger>
             <CollapsibleContent>
               <CardContent className="space-y-4">
-                {/* Locked identity — the track name and story stay as created */}
-                <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
-                  <p className="text-sm font-semibold">{title.trim() || "Untitled track"}</p>
-                  <p className="mt-1 line-clamp-3 text-xs text-muted-foreground">
-                    {brief.trim() || "No description saved."}
-                  </p>
-                  <p className="mt-2 text-[11px] text-muted-foreground/80">
-                    Name and story can't be changed — everything below can.
-                  </p>
-                </div>
 
                 {/* Styles — stack as many as you like */}
                 <div className="space-y-2">
@@ -999,16 +976,16 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
             </CollapsibleContent>
           </Collapsible>
         </Card>
+        </TabsContent>
 
+        <TabsContent value="preview" className="mt-0">
         {/* Stage 2 — Sample */}
-        <Card
-          className={cn(stage === 2 && "border-primary/40 shadow-glow", stage < 2 && "opacity-60")}
-        >
-          <Collapsible open={step2Open} onOpenChange={setStep2Open}>
-            <CollapsibleTrigger className="flex w-full items-center justify-between gap-3 p-4 text-left sm:p-5">
+        <Card>
+          <Collapsible open>
+            <CollapsibleTrigger className="pointer-events-none flex w-full items-center justify-between gap-3 p-4 text-left sm:p-5 [&>svg]:hidden">
               <div className="min-w-0">
                 <span className="flex items-center gap-2 text-lg font-semibold">
-                  <Play className="h-4 w-4 shrink-0 text-primary" />2 · Preview
+                  <Play className="h-4 w-4 shrink-0 text-primary" />Preview
                 </span>
                 <span className="mt-0.5 block truncate text-xs text-muted-foreground">
                   {isReady
@@ -1135,18 +1112,16 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
             </CollapsibleContent>
           </Collapsible>
         </Card>
+        </TabsContent>
 
+        <TabsContent value="hq" className="mt-0">
         {/* Stage 3 — Final song */}
-        <Card
-          className={cn(stage === 3 && "border-primary/40 shadow-glow", stage < 3 && "opacity-60")}
-        >
+        <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <Music2 className="h-4 w-4 text-primary" />3 · Full HQ
+              <Music2 className="h-4 w-4 text-primary" />Full HQ
             </CardTitle>
-            <CardDescription>
-              Choose {fullUnlockCost} credits or a one-off 99p payment to unlock and download.
-            </CardDescription>
+            <CardDescription>{fullUnlockCost} coins to unlock.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {!isReady ? (
@@ -1205,7 +1180,9 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
             )}
           </CardContent>
         </Card>
+        </TabsContent>
 
+        <TabsContent value="takes" className="mt-0">
         <VariationsCard
           variations={variations}
           variationCost={variationCost}
@@ -1213,7 +1190,8 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
           balance={balance}
           onRevealOne={revealOne}
         />
-      </div>
+        </TabsContent>
+      </Tabs>
 
       <UnlockConfirmDialog
         open={unlockDialogOpen}
