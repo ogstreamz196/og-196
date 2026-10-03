@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Copy,
@@ -652,7 +652,7 @@ function Mission({
   tone: "primary" | "fuchsia" | "destructive";
   n: number;
   icon: React.ReactNode;
-  title: React.ReactNode;
+  title: ReactNode;
   body: string;
 }) {
   const tones = {
