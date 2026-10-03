@@ -319,7 +319,16 @@ export async function transcribeWithGemini(audioBase64: string, mime: string): P
   }
   const json = (await res.json().catch(() => ({}))) as {
     candidates?: { content?: { parts?: { text?: string }[] } }[];
+    usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number; totalTokenCount?: number };
   };
+  logAiUsage({
+    feature: "transcription",
+    provider: "gemini",
+    model,
+    promptTokens: json.usageMetadata?.promptTokenCount ?? 0,
+    completionTokens: json.usageMetadata?.candidatesTokenCount ?? 0,
+    totalTokens: json.usageMetadata?.totalTokenCount ?? 0,
+  });
   return (json.candidates?.[0]?.content?.parts ?? [])
     .map((p) => p?.text ?? "")
     .join("")
