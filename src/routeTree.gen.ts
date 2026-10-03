@@ -66,6 +66,7 @@ import { Route as AuthenticatedAdminWebhooksRouteImport } from './routes/_authen
 import { Route as AuthenticatedBuyCoinsIndexRouteImport } from './routes/_authenticated/buy-coins.index'
 import { Route as AuthenticatedBuyCoinsReturnRouteImport } from './routes/_authenticated/buy-coins.return'
 import { Route as AuthenticatedLibrarySongIdRouteImport } from './routes/_authenticated/library.$songId'
+import { Route as ApiPublicNewUserAlertRouteImport } from './routes/api/public/new-user-alert'
 import { Route as ApiPublicSunoRetryRouteImport } from './routes/api/public/suno-retry'
 import { Route as AuthenticatedAdminUsersUserIdRouteImport } from './routes/_authenticated/admin.users.$userId'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
@@ -379,6 +380,11 @@ const AuthenticatedLibrarySongIdRoute =
     path: '/library/$songId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicNewUserAlertRoute = ApiPublicNewUserAlertRouteImport.update({
+  id: '/api/public/new-user-alert',
+  path: '/api/public/new-user-alert',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicSunoRetryRoute = ApiPublicSunoRetryRouteImport.update({
   id: '/api/public/suno-retry',
   path: '/api/public/suno-retry',
@@ -466,6 +472,7 @@ export interface FileRoutesByFullPath {
   '/admin/webhooks': typeof AuthenticatedAdminWebhooksRoute
   '/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
   '/library/$songId': typeof AuthenticatedLibrarySongIdRoute
+  '/api/public/new-user-alert': typeof ApiPublicNewUserAlertRoute
   '/api/public/suno-retry': typeof ApiPublicSunoRetryRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/buy-coins/': typeof AuthenticatedBuyCoinsIndexRoute
@@ -529,6 +536,7 @@ export interface FileRoutesByTo {
   '/admin/webhooks': typeof AuthenticatedAdminWebhooksRoute
   '/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
   '/library/$songId': typeof AuthenticatedLibrarySongIdRoute
+  '/api/public/new-user-alert': typeof ApiPublicNewUserAlertRoute
   '/api/public/suno-retry': typeof ApiPublicSunoRetryRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/buy-coins': typeof AuthenticatedBuyCoinsIndexRoute
@@ -594,6 +602,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/webhooks': typeof AuthenticatedAdminWebhooksRoute
   '/_authenticated/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
   '/_authenticated/library/$songId': typeof AuthenticatedLibrarySongIdRoute
+  '/api/public/new-user-alert': typeof ApiPublicNewUserAlertRoute
   '/api/public/suno-retry': typeof ApiPublicSunoRetryRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/buy-coins/': typeof AuthenticatedBuyCoinsIndexRoute
@@ -659,6 +668,7 @@ export interface FileRouteTypes {
     | '/admin/webhooks'
     | '/buy-coins/return'
     | '/library/$songId'
+    | '/api/public/new-user-alert'
     | '/api/public/suno-retry'
     | '/admin/'
     | '/buy-coins/'
@@ -722,6 +732,7 @@ export interface FileRouteTypes {
     | '/admin/webhooks'
     | '/buy-coins/return'
     | '/library/$songId'
+    | '/api/public/new-user-alert'
     | '/api/public/suno-retry'
     | '/admin'
     | '/buy-coins'
@@ -786,6 +797,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/webhooks'
     | '/_authenticated/buy-coins/return'
     | '/_authenticated/library/$songId'
+    | '/api/public/new-user-alert'
     | '/api/public/suno-retry'
     | '/_authenticated/admin/'
     | '/_authenticated/buy-coins/'
@@ -823,6 +835,7 @@ export interface RootRouteChildren {
   TrackSongIdRoute: typeof TrackSongIdRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  ApiPublicNewUserAlertRoute: typeof ApiPublicNewUserAlertRoute
   ApiPublicSunoRetryRoute: typeof ApiPublicSunoRetryRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   ApiPublicTelegramWebhookRoute: typeof ApiPublicTelegramWebhookRoute
@@ -1224,6 +1237,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLibrarySongIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/new-user-alert': {
+      id: '/api/public/new-user-alert'
+      path: '/api/public/new-user-alert'
+      fullPath: '/api/public/new-user-alert'
+      preLoaderRoute: typeof ApiPublicNewUserAlertRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/suno-retry': {
       id: '/api/public/suno-retry'
       path: '/api/public/suno-retry'
@@ -1381,6 +1401,7 @@ const rootRouteChildren: RootRouteChildren = {
   TrackSongIdRoute: TrackSongIdRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  ApiPublicNewUserAlertRoute: ApiPublicNewUserAlertRoute,
   ApiPublicSunoRetryRoute: ApiPublicSunoRetryRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   ApiPublicTelegramWebhookRoute: ApiPublicTelegramWebhookRoute,
