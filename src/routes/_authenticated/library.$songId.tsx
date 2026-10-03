@@ -385,7 +385,7 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
       className="scroll-mt-20 overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-card focus:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:p-6"
     >
       <div className="flex flex-col gap-6 sm:flex-row">
-        <div className="relative h-48 w-48 shrink-0 self-center overflow-hidden rounded-xl bg-gradient-brand-soft">
+        <div className="relative h-32 w-32 shrink-0 self-center overflow-hidden rounded-xl bg-gradient-brand-soft sm:h-48 sm:w-48">
           {song.cover_url ? (
             <img
               src={song.cover_url}
@@ -411,9 +411,11 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
             <h2 className="break-words text-xl font-bold leading-tight sm:text-2xl">
               {song.title || (isPending ? "Generating…" : "Untitled")}
             </h2>
-            <p className="mt-2 line-clamp-3 break-words text-sm leading-relaxed text-muted-foreground">
-              {song.prompt}
-            </p>
+            {song.prompt && (
+              <p className="mt-1 line-clamp-1 break-words text-xs text-muted-foreground">
+                {song.prompt.length > 60 ? `${song.prompt.slice(0, 60).trim()}…` : song.prompt}
+              </p>
+            )}
             {song.style && (
               <span className="mt-3 inline-block max-w-full break-words rounded-lg bg-secondary px-2.5 py-1 text-xs leading-relaxed text-secondary-foreground">
                 {song.style}
@@ -489,8 +491,10 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
                 <div className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-2 text-xs leading-relaxed text-muted-foreground">
                   <Lock className="mt-0.5 h-3 w-3 shrink-0" />
                   {communityMode
-                    ? "Full community track plays free. Downloading costs 3 OG coins — 2 burnt, 1 royalty to the creator."
-                    : `Preview limited to ${sampleSeconds}s. ${unlocked ? "Full track download available." : "Unlock to download the full track."}`}
+                    ? "Free to play · 3 coins to download"
+                    : unlocked
+                      ? "Full track unlocked"
+                      : `${sampleSeconds}s preview`}
                 </div>
                 <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-muted">
                   <div
