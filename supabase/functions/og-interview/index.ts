@@ -118,7 +118,7 @@ Deno.serve(async (req) => {
         `Existing details the user already typed (keep these as ground truth):\n${seed || "(none)"}\n\n` +
         `Interview transcript:\n${transcript || "(no answers yet)"}\n\n` +
         `Write the brief now.`;
-      const summary = await callGemini(SYSTEM_SUMMARY, userMsg, 600);
+      const summary = await callGemini(SYSTEM_SUMMARY, userMsg, 600, "interview_summary");
       return jsonResponse({ summary: summary.slice(0, 500) });
     }
 
@@ -127,7 +127,7 @@ Deno.serve(async (req) => {
       (seed ? `Context the user already typed:\n${seed}\n\n` : "") +
       `Conversation so far:\n${transcript || "(empty — this is the opening question)"}\n\n` +
       `Now write ONLY the next question. One sentence. No preamble.`;
-    const question = await callGemini(SYSTEM_NEXT, userMsg, 120);
+    const question = await callGemini(SYSTEM_NEXT, userMsg, 120, "interview_question");
     // Strip surrounding quotes / labels just in case.
     const cleaned = question
       .replace(/^["'`\s]+|["'`\s]+$/g, "")
