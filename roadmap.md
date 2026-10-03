@@ -50,3 +50,7 @@
 
 - [x] Free AI fallback cascade (Groq, OpenRouter) — waiting on user to add GROQ_API_KEY and OPENROUTER_API_KEY
 - [x] Use Lexcel32 as the username example and derive yearly VIP IDs as OG plus the uppercase username
+
+## Later
+
+- [ ] Fix the primary Gemini key (Google says "project denied access") so lyrics stop using the paid backup key — blocked on owner checking Google Cloud
