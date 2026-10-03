@@ -190,8 +190,8 @@ function DashboardHome() {
                 aria-label="You are an OG VIP member"
                 className="inline-flex items-center gap-2 rounded-full border-2 border-amber-300/80 bg-gradient-to-r from-amber-500 via-yellow-300 to-amber-500 px-4 py-1.5 text-sm font-black uppercase tracking-wider text-black shadow-[0_0_24px_rgba(251,191,36,0.6)] wc-bounce-soft sm:px-6 sm:py-2.5 sm:text-lg"
               >
-                <Crown className="h-5 w-5 sm:h-6 sm:w-6" />
-                OG VIP
+                <Crown className="h-6 w-6 fill-current sm:h-7 sm:w-7" />
+                {profile?.og_vip_id ?? "OG VIP"}
               </Link>
             ) : (
               <Link
