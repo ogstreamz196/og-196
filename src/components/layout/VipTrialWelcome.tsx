@@ -69,7 +69,7 @@ export function VipTrialWelcome() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-h-[90dvh] overflow-y-auto border-coin/40 sm:max-w-md">
         <div className="flex flex-col items-center text-center">
-          <span className="grid h-14 w-14 place-items-center rounded-full bg-coin/20 text-coin shadow-[0_0_30px_-4px_hsl(var(--coin)/0.7)]">
+          <span className="grid h-14 w-14 place-items-center rounded-full bg-coin/20 text-coin shadow-lg">
             <Crown className="h-7 w-7" />
           </span>
           <DialogTitle className="mt-3 font-display text-xl uppercase">
