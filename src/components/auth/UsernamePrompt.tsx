@@ -94,7 +94,7 @@ export function UsernamePrompt() {
         <form onSubmit={submit} className="space-y-3">
           <Input
             autoComplete="username"
-            placeholder="e.g. Faiyaz196"
+            placeholder="e.g. Lexcel32"
             value={name}
             maxLength={30}
             onChange={(e) => setName(e.target.value.replace(/[^A-Za-z0-9]/g, ""))}
