@@ -1138,9 +1138,7 @@ function PackCard({
             </span>
           }
         />
-        <p className="text-[10px] text-muted-foreground">
-          {(perCoin * 100).toFixed(1)}p per coin
-        </p>
+        <p className="text-[10px] text-muted-foreground">{(perCoin * 100).toFixed(1)}p per coin</p>
       </div>
 
       <button
