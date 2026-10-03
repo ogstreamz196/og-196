@@ -543,8 +543,8 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       await performUnlock();
       return;
     }
-    if (balance < fullUnlockCost) {
-      setTopUp({ needed: fullUnlockCost, reason: "unlock the HQ version" });
+    if (balance < unlockCost) {
+      setTopUp({ needed: unlockCost, reason: "unlock the HQ version" });
       return;
     }
     setUnlockDialogOpen(true);
@@ -562,7 +562,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
           toast.error(invokeError(error, "Could not unlock"));
           return;
         }
-        if (!data?.already) toast.success(`Unlocked · -${data?.cost ?? fullUnlockCost} coins`);
+        if (!data?.already) toast.success(`Unlocked · -${data?.cost ?? unlockCost} coins`);
         refreshCoinBalance();
         onSaved?.();
       }
@@ -1147,16 +1147,16 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                     : "Unlock once to download the full HQ track."}
                 </p>
 
-                {!song.unlocked && balance < fullUnlockCost && (
+                {!song.unlocked && balance < unlockCost && (
                   <div className="flex items-start gap-3 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
                     <Coins className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
                     <div className="flex-1">
                       <p className="font-semibold text-amber-100">
-                        You need {fullUnlockCost - balance} more coin
-                        {fullUnlockCost - balance === 1 ? "" : "s"} to unlock
+                        You need {unlockCost - balance} more coin
+                        {unlockCost - balance === 1 ? "" : "s"} to unlock
                       </p>
                       <p className="text-xs text-amber-200/80">
-                        Balance: {balance} · Cost: {fullUnlockCost}
+                        Balance: {balance} · Cost: {unlockCost}
                       </p>
                     </div>
                     <Button asChild size="sm" className="shrink-0">
@@ -1168,7 +1168,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                 <div className="flex flex-wrap justify-end gap-2">
                   <Button
                     onClick={unlockFull}
-                    disabled={unlocking || (!song.unlocked && balance < fullUnlockCost)}
+                    disabled={unlocking || (!song.unlocked && balance < unlockCost)}
                     className="gap-2"
                     aria-live="polite"
                   >
@@ -1182,7 +1182,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                         <Music2 className="h-4 w-4" />
                         {song.unlocked
                           ? "Download full HQ"
-                          : `Unlock & download · ${fullUnlockCost} coins`}
+                          : `Unlock & download · ${unlockCost} coins`}
                       </>
                     )}
                   </Button>
@@ -1206,7 +1206,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
         onOpenChange={setUnlockDialogOpen}
         onConfirm={performUnlock}
         busy={unlocking}
-        cost={fullUnlockCost}
+        cost={unlockCost}
         royalty={0}
         balance={balance}
         songTitle={song.title ?? title}
