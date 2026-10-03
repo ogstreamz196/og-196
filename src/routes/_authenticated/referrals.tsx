@@ -303,250 +303,102 @@ function ReferralsPage() {
           )}
         </div>
 
-        {/* THE SCHEME — explained first */}
+        {/* 1. HOW IT WORKS — the deal, stated once */}
         <section
           data-testid="earn-scheme"
           className="relative overflow-hidden rounded-3xl border border-primary/30 bg-card/70 p-5 backdrop-blur-2xl sm:p-8"
         >
           <p className="text-[10px] font-black uppercase tracking-[0.25em] text-amber-300">
-            OG Partner Scheme · 10% lifetime
+            OG Partner Scheme
           </p>
           <h2 className="mt-2 font-bungee text-2xl leading-tight sm:text-4xl">
-            Invite your crew. Get 10% of every coin they spend — forever.
+            Get 10% of every coin your friends spend — forever.
           </h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Free to join. Rewards land in your wallet automatically as OG Coins.
-          </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
             <Mission
               tone="primary"
               n={1}
               icon={<Link2 className="h-5 w-5" />}
-              title="Share your link or code"
-              body="Group chats, bio, DMs — one link works everywhere."
+              title="Share your link"
+              body="Send it anywhere, or let them scan your QR."
             />
             <Mission
               tone="fuchsia"
               n={2}
               icon={<UserPlus className="h-5 w-5" />}
-              title="They sign up & make songs"
-              body="Your link locks them to you for life."
+              title="They join & make songs"
+              body="They're linked to you for life."
             />
             <Mission
               tone="destructive"
               n={3}
               icon={<Flame className="h-5 w-5" />}
-              title="You get 10% automatically"
-              body="Every time they buy or use coins, your share drops in."
+              title="You earn 10%"
+              body="Paid automatically in OG Coins. No limit, no expiry."
             />
           </div>
-          <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-            <Button
-              onClick={share}
-              size="lg"
-              className="h-12 w-full gap-2 bg-gradient-to-r from-primary to-fuchsia-500 font-black uppercase tracking-wider sm:w-auto"
-            >
-              <Share2 className="h-4 w-4" /> Share my link
-            </Button>
-            <Button
-              onClick={copy}
-              variant="secondary"
-              size="lg"
-              className="h-12 w-full gap-2 font-bold sm:w-auto"
-            >
-              {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-              {copied ? "Copied" : "Copy link"}
-            </Button>
-          </div>
+          <p className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <PiggyBank className="h-3.5 w-3.5 text-amber-300" />
+            Example: a friend uses 100 coins → you get +10 OG.
+          </p>
         </section>
 
-        <section aria-label="Earn dashboard" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <DashboardMetric
-            icon={<Coins className="h-4 w-4" />}
-            label="Referral earnings"
-            value={`${summary.total_earned.toLocaleString()} OG`}
-            note="Paid referrals + coin use"
-            tone="primary"
-          />
-          <DashboardMetric
-            icon={<Users className="h-4 w-4" />}
-            label="Your network"
-            value={summary.total_referred.toLocaleString()}
-            note="Referred members"
-            tone="emerald"
-          />
-          <DashboardMetric
-            icon={<Radio className="h-4 w-4" />}
-            label="Published tracks"
-            value={publishedQ.isLoading ? "—" : (publishedQ.data ?? 0).toLocaleString()}
-            note="Live in Global"
-            tone="sky"
-          />
-        </section>
-
-        {/* HERO — oversized wallet counter */}
+        {/* 2. SHARE HUB — the only place to share */}
         <section
-          data-testid="referrals-hero"
-          className="relative overflow-hidden rounded-3xl border border-white/10 bg-card/60 p-5 backdrop-blur-2xl sm:p-10"
+          data-testid="share-hub"
+          className="rounded-3xl border border-white/10 bg-card/60 p-5 backdrop-blur-xl sm:p-6"
         >
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-primary/20 blur-3xl"
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -left-10 -bottom-10 h-48 w-48 rounded-full bg-destructive/15 blur-3xl"
-          />
-
-          <div className="relative text-center">
-            <p className="mb-2 text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground sm:mb-3 sm:tracking-[0.4em]">
-              OG Coin Cashback Wallet
-            </p>
-            <div className="relative inline-block max-w-full">
-              <div
-                aria-hidden
-                className="absolute -inset-2 rounded-3xl bg-gradient-to-r from-primary via-fuchsia-500 to-destructive opacity-25 blur-2xl"
-              />
-              <div className="relative flex items-baseline justify-center gap-2 sm:gap-3">
-                <span className="font-bungee bg-gradient-to-b from-white to-zinc-400 bg-clip-text text-6xl font-black tabular-nums tracking-tight text-transparent drop-shadow-[0_4px_24px_rgba(239,68,68,0.35)] sm:text-8xl">
-                  {summary.total_earned.toLocaleString()}
-                </span>
-                <span className="text-base font-black uppercase tracking-widest text-primary sm:text-2xl">
-                  OG
-                </span>
-              </div>
-            </div>
-            <div className="mt-3 flex flex-wrap items-center justify-center gap-2 text-xs sm:mt-4">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 font-semibold text-emerald-300">
-                <TrendingUp className="h-3 w-3" /> {summary.total_referred}{" "}
-                {summary.total_referred === 1 ? "referral" : "referrals"} · auto-paid
-              </span>
-              <span className="text-muted-foreground">
-                Rewards from their payments and coin use
-              </span>
-            </div>
-
-            <div className="mt-5 flex flex-col gap-2 sm:mt-6 sm:flex-row sm:flex-wrap sm:justify-center">
-              <Button
-                onClick={share}
-                size="lg"
-                className="h-12 w-full gap-2 bg-gradient-to-r from-primary to-fuchsia-500 px-6 font-black uppercase tracking-wider shadow-glow hover:scale-[1.02] sm:w-auto"
-              >
-                <Share2 className="h-4 w-4" /> Share & earn
-              </Button>
-              <Button
-                onClick={copy}
-                variant="secondary"
-                size="lg"
-                className="h-12 w-full gap-2 font-bold uppercase tracking-wider sm:w-auto"
-              >
-                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                {copied ? "Copied" : "Copy link"}
-              </Button>
-            </div>
+          <div className="text-[10px] font-black uppercase tracking-[0.22em] text-primary">
+            Your invite
           </div>
-        </section>
-
-        {/* PAID / PENDING / NETWORK — tight stat tiles */}
-        <section
-          data-testid="referrals-stat-tiles"
-          className="grid grid-cols-2 gap-3 sm:grid-cols-3"
-        >
-          <StatTile
-            tone="emerald"
-            icon={<CheckCircle2 className="h-4 w-4" />}
-            label="Paid"
-            value={paidCoins.toLocaleString()}
-            sub={`${paidEvents} cashback ${paidEvents === 1 ? "event" : "events"}`}
-            unit="OG"
-          />
-          <StatTile
-            tone="amber"
-            icon={<Hourglass className="h-4 w-4" />}
-            label="Pending"
-            value={pendingReferees.toLocaleString()}
-            sub="Awaiting first burn"
-            unit="refs"
-          />
-          <div className="col-span-2 sm:col-span-1">
-            <StatTile
-              tone="sky"
-              icon={<Users className="h-4 w-4" />}
-              label="Network"
-              value={summary.total_referred.toLocaleString()}
-              sub="Lifetime sign-ups"
-              unit="nodes"
-            />
-          </div>
-        </section>
-
-        {/* SHARE LINK + QR — fused command bar */}
-        <section className="rounded-3xl border border-white/10 bg-card/60 p-5 backdrop-blur-xl sm:p-6">
-          <div className="flex items-center justify-between gap-2">
-            <div className="text-[10px] font-black uppercase tracking-[0.22em] text-primary">
-              Your OG Link
-            </div>
-            <span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.18em] text-emerald-300">
-              Active
-            </span>
-          </div>
-
-          <div className="mt-3 grid gap-4 md:grid-cols-[1fr_auto] md:items-start">
+          <div className="mt-3 grid gap-4 md:grid-cols-[1fr_auto] md:items-center">
             <div className="space-y-3">
-              <div className="flex flex-col gap-2 sm:flex-row">
-                <div className="relative flex-1">
-                  <Link2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    readOnly
-                    value={shortLink}
-                    onFocus={(e) => e.currentTarget.select()}
-                    className="h-11 pl-9 font-mono text-xs sm:text-sm"
-                  />
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Button onClick={copy} className="h-11 gap-2">
-                    {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                    {copied ? "Copied" : "Copy"}
-                  </Button>
-                  <Button variant="secondary" onClick={inviteAgain} className="h-11 gap-2">
-                    <Gift className="h-4 w-4" /> Invite
-                  </Button>
-                  <Button variant="outline" onClick={share} className="h-11 gap-2">
-                    <Share2 className="h-4 w-4" /> Share
-                  </Button>
-                </div>
+              <div className="relative">
+                <Link2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  readOnly
+                  value={shortLink}
+                  onFocus={(e) => e.currentTarget.select()}
+                  className="h-11 pl-9 font-mono text-xs sm:text-sm"
+                />
               </div>
-
-              {/* OG Leader Code */}
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  onClick={share}
+                  className="h-11 gap-2 bg-gradient-to-r from-primary to-fuchsia-500 font-black uppercase tracking-wider"
+                >
+                  <Share2 className="h-4 w-4" /> Share
+                </Button>
+                <Button onClick={copy} variant="secondary" className="h-11 gap-2 font-bold">
+                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  {copied ? "Copied" : "Copy link"}
+                </Button>
+              </div>
               {user && (
-                <div className="rounded-2xl border border-primary/30 bg-primary/5 p-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="text-[10px] font-black uppercase tracking-[0.22em] text-primary">
-                      Your OG Leader code
+                <div className="flex items-center justify-between gap-2 rounded-2xl border border-primary/30 bg-primary/5 px-3 py-2">
+                  <div className="min-w-0">
+                    <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                      Or they can enter your code
                     </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      disabled={!myCode}
-                      onClick={async () => {
-                        if (!myCode) return;
-                        const ok = await copyTextWithFallback(myCode);
-                        if (ok) toast.success(`Code ${myCode} copied`);
-                        else toast.error("Couldn't copy");
-                      }}
-                      className="h-7 gap-1.5 px-2 text-[11px]"
-                    >
-                      <Copy className="h-3 w-3" /> Copy code
-                    </Button>
+                    <div className="font-mono text-lg font-black tracking-widest">
+                      {codeQ.isLoading ? "Loading…" : (myCode ?? "—")}
+                    </div>
                   </div>
-                  <div className="mt-1 font-mono text-2xl font-black tracking-widest text-foreground">
-                    {codeQ.isLoading ? "Loading…" : (myCode ?? "—")}
-                  </div>
-                  <div className="mt-1 text-[11px] text-muted-foreground">
-                    Friends paste this in "Connect OG Leader" — locks you in for life. 10% of every
-                    coin they burn → yours.
-                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    disabled={!myCode}
+                    onClick={async () => {
+                      if (!myCode) return;
+                      const ok = await copyTextWithFallback(myCode);
+                      if (ok) toast.success(`Code ${myCode} copied`);
+                      else toast.error("Couldn't copy");
+                    }}
+                    className="h-8 gap-1.5 px-2 text-xs"
+                  >
+                    <Copy className="h-3 w-3" /> Copy
+                  </Button>
                 </div>
               )}
             </div>
@@ -557,13 +409,10 @@ function ReferralsPage() {
                   <QRCodeSVG
                     id="og-referral-qr"
                     value={link}
-                    size={144}
+                    size={128}
                     level="M"
                     includeMargin={false}
                   />
-                </div>
-                <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">
-                  <QrCode className="h-3 w-3" /> Scan to join
                 </div>
                 <Button
                   type="button"
@@ -579,41 +428,43 @@ function ReferralsPage() {
           </div>
         </section>
 
-        {/* WHAT YOU EARN — simple examples */}
-        <section className="rounded-3xl border border-white/10 bg-card/60 p-5 backdrop-blur-xl sm:p-6">
-          <div className="mb-3 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] text-amber-300">
-            <PiggyBank className="h-3.5 w-3.5" /> What you could earn
-          </div>
-          <div className="grid gap-2 sm:grid-cols-3">
-            {[
-              { a: "A friend uses 10 coins", b: "+1 OG to you" },
-              { a: "A friend uses 100 coins", b: "+10 OG to you" },
-              { a: "10 friends use 100 each", b: "+100 OG to you" },
-            ].map((x) => (
-              <div
-                key={x.a}
-                className="rounded-2xl border border-white/10 bg-background/50 p-3 text-sm"
-              >
-                <div className="text-muted-foreground">{x.a}</div>
-                <div className="mt-1 font-black text-primary">{x.b}</div>
-              </div>
-            ))}
-          </div>
-          <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <InfinityIcon className="h-3.5 w-3.5" /> No limit, no expiry — paid automatically for
-            as long as they use OG BOT.
-          </p>
-        </section>
-
-        {/* BIND LEADER — kept anchor */}
+        {/* 3. YOUR NUMBERS — one row */}
         <section
-          id="bind-referrer"
-          className="scroll-mt-24 rounded-3xl border border-white/10 bg-card/60 p-5 backdrop-blur-xl sm:p-6"
+          data-testid="referrals-stat-tiles"
+          className="grid grid-cols-2 gap-3 lg:grid-cols-4"
         >
-          <div className="mb-3 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] text-rose-300">
-            <KeyRound className="h-3.5 w-3.5" /> Connect your OG Leader
-          </div>
-          <BindReferrerCard />
+          <StatTile
+            tone="emerald"
+            icon={<Coins className="h-4 w-4" />}
+            label="Earned"
+            value={paidCoins.toLocaleString()}
+            sub={`${paidEvents} ${paidEvents === 1 ? "reward" : "rewards"}`}
+            unit="OG"
+          />
+          <StatTile
+            tone="sky"
+            icon={<Users className="h-4 w-4" />}
+            label="Friends"
+            value={summary.total_referred.toLocaleString()}
+            sub="Joined with your link"
+            unit=""
+          />
+          <StatTile
+            tone="amber"
+            icon={<Hourglass className="h-4 w-4" />}
+            label="Waiting"
+            value={pendingReferees.toLocaleString()}
+            sub="Not spent coins yet"
+            unit=""
+          />
+          <StatTile
+            tone="sky"
+            icon={<Radio className="h-4 w-4" />}
+            label="Your tracks"
+            value={publishedQ.isLoading ? "—" : (publishedQ.data ?? 0).toLocaleString()}
+            sub="Live in Global"
+            unit=""
+          />
         </section>
 
         {/* CASHBACK FEED — dense activity */}
