@@ -61,8 +61,19 @@ function TermsPage() {
         <Section title="2. OG Coins">
           <p>
             OG Coins are a limited, non-transferable licence to use features inside OG BOT. They
-            have no cash value, cannot be exchanged for money, and are non-refundable except where
-            the law requires otherwise. Unused coins are forfeited if you delete your account.
+            have no cash value and cannot be exchanged for money. Unused coins are forfeited if you
+            delete your account.
+          </p>
+          <p>
+            <strong className="text-foreground">Refunds:</strong> once any coins from a purchase
+            have been used, that purchase cannot be refunded. Website purchases can only be refunded
+            within 14 days and only while all of the purchased coins are unused. Purchases made in
+            the Apple App Store or Google Play are refunded by Apple or Google under their own rules
+            and time limits. Contact{" "}
+            <a href="mailto:ogbot196@gmail.com" className="text-primary underline">
+              ogbot196@gmail.com
+            </a>{" "}
+            with any question.
           </p>
         </Section>
 
