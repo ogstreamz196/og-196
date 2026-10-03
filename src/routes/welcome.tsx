@@ -337,22 +337,22 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
           </p>
         </div>
 
-        <div className="mt-6">
-          <EmailAuthPanel disabled={pending !== null} />
-        </div>
-
         {!native && (
           <>
-            <div className="my-5 flex items-center gap-4" aria-hidden>
+            <div className="mt-6 grid grid-cols-2 gap-3">{PRIMARY_DEVICES.map(renderTile)}</div>
+            <div className="my-5 flex items-center gap-3" aria-hidden>
               <span className="h-px flex-1 bg-border" />
-              <span className="font-auth-display text-3xl font-black uppercase leading-none text-foreground sm:text-4xl">
-                or
+              <span className="font-auth-display text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">
+                or with username
               </span>
               <span className="h-px flex-1 bg-border" />
             </div>
-            <div className="grid grid-cols-2 gap-3">{PRIMARY_DEVICES.map(renderTile)}</div>
           </>
         )}
+
+        <div>
+          <EmailAuthPanel disabled={pending !== null} />
+        </div>
       </div>
     </div>
   );
