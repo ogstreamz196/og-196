@@ -318,32 +318,27 @@ export function CreateNowWizard({
     if (naming) return;
     setOfferOpen(false);
 
-    // Blank title? Name the track from who it's about, the story and styles.
-    let finalTitle = title.trim();
-    if (!finalTitle) {
-      setNaming(true);
-      try {
-        const res = await suggestTitle({
+    // Blank title? Close instantly with a safe default and let the AI name it
+    // in the background — the song only needs its title after lyrics finish.
+    const typedTitle = title.trim();
+    const fallbackTitle = `All About ${subjectName.trim().split(/\s+/)[0] || "You"}`;
+    const finalTitle = typedTitle || fallbackTitle;
+    const titlePromise: Promise<string> | undefined = typedTitle
+      ? undefined
+      : suggestTitle({
           data: {
             subjectName: subjectName.trim(),
             description: description.trim(),
             style: styles.filter(Boolean).join(", "),
           },
-        });
-        finalTitle = (res?.title ?? "").trim();
-        if (finalTitle) toast.success(`Named it "${finalTitle}"`);
-      } catch {
-        /* fall through to a safe default below */
-      } finally {
-        setNaming(false);
-      }
-      if (!finalTitle) finalTitle = `All About ${subjectName.trim().split(/\s+/)[0] || "You"}`;
-      setTitle(finalTitle);
-    }
+        })
+          .then((res) => (res?.title ?? "").trim() || fallbackTitle)
+          .catch(() => fallbackTitle);
 
     onComplete(
       {
         title: finalTitle,
+        titlePromise,
         subjectName: subjectName.trim(),
         description: description.trim(),
         style: styles.filter(Boolean).join(", "),
