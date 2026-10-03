@@ -134,7 +134,7 @@ const USER_KEYBOARD = {
   keyboard: [
     [{ text: "💰 Balance" }, { text: "🎧 Library" }],
     [{ text: "🛒 Buy Coins" }, { text: "👤 My Profile" }],
-    [{ text: "❓ Help" }],
+    [{ text: "👑 VIP Status" }, { text: "❓ Help" }],
   ],
   resize_keyboard: true,
   is_persistent: true,
@@ -143,7 +143,8 @@ const USER_KEYBOARD = {
 const BOSS_KEYBOARD = {
   keyboard: [
     [{ text: "📊 Stats" }, { text: "👥 Users" }],
-    [{ text: "💰 Balance" }, { text: "❓ Help" }],
+    [{ text: "💰 Balance" }, { text: "👑 VIP Status" }],
+    [{ text: "❓ Help" }],
   ],
   resize_keyboard: true,
   is_persistent: true,
@@ -157,6 +158,7 @@ Tap a button below or use a command:
 /library — same as /tracks
 /buy — top up OG coins
 /me — your linked profile
+/vip — your VIP status and expiry date
 /help — this menu
 
 Just type anything else and I'll answer — same brain as the in-app messenger.`;
@@ -772,6 +774,7 @@ async function handleTelegramUpdate(
       "🎧 Library": "/library",
       "🛒 Buy Coins": "/buy",
       "👤 My Profile": "/me",
+      "👑 VIP Status": "/vip",
       "❓ Help": "/help",
       "📊 Stats": "/stats",
       "👥 Users": "/users",
@@ -852,6 +855,69 @@ async function handleTelegramUpdate(
         reply_markup: keyboard,
       });
       return Response.json({ ok: true, me: true });
+    }
+    if (/^\/vip\b/i.test(trimmed)) {
+      const [{ data: p }, { data: sub }] = await Promise.all([
+        admin
+          .from("profiles")
+          .select("display_name, og_vip_id, vip_trial_ends_at")
+          .eq("id", linkedProfile.id)
+          .maybeSingle(),
+        admin
+          .from("subscriptions")
+          .select("status, current_period_end, cancel_at_period_end")
+          .eq("user_id", linkedProfile.id)
+          .order("current_period_end", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+      ]);
+      const now = Date.now();
+      const fmtDate = (iso: string) =>
+        new Date(iso).toLocaleDateString("en-GB", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        });
+      const paidEnd =
+        sub && ["active", "trialing"].includes(sub.status ?? "") && sub.current_period_end
+          ? new Date(sub.current_period_end).getTime()
+          : null;
+      const trialEnd =
+        p?.vip_trial_ends_at && new Date(p.vip_trial_ends_at).getTime() > now
+          ? new Date(p.vip_trial_ends_at).getTime()
+          : null;
+      const isVipRole = roles.includes("vip") || isBoss;
+
+      let body: string;
+      if (paidEnd && paidEnd > now) {
+        body =
+          `👑 <b>You're OG VIP!</b>\n\n` +
+          (p?.og_vip_id ? `🆔 <b>${p.og_vip_id}</b>\n` : "") +
+          `📅 Renews/expires: <b>${fmtDate(new Date(paidEnd).toISOString())}</b>` +
+          (sub?.cancel_at_period_end ? " (cancelled — VIP ends on this date)" : " (auto-renews)");
+      } else if (trialEnd) {
+        const daysLeft = Math.ceil((trialEnd - now) / 86400000);
+        body =
+          `👑 <b>Free VIP trial active!</b>\n\n` +
+          (p?.og_vip_id ? `🆔 <b>${p.og_vip_id}</b>\n` : "") +
+          `📅 Trial ends: <b>${fmtDate(new Date(trialEnd).toISOString())}</b> (${daysLeft} day${daysLeft === 1 ? "" : "s"} left)\n\n` +
+          `Upgrade in the app to keep VIP after the trial.`;
+      } else if (isVipRole) {
+        body =
+          `👑 <b>You're OG VIP!</b>\n\n` +
+          (p?.og_vip_id ? `🆔 <b>${p.og_vip_id}</b>\n` : "") +
+          `📅 No expiry — lifetime/boss VIP.`;
+      } else {
+        body =
+          `🆓 You're on the <b>free plan</b> — no active VIP.\n\n` +
+          `Unlock all styles, Foul Mouth mode and your OG VIP ID in the app Store.`;
+      }
+      await reply(chat_id, body, {
+        reply_markup: {
+          inline_keyboard: [[{ text: "👑 Open VIP Store", url: "https://ogbot.co.uk/store" }]],
+        },
+      });
+      return Response.json({ ok: true, vip: true });
     }
     if (/^\/start\b/i.test(trimmed)) {
       await reply(chat_id, `✅ Already linked. Tap a button below or type /help.`, {
