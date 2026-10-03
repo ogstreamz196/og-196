@@ -123,7 +123,7 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
   const createVipCheckout = useServerFn(createVipCheckoutSession);
   const createCustomCheckout = useServerFn(createCustomCoinCheckoutSession);
   const createCoinCheckout = useServerFn(createCoinCheckoutSession);
-  const { isVip, isDev, isLoading: roleLoading } = useRole();
+  const { isVip, hasVipRole, isDev, isLoading: roleLoading } = useRole();
   const navigate = useNavigate();
   const [selected, setSelected] = useState<Selection | null>(null);
   const [stage, setStage] = useState<"confirm" | "pay">("confirm");
@@ -651,7 +651,7 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
             <h2 id="section-vip" className="font-display text-lg font-black">
               VIP memberships
             </h2>
-            {isVip && (
+            {hasVipRole && (
               <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400 ring-1 ring-emerald-500/30">
                 Active
               </span>
@@ -687,11 +687,11 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                 </div>
                 <Button
                   size="lg"
-                  disabled={isVip}
+                  disabled={hasVipRole}
                   onClick={() => pickSelection({ type: "vip", plan: "monthly" })}
                   className="h-11 w-full font-bold"
                 >
-                  {isVip ? (
+                  {hasVipRole ? (
                     "You're VIP"
                   ) : (
                     <>
@@ -720,21 +720,28 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                       {(VIP_PLAN_YEARLY.priceCents / 1200).toFixed(2)}/month
                     </p>
                   </div>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    disabled={isVip}
-                    onClick={() => pickSelection({ type: "vip", plan: "yearly" })}
-                    className="h-11 w-full font-bold"
-                  >
-                    {isVip ? (
-                      "You're VIP"
-                    ) : (
-                      <>
-                        <Crown className="mr-2 h-4 w-4" /> Join yearly
-                      </>
-                    )}
-                  </Button>
+                  <div>
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      disabled={hasVipRole}
+                      onClick={() => pickSelection({ type: "vip", plan: "yearly" })}
+                      className="h-11 w-full font-bold"
+                    >
+                      {hasVipRole ? (
+                        "You're VIP"
+                      ) : (
+                        <>
+                          <Crown className="mr-2 h-4 w-4" /> Join yearly
+                        </>
+                      )}
+                    </Button>
+                    {hasVipRole && profile?.og_vip_id ? (
+                      <p className="mt-2 flex items-center justify-center gap-1.5 font-mono text-sm font-black tracking-widest text-coin">
+                        <Crown className="h-4 w-4" /> {profile.og_vip_id}
+                      </p>
+                    ) : null}
+                  </div>
                 </div>
               )}
             </div>
@@ -1135,10 +1142,7 @@ function PackCard({
         disabled={field !== null}
         aria-label={`Buy ${effective.coins} OG Coins for ${CURRENCY_SYMBOL}${(effective.priceCents / 100).toFixed(2)}`}
         className={cn(
-          "mt-4 inline-flex h-11 w-full items-center justify-center rounded-md px-3 text-sm font-bold transition-all disabled:opacity-50",
-          accent
-            ? "bg-primary text-primary-foreground hover:bg-primary/90"
-            : "border border-border bg-background/50 text-foreground hover:border-primary hover:bg-primary hover:text-primary-foreground",
+          "mt-4 inline-flex h-11 w-full items-center justify-center rounded-md bg-primary px-3 text-sm font-bold text-primary-foreground transition-all hover:bg-primary/90 disabled:opacity-50",
         )}
       >
         Buy now
