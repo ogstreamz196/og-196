@@ -378,7 +378,8 @@ Deno.serve(async (req) => {
     const generate = async (contents: unknown[]): Promise<Gen> => {
       const first = await callGemini(contents);
       if (first.ok || !GEMINI_BACKUP_API_KEY) return first;
-      if (first.status !== 429 && first.status < 500) return first;
+      // 401/403 = primary key revoked/blocked; let the backup key rescue lyrics too.
+      if (![401, 403, 429].includes(first.status) && first.status < 500) return first;
       console.warn("Primary Gemini exhausted — using backup key once");
       const r = await postTo(GEMINI_BACKUP_MODEL, contents, GEMINI_BACKUP_API_KEY);
       if (r.ok) return { ok: true, status: 200, text: extractText(await r.json()) };
