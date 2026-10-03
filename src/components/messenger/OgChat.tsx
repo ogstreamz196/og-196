@@ -1140,7 +1140,13 @@ export function OgChat({
   );
 }
 
-function VipFoulPromo({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
+function VipFoulPromo({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+}) {
   if (!open) return null;
   return (
     <div
@@ -1154,7 +1160,9 @@ function VipFoulPromo({ open, onOpenChange }: { open: boolean; onOpenChange: (o:
         className="w-full max-w-sm rounded-2xl border-2 border-destructive/50 bg-card p-5 text-center shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="text-4xl" aria-hidden>🤬</div>
+        <div className="text-4xl" aria-hidden>
+          🤬
+        </div>
         <h3 className="mt-2 font-display text-lg font-black">Unlock Foul Mouth</h3>
         <p className="mt-1 text-sm text-muted-foreground">
           OG Bot goes unfiltered — savage roasts, UK street slang, no holding back.

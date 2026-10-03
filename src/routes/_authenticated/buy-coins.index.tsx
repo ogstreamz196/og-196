@@ -659,8 +659,16 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
           <div className="rounded-xl border border-primary/30 bg-store-card p-4 shadow-card sm:p-5">
             <div className="grid gap-2 sm:grid-cols-3">
               {[
-                { icon: "⚡", t: "Creative power", d: "Priority replies, daily 10-coin safety net, free image edit every 4h" },
-                { icon: "👑", t: "Street status", d: "Your own OG VIP ID, gold crown & badge everywhere" },
+                {
+                  icon: "⚡",
+                  t: "Creative power",
+                  d: "Priority replies, daily 10-coin safety net, free image edit every 4h",
+                },
+                {
+                  icon: "👑",
+                  t: "Street status",
+                  d: "Your own OG VIP ID, gold crown & badge everywhere",
+                },
                 { icon: "🔥", t: "Unfiltered", d: "Foul-mouth OG Bot — savage roasts & UK slang" },
               ].map((p) => (
                 <div key={p.t} className="rounded-lg border border-border bg-background/40 p-3">

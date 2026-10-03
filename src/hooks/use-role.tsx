@@ -11,7 +11,8 @@ export function useRole() {
   const { enabled: freeAccess } = useFreeAccess();
   const { data: profile } = useProfile();
   const trialEndsAt =
-    (profile as { vip_trial_ends_at?: string | null } | null | undefined)?.vip_trial_ends_at ?? null;
+    (profile as { vip_trial_ends_at?: string | null } | null | undefined)?.vip_trial_ends_at ??
+    null;
   const isTrial = !!trialEndsAt && new Date(trialEndsAt).getTime() > Date.now();
   const query = useQuery({
     queryKey: ["user-role", user?.id],

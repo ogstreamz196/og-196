@@ -273,8 +273,18 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border">
-        {!collapsed && !isAdmin && <VipTrialCountdown isTrial={isTrial} endsAt={trialEndsAt} paid={hasVipRole} onNavigate={() => isMobile && setOpenMobile(false)} />}
-        <div className="flex min-w-0 flex-col gap-2 px-2 pt-3" style={{ paddingBottom: "max(1rem, calc(env(safe-area-inset-bottom) + 0.75rem))" }}>
+        {!collapsed && !isAdmin && (
+          <VipTrialCountdown
+            isTrial={isTrial}
+            endsAt={trialEndsAt}
+            paid={hasVipRole}
+            onNavigate={() => isMobile && setOpenMobile(false)}
+          />
+        )}
+        <div
+          className="flex min-w-0 flex-col gap-2 px-2 pt-3"
+          style={{ paddingBottom: "max(1rem, calc(env(safe-area-inset-bottom) + 0.75rem))" }}
+        >
           <div className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
             <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-muted text-[10px] font-bold uppercase">
               {dev.isDev ? "D" : (user?.email?.[0] ?? "U")}
@@ -328,14 +338,17 @@ function VipTrialCountdown({
       className="mx-2 mt-2 block rounded-xl border border-coin/40 bg-coin/10 px-3 py-2 text-left transition hover:bg-coin/15"
     >
       <span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-coin">
-        <Crown className="h-3.5 w-3.5" /> {active ? "Free VIP trial" : endsAt ? "VIP trial ended" : "Unlock OG VIP"}
+        <Crown className="h-3.5 w-3.5" />{" "}
+        {active ? "Free VIP trial" : endsAt ? "VIP trial ended" : "Unlock OG VIP"}
       </span>
       {active ? (
         <span className="mt-0.5 block font-mono text-sm font-black tabular-nums text-foreground">
           {days}d {hours}h {mins}m left
         </span>
       ) : (
-        <span className="mt-0.5 block text-xs font-semibold text-foreground">Tap to keep VIP perks</span>
+        <span className="mt-0.5 block text-xs font-semibold text-foreground">
+          Tap to keep VIP perks
+        </span>
       )}
     </Link>
   );
