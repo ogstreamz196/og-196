@@ -159,7 +159,7 @@ export function BulkReconcilePanel() {
           ok++;
         } catch (e) {
           fail++;
-          console.error("reconcile failed", r.user_id, e?.message);
+          console.error("reconcile failed", r.user_id, (e as Error)?.message);
         }
       }
       return { ok, fail };
