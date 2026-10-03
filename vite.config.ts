@@ -13,7 +13,6 @@ import { VitePWA } from "vite-plugin-pwa";
 const serverEnv = loadEnv(process.env.NODE_ENV ?? "development", process.cwd(), "");
 Object.assign(process.env, serverEnv);
 
-
 export default defineConfig({
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
@@ -80,6 +79,4 @@ export default defineConfig({
       }),
     ],
   },
-
 });
-

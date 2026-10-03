@@ -366,8 +366,8 @@ export function personalDetailsCheck(
 ): PersonalDetailsCheck {
   const len = text.length;
   const trimmed = text.trim();
-  const hasName = /name\s*[:\-]/i.test(trimmed) || /^[A-Z][a-z]+/m.test(trimmed);
-  const hasDetail = /(occasion|love|joke|story|city|place)\s*[:\-]/i.test(trimmed);
+  const hasName = /name\s*[:-]/i.test(trimmed) || /^[A-Z][a-z]+/m.test(trimmed);
+  const hasDetail = /(occasion|love|joke|story|city|place)\s*[:-]/i.test(trimmed);
   const pct = (len / max) * 100;
 
   let status: PersonalDetailsStatus;

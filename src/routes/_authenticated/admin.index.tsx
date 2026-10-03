@@ -454,6 +454,7 @@ function PricingControls() {
     if (settings) {
       setValues(
         Object.fromEntries(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- untyped table/SDK shape
           Object.keys(PRICING_RULES).map((k) => [k, String((settings as any)[k])]),
         ),
       );
@@ -466,6 +467,7 @@ function PricingControls() {
   const hasErrors = Object.values(errors).some((e) => e !== null);
   const dirty =
     !!settings &&
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- untyped table/SDK shape
     Object.keys(PRICING_RULES).some((k) => String((settings as any)[k]) !== (values[k] ?? ""));
 
   const save = useMutation({
@@ -475,6 +477,7 @@ function PricingControls() {
       for (const u of updates) {
         const { error } = await supabase
           .from("app_settings")
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- untyped table/SDK shape
           .upsert({ key: u.key, value: u.value as any }, { onConflict: "key" });
         if (error) throw error;
       }

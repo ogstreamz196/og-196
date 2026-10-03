@@ -24,6 +24,7 @@ export function VipAcknowledgements() {
   const q = useQuery({
     queryKey: ["vip-acks"],
     queryFn: async (): Promise<Row[]> => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- untyped table/SDK shape
       const { data, error } = await (supabase as any)
         .from("vip_acknowledgements")
         .select("user_id, og_vip_id, acknowledged_at, created_at")
@@ -45,6 +46,7 @@ export function VipAcknowledgements() {
 
   const ack = useMutation({
     mutationFn: async (userId: string) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- untyped table/SDK shape
       const { error } = await (supabase as any)
         .from("vip_acknowledgements")
         .update({ acknowledged_at: new Date().toISOString(), acknowledged_by: user!.id })

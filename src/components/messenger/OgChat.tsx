@@ -170,7 +170,8 @@ export function OgChat({
   useEffect(() => {
     try {
       const saved = window.localStorage.getItem(LANG_KEY);
-      if (saved && OG_LANGUAGES.includes(saved as (typeof OG_LANGUAGES)[number])) setLanguage(saved);
+      if (saved && OG_LANGUAGES.includes(saved as (typeof OG_LANGUAGES)[number]))
+        setLanguage(saved);
     } catch {
       /* storage blocked in private mode */
     }

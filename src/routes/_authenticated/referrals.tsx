@@ -475,7 +475,8 @@ function ReferralsPage() {
                       onClick={async () => {
                         if (!myCode) return;
                         const ok = await copyTextWithFallback(myCode);
-                        ok ? toast.success(`Code ${myCode} copied`) : toast.error("Couldn't copy");
+                        if (ok) toast.success(`Code ${myCode} copied`);
+                        else toast.error("Couldn't copy");
                       }}
                       className="h-7 gap-1.5 px-2 text-[11px]"
                     >

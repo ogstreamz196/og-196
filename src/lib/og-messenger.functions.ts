@@ -206,7 +206,7 @@ export const chatOgBot = createServerFn({ method: "POST" })
     }
 
     // 4. Call Gemini or ChatGPT, with one retryable cross-provider fallback.
-    try {
+    {
       const { response: res, provider } = await fetchAiChat(
         {
           temperature: data.mode === "og" && foulMouth ? 0.9 : data.mode === "og" ? 0.75 : 0.6,
@@ -250,7 +250,5 @@ export const chatOgBot = createServerFn({ method: "POST" })
         coin_balance: newBalance ?? userCtx.coin_balance,
         learned_insults: newlyLearned,
       };
-    } catch (err) {
-      throw err;
     }
   });

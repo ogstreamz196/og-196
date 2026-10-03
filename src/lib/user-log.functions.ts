@@ -34,7 +34,7 @@ async function gw(url: string, init: RequestInit, connectorKey: string) {
 
 function safeTabName(input: string): string {
   // Sheets: max 100 chars, no : \ / ? * [ ]
-  const cleaned = input.replace(/[:\\/?*\[\]]/g, "_").slice(0, 95);
+  const cleaned = input.replace(/[:\\/?*[\]]/g, "_").slice(0, 95);
   return cleaned || "user";
 }
 

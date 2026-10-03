@@ -24,7 +24,9 @@ Deno.serve(async (req) => {
     const admin = adminClient();
     const { data: song } = await admin
       .from("songs")
-      .select("id, user_id, status, unlocked, audio_path, revealed, title, suno_task_id, is_variation")
+      .select(
+        "id, user_id, status, unlocked, audio_path, revealed, title, suno_task_id, is_variation",
+      )
       .eq("id", song_id)
       .maybeSingle();
     if (!song) return jsonResponse({ error: "Not found" }, 404);
@@ -38,19 +40,28 @@ Deno.serve(async (req) => {
         return jsonResponse({ error: "Song not available", code: "not_revealed" }, 404);
       }
       const { data: existing } = await admin
-        .from("unlocked_songs").select("id")
-        .eq("user_id", user.id).eq("song_id", song_id).maybeSingle();
+        .from("unlocked_songs")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("song_id", song_id)
+        .maybeSingle();
       if (existing) return jsonResponse({ ok: true, already: true, cost: COMMUNITY_COST });
 
       const reference = `community_unlock:${song_id}`;
       const { data: balance, error: dErr } = await admin.rpc("deduct_coins", {
-        p_user: user.id, p_amount: COMMUNITY_COST, p_reference: reference,
+        p_user: user.id,
+        p_amount: COMMUNITY_COST,
+        p_reference: reference,
       });
-      if (dErr) return jsonResponse({ error: "Insufficient coins", code: "insufficient_coins" }, 402);
+      if (dErr)
+        return jsonResponse({ error: "Insufficient coins", code: "insufficient_coins" }, 402);
 
       // Royalty: credit `COMMUNITY_ROYALTY` to the creator. The remainder is burnt.
       const { data: ownerProfile } = await admin
-        .from("profiles").select("coin_balance").eq("id", song.user_id).maybeSingle();
+        .from("profiles")
+        .select("coin_balance")
+        .eq("id", song.user_id)
+        .maybeSingle();
       const newOwnerBal = (ownerProfile?.coin_balance ?? 0) + COMMUNITY_ROYALTY;
       await admin.from("profiles").update({ coin_balance: newOwnerBal }).eq("id", song.user_id);
       await admin.from("coin_transactions").insert({
@@ -97,16 +108,16 @@ Deno.serve(async (req) => {
     if (song.unlocked && !bundle_both) return jsonResponse({ ok: true, already: true });
 
     const { data: settingRows } = await admin
-      .from("app_settings").select("key, value").in(
-        "key",
-        ["coins_per_full_unlock", "coins_per_remake"],
-      );
+      .from("app_settings")
+      .select("key, value")
+      .in("key", ["coins_per_full_unlock", "coins_per_remake"]);
     const settings = new Map(
       (settingRows ?? []).map((r: { key: string; value: unknown }) => [r.key, r.value]),
     );
-    const unlockCost = typeof settings.get("coins_per_full_unlock") === "number"
-      ? (settings.get("coins_per_full_unlock") as number)
-      : 5;
+    const unlockCost =
+      typeof settings.get("coins_per_full_unlock") === "number"
+        ? (settings.get("coins_per_full_unlock") as number)
+        : 5;
     const remakeRaw = Number(settings.get("coins_per_remake"));
     const remakeCost = Number.isFinite(remakeRaw) && remakeRaw >= 1 ? Math.round(remakeRaw) : 2;
 
@@ -136,7 +147,9 @@ Deno.serve(async (req) => {
       const { data: claimed } = await admin
         .from("songs")
         .update({ unlocked: true, revealed: true })
-        .eq("id", sibling.id).eq("user_id", user.id).eq("unlocked", false)
+        .eq("id", sibling.id)
+        .eq("user_id", user.id)
+        .eq("unlocked", false)
         .select("id");
       if (!claimed || claimed.length === 0) sibling = null;
     }

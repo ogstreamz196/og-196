@@ -232,8 +232,8 @@ export function BindReferrerCard() {
         return;
       }
       setLookup({ id: r.referrer_id!, name: r.referrer_name!, code: r.referrer_code });
-    } catch (e: any) {
-      const msg = String(e?.message ?? "");
+    } catch (e) {
+      const msg = String((e as Error)?.message ?? "");
       if (msg.toLowerCase().includes("network") || msg.includes("Failed to fetch")) {
         setLookupErr("Network error. Check your connection and try again.");
       } else {
@@ -256,8 +256,8 @@ export function BindReferrerCard() {
       if (error) throw error;
       toast.success(`Bound to ${lookup.name} — forever.`);
       qc.invalidateQueries({ queryKey: ["my-referrer", user?.id] });
-    } catch (e: any) {
-      const raw = String(e?.message ?? "");
+    } catch (e) {
+      const raw = String((e as Error)?.message ?? "");
       let friendly = "Could not bind referrer. Please try again.";
       if (raw.includes("already_has_referrer")) {
         friendly = "You already have a referrer locked. This is permanent and can't be changed.";

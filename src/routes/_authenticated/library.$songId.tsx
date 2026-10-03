@@ -128,6 +128,7 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
   // costs 2 OG coins (1 burnt, 1 royalty to the creator).
   const communityMode = !isOwner;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- untyped table/SDK shape
   const isReady = song.status === "completed" && !!(song.audio_path || (song as any).sample_path);
   const isFailed = song.status === "failed";
   const isPending =
@@ -561,6 +562,7 @@ function GeneratingStatus({ song }: { song: FullSong }) {
   const elapsedLabel = mm > 0 ? `${mm}m ${ss}s` : `${ss}s`;
 
   const hasCover = !!song.cover_url;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- untyped table/SDK shape
   const hasAudio = !!(song.audio_path || (song as any).sample_path);
   type StepState = "done" | "active" | "pending";
   const steps: { label: string; hint: string; state: StepState }[] = [

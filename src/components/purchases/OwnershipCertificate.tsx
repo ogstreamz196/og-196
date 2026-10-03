@@ -6,7 +6,10 @@ const SUPPORT_EMAIL = "ogbot196@gmail.com";
 
 function money(amount: number, currency: string) {
   try {
-    return new Intl.NumberFormat("en-GB", { style: "currency", currency: currency.toUpperCase() }).format(amount);
+    return new Intl.NumberFormat("en-GB", {
+      style: "currency",
+      currency: currency.toUpperCase(),
+    }).format(amount);
   } catch {
     return `${amount.toFixed(2)} ${currency.toUpperCase()}`;
   }
@@ -23,7 +26,10 @@ export function OwnershipCertificate({ row, onClose }: { row: PurchaseRow; onClo
     month: "long",
     year: "numeric",
   });
-  const time = new Date(row.created_at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  const time = new Date(row.created_at).toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
   const holder = profile?.display_name || "OG Member";
   const refunded = row.stripe?.refunded;
 
@@ -63,7 +69,9 @@ export function OwnershipCertificate({ row, onClose }: { row: PurchaseRow; onClo
             />
 
             <header className="relative text-center">
-              <p className="text-[10px] font-black uppercase tracking-[0.4em] text-coin">OGSTREAMZ · OG BOT</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.4em] text-coin">
+                OGSTREAMZ · OG BOT
+              </p>
               <h2 className="font-display mt-3 text-2xl font-black uppercase leading-tight tracking-[0.04em] text-foreground sm:text-3xl">
                 Certificate of Ownership
               </h2>
@@ -75,7 +83,9 @@ export function OwnershipCertificate({ row, onClose }: { row: PurchaseRow; onClo
 
             <section className="relative mt-6 text-center">
               <p className="text-sm text-muted-foreground">This certifies that</p>
-              <p className="font-display mt-1 break-words text-3xl font-black text-primary sm:text-4xl">{holder}</p>
+              <p className="font-display mt-1 break-words text-3xl font-black text-primary sm:text-4xl">
+                {holder}
+              </p>
               {profile?.og_vip_id ? (
                 <p className="mt-1 inline-flex items-center gap-1 font-mono text-xs font-black tracking-widest text-coin">
                   <Crown className="h-3.5 w-3.5" /> {profile.og_vip_id}
@@ -92,13 +102,21 @@ export function OwnershipCertificate({ row, onClose }: { row: PurchaseRow; onClo
               {[
                 ["Certificate no.", serialFor(row)],
                 ["Issued", `${issued} · ${time}`],
-                ["Amount paid", row.stripe ? money(row.stripe.amountPaid, row.stripe.currency) : "—"],
+                [
+                  "Amount paid",
+                  row.stripe ? money(row.stripe.amountPaid, row.stripe.currency) : "—",
+                ],
                 ["Status", refunded ? "Refunded — void" : "Paid · Valid"],
                 ["Account", profile?.email ?? "—"],
                 ["Payment", "Card · secured by Stripe"],
               ].map(([k, v]) => (
-                <div key={k} className="min-w-0 rounded-xl border border-border bg-background/60 p-3">
-                  <dt className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground">{k}</dt>
+                <div
+                  key={k}
+                  className="min-w-0 rounded-xl border border-border bg-background/60 p-3"
+                >
+                  <dt className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+                    {k}
+                  </dt>
                   <dd className="mt-1 break-words font-semibold text-foreground">{v}</dd>
                 </div>
               ))}
@@ -107,8 +125,8 @@ export function OwnershipCertificate({ row, onClose }: { row: PurchaseRow; onClo
             <footer className="relative mt-7 flex items-end justify-between gap-4">
               <div className="min-w-0 text-[10px] leading-relaxed text-muted-foreground">
                 <p>
-                  OG Coins are a non-transferable licence for use inside OG BOT. Coins already used cannot
-                  be refunded.
+                  OG Coins are a non-transferable licence for use inside OG BOT. Coins already used
+                  cannot be refunded.
                 </p>
                 <p className="mt-1">
                   Questions:{" "}
