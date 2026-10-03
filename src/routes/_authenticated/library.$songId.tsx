@@ -523,6 +523,7 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
         className="hidden"
         data-og-track={song.id}
         data-og-title={song.title || "OG track"}
+        data-og-full={communityMode || unlocked ? "1" : undefined}
       />
 
       <UnlockConfirmDialog
