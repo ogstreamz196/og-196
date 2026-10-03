@@ -1689,3 +1689,11 @@ main:has(.boss-ui) .bg-card {
   background-color: var(--boss-solid);
   box-shadow: 0 0 0 100vmax var(--boss-solid);
 }
+
+@media print {
+  body:has(.og-certificate) * { visibility: hidden; }
+  .og-certificate, .og-certificate * { visibility: visible; }
+  .og-cert-overlay { position: absolute; inset: 0; background: none; backdrop-filter: none; }
+  .og-cert-actions { display: none; }
+  .og-certificate { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
