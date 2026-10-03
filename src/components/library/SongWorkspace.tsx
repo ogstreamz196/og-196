@@ -555,6 +555,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   }
 
   const navigate = useNavigate();
+  const { isVip: isVipUser } = useRole();
   async function performUnlock() {
     setUnlocking(true);
     try {
