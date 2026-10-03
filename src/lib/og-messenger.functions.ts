@@ -76,7 +76,7 @@ export const chatOgBot = createServerFn({ method: "POST" })
       supabaseAdmin.from("user_roles").select("role").eq("user_id", context.userId),
       supabaseAdmin
         .from("user_preferences")
-        .select("foul_mouth")
+        .select("foul_mouth, foul_intensity")
         .eq("user_id", context.userId)
         .maybeSingle(),
       supabaseAdmin
@@ -124,6 +124,12 @@ export const chatOgBot = createServerFn({ method: "POST" })
 
     const foulMouth = isVip ? (prefRes.data?.foul_mouth ?? true) : false;
 
+    const rawIntensity = Number(
+      (prefRes.data as { foul_intensity?: number } | null)?.foul_intensity ?? 1,
+    );
+    // Levels above Mild (1) are VIP-only.
+    const foulIntensity = isVip ? Math.max(1, Math.min(3, rawIntensity || 1)) : 1;
+
     const userCtx: UserContextSummary = {
       display_name: profile.display_name,
       email: profile.email,
@@ -145,7 +151,10 @@ export const chatOgBot = createServerFn({ method: "POST" })
     const songIntent =
       detectSongIntent(latestUserMsg?.content) || detectSongIntent(data.pageContext);
 
-    const system = buildSystemPrompt({
+    const intensityNote = foulMouth
+      ? `\n\nSWEAR INTENSITY: ${["", "MILD — light cheeky swearing only", "SPICY — regular swearing and sharp roasts", "DEMON — maximum savage, uncensored roasting"][foulIntensity]}.`
+      : "";
+    const baseSystem = buildSystemPrompt({
       mode: data.mode,
       foulMouth,
       bossScript: personaMap.get("og_persona.script") ?? null,
@@ -157,6 +166,7 @@ export const chatOgBot = createServerFn({ method: "POST" })
       songIntent,
       dossier,
     });
+    const system = baseSystem + intensityNote;
 
     // 1b. Learn fresh insults from the latest user message (fire-and-forget upsert).
     let newlyLearned: string[] = [];
