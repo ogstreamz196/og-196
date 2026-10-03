@@ -249,10 +249,10 @@ function DashboardHome() {
               <DodgyLogo
                 src={ogLogo.url}
                 alt="OG Streamz"
-                size={200}
+                size={340}
                 maxDrift={80}
                 dodgeRadius={160}
-                imageClassName="rounded-3xl ring-1 ring-white/10 shadow-[0_24px_70px_-20px_rgba(0,0,0,0.8)] w-[min(60vw,200px)] sm:w-[320px] h-auto"
+                imageClassName="rounded-3xl ring-1 ring-white/10 shadow-glow w-[min(86vw,340px)] sm:w-[420px] h-auto"
                 className="mx-auto"
               />
 
