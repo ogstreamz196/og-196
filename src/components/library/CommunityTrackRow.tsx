@@ -146,7 +146,8 @@ function CommunityTrackRowImpl({
 
   const pct = duration > 0 ? Math.min(100, (progress / duration) * 100) : 0;
   const title = song.title || "Untitled track";
-  const showCover = !!song.cover_url && !coverFailed;
+  // Album art hidden in rows so the play button is always clear.
+  const showCover = false && !coverFailed;
   const hue = hueFor(song.id);
 
   async function confirmDownload() {

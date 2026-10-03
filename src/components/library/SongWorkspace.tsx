@@ -454,18 +454,19 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
         return;
       }
       setLyrics(next);
-      toast.success("Lyrics ready · free", {
-        description: "Scroll down to review your new lyrics.",
-      });
-      // Scroll into view + focus the editor so the user immediately sees the result
-      requestAnimationFrame(() => {
-        const el = lyricsRef.current;
-        if (el) {
-          el.scrollIntoView({ behavior: "smooth", block: "center" });
-          el.focus({ preventScroll: true });
-        }
+      toast.success("Lyrics ready — cooking your track now", {
+        description: "Your preview will appear at the bottom when it's done.",
       });
       onSaved?.();
+      // Straight into the track: no second button to hunt for.
+      setGenLyrics(false);
+      setTab("preview");
+      await generatePreview(next);
+      requestAnimationFrame(() =>
+        document
+          .getElementById("studio-preview")
+          ?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      );
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Lyrics generation failed");
     } finally {
@@ -474,14 +475,15 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   }
 
   const submitLockRef = useRef(false);
-  async function generatePreview() {
+  async function generatePreview(lyricsOverride?: string) {
+    const useLyrics = typeof lyricsOverride === "string" ? lyricsOverride : lyrics;
     if (submitLockRef.current) return;
     if (missing) {
       toast.error("This song is no longer available");
       return;
     }
 
-    if (!hasLyrics) {
+    if (!useLyrics.trim()) {
       toast.error("Generate lyrics first");
       return;
     }
@@ -502,12 +504,12 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       // storage may be blocked (private mode)
     }
     try {
-      if (dirty) await saveSettingsPatch();
+      if (dirty && lyricsOverride === undefined) await saveSettingsPatch();
       const { data, error } = await supabase.functions.invoke("suno-generate", {
         body: {
           song_id: isOwner ? song.id : null,
           prompt: nextBriefValue,
-          lyrics,
+          lyrics: useLyrics,
           title: title.trim() || null,
           style: styleValue || song.style || null,
           language: languageValue,
@@ -760,7 +762,12 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                       (mix as many as you like)
                     </span>
                   </Label>
-                  <div className="flex flex-wrap gap-1.5">
+                  <details className="group rounded-xl border border-border/60 bg-muted/20 px-3 py-2">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-sm font-semibold">
+                    <span className="truncate">{languages.join(" + ")}</span>
+                    <ChevronDown className="h-4 w-4 shrink-0 transition-transform group-open:rotate-180" />
+                  </summary>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
                     {LANGUAGES.map((l) => {
                       const on = languages.includes(l);
                       return (
@@ -786,6 +793,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                       );
                     })}
                   </div>
+                  </details>
                 </div>
 
                 {/* Voice + length */}
@@ -969,7 +977,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                     ) : (
                       <Sparkles className="h-4 w-4" />
                     )}
-                    {hasLyrics ? "Regenerate lyrics · Free" : "Generate lyrics · Free"}
+                    {hasLyrics ? "New lyrics + cook track" : "Write lyrics + cook track"}
                   </Button>
                 </div>
               </CardContent>
@@ -978,7 +986,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
         </Card>
         </TabsContent>
 
-        <TabsContent value="preview" className="mt-0">
+        <TabsContent value="preview" id="studio-preview" className="mt-0 scroll-mt-20">
         {/* Stage 2 — Sample */}
         <Card>
           <Collapsible open>
@@ -1038,7 +1046,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                       <Button
                         size="sm"
                         variant="destructive"
-                        onClick={generatePreview}
+                        onClick={() => void generatePreview()}
                         disabled={!hasLyrics || genPreview || balance < previewCost || missing}
                         className="gap-1.5"
                       >
@@ -1080,9 +1088,10 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                   </div>
                 )}
                 {isReady && <InlineSamplePlayer songId={song.id} unlocked={!!song.unlocked} />}
+                {!isReady && (
                 <div className="flex flex-wrap items-center justify-end gap-2">
                   <Button
-                    onClick={generatePreview}
+                    onClick={() => void generatePreview()}
                     disabled={
                       !hasLyrics || genPreview || isPending || balance < previewCost || missing
                     }
@@ -1108,6 +1117,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                     </span>
                   </Button>
                 </div>
+                )}
               </CardContent>
             </CollapsibleContent>
           </Collapsible>
