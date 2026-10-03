@@ -21,7 +21,7 @@ export const Route = createFileRoute("/app-return")({
   component: AppReturn,
 });
 
-function AppReturn() {
+export function AppReturn() {
   const [session, setSession] = useState<Session | null>(null);
   const [native, setNative] = useState(() => Capacitor.isNativePlatform());
   const [opening, setOpening] = useState(false);
