@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_usage_log: {
+        Row: {
+          completion_tokens: number
+          created_at: string
+          feature: string
+          id: string
+          model: string | null
+          prompt_tokens: number
+          provider: string
+          total_tokens: number
+        }
+        Insert: {
+          completion_tokens?: number
+          created_at?: string
+          feature: string
+          id?: string
+          model?: string | null
+          prompt_tokens?: number
+          provider: string
+          total_tokens?: number
+        }
+        Update: {
+          completion_tokens?: number
+          created_at?: string
+          feature?: string
+          id?: string
+          model?: string | null
+          prompt_tokens?: number
+          provider?: string
+          total_tokens?: number
+        }
+        Relationships: []
+      }
       app_settings: {
         Row: {
           key: string

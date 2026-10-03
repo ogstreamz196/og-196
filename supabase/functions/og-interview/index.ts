@@ -3,6 +3,7 @@
 // call (no coin deduction) — short responses, rate-limited by Gemini.
 import { handlePreflight, jsonResponse } from "../_shared/cors.ts";
 import { requireUser } from "../_shared/clients.ts";
+import { geminiUsage, logAiUsage } from "../_shared/ai-usage.ts";
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!;
 const GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") ?? "gemini-3.8-flash";
@@ -56,7 +57,12 @@ function buildTranscript(history: Turn[]): string {
     .join("\n");
 }
 
-async function callGemini(system: string, user: string, maxTokens: number): Promise<string> {
+async function callGemini(
+  system: string,
+  user: string,
+  maxTokens: number,
+  feature: string,
+): Promise<string> {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent?key=${GEMINI_API_KEY}`;
   const res = await fetch(url, {
     method: "POST",
@@ -72,6 +78,7 @@ async function callGemini(system: string, user: string, maxTokens: number): Prom
     throw new Error(`Gemini ${res.status}: ${txt.slice(0, 300)}`);
   }
   const data = await res.json();
+  logAiUsage({ feature, provider: "gemini", model: GEMINI_MODEL, ...geminiUsage(data) });
   return ((data?.candidates?.[0]?.content?.parts ?? []) as Array<{ text?: string }>)
     .map((p) => p?.text ?? "")
     .join("")
@@ -111,7 +118,7 @@ Deno.serve(async (req) => {
         `Existing details the user already typed (keep these as ground truth):\n${seed || "(none)"}\n\n` +
         `Interview transcript:\n${transcript || "(no answers yet)"}\n\n` +
         `Write the brief now.`;
-      const summary = await callGemini(SYSTEM_SUMMARY, userMsg, 600);
+      const summary = await callGemini(SYSTEM_SUMMARY, userMsg, 600, "interview_summary");
       return jsonResponse({ summary: summary.slice(0, 500) });
     }
 
@@ -120,7 +127,7 @@ Deno.serve(async (req) => {
       (seed ? `Context the user already typed:\n${seed}\n\n` : "") +
       `Conversation so far:\n${transcript || "(empty — this is the opening question)"}\n\n` +
       `Now write ONLY the next question. One sentence. No preamble.`;
-    const question = await callGemini(SYSTEM_NEXT, userMsg, 120);
+    const question = await callGemini(SYSTEM_NEXT, userMsg, 120, "interview_question");
     // Strip surrounding quotes / labels just in case.
     const cleaned = question
       .replace(/^["'`\s]+|["'`\s]+$/g, "")

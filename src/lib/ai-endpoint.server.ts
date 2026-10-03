@@ -180,6 +180,32 @@ function hasMedia(body: Record<string, unknown>): boolean {
   );
 }
 
+/** Fire-and-forget usage log for the Boss cost panel. Never throws. */
+export function logAiUsage(entry: {
+  feature: string;
+  provider: string;
+  model?: string;
+  promptTokens?: number;
+  completionTokens?: number;
+  totalTokens?: number;
+}): void {
+  void (async () => {
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      await supabaseAdmin.from("ai_usage_log").insert({
+        feature: entry.feature,
+        provider: entry.provider,
+        model: entry.model ?? null,
+        prompt_tokens: entry.promptTokens ?? 0,
+        completion_tokens: entry.completionTokens ?? 0,
+        total_tokens: entry.totalTokens ?? 0,
+      });
+    } catch (e) {
+      console.warn("ai_usage_log insert failed", e);
+    }
+  })();
+}
+
 export async function fetchAiChat(
   body: Record<string, unknown>,
   affinity = "default",
@@ -207,6 +233,9 @@ export async function fetchAiChat(
       continue;
     }
     if (!shouldFallThrough(response.status) || index === targets.length - 1) {
+      // Chat responses are streamed back to the caller, so token counts aren't
+      // available here — log the call itself (provider + model) instead.
+      logAiUsage({ feature: "chat", provider: target.provider, model: target.model });
       return { response, provider: target.provider };
     }
     console.warn(`AI ${target.provider} returned ${response.status}, falling back`);
@@ -290,7 +319,16 @@ export async function transcribeWithGemini(audioBase64: string, mime: string): P
   }
   const json = (await res.json().catch(() => ({}))) as {
     candidates?: { content?: { parts?: { text?: string }[] } }[];
+    usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number; totalTokenCount?: number };
   };
+  logAiUsage({
+    feature: "transcription",
+    provider: "gemini",
+    model,
+    promptTokens: json.usageMetadata?.promptTokenCount ?? 0,
+    completionTokens: json.usageMetadata?.candidatesTokenCount ?? 0,
+    totalTokens: json.usageMetadata?.totalTokenCount ?? 0,
+  });
   return (json.candidates?.[0]?.content?.parts ?? [])
     .map((p) => p?.text ?? "")
     .join("")
