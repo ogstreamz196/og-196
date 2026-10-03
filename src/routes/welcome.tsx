@@ -2,17 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import ogStreamzLogo from "@/assets/ogstreamz-logo.jpg.asset.json";
 import { Capacitor } from "@capacitor/core";
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactElement } from "react";
-import {
-  Music2,
-  Sparkles,
-  Loader2,
-  Headphones,
-  Heart,
-  Star,
-  Wand2,
-  Mic2,
-  Pencil,
-} from "lucide-react";
+import { Music2, Sparkles, Loader2, Headphones, Wand2, Mic2, Pencil } from "lucide-react";
 import { EditableContent } from "@/components/admin/EditableContent";
 import {
   AdminEditModeProvider,
@@ -671,9 +661,10 @@ function WelcomePage() {
         <WelcomeBackdrop />
         <TopNav />
         <Hero />
-        <FoulMouthHype />
+        <StyleShowcase />
+        <Superpowers />
+        <HowItWorks />
         <AlbumCoverShowcase />
-        <Pillars />
 
         <ClosingCta />
         <Footer />
@@ -737,54 +728,64 @@ function TopNav() {
 
 function Hero() {
   return (
-    <section className="relative mx-auto flex min-h-[calc(100dvh-4rem)] max-w-5xl flex-col justify-center px-3 pt-6 pb-10 sm:min-h-0 sm:px-8 sm:py-14">
-      {/* Floating stickers */}
-      <Sticker className="left-[4%] top-10 wc-float" rotate="-12">
-        <Heart className="h-6 w-6 text-pink-400" />
-      </Sticker>
-      <Sticker className="right-[6%] top-16 wc-float-slow" rotate="14">
-        <Star className="h-6 w-6 text-amber-300" />
-      </Sticker>
-      <Sticker className="left-[8%] bottom-[18%] wc-float-slow" rotate="8">
-        <Headphones className="h-6 w-6 text-primary" />
-      </Sticker>
-      <Sticker className="right-[6%] bottom-[22%] wc-float" rotate="-10">
-        <Mic2 className="h-6 w-6 text-violet-300" />
-      </Sticker>
-
+    <section className="relative mx-auto max-w-5xl px-3 pt-6 pb-10 sm:px-8 sm:py-14">
       <div className="relative mx-auto w-full max-w-3xl text-center">
-        <div className="mx-auto mb-3 inline-flex max-w-full flex-wrap items-center justify-center gap-2 rounded-full border-2 border-primary/40 bg-primary/15 px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-primary shadow-[0_0_28px_-8px_oklch(0.7_0.2_300_/_0.7)] sm:text-sm">
-          <span>🎵 MusicHUB</span>
-          <span aria-hidden className="text-primary/50">
-            ·
-          </span>
-          <span className="inline-flex items-center gap-1.5 normal-case tracking-normal text-foreground">
-            Powered by
-            <OgBotLogo className="h-7 w-7 sm:h-8 sm:w-8" />
-            <span className="font-black uppercase tracking-tight">OG Bot</span>
-          </span>
+        <div className="mx-auto inline-flex max-w-full flex-wrap items-center justify-center gap-2 rounded-full border border-primary/50 bg-primary/15 px-4 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-primary sm:text-xs">
+          <span>👑 15 days free VIP</span>
+          <span aria-hidden className="text-primary/50">·</span>
+          <span>No card</span>
         </div>
 
-        <h1 className="font-display mt-5 text-[clamp(2rem,9.5vw,5.5rem)] font-black leading-[0.92] tracking-[-0.045em] [text-wrap:balance] hyphens-none drop-shadow-[0_8px_30px_rgba(80,60,255,0.35)] sm:mt-8 sm:leading-[0.9] sm:tracking-[-0.05em]">
-          <span className="wc-pop block">PROMPT IT.</span>
+        <h1 className="font-display mt-5 text-[clamp(2.2rem,10vw,5.5rem)] font-black leading-[0.92] tracking-[-0.045em] [text-wrap:balance]">
+          <span className="wc-pop block">TURN ANY IDEA</span>
           <span className="wc-pop block" style={{ animationDelay: "0.15s" }}>
-            MAKE A{" "}
-            <span
-              className="italic wc-bounce-soft inline-block text-accent [text-shadow:0_0_18px_var(--primary),0_2px_0_var(--primary)]"
-              style={{ animationDelay: "0.3s" }}
-            >
-              PERSONAL
-            </span>
+            INTO A{" "}
+            <span className="wc-bounce-soft inline-block italic text-accent">HIT</span>
           </span>
           <span className="wc-pop block" style={{ animationDelay: "0.3s" }}>
-            MUSIC TRACK.
+            IN SECONDS.
           </span>
         </h1>
 
-        <div id="sign-in" className="mx-auto mt-6 max-w-md scroll-mt-24 sm:mt-10">
+        <p className="mx-auto mt-4 max-w-xl text-base font-medium text-muted-foreground sm:text-xl">
+          Drill, afrobeats, pop or savage roasts — your words, real vocals, cover art included.
+        </p>
+
+        <div className="mt-6 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+          <a
+            href="#sign-in"
+            className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-gradient-brand px-7 text-lg font-black uppercase tracking-wide text-primary-foreground shadow-glow transition-transform hover:scale-[1.03]"
+          >
+            🔥 Start creating free
+          </a>
+          <a
+            href="#styles"
+            className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border border-border bg-card/70 px-7 text-base font-bold text-foreground backdrop-blur transition hover:border-primary/60"
+          >
+            <Music2 className="h-5 w-5" /> See what it makes
+          </a>
+        </div>
+
+        <ul className="mx-auto mt-5 flex flex-wrap justify-center gap-2 text-xs font-semibold text-foreground/80 sm:text-sm">
+          {[
+            { i: <Mic2 className="h-3.5 w-3.5" />, t: "Real vocals" },
+            { i: <Sparkles className="h-3.5 w-3.5" />, t: "Album cover" },
+            { i: <span>🤬</span>, t: "Foul Mouth mode" },
+          ].map((c) => (
+            <li
+              key={c.t}
+              className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card/60 px-3 py-1"
+            >
+              {c.i}
+              {c.t}
+            </li>
+          ))}
+        </ul>
+
+        <div id="sign-in" className="mx-auto mt-8 max-w-md scroll-mt-24 sm:mt-10">
           <AuthButtons size="xl" />
-          <p className="mt-3 text-center text-sm font-semibold tracking-wide text-muted-foreground sm:mt-6 sm:text-lg sm:font-bold sm:text-foreground">
-            Free to start — no card required
+          <p className="mt-3 text-center text-sm font-semibold text-muted-foreground">
+            Free to start — new or returning, one form does both.
           </p>
         </div>
       </div>
@@ -879,105 +880,41 @@ function AlbumCoverShowcase() {
   );
 }
 
-function Sticker({
-  children,
-  className,
-  rotate,
-}: {
-  children: React.ReactNode;
-  className?: string;
-  rotate: string;
-}) {
+function StyleShowcase() {
   return (
-    <div
-      className={`absolute hidden sm:grid place-items-center h-12 w-12 rounded-2xl border-2 border-white/20 bg-card/80 shadow-card backdrop-blur-xl ${className ?? ""}`}
-      style={{ transform: `rotate(${rotate}deg)` }}
-    >
-      {children}
-    </div>
-  );
-}
-
-function Pillars() {
-  const items: Array<{
-    icon: React.ReactNode;
-    emoji: string;
-    title: React.ReactNode;
-    body: string;
-    tilt: string;
-    key: string;
-    floatClass: string;
-  }> = [
-    {
-      key: "hub",
-      icon: <Music2 className="h-7 w-7" />,
-      emoji: "🎵",
-      title: "Prompt anything",
-      body: "Any idea — roast, love note, inside joke.",
-      tilt: "-2",
-      floatClass: "wc-float",
-    },
-    {
-      key: "bot",
-      icon: <Wand2 className="h-7 w-7" />,
-      emoji: "🪄",
-      title: "Pick the vibe",
-      body: "Drill, rap, afrobeats, pop or ballad.",
-      tilt: "1.5",
-      floatClass: "wc-float-slow",
-    },
-    {
-      key: "msg",
-      icon: <Sparkles className="h-7 w-7" />,
-      emoji: "💿",
-      title: "Cover included",
-      body: "Cover art plus a track ready to play.",
-      tilt: "-1",
-      floatClass: "wc-wiggle",
-    },
-  ];
-
-  return (
-    <section id="studio" className="relative scroll-mt-24">
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
-        <div className="grid gap-3 sm:gap-4 md:grid-cols-3 lg:gap-5">
-          {items.map((it, idx) => (
-            <div
-              key={it.key}
-              style={{ transform: `rotate(${it.tilt}deg)` }}
-              className="md:transition-transform md:duration-300 md:hover:rotate-0"
+    <section id="styles" className="relative scroll-mt-24 border-t border-border/40">
+      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-8 sm:py-16">
+        <p className="text-center text-xs font-black uppercase tracking-[0.25em] text-primary">
+          🎧 Hear the heat
+        </p>
+        <h2 className="font-display mt-3 text-balance text-center text-3xl font-black tracking-[-0.03em] sm:text-5xl">
+          One idea. Any vibe. Cover art included.
+        </h2>
+        <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+          {albumCovers.map((c) => (
+            <a
+              key={c.title}
+              href="#sign-in"
+              className="group overflow-hidden rounded-2xl border border-border/60 bg-card/80 shadow-card transition hover:-translate-y-1 hover:border-primary/60"
             >
-              <article
-                style={{ animationDelay: `${idx * 0.14}s`, contain: "paint" }}
-                className="group wc-pop relative h-full overflow-hidden rounded-[2rem] border-2 border-white/15 bg-card/80 p-4 shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)] transition-all duration-300 max-sm:rounded-[1.5rem] sm:p-6 md:backdrop-blur-xl md:hover:-translate-y-2 md:hover:border-primary/40 md:hover:shadow-glow"
-              >
-                {/* hover aurora */}
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 -z-10 opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-[radial-gradient(circle_at_top_right,oklch(0.55_0.22_268/0.22),transparent_60%)]"
+              <div className="relative aspect-square overflow-hidden">
+                <img
+                  src={c.image}
+                  alt={`${c.title} album cover`}
+                  loading="lazy"
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-                <CardEditBadge />
-                <div className="flex items-center gap-3">
-                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gradient-brand text-primary-foreground shadow-glow transition-transform duration-300 sm:h-13 sm:w-13 md:group-hover:scale-110 md:group-hover:rotate-6">
-                    {it.icon}
-                  </span>
-                  <span className={`text-2xl sm:text-3xl ${it.floatClass}`}>{it.emoji}</span>
-                </div>
-                <EditableContent
-                  as="h3"
-                  contentKey={`welcome.pillar.${it.key}.title`}
-                  defaultValue={String(it.title)}
-                  className="font-display mt-3 block text-2xl font-black tracking-tight sm:mt-4 sm:text-3xl"
-                />
-                <EditableContent
-                  as="p"
-                  multiline
-                  contentKey={`welcome.pillar.${it.key}.body`}
-                  defaultValue={it.body}
-                  className="mt-2 block text-sm leading-snug text-balance text-muted-foreground sm:text-base"
-                />
-              </article>
-            </div>
+                <span className="absolute left-2 top-2 rounded-full bg-background/80 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-foreground backdrop-blur">
+                  {c.style}
+                </span>
+              </div>
+              <div className="p-3 sm:p-4">
+                <h3 className="font-display text-base font-black sm:text-lg">{c.title}</h3>
+                <p className="mt-1 line-clamp-2 text-xs text-muted-foreground sm:text-sm">
+                  “{c.prompt}”
+                </p>
+              </div>
+            </a>
           ))}
         </div>
       </div>
@@ -985,63 +922,93 @@ function Pillars() {
   );
 }
 
-function FoulMouthHype() {
+function Superpowers() {
+  const items = [
+    {
+      key: "foul",
+      emoji: "🤬",
+      title: "Foul Mouth Mode",
+      body: "Savage roasts, raw bars, no filter. Turn the heat from Mild to Demon.",
+    },
+    {
+      key: "cover",
+      emoji: "💿",
+      title: "Instant album covers",
+      body: "Every track comes with its own artwork, ready to share.",
+    },
+    {
+      key: "vip",
+      emoji: "👑",
+      title: "15 days of free VIP",
+      body: "Every style unlocked from signup — drill, bhangra, afrobeats and more.",
+    },
+  ];
   return (
-    <section className="relative border-t border-white/10">
-      <div className="relative mx-auto max-w-4xl px-4 py-10 sm:px-8 sm:py-16">
-        <div className="relative overflow-hidden rounded-[2.5rem] border-2 border-destructive/40 bg-gradient-to-br from-destructive/25 via-destructive/10 to-transparent p-6 shadow-[0_30px_80px_-30px_oklch(0.62_0.22_25_/_0.7)] sm:p-12">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -right-12 -top-12 h-56 w-56 rounded-full bg-destructive/30 blur-3xl"
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -bottom-16 -left-10 h-56 w-56 rounded-full bg-primary/30 blur-3xl"
-          />
-
-          <div className="relative grid items-center gap-8 md:grid-cols-[auto_minmax(0,1fr)]">
-            <div className="flex items-center justify-center">
-              <div className="relative">
-                <span
-                  aria-hidden
-                  className="absolute -inset-3 animate-pulse rounded-full bg-destructive/30 blur-2xl"
-                />
-                <div className="relative grid h-28 w-28 place-items-center rounded-[2rem] border-2 border-destructive/60 bg-background/60 text-6xl shadow-[0_0_40px_-6px_oklch(0.62_0.22_25_/_0.8)] sm:h-36 sm:w-36 sm:text-8xl">
-                  🤬
-                </div>
-              </div>
-            </div>
-
-            <div className="min-w-0 text-center md:text-left">
-              <p className="inline-flex items-center gap-2 rounded-full border border-destructive/60 bg-destructive/20 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-destructive sm:text-xs">
-                ⚠ Before you walk away
-              </p>
-              <h2 className="font-display mt-4 text-balance text-3xl font-black leading-[0.95] tracking-[-0.03em] sm:text-5xl md:text-6xl">
-                Don't forget to flip <span className="italic text-destructive">Foul Mouth</span> ON.
-              </h2>
-              <p className="mt-4 text-lg leading-relaxed text-foreground/85 sm:text-2xl">
-                The clean version is cute.{" "}
-                <span className="font-black text-foreground">Foul Mouth</span> is where{" "}
-                <span className="inline-flex items-center gap-1.5 align-middle">
-                  <OgBotLogo className="h-6 w-6" />
-                  <span className="font-black">OG Bot</span>
-                </span>{" "}
-                actually goes off — savage roasts, real bars, no filter.
-              </p>
-              <p className="mt-4 text-base font-semibold text-muted-foreground sm:text-lg">
-                Free to try. No card. One tap inside MusicHUB.
-              </p>
-              <div className="mt-7">
-                <a
-                  href="#sign-in"
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-brand px-7 py-4 text-lg font-black uppercase tracking-wide text-primary-foreground shadow-glow ring-1 ring-primary/40 transition-transform hover:scale-[1.03] sm:text-xl"
-                >
-                  🔥 Try OG Bot free
-                </a>
-              </div>
-            </div>
-          </div>
+    <section id="studio" className="relative scroll-mt-24 border-t border-border/40">
+      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-8 sm:py-16">
+        <p className="text-center text-xs font-black uppercase tracking-[0.25em] text-primary">
+          ⚡ Your superpowers
+        </p>
+        <div className="mt-6 grid gap-3 sm:gap-5 md:grid-cols-3">
+          {items.map((it) => (
+            <article
+              key={it.key}
+              className="relative overflow-hidden rounded-2xl border border-border/60 bg-card/80 p-5 shadow-card sm:p-6"
+            >
+              <CardEditBadge />
+              <span className="text-4xl">{it.emoji}</span>
+              <EditableContent
+                as="h3"
+                contentKey={`welcome.power.${it.key}.title`}
+                defaultValue={it.title}
+                className="font-display mt-3 block text-2xl font-black tracking-tight"
+              />
+              <EditableContent
+                as="p"
+                multiline
+                contentKey={`welcome.power.${it.key}.body`}
+                defaultValue={it.body}
+                className="mt-2 block text-sm leading-snug text-muted-foreground sm:text-base"
+              />
+            </article>
+          ))}
         </div>
+      </div>
+    </section>
+  );
+}
+
+function HowItWorks() {
+  const steps = [
+    { icon: <Pencil className="h-5 w-5" />, title: "Type your idea", body: "A name, a roast, a memory." },
+    { icon: <Wand2 className="h-5 w-5" />, title: "Pick the vibe", body: "Choose a style and mood." },
+    { icon: <Headphones className="h-5 w-5" />, title: "OG Bot cooks it", body: "Your song + cover, ready to play." },
+  ];
+  return (
+    <section className="relative border-t border-border/40">
+      <div className="mx-auto max-w-5xl px-4 py-12 sm:px-8 sm:py-16">
+        <h2 className="font-display text-center text-3xl font-black tracking-[-0.03em] sm:text-5xl">
+          3 taps to your first track
+        </h2>
+        <ol className="mt-8 grid gap-3 sm:grid-cols-3 sm:gap-5">
+          {steps.map((s, i) => (
+            <li
+              key={s.title}
+              className="flex items-start gap-4 rounded-2xl border border-border/60 bg-card/70 p-5"
+            >
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-gradient-brand text-primary-foreground shadow-glow">
+                {s.icon}
+              </span>
+              <div className="min-w-0">
+                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-primary">
+                  Step {i + 1}
+                </p>
+                <h3 className="font-display text-lg font-black">{s.title}</h3>
+                <p className="text-sm text-muted-foreground">{s.body}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
       </div>
     </section>
   );
@@ -1049,33 +1016,31 @@ function FoulMouthHype() {
 
 function ClosingCta() {
   return (
-    <section id="how" className="relative border-t border-white/10">
+    <section id="how" className="relative border-t border-border/40">
       <div className="relative mx-auto max-w-3xl px-4 py-14 text-center sm:px-8 sm:py-20">
         <CardEditBadge />
         <EditableContent
           as="p"
           contentKey="welcome.closing.eyebrow"
           defaultValue="Ready?"
-          className="block text-xs font-medium uppercase tracking-[0.25em] text-muted-foreground sm:text-sm"
+          className="block text-xs font-black uppercase tracking-[0.25em] text-primary sm:text-sm"
         />
         <EditableContent
           as="h2"
           contentKey="welcome.closing.title"
           defaultValue="Your next prompt could be a hit."
           multiline
-          className="font-display mt-4 block text-balance text-4xl font-semibold leading-[0.95] tracking-[-0.045em] sm:mt-5 sm:text-6xl md:text-7xl"
+          className="font-display mt-4 block text-balance text-4xl font-black leading-[0.95] tracking-[-0.04em] sm:text-6xl"
         />
-        <EditableContent
-          as="p"
-          multiline
-          contentKey="welcome.closing.body"
-          defaultValue="Sign in. Type the idea. Pick the vibe. Get the cover and the song. 🎉"
-          className="mx-auto mt-6 block max-w-2xl text-lg text-muted-foreground sm:mt-8 sm:text-2xl md:text-3xl"
-        />
-
-        <div className="mx-auto mt-10 max-w-2xl sm:mt-12">
-          <AuthButtons size="xl" />
-        </div>
+        <p className="mx-auto mt-5 max-w-xl text-base text-muted-foreground sm:text-xl">
+          Free account in seconds · 15 days of VIP on us · No card needed.
+        </p>
+        <a
+          href="#sign-in"
+          className="mt-8 inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-gradient-brand px-8 text-lg font-black uppercase tracking-wide text-primary-foreground shadow-glow transition-transform hover:scale-[1.03]"
+        >
+          🔥 Start creating free
+        </a>
       </div>
     </section>
   );
