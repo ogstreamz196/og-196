@@ -289,8 +289,18 @@ function DashboardHome() {
         </div>
       </section>
 
-      {/* Daily free coin drop — one claim per day */}
-      <DailyDrop />
+      {/* Daily free coin drop — one claim per day, with Refer to earn right below */}
+      <div className="space-y-3">
+        <DailyDrop />
+        <Link
+          to="/referrals"
+          preload="intent"
+          className="group flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-5 py-4 text-sm font-black uppercase tracking-[0.18em] text-primary-foreground shadow-glow transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        >
+          <Share2 className="h-5 w-5" /> Refer to earn coins
+          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+        </Link>
+      </div>
 
       {/* Primary CTAs — MusicHub + OG Bot at the top */}
 
@@ -318,17 +328,6 @@ function DashboardHome() {
         </div>
       </section>
 
-      {/* Refer to earn — compact CTA to the referrals/earnings page */}
-      <section>
-        <Link
-          to="/referrals"
-          preload="intent"
-          className="group inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-primary shadow-glow transition hover:scale-105 hover:bg-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-        >
-          <Share2 className="h-4 w-4" /> Refer to earn
-          <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
-        </Link>
-      </section>
 
       {/* Ask OG Bot CTA removed per request */}
 
