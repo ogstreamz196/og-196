@@ -24,7 +24,7 @@ Deno.serve(async (req) => {
     const admin = adminClient();
     const { data: song } = await admin
       .from("songs")
-      .select("id, user_id, status, unlocked, audio_path, revealed, title, suno_task_id")
+      .select("id, user_id, status, unlocked, audio_path, revealed, title, suno_task_id, is_variation")
       .eq("id", song_id)
       .maybeSingle();
     if (!song) return jsonResponse({ error: "Not found" }, 404);
@@ -126,7 +126,9 @@ Deno.serve(async (req) => {
     }
 
     const alreadyUnlocked = !!song.unlocked;
-    const cost = (alreadyUnlocked ? 0 : unlockCost) + (sibling ? remakeCost : 0);
+    // Second takes (variations) unlock at the cheaper remake price, not the full price.
+    const ownCost = song.is_variation ? remakeCost : unlockCost;
+    const cost = (alreadyUnlocked ? 0 : ownCost) + (sibling ? remakeCost : 0);
     if (cost === 0) return jsonResponse({ ok: true, already: true });
 
     // Claim the sibling unlock atomically before charging so retries can't double up.
