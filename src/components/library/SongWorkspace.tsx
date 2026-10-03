@@ -1121,30 +1121,10 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
               </CardContent>
             </CollapsibleContent>
           </Collapsible>
-        </Card>
-        </TabsContent>
-
-        <TabsContent value="hq" className="mt-0">
-        {/* Stage 3 — Final song */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Music2 className="h-4 w-4 text-primary" />Full HQ
-            </CardTitle>
-            <CardDescription>{fullUnlockCost} coins to unlock.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {!isReady ? (
-              <p className="text-sm text-muted-foreground">
-                Once the preview is ready, the full track unlocks here.
-              </p>
-            ) : (
+          {isReady && (
+          <CardContent className="space-y-3 border-t border-border/50 pt-4">
               <>
-                <p className="text-sm text-muted-foreground">
-                  {song.unlocked
-                    ? "Full HQ unlocked. Download as many times as you like."
-                    : "Unlock once to download the full HQ track."}
-                </p>
+
 
                 {!song.unlocked && balance < unlockCost && (
                   <div className="flex items-start gap-3 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
