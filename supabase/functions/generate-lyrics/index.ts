@@ -4,7 +4,7 @@ import { handlePreflight, jsonResponse } from "../_shared/cors.ts";
 import { adminClient, requireUser } from "../_shared/clients.ts";
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY") ?? "";
-const GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") ?? "gemini-2.5-flash";
+const GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") ?? "gemini-3.8-flash";
 // Paid emergency key — used once, only after the primary key is exhausted.
 const GEMINI_BACKUP_API_KEY = Deno.env.get("GEMINI_BACKUP_API_KEY") ?? "";
 const GEMINI_BACKUP_MODEL = Deno.env.get("GEMINI_BACKUP_MODEL") ?? "gemini-flash-latest";
@@ -357,7 +357,7 @@ Deno.serve(async (req) => {
         .join("")
         .trim();
 
-    const GEMINI_MODELS = Array.from(new Set([GEMINI_MODEL, "gemini-2.0-flash"]));
+    const GEMINI_MODELS = Array.from(new Set([GEMINI_MODEL, "gemini-flash-latest"]));
     const callGemini = async (contents: unknown[]): Promise<Gen> => {
       if (!GEMINI_API_KEY) {
         return { ok: false, status: 503, text: "", detail: "No lyrics model available" };
@@ -368,7 +368,7 @@ Deno.serve(async (req) => {
         if (res.ok) return { ok: true, status: 200, text: extractText(await res.json()) };
         const detail = await res.text();
         last = { ok: false, status: res.status, text: "", detail };
-        if (res.status !== 429 && res.status < 500) return last;
+        if (![404, 429].includes(res.status) && res.status < 500) return last;
         console.error("Gemini transient error", GEMINI_MODELS[i], res.status);
         await new Promise((r) => setTimeout(r, 1200 * (i + 1)));
       }
@@ -379,18 +379,18 @@ Deno.serve(async (req) => {
       const first = await callGemini(contents);
       if (first.ok || !GEMINI_BACKUP_API_KEY) return first;
       // 401/403 = primary key revoked/blocked; let the backup key rescue lyrics too.
-      if (![401, 403, 429].includes(first.status) && first.status < 500) return first;
+      if (![401, 403, 404, 429].includes(first.status) && first.status < 500) return first;
       console.warn("Primary Gemini exhausted — using backup key");
-      // Try a few backup models: a busy (503) model is only billed on success.
+      // Try a few backup models: busy (503) or retired (404) models are skipped, only success is billed.
       const backupModels = Array.from(
-        new Set([GEMINI_BACKUP_MODEL, "gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-flash-lite"]),
+        new Set([GEMINI_BACKUP_MODEL, "gemini-3.8-flash", "gemini-flash-lite-latest", "gemini-2.5-flash-lite"]),
       );
       let lastFail: Gen = { ok: false, status: 503, text: "", detail: "No response" };
       for (let i = 0; i < backupModels.length; i++) {
         const r = await postTo(backupModels[i], contents, GEMINI_BACKUP_API_KEY);
         if (r.ok) return { ok: true, status: 200, text: extractText(await r.json()) };
         lastFail = { ok: false, status: r.status, text: "", detail: await r.text() };
-        if (r.status !== 429 && r.status < 500) return lastFail;
+        if (![404, 429].includes(r.status) && r.status < 500) return lastFail;
         console.error("Backup Gemini busy", backupModels[i], r.status);
         await new Promise((res) => setTimeout(res, 800));
       }
