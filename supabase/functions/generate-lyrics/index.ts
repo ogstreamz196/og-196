@@ -22,7 +22,8 @@ Deno.serve(async (req) => {
   if (pre) return pre;
 
   try {
-    if (!GEMINI_API_KEY) return jsonResponse({ error: "Gemini is not configured" }, 500);
+    if (!GEMINI_API_KEY && !Deno.env.get("OPENAI_API_KEY"))
+      return jsonResponse({ error: "No lyrics writer is configured" }, 500);
 
     const auth = await requireUser(req);
     if (auth.error) return auth.error;
@@ -375,7 +376,44 @@ Deno.serve(async (req) => {
       return last;
     };
 
+    // Last resort: OpenAI writes the lyrics when every Gemini route fails,
+    // so a Google outage or blocked key never stops a song.
+    const callOpenAI = async (contents: unknown[]): Promise<Gen> => {
+      const key = Deno.env.get("OPENAI_API_KEY") ?? "";
+      if (!key) return { ok: false, status: 503, text: "", detail: "No OpenAI key" };
+      const messages = [
+        { role: "system", content: systemPrompt },
+        ...(contents as Array<{ role: string; parts: Array<{ text?: string }> }>).map((c) => ({
+          role: c.role === "model" ? "assistant" : "user",
+          content: c.parts.map((p) => p.text ?? "").join("\n"),
+        })),
+      ];
+      for (const model of ["gpt-4.1", "gpt-4o-mini"]) {
+        const r = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+          body: JSON.stringify({ model, messages, temperature: 0.9 }),
+        });
+        if (r.ok) {
+          const j = await r.json();
+          const text = (j?.choices?.[0]?.message?.content ?? "").trim();
+          if (text) return { ok: true, status: 200, text };
+        } else {
+          console.error("OpenAI lyrics fallback failed", model, r.status, (await r.text()).slice(0, 200));
+        }
+      }
+      return { ok: false, status: 502, text: "", detail: "OpenAI fallback failed" };
+    };
+
     const generate = async (contents: unknown[]): Promise<Gen> => {
+      const g = await generateGemini(contents);
+      if (g.ok && g.text) return g;
+      console.warn("Gemini lyrics unavailable — falling back to OpenAI", g.status);
+      const o = await callOpenAI(contents);
+      return o.ok ? o : g;
+    };
+
+    const generateGemini = async (contents: unknown[]): Promise<Gen> => {
       const first = await callGemini(contents);
       if (first.ok || !GEMINI_BACKUP_API_KEY) return first;
       // 401/403 = primary key revoked/blocked; let the backup key rescue lyrics too.
