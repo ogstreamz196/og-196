@@ -28,7 +28,12 @@ import { useAuth } from "@/hooks/use-auth";
 import { useDevMode } from "@/hooks/use-dev-mode";
 import { useProfile } from "@/hooks/use-profile";
 import { useRole } from "@/hooks/use-role";
-import { useFoulMouth, useSetFoulMouth } from "@/hooks/use-foul-mouth";
+import {
+  useFoulMouth,
+  useSetFoulMouth,
+  useFoulIntensity,
+  useSetFoulIntensity,
+} from "@/hooks/use-foul-mouth";
 // useShareLive intentionally removed — Loner/Community is page-level now.
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -157,6 +162,9 @@ export function OgChat({
   const qc = useQueryClient();
   const { data: profile } = useProfile();
   const { foulMouth } = useFoulMouth();
+  const { intensity: rawIntensity } = useFoulIntensity();
+  const intensity = Math.max(1, Math.min(3, rawIntensity));
+  const setIntensityMut = useSetFoulIntensity();
   const setFoulMouth = useSetFoulMouth();
 
   const { isVip } = useRole();
@@ -495,6 +503,19 @@ export function OgChat({
     toast.message("Chat cleared");
   }
 
+  async function pickIntensity(level: number) {
+    if (!isVip) {
+      setVipPromoOpen(true);
+      return;
+    }
+    try {
+      if (!foulMouth) await setFoulMouth.mutateAsync(true);
+      await setIntensityMut.mutateAsync(level);
+    } catch {
+      toast.error("Couldn't change level");
+    }
+  }
+
   async function toggleFoul() {
     if (!isVip) {
       setVipPromoOpen(true);
@@ -697,6 +718,41 @@ export function OgChat({
                 <span className="sr-only sm:not-sr-only">Clear</span>
               </button>
             )}
+          </div>
+        </div>
+      )}
+      {showHeader && (
+        <div
+          data-testid="ogchat-foul-slider"
+          className="flex items-center gap-2 border-b border-destructive/30 bg-gradient-to-r from-destructive/15 via-destructive/5 to-transparent px-3 py-1.5"
+        >
+          <span className="shrink-0 text-[10px] font-black uppercase tracking-wider text-destructive">
+            🔥 Amp it up
+          </span>
+          <div className="flex flex-1 gap-1" role="radiogroup" aria-label="Foul mouth level">
+            {(["Mild", "Spicy", "Demon"] as const).map((label, i) => {
+              const level = i + 1;
+              const locked = !isVip && level > 1;
+              const active = foulActive && intensity === level;
+              return (
+                <button
+                  key={label}
+                  type="button"
+                  role="radio"
+                  aria-checked={active}
+                  onClick={() => pickIntensity(level)}
+                  className={cn(
+                    "flex-1 rounded-md border px-1 py-1 text-[11px] font-black uppercase transition active:scale-95",
+                    active
+                      ? "border-destructive bg-destructive text-destructive-foreground shadow-md"
+                      : "border-destructive/40 bg-card text-foreground hover:bg-destructive/10",
+                  )}
+                >
+                  {locked ? "🔒 " : ""}
+                  {label}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}

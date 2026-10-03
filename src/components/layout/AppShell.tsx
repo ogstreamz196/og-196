@@ -26,6 +26,7 @@ import { useDevMode } from "@/hooks/use-dev-mode";
 import { useRole } from "@/hooks/use-role";
 import { supabase } from "@/integrations/supabase/client";
 import { AppSidebar } from "./AppSidebar";
+import { VipTrialWelcome } from "./VipTrialWelcome";
 import { HighContrastToggle } from "./HighContrastToggle";
 import { WelcomeBackdrop } from "./WelcomeBackdrop";
 import { MobileBottomNav } from "./MobileBottomNav";
@@ -111,6 +112,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <SwipeToOpenSidebar />
         <div className="relative flex min-h-dvh w-full bg-background/80 text-foreground">
           <AppSidebar />
+          <VipTrialWelcome />
 
           <div className="flex min-w-0 flex-1 flex-col">
             <header
