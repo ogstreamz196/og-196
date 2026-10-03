@@ -10,6 +10,23 @@ export const getVipPassStatus = createServerFn({ method: "GET" })
       .select("credential_id")
       .eq("user_id", context.userId)
       .maybeSingle();
+    // VIP members (paid or free trial) get the Vault pass free for a limited time.
+    const [{ data: vipRole }, { data: prof }] = await Promise.all([
+      supabaseAdmin
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", context.userId)
+        .in("role", ["vip", "admin"])
+        .limit(1),
+      supabaseAdmin
+        .from("profiles")
+        .select("vip_trial_ends_at")
+        .eq("id", context.userId)
+        .maybeSingle(),
+    ]);
+    const trialEnds = (prof as { vip_trial_ends_at?: string | null } | null)?.vip_trial_ends_at;
+    const vipFree =
+      (vipRole?.length ?? 0) > 0 || (!!trialEnds && new Date(trialEnds).getTime() > Date.now());
     let username: string | null = null;
     let password: string | null = null;
     const { data: creds } = await supabaseAdmin
@@ -18,7 +35,8 @@ export const getVipPassStatus = createServerFn({ method: "GET" })
       .eq("active", true)
       .order("created_at", { ascending: true });
     const available = creds?.length ?? 0;
-    if (purchase && creds && creds.length > 0) {
+    const owned = !!purchase || vipFree;
+    if (owned && creds && creds.length > 0) {
       // Rotate the shown login every 2 hours; everyone sees the same one
       // in the same window, including the same user on repeat views.
       const windowIndex = Math.floor(Date.now() / (2 * 60 * 60 * 1000));
@@ -26,7 +44,7 @@ export const getVipPassStatus = createServerFn({ method: "GET" })
       username = cred.username;
       password = cred.password;
     }
-    return { owned: !!purchase, username, password, available };
+    return { owned, vipFree: vipFree && !purchase, username, password, available };
   });
 
 export const purchaseVipPass = createServerFn({ method: "POST" })
