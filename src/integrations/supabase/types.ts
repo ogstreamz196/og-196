@@ -683,6 +683,7 @@ export type Database = {
           total_bot_interactions: number
           updated_at: string
           vip_trial_ends_at: string | null
+          vip_trial_started_at: string | null
           widget_deployed_domains: string[]
         }
         Insert: {
@@ -715,6 +716,7 @@ export type Database = {
           total_bot_interactions?: number
           updated_at?: string
           vip_trial_ends_at?: string | null
+          vip_trial_started_at?: string | null
           widget_deployed_domains?: string[]
         }
         Update: {
@@ -747,6 +749,7 @@ export type Database = {
           total_bot_interactions?: number
           updated_at?: string
           vip_trial_ends_at?: string | null
+          vip_trial_started_at?: string | null
           widget_deployed_domains?: string[]
         }
         Relationships: []
@@ -2176,6 +2179,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      start_vip_trial_once: { Args: never; Returns: Json }
       unrevoke_og_bot_token: {
         Args: { admin_notes?: string; target_user_id: string }
         Returns: boolean
