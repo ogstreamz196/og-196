@@ -134,7 +134,7 @@ const USER_KEYBOARD = {
   keyboard: [
     [{ text: "💰 Balance" }, { text: "🎧 Library" }],
     [{ text: "🛒 Buy Coins" }, { text: "👤 My Profile" }],
-    [{ text: "❓ Help" }],
+    [{ text: "👑 VIP Status" }, { text: "❓ Help" }],
   ],
   resize_keyboard: true,
   is_persistent: true,
@@ -143,7 +143,8 @@ const USER_KEYBOARD = {
 const BOSS_KEYBOARD = {
   keyboard: [
     [{ text: "📊 Stats" }, { text: "👥 Users" }],
-    [{ text: "💰 Balance" }, { text: "❓ Help" }],
+    [{ text: "💰 Balance" }, { text: "👑 VIP Status" }],
+    [{ text: "❓ Help" }],
   ],
   resize_keyboard: true,
   is_persistent: true,
