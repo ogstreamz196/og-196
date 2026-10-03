@@ -74,7 +74,13 @@ export function StoreItemCard({
   buying?: boolean;
   sportsGuideState?: "unowned" | "owned" | "invite_sent" | "joined" | "revoked";
   sportsGuideInviteUrl?: string;
-  vipPass?: { owned: boolean; username: string | null; password: string | null; available: number };
+  vipPass?: {
+    owned: boolean;
+    vipFree?: boolean;
+    username: string | null;
+    password: string | null;
+    available: number;
+  };
 }) {
   const r = RARITY[item.rarity];
   const stockRemaining = item.stock === null ? null : Math.max(0, item.stock - item.stock_sold);
@@ -91,8 +97,9 @@ export function StoreItemCard({
 
   return (
     <div
+      id={`item-${item.slug}`}
       className={cn(
-        "group relative flex h-full min-w-0 flex-col overflow-hidden rounded-lg border bg-store-card p-4 shadow-card transition-colors",
+        "group relative flex h-full min-w-0 scroll-mt-24 flex-col overflow-hidden rounded-lg border bg-store-card p-4 shadow-card transition-colors",
         r.ring,
         r.glow,
       )}
@@ -159,9 +166,20 @@ export function StoreItemCard({
       {/* footer */}
       <div className="mt-auto flex flex-col gap-3 pt-4 min-[400px]:grid min-[400px]:grid-cols-[minmax(0,1fr)_auto] min-[400px]:items-end">
         <div className="min-w-0 font-mono text-lg font-bold leading-tight text-foreground sm:text-xl">
-          {item.coin_price !== null
-            ? `${item.coin_price} OG Coins`
-            : formatPrice(item.price_cents, item.currency)}
+          {isVipPass && vipPass?.vipFree ? (
+            <>
+              <span className="mr-2 text-sm text-muted-foreground line-through">
+                {item.coin_price !== null
+                  ? `${item.coin_price} OG Coins`
+                  : formatPrice(item.price_cents, item.currency)}
+              </span>
+              <span className="block text-coin">FREE · limited time 👑</span>
+            </>
+          ) : item.coin_price !== null ? (
+            `${item.coin_price} OG Coins`
+          ) : (
+            formatPrice(item.price_cents, item.currency)
+          )}
         </div>
         <Button
           size="sm"
