@@ -47,6 +47,7 @@ import { Label } from "@/components/ui/label";
 import { UserAuditTrail } from "@/components/admin/UserAuditTrail";
 import { TelegramSignInLog } from "@/components/admin/TelegramSignInLog";
 import { DevBossPanel } from "@/components/admin/DevBossPanel";
+import { VipExpiryDialog, useVipExpiry, formatVipExpiry } from "@/components/admin/VipExpiryDialog";
 import {
   sendTelegramDm,
   retryTelegramDm,
@@ -807,6 +808,7 @@ interface RoleToggleRowProps {
   role: string;
   rpc: "set_vip_admin" | "set_og_bot_admin" | "set_dev_admin" | "set_boss_admin";
   paramKey: "make_vip" | "make_og" | "make_dev" | "make_boss";
+  vipExpiry?: boolean;
 }
 
 function RoleToggleRow({
@@ -818,8 +820,11 @@ function RoleToggleRow({
   role: _role,
   rpc,
   paramKey,
+  vipExpiry = false,
 }: RoleToggleRowProps) {
   const qc = useQueryClient();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const expiry = useVipExpiry(userId, vipExpiry && checked);
   const mut = useMutation({
     mutationFn: async (next: boolean) => {
       const args: Record<string, unknown> = {
@@ -854,6 +859,15 @@ function RoleToggleRow({
         <div>
           <Label className="text-sm font-medium">{title}</Label>
           <p className="text-xs text-muted-foreground">{description}</p>
+          {vipExpiry && checked && (
+            <button
+              type="button"
+              onClick={() => setDialogOpen(true)}
+              className="mt-1 text-xs font-medium text-amber-400 hover:underline"
+            >
+              {expiry.isLoading ? "…" : formatVipExpiry(expiry.data)} · Adjust expiry
+            </button>
+          )}
         </div>
       </div>
       <div className="flex items-center gap-2">
@@ -861,10 +875,19 @@ function RoleToggleRow({
         <Switch
           checked={checked}
           disabled={mut.isPending}
-          onCheckedChange={(v) => mut.mutate(v)}
+          onCheckedChange={(v) => (vipExpiry && v ? setDialogOpen(true) : mut.mutate(v))}
           aria-label={`Toggle ${title}`}
         />
       </div>
+      {vipExpiry && (
+        <VipExpiryDialog
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+          userId={userId}
+          isVip={checked}
+          currentExpiry={expiry.data}
+        />
+      )}
     </div>
   );
 }
