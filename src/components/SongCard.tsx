@@ -187,6 +187,7 @@ function SongCardImpl({ song }: { song: Song }) {
         className="hidden"
         data-og-track={song.id}
         data-og-title={song.title || "OG track"}
+        data-og-full={unlocked ? "1" : undefined}
       />
     </div>
   );

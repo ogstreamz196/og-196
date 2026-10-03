@@ -403,6 +403,9 @@ function CommunityTrackRowImpl({
         ref={audioRef}
         preload="none"
         onEnded={handleEnded}
+        data-og-track={song.id}
+        data-og-title={song.title || "OG track"}
+        data-og-full={owned && !song.unlocked ? undefined : "1"}
         onLoadedMetadata={(e) => {
           const d = e.currentTarget.duration;
           if (Number.isFinite(d) && d > 0) setDuration(d);
