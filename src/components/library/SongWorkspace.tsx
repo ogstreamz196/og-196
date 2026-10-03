@@ -56,7 +56,7 @@ import {
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
 import type { TablesUpdate } from "@/integrations/supabase/types";
 import { useRole } from "@/hooks/use-role";
-import { POOLS, orderLanguages } from "@/lib/library-utils";
+import { POOLS, orderLanguages, isFreeStyle } from "@/lib/library-utils";
 import { LENGTH_OPTIONS, MIN_LENGTH, MAX_LENGTH } from "./CreateNowWizard";
 
 const LANGUAGES = orderLanguages([
@@ -721,12 +721,20 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                   <div className="flex flex-wrap gap-1.5">
                     {STYLE_OPTIONS.map((s) => {
                       const on = styles.includes(s);
+                      const locked = !isVipUser && !isFreeStyle(s) && !on;
                       return (
                         <button
                           key={s}
                           type="button"
                           aria-pressed={on}
                           onClick={() => {
+                            if (locked) {
+                              toast(`👑 ${s} is an OG VIP style`, {
+                                description: "Unlock all 50+ styles & moods, plus custom requests.",
+                                action: { label: "Get VIP", onClick: () => void navigate({ to: "/buy-coins" }) },
+                              });
+                              return;
+                            }
                             if (s === "Nasheed") {
                               setStyles(on ? [] : ["Nasheed"]);
                               setStyleExtra("");
@@ -752,6 +760,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                               : "border-border bg-background/40 text-muted-foreground hover:border-primary/50",
                           )}
                         >
+                          {locked && <span className="mr-1">🔒👑</span>}
                           {s}
                         </button>
                       );

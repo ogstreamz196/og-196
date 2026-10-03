@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { OgVipIdCard } from "@/components/vip/OgVipIdCard";
+import { VipRequestCard } from "@/components/vip/VipRequestCard";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -287,6 +288,7 @@ function ProfilePage() {
         </section>
 
         {extras.data?.og_vip_id && <OgVipIdCard id={extras.data.og_vip_id} />}
+        <VipRequestCard />
 
         <TelegramConnectCard />
 

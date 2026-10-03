@@ -426,3 +426,7 @@ export function languageFromPrompt(text: string | null | undefined): string | nu
   const found = m?.[1]?.trim();
   return found || null;
 }
+
+/** Styles free members can use; everything else needs OG VIP (or the trial). */
+export const FREE_STYLES = ["Hip Hop", "Rap", "Pop", "R&B", "Lo-fi", "Nasheed"];
+export const isFreeStyle = (s: string) => FREE_STYLES.includes(s);
