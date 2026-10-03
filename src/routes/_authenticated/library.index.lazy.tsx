@@ -1104,6 +1104,14 @@ function LibraryPage() {
     },
     getNextPageParam: (lastPage, allPages) =>
       lastPage.length < COMMUNITY_PAGE_SIZE ? undefined : allPages.length,
+    // Keep the global feed in sync for every user on web, Android and iOS:
+    // other users' songs can't stream via realtime (private rows), so poll
+    // and refresh whenever the app/tab comes back into view.
+    staleTime: 15_000,
+    refetchInterval: 30_000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    refetchOnMount: "always",
   });
   const communityTracks = useMemo(() => community.data?.pages.flat() ?? [], [community.data]);
   const communityStyles = useMemo(
