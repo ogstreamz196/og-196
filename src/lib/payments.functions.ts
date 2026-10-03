@@ -836,6 +836,24 @@ export const refundCoinPurchase = createServerFn({ method: "POST" })
         };
       }
 
+      // Refund rules: only within 14 days and only if none of the coins have been used.
+      const REFUND_WINDOW_DAYS = 14;
+      const createdMs = (session.created ?? 0) * 1000;
+      if (Date.now() - createdMs > REFUND_WINDOW_DAYS * 86_400_000) {
+        return { error: `Refunds are only available within ${REFUND_WINDOW_DAYS} days of purchase.` };
+      }
+      const purchasedCoins = Math.max(0, Number(session.metadata?.coins ?? 0)) || 0;
+      if (purchasedCoins > 0) {
+        const { data: balRow } = await supabase
+          .from("profiles")
+          .select("coin_balance")
+          .eq("id", userId)
+          .maybeSingle();
+        if (Number(balRow?.coin_balance ?? 0) < purchasedCoins) {
+          return { error: "Coins from this purchase have already been used, so it can't be refunded." };
+        }
+      }
+
       const refund = await stripe.refunds.create({ payment_intent: pi.id });
       const refundedAmount = toMajorUnit(refund.amount ?? 0, currency);
 
