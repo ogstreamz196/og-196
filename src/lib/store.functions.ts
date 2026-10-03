@@ -297,7 +297,7 @@ export const upsertStoreItem = createServerFn({ method: "POST" })
       slug: data.slug,
       name: data.name.trim(),
       description: data.description?.trim() || null,
-      image_url: data.image_url?.trim() || null,
+      image_url: data.image_url?.trim().replace(/^http:\/\//i, "https://") || null,
       price_cents: data.price_cents,
       coin_price: data.coin_price ?? null,
       currency: data.currency.toLowerCase(),

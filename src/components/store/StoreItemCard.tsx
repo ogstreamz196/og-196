@@ -88,7 +88,10 @@ export function StoreItemCard({
   const isSportsGuide = item.slug === "og-sports-guide-access";
   const ownsSportsGuide =
     isSportsGuide && sportsGuideState && !["unowned", "revoked"].includes(sportsGuideState);
-  const imageUrl = isSportsGuide ? sportsGuideLogo.url : item.image_url;
+  // Phone apps block insecure (http) images, so always load them over https.
+  const imageUrl = isSportsGuide
+    ? sportsGuideLogo.url
+    : item.image_url?.replace(/^http:\/\//i, "https://");
   const isVipPass = item.slug === "og-vip-pass";
   const ownsVipPass = isVipPass && !!vipPass?.owned;
   const vipSoldOut = isVipPass && !ownsVipPass && (vipPass?.available ?? 0) === 0;
