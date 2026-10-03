@@ -6,7 +6,6 @@ import {
   Download,
   Loader2,
   MoreVertical,
-  Music2,
   Pencil,
   Play,
   Share2,
@@ -45,13 +44,6 @@ function fmt(seconds: number) {
   if (!Number.isFinite(seconds) || seconds < 0) return "0:00";
   const s = Math.floor(seconds);
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
-}
-
-/** Deterministic hue from the song id so placeholders feel intentional, not random. */
-function hueFor(id: string) {
-  let h = 0;
-  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) % 360;
-  return h;
 }
 
 function styleChips(style?: string | null) {
