@@ -354,7 +354,7 @@ export function ReferralsAuditPage() {
             <div className="flex items-center gap-2">
               <Scale className="h-4 w-4 text-primary" />
               <h2 className="font-display text-lg font-bold">
-                Reconciliation · expected vs paid (legacy 10% estimate)
+                Reconciliation · expected vs paid (6% free / 13% VIP)
               </h2>
             </div>
             {reconQ.data?.totals && (
