@@ -216,7 +216,7 @@ Deno.serve(async (req) => {
     }
 
     // Creation and rendering are free. Users pay only at final full-track download.
-    let coinCost = 0;
+    const coinCost = 0;
 
     // If this generation came from a portal, force the hardcoded language into the Suno prompt
     let portalLanguage: string | null = null;

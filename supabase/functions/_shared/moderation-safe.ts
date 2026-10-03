@@ -9,8 +9,10 @@ type Rep = string | ((m: string) => string);
 
 const REPLACEMENTS: Array<[RegExp, Rep]> = [
   [/\bmother\s*f+u+c+k+\w*/gi, "mother trucker"],
-  [/\bf+u+c+k+(ing|ed|er|ers|in['’]?)?\b/gi, (m: string) =>
-    /ing|in['’]?$/i.test(m) ? "freaking" : "heck"],
+  [
+    /\bf+u+c+k+(ing|ed|er|ers|in['’]?)?\b/gi,
+    (m: string) => (/ing|in['’]?$/i.test(m) ? "freaking" : "heck"),
+  ],
   [/\bc+u+n+t+s?\b/gi, "clown"],
   [/\bn+i+g+(a|er|ga|gas|gers)\b/gi, "fam"],
   [/\bb+i+t+c+h+(es|ing)?\b/gi, "brat"],

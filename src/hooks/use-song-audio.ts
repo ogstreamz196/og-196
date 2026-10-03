@@ -105,7 +105,6 @@ export function useSongAudio({
     };
     el.addEventListener("timeupdate", onTime);
     return () => el.removeEventListener("timeupdate", onTime);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sampleSeconds, playlist, songId]);
 
   // If the stream dies mid-queue (expired link, network blip), fetch a fresh
@@ -184,7 +183,6 @@ export function useSongAudio({
       pause: () => pauseRef.current(),
       el: () => audioRef.current,
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playlist, songId, playlistTitle]);
 
   async function togglePlay() {

@@ -840,7 +840,9 @@ export const refundCoinPurchase = createServerFn({ method: "POST" })
       const REFUND_WINDOW_DAYS = 14;
       const createdMs = (session.created ?? 0) * 1000;
       if (Date.now() - createdMs > REFUND_WINDOW_DAYS * 86_400_000) {
-        return { error: `Refunds are only available within ${REFUND_WINDOW_DAYS} days of purchase.` };
+        return {
+          error: `Refunds are only available within ${REFUND_WINDOW_DAYS} days of purchase.`,
+        };
       }
       const purchasedCoins = Math.max(0, Number(session.metadata?.coins ?? 0)) || 0;
       if (purchasedCoins > 0) {
@@ -850,7 +852,9 @@ export const refundCoinPurchase = createServerFn({ method: "POST" })
           .eq("id", userId)
           .maybeSingle();
         if (Number(balRow?.coin_balance ?? 0) < purchasedCoins) {
-          return { error: "Coins from this purchase have already been used, so it can't be refunded." };
+          return {
+            error: "Coins from this purchase have already been used, so it can't be refunded.",
+          };
         }
       }
 

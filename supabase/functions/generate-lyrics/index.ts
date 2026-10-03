@@ -399,7 +399,12 @@ Deno.serve(async (req) => {
           const text = (j?.choices?.[0]?.message?.content ?? "").trim();
           if (text) return { ok: true, status: 200, text };
         } else {
-          console.error("OpenAI lyrics fallback failed", model, r.status, (await r.text()).slice(0, 200));
+          console.error(
+            "OpenAI lyrics fallback failed",
+            model,
+            r.status,
+            (await r.text()).slice(0, 200),
+          );
         }
       }
       return { ok: false, status: 502, text: "", detail: "OpenAI fallback failed" };
@@ -421,7 +426,12 @@ Deno.serve(async (req) => {
       console.warn("Primary Gemini exhausted — using backup key");
       // Try a few backup models: busy (503) or retired (404) models are skipped, only success is billed.
       const backupModels = Array.from(
-        new Set([GEMINI_BACKUP_MODEL, "gemini-3.8-flash", "gemini-flash-lite-latest", "gemini-2.5-flash-lite"]),
+        new Set([
+          GEMINI_BACKUP_MODEL,
+          "gemini-3.8-flash",
+          "gemini-flash-lite-latest",
+          "gemini-2.5-flash-lite",
+        ]),
       );
       let lastFail: Gen = { ok: false, status: 503, text: "", detail: "No response" };
       for (let i = 0; i < backupModels.length; i++) {

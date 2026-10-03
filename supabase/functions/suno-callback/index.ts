@@ -20,11 +20,16 @@ const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 async function expectedToken(songId: string): Promise<string> {
   const enc = new TextEncoder();
   const key = await crypto.subtle.importKey(
-    "raw", enc.encode(SERVICE_ROLE),
-    { name: "HMAC", hash: "SHA-256" }, false, ["sign"],
+    "raw",
+    enc.encode(SERVICE_ROLE),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
   );
   const buf = await crypto.subtle.sign("HMAC", key, enc.encode(songId));
-  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+  return Array.from(new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 function timingSafeEq(a: string, b: string): boolean {
@@ -35,7 +40,11 @@ function timingSafeEq(a: string, b: string): boolean {
 }
 
 async function notifyTelegram(admin: any, song: any) {
-  const { data: prof } = await admin.from("profiles").select("telegram_chat_id").eq("id", song.user_id).maybeSingle();
+  const { data: prof } = await admin
+    .from("profiles")
+    .select("telegram_chat_id")
+    .eq("id", song.user_id)
+    .maybeSingle();
   const chatId = prof?.telegram_chat_id;
   if (!chatId) return;
   const botToken = Deno.env.get("OG_BOT_TOKEN");
@@ -58,7 +67,11 @@ async function notifyTelegram(admin: any, song: any) {
       chat_id: chatId,
       parse_mode: "HTML",
       text: `🎵 <b>Track ready!</b>\n\n<b>${title}</b> is done and waiting in your library. Type /tracks anytime to see your latest songs.`,
-      reply_markup: { inline_keyboard: [[{ text: "▶️ Listen now", url: `https://ogbot.co.uk/library/${song.id}` }]] },
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: "▶️ Listen now", url: `https://ogbot.co.uk/library/${song.id}` }],
+        ],
+      },
     }),
   });
 }
@@ -76,7 +89,11 @@ Deno.serve(async (req) => {
   }
 
   let payload: any = {};
-  try { payload = await req.json(); } catch { /* tolerate empty */ }
+  try {
+    payload = await req.json();
+  } catch {
+    /* tolerate empty */
+  }
   console.log("Suno callback for", songId, JSON.stringify(payload).slice(0, 800));
 
   const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
@@ -94,18 +111,33 @@ Deno.serve(async (req) => {
     const refundAmt = 0;
     const rawReason = payload?.msg || payload?.message || "Suno reported failure";
     const terminal = isModerationRejection(rawReason);
-    await admin.from("songs").update({
-      status: "failed",
-      error_message: terminal ? MODERATION_MESSAGE : "Retrying automatically after a temporary music-engine problem.",
-      failure_class: terminal ? "terminal" : "retryable",
-      next_retry_at: terminal ? null : new Date(Date.now() + 60_000).toISOString(),
-    }).eq("id", songId);
+    await admin
+      .from("songs")
+      .update({
+        status: "failed",
+        error_message: terminal
+          ? MODERATION_MESSAGE
+          : "Retrying automatically after a temporary music-engine problem.",
+        failure_class: terminal ? "terminal" : "retryable",
+        next_retry_at: terminal ? null : new Date(Date.now() + 60_000).toISOString(),
+      })
+      .eq("id", songId);
     if (refundAmt > 0) {
       await admin.from("coin_transactions").insert({
-        user_id: parentSong.user_id, amount: refundAmt, type: "refund", reference: songId,
+        user_id: parentSong.user_id,
+        amount: refundAmt,
+        type: "refund",
+        reference: songId,
       });
-      const { data: prof } = await admin.from("profiles").select("coin_balance").eq("id", parentSong.user_id).single();
-      await admin.from("profiles").update({ coin_balance: (prof?.coin_balance ?? 0) + refundAmt }).eq("id", parentSong.user_id);
+      const { data: prof } = await admin
+        .from("profiles")
+        .select("coin_balance")
+        .eq("id", parentSong.user_id)
+        .single();
+      await admin
+        .from("profiles")
+        .update({ coin_balance: (prof?.coin_balance ?? 0) + refundAmt })
+        .eq("id", parentSong.user_id);
     }
     return new Response("ok", { status: 200 });
   }
@@ -120,14 +152,16 @@ Deno.serve(async (req) => {
 
   const clipsRaw = items.map((c: any) => ({
     audioUrl: c?.audio_url || c?.audioUrl || c?.source_audio_url,
-    streamUrl: c?.stream_audio_url || c?.streamAudioUrl || c?.streamAudioURL || c?.source_stream_audio_url,
+    streamUrl:
+      c?.stream_audio_url || c?.streamAudioUrl || c?.streamAudioURL || c?.source_stream_audio_url,
     coverUrl: c?.image_url || c?.imageUrl || c?.cover_url,
     title: c?.title,
     duration: c?.duration,
     clipId: c?.id || c?.clip_id,
   }));
 
-  const callbackTaskId = payload?.data?.task_id || payload?.data?.taskId || payload?.task_id || payload?.taskId || null;
+  const callbackTaskId =
+    payload?.data?.task_id || payload?.data?.taskId || payload?.task_id || payload?.taskId || null;
   if (callbackTaskId && !parentSong.suno_task_id) {
     await admin.from("songs").update({ suno_task_id: callbackTaskId }).eq("id", songId);
   }
@@ -138,11 +172,14 @@ Deno.serve(async (req) => {
   if (callbackType === "first" || callbackType === "text") {
     const firstStream = clipsRaw.find((c) => c.streamUrl && hostAllowed(c.streamUrl!));
     if (firstStream?.streamUrl && !parentSong.stream_audio_url) {
-      await admin.from("songs").update({
-        stream_audio_url: firstStream.streamUrl,
-        cover_url: firstStream.coverUrl ?? parentSong.cover_url,
-        title: firstStream.title ?? parentSong.title,
-      }).eq("id", songId);
+      await admin
+        .from("songs")
+        .update({
+          stream_audio_url: firstStream.streamUrl,
+          cover_url: firstStream.coverUrl ?? parentSong.cover_url,
+          title: firstStream.title ?? parentSong.title,
+        })
+        .eq("id", songId);
       console.log("Stream URL stored for live preview:", songId);
     }
     return new Response("streaming", { status: 200 });
@@ -188,7 +225,9 @@ Deno.serve(async (req) => {
 
     // Ping the owner on Telegram once, on the first transition to completed.
     if (result.parentCompleted && parentSong.status !== "completed") {
-      await notifyTelegram(admin, parentSong).catch((e) => console.warn("telegram notify failed", e));
+      await notifyTelegram(admin, parentSong).catch((e) =>
+        console.warn("telegram notify failed", e),
+      );
     }
 
     return new Response("ok", { status: 200 });

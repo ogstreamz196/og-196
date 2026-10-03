@@ -26,7 +26,9 @@ Deno.serve(async (req) => {
     const userClient = createClient(SUPABASE_URL, anonKey, {
       global: { headers: { Authorization: authHeader } },
     });
-    const { data: { user } } = await userClient.auth.getUser();
+    const {
+      data: { user },
+    } = await userClient.auth.getUser();
     if (!user) return json({ error: "Unauthorized" }, 401);
 
     const { song_id } = await req.json();
@@ -47,19 +49,29 @@ Deno.serve(async (req) => {
     let refundAmt = 3;
     if (song.portal_id) {
       const { data: portal } = await admin
-        .from("portals").select("coin_cost_per_generation").eq("id", song.portal_id).maybeSingle();
-      if (typeof portal?.coin_cost_per_generation === "number") refundAmt = portal.coin_cost_per_generation;
+        .from("portals")
+        .select("coin_cost_per_generation")
+        .eq("id", song.portal_id)
+        .maybeSingle();
+      if (typeof portal?.coin_cost_per_generation === "number")
+        refundAmt = portal.coin_cost_per_generation;
     } else {
       const { data: setting } = await admin
-        .from("app_settings").select("value").eq("key", "coins_per_generation").maybeSingle();
+        .from("app_settings")
+        .select("value")
+        .eq("key", "coins_per_generation")
+        .maybeSingle();
       if (typeof setting?.value === "number") refundAmt = setting.value;
     }
 
-    await admin.from("songs").update({
-      status: "failed",
-      error_message: "Cancelled by user",
-      suno_task_id: null,
-    }).eq("id", song_id);
+    await admin
+      .from("songs")
+      .update({
+        status: "failed",
+        error_message: "Cancelled by user",
+        suno_task_id: null,
+      })
+      .eq("id", song_id);
 
     const { error: refundErr } = await admin.rpc("refund_generation_charge", {
       p_user: user.id,

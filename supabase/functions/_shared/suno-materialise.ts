@@ -66,10 +66,7 @@ export function normaliseClip(c: any): SunoClip {
   return {
     audioUrl: c?.audio_url || c?.audioUrl || c?.source_audio_url,
     streamUrl:
-      c?.stream_audio_url ||
-      c?.streamAudioUrl ||
-      c?.streamAudioURL ||
-      c?.source_stream_audio_url,
+      c?.stream_audio_url || c?.streamAudioUrl || c?.streamAudioURL || c?.source_stream_audio_url,
     coverUrl: c?.image_url || c?.imageUrl || c?.cover_url,
     title: c?.title,
     duration: c?.duration,
@@ -285,13 +282,11 @@ export async function materialiseClips(
         if (!res.ok) throw new Error(`Full download failed: ${res.status}`);
         if (buf.byteLength === 0) throw new Error("Full download returned no data");
         const fullPath = `${userId}/${finalId}.mp3`;
-        const { error: fullUpErr } = await admin.storage
-          .from("song-files")
-          .upload(fullPath, buf, {
-            contentType: "audio/mpeg",
-            upsert: true,
-            metadata: ownerMeta(userId, finalId, "full"),
-          } as any);
+        const { error: fullUpErr } = await admin.storage.from("song-files").upload(fullPath, buf, {
+          contentType: "audio/mpeg",
+          upsert: true,
+          metadata: ownerMeta(userId, finalId, "full"),
+        } as any);
         if (fullUpErr) throw fullUpErr;
         await admin.from("songs").update({ audio_path: fullPath }).eq("id", finalId);
         console.log("Full track stored for", finalId);

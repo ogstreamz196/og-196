@@ -328,7 +328,6 @@ function DashboardHome() {
         </div>
       </section>
 
-
       {/* Ask OG Bot CTA removed per request */}
 
       {/* Continuity demo */}

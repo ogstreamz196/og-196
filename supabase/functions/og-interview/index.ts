@@ -57,8 +57,7 @@ function buildTranscript(history: Turn[]): string {
 }
 
 async function callGemini(system: string, user: string, maxTokens: number): Promise<string> {
-  const url =
-    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent?key=${GEMINI_API_KEY}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent?key=${GEMINI_API_KEY}`;
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -94,9 +93,11 @@ Deno.serve(async (req) => {
     const seed = (body.seed ?? "").toString().slice(0, 400);
     const historyRaw = Array.isArray(body.history) ? body.history : [];
     const history: Turn[] = historyRaw
-      .filter((t: unknown): t is { role: string; text: string } =>
-        !!t && typeof (t as { role?: unknown }).role === "string" &&
-        typeof (t as { text?: unknown }).text === "string"
+      .filter(
+        (t: unknown): t is { role: string; text: string } =>
+          !!t &&
+          typeof (t as { role?: unknown }).role === "string" &&
+          typeof (t as { text?: unknown }).text === "string",
       )
       .map((t: { role: string; text: string }) => ({
         role: t.role === "user" ? "user" : "bot",
