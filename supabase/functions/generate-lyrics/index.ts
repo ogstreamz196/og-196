@@ -380,10 +380,21 @@ Deno.serve(async (req) => {
       if (first.ok || !GEMINI_BACKUP_API_KEY) return first;
       // 401/403 = primary key revoked/blocked; let the backup key rescue lyrics too.
       if (![401, 403, 429].includes(first.status) && first.status < 500) return first;
-      console.warn("Primary Gemini exhausted — using backup key once");
-      const r = await postTo(GEMINI_BACKUP_MODEL, contents, GEMINI_BACKUP_API_KEY);
-      if (r.ok) return { ok: true, status: 200, text: extractText(await r.json()) };
-      return { ok: false, status: r.status, text: "", detail: await r.text() };
+      console.warn("Primary Gemini exhausted — using backup key");
+      // Try a few backup models: a busy (503) model is only billed on success.
+      const backupModels = Array.from(
+        new Set([GEMINI_BACKUP_MODEL, "gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-flash-lite"]),
+      );
+      let lastFail: Gen = { ok: false, status: 503, text: "", detail: "No response" };
+      for (let i = 0; i < backupModels.length; i++) {
+        const r = await postTo(backupModels[i], contents, GEMINI_BACKUP_API_KEY);
+        if (r.ok) return { ok: true, status: 200, text: extractText(await r.json()) };
+        lastFail = { ok: false, status: r.status, text: "", detail: await r.text() };
+        if (r.status !== 429 && r.status < 500) return lastFail;
+        console.error("Backup Gemini busy", backupModels[i], r.status);
+        await new Promise((res) => setTimeout(res, 800));
+      }
+      return lastFail;
     };
 
     const res = await generate([{ role: "user", parts: [{ text: userPrompt }] }]);
