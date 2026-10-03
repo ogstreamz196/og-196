@@ -367,7 +367,11 @@ Deno.serve(async (req) => {
       let last: Gen = { ok: false, status: 503, text: "", detail: "No response" };
       for (let i = 0; i < GEMINI_MODELS.length; i++) {
         const res = await postTo(GEMINI_MODELS[i], contents);
-        if (res.ok) return { ok: true, status: 200, text: extractText(await res.json()) };
+        if (res.ok) {
+          const data = await res.json();
+          logAiUsage({ feature: "lyrics", provider: "gemini", model: GEMINI_MODELS[i], ...geminiUsage(data) });
+          return { ok: true, status: 200, text: extractText(data) };
+        }
         const detail = await res.text();
         last = { ok: false, status: res.status, text: "", detail };
         if (![404, 429].includes(res.status) && res.status < 500) return last;
@@ -398,7 +402,18 @@ Deno.serve(async (req) => {
         if (r.ok) {
           const j = await r.json();
           const text = (j?.choices?.[0]?.message?.content ?? "").trim();
-          if (text) return { ok: true, status: 200, text };
+          if (text) {
+            const u = j?.usage ?? {};
+            logAiUsage({
+              feature: "lyrics",
+              provider: "openai",
+              model,
+              promptTokens: u.prompt_tokens ?? 0,
+              completionTokens: u.completion_tokens ?? 0,
+              totalTokens: u.total_tokens ?? 0,
+            });
+            return { ok: true, status: 200, text };
+          }
         } else {
           console.error(
             "OpenAI lyrics fallback failed",
@@ -437,7 +452,11 @@ Deno.serve(async (req) => {
       let lastFail: Gen = { ok: false, status: 503, text: "", detail: "No response" };
       for (let i = 0; i < backupModels.length; i++) {
         const r = await postTo(backupModels[i], contents, GEMINI_BACKUP_API_KEY);
-        if (r.ok) return { ok: true, status: 200, text: extractText(await r.json()) };
+        if (r.ok) {
+          const data = await r.json();
+          logAiUsage({ feature: "lyrics", provider: "gemini_backup", model: backupModels[i], ...geminiUsage(data) });
+          return { ok: true, status: 200, text: extractText(data) };
+        }
         lastFail = { ok: false, status: r.status, text: "", detail: await r.text() };
         if (![404, 429].includes(r.status) && r.status < 500) return lastFail;
         console.error("Backup Gemini busy", backupModels[i], r.status);
