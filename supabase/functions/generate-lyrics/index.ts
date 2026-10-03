@@ -369,7 +369,12 @@ Deno.serve(async (req) => {
         const res = await postTo(GEMINI_MODELS[i], contents);
         if (res.ok) {
           const data = await res.json();
-          logAiUsage({ feature: "lyrics", provider: "gemini", model: GEMINI_MODELS[i], ...geminiUsage(data) });
+          logAiUsage({
+            feature: "lyrics",
+            provider: "gemini",
+            model: GEMINI_MODELS[i],
+            ...geminiUsage(data),
+          });
           return { ok: true, status: 200, text: extractText(data) };
         }
         const detail = await res.text();
@@ -454,7 +459,12 @@ Deno.serve(async (req) => {
         const r = await postTo(backupModels[i], contents, GEMINI_BACKUP_API_KEY);
         if (r.ok) {
           const data = await r.json();
-          logAiUsage({ feature: "lyrics", provider: "gemini_backup", model: backupModels[i], ...geminiUsage(data) });
+          logAiUsage({
+            feature: "lyrics",
+            provider: "gemini_backup",
+            model: backupModels[i],
+            ...geminiUsage(data),
+          });
           return { ok: true, status: 200, text: extractText(data) };
         }
         lastFail = { ok: false, status: r.status, text: "", detail: await r.text() };

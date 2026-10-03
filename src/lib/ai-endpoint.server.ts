@@ -176,7 +176,8 @@ export async function getAiRoutingMode(): Promise<AiRoutingMode> {
 function hasMedia(body: Record<string, unknown>): boolean {
   const messages = Array.isArray(body.messages) ? (body.messages as Msg[]) : [];
   return messages.some(
-    (m) => Array.isArray(m.content) && (m.content as { type?: string }[]).some((p) => p.type !== "text"),
+    (m) =>
+      Array.isArray(m.content) && (m.content as { type?: string }[]).some((p) => p.type !== "text"),
   );
 }
 
@@ -319,7 +320,11 @@ export async function transcribeWithGemini(audioBase64: string, mime: string): P
   }
   const json = (await res.json().catch(() => ({}))) as {
     candidates?: { content?: { parts?: { text?: string }[] } }[];
-    usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number; totalTokenCount?: number };
+    usageMetadata?: {
+      promptTokenCount?: number;
+      candidatesTokenCount?: number;
+      totalTokenCount?: number;
+    };
   };
   logAiUsage({
     feature: "transcription",
