@@ -45,28 +45,38 @@ export function LibraryFilters({
       rootRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
     );
   };
+  // Filters only help once there is something to filter — keep new creators' view clean.
+  if (typeof allCount === "number" && allCount < 3) return null;
   return (
-    <div ref={rootRef} aria-label="Filter tracks" className="grid scroll-mt-24 grid-cols-3 gap-2">
+    <div
+      ref={rootRef}
+      aria-label="Filter tracks"
+      className="flex scroll-mt-24 items-center gap-2 overflow-x-auto pb-0.5"
+    >
+      <span className="shrink-0 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+        Show
+      </span>
       <Button
         type="button"
-        variant={mode === "all" ? "default" : "outline"}
+        variant={mode === "all" ? "default" : "ghost"}
         size="sm"
         aria-pressed={mode === "all"}
         onClick={() => changeMode("all")}
-        className="min-w-0 rounded-full"
+        className="h-8 shrink-0 rounded-full px-3 text-xs"
       >
         All
         {typeof allCount === "number" && <CountBadge count={allCount} active={mode === "all"} />}
       </Button>
       <Button
         type="button"
-        variant={mode === "unlocked" ? "default" : "outline"}
+        variant={mode === "unlocked" ? "default" : "ghost"}
         size="sm"
         aria-pressed={mode === "unlocked"}
         onClick={() => changeMode("unlocked")}
-        className="min-w-0 rounded-full"
+        className="h-8 shrink-0 rounded-full px-3 text-xs"
+        title="Full songs you can play right through"
       >
-        Unlocked
+        Full songs
         {typeof unlockedCount === "number" && (
           <CountBadge count={unlockedCount} active={mode === "unlocked"} />
         )}
@@ -75,13 +85,13 @@ export function LibraryFilters({
         <PopoverTrigger asChild>
           <Button
             type="button"
-            variant={mode === "styles" ? "default" : "outline"}
+            variant={mode === "styles" ? "default" : "ghost"}
             size="sm"
             aria-pressed={mode === "styles"}
-            className="min-w-0 rounded-full px-2"
+            className="h-8 shrink-0 rounded-full px-3 text-xs"
           >
             <SlidersHorizontal className="h-3.5 w-3.5" />
-            <span className="truncate">{selectedStyle || "Styles"}</span>
+            <span className="max-w-28 truncate">{selectedStyle || "By style"}</span>
           </Button>
         </PopoverTrigger>
         <PopoverContent align="end" className="w-64 p-2">
