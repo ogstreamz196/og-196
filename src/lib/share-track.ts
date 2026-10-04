@@ -1,5 +1,5 @@
 import { toast } from "sonner";
-const SITE_URL = "https://og-196.lovable.app";
+const SITE_URL = "https://ogbot.co.uk";
 const SHARE_LOGO_URL = "/share/og-bot-track.png";
 
 function trackShareUrl(songId?: string) {

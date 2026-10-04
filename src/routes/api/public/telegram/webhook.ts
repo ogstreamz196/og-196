@@ -806,7 +806,7 @@ async function handleTelegramUpdate(
     if (/^\/buy\b/i.test(trimmed)) {
       await reply(chat_id, "🛒 <b>Top up OG coins</b>", {
         reply_markup: {
-          inline_keyboard: [[{ text: "Open Store", url: "https://og-196.lovable.app/buy-coins" }]],
+          inline_keyboard: [[{ text: "Open Store", url: "https://ogbot.co.uk/buy-coins" }]],
         },
       });
       return Response.json({ ok: true, buy: true });

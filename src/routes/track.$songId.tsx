@@ -5,7 +5,7 @@ import ogBotAsset from "@/assets/ogbot.png.asset.json";
 import { Button } from "@/components/ui/button";
 import { getPublicSharedTrack } from "@/lib/public-track.functions";
 
-const SITE_URL = "https://og-196.lovable.app";
+const SITE_URL = "https://ogbot.co.uk";
 const SHARE_IMAGE = `${SITE_URL}/share/og-bot-track.png`;
 
 export const Route = createFileRoute("/track/$songId")({
