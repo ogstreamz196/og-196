@@ -1,17 +1,19 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
-import { Scale, Users } from "lucide-react";
+import { Receipt, Scale, Users } from "lucide-react";
 import { useRole } from "@/hooks/use-role";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { BossNav } from "@/components/admin/BossNav";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CoinAuditPage } from "./admin.coin-audit";
 import { ReferralsAuditPage } from "./admin.referrals-audit";
+import { AccountantLogPanel } from "@/components/admin/AccountantLogPanel";
 
 export const Route = createFileRoute("/_authenticated/admin/audit")({
   component: AdminAuditHub,
 });
 
 const TABS = [
+  { value: "card", label: "Card transactions", Icon: Receipt, Panel: AccountantLogPanel },
   { value: "coins", label: "Coin audit", Icon: Scale, Panel: CoinAuditPage },
   { value: "referrals", label: "Referral audit", Icon: Users, Panel: ReferralsAuditPage },
 ] as const;
@@ -37,7 +39,7 @@ function AdminAuditHub() {
         <h1 className="font-display text-2xl font-black">Audit</h1>
         <p className="text-sm text-muted-foreground">Coin ledger and referral payouts.</p>
       </header>
-      <Tabs defaultValue="coins" className="w-full">
+      <Tabs defaultValue="card" className="w-full">
         <TabsList className="mb-5 flex h-auto w-full flex-wrap justify-start gap-4 rounded-none border-0 border-b border-border/60 bg-transparent p-0">
           {TABS.map(({ value, label, Icon }) => (
             <TabsTrigger
