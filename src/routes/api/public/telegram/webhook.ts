@@ -523,22 +523,7 @@ async function runChatAI(
   const isVip = roles.includes("vip") || roles.includes("admin") || roles.includes("dev");
   const isAdminUser = roles.includes("admin") || roles.includes("dev");
 
-  // Charge 1 coin per message — skip for admins/dev.
-  if (!isAdminUser) {
-    if ((profile.coin_balance ?? 0) <= 0) {
-      await reply(chat_id, "💸 Out of OG coins. Top up in the app to keep chatting.");
-      return;
-    }
-    const { error: deductErr } = await admin.rpc("deduct_coins", {
-      p_user: profileId,
-      p_amount: 1,
-      p_reference: "telegram_chat",
-    });
-    if (deductErr) {
-      await reply(chat_id, `❌ ${deductErr.message}`);
-      return;
-    }
-  }
+  // Chatting with the bot is free — coins are only spent on images/music.
 
   // Pull persona overrides + foul preference
   const [prefRes, siteRes, historyRes] = await Promise.all([
@@ -620,13 +605,6 @@ async function runChatAI(
     );
 
     if (!res.ok) {
-      if (!isAdminUser) {
-        await admin.rpc("mint_coins_admin", {
-          target_user_id: profileId,
-          amount: 1,
-          admin_notes: "telegram_chat_refund",
-        });
-      }
       if (res.status === 429) {
         await reply(chat_id, "⏱️ OG Bot is rate-limited, try again soon.");
       } else if (res.status === 402) {
@@ -661,18 +639,6 @@ async function runChatAI(
       });
     }
   } catch (err) {
-    if (!isAdminUser) {
-      await admin
-        .rpc("mint_coins_admin", {
-          target_user_id: profileId,
-          amount: 1,
-          admin_notes: "telegram_chat_refund",
-        })
-        .then(
-          () => undefined,
-          () => undefined,
-        );
-    }
     await reply(chat_id, `❌ ${(err as Error).message}`);
   }
 }
