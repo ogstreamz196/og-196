@@ -1206,7 +1206,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
               </CardContent>
             </CollapsibleContent>
           </Collapsible>
-          {isReady && (
+          {isReady && !cooking && (
           <CardContent className="space-y-3 border-t border-border/50 pt-4">
               <>
 
