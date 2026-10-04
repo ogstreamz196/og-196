@@ -156,5 +156,33 @@ export async function loadUserDossier(admin: AnyClient, userId: string): Promise
     `- Telegram: ${p.telegram_linked_at ? `linked${p.telegram_username ? ` as @${p.telegram_username}` : ""}` : "not linked — they can connect from the Profile page"}`,
   );
 
+  // Extras: store passes, referral circle, Battle Zone record. Soft-fail each.
+  const [sports, vault, refs, refEarn, battle] = await Promise.all([
+    admin.from("sports_guide_access").select("status, joined_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(1),
+    admin.from("vip_pass_purchases").select("id").eq("user_id", userId).limit(1),
+    admin.from("referrals").select("referee_id", { count: "exact", head: true }).eq("referrer_id", userId),
+    admin.from("coin_transactions").select("amount").eq("user_id", userId).eq("type", "referral").limit(1000),
+    admin.from("battle_tallies").select("rounds, streak_days, total_awarded_coins, last_battle_date").eq("user_id", userId).maybeSingle(),
+  ]).catch(() => [{}, {}, {}, {}, {}] as any[]);
+
+  const sg = sports?.data?.[0];
+  lines.push(
+    `- OG Sports Guide access: ${sg ? `${sg.status}${sg.joined_at ? ", joined the group" : ""}` : "not owned (available in the Store)"}`,
+  );
+  const isVipNow = hasVipRole || (sub && ["active", "trialing", "past_due"].includes(sub.status));
+  lines.push(
+    `- OG Vault Access Pass: ${vault?.data?.length ? "owned — code & PIN shown on the Vault card in the Store" : isVipNow ? "free with VIP — code & PIN shown on the Vault card in the Store" : "not owned"}`,
+  );
+  const earned = (refEarn?.data ?? []).reduce((a: number, r: any) => a + Number(r.amount || 0), 0);
+  lines.push(
+    `- Referral circle: ${refs?.count ?? 0} friends invited, ${earned} coins earned lifetime (rate: ${isVipNow ? "13% VIP" : "6% free"} of friends' coin spends)`,
+  );
+  const b = battle?.data;
+  lines.push(
+    b
+      ? `- Battle Zone: ${b.rounds} rounds, current streak ${b.streak_days} day(s), ${Number(b.total_awarded_coins)} coins won${b.last_battle_date ? `, last battled ${fmtDate(b.last_battle_date)}` : ""}`
+      : "- Battle Zone: hasn't battled yet",
+  );
+
   return lines.join("\n");
 }
