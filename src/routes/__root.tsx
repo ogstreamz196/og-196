@@ -104,7 +104,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Generate full songs from a prompt, chat with OG Bot, and run your creator economy in one place.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://ogwidget.lovable.app" },
+      { property: "og:url", content: "https://ogbot.co.uk" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "OG Streamz — AI Song Generator & OG Bot Hub" },
       {
@@ -172,13 +172,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://fonts.gstatic.com/s/bitcountgriddouble/v3/WBK7rFjbakJVFOargiWSKQysDITG_S0VtG0x3HD2FYHVdlZI-rLlahmEAPp8wjYMvkPq48MVQo5RQf2svjnxa5Anx8-Y-pHdkVb0ByRHaxzbXaLbA9wfZNtjSZYdig.woff2",
         crossOrigin: "anonymous",
       },
-      {
-        rel: "preload",
-        as: "font",
-        type: "font/woff2",
-        href: "https://fonts.gstatic.com/s/bungee/v14/N0bU2SZBIuF2PU_0Cn40Kd_PmA.woff2",
-        crossOrigin: "anonymous",
-      },
     ],
     scripts: [
       {
@@ -187,7 +180,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@context": "https://schema.org",
           "@type": "WebSite",
           name: "OG Streamz",
-          url: "https://ogwidget.lovable.app",
+          url: "https://ogbot.co.uk",
           description: "AI song generation, OG Bot assistant, and a coin-powered creator economy.",
         }),
       },
@@ -197,7 +190,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@context": "https://schema.org",
           "@type": "Organization",
           name: "OG Streamz",
-          url: "https://ogwidget.lovable.app",
+          url: "https://ogbot.co.uk",
         }),
       },
     ],

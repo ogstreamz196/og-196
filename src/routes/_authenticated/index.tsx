@@ -68,9 +68,9 @@ export const Route = createFileRoute("/_authenticated/")({
         property: "og:description",
         content: "Generate AI songs, chat with OG Bot, and run your creator economy.",
       },
-      { property: "og:url", content: "https://ogwidget.lovable.app/" },
+      { property: "og:url", content: "https://ogbot.co.uk/" },
     ],
-    links: [{ rel: "canonical", href: "https://ogwidget.lovable.app/" }],
+    links: [{ rel: "canonical", href: "https://ogbot.co.uk/" }],
   }),
 });
 

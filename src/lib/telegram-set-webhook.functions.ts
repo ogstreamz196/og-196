@@ -4,7 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/telegram";
 const DEFAULT_WEBHOOK_URL =
-  "https://project--07659a42-5b68-4c8b-83b5-ee9a625dbb92.lovable.app/api/public/telegram/webhook";
+  "https://ogbot.co.uk/api/public/telegram/webhook";
 
 export type SetWebhookResult = {
   ok: boolean;
