@@ -210,7 +210,7 @@ export function OgChat({
           ...cur,
           {
             role: "assistant",
-            content: "⚠️ You've used your free image for now — you need 2 coins for another edit.",
+            content: "⚠️ You've used your free image for now — you need 1 coin for another edit.",
           },
         ]);
         setNoCoinsOpen(true);
@@ -218,7 +218,7 @@ export function OgChat({
       }
       const note = res.free
         ? "Free edit used — next free one in 4 hours."
-        : "Edit done · -2 coins.";
+        : "Edit done · -1 coin.";
       setMessages((cur) => [
         ...cur,
         {
@@ -993,7 +993,7 @@ export function OgChat({
                 🎨 Edit image ·{" "}
                 {editStatus.data?.freeAvailable !== false
                   ? "Free"
-                  : `2 coins (free in ${Math.max(1, Math.ceil((editStatus.data.nextFreeAt - Date.now()) / 60000))}m)`}
+                  : `1 coin (free in ${Math.max(1, Math.ceil((editStatus.data.nextFreeAt - Date.now()) / 60000))}m)`}
               </button>
             </div>
             {editMode && (

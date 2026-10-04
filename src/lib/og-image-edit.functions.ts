@@ -3,7 +3,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const FREE_WINDOW_MS = 4 * 60 * 60 * 1000;
 
-/** How the next image edit will be paid for: free slot or 2 coins. */
+/** How the next image edit will be paid for: free slot or 1 coin. */
 export const getImageEditStatus = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
@@ -14,7 +14,7 @@ export const getImageEditStatus = createServerFn({ method: "GET" })
       .maybeSingle();
     const last = (data as { last_free_at: string | null } | null)?.last_free_at;
     const nextFreeAt = last ? new Date(last).getTime() + FREE_WINDOW_MS : 0;
-    return { freeAvailable: nextFreeAt <= Date.now(), nextFreeAt, cost: 2 };
+    return { freeAvailable: nextFreeAt <= Date.now(), nextFreeAt, cost: 1 };
   });
 
 export const editChatImage = createServerFn({ method: "POST" })
