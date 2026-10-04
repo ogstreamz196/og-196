@@ -314,6 +314,7 @@ function DashboardHome() {
             title="Create a song"
             body="Generate · Remix · Release"
             cta="Open MusicHub"
+            hazard
           />
           <PrimaryCard
             to="/messenger"
@@ -620,6 +621,7 @@ function PrimaryCard({
   cta,
   variant = "primary",
   wide = false,
+  hazard = false,
 }: {
   to: "/library" | "/messenger";
   image: string;
@@ -630,12 +632,14 @@ function PrimaryCard({
   cta: string;
   variant?: "primary" | "accent" | "cinema";
   wide?: boolean;
+  hazard?: boolean;
 }) {
   const isAccent = variant === "accent";
   const isCinema = variant === "cinema";
   return (
     <Link
       to={to}
+      hash={hazard ? "create" : undefined}
       preload="intent"
       className={cn(
         "group relative flex flex-col overflow-hidden rounded-3xl border-2 border-white/15 bg-card/70 shadow-card backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-primary/60 hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
@@ -662,17 +666,51 @@ function PrimaryCard({
           wide ? "aspect-video sm:aspect-auto sm:min-h-72" : "aspect-square",
         )}
       >
-        <img
-          src={image}
-          alt={imageAlt}
-          loading="lazy"
-          width={768}
-          height={768}
-          className={
-            "h-full w-full object-cover transition-transform duration-700 group-hover:scale-110 " +
-            (isAccent ? "p-4 sm:p-6" : "")
-          }
-        />
+        {hazard ? (
+          <div className="grid h-full w-full place-items-center p-3">
+            <span
+              aria-hidden="true"
+              style={{
+                background:
+                  "radial-gradient(circle at 50% 28%, oklch(0.74 0.24 28), oklch(0.47 0.21 26) 66%, oklch(0.24 0.12 25))",
+              }}
+              className="hazard-create relative grid aspect-square w-[85%] place-items-center rounded-full border-[5px] border-destructive text-white"
+            >
+              <span
+                className="hazard-ring absolute inset-1.5 rounded-full"
+                style={{
+                  background:
+                    "repeating-conic-gradient(from 0deg, oklch(0.85 0.19 85 / 0.55) 0deg 18deg, transparent 18deg 36deg)",
+                  WebkitMask:
+                    "radial-gradient(farthest-side, transparent calc(100% - 10px), #000 calc(100% - 9px))",
+                  mask: "radial-gradient(farthest-side, transparent calc(100% - 10px), #000 calc(100% - 9px))",
+                }}
+              />
+              <span className="hazard-core absolute inset-6 rounded-full bg-white/20 blur-md" />
+              <span className="relative z-10 flex flex-col items-center gap-0.5">
+                <Sparkles className="h-6 w-6 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] sm:h-9 sm:w-9" />
+                <span className="font-display text-xl font-black uppercase leading-none drop-shadow-[0_3px_5px_rgba(0,0,0,0.9)] sm:text-4xl">
+                  Create
+                </span>
+                <span className="font-display text-sm font-black uppercase leading-none tracking-[0.18em] drop-shadow-[0_3px_5px_rgba(0,0,0,0.9)] sm:text-2xl">
+                  Now
+                </span>
+              </span>
+            </span>
+          </div>
+        ) : (
+          <img
+            src={image}
+            alt={imageAlt}
+            loading="lazy"
+            width={768}
+            height={768}
+            className={
+              "h-full w-full object-cover transition-transform duration-700 group-hover:scale-110 " +
+              (isAccent ? "p-4 sm:p-6" : "")
+            }
+          />
+        )}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 bg-gradient-to-t from-card via-card/30 to-transparent"
