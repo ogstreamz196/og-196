@@ -605,13 +605,6 @@ async function runChatAI(
     );
 
     if (!res.ok) {
-      if (!isAdminUser) {
-        await admin.rpc("mint_coins_admin", {
-          target_user_id: profileId,
-          amount: 1,
-          admin_notes: "telegram_chat_refund",
-        });
-      }
       if (res.status === 429) {
         await reply(chat_id, "⏱️ OG Bot is rate-limited, try again soon.");
       } else if (res.status === 402) {
@@ -646,18 +639,6 @@ async function runChatAI(
       });
     }
   } catch (err) {
-    if (!isAdminUser) {
-      await admin
-        .rpc("mint_coins_admin", {
-          target_user_id: profileId,
-          amount: 1,
-          admin_notes: "telegram_chat_refund",
-        })
-        .then(
-          () => undefined,
-          () => undefined,
-        );
-    }
     await reply(chat_id, `❌ ${(err as Error).message}`);
   }
 }
