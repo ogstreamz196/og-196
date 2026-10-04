@@ -1167,7 +1167,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                       </div>
                     )}
                     <InlineSamplePlayer
-                      key={`${song.id}-${song.completed_at ?? ""}`}
+                      key={`${song.id}-${song.updated_at ?? ""}`}
                       songId={song.id}
                       unlocked={!!song.unlocked}
                     />
