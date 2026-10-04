@@ -621,6 +621,7 @@ function PrimaryCard({
   cta,
   variant = "primary",
   wide = false,
+  hazard = false,
 }: {
   to: "/library" | "/messenger";
   image: string;

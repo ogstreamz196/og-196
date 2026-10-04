@@ -179,6 +179,13 @@ function LibraryPage() {
   // failure) never loses what the user already typed.
   const [wizardDraft, setWizardDraft] = useState<WizardDraft>(EMPTY_DRAFT);
 
+  // Home "Create now" thumbnail lands here with #create — open the wizard.
+  useEffect(() => {
+    if (typeof window === "undefined" || window.location.hash !== "#create") return;
+    setWizardOpen(true);
+    window.history.replaceState(null, "", window.location.pathname + window.location.search);
+  }, []);
+
   /**
    * "Use this vibe" — open the wizard pre-loaded with a track's styles and
    * languages so a new song only needs a name and a story.
@@ -1490,9 +1497,9 @@ function LibraryPage() {
           // celebratory "come back in 5" popup instead of a bare toast.
           setCooking({ open: true, title: v.title });
           void createSong(v);
-          // Bring the live status panel into view right after the popup.
+          // Take them to their music library right after the popup.
           window.setTimeout(
-            () => statusPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }),
+            () => libraryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
             250,
           );
         }}
