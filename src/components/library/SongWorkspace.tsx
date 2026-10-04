@@ -423,6 +423,13 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       return;
     }
     setGenLyrics(true);
+    // Jump straight to Preview so the cooking visuals show immediately.
+    setTab("preview");
+    requestAnimationFrame(() =>
+      document
+        .getElementById("studio-preview")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" }),
+    );
     try {
       await saveSettingsPatch();
 
@@ -1010,8 +1017,11 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
             </CollapsibleTrigger>
             <CollapsibleContent>
               <CardContent className="space-y-3">
-                {!hasLyrics && (
+                {!hasLyrics && !genLyrics && (
                   <p className="text-sm text-muted-foreground">Generate lyrics in step 1 first.</p>
+                )}
+                {!isPending && (genLyrics || genPreview) && (
+                  <LyricsSkeleton songId={song.id} />
                 )}
                 {isPending && (
                   <>
@@ -1088,7 +1098,9 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                     </div>
                   </div>
                 )}
-                {isReady && <InlineSamplePlayer songId={song.id} unlocked={!!song.unlocked} />}
+                {isReady && !genLyrics && !genPreview && (
+                  <InlineSamplePlayer songId={song.id} unlocked={!!song.unlocked} />
+                )}
                 {!isReady && (
                 <div className="flex flex-wrap items-center justify-end gap-2">
                   <Button
