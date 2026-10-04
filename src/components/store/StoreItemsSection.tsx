@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, PackageOpen } from "lucide-react";
 import { toast } from "sonner";
+import { Capacitor } from "@capacitor/core";
 import { arePaymentsEnabled } from "@/lib/stripe";
 import { StoreItemCard } from "@/components/store/StoreItemCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -93,7 +94,7 @@ export function StoreItemsSection() {
       vipPass.mutate();
       return;
     }
-    if (!arePaymentsEnabled()) {
+    if (!arePaymentsEnabled() || Capacitor.isNativePlatform()) {
       toast.info("This item isn't available in the app yet.");
       return;
     }
