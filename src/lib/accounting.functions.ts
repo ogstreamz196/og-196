@@ -93,3 +93,61 @@ export const listCardTransactions = createServerFn({ method: "POST" })
       return { error: "Couldn't load transactions from the payment provider." };
     }
   });
+
+const PURCHASE_REVIEW_FOLDER = "1aaNQ3B5cglti1x1kAGGk9y6FtMQ5FHT0"; // OG BOT / PURCHASE REVIEW
+const DRIVE = "https://connector-gateway.lovable.dev/google_drive";
+
+/** Saves the accountant CSV into PURCHASE REVIEW/<period folder> on the boss's Drive. */
+export const saveAccountantCsvToDrive = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { folder: string; fileName: string; csv: string }) => {
+    if (!/^[\w .\-/]{1,60}$/.test(d.folder) || !/^[\w .\-]{1,120}\.csv$/.test(d.fileName))
+      throw new Error("Invalid name");
+    if (d.csv.length > 5_000_000) throw new Error("File too large");
+    return d;
+  })
+  .handler(async ({ data, context }): Promise<{ link: string | null } | { error: string }> => {
+    const [b, a] = await Promise.all([
+      context.supabase.rpc("has_role", { _user_id: context.userId, _role: "boss" }),
+      context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" }),
+    ]);
+    if (!b.data && !a.data) return { error: "Forbidden" };
+    const lovable = process.env["LOVABLE_API_KEY"];
+    const conn = process.env["GOOGLE_DRIVE_API_KEY"];
+    if (!lovable || !conn) return { error: "Google Drive isn't connected" };
+    const h = { Authorization: `Bearer ${lovable}`, "X-Connection-Api-Key": conn };
+    try {
+      const folderName = data.folder.replace(/\//g, "-");
+      const q = encodeURIComponent(
+        `name='${folderName}' and '${PURCHASE_REVIEW_FOLDER}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+      );
+      const found = await fetch(`${DRIVE}/drive/v3/files?q=${q}&fields=files(id)&pageSize=1`, { headers: h });
+      if (!found.ok) throw new Error(`find ${found.status}: ${await found.text()}`);
+      let folderId = ((await found.json()) as { files?: { id: string }[] }).files?.[0]?.id;
+      if (!folderId) {
+        const c = await fetch(`${DRIVE}/drive/v3/files?fields=id`, {
+          method: "POST",
+          headers: { ...h, "Content-Type": "application/json" },
+          body: JSON.stringify({ name: folderName, parents: [PURCHASE_REVIEW_FOLDER], mimeType: "application/vnd.google-apps.folder" }),
+        });
+        if (!c.ok) throw new Error(`folder ${c.status}: ${await c.text()}`);
+        folderId = ((await c.json()) as { id: string }).id;
+      }
+      const boundary = `ogbot${Date.now()}`;
+      const body =
+        `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n` +
+        JSON.stringify({ name: data.fileName, parents: [folderId], mimeType: "application/vnd.google-apps.spreadsheet" }) +
+        `\r\n--${boundary}\r\nContent-Type: text/csv; charset=UTF-8\r\n\r\n${data.csv}\r\n--${boundary}--`;
+      const up = await fetch(`${DRIVE}/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink`, {
+        method: "POST",
+        headers: { ...h, "Content-Type": `multipart/related; boundary=${boundary}` },
+        body,
+      });
+      if (!up.ok) throw new Error(`upload ${up.status}: ${await up.text()}`);
+      const f = (await up.json()) as { webViewLink?: string };
+      return { link: f.webViewLink ?? null };
+    } catch (e) {
+      console.error("saveAccountantCsvToDrive", e);
+      return { error: "Couldn't save to Google Drive. Try again." };
+    }
+  });

@@ -17,7 +17,12 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { arePaymentsEnabled } from "@/lib/stripe";
+import { arePaymentsEnabled, getStripeEnvironment } from "@/lib/stripe";
+import { Capacitor } from "@capacitor/core";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
+import { createTrackUnlockCheckoutSession } from "@/lib/payments.functions";
+import { StripeCheckoutDialog } from "@/components/payments/StripeCheckoutDialog";
 
 /** One-off card price shown in the UI. Must match TRACK_UNLOCK_PENCE server-side. */
 const CARD_PRICE_LABEL = "99p";
@@ -47,9 +52,14 @@ export function UnlockConfirmDialog({
   songId,
 }: Props) {
   const [payByCard, setPayByCard] = useState(false);
+  const [starting, setStarting] = useState(false);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const createCheckout = useServerFn(createTrackUnlockCheckoutSession);
   const burnt = Math.max(0, cost - royalty);
   const canAfford = balance >= cost;
-  const cardAvailable = !!songId && arePaymentsEnabled();
+  // Card checkout is web-only; app stores require their own billing.
+  const cardAvailable =
+    !!songId && arePaymentsEnabled() && !(typeof window !== "undefined" && Capacitor.isNativePlatform());
 
   const returnUrl =
     typeof window === "undefined"
@@ -62,6 +72,8 @@ export function UnlockConfirmDialog({
         })();
 
   return (
+    <>
+    <StripeCheckoutDialog clientSecret={clientSecret} onClose={() => setClientSecret(null)} />
     <Dialog
       open={open}
       onOpenChange={(v) => {
@@ -91,13 +103,38 @@ export function UnlockConfirmDialog({
 
         {payByCard ? (
           <div className="space-y-3">
-            <div className="flex flex-col items-center justify-center p-8 bg-muted/30 rounded-xl border border-border">
-              <p className="text-center text-muted-foreground mb-4">
-                In-app purchases are being set up.
+            <div className="flex flex-col items-center justify-center rounded-xl border border-border bg-muted/30 p-6 text-center">
+              <CreditCard className="mb-2 h-8 w-8 text-primary" />
+              <p className="mb-4 text-sm text-muted-foreground">
+                One-off payment · Card, Apple Pay or Google Pay. No coins needed.
               </p>
-              <Button disabled>
-                <Lock className="w-4 h-4 mr-2" />
-                Pay 99p
+              <Button
+                className="w-full"
+                disabled={starting || !songId}
+                onClick={async () => {
+                  if (!songId) return;
+                  setStarting(true);
+                  try {
+                    const res = await createCheckout({
+                      data: { songId, returnUrl, environment: getStripeEnvironment() },
+                    });
+                    if ("error" in res && res.error) throw new Error(res.error);
+                    const secret = (res as { clientSecret?: string }).clientSecret;
+                    if (!secret) throw new Error("Checkout unavailable right now");
+                    setClientSecret(secret);
+                  } catch (e) {
+                    toast.error(e instanceof Error ? e.message : "Checkout failed");
+                  } finally {
+                    setStarting(false);
+                  }
+                }}
+              >
+                {starting ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Lock className="mr-2 h-4 w-4" />
+                )}
+                Pay {CARD_PRICE_LABEL} securely
               </Button>
             </div>
             <Button variant="ghost" className="w-full" onClick={() => setPayByCard(false)}>
@@ -203,5 +240,6 @@ export function UnlockConfirmDialog({
         )}
       </DialogContent>
     </Dialog>
+    </>
   );
 }
