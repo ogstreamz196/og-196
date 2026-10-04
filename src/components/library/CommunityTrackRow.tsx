@@ -257,15 +257,20 @@ function CommunityTrackRowImpl({
           >
             <Pencil className="h-3.5 w-3.5" />
           </Link>
-          {song.unlocked && isReady && (
+          {song.unlocked && (
             <button
               type="button"
               onClick={() => void downloadOwned()}
-              disabled={busy}
-              aria-label={`Download ${title} to device`}
+              disabled={busy || !isReady || !song.audio_path}
+              aria-label={
+                isReady && song.audio_path
+                  ? `Download ${title} to device`
+                  : `Download pending — ${title} is still finishing`
+              }
+              title={isReady && song.audio_path ? undefined : "Download pending — track still finishing"}
               className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-primary/40 bg-primary/15 text-primary transition-colors hover:bg-primary/25 disabled:opacity-40"
             >
-              {busy ? (
+              {busy || !isReady || !song.audio_path ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
               ) : (
                 <Download className="h-3.5 w-3.5" />

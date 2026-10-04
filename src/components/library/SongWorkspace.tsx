@@ -1147,7 +1147,11 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
 
                 <Button
                   onClick={unlockFull}
-                  disabled={unlocking || (!song.unlocked && balance < unlockCost)}
+                  disabled={
+                    unlocking ||
+                    (!song.unlocked && balance < unlockCost) ||
+                    (song.unlocked && (!isReady || !song.audio_path))
+                  }
                   variant={song.unlocked ? "default" : "outline"}
                   className="h-12 w-full gap-2"
                   aria-live="polite"
@@ -1156,6 +1160,10 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
                       {song.unlocked ? "Preparing download…" : "Processing payment…"}
+                    </>
+                  ) : song.unlocked && (!isReady || !song.audio_path) ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" /> Download pending — finishing track…
                     </>
                   ) : song.unlocked ? (
                     <>
