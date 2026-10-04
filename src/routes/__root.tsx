@@ -254,7 +254,7 @@ function RootComponent() {
             typeof window !== "undefined" ? localStorage.getItem("og_pending_ref") : null;
           if (pending) {
             let referrerId = pending;
-            if (/^OG-[A-Z0-9]{6}$/i.test(pending)) {
+            if (!/^[0-9a-f-]{36}$/i.test(pending)) {
               const { data: lookup, error: lookupError } = await supabase.rpc(
                 "lookup_referrer_by_code",
                 { p_code: pending.toUpperCase() },
