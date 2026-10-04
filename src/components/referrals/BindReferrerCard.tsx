@@ -30,12 +30,12 @@ function classify(raw: string): { kind: LookupKind; value: string } {
   if (UUID_RE.test(t)) return { kind: "uuid", value: t.toLowerCase() };
   const linkUuid = t.match(/\/r\/([0-9a-f-]{36})/i)?.[1];
   if (linkUuid) return { kind: "link", value: linkUuid.toLowerCase() };
-  const linkCode = t.match(/\/r\/(OG-[A-Z0-9]{6})/i)?.[1];
+  const linkCode = t.match(/\/r\/((?:OG-)?[A-Z0-9]{3,32})/i)?.[1];
   if (linkCode) return { kind: "code", value: linkCode.toUpperCase() };
-  // bare short code, with or without dash
+  // bare code: legacy OG-XXXXXX, OG VIP ID (OGNAME123) or username
   const cleaned = t.toUpperCase().replace(/\s+/g, "");
   if (CODE_RE.test(cleaned)) return { kind: "code", value: cleaned };
-  if (/^[A-Z0-9]{6}$/.test(cleaned)) return { kind: "code", value: `OG-${cleaned}` };
+  if (/^(?:OG-)?[A-Z0-9]{3,32}$/.test(cleaned)) return { kind: "code", value: cleaned };
   return { kind: null, value: t };
 }
 

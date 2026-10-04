@@ -143,13 +143,9 @@ function useRedirectIfSignedIn() {
       const ref = new URLSearchParams(window.location.search).get("ref");
       const normalizedRef = ref?.trim().toUpperCase();
       const validUuid = !!ref && /^[0-9a-f-]{36}$/i.test(ref);
-      const validCode = !!normalizedRef && /^(?:OG-)?[A-Z0-9]{6}$/.test(normalizedRef);
+      const validCode = !!normalizedRef && /^(?:OG-)?[A-Z0-9]{3,32}$/.test(normalizedRef);
       if ((validUuid || validCode) && ref && normalizedRef) {
-        const stored = validUuid
-          ? ref.toLowerCase()
-          : normalizedRef.startsWith("OG-")
-            ? normalizedRef
-            : `OG-${normalizedRef}`;
+        const stored = validUuid ? ref.toLowerCase() : normalizedRef;
         try {
           localStorage.setItem(PENDING_REF_KEY, stored);
         } catch {
