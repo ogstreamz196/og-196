@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Download, Loader2, Receipt } from "lucide-react";
+import { CloudUpload, Download, Loader2, Receipt } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { listCardTransactions, type CardTxRow } from "@/lib/accounting.functions";
+import { listCardTransactions, saveAccountantCsvToDrive, type CardTxRow } from "@/lib/accounting.functions";
 
 type Period = { key: string; label: string; from: string; to: string };
 
@@ -33,6 +34,8 @@ const esc = (v: unknown) => {
 
 export function AccountantLogPanel() {
   const list = useServerFn(listCardTransactions);
+  const saveDrive = useServerFn(saveAccountantCsvToDrive);
+  const [saving, setSaving] = useState(false);
   const opts = useMemo(periods, []);
   const [key, setKey] = useState(opts[0].key);
   const [cat, setCat] = useState("All");
@@ -53,7 +56,7 @@ export function AccountantLogPanel() {
   const refunds = sum((r) => r.refunded);
   const net = gross - fees - refunds;
 
-  const exportCsv = () => {
+  const buildCsv = () => {
     const header = [
       "Date", "Time (UTC)", "Transaction ID", "Payment Intent", "Category", "Description",
       "Customer Name", "Customer Email", "Currency", "Gross Amount", "Stripe Fee",
@@ -67,11 +70,31 @@ export function AccountantLogPanel() {
     ]);
     const totals = ["TOTAL", "", "", "", "", `${rows.length} transactions`, "", "", "GBP",
       gross.toFixed(2), fees.toFixed(2), (gross - fees).toFixed(2), refunds.toFixed(2), "", "", "", ""];
-    const csv = [header, ...body, [], totals].map((r) => r.map(esc).join(",")).join("\n");
+    return [header, ...body, [], totals].map((r) => r.map(esc).join(",")).join("\n");
+  };
+  const fileName = `og-bot-card-transactions-${p.from}-to-${p.to}.csv`;
+  const toDrive = async () => {
+    setSaving(true);
+    try {
+      const folder = p.key.startsWith("tax-")
+        ? `Tax Year ${p.from.slice(0, 4)}-${p.to.slice(2, 4)}`
+        : `Calendar ${p.from.slice(0, 4)}`;
+      const res = await saveDrive({ data: { folder, fileName, csv: buildCsv() } });
+      if ("error" in res) throw new Error(res.error);
+      toast.success(`Saved to Drive → PURCHASE REVIEW / ${folder}`);
+      if (res.link) window.open(res.link, "_blank", "noopener");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Drive save failed");
+    } finally {
+      setSaving(false);
+    }
+  };
+  const exportCsv = () => {
+    const csv = buildCsv();
     const url = URL.createObjectURL(new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" }));
     const a = document.createElement("a");
     a.href = url;
-    a.download = `og-bot-card-transactions-${p.from}-to-${p.to}.csv`;
+    a.download = fileName;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -93,7 +116,10 @@ export function AccountantLogPanel() {
             {cats.map((c) => <option key={c}>{c}</option>)}
           </select>
         </label>
-        <Button size="sm" className="ml-auto" onClick={exportCsv} disabled={!rows.length}>
+        <Button size="sm" variant="outline" className="ml-auto" onClick={toDrive} disabled={!rows.length || saving}>
+          {saving ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <CloudUpload className="mr-1.5 h-4 w-4" />} Save to Drive
+        </Button>
+        <Button size="sm" onClick={exportCsv} disabled={!rows.length}>
           <Download className="mr-1.5 h-4 w-4" /> Export for accountant
         </Button>
       </div>
