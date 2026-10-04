@@ -8,6 +8,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { injectSignature, withSignatureHint } from "../_shared/track-signature.ts";
 import { sanitizeLyrics } from "../_shared/lyrics-sanitize.ts";
+import { languageVoiceHint } from "../_shared/language-guide.ts";
 import {
   isModerationRejection,
   MODERATION_MESSAGE,
@@ -158,8 +159,8 @@ Deno.serve(async (req) => {
     );
     const languageStyleHint = languageList.length
       ? languageList.length > 1
-        ? `multilingual vocals sung in ${languageList.join(" and ")}, switch language per section exactly as the lyric section markers indicate, keep native pronunciation for each language`
-        : `vocals sung in ${languageList[0]} with native pronunciation`
+        ? `multilingual vocals sung in ${languageList.join(" and ")}, switch language per section exactly as the lyric section markers indicate, ${languageVoiceHint(languageList)}`
+        : `vocals sung in ${languageList[0]}, ${languageVoiceHint(languageList)}`
       : null;
     // Multiple styles: make the section-to-section genre changes explicit.
     const styleCount = rawStyle ? rawStyle.split(/\s*,\s*/).filter(Boolean).length : 0;
@@ -187,7 +188,7 @@ Deno.serve(async (req) => {
           vocalsOnlyStyle,
           lengthStyleHint,
         ];
-    const style = limitText(styleParts.filter(Boolean).join(", ") || null, MAX_STYLE_CHARS);
+    let style = limitText(styleParts.filter(Boolean).join(", ") || null, MAX_STYLE_CHARS);
     const lyrics = limitText((body.lyrics ?? "").toString().trim() || null, MAX_PROMPT_CHARS);
     const title = limitText((body.title ?? "").toString().trim() || null, MAX_TITLE_CHARS);
     const instrumental = !!body.instrumental;
@@ -230,6 +231,15 @@ Deno.serve(async (req) => {
       if (!p) return json({ error: "Portal not found" }, 404);
       if (p.status === "maintenance") return json({ error: "Portal is in maintenance mode" }, 423);
       portalLanguage = p.language ?? null;
+      // Portal language must reach the voice even when lyrics were supplied.
+      if (portalLanguage && !languageStyleHint) {
+        style = limitText(
+          [`vocals sung in ${portalLanguage}, ${languageVoiceHint([portalLanguage])}`, style]
+            .filter(Boolean)
+            .join(", "),
+          MAX_STYLE_CHARS,
+        );
+      }
       // Portal generations follow the same free-until-download rule.
     }
     // Language goes in the style hint only — never into sung lyrics.
