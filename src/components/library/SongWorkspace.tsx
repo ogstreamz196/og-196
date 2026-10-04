@@ -577,23 +577,24 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
           toast.error(
             "This song is no longer available — it may have been deleted. Start a new one from the studio.",
           );
-          return;
+        } else {
+          toast.error(msg);
         }
-        toast.error(msg);
-        return;
-      }
-      if (data?.accepted === false) {
+      } else if (data?.accepted === false) {
         toast.info(data.error || "Your current generations need to finish first");
-        return;
+      } else {
+        ok = true;
+        toast.success("OG Bot is cooking your new take — no credits charged");
+        onSaved?.();
       }
-      toast.success("OG Bot is creating your track — no credits charged");
-      onSaved?.();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not start generation");
     } finally {
       setGenPreview(false);
       submitLockRef.current = false;
+      if (!ok) setCooking(false);
     }
+    return ok;
   }
 
   async function unlockFull() {
