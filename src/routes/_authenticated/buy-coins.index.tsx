@@ -1021,7 +1021,7 @@ function PackCard({
         </div>
       )}
 
-      <div className={cn("flex items-center justify-between gap-1", badge && "mt-3")}>
+      <div className="mt-3 flex items-center justify-between gap-1">{/* same top space on every card */}
         <span className="inline-flex min-w-0 items-center gap-1 truncate text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
           <TierIcon className="h-3 w-3 shrink-0" /> {tier.name}
         </span>
@@ -1091,7 +1091,7 @@ function PackCard({
             </div>
           }
         />
-        <div className="mt-1 flex justify-center">
+        <div className="mt-1 flex min-h-[18px] justify-center">
           {canEdit ? (
             <button
               type="button"

@@ -1,17 +1,19 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
-import { Scale, Users } from "lucide-react";
+import { Receipt, Scale, Users } from "lucide-react";
 import { useRole } from "@/hooks/use-role";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { BossNav } from "@/components/admin/BossNav";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CoinAuditPage } from "./admin.coin-audit";
 import { ReferralsAuditPage } from "./admin.referrals-audit";
+import { AccountantLogPanel } from "@/components/admin/AccountantLogPanel";
 
 export const Route = createFileRoute("/_authenticated/admin/audit")({
   component: AdminAuditHub,
 });
 
 const TABS = [
+  { value: "card", label: "Card transactions", Icon: Receipt, Panel: AccountantLogPanel },
   { value: "coins", label: "Coin audit", Icon: Scale, Panel: CoinAuditPage },
   { value: "referrals", label: "Referral audit", Icon: Users, Panel: ReferralsAuditPage },
 ] as const;
