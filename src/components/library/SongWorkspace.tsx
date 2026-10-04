@@ -236,6 +236,11 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const [saving, setSaving] = useState(false);
   const [genLyrics, setGenLyrics] = useState(false);
   const [genPreview, setGenPreview] = useState(false);
+  // True from the moment the user taps "cook" until the NEW take finishes.
+  // While true, the old sample is hidden so it can't be mistaken for the new one.
+  const [cooking, setCooking] = useState(false);
+  const [freshReady, setFreshReady] = useState(false);
+  const sawPendingRef = useRef(false);
   const [unlocking, setUnlocking] = useState(false);
   const [unlockDialogOpen, setUnlockDialogOpen] = useState(false);
   const [topUp, setTopUp] = useState<{ needed: number; reason: string } | null>(null);
@@ -302,6 +307,27 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const isPending = song.status === "pending" || song.status === "processing";
   const isReady = song.status === "completed";
   const isFailed = song.status === "failed";
+
+  // Track the re-cook lifecycle: wait until we've seen the row go pending,
+  // then finish when it lands on completed/failed.
+  useEffect(() => {
+    if (!cooking) return;
+    if (isPending) {
+      sawPendingRef.current = true;
+      return;
+    }
+    if (sawPendingRef.current && (isReady || isFailed)) {
+      sawPendingRef.current = false;
+      setCooking(false);
+      if (isReady) setFreshReady(true);
+    }
+  }, [cooking, isPending, isReady, isFailed]);
+
+  function startCooking() {
+    sawPendingRef.current = false;
+    setFreshReady(false);
+    setCooking(true);
+  }
 
   // Realtime + polling fallback: while the song is generating, listen for the row
   // flipping to completed/failed and ask the parent to refetch so the UI moves
@@ -423,6 +449,8 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       return;
     }
     setGenLyrics(true);
+    startCooking();
+    let started = false;
     // Jump straight to Preview so the cooking visuals show immediately.
     setTab("preview");
     requestAnimationFrame(() =>
@@ -470,7 +498,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       // Straight into the track: no second button to hunt for.
       setGenLyrics(false);
       setTab("preview");
-      await generatePreview(next);
+      started = await generatePreview(next);
       requestAnimationFrame(() =>
         document
           .getElementById("studio-preview")
@@ -480,28 +508,41 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       toast.error(e instanceof Error ? e.message : "Lyrics generation failed");
     } finally {
       setGenLyrics(false);
+      if (!started) setCooking(false);
     }
   }
 
+  async function cookCurrentLyrics() {
+    setTab("preview");
+    requestAnimationFrame(() =>
+      document
+        .getElementById("studio-preview")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" }),
+    );
+    await generatePreview();
+  }
+
   const submitLockRef = useRef(false);
-  async function generatePreview(lyricsOverride?: string) {
+  async function generatePreview(lyricsOverride?: string): Promise<boolean> {
     const useLyrics = typeof lyricsOverride === "string" ? lyricsOverride : lyrics;
-    if (submitLockRef.current) return;
+    if (submitLockRef.current) return false;
     if (missing) {
       toast.error("This song is no longer available");
-      return;
+      return false;
     }
 
     if (!useLyrics.trim()) {
       toast.error("Generate lyrics first");
-      return;
+      return false;
     }
     if (balance < previewCost) {
       setTopUp({ needed: previewCost, reason: "finish this track" });
-      return;
+      return false;
     }
     submitLockRef.current = true;
     setGenPreview(true);
+    startCooking();
+    let ok = false;
     try {
       localStorage.setItem("welcome.personal_banner.dismissed", "1");
     } catch {
@@ -536,23 +577,24 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
           toast.error(
             "This song is no longer available — it may have been deleted. Start a new one from the studio.",
           );
-          return;
+        } else {
+          toast.error(msg);
         }
-        toast.error(msg);
-        return;
-      }
-      if (data?.accepted === false) {
+      } else if (data?.accepted === false) {
         toast.info(data.error || "Your current generations need to finish first");
-        return;
+      } else {
+        ok = true;
+        toast.success("OG Bot is cooking your new take — no credits charged");
+        onSaved?.();
       }
-      toast.success("OG Bot is creating your track — no credits charged");
-      onSaved?.();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not start generation");
     } finally {
       setGenPreview(false);
       submitLockRef.current = false;
+      if (!ok) setCooking(false);
     }
+    return ok;
   }
 
   async function unlockFull() {
@@ -662,7 +704,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
 
   return (
     <div className="space-y-6">
-      {isPending && (
+      {isPending && tab !== "preview" && (
         <div className="sticky top-2 z-30">
           <GeneratingProgress
             sampleSeconds={settings?.sample_seconds ?? 60}
@@ -985,8 +1027,18 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                     ) : (
                       <Sparkles className="h-4 w-4" />
                     )}
-                    {hasLyrics ? "New lyrics + cook track" : "Write lyrics + cook track"}
+                    {hasLyrics ? "Re-write lyrics + cook" : "Write lyrics + cook track"}
                   </Button>
+                  {hasLyrics && (
+                    <Button
+                      variant="secondary"
+                      onClick={() => void cookCurrentLyrics()}
+                      disabled={genLyrics || genPreview || isPending || cooking || missing}
+                      className="col-span-2 min-w-0 gap-1.5 sm:col-span-1 sm:gap-2"
+                    >
+                      <Play className="h-4 w-4" /> Cook with my lyrics
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </CollapsibleContent>
@@ -1020,7 +1072,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                 {!hasLyrics && !genLyrics && (
                   <p className="text-sm text-muted-foreground">Generate lyrics in step 1 first.</p>
                 )}
-                {!isPending && (genLyrics || genPreview) && (
+                {!isPending && (genLyrics || genPreview || cooking) && (
                   <LyricsSkeleton songId={song.id} />
                 )}
                 {isPending && (
@@ -1038,7 +1090,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                     )}
                   </>
                 )}
-                {isFailed && (
+                {isFailed && !cooking && (
                   <div
                     role="alert"
                     className="space-y-3 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
@@ -1098,10 +1150,30 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                     </div>
                   </div>
                 )}
-                {isReady && !genLyrics && !genPreview && (
-                  <InlineSamplePlayer songId={song.id} unlocked={!!song.unlocked} />
+                {isReady && !genLyrics && !genPreview && !cooking && (
+                  <>
+                    {freshReady && (
+                      <div className="flex items-center justify-between gap-2 rounded-lg border border-primary/40 bg-primary/10 px-3 py-2 text-sm font-semibold text-primary">
+                        <span className="flex items-center gap-2">
+                          <Sparkles className="h-4 w-4" /> Your new take is ready!
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setTab("takes")}
+                          className="text-xs font-medium underline underline-offset-2"
+                        >
+                          Compare takes
+                        </button>
+                      </div>
+                    )}
+                    <InlineSamplePlayer
+                      key={`${song.id}-${song.updated_at ?? ""}`}
+                      songId={song.id}
+                      unlocked={!!song.unlocked}
+                    />
+                  </>
                 )}
-                {!isReady && (
+                {!isReady && !cooking && (
                 <div className="flex flex-wrap items-center justify-end gap-2">
                   <Button
                     onClick={() => void generatePreview()}
@@ -1134,7 +1206,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
               </CardContent>
             </CollapsibleContent>
           </Collapsible>
-          {isReady && (
+          {isReady && !cooking && (
           <CardContent className="space-y-3 border-t border-border/50 pt-4">
               <>
 
