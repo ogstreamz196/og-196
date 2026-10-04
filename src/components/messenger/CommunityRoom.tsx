@@ -89,10 +89,29 @@ export function CommunityRoom() {
     staleTime: 60_000,
   });
   const blockedSet = useMemo(() => new Set(blockData?.blocked ?? []), [blockData]);
+  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("og-bz-hidden");
+      if (raw) setHiddenIds(new Set(JSON.parse(raw) as string[]));
+    } catch {
+      /* private mode */
+    }
+  }, []);
   const reportMsg = async (id: string) => {
     try {
       await reportFn({ data: { messageId: id } });
-      toast.success("Thanks — reported. Our team reviews reports within 24 hours.");
+      setHiddenIds((prev) => {
+        const next = new Set(prev);
+        next.add(id);
+        try {
+          localStorage.setItem("og-bz-hidden", JSON.stringify([...next].slice(-500)));
+        } catch {
+          /* private mode */
+        }
+        return next;
+      });
+      toast.success("Message reported and hidden from your view. We review reports within 24 hours.");
     } catch (e) {
       toast.error((e as Error).message || "Couldn't send report");
     }
@@ -134,8 +153,11 @@ export function CommunityRoom() {
   const [lastEarned, setLastEarned] = useState<number | null>(null);
   const pendingCoins = ((tally?.pendingTenths ?? 0) / 10).toFixed(2);
   const messages: CommunityMessage[] = useMemo(
-    () => (data?.messages ?? []).filter((m) => !m.user_id || !blockedSet.has(m.user_id)),
-    [data?.messages, blockedSet],
+    () =>
+      (data?.messages ?? []).filter(
+        (m) => !hiddenIds.has(m.id) && (!m.user_id || !blockedSet.has(m.user_id)),
+      ),
+    [data?.messages, blockedSet, hiddenIds],
   );
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -756,6 +778,15 @@ export function CommunityRoom() {
           )}
         </Button>
       </form>
+      {nativeApp && (
+        <p className="px-3 pb-1 text-center text-[11px] text-muted-foreground">
+          Zero tolerance for abusive content. By chatting you agree to our{" "}
+          <a href="/terms" className="underline">
+            Terms of Use
+          </a>
+          .
+        </p>
+      )}
     </div>
   );
 }
