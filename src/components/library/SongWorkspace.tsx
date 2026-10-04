@@ -1147,11 +1147,11 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
 
                 <Button
                   onClick={unlockFull}
-                  disabled={
+                  disabled={!!(
                     unlocking ||
                     (!song.unlocked && balance < unlockCost) ||
                     (!!song.unlocked && (!isReady || !song.audio_path))
-                  }
+                  )}
                   variant={song.unlocked ? "default" : "outline"}
                   className="h-12 w-full gap-2"
                   aria-live="polite"
