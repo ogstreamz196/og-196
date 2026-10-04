@@ -93,7 +93,7 @@ export function UnlockConfirmDialog({
           <div className="space-y-3">
             <div className="flex flex-col items-center justify-center p-8 bg-muted/30 rounded-xl border border-border">
               <p className="text-center text-muted-foreground mb-4">
-                Google Play Billing is being configured.
+                In-app purchases are being set up.
               </p>
               <Button disabled>
                 <Lock className="w-4 h-4 mr-2" />

@@ -644,3 +644,87 @@ export const clearCommunityMessages = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });
+
+/** Battle Zone safety: users the caller has blocked. */
+export const listMyCommunityBlocks = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data } = await context.supabase
+      .from("community_blocks" as never)
+      .select("blocked_id")
+      .eq("blocker_id", context.userId);
+    return { blocked: ((data ?? []) as { blocked_id: string }[]).map((r) => r.blocked_id) };
+  });
+
+/** Block a member so their Battle Zone messages are hidden for the caller. */
+export const blockCommunityUser = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { userId: string }) => {
+    if (!d || typeof d.userId !== "string" || !/^[0-9a-f-]{36}$/i.test(d.userId)) {
+      throw new Error("Invalid user");
+    }
+    return d;
+  })
+  .handler(async ({ data, context }) => {
+    if (data.userId === context.userId) throw new Error("You can't block yourself");
+    const { error } = await context.supabase
+      .from("community_blocks" as never)
+      .upsert({ blocker_id: context.userId, blocked_id: data.userId } as never);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+/** Report an abusive Battle Zone message; Boss is alerted on Telegram. */
+export const reportCommunityMessage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { messageId: string; reason?: string }) => {
+    if (!d || typeof d.messageId !== "string" || !/^[0-9a-f-]{36}$/i.test(d.messageId)) {
+      throw new Error("Invalid message");
+    }
+    return { messageId: d.messageId, reason: String(d.reason ?? "abusive").slice(0, 200) };
+  })
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: msg } = await supabaseAdmin
+      .from("community_messages")
+      .select("id, user_id, content, display_name")
+      .eq("id", data.messageId)
+      .maybeSingle();
+    if (!msg) throw new Error("Message not found");
+    const { error } = await supabaseAdmin.from("community_reports" as never).upsert(
+      {
+        reporter_id: context.userId,
+        message_id: msg.id,
+        reported_user_id: msg.user_id,
+        reason: data.reason,
+      } as never,
+      { onConflict: "reporter_id,message_id", ignoreDuplicates: true } as never,
+    );
+    if (error) throw new Error(error.message);
+    try {
+      const { data: roles } = await supabaseAdmin
+        .from("user_roles")
+        .select("user_id")
+        .in("role", ["admin", "boss"] as never);
+      const ids = [...new Set((roles ?? []).map((r: { user_id: string }) => r.user_id))];
+      if (ids.length) {
+        const { data: bosses } = await supabaseAdmin
+          .from("profiles")
+          .select("telegram_chat_id")
+          .in("id", ids);
+        const esc = (s: string) =>
+          s.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+        const text = `<b>🚩 Battle Zone report</b>\nFrom: ${esc(msg.display_name || "OG member")}\n“${esc(String(msg.content).slice(0, 300))}”\nReview and remove within 24h if abusive.`;
+        const { vipAckTelegram } = await import("@/lib/vip-ack.server");
+        const chats = [...new Set((bosses ?? []).map((b) => b.telegram_chat_id).filter(Boolean))];
+        await Promise.all(
+          chats.map((chat_id) =>
+            vipAckTelegram("sendMessage", { chat_id, text, parse_mode: "HTML" }),
+          ),
+        );
+      }
+    } catch (e) {
+      console.error("report alert failed", e);
+    }
+    return { ok: true };
+  });

@@ -54,3 +54,12 @@
 ## Later
 
 - [ ] Fix the primary Gemini key (Google says "project denied access") so lyrics stop using the paid backup key — blocked on owner checking Google Cloud
+
+## Native store compliance (Oct 2026)
+
+- [x] Battle Zone Report message / Block user in phone apps
+- [x] iOS privacy manifest
+- [x] Android app link package name = og.bot
+- [x] Platform-correct store wording, no web checkout links in apps
+- [ ] iOS production RevenueCat key — pending (owner to supply)
+- [ ] Age rating questionnaires 16+/17+ at store submission (owner)
