@@ -94,7 +94,7 @@ export function StoreItemsSection() {
       return;
     }
     if (!arePaymentsEnabled()) {
-      toast.info("This item can be bought on ogbot.co.uk.");
+      toast.info("This item isn't available in the app yet.");
       return;
     }
     setStartingId(itemId);
