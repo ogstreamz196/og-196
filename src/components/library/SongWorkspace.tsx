@@ -236,6 +236,11 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const [saving, setSaving] = useState(false);
   const [genLyrics, setGenLyrics] = useState(false);
   const [genPreview, setGenPreview] = useState(false);
+  // True from the moment the user taps "cook" until the NEW take finishes.
+  // While true, the old sample is hidden so it can't be mistaken for the new one.
+  const [cooking, setCooking] = useState(false);
+  const [freshReady, setFreshReady] = useState(false);
+  const sawPendingRef = useRef(false);
   const [unlocking, setUnlocking] = useState(false);
   const [unlockDialogOpen, setUnlockDialogOpen] = useState(false);
   const [topUp, setTopUp] = useState<{ needed: number; reason: string } | null>(null);
@@ -302,6 +307,27 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const isPending = song.status === "pending" || song.status === "processing";
   const isReady = song.status === "completed";
   const isFailed = song.status === "failed";
+
+  // Track the re-cook lifecycle: wait until we've seen the row go pending,
+  // then finish when it lands on completed/failed.
+  useEffect(() => {
+    if (!cooking) return;
+    if (isPending) {
+      sawPendingRef.current = true;
+      return;
+    }
+    if (sawPendingRef.current && (isReady || isFailed)) {
+      sawPendingRef.current = false;
+      setCooking(false);
+      if (isReady) setFreshReady(true);
+    }
+  }, [cooking, isPending, isReady, isFailed]);
+
+  function startCooking() {
+    sawPendingRef.current = false;
+    setFreshReady(false);
+    setCooking(true);
+  }
 
   // Realtime + polling fallback: while the song is generating, listen for the row
   // flipping to completed/failed and ask the parent to refetch so the UI moves
@@ -423,6 +449,8 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       return;
     }
     setGenLyrics(true);
+    startCooking();
+    let started = false;
     // Jump straight to Preview so the cooking visuals show immediately.
     setTab("preview");
     requestAnimationFrame(() =>
@@ -470,7 +498,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       // Straight into the track: no second button to hunt for.
       setGenLyrics(false);
       setTab("preview");
-      await generatePreview(next);
+      started = await generatePreview(next);
       requestAnimationFrame(() =>
         document
           .getElementById("studio-preview")
@@ -480,28 +508,41 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       toast.error(e instanceof Error ? e.message : "Lyrics generation failed");
     } finally {
       setGenLyrics(false);
+      if (!started) setCooking(false);
     }
   }
 
+  async function cookCurrentLyrics() {
+    setTab("preview");
+    requestAnimationFrame(() =>
+      document
+        .getElementById("studio-preview")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" }),
+    );
+    await generatePreview();
+  }
+
   const submitLockRef = useRef(false);
-  async function generatePreview(lyricsOverride?: string) {
+  async function generatePreview(lyricsOverride?: string): Promise<boolean> {
     const useLyrics = typeof lyricsOverride === "string" ? lyricsOverride : lyrics;
-    if (submitLockRef.current) return;
+    if (submitLockRef.current) return false;
     if (missing) {
       toast.error("This song is no longer available");
-      return;
+      return false;
     }
 
     if (!useLyrics.trim()) {
       toast.error("Generate lyrics first");
-      return;
+      return false;
     }
     if (balance < previewCost) {
       setTopUp({ needed: previewCost, reason: "finish this track" });
-      return;
+      return false;
     }
     submitLockRef.current = true;
     setGenPreview(true);
+    startCooking();
+    let ok = false;
     try {
       localStorage.setItem("welcome.personal_banner.dismissed", "1");
     } catch {
