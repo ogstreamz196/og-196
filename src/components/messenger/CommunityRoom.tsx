@@ -670,7 +670,7 @@ export function CommunityRoom() {
               submit(e as unknown as React.FormEvent);
             }
           }}
-          placeholder="Drop your bars — OG Bot will fire back…"
+          placeholder="Give me ur best shot — say or ask anything…"
           rows={2}
           maxLength={1000}
           enterKeyHint="send"

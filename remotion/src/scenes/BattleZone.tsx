@@ -54,7 +54,7 @@ export const BattleZone: React.FC = () => {
             maxWidth: 530,
           }}
         >
-          Drop your bars. Get roasted. Climb the ranks. Earn OG credits.
+          Give me ur best shot — say or ask anything. Get roasted. Earn OG credits.
         </div>
         <div
           style={{
