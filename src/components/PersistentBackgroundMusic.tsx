@@ -151,7 +151,13 @@ export function PersistentBackgroundMusic() {
     audio.volume = 0;
 
     const storedEnabled = window.localStorage.getItem(ENABLED_KEY);
-    enabledRef.current = storedEnabled !== "0";
+    // Native Android/iOS apps never auto-play on launch; the header Play button
+    // still works. The website keeps auto-play unless the visitor paused it.
+    const isNativeApp = Boolean(
+      (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor
+        ?.isNativePlatform?.(),
+    );
+    enabledRef.current = isNativeApp ? false : storedEnabled !== "0";
 
     const storedTrack = Number(window.localStorage.getItem(TRACK_KEY));
     if (Number.isInteger(storedTrack) && storedTrack > 0 && storedTrack < PLAYLIST.length) {
