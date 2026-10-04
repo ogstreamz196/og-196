@@ -823,7 +823,7 @@ async function handleTelegramUpdate(
       return Response.json({ ok: true, me: true });
     }
     if (/^\/vip\b/i.test(trimmed)) {
-      const [{ data: p }, { data: sub }] = await Promise.all([
+      const [{ data: p }, { data: sub }, { data: vipRow }] = await Promise.all([
         admin
           .from("profiles")
           .select("display_name, og_vip_id, vip_trial_ends_at")
@@ -835,6 +835,12 @@ async function handleTelegramUpdate(
           .eq("user_id", linkedProfile.id)
           .order("current_period_end", { ascending: false })
           .limit(1)
+          .maybeSingle(),
+        admin
+          .from("user_roles")
+          .select("expires_at")
+          .eq("user_id", linkedProfile.id)
+          .eq("role", "vip")
           .maybeSingle(),
       ]);
       const now = Date.now();
@@ -868,6 +874,16 @@ async function handleTelegramUpdate(
           (p?.og_vip_id ? `🆔 <b>${p.og_vip_id}</b>\n` : "") +
           `📅 Trial ends: <b>${fmtDate(new Date(trialEnd).toISOString())}</b> (${daysLeft} day${daysLeft === 1 ? "" : "s"} left)\n\n` +
           `Upgrade in the app to keep VIP after the trial.`;
+      } else if (
+        roles.includes("vip") &&
+        vipRow?.expires_at &&
+        new Date(vipRow.expires_at).getTime() > now
+      ) {
+        const daysLeft = Math.ceil((new Date(vipRow.expires_at).getTime() - now) / 86400000);
+        body =
+          `👑 <b>You're OG VIP!</b>\n\n` +
+          (p?.og_vip_id ? `🆔 <b>${p.og_vip_id}</b>\n` : "") +
+          `📅 VIP ends: <b>${fmtDate(vipRow.expires_at)}</b> (${daysLeft} day${daysLeft === 1 ? "" : "s"} left)`;
       } else if (isVipRole) {
         body =
           `👑 <b>You're OG VIP!</b>\n\n` +

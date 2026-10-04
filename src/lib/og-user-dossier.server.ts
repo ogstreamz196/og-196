@@ -43,7 +43,7 @@ export async function loadUserDossier(admin: AnyClient, userId: string): Promise
       )
       .eq("id", userId)
       .maybeSingle(),
-    admin.from("user_roles").select("role").eq("user_id", userId),
+    admin.from("user_roles").select("role, expires_at").eq("user_id", userId),
     admin
       .from("subscriptions")
       .select("status, price_id, current_period_end, cancel_at_period_end, environment")
@@ -103,8 +103,13 @@ export async function loadUserDossier(admin: AnyClient, userId: string): Promise
       `- VIP: ${plan}, status ${sub.status}. ${sub.cancel_at_period_end ? `Auto-renew is OFF — VIP ends on ${fmtDate(sub.current_period_end)}.` : `Renews on ${fmtDate(sub.current_period_end)}.`} Billed via web card payment.`,
     );
   } else if (hasVipRole) {
+    const vipRow = (roles.data ?? []).find((r: { role: string }) => r.role === "vip") as
+      | { expires_at?: string | null }
+      | undefined;
     lines.push(
-      "- VIP: active (granted via app store subscription or by the Boss). Exact renewal date is managed in their Google Play / App Store account.",
+      vipRow?.expires_at
+        ? `- VIP: active, granted by the Boss. VIP ends on ${fmtDate(vipRow.expires_at)} (no auto-renew).`
+        : "- VIP: active with no end date (lifetime, Boss-granted or app store subscription).",
     );
   } else {
     lines.push(
