@@ -39,7 +39,7 @@ function AdminAuditHub() {
         <h1 className="font-display text-2xl font-black">Audit</h1>
         <p className="text-sm text-muted-foreground">Coin ledger and referral payouts.</p>
       </header>
-      <Tabs defaultValue="coins" className="w-full">
+      <Tabs defaultValue="card" className="w-full">
         <TabsList className="mb-5 flex h-auto w-full flex-wrap justify-start gap-4 rounded-none border-0 border-b border-border/60 bg-transparent p-0">
           {TABS.map(({ value, label, Icon }) => (
             <TabsTrigger

@@ -1021,7 +1021,7 @@ function PackCard({
         </div>
       )}
 
-      <div className="mt-3 flex items-center justify-between gap-1">{/* same top space on every card */}
+      <div className="mt-3 flex items-center justify-between gap-1">
         <span className="inline-flex min-w-0 items-center gap-1 truncate text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
           <TierIcon className="h-3 w-3 shrink-0" /> {tier.name}
         </span>
