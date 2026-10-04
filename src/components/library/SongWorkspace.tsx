@@ -704,7 +704,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
 
   return (
     <div className="space-y-6">
-      {isPending && (
+      {isPending && tab !== "preview" && (
         <div className="sticky top-2 z-30">
           <GeneratingProgress
             sampleSeconds={settings?.sample_seconds ?? 60}
@@ -1027,8 +1027,18 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                     ) : (
                       <Sparkles className="h-4 w-4" />
                     )}
-                    {hasLyrics ? "New lyrics + cook track" : "Write lyrics + cook track"}
+                    {hasLyrics ? "Re-write lyrics + cook" : "Write lyrics + cook track"}
                   </Button>
+                  {hasLyrics && (
+                    <Button
+                      variant="secondary"
+                      onClick={() => void cookCurrentLyrics()}
+                      disabled={genLyrics || genPreview || isPending || cooking || missing}
+                      className="col-span-2 min-w-0 gap-1.5 sm:col-span-1 sm:gap-2"
+                    >
+                      <Play className="h-4 w-4" /> Cook with my lyrics
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </CollapsibleContent>
@@ -1062,7 +1072,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                 {!hasLyrics && !genLyrics && (
                   <p className="text-sm text-muted-foreground">Generate lyrics in step 1 first.</p>
                 )}
-                {!isPending && (genLyrics || genPreview) && (
+                {!isPending && (genLyrics || genPreview || cooking) && (
                   <LyricsSkeleton songId={song.id} />
                 )}
                 {isPending && (
@@ -1080,7 +1090,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                     )}
                   </>
                 )}
-                {isFailed && (
+                {isFailed && !cooking && (
                   <div
                     role="alert"
                     className="space-y-3 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
@@ -1140,10 +1150,30 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                     </div>
                   </div>
                 )}
-                {isReady && !genLyrics && !genPreview && (
-                  <InlineSamplePlayer songId={song.id} unlocked={!!song.unlocked} />
+                {isReady && !genLyrics && !genPreview && !cooking && (
+                  <>
+                    {freshReady && (
+                      <div className="flex items-center justify-between gap-2 rounded-lg border border-primary/40 bg-primary/10 px-3 py-2 text-sm font-semibold text-primary">
+                        <span className="flex items-center gap-2">
+                          <Sparkles className="h-4 w-4" /> Your new take is ready!
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setTab("takes")}
+                          className="text-xs font-medium underline underline-offset-2"
+                        >
+                          Compare takes
+                        </button>
+                      </div>
+                    )}
+                    <InlineSamplePlayer
+                      key={`${song.id}-${song.completed_at ?? ""}`}
+                      songId={song.id}
+                      unlocked={!!song.unlocked}
+                    />
+                  </>
                 )}
-                {!isReady && (
+                {!isReady && !cooking && (
                 <div className="flex flex-wrap items-center justify-end gap-2">
                   <Button
                     onClick={() => void generatePreview()}
