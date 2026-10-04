@@ -14,10 +14,21 @@ import {
   getRoastOfTheDay,
   endBattle,
   getBattleLeaderboard,
+  listMyCommunityBlocks,
+  blockCommunityUser,
+  reportCommunityMessage,
   type BattleLeaderboardRow,
   type CommunityMessage,
 } from "@/lib/community.functions";
 import { supabase } from "@/integrations/supabase/client";
+import { Capacitor } from "@capacitor/core";
+import { MoreVertical } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/use-auth";
@@ -65,6 +76,36 @@ export function CommunityRoom() {
   const { foulMouth } = useFoulMouth();
   const { isDev, isAdmin } = useRole();
   const canClear = isDev || isAdmin;
+  // Report / Block are app-store safety tools — shown in the phone apps only.
+  const [nativeApp, setNativeApp] = useState(false);
+  useEffect(() => setNativeApp(Capacitor.isNativePlatform()), []);
+  const blocksFn = useServerFn(listMyCommunityBlocks);
+  const blockFn = useServerFn(blockCommunityUser);
+  const reportFn = useServerFn(reportCommunityMessage);
+  const { data: blockData } = useQuery({
+    queryKey: ["community-blocks"],
+    queryFn: () => blocksFn(),
+    enabled: !!myId,
+    staleTime: 60_000,
+  });
+  const blockedSet = useMemo(() => new Set(blockData?.blocked ?? []), [blockData]);
+  const reportMsg = async (id: string) => {
+    try {
+      await reportFn({ data: { messageId: id } });
+      toast.success("Thanks — reported. Our team reviews reports within 24 hours.");
+    } catch (e) {
+      toast.error((e as Error).message || "Couldn't send report");
+    }
+  };
+  const blockUser = async (uid: string) => {
+    try {
+      await blockFn({ data: { userId: uid } });
+      await qc.invalidateQueries({ queryKey: ["community-blocks"] });
+      toast.success("Blocked — you won't see their messages any more.");
+    } catch (e) {
+      toast.error((e as Error).message || "Couldn't block");
+    }
+  };
 
   const { data, isLoading } = useQuery({
     queryKey: ["community-messages"],
@@ -92,7 +133,10 @@ export function CommunityRoom() {
   });
   const [lastEarned, setLastEarned] = useState<number | null>(null);
   const pendingCoins = ((tally?.pendingTenths ?? 0) / 10).toFixed(2);
-  const messages: CommunityMessage[] = useMemo(() => data?.messages ?? [], [data?.messages]);
+  const messages: CommunityMessage[] = useMemo(
+    () => (data?.messages ?? []).filter((m) => !m.user_id || !blockedSet.has(m.user_id)),
+    [data?.messages, blockedSet],
+  );
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const composerRef = useRef<HTMLTextAreaElement>(null);
@@ -598,6 +642,27 @@ export function CommunityRoom() {
                             {m.content}
                           </p>
                         </div>
+                        {nativeApp && !mine && !isBot && m.user_id && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger
+                              aria-label="Message options"
+                              className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-muted-foreground"
+                            >
+                              <MoreVertical className="h-3.5 w-3.5" />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="start">
+                              <DropdownMenuItem onSelect={() => void reportMsg(m.id)}>
+                                Report message
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-destructive"
+                                onSelect={() => void blockUser(m.user_id!)}
+                              >
+                                Block user
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
                       </div>
                     </div>
                   );
