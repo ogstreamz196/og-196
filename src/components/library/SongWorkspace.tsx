@@ -1150,7 +1150,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                   disabled={
                     unlocking ||
                     (!song.unlocked && balance < unlockCost) ||
-                    (song.unlocked && (!isReady || !song.audio_path))
+                    (!!song.unlocked && (!isReady || !song.audio_path))
                   }
                   variant={song.unlocked ? "default" : "outline"}
                   className="h-12 w-full gap-2"
