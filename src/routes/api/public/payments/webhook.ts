@@ -261,6 +261,19 @@ async function grantVipFromCheckout(session: any, env: StripeEnv) {
     return;
   }
   await grantVipRole(userId, { sessionId: session.id, env, source: "checkout" });
+  // Member chose "don't auto-renew" before checkout: switch renewal off now.
+  // They keep VIP for the full paid year; Stripe ends the plan after that.
+  if (session?.metadata?.noAutoRenew === "1" && session?.subscription) {
+    try {
+      const { createStripeClient } = await import("@/lib/stripe.server");
+      const subId =
+        typeof session.subscription === "string" ? session.subscription : session.subscription.id;
+      await createStripeClient(env).subscriptions.update(subId, { cancel_at_period_end: true });
+      log("info", "auto-renew disabled at checkout", { subId, userId });
+    } catch (e) {
+      log("error", "disable auto-renew failed", { sessionId: session.id, err: String(e) });
+    }
+  }
   if (isYearlyPrice(session?.metadata?.bundleId)) {
     await assignOgVipId(userId, { sessionId: session.id, env });
   }

@@ -163,7 +163,12 @@ export const createCoinCheckoutSession = createServerFn({ method: "POST" })
 export const createVipCheckoutSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(
-    (data: { returnUrl: string; environment: StripeEnv; plan?: "monthly" | "yearly" }) => {
+    (data: {
+      returnUrl: string;
+      environment: StripeEnv;
+      plan?: "monthly" | "yearly";
+      noAutoRenew?: boolean;
+    }) => {
       if (data.environment !== "sandbox" && data.environment !== "live") {
         throw new Error("Invalid environment");
       }
@@ -207,11 +212,13 @@ export const createVipCheckoutSession = createServerFn({ method: "POST" })
           userId,
           bundleId: plan.bundleId,
           environment: data.environment,
+          ...(data.noAutoRenew && data.plan === "yearly" ? { noAutoRenew: "1" } : {}),
         },
         subscription_data: {
           metadata: {
             userId,
             bundleId: plan.bundleId,
+            ...(data.noAutoRenew && data.plan === "yearly" ? { noAutoRenew: "1" } : {}),
           },
         },
       });

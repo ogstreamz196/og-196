@@ -119,6 +119,7 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const createVipCheckout = useServerFn(createVipCheckoutSession);
+  const [noAutoRenew, setNoAutoRenew] = useState(false);
   const createCustomCheckout = useServerFn(createCustomCoinCheckoutSession);
   const createCoinCheckout = useServerFn(createCoinCheckoutSession);
   const { isVip, hasVipRole, isDev, isLoading: roleLoading } = useRole();
@@ -354,6 +355,20 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                         ? `Cancel whenever you like. You'll still keep VIP and every perk until your full year is up (${new Date(Date.now() + 365 * 864e5).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}). Renews yearly unless cancelled. You'll also get your own OG VIP ID.`
                         : "Cancel whenever you like. You'll keep VIP until the end of the month you've paid for. Renews monthly unless cancelled."}
                     </p>
+                    {vipYearly && !Capacitor.isNativePlatform() && (
+                      <label className="mt-3 flex cursor-pointer items-start gap-2.5 border-t border-coin/25 pt-3 text-xs text-muted-foreground">
+                        <input
+                          type="checkbox"
+                          checked={noAutoRenew}
+                          onChange={(e) => setNoAutoRenew(e.target.checked)}
+                          className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--color-coin,currentColor)]"
+                        />
+                        <span>
+                          <span className="font-semibold text-foreground">Don't auto-renew</span>{" "}
+                          — pay once for the year. VIP stays on until it ends, with no renewal charge.
+                        </span>
+                      </label>
+                    )}
                   </div>
                 )}
 
@@ -500,6 +515,7 @@ export function CoinStore({ editMode }: { editMode?: 1 }) {
                                     returnUrl,
                                     environment: getStripeEnvironment(),
                                     plan: vipYearly ? "yearly" : "monthly",
+                                    noAutoRenew: vipYearly && noAutoRenew,
                                   },
                                 });
                               } else if (isCustomFlow) {
