@@ -76,6 +76,8 @@ export function FreshTrackCard({
     };
   }, [song.id, unlocked]);
   const title = song.title || "Your track";
+  // Never offer a download until the finished master exists.
+  const fullReady = song.status === "completed" && !!song.audio_path;
   const cap = Math.max(5, sampleSeconds);
 
   // Fetch the preview URL and start playing straight away.
@@ -266,17 +268,21 @@ export function FreshTrackCard({
           <Button
             type="button"
             onClick={() => setUnlockOpen(true)}
-            disabled={busy}
+            disabled={busy || (unlocked && !fullReady)}
             className="min-h-12 w-full gap-2 rounded-2xl bg-gradient-brand font-black uppercase tracking-[0.12em] text-primary-foreground shadow-glow sm:col-span-2"
           >
-            {busy ? (
+            {busy || (unlocked && !fullReady) ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : unlocked ? (
               <Download className="h-4 w-4" />
             ) : (
               <Lock className="h-4 w-4" />
             )}
-            {unlocked ? "Download full track" : `Unlock full version · ${unlockCost} coins`}
+            {unlocked
+              ? fullReady
+                ? "Download full track"
+                : "Download pending…"
+              : `Unlock full version · ${unlockCost} coins`}
           </Button>
           {unlocked && (
             <Button
