@@ -1,6 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, Library, MessageCircle, ShoppingBag, Sparkles } from "lucide-react";
-import type { ComponentType } from "react";
+import { useEffect, type ComponentType } from "react";
 
 type Tab = {
   to: string;
@@ -27,8 +27,37 @@ const TABS: Tab[] = [
   { to: "/referrals", label: "Earn", icon: Sparkles, match: (p) => p.startsWith("/referrals") },
 ];
 
+function isTypingTarget(el: Element | null) {
+  if (!el) return false;
+  if (el instanceof HTMLTextAreaElement) return true;
+  if (el instanceof HTMLInputElement)
+    return !["checkbox", "radio", "button", "submit", "range", "file"].includes(el.type);
+  return (el as HTMLElement).isContentEditable === true;
+}
+
 export function MobileBottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  // While a phone keyboard is up, hide the bottom bar so typing areas can sit
+  // flush above the keyboard instead of being squeezed behind it.
+  useEffect(() => {
+    if (!window.matchMedia?.("(pointer: coarse)").matches) return;
+    const root = document.documentElement;
+    const sync = () => {
+      const on = isTypingTarget(document.activeElement);
+      if (on) root.dataset["kb"] = "1";
+      else delete root.dataset["kb"];
+      window.dispatchEvent(new Event("og:kb"));
+    };
+    const onOut = () => window.setTimeout(sync, 50);
+    document.addEventListener("focusin", sync);
+    document.addEventListener("focusout", onOut);
+    return () => {
+      document.removeEventListener("focusin", sync);
+      document.removeEventListener("focusout", onOut);
+      delete root.dataset["kb"];
+    };
+  }, []);
 
   return (
     <nav
