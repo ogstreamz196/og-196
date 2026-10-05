@@ -48,66 +48,59 @@ const SPORTS_LOCKED_PROMPT = `SPORTS GUIDE LOCKED — HARD RULE: This user has N
 3. Once unlocked, the full live match centre is at https://www.ogbot.co.uk/sports and you'll answer every fixture question.
 Keep it short and punchy.`;
 
-/** Returns a prompt block, or "" when the message isn't about sport. */
+/** Returns a prompt block, or "" when the message isn't about sport.
+ * Always checks the parsed feed for team/event names, so "when does Swansea
+ * play next" works even without sporty words. */
 export async function buildSportsGuideContext(admin: Admin, userId: string, text: string): Promise<string> {
-  if (!detectSportsIntent(text)) return "";
+  if (!text?.trim()) return "";
+  const words = keywords(text);
+  if (!detectSportsIntent(text) && !words.length) return "";
+
+  const { parseListing, dedupe } = await import("./sports-listing");
+  const { data } = await admin
+    .from("sports_guide_posts")
+    .select("id, raw_text, posted_at, telegram_message_id")
+    .gte("posted_at", new Date(Date.now() - 10 * 86_400_000).toISOString())
+    .order("posted_at", { ascending: false })
+    .limit(120);
+  const fixtures = dedupe(data ?? []).map(parseListing).flatMap((l) => l.fixtures);
+  const seen = new Set<string>();
+  const uniq = fixtures.filter((f) => !seen.has(f.raw) && seen.add(f.raw));
+
+  const score = (f: (typeof uniq)[number]) => {
+    const hay = `${f.event} ${f.channel}`.toLowerCase();
+    return words.filter((w) => hay.includes(w)).length;
+  };
+  const hits = words.length
+    ? uniq
+        .filter((f) => score(f) > 0)
+        .sort((a, b) => score(b) - score(a) || (a.at?.getTime() ?? 0) - (b.at?.getTime() ?? 0))
+    : [];
+
+  // Not a sports question and nothing in the feed matches — stay out of the way.
+  if (!detectSportsIntent(text) && !hits.length) return "";
+
   const { data: access } = await admin.rpc("has_sports_guide_access", { _user: userId });
   if (!access) return SPORTS_LOCKED_PROMPT;
 
-  const words = keywords(text);
-  const since = new Date(Date.now() - 10 * 86_400_000).toISOString();
-  let rows: { raw_text: string; posted_at: string; sport_category: string; event_time: string | null; telegram_message_id: number }[] = [];
-  if (words.length) {
-    const or = words.map((w) => `raw_text.ilike.%${w.replace(/[%,()]/g, "")}%`).join(",");
-    const { data } = await admin
-      .from("sports_guide_posts")
-      .select("raw_text, posted_at, sport_category, event_time, telegram_message_id")
-      .or(or)
-      .gte("posted_at", since)
-      .order("posted_at", { ascending: false })
-      .limit(40);
-    rows = data ?? [];
-    // Rank by how many keywords each post contains.
-    rows.sort(
-      (a, b) =>
-        words.filter((w) => b.raw_text.toLowerCase().includes(w)).length -
-        words.filter((w) => a.raw_text.toLowerCase().includes(w)).length,
-    );
-  }
-  if (!rows.length) {
-    const { data } = await admin
-      .from("sports_guide_posts")
-      .select("raw_text, posted_at, sport_category, event_time, telegram_message_id")
-      .gte("posted_at", new Date(Date.now() - 2 * 86_400_000).toISOString())
-      .order("posted_at", { ascending: false })
-      .limit(12);
-    rows = data ?? [];
-  }
-
   const now = fmtDay(new Date().toISOString());
-  if (!rows.length) {
+  const cutoff = Date.now() - 3 * 3_600_000;
+  const pool = hits.length
+    ? hits
+    : uniq.filter((f) => f.at && f.at.getTime() > cutoff).sort((a, b) => a.at!.getTime() - b.at!.getTime());
+  const list = pool
+    .slice(0, 40)
+    .map((f) => `• ${f.at ? fmtDay(f.at.toISOString()) + " UK" : "time not listed"} — ${f.event} — 📺 ${f.channel}`);
+
+  if (!list.length) {
     return `SPORTS GUIDE (current UK time: ${now}): The Sports Guide feed has no matching events right now. Say so honestly, don't invent fixtures or channels, and point them to https://www.ogbot.co.uk/sports for the live list.`;
   }
 
-  let budget = 9000;
-  const blocks: string[] = [];
-  for (const r of rows.slice(0, 15)) {
-    const cat = SPORT_CATEGORIES.find((c) => c.id === r.sport_category)?.label ?? "Other";
-    const body = r.raw_text.replace(/\n?•\s*Sent via TeleFeed\s*$/i, "").trim().slice(0, 1800);
-    const block = `--- Post (${cat}) published ${fmtDay(r.posted_at)} UK\n${body}`;
-    if (budget - block.length < 0) break;
-    budget -= block.length;
-    blocks.push(block);
-  }
+  return `SPORTS GUIDE FIXTURES (the user's unlocked OG Sports Guide — trusted, already searched for you). Current UK time: ${now}.
+${hits.length ? "These fixtures MATCH the user's question. Answer from them straight away, first time, confidently. NEVER say you can't see it, and never send them to BBC, club sites or anywhere else." : "No exact match for their words; these are the next upcoming fixtures."}
+Answer with: the event, day + date, UK kick-off time, how long until it starts, and EVERY channel listed for it as bullets. If they ask "next", give the soonest upcoming one first. Never invent fixtures. Plain text only, no markdown asterisks. Never mention any Telegram channel or t.me link. You may mention https://www.ogbot.co.uk/sports.
 
-  return `SPORTS GUIDE FEED (the user's unlocked OG Sports Guide — trusted source). Current UK time: ${now}.
-When the user asks about an event:
-1. Find it in the posts below. Work out the exact day and date from the post's publish date (times in posts are UK time; "today"/"tonight" means the publish date; a time earlier than the publish time usually means the next day).
-2. Answer with: the event, the day + date, the UK kick-off/start time, and how long until it starts if it's soon.
-3. List EVERY channel/broadcaster the posts mention for that event as a short bullet list (e.g. Sky Sports Main Event, TNT Sports 1, DAZN). If no channel is listed, say the guide doesn't name one.
-4. If several matching events exist, list them in time order. Never invent fixtures, times or channels that aren't in the posts. Mention https://www.ogbot.co.uk/sports for the full live list. Never share or mention any Telegram channel or t.me link.
-
-${blocks.join("\n\n")}`;
+${list.join("\n")}`;
 }
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
