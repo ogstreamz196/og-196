@@ -46,9 +46,7 @@ const fmtDay = (iso: string) =>
 export async function buildSportsGuideContext(admin: Admin, userId: string, text: string): Promise<string> {
   if (!detectSportsIntent(text)) return "";
   const { data: access } = await admin.rpc("has_sports_guide_access", { _user: userId });
-  if (!access) {
-    return `SPORTS GUIDE: The user asked about sport, but they haven't unlocked the OG Sports Guide. Don't list fixtures or channels from it. Tell them in your voice it's free for VIP (including the 15-day free trial) or can be unlocked in the Store, and the page is https://www.ogbot.co.uk/sports.`;
-  }
+  if (!access) return SPORTS_LOCKED_PROMPT;
 
   const words = keywords(text);
   const since = new Date(Date.now() - 10 * 86_400_000).toISOString();
