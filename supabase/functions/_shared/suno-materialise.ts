@@ -270,12 +270,25 @@ export async function materialiseClips(
       continue;
     }
 
-    // Mark completed now — the UI can play the sample immediately.
+    // Save the full master alongside the sample before marking completed.
+    let savedFullPath: string | null = null;
+    if (fullBuf && fullBuf.byteLength > 0) {
+      const fullPath = `${userId}/${targetId}.mp3`;
+      const { error: fullUpErr } = await admin.storage.from("song-files").upload(fullPath, fullBuf, {
+        contentType: "audio/mpeg",
+        upsert: true,
+        metadata: ownerMeta(userId, targetId, "full"),
+      } as any);
+      if (fullUpErr) console.error("Full upload failed for", targetId, fullUpErr);
+      else savedFullPath = fullPath;
+    }
+
     await admin
       .from("songs")
       .update({
         status: "completed",
         sample_path: samplePath,
+        ...(savedFullPath ? { audio_path: savedFullPath } : {}),
         cover_url: clip.coverUrl ?? null,
         title: clip.title ?? parentSong.title,
         suno_clip_id: clip.clipId ?? null,
@@ -288,8 +301,9 @@ export async function materialiseClips(
 
     result.completed += 1;
     if (targetId === songId) result.parentCompleted = true;
+    if (savedFullPath) continue;
 
-    // --- Phase 2: full download (background where available) ---
+    // --- Phase 2 (fallback only): full download retried in the background ---
     const finalId = targetId;
     const audioUrl = clip.audioUrl!;
     const bgTask = (async () => {
