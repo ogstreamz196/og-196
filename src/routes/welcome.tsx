@@ -1,3 +1,4 @@
+import { ForgotPasswordDialog } from "@/components/auth/ForgotPasswordDialog";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import ogStreamzLogo from "@/assets/ogstreamz-logo.jpg.asset.json";
 import { Capacitor } from "@capacitor/core";
