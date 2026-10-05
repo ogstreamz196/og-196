@@ -188,7 +188,7 @@ export function StoreItemCard({
           size="sm"
           onClick={() => {
             if (ownsSportsGuide) {
-              window.location.assign("/sports-guide");
+              window.location.assign("/sports");
               return;
             }
             onBuy(item.id);

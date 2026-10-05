@@ -13,7 +13,7 @@ import { getSportsGuideHub, toggleSportsGuideReminder, type SportsGuidePost } fr
 import { purchaseSportsGuideAccess } from "@/lib/store.functions";
 import { SPORT_CATEGORIES, SPORTS_GUIDE_USERNAME, expandQuery } from "@/lib/sports-guide-parse";
 
-export const Route = createFileRoute("/_authenticated/sports-guide")({
+export const Route = createFileRoute("/_authenticated/sports")({
   head: () => ({
     meta: [
       { title: "Sports Guide · OG BOT" },
@@ -208,6 +208,12 @@ function SportsGuidePage() {
               </Button>
             )}
             <p className="text-center text-[11px] text-muted-foreground">One-time unlock · yours to keep</p>
+            <Link
+              to="/buy-coins"
+              className="block rounded-xl border border-coin/40 bg-coin/10 px-4 py-3 text-center text-xs font-bold text-coin"
+            >
+              👑 Free for VIP members — including the 15-day free trial. Go VIP →
+            </Link>
           </div>
         </div>
       </div>
