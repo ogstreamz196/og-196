@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
@@ -192,6 +192,10 @@ export function OgChat({
   // Attachment + mic state
   const [attachment, setAttachment] = useState<{ dataUrl: string; name: string } | null>(null);
   const [editMode, setEditMode] = useState(false);
+  // Conversation image memory: the photo the user last attached this session
+  // (kept in memory only) — later edits reuse it without re-attaching.
+  const [lastUpload, setLastUpload] = useState<string | null>(null);
+  const [memoryOff, setMemoryOff] = useState(false);
   const [noCoinsOpen, setNoCoinsOpen] = useState(false);
   const [vipPromoOpen, setVipPromoOpen] = useState(false);
   const fetchEditStatus = useServerFn(getImageEditStatus);
@@ -203,7 +207,8 @@ export function OgChat({
     refetchInterval: 60_000,
   });
   const imageEdit = useMutation({
-    mutationFn: (args: { prompt: string; imageDataUrl: string }) => runImageEdit({ data: args }),
+    mutationFn: (args: { prompt: string; imageDataUrl?: string; imageUrl?: string }) =>
+      runImageEdit({ data: args }),
     onSuccess: (res) => {
       if (!res.ok) {
         setMessages((cur) => [
@@ -219,6 +224,7 @@ export function OgChat({
       const note = res.free
         ? "Free edit used — next free one in 4 hours."
         : "Edit done · -1 coin.";
+      setMemoryOff(false);
       setMessages((cur) => [
         ...cur,
         {
@@ -246,7 +252,7 @@ export function OgChat({
     const composer = inputRef.current;
     if (!composer) return;
     composer.style.height = "0px";
-    composer.style.height = `${Math.min(Math.max(composer.scrollHeight, 56), 144)}px`;
+    composer.style.height = `${Math.min(Math.max(composer.scrollHeight, 40), 128)}px`;
   }, [input]);
 
   // Anti-flicker skeleton: stays visible at least 600ms once shown so quick
@@ -428,6 +434,18 @@ export function OgChat({
     return () => clearTimeout(t);
   }, [m.isPending, showSkeleton]);
 
+  // Latest image in the conversation: newest bot edit, else the last upload.
+  const memoryImage = useMemo(() => {
+    if (memoryOff) return null;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const msg = messages[i];
+      if (msg.role !== "assistant") continue;
+      const hit = /!\[[^\]]*\]\((https:\/\/[^)\s]+)\)/.exec(msg.content);
+      if (hit) return hit[1];
+    }
+    return lastUpload;
+  }, [messages, lastUpload, memoryOff]);
+
   function sendText(text: string, opts?: { forcePrivate?: boolean }) {
     const t = text.trim();
     const att = attachment;
@@ -467,7 +485,7 @@ export function OgChat({
     }
 
     const EDIT_INTENT =
-      /\b(edit|change|turn (it|this|me|him|her|them)|make (it|this|me|him|her|them)|add|remove|replace|swap|put|convert|transform|restyle|style|cartoon|anime|pixar|sketch|paint|draw|colou?ri[sz]e|background|filter|enhance|upscale|blur|brighten|darken|into a|as a|look like)\b/i;
+      /\b(edit|change|turn (it|this|me|him|her|them)|make (it|this|me|him|her|them)|add|remove|replace|swap|put|convert|transform|restyle|style|cartoon|anime|pixar|sketch|paint|draw|colou?ri[sz]e|background|filter|enhance|upscale|blur|brighten|darken|into a|as a|look like|now make|bigger|smaller|give (him|her|them|it))\b/i;
     const wantsEdit = !!att && (editMode || EDIT_INTENT.test(t));
     if (att && wantsEdit) {
       if (imageEdit.isPending) return;
@@ -476,7 +494,22 @@ export function OgChat({
       setInput("");
       setAttachment(null);
       setEditMode(false);
+      setLastUpload(att.dataUrl);
+      setMemoryOff(false);
       imageEdit.mutate({ prompt: t, imageDataUrl: att.dataUrl });
+      return;
+    }
+
+    // Follow-up edit on the latest image in this conversation — no re-attach.
+    if (!att && memoryImage && t && EDIT_INTENT.test(t)) {
+      if (imageEdit.isPending) return;
+      setMessages((cur) => [...cur, { role: "user", content: `🎨 Edit image: ${t}` }]);
+      setInput("");
+      imageEdit.mutate(
+        memoryImage.startsWith("data:")
+          ? { prompt: t, imageDataUrl: memoryImage }
+          : { prompt: t, imageUrl: memoryImage },
+      );
       return;
     }
 
@@ -488,11 +521,16 @@ export function OgChat({
     window.dispatchEvent(new Event(SYNC_EVENT));
     setInput("");
     setAttachment(null);
+    if (att) {
+      setLastUpload(att.dataUrl);
+      setMemoryOff(false);
+    }
     m.mutate({ history: next, attachmentDataUrl: att?.dataUrl });
   }
 
   function clearChat() {
     setMessages([]);
+    setLastUpload(null);
     selfSyncRef.current = true;
     window.dispatchEvent(new Event(SYNC_EVENT));
     toast.message("Chat cleared");
@@ -676,10 +714,25 @@ export function OgChat({
               </span>
             </span>
             {/* OG/Safe mode toggle removed — Foul Mouth is the single tone control. */}
+            <label className="relative inline-flex h-8 items-center rounded-lg border border-amber-400/50 bg-amber-400/10 px-2 text-[10px] font-bold text-amber-600 dark:text-amber-300 sm:hidden">
+              🌐 {language.slice(0, 2).toUpperCase()}
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                className="absolute inset-0 opacity-0"
+                aria-label="Reply language"
+              >
+                {OG_LANGUAGES.map((l) => (
+                  <option key={l} value={l}>
+                    {l}
+                  </option>
+                ))}
+              </select>
+            </label>
             <select
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
-              className="h-8 max-w-[88px] rounded-lg border border-amber-400/50 bg-amber-400/10 px-1.5 text-[10px] font-bold text-amber-600 transition hover:bg-amber-400/20 focus:outline-none focus:ring-2 focus:ring-amber-400/50 dark:text-amber-300 sm:h-auto sm:max-w-none sm:border-2 sm:px-3 sm:py-1.5 sm:text-[12px]"
+              className="hidden h-8 max-w-[88px] rounded-lg border border-amber-400/50 bg-amber-400/10 px-1.5 text-[10px] font-bold text-amber-600 transition hover:bg-amber-400/20 focus:outline-none focus:ring-2 focus:ring-amber-400/50 dark:text-amber-300 sm:block sm:h-auto sm:max-w-none sm:border-2 sm:px-3 sm:py-1.5 sm:text-[12px]"
               title="Reply language"
               aria-label="Reply language"
             >
@@ -946,6 +999,25 @@ export function OgChat({
             </button>
           </div>
         )}
+        {!attachment && memoryImage && (
+          <div
+            data-testid="ogchat-image-memory"
+            className="mb-1.5 flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/10 px-2 py-1"
+          >
+            <img src={memoryImage} alt="" className="h-7 w-7 rounded object-cover" />
+            <span className="min-w-0 flex-1 truncate text-[11px] text-foreground">
+              Editing your last image — just type the next change
+            </span>
+            <button
+              type="button"
+              onClick={() => setMemoryOff(true)}
+              className="rounded p-1 text-muted-foreground hover:text-foreground"
+              aria-label="Stop editing this image"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
         {attachment && (
           <div className="mb-2 space-y-2 rounded-xl border border-border bg-muted/40 p-2">
             <div className="flex items-center gap-2">
@@ -1080,7 +1152,7 @@ export function OgChat({
             aria-label="Message OG Bot in Loner Mode"
             data-testid="og-loner-composer"
             style={{ touchAction: "manipulation" }}
-            className="min-h-14 max-h-36 flex-1 resize-none overflow-y-auto bg-transparent px-2 py-2 text-base leading-5 placeholder:text-muted-foreground/70 focus:outline-none disabled:cursor-not-allowed sm:px-2.5 sm:text-[15px]"
+            className="min-h-10 max-h-32 flex-1 resize-none overflow-y-auto bg-transparent px-2 py-2.5 text-base leading-5 placeholder:text-muted-foreground/70 focus:outline-none disabled:cursor-not-allowed sm:px-2.5 sm:text-[15px]"
           />
           {attachment && editMode ? (
             <button

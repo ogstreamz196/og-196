@@ -99,6 +99,31 @@ function MessengerPage() {
 
   const { ref: fillRef, height: fillHeight } = useFillViewport<HTMLDivElement>(0);
 
+  // Lock the outer page on the messenger so only the chat list scrolls and the
+  // phone keyboard can't shove the header off the top of the screen.
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const prev = [html.style.overflow, body.style.overflow, html.style.overscrollBehavior];
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    html.style.overscrollBehavior = "none";
+    const pin = () => {
+      if (window.scrollY !== 0) window.scrollTo(0, 0);
+    };
+    window.addEventListener("scroll", pin, { passive: true });
+    window.visualViewport?.addEventListener("resize", pin);
+    return () => {
+      [html.style.overflow, body.style.overflow, html.style.overscrollBehavior] = prev as [
+        string,
+        string,
+        string,
+      ];
+      window.removeEventListener("scroll", pin);
+      window.visualViewport?.removeEventListener("resize", pin);
+    };
+  }, []);
+
   return (
     <DashboardShell title={modeHeading(mode)}>
       <div

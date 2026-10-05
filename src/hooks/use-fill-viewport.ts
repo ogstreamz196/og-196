@@ -28,7 +28,9 @@ export function useFillViewport<T extends HTMLElement>(bottomGutter = 0) {
       // shift the measurement by its offset or the panel overshoots the screen.
       const top = el.getBoundingClientRect().top - (vv?.offsetTop ?? 0);
       const nav = document.querySelector("nav.safe-bottom.fixed") as HTMLElement | null;
-      const keyboardOpen = vv ? window.innerHeight - vv.height > 120 : false;
+      const keyboardOpen =
+        document.documentElement.dataset["kb"] === "1" ||
+        (vv ? window.innerHeight - vv.height > 120 : false);
       // The mobile bottom nav is fixed — stop the panel at its top edge. While
       // the keyboard is up the nav is pushed off-screen, so ignore it then.
       const limit =
@@ -55,11 +57,13 @@ export function useFillViewport<T extends HTMLElement>(bottomGutter = 0) {
       });
     }
 
-    // Keyboard slide-in: wait until the viewport stops moving, then commit once.
+    // Keyboard slide-in: measure on the next frame (coalesced) and once more
+    // after the animation settles, so the composer never hides behind it.
     let settle = 0;
     function measureSettled() {
+      measure();
       window.clearTimeout(settle);
-      settle = window.setTimeout(measure, 120);
+      settle = window.setTimeout(measure, 200);
     }
 
     compute();
@@ -67,9 +71,10 @@ export function useFillViewport<T extends HTMLElement>(bottomGutter = 0) {
     const timers = [60, 250, 800].map((ms) => window.setTimeout(measure, ms));
     const ro = new ResizeObserver(measure);
     ro.observe(document.body);
-    window.addEventListener("resize", measure);
+    window.addEventListener("resize", measureSettled);
     window.addEventListener("orientationchange", measure);
     window.addEventListener("pageshow", measure);
+    window.addEventListener("og:kb", measureSettled);
     window.visualViewport?.addEventListener("resize", measureSettled);
     window.visualViewport?.addEventListener("scroll", measureSettled);
     return () => {
@@ -77,9 +82,10 @@ export function useFillViewport<T extends HTMLElement>(bottomGutter = 0) {
       window.clearTimeout(settle);
       timers.forEach(clearTimeout);
       ro.disconnect();
-      window.removeEventListener("resize", measure);
+      window.removeEventListener("resize", measureSettled);
       window.removeEventListener("orientationchange", measure);
       window.removeEventListener("pageshow", measure);
+      window.removeEventListener("og:kb", measureSettled);
       window.visualViewport?.removeEventListener("resize", measureSettled);
       window.visualViewport?.removeEventListener("scroll", measureSettled);
     };
