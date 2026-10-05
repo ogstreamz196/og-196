@@ -104,6 +104,8 @@ export const setTelegramWebhook = createServerFn({ method: "POST" })
       { command: "help", description: "Show menu" },
       { command: "balance", description: "Your OG coin balance" },
       { command: "library", description: "Open your song library" },
+      { command: "vip", description: "Your VIP status and expiry" },
+      { command: "sports", description: "Open the Sports Guide" },
       { command: "buy", description: "Top up OG coins" },
       { command: "me", description: "Your profile" },
     ];
@@ -128,8 +130,30 @@ export const setTelegramWebhook = createServerFn({ method: "POST" })
         body: JSON.stringify({ commands, scope }),
       }).catch(() => undefined);
     };
+    // Everyone (incl. all private DMs) sees only public commands.
     await setCommands({ type: "default" }, publicCommands);
-    await setCommands({ type: "all_private_chats" }, adminCommands);
+    await setCommands({ type: "all_private_chats" }, publicCommands);
+    // Admin commands are scoped to each boss's own Telegram chat only.
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: roleRows } = await supabaseAdmin
+        .from("user_roles")
+        .select("user_id")
+        .in("role", ["admin"]);
+      const ids = Array.from(new Set((roleRows ?? []).map((r) => r.user_id as string)));
+      if (ids.length) {
+        const { data: profs } = await supabaseAdmin
+          .from("profiles")
+          .select("telegram_chat_id")
+          .in("id", ids)
+          .not("telegram_chat_id", "is", null);
+        for (const p of (profs ?? []) as { telegram_chat_id: number }[]) {
+          await setCommands({ type: "chat", chat_id: p.telegram_chat_id }, adminCommands);
+        }
+      }
+    } catch (e) {
+      console.warn("[telegram] boss command scope failed", e);
+    }
 
     return {
       ok: true,
