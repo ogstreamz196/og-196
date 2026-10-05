@@ -621,7 +621,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   async function unlockFull() {
     if (!isReady) return;
     // Already-unlocked owners skip the confirmation modal — they've already paid.
-    if (song.unlocked) {
+    if (ownsFull) {
       await performUnlock();
       return;
     }
@@ -633,11 +633,13 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   }
 
   const navigate = useNavigate();
-  const { isVip: isVipUser } = useRole();
+  const { isVip: isVipUser, isBoss } = useRole();
+  // Boss accounts play and download everything, so treat them as owners.
+  const ownsFull = !!song.unlocked || !!isBoss;
   async function performUnlock() {
     setUnlocking(true);
     try {
-      if (!song.unlocked) {
+      if (!ownsFull) {
         const { data, error } = await supabase.functions.invoke("unlock-full-song", {
           body: { song_id: song.id },
         });
@@ -1213,7 +1215,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
               <>
 
 
-                {!song.unlocked && balance < unlockCost && (
+                {!ownsFull && balance < unlockCost && (
                   <div className="flex items-start gap-3 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
                     <Coins className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
                     <div className="flex-1">
@@ -1235,23 +1237,23 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                   onClick={unlockFull}
                   disabled={!!(
                     unlocking ||
-                    (!song.unlocked && balance < unlockCost) ||
-                    (!!song.unlocked && (!isReady || !song.audio_path))
+                    (!ownsFull && balance < unlockCost) ||
+                    (ownsFull && (!isReady || !song.audio_path))
                   )}
-                  variant={song.unlocked ? "default" : "outline"}
+                  variant={ownsFull ? "default" : "outline"}
                   className="h-12 w-full gap-2"
                   aria-live="polite"
                 >
                   {unlocking ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      {song.unlocked ? "Preparing download…" : "Processing payment…"}
+                      {ownsFull ? "Preparing download…" : "Processing payment…"}
                     </>
-                  ) : song.unlocked && (!isReady || !song.audio_path) ? (
+                  ) : ownsFull && (!isReady || !song.audio_path) ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" /> Download pending — finishing track…
                     </>
-                  ) : song.unlocked ? (
+                  ) : ownsFull ? (
                     <>
                       <Download className="h-4 w-4" /> Download to device
                     </>
