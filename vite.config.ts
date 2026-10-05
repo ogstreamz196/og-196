@@ -52,6 +52,8 @@ export default defineConfig({
           // Opens the track page when a "track ready" notification is tapped.
           importScripts: ["/sw-notify.js"],
           cleanupOutdatedCaches: true,
+          skipWaiting: true,
+          clientsClaim: true,
           maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
           runtimeCaching: [
             {
