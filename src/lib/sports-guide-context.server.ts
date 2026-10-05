@@ -94,7 +94,7 @@ export async function buildSportsGuideContext(admin: Admin, userId: string, text
   for (const r of rows.slice(0, 15)) {
     const cat = SPORT_CATEGORIES.find((c) => c.id === r.sport_category)?.label ?? "Other";
     const body = r.raw_text.replace(/\n?•\s*Sent via TeleFeed\s*$/i, "").trim().slice(0, 1800);
-    const block = `--- Post (${cat}) published ${fmtDay(r.posted_at)} UK · https://t.me/OGSPORTSGUIDE/${r.telegram_message_id}\n${body}`;
+    const block = `--- Post (${cat}) published ${fmtDay(r.posted_at)} UK\n${body}`;
     if (budget - block.length < 0) break;
     budget -= block.length;
     blocks.push(block);
@@ -105,7 +105,7 @@ When the user asks about an event:
 1. Find it in the posts below. Work out the exact day and date from the post's publish date (times in posts are UK time; "today"/"tonight" means the publish date; a time earlier than the publish time usually means the next day).
 2. Answer with: the event, the day + date, the UK kick-off/start time, and how long until it starts if it's soon.
 3. List EVERY channel/broadcaster the posts mention for that event as a short bullet list (e.g. Sky Sports Main Event, TNT Sports 1, DAZN). If no channel is listed, say the guide doesn't name one.
-4. If several matching events exist, list them in time order. Never invent fixtures, times or channels that aren't in the posts. Mention https://www.ogbot.co.uk/sports for the full live list.
+4. If several matching events exist, list them in time order. Never invent fixtures, times or channels that aren't in the posts. Mention https://www.ogbot.co.uk/sports for the full live list. Never share or mention any Telegram channel or t.me link.
 
 ${blocks.join("\n\n")}`;
 }
