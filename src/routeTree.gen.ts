@@ -25,6 +25,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SignInReturnRouteImport } from './routes/sign-in-return'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SportsGuideRouteImport } from './routes/sports-guide'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TrustRouteImport } from './routes/trust'
 import { Route as WelcomeRouteImport } from './routes/welcome'
@@ -40,7 +41,7 @@ import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedPurchaseHistoryRouteImport } from './routes/_authenticated/purchase-history'
 import { Route as AuthenticatedReferralsRouteImport } from './routes/_authenticated/referrals'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
-import { Route as AuthenticatedSportsGuideRouteImport } from './routes/_authenticated/sports-guide'
+import { Route as AuthenticatedSportsRouteImport } from './routes/_authenticated/sports'
 import { Route as AuthenticatedStoreRouteImport } from './routes/_authenticated/store'
 import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
 import { Route as PortalSlugRouteImport } from './routes/portal.$slug'
@@ -149,6 +150,11 @@ const SignupRoute = SignupRouteImport.update({
   path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SportsGuideRoute = SportsGuideRouteImport.update({
+  id: '/sports-guide',
+  path: '/sports-guide',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
@@ -228,12 +234,11 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedSportsGuideRoute =
-  AuthenticatedSportsGuideRouteImport.update({
-    id: '/sports-guide',
-    path: '/sports-guide',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
+const AuthenticatedSportsRoute = AuthenticatedSportsRouteImport.update({
+  id: '/sports',
+  path: '/sports',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedStoreRoute = AuthenticatedStoreRouteImport.update({
   id: '/store',
   path: '/store',
@@ -448,6 +453,7 @@ export interface FileRoutesByFullPath {
   '/sign-in-return': typeof SignInReturnRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
+  '/sports-guide': typeof SportsGuideRoute
   '/terms': typeof TermsRoute
   '/trust': typeof TrustRoute
   '/welcome': typeof WelcomeRoute
@@ -462,7 +468,7 @@ export interface FileRoutesByFullPath {
   '/purchase-history': typeof AuthenticatedPurchaseHistoryRoute
   '/referrals': typeof AuthenticatedReferralsRoute
   '/settings': typeof AuthenticatedSettingsRoute
-  '/sports-guide': typeof AuthenticatedSportsGuideRoute
+  '/sports': typeof AuthenticatedSportsRoute
   '/store': typeof AuthenticatedStoreRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/portal/$slug': typeof PortalSlugRoute
@@ -513,6 +519,7 @@ export interface FileRoutesByTo {
   '/sign-in-return': typeof SignInReturnRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
+  '/sports-guide': typeof SportsGuideRoute
   '/terms': typeof TermsRoute
   '/trust': typeof TrustRoute
   '/welcome': typeof WelcomeRoute
@@ -527,7 +534,7 @@ export interface FileRoutesByTo {
   '/purchase-history': typeof AuthenticatedPurchaseHistoryRoute
   '/referrals': typeof AuthenticatedReferralsRoute
   '/settings': typeof AuthenticatedSettingsRoute
-  '/sports-guide': typeof AuthenticatedSportsGuideRoute
+  '/sports': typeof AuthenticatedSportsRoute
   '/store': typeof AuthenticatedStoreRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/portal/$slug': typeof PortalSlugRoute
@@ -581,6 +588,7 @@ export interface FileRoutesById {
   '/sign-in-return': typeof SignInReturnRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
+  '/sports-guide': typeof SportsGuideRoute
   '/terms': typeof TermsRoute
   '/trust': typeof TrustRoute
   '/welcome': typeof WelcomeRoute
@@ -595,7 +603,7 @@ export interface FileRoutesById {
   '/_authenticated/purchase-history': typeof AuthenticatedPurchaseHistoryRoute
   '/_authenticated/referrals': typeof AuthenticatedReferralsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
-  '/_authenticated/sports-guide': typeof AuthenticatedSportsGuideRoute
+  '/_authenticated/sports': typeof AuthenticatedSportsRoute
   '/_authenticated/store': typeof AuthenticatedStoreRoute
   '/auth_/callback': typeof AuthCallbackRoute
   '/portal/$slug': typeof PortalSlugRoute
@@ -650,6 +658,7 @@ export interface FileRouteTypes {
     | '/sign-in-return'
     | '/signin'
     | '/signup'
+    | '/sports-guide'
     | '/terms'
     | '/trust'
     | '/welcome'
@@ -664,7 +673,7 @@ export interface FileRouteTypes {
     | '/purchase-history'
     | '/referrals'
     | '/settings'
-    | '/sports-guide'
+    | '/sports'
     | '/store'
     | '/auth/callback'
     | '/portal/$slug'
@@ -715,6 +724,7 @@ export interface FileRouteTypes {
     | '/sign-in-return'
     | '/signin'
     | '/signup'
+    | '/sports-guide'
     | '/terms'
     | '/trust'
     | '/welcome'
@@ -729,7 +739,7 @@ export interface FileRouteTypes {
     | '/purchase-history'
     | '/referrals'
     | '/settings'
-    | '/sports-guide'
+    | '/sports'
     | '/store'
     | '/auth/callback'
     | '/portal/$slug'
@@ -782,6 +792,7 @@ export interface FileRouteTypes {
     | '/sign-in-return'
     | '/signin'
     | '/signup'
+    | '/sports-guide'
     | '/terms'
     | '/trust'
     | '/welcome'
@@ -796,7 +807,7 @@ export interface FileRouteTypes {
     | '/_authenticated/purchase-history'
     | '/_authenticated/referrals'
     | '/_authenticated/settings'
-    | '/_authenticated/sports-guide'
+    | '/_authenticated/sports'
     | '/_authenticated/store'
     | '/auth_/callback'
     | '/portal/$slug'
@@ -850,6 +861,7 @@ export interface RootRouteChildren {
   SignInReturnRoute: typeof SignInReturnRoute
   SigninRoute: typeof SigninRoute
   SignupRoute: typeof SignupRoute
+  SportsGuideRoute: typeof SportsGuideRoute
   TermsRoute: typeof TermsRoute
   TrustRoute: typeof TrustRoute
   WelcomeRoute: typeof WelcomeRoute
@@ -970,6 +982,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sports-guide': {
+      id: '/sports-guide'
+      path: '/sports-guide'
+      fullPath: '/sports-guide'
+      preLoaderRoute: typeof SportsGuideRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/terms': {
       id: '/terms'
       path: '/terms'
@@ -1075,11 +1094,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/sports-guide': {
-      id: '/_authenticated/sports-guide'
-      path: '/sports-guide'
-      fullPath: '/sports-guide'
-      preLoaderRoute: typeof AuthenticatedSportsGuideRouteImport
+    '/_authenticated/sports': {
+      id: '/_authenticated/sports'
+      path: '/sports'
+      fullPath: '/sports'
+      preLoaderRoute: typeof AuthenticatedSportsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/store': {
@@ -1354,7 +1373,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPurchaseHistoryRoute: typeof AuthenticatedPurchaseHistoryRoute
   AuthenticatedReferralsRoute: typeof AuthenticatedReferralsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
-  AuthenticatedSportsGuideRoute: typeof AuthenticatedSportsGuideRoute
+  AuthenticatedSportsRoute: typeof AuthenticatedSportsRoute
   AuthenticatedStoreRoute: typeof AuthenticatedStoreRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedAdminApiKeysRoute: typeof AuthenticatedAdminApiKeysRoute
@@ -1389,7 +1408,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPurchaseHistoryRoute: AuthenticatedPurchaseHistoryRoute,
   AuthenticatedReferralsRoute: AuthenticatedReferralsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
-  AuthenticatedSportsGuideRoute: AuthenticatedSportsGuideRoute,
+  AuthenticatedSportsRoute: AuthenticatedSportsRoute,
   AuthenticatedStoreRoute: AuthenticatedStoreRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedAdminApiKeysRoute: AuthenticatedAdminApiKeysRoute,
@@ -1432,6 +1451,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignInReturnRoute: SignInReturnRoute,
   SigninRoute: SigninRoute,
   SignupRoute: SignupRoute,
+  SportsGuideRoute: SportsGuideRoute,
   TermsRoute: TermsRoute,
   TrustRoute: TrustRoute,
   WelcomeRoute: WelcomeRoute,
