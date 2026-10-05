@@ -42,13 +42,17 @@ const fmtDay = (iso: string) =>
     minute: "2-digit",
   }).format(new Date(iso));
 
+const SPORTS_LOCKED_PROMPT = `SPORTS GUIDE LOCKED — HARD RULE: This user has NOT unlocked the OG Sports Guide and is not VIP. Do NOT give ANY fixtures, kick-off times, dates, channels, broadcasters or Telegram links — not from the guide, not from memory, not from web sources. Do not mention or link any Telegram channel/group. Instead, in full OG Bot voice (cheeky British banter, roast them for being tight), tell them:
+1. The OG Sports Guide is locked — unlock it in the Store for just 10 OG Coins, or go VIP and it's included free (VIP includes it during the 15-day free trial too).
+2. No coins? Earn them with the app's earn methods (referrals/inviting mates via their OG code, Battle Zone rewards, the Earn page), or stop being tight and just buy some — 5 coins is only 99p at https://www.ogbot.co.uk/buy-coins.
+3. Once unlocked, the full live match centre is at https://www.ogbot.co.uk/sports and you'll answer every fixture question.
+Keep it short and punchy.`;
+
 /** Returns a prompt block, or "" when the message isn't about sport. */
 export async function buildSportsGuideContext(admin: Admin, userId: string, text: string): Promise<string> {
   if (!detectSportsIntent(text)) return "";
   const { data: access } = await admin.rpc("has_sports_guide_access", { _user: userId });
-  if (!access) {
-    return `SPORTS GUIDE: The user asked about sport, but they haven't unlocked the OG Sports Guide. Don't list fixtures or channels from it. Tell them in your voice it's free for VIP (including the 15-day free trial) or can be unlocked in the Store, and the page is https://www.ogbot.co.uk/sports.`;
-  }
+  if (!access) return SPORTS_LOCKED_PROMPT;
 
   const words = keywords(text);
   const since = new Date(Date.now() - 10 * 86_400_000).toISOString();
@@ -90,7 +94,7 @@ export async function buildSportsGuideContext(admin: Admin, userId: string, text
   for (const r of rows.slice(0, 15)) {
     const cat = SPORT_CATEGORIES.find((c) => c.id === r.sport_category)?.label ?? "Other";
     const body = r.raw_text.replace(/\n?•\s*Sent via TeleFeed\s*$/i, "").trim().slice(0, 1800);
-    const block = `--- Post (${cat}) published ${fmtDay(r.posted_at)} UK · https://t.me/OGSPORTSGUIDE/${r.telegram_message_id}\n${body}`;
+    const block = `--- Post (${cat}) published ${fmtDay(r.posted_at)} UK\n${body}`;
     if (budget - block.length < 0) break;
     budget -= block.length;
     blocks.push(block);
@@ -101,7 +105,7 @@ When the user asks about an event:
 1. Find it in the posts below. Work out the exact day and date from the post's publish date (times in posts are UK time; "today"/"tonight" means the publish date; a time earlier than the publish time usually means the next day).
 2. Answer with: the event, the day + date, the UK kick-off/start time, and how long until it starts if it's soon.
 3. List EVERY channel/broadcaster the posts mention for that event as a short bullet list (e.g. Sky Sports Main Event, TNT Sports 1, DAZN). If no channel is listed, say the guide doesn't name one.
-4. If several matching events exist, list them in time order. Never invent fixtures, times or channels that aren't in the posts. Mention https://www.ogbot.co.uk/sports for the full live list.
+4. If several matching events exist, list them in time order. Never invent fixtures, times or channels that aren't in the posts. Mention https://www.ogbot.co.uk/sports for the full live list. Never share or mention any Telegram channel or t.me link.
 
 ${blocks.join("\n\n")}`;
 }
@@ -113,7 +117,8 @@ const fmtKo = (d: Date) =>
 /** Instant Telegram reply for "/sports <query>" — same parser/search as the website. */
 export async function quickSportsReply(admin: Admin, userId: string, query: string): Promise<string> {
   const { data: access } = await admin.rpc("has_sports_guide_access", { _user: userId });
-  if (!access) return "🔒 <b>OG Sports Guide</b> is free for VIP (incl. the 15-day trial) or unlock it in the Store.";
+  if (!access)
+    return "🔒 Oi, nice try! The <b>OG Sports Guide</b> is locked, mate.\n\n🏆 Unlock it in the Store for just <b>10 OG Coins</b> — or go <b>VIP</b> and it's included free.\n\n💸 Skint? Earn coins by inviting your mates with your OG code or smashing Battle Zone. Or stop being tight and just buy some — <b>5 coins is only 99p</b>.\n\n👉 https://www.ogbot.co.uk/buy-coins";
   const { parseListing, dedupe, searchListing } = await import("./sports-listing");
   const { data } = await admin
     .from("sports_guide_posts")

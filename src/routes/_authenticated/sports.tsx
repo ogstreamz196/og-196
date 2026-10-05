@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Copy, ExternalLink, Loader2, Lock, Radio, Search, Tv, X } from "lucide-react";
+import { Copy, Loader2, Lock, Radio, Search, Tv, X } from "lucide-react";
 import { dedupe, parseListing, searchListing, type Fixture, type Listing } from "@/lib/sports-listing";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,7 +11,6 @@ import { Input } from "@/components/ui/input";
 import sportsGuideLogo from "@/assets/og-bot-sports-guide.png.asset.json";
 import { getSportsGuideHub, type SportsGuidePost } from "@/lib/sports-guide.functions";
 import { purchaseSportsGuideAccess } from "@/lib/store.functions";
-import { SPORTS_GUIDE_USERNAME } from "@/lib/sports-guide-parse";
 
 export const Route = createFileRoute("/_authenticated/sports")({
   head: () => ({
@@ -390,11 +389,6 @@ function ListingCard({ listing: l, terms }: { listing: Listing; terms: string[] 
           }}
         >
           <Copy className="mr-1 h-3.5 w-3.5" /> Copy
-        </Button>
-        <Button size="sm" variant="ghost" asChild className="ml-auto h-8 text-xs">
-          <a href={`https://t.me/${SPORTS_GUIDE_USERNAME}/${l.messageId}`} target="_blank" rel="noopener noreferrer">
-            <ExternalLink className="mr-1 h-3.5 w-3.5" /> Telegram
-          </a>
         </Button>
       </div>
     </article>
