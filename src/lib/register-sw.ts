@@ -35,7 +35,27 @@ export function registerAppServiceWorker() {
     void unregisterAppSw();
     return;
   }
-  const go = () => navigator.serviceWorker.register(SW_PATH, { scope: "/" }).catch(() => {});
-  if (document.readyState === "complete") go();
-  else window.addEventListener("load", go, { once: true });
+  // Reload once when a new version takes over so users never run old code.
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (!hadController || reloaded) return;
+    reloaded = true;
+    window.location.reload();
+  });
+  // Register immediately and check the server for a newer version right away,
+  // whenever the app comes back into view, on reconnect, and every 5 minutes.
+  navigator.serviceWorker
+    .register(SW_PATH, { scope: "/", updateViaCache: "none" })
+    .then((reg) => {
+      const check = () => void reg.update().catch(() => {});
+      check();
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") check();
+      });
+      window.addEventListener("focus", check);
+      window.addEventListener("online", check);
+      setInterval(check, 5 * 60_000);
+    })
+    .catch(() => {});
 }
