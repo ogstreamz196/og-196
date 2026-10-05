@@ -174,7 +174,15 @@ export const chatOgBot = createServerFn({ method: "POST" })
         promoNote = vp.promoPromptNote(promo);
       }
     }
-    const system = baseSystem + intensityNote + promoNote;
+    let sportsNote = "";
+    try {
+      const { buildSportsGuideContext } = await import("@/lib/sports-guide-context.server");
+      const block = await buildSportsGuideContext(supabaseAdmin, context.userId, latestUserMsg?.content ?? "");
+      if (block) sportsNote = `\n\n${block}`;
+    } catch (e) {
+      console.warn("sports guide context failed", e);
+    }
+    const system = baseSystem + intensityNote + promoNote + sportsNote;
 
     // 1b. Learn fresh insults from the latest user message (fire-and-forget upsert).
     let newlyLearned: string[] = [];

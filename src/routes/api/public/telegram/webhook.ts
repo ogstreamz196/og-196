@@ -563,8 +563,17 @@ async function runChatAI(
     ? await vp.getOrCreateVipPromo(admin, profileId, { isPaidVip: roles.includes("vip") })
     : null;
   const promoNote = promo ? vp.promoPromptNote(promo) : "";
+  let sportsNote = "";
+  try {
+    const { buildSportsGuideContext } = await import("@/lib/sports-guide-context.server");
+    const block = await buildSportsGuideContext(admin, profileId, userText);
+    if (block) sportsNote = `${block}\n\n`;
+  } catch (e) {
+    console.warn("[telegram] sports guide context failed", e);
+  }
 
   const system =
+    sportsNote +
     promoNote +
     "" +
     buildSystemPrompt({

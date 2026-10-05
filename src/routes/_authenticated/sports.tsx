@@ -208,6 +208,12 @@ function SportsGuidePage() {
               </Button>
             )}
             <p className="text-center text-[11px] text-muted-foreground">One-time unlock · yours to keep</p>
+            <Link
+              to="/buy-coins"
+              className="block rounded-xl border border-coin/40 bg-coin/10 px-4 py-3 text-center text-xs font-bold text-coin"
+            >
+              👑 Free for VIP members — including the 15-day free trial. Go VIP →
+            </Link>
           </div>
         </div>
       </div>
