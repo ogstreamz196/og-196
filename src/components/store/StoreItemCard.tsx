@@ -212,7 +212,7 @@ export function StoreItemCard({
               : buying
                 ? "…"
                 : ownsSportsGuide
-                  ? "Open group"
+                  ? "Open Sports Guide"
                   : "Buy"}
         </Button>
       </div>
