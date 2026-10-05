@@ -192,6 +192,10 @@ export function OgChat({
   // Attachment + mic state
   const [attachment, setAttachment] = useState<{ dataUrl: string; name: string } | null>(null);
   const [editMode, setEditMode] = useState(false);
+  // Conversation image memory: the photo the user last attached this session
+  // (kept in memory only) — later edits reuse it without re-attaching.
+  const [lastUpload, setLastUpload] = useState<string | null>(null);
+  const [memoryOff, setMemoryOff] = useState(false);
   const [noCoinsOpen, setNoCoinsOpen] = useState(false);
   const [vipPromoOpen, setVipPromoOpen] = useState(false);
   const fetchEditStatus = useServerFn(getImageEditStatus);
@@ -203,7 +207,8 @@ export function OgChat({
     refetchInterval: 60_000,
   });
   const imageEdit = useMutation({
-    mutationFn: (args: { prompt: string; imageDataUrl: string }) => runImageEdit({ data: args }),
+    mutationFn: (args: { prompt: string; imageDataUrl?: string; imageUrl?: string }) =>
+      runImageEdit({ data: args }),
     onSuccess: (res) => {
       if (!res.ok) {
         setMessages((cur) => [
@@ -428,6 +433,18 @@ export function OgChat({
     return () => clearTimeout(t);
   }, [m.isPending, showSkeleton]);
 
+  // Latest image in the conversation: newest bot edit, else the last upload.
+  const memoryImage = useMemo(() => {
+    if (memoryOff) return null;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const msg = messages[i];
+      if (msg.role !== "assistant") continue;
+      const hit = /!\[[^\]]*\]\((https:\/\/[^)\s]+)\)/.exec(msg.content);
+      if (hit) return hit[1];
+    }
+    return lastUpload;
+  }, [messages, lastUpload, memoryOff]);
+
   function sendText(text: string, opts?: { forcePrivate?: boolean }) {
     const t = text.trim();
     const att = attachment;
@@ -467,7 +484,7 @@ export function OgChat({
     }
 
     const EDIT_INTENT =
-      /\b(edit|change|turn (it|this|me|him|her|them)|make (it|this|me|him|her|them)|add|remove|replace|swap|put|convert|transform|restyle|style|cartoon|anime|pixar|sketch|paint|draw|colou?ri[sz]e|background|filter|enhance|upscale|blur|brighten|darken|into a|as a|look like)\b/i;
+      /\b(edit|change|turn (it|this|me|him|her|them)|make (it|this|me|him|her|them)|add|remove|replace|swap|put|convert|transform|restyle|style|cartoon|anime|pixar|sketch|paint|draw|colou?ri[sz]e|background|filter|enhance|upscale|blur|brighten|darken|into a|as a|look like|now make|more|less|bigger|smaller|again|instead|give (him|her|them|it))\b/i;
     const wantsEdit = !!att && (editMode || EDIT_INTENT.test(t));
     if (att && wantsEdit) {
       if (imageEdit.isPending) return;
@@ -476,7 +493,22 @@ export function OgChat({
       setInput("");
       setAttachment(null);
       setEditMode(false);
+      setLastUpload(att.dataUrl);
+      setMemoryOff(false);
       imageEdit.mutate({ prompt: t, imageDataUrl: att.dataUrl });
+      return;
+    }
+
+    // Follow-up edit on the latest image in this conversation — no re-attach.
+    if (!att && memoryImage && t && EDIT_INTENT.test(t)) {
+      if (imageEdit.isPending) return;
+      setMessages((cur) => [...cur, { role: "user", content: `🎨 Edit image: ${t}` }]);
+      setInput("");
+      imageEdit.mutate(
+        memoryImage.startsWith("data:")
+          ? { prompt: t, imageDataUrl: memoryImage }
+          : { prompt: t, imageUrl: memoryImage },
+      );
       return;
     }
 
