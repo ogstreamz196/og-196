@@ -7,7 +7,7 @@ import type { Database } from "@/integrations/supabase/types";
 type Admin = SupabaseClient<Database>;
 
 const SPORTS_INTENT_RE =
-  /\b(sports?|fixtures?|match(es)?|games?|kick[\s-]?off|ko|fight(s|ing)?|fight night|card|bout|race|grand prix|f1|ufc|boxing|mma|wwe|darts|tennis|cricket|nba|nfl|football|soccer|premier league|champions league|ucl|epl|la ?liga|serie a|bundesliga|vs\.?|versus|playing|on tonight|on today|on tv|channel|channels|sky sports|tnt|dazn|bt sport|amazon prime|what time|when is|where can i watch|watch)\b/i;
+  /\b(sports?|fixtures?|match(es)?|games?|kick[\s-]?off|ko|fight(s|ing)?|fight night|card|bout|race|grand prix|f1|ufc|boxing|mma|wwe|darts|tennis|cricket|nba|nfl|football|soccer|premier league|champions league|ucl|epl|la ?liga|serie a|bundesliga|vs\.?|versus|play|plays|playing|next match|next game|against|on tonight|on today|on tv|channel|channels|sky sports|tnt|dazn|bt sport|amazon prime|what time|when is|where can i watch|watch)\b/i;
 
 const STOP = new Set(
   "the a an and or of to in on at for is are was be what when where which who how time today tonight tomorrow game match fixture fixtures channel channels watch playing play sport sports show showing can i me my you u it its any there this that with vs versus kick off live tv on bro mate pls please".split(
@@ -92,15 +92,25 @@ export async function buildSportsGuideContext(admin: Admin, userId: string, text
     .slice(0, 40)
     .map((f) => `• ${f.at ? fmtDay(f.at.toISOString()) + " UK" : "time not listed"} — ${f.event} — 📺 ${f.channel}`);
 
+  // Not in the guide? Check the web so OG Bot still knows about future events.
+  let web: string | null = null;
+  if (!hits.length && words.length) {
+    const { getLiveResearchContext } = await import("./ai-endpoint.server");
+    web = await getLiveResearchContext(`${text} next fixture date kick-off time UK TV channel`).catch(() => null);
+  }
+  const webBlock = web
+    ? `\n\nWEB RESULTS (not in the Sports Guide — use these to answer; say it's not in the guide yet, give date, UK time and UK TV channel if found, and never invent anything not stated here):\n${web.slice(0, 4000)}`
+    : "";
+
   if (!list.length) {
-    return `SPORTS GUIDE (current UK time: ${now}): The Sports Guide feed has no matching events right now. Say so honestly, don't invent fixtures or channels, and point them to https://www.ogbot.co.uk/sports for the live list.`;
+    return `SPORTS GUIDE (current UK time: ${now}): The Sports Guide feed has no matching events right now.${web ? "" : " Say so honestly, don't invent fixtures or channels, and point them to https://www.ogbot.co.uk/sports for the live list."}${webBlock}`;
   }
 
   return `SPORTS GUIDE FIXTURES (the user's unlocked OG Sports Guide — trusted, already searched for you). Current UK time: ${now}.
 ${hits.length ? "These fixtures MATCH the user's question. Answer from them straight away, first time, confidently. NEVER say you can't see it, and never send them to BBC, club sites or anywhere else." : "No exact match for their words; these are the next upcoming fixtures."}
 Answer with: the event, day + date, UK kick-off time, how long until it starts, and EVERY channel listed for it as bullets. If they ask "next", give the soonest upcoming one first. Never invent fixtures. Plain text only, no markdown asterisks. Never mention any Telegram channel or t.me link. You may mention https://www.ogbot.co.uk/sports.
 
-${list.join("\n")}`;
+${list.join("\n")}${webBlock}`;
 }
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
