@@ -424,7 +424,7 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
           </div>
 
           <div className="mt-4">
-            {isPending && <GeneratingStatus song={song} />}
+            {isPending && communityMode && <GeneratingStatus song={song} />}
             {isFailed && (
               <div
                 role="alert"
