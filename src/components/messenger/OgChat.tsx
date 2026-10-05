@@ -224,6 +224,7 @@ export function OgChat({
       const note = res.free
         ? "Free edit used — next free one in 4 hours."
         : "Edit done · -1 coin.";
+      setMemoryOff(false);
       setMessages((cur) => [
         ...cur,
         {
@@ -484,7 +485,7 @@ export function OgChat({
     }
 
     const EDIT_INTENT =
-      /\b(edit|change|turn (it|this|me|him|her|them)|make (it|this|me|him|her|them)|add|remove|replace|swap|put|convert|transform|restyle|style|cartoon|anime|pixar|sketch|paint|draw|colou?ri[sz]e|background|filter|enhance|upscale|blur|brighten|darken|into a|as a|look like|now make|more|less|bigger|smaller|again|instead|give (him|her|them|it))\b/i;
+      /\b(edit|change|turn (it|this|me|him|her|them)|make (it|this|me|him|her|them)|add|remove|replace|swap|put|convert|transform|restyle|style|cartoon|anime|pixar|sketch|paint|draw|colou?ri[sz]e|background|filter|enhance|upscale|blur|brighten|darken|into a|as a|look like|now make|bigger|smaller|give (him|her|them|it))\b/i;
     const wantsEdit = !!att && (editMode || EDIT_INTENT.test(t));
     if (att && wantsEdit) {
       if (imageEdit.isPending) return;
@@ -520,11 +521,16 @@ export function OgChat({
     window.dispatchEvent(new Event(SYNC_EVENT));
     setInput("");
     setAttachment(null);
+    if (att) {
+      setLastUpload(att.dataUrl);
+      setMemoryOff(false);
+    }
     m.mutate({ history: next, attachmentDataUrl: att?.dataUrl });
   }
 
   function clearChat() {
     setMessages([]);
+    setLastUpload(null);
     selfSyncRef.current = true;
     window.dispatchEvent(new Event(SYNC_EVENT));
     toast.message("Chat cleared");
@@ -975,6 +981,25 @@ export function OgChat({
               className="p-1"
             >
               <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+        {!attachment && memoryImage && (
+          <div
+            data-testid="ogchat-image-memory"
+            className="mb-1.5 flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/10 px-2 py-1"
+          >
+            <img src={memoryImage} alt="" className="h-7 w-7 rounded object-cover" />
+            <span className="min-w-0 flex-1 truncate text-[11px] text-foreground">
+              Editing your last image — just type the next change
+            </span>
+            <button
+              type="button"
+              onClick={() => setMemoryOff(true)}
+              className="rounded p-1 text-muted-foreground hover:text-foreground"
+              aria-label="Stop editing this image"
+            >
+              <X className="h-3.5 w-3.5" />
             </button>
           </div>
         )}
