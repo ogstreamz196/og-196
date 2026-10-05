@@ -714,10 +714,25 @@ export function OgChat({
               </span>
             </span>
             {/* OG/Safe mode toggle removed — Foul Mouth is the single tone control. */}
+            <label className="relative inline-flex h-8 items-center rounded-lg border border-amber-400/50 bg-amber-400/10 px-2 text-[10px] font-bold text-amber-600 dark:text-amber-300 sm:hidden">
+              🌐 {language.slice(0, 2).toUpperCase()}
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                className="absolute inset-0 opacity-0"
+                aria-label="Reply language"
+              >
+                {OG_LANGUAGES.map((l) => (
+                  <option key={l} value={l}>
+                    {l}
+                  </option>
+                ))}
+              </select>
+            </label>
             <select
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
-              className="h-8 max-w-[88px] rounded-lg border border-amber-400/50 bg-amber-400/10 px-1.5 text-[10px] font-bold text-amber-600 transition hover:bg-amber-400/20 focus:outline-none focus:ring-2 focus:ring-amber-400/50 dark:text-amber-300 sm:h-auto sm:max-w-none sm:border-2 sm:px-3 sm:py-1.5 sm:text-[12px]"
+              className="hidden h-8 max-w-[88px] rounded-lg border border-amber-400/50 bg-amber-400/10 px-1.5 text-[10px] font-bold text-amber-600 transition hover:bg-amber-400/20 focus:outline-none focus:ring-2 focus:ring-amber-400/50 dark:text-amber-300 sm:block sm:h-auto sm:max-w-none sm:border-2 sm:px-3 sm:py-1.5 sm:text-[12px]"
               title="Reply language"
               aria-label="Reply language"
             >
