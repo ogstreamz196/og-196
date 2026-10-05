@@ -105,3 +105,36 @@ When the user asks about an event:
 
 ${blocks.join("\n\n")}`;
 }
+
+const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const fmtKo = (d: Date) =>
+  new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }).format(d);
+
+/** Instant Telegram reply for "/sports <query>" — same parser/search as the website. */
+export async function quickSportsReply(admin: Admin, userId: string, query: string): Promise<string> {
+  const { data: access } = await admin.rpc("has_sports_guide_access", { _user: userId });
+  if (!access) return "🔒 <b>OG Sports Guide</b> is free for VIP (incl. the 15-day trial) or unlock it in the Store.";
+  const { parseListing, dedupe, searchListing } = await import("./sports-listing");
+  const { data } = await admin
+    .from("sports_guide_posts")
+    .select("id, raw_text, posted_at, telegram_message_id")
+    .gte("posted_at", new Date(Date.now() - 7 * 86_400_000).toISOString())
+    .order("posted_at", { ascending: false })
+    .limit(80);
+  const words = query.toLowerCase().split(/\s+/).filter(Boolean);
+  const listings = dedupe(data ?? []).map(parseListing);
+  const hits = listings.map((l) => searchListing(l, words)).filter((l): l is NonNullable<typeof l> => !!l);
+  const fixtures = hits.flatMap((l) => l.fixtures);
+  if (!words.length) {
+    const upcoming = fixtures.filter((f) => f.at && f.at.getTime() > Date.now() - 2 * 3_600_000)
+      .sort((a, b) => a.at!.getTime() - b.at!.getTime()).slice(0, 15);
+    if (!upcoming.length) return "⚽ No upcoming fixtures in the guide right now.";
+    return "⚽ <b>Next up</b>\n" + upcoming.map((f) => `• ${fmtKo(f.at!)} — ${esc(f.event)}\n   📺 ${esc(f.channel)}`).join("\n");
+  }
+  if (!fixtures.length) return `⚽ No fixtures found for "<b>${esc(query)}</b>".`;
+  const seen = new Set<string>();
+  const uniq = fixtures.filter((f) => !seen.has(f.raw) && seen.add(f.raw))
+    .sort((a, b) => (a.at?.getTime() ?? 0) - (b.at?.getTime() ?? 0)).slice(0, 20);
+  return `⚽ <b>${uniq.length} match${uniq.length === 1 ? "" : "es"}</b> for "${esc(query)}"\n` +
+    uniq.map((f) => `• ${f.at ? fmtKo(f.at) : ""} — ${esc(f.event)}\n   📺 ${esc(f.channel)}`).join("\n");
+}
