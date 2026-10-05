@@ -13,7 +13,7 @@ import { getSportsGuideHub, toggleSportsGuideReminder, type SportsGuidePost } fr
 import { purchaseSportsGuideAccess } from "@/lib/store.functions";
 import { SPORT_CATEGORIES, SPORTS_GUIDE_USERNAME, expandQuery } from "@/lib/sports-guide-parse";
 
-export const Route = createFileRoute("/_authenticated/sports-guide")({
+export const Route = createFileRoute("/_authenticated/sports")({
   head: () => ({
     meta: [
       { title: "Sports Guide · OG BOT" },

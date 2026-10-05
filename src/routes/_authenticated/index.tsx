@@ -329,7 +329,7 @@ function DashboardHome() {
           />
         </div>
         <Link
-          to="/sports-guide"
+          to="/sports"
           preload="intent"
           className="group flex items-center gap-3 overflow-hidden rounded-3xl border-2 border-primary/30 bg-card/70 p-3 shadow-card transition-all hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-glow"
         >

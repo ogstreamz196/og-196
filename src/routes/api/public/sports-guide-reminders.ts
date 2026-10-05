@@ -37,7 +37,7 @@ export const Route = createFileRoute("/api/public/sports-guide-reminders")({
           const snippet = esc(post.raw_text.split("\n").filter(Boolean).slice(0, 4).join("\n").slice(0, 400));
           const okSend = await sendTelegramText(
             prof.telegram_chat_id,
-            `🔔 <b>Match alert</b>${post.event_time ? ` · kick-off ${post.event_time}` : ""}\n\n${snippet}\n\n<a href="https://www.ogbot.co.uk/sports-guide">Open Sports Guide</a>`,
+            `🔔 <b>Match alert</b>${post.event_time ? ` · kick-off ${post.event_time}` : ""}\n\n${snippet}\n\n<a href="https://www.ogbot.co.uk/sports">Open Sports Guide</a>`,
           );
           if (okSend) sent++;
         }
