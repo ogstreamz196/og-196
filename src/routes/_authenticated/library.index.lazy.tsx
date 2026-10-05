@@ -1,6 +1,7 @@
 import { createLazyFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useSessionRunState } from "@/hooks/use-session-run-state";
 
 /** Falling ember config for the hazard CREATE button — staggered so the shower looks random. */
 const SPARKS = [
@@ -565,7 +566,9 @@ function LibraryPage() {
     durations: Partial<Record<PipelineStage, number>>;
     error?: string;
   };
-  const [pipeline, setPipeline] = useState<PipelineState>({
+  // App-lifetime: an in-flight creation keeps running and is shown again
+  // when the user navigates away and comes back.
+  const [pipeline, setPipeline] = useSessionRunState<PipelineState>("pipeline", {
     stage: "idle",
     startedAt: 0,
     stageStartedAt: 0,
@@ -585,7 +588,11 @@ function LibraryPage() {
   }, [pipeline.stage]);
   const pipelineLockRef = useRef(false);
   // The song we're watching in realtime while its audio renders.
-  const [trackedSongId, setTrackedSongId] = useState<string | null>(null);
+  const [trackedSongId, setTrackedSongId] = useSessionRunState<string | null>(
+    "trackedSongId",
+    null,
+    true,
+  );
   // Set when the user accepted the paid second version in the wizard.
   const wantSecondTakeRef = useRef(false);
 
