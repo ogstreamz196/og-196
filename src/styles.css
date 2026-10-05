@@ -1697,3 +1697,8 @@ main:has(.boss-ui) .bg-card {
   .og-cert-actions { display: none; }
   .og-certificate { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
+
+/* Phone keyboard open: hide the bottom tab bar so typing areas sit flush above the keyboard. */
+html[data-kb="1"] nav.safe-bottom.fixed {
+  display: none;
+}

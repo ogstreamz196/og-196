@@ -246,7 +246,7 @@ export function OgChat({
     const composer = inputRef.current;
     if (!composer) return;
     composer.style.height = "0px";
-    composer.style.height = `${Math.min(Math.max(composer.scrollHeight, 56), 144)}px`;
+    composer.style.height = `${Math.min(Math.max(composer.scrollHeight, 40), 128)}px`;
   }, [input]);
 
   // Anti-flicker skeleton: stays visible at least 600ms once shown so quick
@@ -1080,7 +1080,7 @@ export function OgChat({
             aria-label="Message OG Bot in Loner Mode"
             data-testid="og-loner-composer"
             style={{ touchAction: "manipulation" }}
-            className="min-h-14 max-h-36 flex-1 resize-none overflow-y-auto bg-transparent px-2 py-2 text-base leading-5 placeholder:text-muted-foreground/70 focus:outline-none disabled:cursor-not-allowed sm:px-2.5 sm:text-[15px]"
+            className="min-h-10 max-h-32 flex-1 resize-none overflow-y-auto bg-transparent px-2 py-2.5 text-base leading-5 placeholder:text-muted-foreground/70 focus:outline-none disabled:cursor-not-allowed sm:px-2.5 sm:text-[15px]"
           />
           {attachment && editMode ? (
             <button
