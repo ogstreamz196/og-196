@@ -1144,7 +1144,9 @@ export function OgChat({
                   ? "Listening… tap mic to stop"
                   : isOut
                     ? "Out of coins — top up to chat"
-                    : "Message OG Bot…"
+                    : !attachment && memoryImage
+                      ? "Describe the change (e.g. clear the rubbish)…"
+                      : "Message OG Bot…"
             }
             disabled={m.isPending || isOut || !user || transcribing}
             maxLength={2000}
