@@ -53,6 +53,8 @@ import { AdminEditModeToggle } from "@/components/admin/AdminEditMode";
 import { BulkReconcilePanel } from "@/components/admin/BulkReconcilePanel";
 import { BossNav } from "@/components/admin/BossNav";
 import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
+import { sendTelegramDm } from "@/lib/telegram-admin.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/users")({
   component: AdminUsersPage,
@@ -73,7 +75,7 @@ interface RoleRow {
 
 type ProUserRow = Awaited<ReturnType<typeof listUsersPro>>[number];
 
-type RoleFilter = "all" | "admin" | "vip" | "og_bot" | "user";
+type RoleFilter = "all" | "admin" | "vip" | "telegram" | "og_bot" | "user";
 type SortKey = "joined" | "balance" | "name" | "spend" | "buys";
 
 function AdminUsersPage() {
@@ -143,7 +145,9 @@ function AdminUsersPage() {
     const needle = q.trim().toLowerCase();
     let list = usersQ.data ?? [];
 
-    if (roleFilter !== "all") {
+    if (roleFilter === "telegram") {
+      list = list.filter((u) => !!proByUser.get(u.id)?.telegram_chat_id);
+    } else if (roleFilter !== "all") {
       list = list.filter((u) => {
         const r = rolesByUser.get(u.id) ?? [];
         if (roleFilter === "user") return r.length === 0 || (r.length === 1 && r[0] === "user");
@@ -175,7 +179,7 @@ function AdminUsersPage() {
     });
 
     return sorted;
-  }, [usersQ.data, q, roleFilter, rolesByUser, sort, sortDir, spendByUser]);
+  }, [usersQ.data, q, roleFilter, rolesByUser, proByUser, sort, sortDir, spendByUser]);
 
   if (roleLoading) {
     return (
@@ -192,6 +196,7 @@ function AdminUsersPage() {
   const totalCoins = (usersQ.data ?? []).reduce((sum, p) => sum + (p.coin_balance ?? 0), 0);
   const totalVip = (rolesQ.data ?? []).filter((r) => r.role === "vip").length;
   const totalBots = (rolesQ.data ?? []).filter((r) => r.role === "og_bot").length;
+  const totalTelegram = (proQ.data ?? []).filter((p) => !!p.telegram_chat_id).length;
 
   const toggleSort = (key: SortKey) => {
     if (sort === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
@@ -299,7 +304,7 @@ function AdminUsersPage() {
               )}
             </div>
             <div className="flex flex-wrap items-center gap-1.5">
-              {(["all", "admin", "vip", "og_bot", "user"] as RoleFilter[]).map((r) => (
+              {(["all", "admin", "vip", "telegram", "og_bot", "user"] as RoleFilter[]).map((r) => (
                 <button
                   key={r}
                   type="button"
@@ -310,7 +315,7 @@ function AdminUsersPage() {
                       : "border-border bg-background/40 text-muted-foreground hover:border-primary/40 hover:text-foreground"
                   }`}
                 >
-                  {r === "og_bot" ? "OG bot" : r}
+                  {r === "og_bot" ? "OG bot" : r === "telegram" ? `Telegram (${totalTelegram})` : r}
                 </button>
               ))}
             </div>
@@ -517,6 +522,50 @@ function InlineNameEdit({ user }: { user: ProfileRow }) {
   );
 }
 
+function TelegramMessageButton({ user }: { user: ProfileRow }) {
+  const [open, setOpen] = useState(false);
+  const [text, setText] = useState("");
+  const sendFn = useServerFn(sendTelegramDm);
+  const send = useMutation({
+    mutationFn: () => sendFn({ data: { userId: user.id, text } }),
+    onSuccess: () => {
+      toast.success("Sent via OG Bot ✅");
+      setText("");
+      setOpen(false);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button size="icon" variant="ghost" className="h-8 w-8" aria-label="Message on Telegram">
+          <Send className="h-3.5 w-3.5" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-[min(20rem,calc(100vw-2rem))] space-y-2">
+        <p className="text-sm font-semibold">
+          Message {user.display_name ?? user.email ?? "user"}
+        </p>
+        <p className="text-[11px] text-muted-foreground">Delivered by OG Bot on Telegram.</p>
+        <Textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          maxLength={4000}
+          rows={4}
+          placeholder="Type your message…"
+        />
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] text-muted-foreground">{text.length}/4000</span>
+          <Button size="sm" onClick={() => send.mutate()} disabled={!text.trim() || send.isPending}>
+            {send.isPending && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}
+            Send
+          </Button>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 function UserRow({
   user,
   roles,
@@ -574,6 +623,7 @@ function UserRow({
           <div className="flex flex-wrap items-center gap-1">
             {isAdminUser && <RoleChip label="Admin" tone="primary" />}
             {isVip && <RoleChip label="VIP" tone="amber" />}
+            {pro?.telegram_chat_id && <RoleChip label="Telegram" tone="primary-soft" />}
             {isOgBot && <RoleChip label="Bot" tone="primary-soft" />}
             {!isAdminUser && !isVip && !isOgBot && <RoleChip label="User" tone="muted" />}
           </div>
@@ -604,6 +654,7 @@ function UserRow({
 
         <TableCell className="text-right">
           <div className="flex items-center justify-end gap-1">
+            {pro?.telegram_chat_id && <TelegramMessageButton user={user} />}
             <VipQuickToggle userId={user.id} checked={isVip} />
             <CoinsPopover userId={user.id} balance={user.coin_balance ?? 0} />
             <EditUserPopover user={user} roles={roles} />
@@ -678,6 +729,7 @@ function MobileUserCard({
           <div className="mt-1.5 flex flex-wrap gap-1">
             {isAdminUser && <RoleChip label="Admin" tone="primary" />}
             {isVip && <RoleChip label="VIP" tone="amber" />}
+            {pro?.telegram_chat_id && <RoleChip label="Telegram" tone="primary-soft" />}
             {isOgBot && <RoleChip label="Bot" tone="primary-soft" />}
             {!isAdminUser && !isVip && !isOgBot && <RoleChip label="User" tone="muted" />}
           </div>
@@ -715,6 +767,7 @@ function MobileUserCard({
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
         <VipQuickToggle userId={user.id} checked={isVip} />
         <div className="flex items-center gap-1">
+          {pro?.telegram_chat_id && <TelegramMessageButton user={user} />}
           <CoinsPopover userId={user.id} balance={user.coin_balance ?? 0} />
           <EditUserPopover user={user} roles={roles} />
           <Link to="/admin/users/$userId" params={{ userId: user.id }}>
