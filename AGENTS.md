@@ -32,3 +32,7 @@
 ## Chat image edits
 
 - Private-chat image edits charge through the service-only consume_chat_image_edit function (one free slot per rolling window, then coins) and refund on failure, so retries cannot double-charge; edits use Gemini image first, OpenAI fallback only on 429/5xx.
+
+## Sports Guide
+
+- Sports Guide posts are mirrored from the Telegram sports group by the existing bot webhook into a database table and read only by owners of the Sports Guide store item, so the in-app page is the paid product rather than a Telegram invite.
