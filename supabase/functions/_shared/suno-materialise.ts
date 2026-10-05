@@ -19,7 +19,8 @@ export const SAMPLE_BYTES = 1_048_576;
 
 /** Abort a stalled download rather than hanging the whole invocation. */
 const SAMPLE_TIMEOUT_MS = 25_000;
-const FULL_TIMEOUT_MS = 90_000;
+const FULL_TIMEOUT_MS = 180_000;
+const FULL_ATTEMPTS = 3;
 
 // Allow-list of hostnames we'll fetch audio from (defence-in-depth SSRF guard).
 export const AUDIO_HOST_ALLOWLIST = [
@@ -277,23 +278,29 @@ export async function materialiseClips(
     const finalId = targetId;
     const audioUrl = clip.audioUrl!;
     const bgTask = (async () => {
-      try {
-        const { res, buf } = await fetchWithTimeout(audioUrl, {}, FULL_TIMEOUT_MS);
-        if (!res.ok) throw new Error(`Full download failed: ${res.status}`);
-        if (buf.byteLength === 0) throw new Error("Full download returned no data");
-        const fullPath = `${userId}/${finalId}.mp3`;
-        const { error: fullUpErr } = await admin.storage.from("song-files").upload(fullPath, buf, {
-          contentType: "audio/mpeg",
-          upsert: true,
-          metadata: ownerMeta(userId, finalId, "full"),
-        } as any);
-        if (fullUpErr) throw fullUpErr;
-        await admin.from("songs").update({ audio_path: fullPath }).eq("id", finalId);
-        console.log("Full track stored for", finalId);
-      } catch (e) {
-        // Non-fatal: the sample already plays, and reconcile can retry the
-        // full file later from the same Suno task.
-        console.error("Background full-download failed for", finalId, e);
+      // Several attempts: a single stalled CDN read used to leave the song
+      // with only its 1-minute sample. The scheduled sweep retries later too.
+      for (let attempt = 1; attempt <= FULL_ATTEMPTS; attempt++) {
+        try {
+          const { res, buf } = await fetchWithTimeout(audioUrl, {}, FULL_TIMEOUT_MS);
+          if (!res.ok) throw new Error(`Full download failed: ${res.status}`);
+          if (buf.byteLength <= SAMPLE_BYTES) throw new Error("Full download looked truncated");
+          const fullPath = `${userId}/${finalId}.mp3`;
+          const { error: fullUpErr } = await admin.storage
+            .from("song-files")
+            .upload(fullPath, buf, {
+              contentType: "audio/mpeg",
+              upsert: true,
+              metadata: ownerMeta(userId, finalId, "full"),
+            } as any);
+          if (fullUpErr) throw fullUpErr;
+          await admin.from("songs").update({ audio_path: fullPath }).eq("id", finalId);
+          console.log("Full track stored for", finalId, "attempt", attempt);
+          return;
+        } catch (e) {
+          console.error("Full-download attempt failed", finalId, attempt, (e as Error).message);
+          if (attempt < FULL_ATTEMPTS) await new Promise((r) => setTimeout(r, 5_000 * attempt));
+        }
       }
     })();
 

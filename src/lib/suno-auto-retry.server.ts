@@ -1,5 +1,5 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { extractClips, materialiseClips } from "./suno-recover.server";
+import { backfillFullAudio, extractClips, fetchTask, materialiseClips } from "./suno-recover.server";
 
 const BACKOFF_MINUTES = [1, 3, 10, 30, 60];
 const GENERATE_URL = "https://apibox.erweima.ai/api/v1/generate";
@@ -156,5 +156,35 @@ export async function retryDueSongs() {
       results.push({ id: song.id, outcome: "rescheduled" });
     }
   }
-  return { processed: results.length };
+  const backfilled = await backfillMissingFullTracks();
+  return { processed: results.length, backfilled };
+}
+
+/**
+ * Finished songs whose full-length file never landed only have the 1-minute
+ * sample. Fetch the full file again from the same music-engine task.
+ */
+async function backfillMissingFullTracks(): Promise<number> {
+  const since = new Date(Date.now() - 14 * 24 * 60 * 60_000).toISOString();
+  const { data } = await (supabaseAdmin as any)
+    .from("songs")
+    .select("*")
+    .eq("status", "completed")
+    .is("audio_path", null)
+    .not("sample_path", "is", null)
+    .not("suno_task_id", "is", null)
+    .gte("completed_at", since)
+    .lte("completed_at", new Date(Date.now() - 3 * 60_000).toISOString())
+    .order("completed_at", { ascending: false })
+    .limit(3);
+  let fixed = 0;
+  for (const song of (data ?? []) as Array<Record<string, any>>) {
+    try {
+      const info = await fetchTask(String(song.suno_task_id));
+      if (info.ok && (await backfillFullAudio(supabaseAdmin as any, song, info.clips))) fixed++;
+    } catch (e) {
+      console.error("Full-track backfill failed", song.id, (e as Error).message);
+    }
+  }
+  return fixed;
 }
