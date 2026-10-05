@@ -2,12 +2,9 @@
 // fixtures, fights, kick-off times or which TV channel is showing an event.
 import { SPORT_CATEGORIES } from "./sports-guide-parse";
 
-type Admin = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  from: (t: string) => any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  rpc: (fn: string, args: Record<string, unknown>) => any;
-};
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
+type Admin = SupabaseClient<Database>;
 
 const SPORTS_INTENT_RE =
   /\b(sports?|fixtures?|match(es)?|games?|kick[\s-]?off|ko|fight(s|ing)?|fight night|card|bout|race|grand prix|f1|ufc|boxing|mma|wwe|darts|tennis|cricket|nba|nfl|football|soccer|premier league|champions league|ucl|epl|la ?liga|serie a|bundesliga|vs\.?|versus|playing|on tonight|on today|on tv|channel|channels|sky sports|tnt|dazn|bt sport|amazon prime|what time|when is|where can i watch|watch)\b/i;
