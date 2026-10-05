@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useSessionRunState } from "@/hooks/use-session-run-state";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { requestFullTrackPlay } from "@/lib/full-track-autoplay";
 import { useQueryClient } from "@tanstack/react-query";
@@ -238,9 +239,21 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const [genPreview, setGenPreview] = useState(false);
   // True from the moment the user taps "cook" until the NEW take finishes.
   // While true, the old sample is hidden so it can't be mistaken for the new one.
-  const [cooking, setCooking] = useState(false);
-  const [freshReady, setFreshReady] = useState(false);
-  const sawPendingRef = useRef(false);
+  // Kept app-wide (and across reloads) so leaving the page mid-cook doesn't
+  // lose the "cooking your new take" state for this song.
+  const [cooking, setCooking] = useSessionRunState<boolean>(`edit-cook:${song.id}`, false, true);
+  const [freshReady, setFreshReady] = useSessionRunState<boolean>(
+    `edit-fresh:${song.id}`,
+    false,
+    true,
+  );
+  const [sawPending, setSawPending] = useSessionRunState<boolean>(
+    `edit-saw:${song.id}`,
+    false,
+    true,
+  );
+  const sawPendingRef = useRef(sawPending);
+  sawPendingRef.current = sawPending;
   const [unlocking, setUnlocking] = useState(false);
   const [unlockDialogOpen, setUnlockDialogOpen] = useState(false);
   const [topUp, setTopUp] = useState<{ needed: number; reason: string } | null>(null);
@@ -313,18 +326,18 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   useEffect(() => {
     if (!cooking) return;
     if (isPending) {
-      sawPendingRef.current = true;
+      if (!sawPendingRef.current) setSawPending(true);
       return;
     }
     if (sawPendingRef.current && (isReady || isFailed)) {
-      sawPendingRef.current = false;
+      setSawPending(false);
       setCooking(false);
       if (isReady) setFreshReady(true);
     }
-  }, [cooking, isPending, isReady, isFailed]);
+  }, [cooking, isPending, isReady, isFailed, setSawPending, setCooking, setFreshReady]);
 
   function startCooking() {
-    sawPendingRef.current = false;
+    setSawPending(false);
     setFreshReady(false);
     setCooking(true);
   }
