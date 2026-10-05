@@ -678,6 +678,35 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
         if (update?.callback_query) {
           return await handleCallbackQuery(update.callback_query);
         }
+        // ---- Sports Guide feed: mirror posts from the sports channel/group.
+        const sgPost =
+          update?.channel_post ??
+          update?.edited_channel_post ??
+          (update?.message?.chat?.id === SPORTS_GUIDE_CHAT_ID ? update.message : null) ??
+          (update?.edited_message?.chat?.id === SPORTS_GUIDE_CHAT_ID ? update.edited_message : null);
+        if (sgPost) {
+          if (sgPost.chat?.id !== SPORTS_GUIDE_CHAT_ID) {
+            return Response.json({ ok: true, ignored: "other_channel" });
+          }
+          const body: string = (sgPost.text ?? sgPost.caption ?? "").trim();
+          if (body) {
+            const sgAdmin = await loadAdmin();
+            const { error: sgErr } = await sgAdmin.from("sports_guide_posts").upsert(
+              {
+                chat_id: SPORTS_GUIDE_CHAT_ID,
+                telegram_message_id: sgPost.message_id,
+                raw_text: body.slice(0, 8000),
+                sport_category: detectSport(body),
+                event_time: detectEventTime(body),
+                posted_at: new Date((sgPost.date ?? Date.now() / 1000) * 1000).toISOString(),
+              },
+              { onConflict: "chat_id,telegram_message_id" },
+            );
+            if (sgErr) console.error("[telegram] sports guide upsert failed", sgErr);
+          }
+          return Response.json({ ok: true, sports_guide: true });
+        }
+
         const msg = update?.message ?? update?.edited_message;
         const chat_id: number | undefined = msg?.chat?.id;
         const text: string | undefined = msg?.text;
