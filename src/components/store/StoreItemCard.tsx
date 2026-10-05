@@ -187,19 +187,13 @@ export function StoreItemCard({
         <Button
           size="sm"
           onClick={() => {
-            if (ownsSportsGuide && sportsGuideInviteUrl) {
-              const opened = window.open(sportsGuideInviteUrl, "_blank", "noopener,noreferrer");
-              if (!opened) window.location.assign(sportsGuideInviteUrl);
+            if (ownsSportsGuide) {
+              window.location.assign("/sports-guide");
               return;
             }
             onBuy(item.id);
           }}
-          disabled={
-            (soldOut && !ownsVipPass) ||
-            buying ||
-            ownsVipPass ||
-            (Boolean(ownsSportsGuide) && !sportsGuideInviteUrl)
-          }
+          disabled={(soldOut && !ownsVipPass) || buying || ownsVipPass}
           className="w-full bg-gradient-brand font-bold uppercase tracking-wider min-[400px]:w-auto"
         >
           {buying ? (
@@ -218,7 +212,7 @@ export function StoreItemCard({
               : buying
                 ? "…"
                 : ownsSportsGuide
-                  ? "Open group"
+                  ? "Open Sports Guide"
                   : "Buy"}
         </Button>
       </div>

@@ -1229,6 +1229,77 @@ export type Database = {
           },
         ]
       }
+      sports_guide_posts: {
+        Row: {
+          chat_id: number
+          created_at: string
+          event_time: string | null
+          id: string
+          posted_at: string
+          raw_text: string
+          sport_category: string
+          telegram_message_id: number
+          updated_at: string
+        }
+        Insert: {
+          chat_id: number
+          created_at?: string
+          event_time?: string | null
+          id?: string
+          posted_at?: string
+          raw_text: string
+          sport_category?: string
+          telegram_message_id: number
+          updated_at?: string
+        }
+        Update: {
+          chat_id?: number
+          created_at?: string
+          event_time?: string | null
+          id?: string
+          posted_at?: string
+          raw_text?: string
+          sport_category?: string
+          telegram_message_id?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sports_guide_reminders: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          remind_at: string
+          sent_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          remind_at: string
+          sent_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          remind_at?: string
+          sent_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sports_guide_reminders_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "sports_guide_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       store_categories: {
         Row: {
           active: boolean
@@ -2129,6 +2200,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_sports_guide_access: { Args: { _user: string }; Returns: boolean }
       increment_bot_interactions: {
         Args: { p_delta?: number }
         Returns: number

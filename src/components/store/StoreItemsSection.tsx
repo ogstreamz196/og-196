@@ -66,7 +66,7 @@ export function StoreItemsSection() {
         queryClient.invalidateQueries({ queryKey: ["profile"] }),
         queryClient.invalidateQueries({ queryKey: ["coin-transactions"] }),
       ]);
-      toast.success("Sports Guide access unlocked — your private link is ready");
+      toast.success("Sports Guide unlocked — open it from your dashboard");
     },
     onError: (error: Error) => toast.error(error.message),
   });

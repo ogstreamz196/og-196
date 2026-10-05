@@ -36,6 +36,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
 import musicHubHero from "@/assets/musichub-hero.jpg";
+import sportsGuideLogo from "@/assets/og-bot-sports-guide.png.asset.json";
 
 import { useAuth } from "@/hooks/use-auth";
 import { useDevMode } from "@/hooks/use-dev-mode";
@@ -327,6 +328,23 @@ function DashboardHome() {
             variant="accent"
           />
         </div>
+        <Link
+          to="/sports-guide"
+          preload="intent"
+          className="group flex items-center gap-3 overflow-hidden rounded-3xl border-2 border-primary/30 bg-card/70 p-3 shadow-card transition-all hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-glow"
+        >
+          <img
+            src={sportsGuideLogo.url}
+            alt="OG Sports Guide"
+            className="h-16 w-16 shrink-0 rounded-2xl border border-primary/30 object-cover sm:h-20 sm:w-20"
+          />
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Live fixtures & events</p>
+            <p className="font-display text-lg font-black uppercase leading-tight">Sports Guide</p>
+            <p className="truncate text-xs text-muted-foreground">Daily matches, fight cards & TV listings</p>
+          </div>
+          <ArrowRight className="h-5 w-5 shrink-0 text-primary transition-transform group-hover:translate-x-1" />
+        </Link>
       </section>
 
       {/* Ask OG Bot CTA removed per request */}

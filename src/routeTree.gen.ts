@@ -40,6 +40,7 @@ import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedPurchaseHistoryRouteImport } from './routes/_authenticated/purchase-history'
 import { Route as AuthenticatedReferralsRouteImport } from './routes/_authenticated/referrals'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedSportsGuideRouteImport } from './routes/_authenticated/sports-guide'
 import { Route as AuthenticatedStoreRouteImport } from './routes/_authenticated/store'
 import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
 import { Route as PortalSlugRouteImport } from './routes/portal.$slug'
@@ -67,6 +68,7 @@ import { Route as AuthenticatedBuyCoinsIndexRouteImport } from './routes/_authen
 import { Route as AuthenticatedBuyCoinsReturnRouteImport } from './routes/_authenticated/buy-coins.return'
 import { Route as AuthenticatedLibrarySongIdRouteImport } from './routes/_authenticated/library.$songId'
 import { Route as ApiPublicNewUserAlertRouteImport } from './routes/api/public/new-user-alert'
+import { Route as ApiPublicSportsGuideRemindersRouteImport } from './routes/api/public/sports-guide-reminders'
 import { Route as ApiPublicSunoRetryRouteImport } from './routes/api/public/suno-retry'
 import { Route as AuthenticatedAdminUsersUserIdRouteImport } from './routes/_authenticated/admin.users.$userId'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
@@ -226,6 +228,12 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSportsGuideRoute =
+  AuthenticatedSportsGuideRouteImport.update({
+    id: '/sports-guide',
+    path: '/sports-guide',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedStoreRoute = AuthenticatedStoreRouteImport.update({
   id: '/store',
   path: '/store',
@@ -385,6 +393,12 @@ const ApiPublicNewUserAlertRoute = ApiPublicNewUserAlertRouteImport.update({
   path: '/api/public/new-user-alert',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicSportsGuideRemindersRoute =
+  ApiPublicSportsGuideRemindersRouteImport.update({
+    id: '/api/public/sports-guide-reminders',
+    path: '/api/public/sports-guide-reminders',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicSunoRetryRoute = ApiPublicSunoRetryRouteImport.update({
   id: '/api/public/suno-retry',
   path: '/api/public/suno-retry',
@@ -448,6 +462,7 @@ export interface FileRoutesByFullPath {
   '/purchase-history': typeof AuthenticatedPurchaseHistoryRoute
   '/referrals': typeof AuthenticatedReferralsRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/sports-guide': typeof AuthenticatedSportsGuideRoute
   '/store': typeof AuthenticatedStoreRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/portal/$slug': typeof PortalSlugRoute
@@ -473,6 +488,7 @@ export interface FileRoutesByFullPath {
   '/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
   '/library/$songId': typeof AuthenticatedLibrarySongIdRoute
   '/api/public/new-user-alert': typeof ApiPublicNewUserAlertRoute
+  '/api/public/sports-guide-reminders': typeof ApiPublicSportsGuideRemindersRoute
   '/api/public/suno-retry': typeof ApiPublicSunoRetryRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/buy-coins/': typeof AuthenticatedBuyCoinsIndexRoute
@@ -511,6 +527,7 @@ export interface FileRoutesByTo {
   '/purchase-history': typeof AuthenticatedPurchaseHistoryRoute
   '/referrals': typeof AuthenticatedReferralsRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/sports-guide': typeof AuthenticatedSportsGuideRoute
   '/store': typeof AuthenticatedStoreRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/portal/$slug': typeof PortalSlugRoute
@@ -537,6 +554,7 @@ export interface FileRoutesByTo {
   '/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
   '/library/$songId': typeof AuthenticatedLibrarySongIdRoute
   '/api/public/new-user-alert': typeof ApiPublicNewUserAlertRoute
+  '/api/public/sports-guide-reminders': typeof ApiPublicSportsGuideRemindersRoute
   '/api/public/suno-retry': typeof ApiPublicSunoRetryRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/buy-coins': typeof AuthenticatedBuyCoinsIndexRoute
@@ -577,6 +595,7 @@ export interface FileRoutesById {
   '/_authenticated/purchase-history': typeof AuthenticatedPurchaseHistoryRoute
   '/_authenticated/referrals': typeof AuthenticatedReferralsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/sports-guide': typeof AuthenticatedSportsGuideRoute
   '/_authenticated/store': typeof AuthenticatedStoreRoute
   '/auth_/callback': typeof AuthCallbackRoute
   '/portal/$slug': typeof PortalSlugRoute
@@ -603,6 +622,7 @@ export interface FileRoutesById {
   '/_authenticated/buy-coins/return': typeof AuthenticatedBuyCoinsReturnRoute
   '/_authenticated/library/$songId': typeof AuthenticatedLibrarySongIdRoute
   '/api/public/new-user-alert': typeof ApiPublicNewUserAlertRoute
+  '/api/public/sports-guide-reminders': typeof ApiPublicSportsGuideRemindersRoute
   '/api/public/suno-retry': typeof ApiPublicSunoRetryRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/buy-coins/': typeof AuthenticatedBuyCoinsIndexRoute
@@ -644,6 +664,7 @@ export interface FileRouteTypes {
     | '/purchase-history'
     | '/referrals'
     | '/settings'
+    | '/sports-guide'
     | '/store'
     | '/auth/callback'
     | '/portal/$slug'
@@ -669,6 +690,7 @@ export interface FileRouteTypes {
     | '/buy-coins/return'
     | '/library/$songId'
     | '/api/public/new-user-alert'
+    | '/api/public/sports-guide-reminders'
     | '/api/public/suno-retry'
     | '/admin/'
     | '/buy-coins/'
@@ -707,6 +729,7 @@ export interface FileRouteTypes {
     | '/purchase-history'
     | '/referrals'
     | '/settings'
+    | '/sports-guide'
     | '/store'
     | '/auth/callback'
     | '/portal/$slug'
@@ -733,6 +756,7 @@ export interface FileRouteTypes {
     | '/buy-coins/return'
     | '/library/$songId'
     | '/api/public/new-user-alert'
+    | '/api/public/sports-guide-reminders'
     | '/api/public/suno-retry'
     | '/admin'
     | '/buy-coins'
@@ -772,6 +796,7 @@ export interface FileRouteTypes {
     | '/_authenticated/purchase-history'
     | '/_authenticated/referrals'
     | '/_authenticated/settings'
+    | '/_authenticated/sports-guide'
     | '/_authenticated/store'
     | '/auth_/callback'
     | '/portal/$slug'
@@ -798,6 +823,7 @@ export interface FileRouteTypes {
     | '/_authenticated/buy-coins/return'
     | '/_authenticated/library/$songId'
     | '/api/public/new-user-alert'
+    | '/api/public/sports-guide-reminders'
     | '/api/public/suno-retry'
     | '/_authenticated/admin/'
     | '/_authenticated/buy-coins/'
@@ -836,6 +862,7 @@ export interface RootRouteChildren {
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicNewUserAlertRoute: typeof ApiPublicNewUserAlertRoute
+  ApiPublicSportsGuideRemindersRoute: typeof ApiPublicSportsGuideRemindersRoute
   ApiPublicSunoRetryRoute: typeof ApiPublicSunoRetryRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   ApiPublicTelegramWebhookRoute: typeof ApiPublicTelegramWebhookRoute
@@ -1048,6 +1075,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/sports-guide': {
+      id: '/_authenticated/sports-guide'
+      path: '/sports-guide'
+      fullPath: '/sports-guide'
+      preLoaderRoute: typeof AuthenticatedSportsGuideRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/store': {
       id: '/_authenticated/store'
       path: '/store'
@@ -1244,6 +1278,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicNewUserAlertRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/sports-guide-reminders': {
+      id: '/api/public/sports-guide-reminders'
+      path: '/api/public/sports-guide-reminders'
+      fullPath: '/api/public/sports-guide-reminders'
+      preLoaderRoute: typeof ApiPublicSportsGuideRemindersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/suno-retry': {
       id: '/api/public/suno-retry'
       path: '/api/public/suno-retry'
@@ -1313,6 +1354,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPurchaseHistoryRoute: typeof AuthenticatedPurchaseHistoryRoute
   AuthenticatedReferralsRoute: typeof AuthenticatedReferralsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedSportsGuideRoute: typeof AuthenticatedSportsGuideRoute
   AuthenticatedStoreRoute: typeof AuthenticatedStoreRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedAdminApiKeysRoute: typeof AuthenticatedAdminApiKeysRoute
@@ -1347,6 +1389,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPurchaseHistoryRoute: AuthenticatedPurchaseHistoryRoute,
   AuthenticatedReferralsRoute: AuthenticatedReferralsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedSportsGuideRoute: AuthenticatedSportsGuideRoute,
   AuthenticatedStoreRoute: AuthenticatedStoreRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedAdminApiKeysRoute: AuthenticatedAdminApiKeysRoute,
@@ -1402,6 +1445,7 @@ const rootRouteChildren: RootRouteChildren = {
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicNewUserAlertRoute: ApiPublicNewUserAlertRoute,
+  ApiPublicSportsGuideRemindersRoute: ApiPublicSportsGuideRemindersRoute,
   ApiPublicSunoRetryRoute: ApiPublicSunoRetryRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   ApiPublicTelegramWebhookRoute: ApiPublicTelegramWebhookRoute,
