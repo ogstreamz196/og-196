@@ -28,6 +28,7 @@ import { TrackUnlockReturnHandler } from "@/components/library/TrackUnlockReturn
 import { NativeAppLinkBridge } from "@/components/NativeAppLinkBridge";
 import { RevenueCatBridge } from "@/components/revenuecat/RevenueCatBridge";
 import { registerAppServiceWorker } from "@/lib/register-sw";
+import { TrackReadyNotifier } from "@/components/TrackReadyNotifier";
 
 function NotFoundComponent() {
   return (
@@ -342,6 +343,7 @@ function RootComponent() {
           <NativeAppLinkBridge />
           <Outlet />
           <InstallAppPrompt />
+          <TrackReadyNotifier />
           <Toaster position="top-center" offset={72} />
         </RevenueCatBridge>
       </AuthProvider>

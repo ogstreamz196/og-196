@@ -49,6 +49,8 @@ export default defineConfig({
           // Only hashed, same-origin build assets are precached.
           globPatterns: ["assets/**/*.{js,css,woff2,png,svg,jpg,webp}"],
           navigateFallback: null,
+          // Opens the track page when a "track ready" notification is tapped.
+          importScripts: ["/sw-notify.js"],
           cleanupOutdatedCaches: true,
           maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
           runtimeCaching: [

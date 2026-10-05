@@ -21,6 +21,8 @@ export const SAMPLE_BYTES = 1_048_576;
 const SAMPLE_TIMEOUT_MS = 25_000;
 const FULL_TIMEOUT_MS = 180_000;
 const FULL_ATTEMPTS = 3;
+/** Synchronous full-master download window (per attempt) before falling back. */
+const SYNC_FULL_TIMEOUT_MS = 60_000;
 
 // Allow-list of hostnames we'll fetch audio from (defence-in-depth SSRF guard).
 export const AUDIO_HOST_ALLOWLIST = [
@@ -181,28 +183,41 @@ export async function materialiseClips(
       }
     }
 
-    // --- Phase 1: short sample (fast, and the gate for "is this clip usable") ---
-    let sampleBuf: Uint8Array;
-    try {
-      const { res, buf } = await fetchWithTimeout(
-        clip.audioUrl!,
-        { headers: { Range: `bytes=0-${SAMPLE_BYTES - 1}` } },
-        SAMPLE_TIMEOUT_MS,
-      );
-      if (!res.ok && res.status !== 206) {
-        throw new Error(`HTTP ${res.status}`);
+    // --- Phase 1: the FULL master file, downloaded and saved before anything
+    // else. The 1-minute sample is just the first slice of that same file, so
+    // a song is never marked finished with only a sample.
+    let fullBuf: Uint8Array | null = null;
+    for (let attempt = 1; attempt <= 2 && !fullBuf; attempt++) {
+      try {
+        const { res, buf } = await fetchWithTimeout(clip.audioUrl!, {}, SYNC_FULL_TIMEOUT_MS);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        if (buf.byteLength === 0) throw new Error("empty body");
+        fullBuf = buf;
+      } catch (e) {
+        console.error("Full download attempt failed", clip.clipId, attempt, (e as Error).message);
       }
-      if (buf.byteLength === 0) throw new Error("empty body");
-      sampleBuf = buf;
-    } catch (e) {
-      // Broken/stalled clip on Suno's CDN — try the next take instead of dying.
-      console.error(
-        "Clip sample download failed, trying next take:",
-        clip.clipId,
-        (e as Error).message,
-      );
-      result.brokenClips.push(clip.clipId ?? clip.audioUrl!);
-      continue;
+    }
+
+    let sampleBuf: Uint8Array;
+    if (fullBuf) {
+      sampleBuf = fullBuf.byteLength > SAMPLE_BYTES ? fullBuf.slice(0, SAMPLE_BYTES) : fullBuf;
+    } else {
+      // Last resort: CDN won't serve the whole file right now. Grab a sample so
+      // the clip is usable; the background loop + scheduled sweep fetch the full.
+      try {
+        const { res, buf } = await fetchWithTimeout(
+          clip.audioUrl!,
+          { headers: { Range: `bytes=0-${SAMPLE_BYTES - 1}` } },
+          SAMPLE_TIMEOUT_MS,
+        );
+        if (!res.ok && res.status !== 206) throw new Error(`HTTP ${res.status}`);
+        if (buf.byteLength === 0) throw new Error("empty body");
+        sampleBuf = buf;
+      } catch (e) {
+        console.error("Clip unusable, trying next take:", clip.clipId, (e as Error).message);
+        result.brokenClips.push(clip.clipId ?? clip.audioUrl!);
+        continue;
+      }
     }
 
     // Decide which row this clip fills.
@@ -255,12 +270,25 @@ export async function materialiseClips(
       continue;
     }
 
-    // Mark completed now — the UI can play the sample immediately.
+    // Save the full master alongside the sample before marking completed.
+    let savedFullPath: string | null = null;
+    if (fullBuf && fullBuf.byteLength > 0) {
+      const fullPath = `${userId}/${targetId}.mp3`;
+      const { error: fullUpErr } = await admin.storage.from("song-files").upload(fullPath, fullBuf, {
+        contentType: "audio/mpeg",
+        upsert: true,
+        metadata: ownerMeta(userId, targetId, "full"),
+      } as any);
+      if (fullUpErr) console.error("Full upload failed for", targetId, fullUpErr);
+      else savedFullPath = fullPath;
+    }
+
     await admin
       .from("songs")
       .update({
         status: "completed",
         sample_path: samplePath,
+        ...(savedFullPath ? { audio_path: savedFullPath } : {}),
         cover_url: clip.coverUrl ?? null,
         title: clip.title ?? parentSong.title,
         suno_clip_id: clip.clipId ?? null,
@@ -273,8 +301,9 @@ export async function materialiseClips(
 
     result.completed += 1;
     if (targetId === songId) result.parentCompleted = true;
+    if (savedFullPath) continue;
 
-    // --- Phase 2: full download (background where available) ---
+    // --- Phase 2 (fallback only): full download retried in the background ---
     const finalId = targetId;
     const audioUrl = clip.audioUrl!;
     const bgTask = (async () => {
