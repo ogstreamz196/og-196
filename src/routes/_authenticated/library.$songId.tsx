@@ -157,7 +157,7 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
   useEffect(() => {
     let cancelled = false;
     async function load() {
-      if (!isReady || previewUrl || loadingPreview) return;
+      if (!isReady || previewUrl) return;
       setLoadingPreview(true);
       try {
         const { data, error } = await supabase.functions.invoke("song-url", {
@@ -178,14 +178,14 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
       } catch (e) {
         if (!cancelled) toast.error(e instanceof Error ? e.message : "Could not load preview");
       } finally {
-        if (!cancelled) setLoadingPreview(false);
+        setLoadingPreview(false);
       }
     }
     load();
     return () => {
       cancelled = true;
     };
-  }, [isReady, song.id, previewUrl, loadingPreview, communityMode, unlocked]);
+  }, [isReady, song.id, previewUrl, communityMode, unlocked]);
 
   // The moment a track becomes paid-for, drop the sample link so the player
   // reloads with the full-length version.
@@ -424,7 +424,7 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
           </div>
 
           <div className="mt-4">
-            {isPending && <GeneratingStatus song={song} />}
+            {isPending && communityMode && <GeneratingStatus song={song} />}
             {isFailed && (
               <div
                 role="alert"

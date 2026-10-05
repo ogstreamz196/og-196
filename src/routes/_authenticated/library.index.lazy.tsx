@@ -572,6 +572,17 @@ function LibraryPage() {
     durations: {},
   });
   const [pipelineNow, setPipelineNow] = useState(0);
+  // Lyrics are written and the track saved from this page, so warn before
+  // closing during those first seconds or the track would be lost.
+  useEffect(() => {
+    if (pipeline.stage !== "lyrics" && pipeline.stage !== "saving") return;
+    const warn = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [pipeline.stage]);
   const pipelineLockRef = useRef(false);
   // The song we're watching in realtime while its audio renders.
   const [trackedSongId, setTrackedSongId] = useState<string | null>(null);
@@ -1510,6 +1521,7 @@ function LibraryPage() {
         onOpenChange={(o) => setCooking((c) => ({ ...c, open: o }))}
         title={cooking.title}
         etaMinutes={5}
+        safeToLeave={pipeline.stage !== "lyrics" && pipeline.stage !== "saving"}
       />
 
       {/* Creation happens entirely inside the Create now wizard — no inline form. */}

@@ -920,7 +920,7 @@ export function CreateNowWizard({
                   <div className="flex items-center justify-between gap-2">
                     <p className="min-w-0 truncate text-sm font-bold text-foreground">
                       {title.trim() ||
-                        `For ${subjectName.trim().split(/\s+/)[0] || "you"} · OG Bot names it`}
+                        `For ${subjectName.trim().slice(0, 24) || "you"} · OG Bot names it`}
                     </p>
                     <span className="flex shrink-0 items-center gap-1 text-[11px] font-semibold text-muted-foreground">
                       {isPublic ? (
@@ -1078,7 +1078,7 @@ export function CreateNowWizard({
       </AlertDialog>
 
       <AlertDialog open={offerOpen} onOpenChange={setOfferOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="w-[calc(100vw-2rem)] max-w-md overflow-hidden">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-primary" />
@@ -1095,7 +1095,7 @@ export function CreateNowWizard({
               <Button
                 type="button"
                 onClick={() => void finish(true)}
-                className="min-h-12 w-full gap-2 bg-gradient-brand font-black uppercase tracking-wide text-primary-foreground shadow-glow"
+                className="h-auto min-h-12 w-full gap-2 whitespace-normal bg-gradient-brand py-2 text-center font-black uppercase tracking-wide text-primary-foreground shadow-glow"
               >
                 <Coins className="h-4 w-4" />
                 Yes — add 2nd version · {secondVersionCost} coins
@@ -1108,7 +1108,7 @@ export function CreateNowWizard({
                     setOfferOpen(false);
                     onBuyCoins?.();
                   }}
-                  className="min-h-12 w-full gap-2 bg-gradient-brand font-black uppercase tracking-wide text-primary-foreground shadow-glow"
+                  className="h-auto min-h-12 w-full gap-2 whitespace-normal bg-gradient-brand py-2 text-center font-black uppercase tracking-wide text-primary-foreground shadow-glow"
                 >
                   <Coins className="h-4 w-4" />
                   Buy coins
