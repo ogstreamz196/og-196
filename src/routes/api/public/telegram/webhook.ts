@@ -134,8 +134,8 @@ async function reply(chat_id: number, text: string, extra?: Record<string, unkno
 const USER_KEYBOARD = {
   keyboard: [
     [{ text: "💰 Balance" }, { text: "🎧 Library" }],
-    [{ text: "🛒 Buy Coins" }, { text: "👤 My Profile" }],
-    [{ text: "👑 VIP Status" }, { text: "❓ Help" }],
+    [{ text: "👑 VIP Status" }, { text: "⚽ Sports Guide" }],
+    [{ text: "🛒 Buy Coins" }, { text: "❓ Help" }],
   ],
   resize_keyboard: true,
   is_persistent: true,
@@ -145,7 +145,7 @@ const BOSS_KEYBOARD = {
   keyboard: [
     [{ text: "📊 Stats" }, { text: "👥 Users" }],
     [{ text: "💰 Balance" }, { text: "👑 VIP Status" }],
-    [{ text: "❓ Help" }],
+    [{ text: "⚽ Sports Guide" }, { text: "❓ Help" }],
   ],
   resize_keyboard: true,
   is_persistent: true,
@@ -160,6 +160,7 @@ Tap a button below or use a command:
 /buy — top up OG coins
 /me — your linked profile
 /vip — your VIP status and expiry date
+/sports — open the Sports Guide
 /help — this menu
 
 Just type anything else and I'll answer — same brain as the in-app messenger.`;
