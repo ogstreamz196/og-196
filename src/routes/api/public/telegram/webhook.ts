@@ -792,8 +792,8 @@ async function handleTelegramUpdate(
       "👤 My Profile": "/me",
       "👑 VIP Status": "/vip",
       "❓ Help": "/help",
-      "📊 Stats": "/stats",
-      "👥 Users": "/users",
+      "⚽ Sports Guide": "/sports",
+      ...(isBoss ? { "📊 Stats": "/stats", "👥 Users": "/users" } : {}),
     };
     if (buttonMap[trimmed]) trimmed = buttonMap[trimmed];
 
@@ -802,6 +802,18 @@ async function handleTelegramUpdate(
         reply_markup: keyboard,
       });
       return Response.json({ ok: true, help: true });
+    }
+    if (/^\/sports\b/i.test(trimmed)) {
+      await reply(
+        chat_id,
+        "⚽ <b>OG Sports Guide</b>\nLive fixtures, fight cards and TV channels — included with VIP or the Sports Guide pass.",
+        {
+          reply_markup: {
+            inline_keyboard: [[{ text: "Open Sports Guide", url: "https://ogbot.co.uk/sports" }]],
+          },
+        },
+      );
+      return Response.json({ ok: true, sports: true });
     }
     if (/^\/balance\b/i.test(trimmed)) {
       const { data: p } = await admin
