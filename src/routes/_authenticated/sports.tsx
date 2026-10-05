@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Copy, ExternalLink, Loader2, Lock, Search, X } from "lucide-react";
+import { Copy, ExternalLink, Loader2, Lock, Radio, Search, Tv, X } from "lucide-react";
+import { dedupe, parseListing, searchListing, type Fixture, type Listing } from "@/lib/sports-listing";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -27,7 +28,6 @@ export const Route = createFileRoute("/_authenticated/sports")({
 });
 
 const KEY = ["sports-guide-hub"];
-const clean = (t: string) => t.replace(/\n?•\s*Sent via TeleFeed\s*$/i, "").trim();
 
 function SportsGuidePage() {
   const qc = useQueryClient();
@@ -83,14 +83,13 @@ function SportsGuidePage() {
   });
 
   const words = useMemo(() => dq.toLowerCase().split(/\s+/).filter(Boolean), [dq]);
-  const results = useMemo(() => {
-    const posts = hub.data?.posts ?? [];
-    if (!words.length) return posts;
-    return posts.filter((p) => {
-      const t = p.raw_text.toLowerCase();
-      return words.every((w) => t.includes(w));
-    });
-  }, [hub.data?.posts, words]);
+  const listings = useMemo(() => dedupe(hub.data?.posts ?? []).map(parseListing), [hub.data?.posts]);
+  const results = useMemo(
+    () => listings.map((l) => searchListing(l, words)).filter((l): l is Listing => !!l),
+    [listings, words],
+  );
+  const matchCount = results.reduce((n, l) => n + (l.fixtures.length || 1), 0);
+  const fixtureTotal = listings.reduce((n, l) => n + l.fixtures.length, 0);
 
   if (hub.isLoading) {
     return (
@@ -156,27 +155,53 @@ function SportsGuidePage() {
     );
   }
 
-  const total = hub.data?.posts.length ?? 0;
+
+  const QUICK = ["Premier League", "Champions League", "UFC", "Boxing", "NFL", "F1", "DAZN", "Sky"];
   return (
-    <div className="mx-auto max-w-2xl space-y-3 px-4 pb-24 pt-3">
-      <header className="flex items-center gap-3">
-        <img src={sportsGuideLogo.url} alt="" className="h-11 w-11 rounded-xl border border-primary/40 object-cover" />
-        <div className="min-w-0 flex-1">
-          <h1 className="font-display text-xl font-black uppercase leading-tight">Sports Guide</h1>
-          <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-success" /> Live · {total} posts
-          </p>
+    <div className="mx-auto max-w-2xl px-4 pb-24 pt-3">
+      <header className="relative overflow-hidden rounded-3xl border border-primary/30 bg-card shadow-glow">
+        <div
+          aria-hidden
+          className="absolute inset-0 opacity-20"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(90deg, var(--primary) 0 1px, transparent 1px 64px), radial-gradient(circle at 50% 120%, transparent 38%, var(--primary) 38.5%, transparent 39.5%)",
+          }}
+        />
+        <div aria-hidden className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-primary/30 blur-3xl" />
+        <div aria-hidden className="absolute -left-10 bottom-0 h-32 w-32 rounded-full bg-coin/20 blur-3xl" />
+        <div className="relative flex items-center gap-4 p-4">
+          <img src={sportsGuideLogo.url} alt="" className="h-16 w-16 shrink-0 rounded-2xl border-2 border-coin/60 object-cover shadow-lg" />
+          <div className="min-w-0 flex-1">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-destructive px-2 py-0.5 text-[10px] font-black uppercase tracking-widest text-destructive-foreground">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-destructive-foreground" /> Live
+            </span>
+            <h1 className="mt-1 font-display text-3xl font-black uppercase leading-none tracking-tight">
+              Match <span className="text-coin">Centre</span>
+            </h1>
+            <p className="mt-1 text-xs text-muted-foreground">Every fixture & channel, synced live from OG Sports Guide</p>
+          </div>
+        </div>
+        <div className="relative grid grid-cols-3 border-t border-border/60 bg-background/40 text-center">
+          <Stat label="Fixtures" value={fixtureTotal} />
+          <Stat label="Guides" value={listings.length} />
+          <div className="py-2">
+            <div className="flex items-center justify-center gap-1 font-display text-lg font-black text-success">
+              <Radio className="h-4 w-4 animate-pulse" /> ON
+            </div>
+            <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Auto-sync</div>
+          </div>
         </div>
       </header>
 
-      <div className="sticky top-0 z-10 -mx-4 bg-background/90 px-4 py-2 backdrop-blur">
+      <div className="sticky top-0 z-10 -mx-4 mt-3 bg-background/90 px-4 py-2 backdrop-blur">
         <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-coin" />
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search team, fighter, channel…"
-            className="h-12 rounded-2xl pl-9 pr-10 text-base"
+            placeholder="Search team, fighter, league or channel…"
+            className="h-14 rounded-2xl border-2 border-primary/40 bg-card pl-12 pr-12 text-base font-semibold shadow-card focus-visible:border-coin focus-visible:ring-coin/40"
             inputMode="search"
             autoComplete="off"
           />
@@ -184,28 +209,60 @@ function SportsGuidePage() {
             <button
               aria-label="Clear search"
               onClick={() => setQ("")}
-              className="absolute right-2 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-full hover:bg-muted"
+              className="absolute right-3 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-full bg-muted hover:bg-muted/70"
             >
               <X className="h-4 w-4" />
             </button>
           )}
         </div>
-        {words.length > 0 && (
-          <p className="mt-1.5 px-1 text-xs text-muted-foreground">
-            {results.length} {results.length === 1 ? "match" : "matches"}
+        {words.length > 0 ? (
+          <p className="mt-2 px-1 text-xs font-bold uppercase tracking-wider text-coin">
+            {matchCount} {matchCount === 1 ? "match" : "matches"} for “{dq.trim()}”
           </p>
+        ) : (
+          <div className="-mx-4 mt-2 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
+            {QUICK.map((t) => (
+              <button
+                key={t}
+                onClick={() => setQ(t)}
+                className="shrink-0 rounded-full border border-border bg-card px-3 py-1 text-xs font-bold text-muted-foreground transition-colors hover:border-coin hover:text-coin"
+              >
+                {t}
+              </button>
+            ))}
+          </div>
         )}
       </div>
 
-      <section className="space-y-2">
+      <section className="mt-2 space-y-3">
         {results.length === 0 ? (
-          <p className="py-12 text-center text-sm text-muted-foreground">
-            {total ? "No messages match — try another word." : "New messages will appear here as soon as they're posted."}
-          </p>
+          <div className="rounded-3xl border border-dashed border-border py-14 text-center">
+            <div className="text-4xl">🏟️</div>
+            <p className="mt-2 font-display text-lg font-black uppercase">
+              {listings.length ? "No fixtures found" : "Waiting for kick-off"}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {listings.length ? "Try another team, league or channel." : "New listings appear here the moment they're posted."}
+            </p>
+            {q && (
+              <Button variant="outline" size="sm" className="mt-3" onClick={() => setQ("")}>
+                Clear search
+              </Button>
+            )}
+          </div>
         ) : (
-          results.map((p) => <PostCard key={p.id} post={p} terms={words} />)
+          results.map((l) => <ListingCard key={l.id} listing={l} terms={words} />)
         )}
       </section>
+    </div>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="border-r border-border/60 py-2">
+      <div className="font-display text-lg font-black text-foreground">{value}</div>
+      <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{label}</div>
     </div>
   );
 }
@@ -227,21 +284,105 @@ function Highlight({ text, terms }: { text: string; terms: string[] }) {
   );
 }
 
-function PostCard({ post, terms }: { post: SportsGuidePost; terms: string[] }) {
-  const text = clean(post.raw_text);
-  const posted = new Date(post.posted_at);
+const fmtTime = (d: Date) => d.toLocaleTimeString("en-GB", { timeZone: "Europe/London", hour: "2-digit", minute: "2-digit" });
+const fmtDay = (d: Date) => {
+  const key = (x: Date) => x.toLocaleDateString("en-CA", { timeZone: "Europe/London" });
+  const today = key(new Date());
+  const tom = key(new Date(Date.now() + 86_400_000));
+  const k = key(d);
+  if (k === today) return "Today";
+  if (k === tom) return "Tomorrow";
+  return d.toLocaleDateString("en-GB", { timeZone: "Europe/London", weekday: "short", day: "numeric", month: "short" });
+};
+
+function splitTeams(event: string) {
+  const m = event.match(/^(?:(.+?)\s*[:|]\s*)?(.+?)\s+(?:vs\.?|v|@)\s+(.+)$/i);
+  return m ? { tag: m[1], home: m[2], away: m[3], sep: /@/.test(event) ? "@" : "VS" } : null;
+}
+
+function FixtureRow({ f, terms }: { f: Fixture; terms: string[] }) {
+  const teams = splitTeams(f.event);
+  const live = f.at && Date.now() >= f.at.getTime() && Date.now() - f.at.getTime() < 2 * 3600_000;
   return (
-    <article className="rounded-2xl border border-border bg-card p-4 shadow-card">
-      <div className="mb-2 text-[11px] text-muted-foreground">
-        {posted.toLocaleString(undefined, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+    <li className="flex items-stretch gap-3 px-3 py-2.5">
+      <div className="flex w-14 shrink-0 flex-col items-center justify-center rounded-xl bg-background/60 py-1 text-center">
+        {f.at ? (
+          <>
+            <span className="font-mono text-sm font-black text-coin">{fmtTime(f.at)}</span>
+            <span className={live ? "text-[9px] font-black uppercase text-destructive" : "text-[9px] font-bold uppercase text-muted-foreground"}>
+              {live ? "● Live" : fmtDay(f.at)}
+            </span>
+          </>
+        ) : (
+          <span className="text-[10px] text-muted-foreground">TBC</span>
+        )}
       </div>
-      <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">
-        <Highlight text={text} terms={terms} />
-      </p>
-      <div className="mt-3 flex gap-2">
+      <div className="min-w-0 flex-1">
+        {teams ? (
+          <>
+            {teams.tag && (
+              <div className="truncate text-[10px] font-bold uppercase tracking-wider text-primary">
+                <Highlight text={teams.tag} terms={terms} />
+              </div>
+            )}
+            <div className="text-sm font-bold leading-snug">
+              <Highlight text={teams.home} terms={terms} />
+              <span className="mx-1.5 text-[10px] font-black text-muted-foreground">{teams.sep}</span>
+              <Highlight text={teams.away} terms={terms} />
+            </div>
+          </>
+        ) : (
+          <div className="text-sm font-bold leading-snug">
+            <Highlight text={f.event} terms={terms} />
+          </div>
+        )}
+        <div className="mt-1 inline-flex items-center gap-1 rounded-md bg-primary/15 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wide text-primary">
+          <Tv className="h-3 w-3" /> <Highlight text={f.channel} terms={terms} />
+        </div>
+      </div>
+    </li>
+  );
+}
+
+function ListingCard({ listing: l, terms }: { listing: Listing; terms: string[] }) {
+  const [open, setOpen] = useState(false);
+  const limit = terms.length ? 50 : 6;
+  const shown = open ? l.fixtures : l.fixtures.slice(0, limit);
+  const text = [l.title && `${l.title}${l.date ? ` ${l.date}` : ""}`, ...l.fixtures.map((f) => f.raw), ...l.notes]
+    .filter(Boolean)
+    .join("\n");
+  return (
+    <article className="overflow-hidden rounded-3xl border border-border bg-card shadow-card">
+      <div className="flex items-center gap-2 border-b border-border bg-gradient-to-r from-primary/25 via-primary/10 to-transparent px-4 py-2.5">
+        <Tv className="h-4 w-4 text-coin" />
+        <h2 className="min-w-0 flex-1 truncate font-display text-base font-black uppercase tracking-wide">
+          {l.title ? <Highlight text={l.title} terms={terms} /> : "OG Sports Guide"}
+        </h2>
+        <span className="shrink-0 text-[10px] font-bold uppercase text-muted-foreground">
+          {l.fixtures.length ? `${l.fixtures.length} fixtures` : fmtDay(new Date(l.postedAt))}
+        </span>
+      </div>
+      {shown.length > 0 && (
+        <ul className="divide-y divide-border/60">
+          {shown.map((f, i) => (
+            <FixtureRow key={i} f={f} terms={terms} />
+          ))}
+        </ul>
+      )}
+      {l.fixtures.length > shown.length && (
+        <button onClick={() => setOpen(true)} className="w-full border-t border-border py-2 text-xs font-black uppercase tracking-wider text-coin">
+          Show all {l.fixtures.length} fixtures
+        </button>
+      )}
+      {l.notes.length > 0 && (
+        <p className="whitespace-pre-wrap break-words px-4 py-3 text-sm leading-relaxed">
+          <Highlight text={l.notes.join("\n")} terms={terms} />
+        </p>
+      )}
+      <div className="flex gap-2 border-t border-border/60 px-3 py-2">
         <Button
           size="sm"
-          variant="outline"
+          variant="ghost"
           className="h-8 text-xs"
           onClick={() => {
             navigator.clipboard?.writeText(text);
@@ -250,8 +391,8 @@ function PostCard({ post, terms }: { post: SportsGuidePost; terms: string[] }) {
         >
           <Copy className="mr-1 h-3.5 w-3.5" /> Copy
         </Button>
-        <Button size="sm" variant="ghost" asChild className="h-8 text-xs">
-          <a href={`https://t.me/${SPORTS_GUIDE_USERNAME}/${post.telegram_message_id}`} target="_blank" rel="noopener noreferrer">
+        <Button size="sm" variant="ghost" asChild className="ml-auto h-8 text-xs">
+          <a href={`https://t.me/${SPORTS_GUIDE_USERNAME}/${l.messageId}`} target="_blank" rel="noopener noreferrer">
             <ExternalLink className="mr-1 h-3.5 w-3.5" /> Telegram
           </a>
         </Button>
