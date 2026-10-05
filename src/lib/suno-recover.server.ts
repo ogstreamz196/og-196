@@ -17,7 +17,7 @@ type AnyClient = {
 const RECORD_INFO_URL = "https://apibox.erweima.ai/api/v1/generate/record-info";
 const SAMPLE_BYTES = 1_048_576;
 const SAMPLE_TIMEOUT_MS = 25_000;
-const FULL_TIMEOUT_MS = 90_000;
+const FULL_TIMEOUT_MS = 180_000;
 
 const AUDIO_HOST_ALLOWLIST = [
   "apibox.erweima.ai",
