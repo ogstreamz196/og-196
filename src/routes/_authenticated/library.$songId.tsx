@@ -190,13 +190,15 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
   // The moment a track becomes paid-for, drop the sample link so the player
   // reloads with the full-length version.
   const wasUnlockedRef = useRef(unlocked);
+  const resumeAtRef = useRef<number | null>(null);
   useEffect(() => {
     if (unlocked && !wasUnlockedRef.current) {
       wasUnlockedRef.current = true;
-      setPreviewUrl(null);
-      setProgress(0);
-      setPlaying(false);
       const el = audioRef.current;
+      // Remember where the sample was so the full track carries on from there.
+      resumeAtRef.current = el && el.currentTime > 0 ? el.currentTime : null;
+      setPreviewUrl(null);
+      setPlaying(false);
       if (el) {
         el.pause();
         el.removeAttribute("src");
@@ -204,6 +206,22 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
     }
     wasUnlockedRef.current = unlocked;
   }, [unlocked]);
+
+  // Once the full-track link arrives after unlocking, resume playback.
+  useEffect(() => {
+    const at = resumeAtRef.current;
+    const el = audioRef.current;
+    if (at == null || !previewUrl || !el) return;
+    resumeAtRef.current = null;
+    const go = () => {
+      el.currentTime = at;
+      el.play()
+        .then(() => setPlaying(true))
+        .catch(() => {});
+    };
+    if (el.readyState >= 1) go();
+    else el.addEventListener("loadedmetadata", go, { once: true });
+  }, [previewUrl]);
 
   // Once the preview URL is warmed after a pending→ready transition, auto-play
   // it so the user gets an immediate "song is ready" moment.

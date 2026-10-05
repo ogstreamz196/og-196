@@ -675,8 +675,9 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       refreshCoinBalance();
       onSaved?.();
       onRefresh?.();
+      // Stay on the track: the player swaps to the full version and carries on
+      // from where the sample stopped.
       requestFullTrackPlay(song.id);
-      void navigate({ to: "/library" });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not unlock");
     } finally {
@@ -1754,9 +1755,16 @@ function InlineSamplePlayer({ songId, unlocked = false }: { songId: string; unlo
   const canPlayFull = unlocked || isBoss;
   const [playingFull, setPlayingFull] = useState(canPlayFull);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  // When a sample flips to the full track, remember where the listener was so
+  // the full version carries on from that exact spot.
+  const resumeAtRef = useRef<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
+    const prev = audioRef.current;
+    if (canPlayFull && prev && prev.currentTime > 0) {
+      resumeAtRef.current = prev.currentTime;
+    }
     setError(null);
     setUrl(null);
     setLoading(true);
@@ -1827,6 +1835,14 @@ function InlineSamplePlayer({ songId, unlocked = false }: { songId: string; unlo
           src={url}
           controls
           preload="auto"
+          onLoadedMetadata={(e) => {
+            const at = resumeAtRef.current;
+            if (at == null || !playingFull) return;
+            resumeAtRef.current = null;
+            const el = e.currentTarget;
+            el.currentTime = at;
+            void el.play().catch(() => {});
+          }}
           className="w-full rounded-lg bg-black/30"
           aria-label="Sample preview"
         />
