@@ -1060,7 +1060,9 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                   <Play className="h-4 w-4 shrink-0 text-primary" />Preview
                 </span>
                 <span className="mt-0.5 block truncate text-xs text-muted-foreground">
-                  {isReady
+                  {isReady && ownsFull
+                    ? "Full track ready"
+                    : isReady
                     ? `Free ${settings?.sample_seconds ?? 60}s sample ready`
                     : isPending
                       ? "Generating…"
