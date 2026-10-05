@@ -550,6 +550,31 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Rewrites often come back no longer than the draft. If still short, ask
+    // only for the missing sections and append them so length is guaranteed.
+    for (let attempt = 0; attempt < 2 && lyrics && wordCount(lyrics) < minWords; attempt++) {
+      const missing = minWords - wordCount(lyrics);
+      try {
+        const more = await generate([
+          { role: "user", parts: [{ text: userPrompt }] },
+          { role: "model", parts: [{ text: lyrics }] },
+          {
+            role: "user",
+            parts: [
+              {
+                text: `Continue this SAME song. Write ONLY the NEW sections that come after the last line — at least ${missing} more words: a new labelled verse, a [Bridge], and a full final [Chorus] plus [Outro]. Same title, theme, hook, languages (${languagesLabel}), styles and voice. Do not repeat what is already written above. Output ONLY the new lyrics.`,
+              },
+            ],
+          },
+        ]);
+        if (!more.ok || wordCount(more.text) < 20) break;
+        lyrics = `${lyrics.trim()}\n\n${more.text.trim()}`;
+      } catch (e) {
+        console.error("lyrics continuation failed", e);
+        break;
+      }
+    }
+
     lyrics = sanitizeLyrics(lyrics);
     const words = wordCount(lyrics);
     const estimatedSec = Math.max(targetSec, Math.round((words / WORDS_PER_MIN) * 60));
