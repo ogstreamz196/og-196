@@ -501,8 +501,15 @@ export function OgChat({
     }
 
     // Follow-up edit on the latest image in this conversation — no re-attach.
-    // While the "Editing your last image" chip is visible, any message edits it.
-    if (!att && memoryImage && !memoryOff && t) {
+    // While the "Editing your last image" chip is visible, messages edit it —
+    // except plain questions ("what did you do?"), which go to normal chat.
+    const isQuestion =
+      /\?\s*$/.test(t) ||
+      /^(what|why|how|who|when|where|which|did|do|does|is|are|was|were|have|has|whats|wat|wot|wtf|huh)\b/i.test(
+        t,
+      );
+    const plainQuestion = isQuestion && !EDIT_INTENT.test(t);
+    if (!att && memoryImage && !memoryOff && t && !plainQuestion) {
       if (imageEdit.isPending) return;
       setMessages((cur) => [...cur, { role: "user", content: `🎨 Edit image: ${t}` }]);
       setInput("");
@@ -1145,7 +1152,7 @@ export function OgChat({
                   : isOut
                     ? "Out of coins — top up to chat"
                     : !attachment && memoryImage
-                      ? "Describe the change (e.g. clear the rubbish)…"
+                      ? "Describe the change…"
                       : "Message OG Bot…"
             }
             disabled={m.isPending || isOut || !user || transcribing}
