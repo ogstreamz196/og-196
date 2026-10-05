@@ -163,7 +163,18 @@ export const chatOgBot = createServerFn({ method: "POST" })
       songIntent,
       dossier,
     });
-    const system = baseSystem + intensityNote;
+    let promo: import("@/lib/vip-promo.server").PromoResult | null = null;
+    let promoNote = "";
+    {
+      const vp = await import("@/lib/vip-promo.server");
+      if (vp.detectPromoIntent(latestUserMsg?.content)) {
+        promo = await vp.getOrCreateVipPromo(supabaseAdmin, context.userId, {
+          isPaidVip: roles.includes("vip"),
+        });
+        promoNote = vp.promoPromptNote(promo);
+      }
+    }
+    const system = baseSystem + intensityNote + promoNote;
 
     // 1b. Learn fresh insults from the latest user message (fire-and-forget upsert).
     let newlyLearned: string[] = [];
@@ -252,7 +263,11 @@ export const chatOgBot = createServerFn({ method: "POST" })
       const json = (await res.json().catch(() => ({}))) as {
         choices?: { message?: { content?: string } }[];
       };
-      const reply = (json.choices?.[0]?.message?.content ?? "").trim() || "…";
+      let reply = (json.choices?.[0]?.message?.content ?? "").trim() || "…";
+      if (promo) {
+        const { ensureCodeInReply } = await import("@/lib/vip-promo.server");
+        reply = ensureCodeInReply(reply, promo);
+      }
 
       return {
         reply,

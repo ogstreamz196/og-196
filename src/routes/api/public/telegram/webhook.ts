@@ -557,7 +557,16 @@ async function runChatAI(
   const { loadUserDossier } = await import("@/lib/og-user-dossier.server");
   const dossier = await loadUserDossier(admin, profileId).catch(() => null);
 
-  const system = buildSystemPrompt({
+  const vp = await import("@/lib/vip-promo.server");
+  const promo = vp.detectPromoIntent(userText)
+    ? await vp.getOrCreateVipPromo(admin, profileId, { isPaidVip: roles.includes("vip") })
+    : null;
+  const promoNote = promo ? vp.promoPromptNote(promo) : "";
+
+  const system =
+    promoNote +
+    "" +
+    buildSystemPrompt({
     mode: "og",
     foulMouth,
     bossScript: personaMap.get("og_persona.script") ?? null,
@@ -621,7 +630,8 @@ async function runChatAI(
     const json = (await res.json().catch(() => ({}))) as {
       choices?: { message?: { content?: string } }[];
     };
-    const replyText = (json.choices?.[0]?.message?.content ?? "").trim() || "…";
+    let replyText = (json.choices?.[0]?.message?.content ?? "").trim() || "…";
+    if (promo) replyText = vp.ensureCodeInReply(replyText, promo).replace(/\*\*/g, "");
 
     await admin.from("og_messages").insert({
       user_id: profileId,
