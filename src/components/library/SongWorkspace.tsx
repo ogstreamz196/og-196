@@ -930,7 +930,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
 
                 {hasLyrics && languageChanged && (
                   <div className="rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-xs text-foreground/80">
-                    Language changed to <b>{languageValue}</b> — regenerate lyrics to rewrite them.
+                    Language changed to <b>{languageValue}</b> — Cook now will rewrite the lyrics.
                   </div>
                 )}
 
