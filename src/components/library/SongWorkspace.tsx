@@ -512,6 +512,27 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
     }
   }
 
+  // Single "Cook now": apply any edits, rewrite lyrics only when needed
+  // (none yet, or the language changed), otherwise cook the current lyrics.
+  async function cookNow() {
+    if (dirty) {
+      setSaving(true);
+      try {
+        await saveSettingsPatch();
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "Could not save changes");
+        return;
+      } finally {
+        setSaving(false);
+      }
+    }
+    if (!hasLyrics || languageChanged) {
+      await generateLyrics();
+    } else {
+      await cookCurrentLyrics();
+    }
+  }
+
   async function cookCurrentLyrics() {
     setTab("preview");
     requestAnimationFrame(() =>
@@ -909,7 +930,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
 
                 {hasLyrics && languageChanged && (
                   <div className="rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-xs text-foreground/80">
-                    Language changed to <b>{languageValue}</b> — regenerate lyrics to rewrite them.
+                    Language changed to <b>{languageValue}</b> — Cook now will rewrite the lyrics.
                   </div>
                 )}
 
@@ -1009,36 +1030,17 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                     </div>
                   )}
                   <Button
-                    variant="ghost"
-                    onClick={handleSave}
-                    disabled={!dirty || saving}
-                    className="min-w-0"
+                    onClick={() => void cookNow()}
+                    disabled={genLyrics || genPreview || isPending || cooking || saving || missing}
+                    className="col-span-2 min-w-0 gap-2"
                   >
-                    {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
-                  </Button>
-
-                  <Button
-                    onClick={generateLyrics}
-                    disabled={genLyrics || missing}
-                    className="min-w-0 gap-1.5 sm:gap-2"
-                  >
-                    {genLyrics ? (
+                    {genLyrics || genPreview || saving ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       <Sparkles className="h-4 w-4" />
                     )}
-                    {hasLyrics ? "Re-write lyrics + cook" : "Write lyrics + cook track"}
+                    Cook now
                   </Button>
-                  {hasLyrics && (
-                    <Button
-                      variant="secondary"
-                      onClick={() => void cookCurrentLyrics()}
-                      disabled={genLyrics || genPreview || isPending || cooking || missing}
-                      className="col-span-2 min-w-0 gap-1.5 sm:col-span-1 sm:gap-2"
-                    >
-                      <Play className="h-4 w-4" /> Cook with my lyrics
-                    </Button>
-                  )}
                 </div>
               </CardContent>
             </CollapsibleContent>
