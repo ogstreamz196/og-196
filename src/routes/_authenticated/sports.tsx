@@ -359,7 +359,7 @@ function ListingCard({ listing: l, terms }: { listing: Listing; terms: string[] 
           {l.title ? <Highlight text={l.title} terms={terms} /> : "OG Sports Guide"}
         </h2>
         <span className="shrink-0 text-[10px] font-bold uppercase text-muted-foreground">
-          {l.fixtures.length ? `${l.fixtures.length} fixtures` : fmtDay(new Date(l.postedAt))}
+          {l.fixtures.length ? `${l.fixtures.length} ${l.fixtures.length === 1 ? "fixture" : "fixtures"}` : fmtDay(new Date(l.postedAt))}
         </span>
       </div>
       {shown.length > 0 && (
