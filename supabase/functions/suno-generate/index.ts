@@ -217,8 +217,9 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Creation and rendering are free. Users pay only at final full-track download.
-    const coinCost = 0;
+    // Creation is free. Editing a finished track costs EDIT_COST (charged below).
+    const EDIT_COST = 2;
+    let coinCost = 0;
 
     // If this generation came from a portal, force the hardcoded language into the Suno prompt
     let portalLanguage: string | null = null;
@@ -294,6 +295,33 @@ Deno.serve(async (req) => {
         );
       }
       existing = row;
+      // Editing a finished track (re-cook) costs 2 coins, taken once at submit.
+      // Retries of failed jobs and first-time creation stay free.
+      if (row.status === "completed") {
+        const { error: chargeErr } = await admin.rpc("deduct_coins", {
+          p_user: user.id,
+          p_amount: EDIT_COST,
+          p_reference: `edit:${row.id}:${generationStartedAt}`,
+        });
+        if (chargeErr) {
+          await admin
+            .from("songs")
+            .update({ status: "completed" })
+            .eq("id", row.id)
+            .eq("status", "pending");
+          const insufficient = /insufficient/i.test(chargeErr.message);
+          return json(
+            {
+              error: insufficient
+                ? `Editing a track costs ${EDIT_COST} coins — top up to continue`
+                : "Could not charge for this edit",
+              code: insufficient ? "insufficient_coins" : "charge_failed",
+            },
+            insufficient ? 402 : 500,
+          );
+        }
+        coinCost = EDIT_COST;
+      }
     }
 
     // Read the current balance for the response without charging creation.

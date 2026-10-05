@@ -213,6 +213,8 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const unlockCost = song.is_variation ? remakeCost : fullUnlockCost;
   const balance = profile?.coin_balance ?? 0;
   const isOwner = !!profile?.id && song.user_id === profile.id;
+  // Re-cooking a finished track is an edit: 2 coins, charged once on submit.
+  const editCost = song.status === "completed" ? 2 : 0;
 
   const [title] = useState(song.title ?? "");
   const [brief, setBrief] = useState(song.prompt ?? "");
@@ -569,8 +571,8 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       toast.error("Generate lyrics first");
       return false;
     }
-    if (balance < previewCost) {
-      setTopUp({ needed: previewCost, reason: "finish this track" });
+    if (balance < previewCost + editCost) {
+      setTopUp({ needed: previewCost + editCost, reason: "edit this track" });
       return false;
     }
     submitLockRef.current = true;
@@ -622,7 +624,12 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
         toast.info(data.error || "Your current generations need to finish first");
       } else {
         ok = true;
-        toast.success("OG Bot is cooking your new take — no credits charged");
+        toast.success(
+          editCost > 0
+            ? `${editCost} OG coins used · OG Bot is cooking your new take`
+            : "OG Bot is cooking your new take",
+        );
+        refreshCoinBalance();
         onSaved?.();
       }
     } catch (e) {
@@ -1059,7 +1066,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                     ) : (
                       <Sparkles className="h-4 w-4" />
                     )}
-                    Cook now
+                    {editCost > 0 ? `Cook now · ${editCost} coins` : "Cook now"}
                   </Button>
                 </div>
               </CardContent>
