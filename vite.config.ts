@@ -76,6 +76,28 @@ export default defineConfig({
                 expiration: { maxEntries: 200, maxAgeSeconds: 30 * 24 * 3600 },
               },
             },
+            {
+              urlPattern: ({ url }) =>
+                url.origin === "https://fonts.googleapis.com" ||
+                url.origin === "https://fonts.gstatic.com",
+              handler: "StaleWhileRevalidate",
+              options: {
+                cacheName: "og-fonts",
+                expiration: { maxEntries: 40, maxAgeSeconds: 365 * 24 * 3600 },
+                cacheableResponse: { statuses: [0, 200] },
+              },
+            },
+            {
+              urlPattern: ({ url, request }) =>
+                request.destination === "image" &&
+                url.pathname.includes("/storage/v1/object/public/"),
+              handler: "CacheFirst",
+              options: {
+                cacheName: "og-images",
+                expiration: { maxEntries: 150, maxAgeSeconds: 14 * 24 * 3600 },
+                cacheableResponse: { statuses: [0, 200] },
+              },
+            },
           ],
         },
       }),
