@@ -501,7 +501,8 @@ export function OgChat({
     }
 
     // Follow-up edit on the latest image in this conversation — no re-attach.
-    if (!att && memoryImage && t && EDIT_INTENT.test(t)) {
+    // While the "Editing your last image" chip is visible, any message edits it.
+    if (!att && memoryImage && !memoryOff && t) {
       if (imageEdit.isPending) return;
       setMessages((cur) => [...cur, { role: "user", content: `🎨 Edit image: ${t}` }]);
       setInput("");
