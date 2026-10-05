@@ -804,9 +804,14 @@ async function handleTelegramUpdate(
       return Response.json({ ok: true, help: true });
     }
     if (/^\/sports\b/i.test(trimmed)) {
+      const { quickSportsReply } = await import("@/lib/sports-guide-context.server");
+      const q = trimmed.replace(/^\/sports(@\w+)?/i, "").trim();
+      let body = "⚽ <b>OG Sports Guide</b>";
+      try { body = await quickSportsReply(admin, linkedProfile.id, q); } catch (e) { console.warn("[telegram] quick sports failed", e); }
+      if (!q) body += "\n\nTip: send <code>/sports arsenal</code> or <code>/sports dazn</code>";
       await reply(
         chat_id,
-        "⚽ <b>OG Sports Guide</b>\nLive fixtures, fight cards and TV channels — included with VIP or the Sports Guide pass.",
+        body.slice(0, 4000),
         {
           reply_markup: {
             inline_keyboard: [[{ text: "Open Sports Guide", url: "https://ogbot.co.uk/sports" }]],
