@@ -1885,6 +1885,36 @@ export type Database = {
           },
         ]
       }
+      vip_promo_codes: {
+        Row: {
+          code: string
+          created_at: string
+          environment: string
+          id: string
+          redeemed_at: string | null
+          stripe_promotion_code_id: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          environment: string
+          id?: string
+          redeemed_at?: string | null
+          stripe_promotion_code_id: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          environment?: string
+          id?: string
+          redeemed_at?: string | null
+          stripe_promotion_code_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
