@@ -593,7 +593,11 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
 
       if (error) {
         const msg = invokeError(error, "Could not start generation");
-        if (/song not found/i.test(msg)) {
+        if (/already generating/i.test(msg)) {
+          // A duplicate tap/auto-start raced the first request — that one is cooking.
+          ok = true;
+          onSaved?.();
+        } else if (/song not found/i.test(msg)) {
           setMissing(true);
           toast.error(
             "This song is no longer available — it may have been deleted. Start a new one from the studio.",
