@@ -659,6 +659,99 @@ export function CreateNowWizard({
 
             {step === 3 && (
               <div className="space-y-5">
+                {/* Content rating — replaces the old foul mouth toggle. */}
+                <div className="space-y-2">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
+                    Lyrics rating
+                  </p>
+                  <div role="group" aria-label="Lyrics rating" className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      aria-pressed={!foulMouth}
+                      disabled={ratingSaving}
+                      onClick={() => selectRating(false)}
+                      className={cn(
+                        "flex flex-col items-center gap-1.5 rounded-xl border px-3 py-3 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-60",
+                        !foulMouth
+                          ? "border-emerald-400 bg-emerald-400/15"
+                          : "border-border bg-background hover:border-emerald-400/40",
+                      )}
+                    >
+                      <img
+                        src={ratingPgImg}
+                        alt="PG — Parental Guidance rating certificate"
+                        loading="lazy"
+                        width={56}
+                        height={56}
+                        className={cn(
+                          "h-14 w-14 object-contain transition",
+                          !foulMouth ? "opacity-100" : "opacity-50 saturate-50",
+                        )}
+                      />
+                      <span className="text-sm font-bold">PG rated</span>
+                      <span className="text-[11px] text-muted-foreground">Clean, family safe</span>
+                    </button>
+                    <button
+                      type="button"
+                      aria-pressed={foulMouth}
+                      disabled={ratingSaving || isNasheed}
+                      onClick={() => selectRating(true)}
+                      className={cn(
+                        "flex flex-col items-center gap-1.5 rounded-xl border px-3 py-3 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-60",
+                        foulMouth
+                          ? "border-destructive bg-destructive/20"
+                          : "border-border bg-background hover:border-destructive/40",
+                      )}
+                    >
+                      <img
+                        src={rating18Img}
+                        alt="18 — adults only rating certificate"
+                        loading="lazy"
+                        width={56}
+                        height={56}
+                        className={cn(
+                          "h-14 w-14 object-contain transition",
+                          foulMouth ? "opacity-100" : "opacity-50 saturate-50",
+                        )}
+                      />
+                      <span className="text-sm font-bold">18+ rated</span>
+                      <span className="text-[11px] text-muted-foreground">Explicit, no filter</span>
+                    </button>
+                  </div>
+
+                  {!isNasheed && foulMouth && (
+                    <div className="space-y-2 rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-3">
+                      <div className="flex items-baseline justify-between gap-2">
+                        <label
+                          htmlFor="foul-intensity"
+                          className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground"
+                        >
+                          Swearing intensity
+                        </label>
+                        <span className="text-[11px] font-bold text-destructive">
+                          {INTENSITY_LABELS[intensity]}
+                        </span>
+                      </div>
+                      <Slider
+                        id="foul-intensity"
+                        aria-label="Swearing intensity"
+                        min={0}
+                        max={3}
+                        step={1}
+                        value={[intensity]}
+                        onValueChange={(v) => changeIntensity(v[0] ?? 3)}
+                        onValueCommit={(v) => saveIntensity(v[0] ?? 3)}
+                      />
+                      <div className="flex justify-between text-[10px] text-muted-foreground">
+                        <span>Clean</span>
+                        <span>Mild</span>
+                        <span>Strong</span>
+                        <span>Savage</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 <div className="space-y-2">
                   <div className="flex items-baseline justify-between gap-2">
                     <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
@@ -822,98 +915,6 @@ export function CreateNowWizard({
                   )}
                 </div>
 
-                {/* Content rating — replaces the old foul mouth toggle. */}
-                <div className="space-y-2">
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
-                    Lyrics rating
-                  </p>
-                  <div role="group" aria-label="Lyrics rating" className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      aria-pressed={!foulMouth}
-                      disabled={ratingSaving}
-                      onClick={() => selectRating(false)}
-                      className={cn(
-                        "flex flex-col items-center gap-1.5 rounded-xl border px-3 py-3 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-60",
-                        !foulMouth
-                          ? "border-emerald-400 bg-emerald-400/15"
-                          : "border-border bg-background hover:border-emerald-400/40",
-                      )}
-                    >
-                      <img
-                        src={ratingPgImg}
-                        alt="PG — Parental Guidance rating certificate"
-                        loading="lazy"
-                        width={56}
-                        height={56}
-                        className={cn(
-                          "h-14 w-14 object-contain transition",
-                          !foulMouth ? "opacity-100" : "opacity-50 saturate-50",
-                        )}
-                      />
-                      <span className="text-sm font-bold">PG rated</span>
-                      <span className="text-[11px] text-muted-foreground">Clean, family safe</span>
-                    </button>
-                    <button
-                      type="button"
-                      aria-pressed={foulMouth}
-                      disabled={ratingSaving || isNasheed}
-                      onClick={() => selectRating(true)}
-                      className={cn(
-                        "flex flex-col items-center gap-1.5 rounded-xl border px-3 py-3 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-60",
-                        foulMouth
-                          ? "border-destructive bg-destructive/20"
-                          : "border-border bg-background hover:border-destructive/40",
-                      )}
-                    >
-                      <img
-                        src={rating18Img}
-                        alt="18 — adults only rating certificate"
-                        loading="lazy"
-                        width={56}
-                        height={56}
-                        className={cn(
-                          "h-14 w-14 object-contain transition",
-                          foulMouth ? "opacity-100" : "opacity-50 saturate-50",
-                        )}
-                      />
-                      <span className="text-sm font-bold">18+ rated</span>
-                      <span className="text-[11px] text-muted-foreground">Explicit, no filter</span>
-                    </button>
-                  </div>
-
-                  {!isNasheed && foulMouth && (
-                    <div className="space-y-2 rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-3">
-                      <div className="flex items-baseline justify-between gap-2">
-                        <label
-                          htmlFor="foul-intensity"
-                          className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground"
-                        >
-                          Swearing intensity
-                        </label>
-                        <span className="text-[11px] font-bold text-destructive">
-                          {INTENSITY_LABELS[intensity]}
-                        </span>
-                      </div>
-                      <Slider
-                        id="foul-intensity"
-                        aria-label="Swearing intensity"
-                        min={0}
-                        max={3}
-                        step={1}
-                        value={[intensity]}
-                        onValueChange={(v) => changeIntensity(v[0] ?? 3)}
-                        onValueCommit={(v) => saveIntensity(v[0] ?? 3)}
-                      />
-                      <div className="flex justify-between text-[10px] text-muted-foreground">
-                        <span>Clean</span>
-                        <span>Mild</span>
-                        <span>Strong</span>
-                        <span>Savage</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
 
                 {/* Compact track recipe so nothing is a surprise before creating. */}
                 <div className="rounded-xl border border-border bg-background/60 p-3">
@@ -970,7 +971,7 @@ export function CreateNowWizard({
           )}
         </div>
 
-        <div className="sticky bottom-0 z-10 -mx-4 mt-3 shrink-0 border-t border-white/10 bg-card/95 px-4 pb-[max(0.25rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-xl sm:static sm:-mx-6 sm:mt-1 sm:px-6 sm:pb-1">
+        <div className="-mx-4 mt-6 shrink-0 border-t border-white/10 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-4 sm:-mx-6 sm:mt-1 sm:px-6 sm:pb-1">
           <div className="flex items-center gap-2">
             <Button
               type="button"
