@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { createHash, timingSafeEqual } from "crypto";
 import { buildSystemPrompt, detectSongIntent } from "@/lib/og-persona.server";
 import type { UserContextSummary } from "@/lib/og-persona-public";
+import { SPORTS_GUIDE_CHAT_ID, detectSport, detectEventTime } from "@/lib/sports-guide-parse";
 
 // Accepted tokens:
 //   - Rotated, single-use: "t_" + 32 lowercase hex chars (matched against
