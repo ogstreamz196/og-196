@@ -179,7 +179,7 @@ function AdminUsersPage() {
     });
 
     return sorted;
-  }, [usersQ.data, q, roleFilter, rolesByUser, sort, sortDir, spendByUser]);
+  }, [usersQ.data, q, roleFilter, rolesByUser, proByUser, sort, sortDir, spendByUser]);
 
   if (roleLoading) {
     return (
