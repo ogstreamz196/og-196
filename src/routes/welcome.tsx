@@ -1,3 +1,4 @@
+import { ForgotPasswordDialog } from "@/components/auth/ForgotPasswordDialog";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import ogStreamzLogo from "@/assets/ogstreamz-logo.jpg.asset.json";
 import { Capacitor } from "@capacitor/core";
@@ -373,6 +374,7 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
 
   const [busy, setBusy] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  const [forgotOpen, setForgotOpen] = useState(false);
   const [createProgress, setCreateProgress] = useState(0);
   const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -619,15 +621,13 @@ function EmailAuthPanel({ disabled }: { disabled?: boolean }) {
       {mode !== "reset" && (
         <button
           type="button"
-          onClick={() => {
-            setResetSent(false);
-            setMode("reset");
-          }}
+          onClick={() => setForgotOpen(true)}
           className="mt-4 h-12 w-full rounded-lg border-2 border-border bg-secondary/60 text-center text-base font-semibold text-foreground transition-colors hover:border-primary/60"
         >
           Forgot password?
         </button>
       )}
+      <ForgotPasswordDialog open={forgotOpen} onOpenChange={setForgotOpen} />
 
       {mode === "reset" && (
         <button
