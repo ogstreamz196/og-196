@@ -105,7 +105,14 @@ export const getSportsGuideAccessStatus = createServerFn({ method: "GET" })
     if (access.error) throw new Error(access.error.message);
     if (profile.error) throw new Error(profile.error.message);
     if (setting.error) throw new Error(setting.error.message);
-    const status = access.data?.status as SportsGuideAccessStatus["status"] | undefined;
+    let status = access.data?.status as SportsGuideAccessStatus["status"] | undefined;
+    // VIP members (incl. the free trial) get the in-app Sports Guide included.
+    if (!status || status === "revoked") {
+      const { data: viaVip } = await supabaseAdmin.rpc("has_sports_guide_access", {
+        _user: context.userId,
+      });
+      if (viaVip) status = "owned";
+    }
     return {
       owned: !!status && status !== "revoked",
       status: status ?? "unowned",
