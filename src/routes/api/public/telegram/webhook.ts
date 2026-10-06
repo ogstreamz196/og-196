@@ -145,16 +145,13 @@ async function reply(chat_id: number, text: string, extra?: Record<string, unkno
   });
 }
 
-// Short first-time intro with a single Clear chat button.
 const INTRO_TEXT =
   `🔥 <b>Yo, I'm OG Bot.</b>\n\n` +
   `Ask me anything — just chat, need advice, what time is the game… or just plain insult me.\n\n` +
   `Go on, fire away 👇`;
 
 async function sendIntro(chat_id: number) {
-  await reply(chat_id, INTRO_TEXT, {
-    reply_markup: { inline_keyboard: [[{ text: "🧹 Clear chat", callback_data: "clearchat" }]] },
-  });
+  await reply(chat_id, INTRO_TEXT);
 }
 
 // Deletes up to the last 100 messages (bots may delete private-chat messages <48h old).
@@ -170,6 +167,7 @@ const USER_KEYBOARD = {
     [{ text: "💰 Balance" }, { text: "🎧 Library" }],
     [{ text: "👑 VIP Status" }, { text: "⚽ Sports Guide" }],
     [{ text: "🛒 Buy Coins" }, { text: "❓ Help" }],
+    [{ text: "🧹 Clear chat" }, { text: "🌐 OGBOT.CO.UK" }],
   ],
   resize_keyboard: true,
   is_persistent: true,
@@ -180,7 +178,15 @@ const BOSS_KEYBOARD = {
     [{ text: "📊 Stats" }, { text: "👥 Users" }],
     [{ text: "💰 Balance" }, { text: "👑 VIP Status" }],
     [{ text: "⚽ Sports Guide" }, { text: "❓ Help" }],
+    [{ text: "🧹 Clear chat" }, { text: "🌐 OGBOT.CO.UK" }],
   ],
+  resize_keyboard: true,
+  is_persistent: true,
+};
+
+// Bottom-bar buttons for users who haven't linked their account yet.
+const BOTTOM_BAR_KEYBOARD = {
+  keyboard: [[{ text: "🧹 Clear chat" }, { text: "🌐 OGBOT.CO.UK" }]],
   resize_keyboard: true,
   is_persistent: true,
 };
@@ -814,10 +820,20 @@ async function handleTelegramUpdate(
       "👤 My Profile": "/me",
       "👑 VIP Status": "/vip",
       "❓ Help": "/help",
-      "⚽ Sports Guide": "/sports",
+"⚽ Sports Guide": "/sports",
+      "🧹 Clear chat": "/clear",
       ...(isBoss ? { "📊 Stats": "/stats", "👥 Users": "/users" } : {}),
     };
     if (buttonMap[trimmed]) trimmed = buttonMap[trimmed];
+
+    if (trimmed === "🌐 OGBOT.CO.UK") {
+      await reply(chat_id, "🌐 <b>OG BOT on the web</b>", {
+        reply_markup: {
+          inline_keyboard: [[{ text: "Open OGBOT.CO.UK", url: "https://ogbot.co.uk" }]],
+        },
+      });
+      return Response.json({ ok: true, site: true });
+    }
 
     if (/^\/start\b/i.test(trimmed)) {
       await sendIntro(chat_id);
@@ -1042,16 +1058,37 @@ async function handleTelegramUpdate(
   }
 
   if (!startMatch) {
-    if (typeof text === "string" && /^\/start\b/i.test(text.trim())) {
+    const unlinkedText = typeof text === "string" ? text.trim() : "";
+    if (unlinkedText === "🧹 Clear chat") {
+      const mid = (msg as { message_id?: number }).message_id;
+      if (mid) await clearRecentChat(chat_id, mid);
       await reply(
         chat_id,
         `${INTRO_TEXT}\n\n🔗 First, link your account: ogbot.co.uk → Settings → <b>Connect Telegram</b>.`,
+        { reply_markup: BOTTOM_BAR_KEYBOARD },
+      );
+      return Response.json({ ok: true, cleared: true });
+    }
+    if (unlinkedText === "🌐 OGBOT.CO.UK") {
+      await reply(chat_id, "🌐 <b>OG BOT on the web</b>", {
+        reply_markup: {
+          inline_keyboard: [[{ text: "Open OGBOT.CO.UK", url: "https://ogbot.co.uk" }]],
+        },
+      });
+      return Response.json({ ok: true, site: true });
+    }
+    if (/^\/start\b/i.test(unlinkedText)) {
+      await reply(
+        chat_id,
+        `${INTRO_TEXT}\n\n🔗 First, link your account: ogbot.co.uk → Settings → <b>Connect Telegram</b>.`,
+        { reply_markup: BOTTOM_BAR_KEYBOARD },
       );
       return Response.json({ ok: true, missing_token: true });
     }
     await reply(
       chat_id,
       "👋 <b>OG Bot is online.</b>\n\nLink your OG profile from Settings → Connect Telegram to unlock the full assistant here.",
+      { reply_markup: BOTTOM_BAR_KEYBOARD },
     );
     return Response.json({ ok: true, unlinked_reply: true });
   }
