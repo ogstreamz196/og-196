@@ -52,8 +52,29 @@ export function formatVipExpiry(expiresAt: string | null | undefined) {
   })}`;
 }
 
-function toDateInput(d: Date) {
-  return d.toISOString().slice(0, 10);
+function toUkDateInput(d: Date) {
+  return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
+}
+
+/** Accepts DD/MM/YYYY (typed) or YYYY-MM-DD; returns a Date at 23:59:59 local, or null. */
+function parseTypedDate(s: string): Date | null {
+  const v = s.trim();
+  let day: number, month: number, year: number;
+  const uk = v.match(/^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$/);
+  const iso = v.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (uk) {
+    day = Number(uk[1]);
+    month = Number(uk[2]);
+    year = Number(uk[3]);
+  } else if (iso) {
+    year = Number(iso[1]);
+    month = Number(iso[2]);
+    day = Number(iso[3]);
+  } else return null;
+  if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+  const d = new Date(year, month - 1, day, 23, 59, 59);
+  if (d.getFullYear() !== year || d.getMonth() !== month - 1 || d.getDate() !== day) return null;
+  return d;
 }
 
 export function VipExpiryDialog({
@@ -79,7 +100,7 @@ export function VipExpiryDialog({
     if (isVip && !currentExpiry) setMode("lifetime");
     else if (isVip && currentExpiry) {
       setMode("custom");
-      setCustom(toDateInput(new Date(currentExpiry)));
+      setCustom(toUkDateInput(new Date(currentExpiry)));
     } else setMode("months");
   }, [open, isVip, currentExpiry]);
 
@@ -91,8 +112,8 @@ export function VipExpiryDialog({
         d.setMonth(d.getMonth() + Number(months));
         expires = d.toISOString();
       } else if (mode === "custom") {
-        if (!custom) throw new Error("Pick a date");
-        const d = new Date(`${custom}T23:59:59`);
+        const d = parseTypedDate(custom);
+        if (!d) throw new Error("Type the date as DD/MM/YYYY");
         if (d.getTime() <= Date.now()) throw new Error("Date must be in the future");
         expires = d.toISOString();
       }
@@ -165,12 +186,16 @@ export function VipExpiryDialog({
           </label>
           <label className="flex items-center gap-3 rounded-lg border border-border p-3">
             <RadioGroupItem value="custom" />
-            <span className="text-sm font-medium">Custom date</span>
+            <span className="text-sm font-medium shrink-0">Custom date</span>
             <Input
-              type="date"
-              className="ml-auto h-8 w-40"
-              min={toDateInput(new Date(Date.now() + 86_400_000))}
+              type="text"
+              inputMode="numeric"
+              autoComplete="off"
+              placeholder="DD/MM/YYYY"
+              maxLength={10}
+              className="ml-auto h-8 w-36 text-center"
               value={custom}
+              onFocus={() => setMode("custom")}
               onChange={(e) => {
                 setCustom(e.target.value);
                 setMode("custom");
