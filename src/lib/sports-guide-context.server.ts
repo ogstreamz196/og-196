@@ -48,6 +48,32 @@ const SPORTS_LOCKED_PROMPT = `SPORTS GUIDE LOCKED — HARD RULE: This user has N
 3. Once unlocked, the full live match centre is at https://www.ogbot.co.uk/sports and you'll answer every fixture question.
 Keep it short and punchy.`;
 
+// Warm per-instance caches so repeat questions skip the DB parse / web search.
+type Fixture = ReturnType<typeof import("./sports-listing").parseListing>["fixtures"][number];
+let fixtureCache: { at: number; value: Fixture[] } | null = null;
+let fixtureInflight: Promise<Fixture[]> | null = null;
+const webCache = new Map<string, { value: string; exp: number }>();
+
+async function loadFixturesCached(admin: Admin): Promise<Fixture[]> {
+  if (fixtureCache && Date.now() - fixtureCache.at < 60_000) return fixtureCache.value;
+  if (fixtureInflight) return fixtureInflight;
+  fixtureInflight = (async () => {
+    const { parseListing, dedupe } = await import("./sports-listing");
+    const { data } = await admin
+      .from("sports_guide_posts")
+      .select("id, raw_text, posted_at, telegram_message_id")
+      .gte("posted_at", new Date(Date.now() - 10 * 86_400_000).toISOString())
+      .order("posted_at", { ascending: false })
+      .limit(120);
+    const fixtures = dedupe(data ?? []).map(parseListing).flatMap((l) => l.fixtures);
+    const seen = new Set<string>();
+    const uniq = fixtures.filter((f) => !seen.has(f.raw) && seen.add(f.raw));
+    fixtureCache = { at: Date.now(), value: uniq };
+    return uniq;
+  })().finally(() => { fixtureInflight = null; });
+  return fixtureInflight;
+}
+
 /** Returns a prompt block, or "" when the message isn't about sport.
  * Always checks the parsed feed for team/event names, so "when does Swansea
  * play next" works even without sporty words. */
@@ -56,16 +82,7 @@ export async function buildSportsGuideContext(admin: Admin, userId: string, text
   const words = keywords(text);
   if (!detectSportsIntent(text) && !words.length) return "";
 
-  const { parseListing, dedupe } = await import("./sports-listing");
-  const { data } = await admin
-    .from("sports_guide_posts")
-    .select("id, raw_text, posted_at, telegram_message_id")
-    .gte("posted_at", new Date(Date.now() - 10 * 86_400_000).toISOString())
-    .order("posted_at", { ascending: false })
-    .limit(120);
-  const fixtures = dedupe(data ?? []).map(parseListing).flatMap((l) => l.fixtures);
-  const seen = new Set<string>();
-  const uniq = fixtures.filter((f) => !seen.has(f.raw) && seen.add(f.raw));
+  const uniq = await loadFixturesCached(admin);
 
   const score = (f: (typeof uniq)[number]) => {
     const hay = `${f.event} ${f.channel}`.toLowerCase();
@@ -96,7 +113,18 @@ export async function buildSportsGuideContext(admin: Admin, userId: string, text
   let web: string | null = null;
   if (!hits.length && words.length) {
     const { getLiveResearchContext } = await import("./ai-endpoint.server");
-    web = await getLiveResearchContext(`${text} next fixture date kick-off time UK TV channel`).catch(() => null);
+    const q = `${text} next fixture date kick-off time UK TV channel`;
+    const key = q.toLowerCase().replace(/\s+/g, " ").trim();
+    const hit = webCache.get(key);
+    if (hit && hit.exp > Date.now()) web = hit.value;
+    else {
+      // Cap the web lookup so a slow search never stalls the reply.
+      web = await Promise.race([
+        getLiveResearchContext(q).catch(() => null),
+        new Promise<null>((r) => setTimeout(() => r(null), 6000)),
+      ]);
+      if (web) webCache.set(key, { value: web, exp: Date.now() + 30 * 60_000 });
+    }
   }
   const webBlock = web
     ? `\n\nWEB RESULTS (not in the Sports Guide — use these to answer; say it's not in the guide yet, give date, UK time and UK TV channel if found, and never invent anything not stated here):\n${web.slice(0, 4000)}`
