@@ -155,9 +155,8 @@ function SportsGuidePage() {
   }
 
 
-  const QUICK = ["Premier League", "Champions League", "UFC", "Boxing", "NFL", "F1", "DAZN", "Sky"];
   return (
-    <div className="mx-auto max-w-2xl px-4 pb-24 pt-3">
+    <div className="mx-auto max-w-2xl px-3 pb-24 pt-3 sm:px-4">
       <header className="relative overflow-hidden rounded-3xl border-2 border-pitch/60 bg-card shadow-glow">
         <div
           aria-hidden
@@ -167,69 +166,82 @@ function SportsGuidePage() {
               "repeating-linear-gradient(90deg, color-mix(in oklab, var(--pitch) 38%, transparent) 0 40px, color-mix(in oklab, var(--pitch) 24%, transparent) 40px 80px)",
           }}
         />
-        <div
-          aria-hidden
-          className="absolute inset-0 opacity-50"
-          style={{
-            backgroundImage:
-              "linear-gradient(90deg, transparent calc(50% - 1px), var(--pitch-foreground) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px)), radial-gradient(circle at 50% 50%, transparent 54px, var(--pitch-foreground) 55px 57px, transparent 58px)",
-          }}
-        />
-        <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/40 to-background/85" />
-        <div aria-hidden className="absolute -left-10 -top-10 h-40 w-40 rounded-full bg-coin/40 blur-3xl" />
-        <div aria-hidden className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-coin/40 blur-3xl" />
-        <div className="relative flex items-center gap-4 p-5">
-          <img src={sportsGuideLogo.url} alt="" className="h-20 w-20 shrink-0 rounded-2xl border-2 border-coin object-cover shadow-lg" />
+        <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/50 to-background/90" />
+        <div className="relative flex items-center gap-3 p-4 sm:gap-4 sm:p-5">
+          <img src={sportsGuideLogo.url} alt="" className="h-16 w-16 shrink-0 rounded-2xl border-2 border-coin object-cover shadow-lg sm:h-20 sm:w-20" />
           <div className="min-w-0 flex-1">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-destructive px-2.5 py-0.5 text-[10px] font-black uppercase tracking-widest text-destructive-foreground shadow">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-destructive-foreground" /> Live
             </span>
-            <h1 className="mt-1 font-display text-4xl font-black uppercase italic leading-none tracking-tight drop-shadow">
+            <h1 className="mt-1 truncate font-display text-3xl font-black uppercase italic leading-none tracking-tight drop-shadow sm:text-4xl">
               Match <span className="text-coin">Centre</span>
             </h1>
-            <p className="mt-1 text-xs font-semibold text-foreground/85">Every fixture & channel, live</p>
+            <p className="mt-1 truncate text-xs font-semibold text-foreground/85">
+              {fixtureTotal} fixtures · {listings.length} guides · auto-sync on
+            </p>
           </div>
         </div>
 
-        <div className="relative px-4 pb-4">
-          <div className="rounded-3xl bg-gradient-to-r from-coin via-pitch to-coin p-[3px] shadow-glow">
-            <div className="relative rounded-[calc(1.5rem-3px)] bg-card">
-              <Search className="pointer-events-none absolute left-5 top-1/2 h-8 w-8 -translate-y-1/2 text-coin" />
-              <Input
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder="Search…"
-                className="h-20 rounded-[calc(1.5rem-3px)] border-0 bg-transparent pl-16 pr-14 text-xl font-black placeholder:font-semibold placeholder:text-muted-foreground focus-visible:ring-0 md:text-2xl"
-                inputMode="search"
-                autoComplete="off"
-              />
-              {q && (
-                <button
-                  aria-label="Clear search"
-                  onClick={() => setQ("")}
-                  className="absolute right-4 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-coin text-coin-foreground"
-                >
-                  <X className="h-5 w-5" />
-                </button>
+        <div className="relative px-3 pb-4 sm:px-4">
+          <div className="flex items-stretch gap-2">
+            <div className="min-w-0 flex-1 rounded-2xl bg-gradient-to-r from-coin via-pitch to-coin p-[2px] shadow-glow">
+              <div className="relative rounded-[calc(1rem-2px)] bg-card">
+                <Search className="pointer-events-none absolute left-4 top-1/2 h-6 w-6 -translate-y-1/2 text-coin" />
+                <Input
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  placeholder="Search team, fighter, channel…"
+                  className="h-16 rounded-[calc(1rem-2px)] border-0 bg-transparent pl-12 pr-11 text-lg font-black placeholder:text-sm placeholder:font-semibold placeholder:text-muted-foreground focus-visible:ring-0 sm:text-xl"
+                  inputMode="search"
+                  autoComplete="off"
+                />
+                {q && (
+                  <button
+                    aria-label="Clear search"
+                    onClick={() => setQ("")}
+                    className="absolute right-3 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-full bg-coin text-coin-foreground"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+            </div>
+            <button
+              aria-label="Filter by team"
+              aria-expanded={showTeams}
+              onClick={() => setShowTeams((v) => !v)}
+              className={`grid w-16 shrink-0 place-items-center rounded-2xl border-2 transition-colors ${showTeams ? "border-coin bg-coin text-coin-foreground" : "border-pitch/70 bg-card text-coin"}`}
+            >
+              <SlidersHorizontal className="h-6 w-6" />
+            </button>
+          </div>
+          {showTeams && (
+            <div className="mt-3 max-h-64 overflow-y-auto rounded-2xl border border-border bg-background/90 p-2">
+              {teams.length === 0 ? (
+                <p className="p-3 text-center text-sm text-muted-foreground">No teams found yet.</p>
+              ) : (
+                <div className="grid grid-cols-2 gap-1.5">
+                  {teams.map(([t, n]) => (
+                    <button
+                      key={t}
+                      onClick={() => {
+                        setQ(t);
+                        setShowTeams(false);
+                      }}
+                      className="flex min-w-0 items-center justify-between gap-2 rounded-xl bg-card px-3 py-2 text-left text-sm font-bold hover:bg-coin hover:text-coin-foreground"
+                    >
+                      <span className="truncate">{t}</span>
+                      <span className="shrink-0 text-[10px] font-black text-muted-foreground">{n}</span>
+                    </button>
+                  ))}
+                </div>
               )}
             </div>
-          </div>
-          {words.length > 0 ? (
+          )}
+          {words.length > 0 && (
             <p className="mt-3 px-1 text-sm font-black uppercase tracking-wider text-coin">
               {matchCount} {matchCount === 1 ? "match" : "matches"} for “{dq.trim()}”
             </p>
-          ) : (
-            <div className="-mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
-              {QUICK.map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setQ(t)}
-                  className="shrink-0 rounded-full border-2 border-pitch/70 bg-background/80 px-4 py-1.5 text-sm font-black uppercase text-foreground transition-colors hover:border-coin hover:bg-coin hover:text-coin-foreground"
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
           )}
         </div>
 
