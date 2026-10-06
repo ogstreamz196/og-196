@@ -253,7 +253,7 @@ function DashboardHome() {
                 size={420}
                 maxDrift={80}
                 dodgeRadius={160}
-                imageClassName="rounded-3xl ring-1 ring-white/10 shadow-glow w-[min(92vw,420px)] sm:w-[520px] h-auto"
+                imageClassName="rounded-3xl ring-1 ring-white/10 shadow-glow w-full max-w-[420px] sm:max-w-[520px] h-auto"
                 className="mx-auto"
               />
 
