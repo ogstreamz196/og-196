@@ -89,6 +89,20 @@ function SportsGuidePage() {
   );
   const matchCount = results.reduce((n, l) => n + (l.fixtures.length || 1), 0);
   const fixtureTotal = listings.reduce((n, l) => n + l.fixtures.length, 0);
+  const [showTeams, setShowTeams] = useState(false);
+  const teams = useMemo(() => {
+    const c = new Map<string, number>();
+    for (const l of listings)
+      for (const f of l.fixtures) {
+        const t = splitTeams(f.event);
+        if (!t) continue;
+        for (const name of [t.home, t.away]) {
+          const k = name.replace(/\s*\(.*?\)\s*/g, "").trim();
+          if (k.length > 1 && k.length < 40) c.set(k, (c.get(k) ?? 0) + 1);
+        }
+      }
+    return [...c.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 120);
+  }, [listings]);
 
   if (hub.isLoading) {
     return (
@@ -243,17 +257,6 @@ function SportsGuidePage() {
               {matchCount} {matchCount === 1 ? "match" : "matches"} for “{dq.trim()}”
             </p>
           )}
-        </div>
-
-        <div className="relative grid grid-cols-3 border-t-2 border-pitch/50 bg-background/80 text-center">
-          <Stat label="Fixtures" value={fixtureTotal} />
-          <Stat label="Guides" value={listings.length} />
-          <div className="py-2">
-            <div className="flex items-center justify-center gap-1 font-display text-lg font-black text-pitch">
-              <Radio className="h-4 w-4 animate-pulse" /> ON
-            </div>
-            <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Auto-sync</div>
-          </div>
         </div>
       </header>
 
