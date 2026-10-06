@@ -78,10 +78,10 @@ export async function pickCatchphrases(
 /** Prompt note telling the model to use the picked lines instead of inventing its own. */
 export function catchphraseNote(p: { opener: string | null; closer: string | null }): string {
   if (!p.opener && !p.closer) return "";
-  const parts = ["\n\nOPENER/CLOSER (pre-picked, saves tokens — do not invent your own greeting or sign-off):"];
-  if (p.opener) parts.push(`- Start the reply with exactly: "${p.opener}"`);
-  if (p.closer) parts.push(`- End the reply with exactly: "${p.closer}"`);
-  parts.push("- Skip either line if the user is upset/serious or it clearly doesn't fit. Keep everything between them focused on the actual answer.");
+  const parts = ["\n\nBANTER INSPIRATION (optional — riff on these in your own words, don't paste them verbatim, don't force them as a fixed opener/closer):"];
+  if (p.opener) parts.push(`- "${p.opener}"`);
+  if (p.closer) parts.push(`- "${p.closer}"`);
+  parts.push("- Spread the piss-taking naturally through the whole reply. Skip entirely if the user is upset or serious.");
   return parts.join("\n");
 }
 
