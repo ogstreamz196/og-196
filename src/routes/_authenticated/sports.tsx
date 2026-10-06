@@ -2,14 +2,14 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Copy, Loader2, Lock, Search, SlidersHorizontal, Tv, X } from "lucide-react";
+import { Copy, Loader2, Lock, RefreshCw, Search, SlidersHorizontal, Tv, X } from "lucide-react";
 import { dedupe, parseListing, searchListing, type Fixture, type Listing } from "@/lib/sports-listing";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import sportsGuideLogo from "@/assets/og-bot-sports-guide.png.asset.json";
-import { getSportsGuideHub, type SportsGuidePost } from "@/lib/sports-guide.functions";
+import { getSportsGuideHub, syncSportsGuide, type SportsGuidePost } from "@/lib/sports-guide.functions";
 import { purchaseSportsGuideAccess } from "@/lib/store.functions";
 
 export const Route = createFileRoute("/_authenticated/sports")({
