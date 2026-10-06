@@ -24,7 +24,7 @@ import {
   ShieldCheck,
   Crown,
 } from "lucide-react";
-import { useRef, useState, useCallback, type PointerEvent as ReactPointerEvent } from "react";
+import { useEffect, useRef, useState, useCallback, type PointerEvent as ReactPointerEvent } from "react";
 import {
   Dialog,
   DialogContent,
@@ -53,7 +53,6 @@ import { DodgyLogo } from "@/components/welcome/DodgyLogo";
 import { DodgyText } from "@/components/welcome/DodgyText";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getMyTelegramStatus } from "@/lib/telegram-admin.functions";
 import { isValidUsername } from "@/components/auth/UsernamePrompt";
