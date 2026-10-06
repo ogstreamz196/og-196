@@ -82,6 +82,20 @@ async function handleCallbackQuery(cq: {
   message?: { chat?: { id?: number }; message_id?: number; text?: string };
 }) {
   const answer = (text: string) => tg("answerCallbackQuery", { callback_query_id: cq.id, text });
+  if (cq.data === "clearchat" && cq.message?.chat?.id && cq.message.message_id) {
+    const chatId = cq.message.chat.id;
+    await answer("Chat cleared 🧹");
+    await clearRecentChat(chatId, cq.message.message_id);
+    const admin = await loadAdmin();
+    const { data: me } = await admin
+      .from("profiles")
+      .select("id")
+      .eq("telegram_chat_id", chatId)
+      .maybeSingle();
+    if (me?.id) await admin.from("og_messages").delete().eq("user_id", me.id);
+    await sendIntro(chatId);
+    return Response.json({ ok: true, cleared: true });
+  }
   const m = /^vipack:([0-9a-f-]{36})$/.exec(cq.data ?? "");
   if (!m) {
     await answer("Unknown action");
@@ -129,6 +143,25 @@ async function reply(chat_id: number, text: string, extra?: Record<string, unkno
     disable_web_page_preview: true,
     ...(extra ?? {}),
   });
+}
+
+// Short first-time intro with a single Clear chat button.
+const INTRO_TEXT =
+  `🔥 <b>Yo, I'm OG Bot.</b>\n\n` +
+  `Ask me anything — just chat, need advice, what time is the game… or just plain insult me.\n\n` +
+  `Go on, fire away 👇`;
+
+async function sendIntro(chat_id: number) {
+  await reply(chat_id, INTRO_TEXT, {
+    reply_markup: { inline_keyboard: [[{ text: "🧹 Clear chat", callback_data: "clearchat" }]] },
+  });
+}
+
+// Deletes up to the last 100 messages (bots may delete private-chat messages <48h old).
+async function clearRecentChat(chat_id: number, upToMessageId: number) {
+  const ids: number[] = [];
+  for (let i = upToMessageId; i > 0 && ids.length < 100; i--) ids.push(i);
+  if (ids.length) await tg("deleteMessages", { chat_id, message_ids: ids });
 }
 
 // Persistent reply keyboards — one row of quick actions.
