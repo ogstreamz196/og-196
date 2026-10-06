@@ -819,6 +819,17 @@ async function handleTelegramUpdate(
     };
     if (buttonMap[trimmed]) trimmed = buttonMap[trimmed];
 
+    if (/^\/start\b/i.test(trimmed)) {
+      await sendIntro(chat_id);
+      return Response.json({ ok: true, intro: true });
+    }
+    if (/^\/clear\b/i.test(trimmed)) {
+      const mid = (msg as { message_id?: number }).message_id;
+      if (mid) await clearRecentChat(chat_id, mid);
+      await admin.from("og_messages").delete().eq("user_id", linkedProfile.id);
+      await sendIntro(chat_id);
+      return Response.json({ ok: true, cleared: true });
+    }
     if (/^\/help\b/i.test(trimmed) || /^\/menu\b/i.test(trimmed)) {
       await reply(chat_id, isBoss ? HELP_ADMIN : HELP_USER, {
         reply_markup: keyboard,
@@ -1158,14 +1169,9 @@ async function handleTelegramUpdate(
   const balance = profile?.coin_balance ?? 0;
 
   const greeting =
-    `✅ <b>Connected!</b> OG Bot is now linked to your account.\n\n` +
-    `🔥 Yo <b>${name}</b> — link verified. OG Bot in your pocket now.\n\n` +
-    `💰 Balance: <b>${balance}</b> OG coins\n` +
-    `🎧 Just chat — same brain as the in-app messenger.\n` +
-    (isBoss
-      ? `👑 Boss mode unlocked — type /help for admin commands.\n\n`
-      : `Type /help for commands.\n\n`) +
-    `Now go make some noise. 🎤`;
+    `✅ <b>Connected, ${name}!</b>` +
+    (isBoss ? ` 👑 Boss mode on — /help for admin commands.` : "") +
+    `\n💰 ${balance} OG coins`;
 
   await reply(chat_id, greeting, {
     reply_markup: isBoss ? BOSS_KEYBOARD : USER_KEYBOARD,
