@@ -24,7 +24,7 @@ import {
   ShieldCheck,
   Crown,
 } from "lucide-react";
-import { useRef, useState, useCallback, type PointerEvent as ReactPointerEvent } from "react";
+import { useEffect, useRef, useState, useCallback, type PointerEvent as ReactPointerEvent } from "react";
 import {
   Dialog,
   DialogContent,
@@ -51,7 +51,11 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { DodgyLogo } from "@/components/welcome/DodgyLogo";
 import { DodgyText } from "@/components/welcome/DodgyText";
-import { DashboardGenerationHistory } from "@/components/dashboard/DashboardGenerationHistory";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { supabase } from "@/integrations/supabase/client";
+import { getMyTelegramStatus } from "@/lib/telegram-admin.functions";
+import { isValidUsername } from "@/components/auth/UsernamePrompt";
 import { DailyDrop } from "@/components/dashboard/DailyDrop";
 
 export const Route = createFileRoute("/_authenticated/")({
@@ -123,6 +127,38 @@ function DashboardHome() {
     (dev.isDev ? "Developer" : "there");
   const balance = profile?.coin_balance ?? 0;
   const hasSongs = recentSongs.length > 0;
+  const statusFn = useServerFn(getMyTelegramStatus);
+  const tg = useQuery({ queryKey: ["my-telegram-status"], queryFn: () => statusFn(), enabled: !!user, staleTime: 30_000 });
+  const tgDone = tg.data?.state === "verified" || !!(tg.data as { linked?: boolean } | undefined)?.linked;
+  const emailDone = !!user?.email && !user.email.toLowerCase().endsWith("@ogstreamz.app");
+  const nameDone = isValidUsername(profile?.display_name ?? "");
+  const profileDone = nameDone && emailDone && tgDone;
+  // "Say hi" = any message from this user in web chat (stored on this device) or via Telegram.
+  const [webHi, setWebHi] = useState(false);
+  useEffect(() => {
+    if (!user) return;
+    const check = () => {
+      try {
+        const raw = localStorage.getItem(`og-messenger-thread-v3:${user.id}`);
+        const arr = raw ? (JSON.parse(raw) as { role?: string }[]) : [];
+        setWebHi(Array.isArray(arr) && arr.some((m) => m?.role === "user"));
+      } catch { /* ignore */ }
+    };
+    check();
+    window.addEventListener("og-messenger:sync", check);
+    window.addEventListener("storage", check);
+    return () => { window.removeEventListener("og-messenger:sync", check); window.removeEventListener("storage", check); };
+  }, [user]);
+  const tgHi = useQuery({
+    queryKey: ["said-hi", user?.id],
+    enabled: !!user && !webHi,
+    queryFn: async () => {
+      const { count } = await supabase.from("og_messages").select("id", { count: "exact", head: true }).eq("user_id", user!.id).eq("role", "user");
+      return (count ?? 0) > 0;
+    },
+  });
+  const saidHi = webHi || !!tgHi.data;
+  const allStepsDone = profileDone && hasSongs && saidHi && isVip;
   const welcomeRef = useRef<HTMLElement | null>(null);
   const scrimOpacity = useAdaptiveOverlay(welcomeRef, { min: 0.55, max: 0.92 });
 
@@ -378,14 +414,13 @@ function DashboardHome() {
         </div>
       </section>
 
-      <DashboardGenerationHistory songs={recentSongs} />
-
+      {!allStepsDone && (
       <div className="grid grid-cols-1 gap-6">
         {/* Next steps */}
         <Card className="rounded-[2rem] border-2 border-white/15 shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)]">
           <CardHeader>
             <CardTitle className="font-display text-2xl font-black leading-[1.1] tracking-tight break-words sm:text-4xl md:text-5xl">
-              ✅ Next steps
+              Next steps
             </CardTitle>
             <CardDescription className="text-base sm:text-lg">
               Get the most out of OG Studio.
@@ -393,16 +428,17 @@ function DashboardHome() {
           </CardHeader>
           <CardContent className="space-y-3">
             <ChecklistItem
-              done={!!profile?.display_name}
-              label="Complete your profile"
+              done={profileDone}
+              label="Complete your profile (username, email & Telegram)"
               to="/settings"
             />
             <ChecklistItem done={hasSongs} label="Create your first song" to="/library" />
-            <ChecklistItem done={false} label="Say hi in OG Bot" to="/messenger" />
+            <ChecklistItem done={saidHi} label="Say hi in OG Bot" to="/messenger" />
             <ChecklistItem done={isVip} label="Unlock VIP perks" to="/buy-coins" />
           </CardContent>
         </Card>
       </div>
+      )}
 
       <footer className="flex justify-center border-t border-white/10 pt-6">
         <Link
