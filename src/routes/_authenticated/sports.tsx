@@ -81,6 +81,16 @@ function SportsGuidePage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const runSync = useServerFn(syncSportsGuide);
+  const sync = useMutation({
+    mutationFn: () => runSync(),
+    onSuccess: async (r) => {
+      await qc.invalidateQueries({ queryKey: KEY });
+      toast.success(r.removed > 0 ? `Synced — removed ${r.removed} deleted post${r.removed === 1 ? "" : "s"}` : "Synced — everything up to date");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const words = useMemo(() => dq.toLowerCase().split(/\s+/).filter(Boolean), [dq]);
   const listings = useMemo(() => dedupe(hub.data?.posts ?? []).map(parseListing), [hub.data?.posts]);
   const results = useMemo(
