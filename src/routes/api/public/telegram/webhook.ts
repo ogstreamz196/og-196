@@ -1003,13 +1003,18 @@ async function handleTelegramUpdate(
           `🔐 <b>Your OG Vault Access</b>\n\n` +
           `🆔 ID: <code>${esc(cred.username)}</code>\n` +
           `🔑 PIN: <code>${esc(cred.password)}</code>\n\n` +
-          `Tap to copy. Keep it private.`;
+          `Tap to copy. Keep it private.\n\n⏳ <i>For your security, this message self-destructs in 1 hour.</i>`;
       }
-      await reply(chat_id, body, {
-        reply_markup: {
-          inline_keyboard: [[{ text: "🛒 Open Store", url: "https://ogbot.co.uk/buy-coins" }]],
+      await reply(
+        chat_id,
+        body,
+        {
+          reply_markup: {
+            inline_keyboard: [[{ text: "🛒 Open Store", url: "https://ogbot.co.uk/buy-coins" }]],
+          },
         },
-      });
+        owned && creds?.length ? VAULT_TTL_MS : undefined,
+      );
       return Response.json({ ok: true, vault: true });
     }
     if (/^\/vip\b/i.test(trimmed)) {
@@ -1156,6 +1161,7 @@ async function handleTelegramUpdate(
         chat_id,
         `${INTRO_TEXT}\n\n🔗 First, link your account: ogbot.co.uk → Settings → <b>Connect Telegram</b>.`,
         { reply_markup: BOTTOM_BAR_KEYBOARD },
+        0,
       );
       return Response.json({ ok: true, missing_token: true });
     }
