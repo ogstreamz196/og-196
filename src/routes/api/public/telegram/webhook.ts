@@ -82,6 +82,20 @@ async function handleCallbackQuery(cq: {
   message?: { chat?: { id?: number }; message_id?: number; text?: string };
 }) {
   const answer = (text: string) => tg("answerCallbackQuery", { callback_query_id: cq.id, text });
+  if (cq.data === "clearchat" && cq.message?.chat?.id && cq.message.message_id) {
+    const chatId = cq.message.chat.id;
+    await answer("Chat cleared 🧹");
+    await clearRecentChat(chatId, cq.message.message_id);
+    const admin = await loadAdmin();
+    const { data: me } = await admin
+      .from("profiles")
+      .select("id")
+      .eq("telegram_chat_id", chatId)
+      .maybeSingle();
+    if (me?.id) await admin.from("og_messages").delete().eq("user_id", me.id);
+    await sendIntro(chatId);
+    return Response.json({ ok: true, cleared: true });
+  }
   const m = /^vipack:([0-9a-f-]{36})$/.exec(cq.data ?? "");
   if (!m) {
     await answer("Unknown action");
@@ -129,6 +143,25 @@ async function reply(chat_id: number, text: string, extra?: Record<string, unkno
     disable_web_page_preview: true,
     ...(extra ?? {}),
   });
+}
+
+// Short first-time intro with a single Clear chat button.
+const INTRO_TEXT =
+  `🔥 <b>Yo, I'm OG Bot.</b>\n\n` +
+  `Ask me anything — just chat, need advice, what time is the game… or just plain insult me.\n\n` +
+  `Go on, fire away 👇`;
+
+async function sendIntro(chat_id: number) {
+  await reply(chat_id, INTRO_TEXT, {
+    reply_markup: { inline_keyboard: [[{ text: "🧹 Clear chat", callback_data: "clearchat" }]] },
+  });
+}
+
+// Deletes up to the last 100 messages (bots may delete private-chat messages <48h old).
+async function clearRecentChat(chat_id: number, upToMessageId: number) {
+  const ids: number[] = [];
+  for (let i = upToMessageId; i > 0 && ids.length < 100; i--) ids.push(i);
+  if (ids.length) await tg("deleteMessages", { chat_id, message_ids: ids });
 }
 
 // Persistent reply keyboards — one row of quick actions.
@@ -786,6 +819,17 @@ async function handleTelegramUpdate(
     };
     if (buttonMap[trimmed]) trimmed = buttonMap[trimmed];
 
+    if (/^\/start\b/i.test(trimmed)) {
+      await sendIntro(chat_id);
+      return Response.json({ ok: true, intro: true });
+    }
+    if (/^\/clear\b/i.test(trimmed)) {
+      const mid = (msg as { message_id?: number }).message_id;
+      if (mid) await clearRecentChat(chat_id, mid);
+      await admin.from("og_messages").delete().eq("user_id", linkedProfile.id);
+      await sendIntro(chat_id);
+      return Response.json({ ok: true, cleared: true });
+    }
     if (/^\/help\b/i.test(trimmed) || /^\/menu\b/i.test(trimmed)) {
       await reply(chat_id, isBoss ? HELP_ADMIN : HELP_USER, {
         reply_markup: keyboard,
@@ -1001,7 +1045,7 @@ async function handleTelegramUpdate(
     if (typeof text === "string" && /^\/start\b/i.test(text.trim())) {
       await reply(
         chat_id,
-        "🔥 <b>OG Bot is alive.</b>\n\nYou opened me without your private link token, so I can't connect this Telegram chat to your OG profile yet.\n\nGo to OG Streamz → Settings → <b>Connect Telegram</b>, tap your personal link, then hit Start again.",
+        `${INTRO_TEXT}\n\n🔗 First, link your account: ogbot.co.uk → Settings → <b>Connect Telegram</b>.`,
       );
       return Response.json({ ok: true, missing_token: true });
     }
@@ -1125,18 +1169,14 @@ async function handleTelegramUpdate(
   const balance = profile?.coin_balance ?? 0;
 
   const greeting =
-    `✅ <b>Connected!</b> OG Bot is now linked to your account.\n\n` +
-    `🔥 Yo <b>${name}</b> — link verified. OG Bot in your pocket now.\n\n` +
-    `💰 Balance: <b>${balance}</b> OG coins\n` +
-    `🎧 Just chat — same brain as the in-app messenger.\n` +
-    (isBoss
-      ? `👑 Boss mode unlocked — type /help for admin commands.\n\n`
-      : `Type /help for commands.\n\n`) +
-    `Now go make some noise. 🎤`;
+    `✅ <b>Connected, ${name}!</b>` +
+    (isBoss ? ` 👑 Boss mode on — /help for admin commands.` : "") +
+    `\n💰 ${balance} OG coins`;
 
   await reply(chat_id, greeting, {
     reply_markup: isBoss ? BOSS_KEYBOARD : USER_KEYBOARD,
   });
+  await sendIntro(chat_id);
 
   await admin
     .from("og_messages")
