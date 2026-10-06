@@ -420,7 +420,7 @@ function DashboardHome() {
         <Card className="rounded-[2rem] border-2 border-white/15 shadow-[0_18px_50px_-20px_rgba(80,60,255,0.35)]">
           <CardHeader>
             <CardTitle className="font-display text-2xl font-black leading-[1.1] tracking-tight break-words sm:text-4xl md:text-5xl">
-              ✅ Next steps
+              Next steps
             </CardTitle>
             <CardDescription className="text-base sm:text-lg">
               Get the most out of OG Studio.
