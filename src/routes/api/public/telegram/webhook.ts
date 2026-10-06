@@ -1058,16 +1058,37 @@ async function handleTelegramUpdate(
   }
 
   if (!startMatch) {
-    if (typeof text === "string" && /^\/start\b/i.test(text.trim())) {
+    const unlinkedText = typeof text === "string" ? text.trim() : "";
+    if (unlinkedText === "🧹 Clear chat") {
+      const mid = (msg as { message_id?: number }).message_id;
+      if (mid) await clearRecentChat(chat_id, mid);
       await reply(
         chat_id,
         `${INTRO_TEXT}\n\n🔗 First, link your account: ogbot.co.uk → Settings → <b>Connect Telegram</b>.`,
+        { reply_markup: BOTTOM_BAR_KEYBOARD },
+      );
+      return Response.json({ ok: true, cleared: true });
+    }
+    if (unlinkedText === "🌐 OGBOT.CO.UK") {
+      await reply(chat_id, "🌐 <b>OG BOT on the web</b>", {
+        reply_markup: {
+          inline_keyboard: [[{ text: "Open OGBOT.CO.UK", url: "https://ogbot.co.uk" }]],
+        },
+      });
+      return Response.json({ ok: true, site: true });
+    }
+    if (/^\/start\b/i.test(unlinkedText)) {
+      await reply(
+        chat_id,
+        `${INTRO_TEXT}\n\n🔗 First, link your account: ogbot.co.uk → Settings → <b>Connect Telegram</b>.`,
+        { reply_markup: BOTTOM_BAR_KEYBOARD },
       );
       return Response.json({ ok: true, missing_token: true });
     }
     await reply(
       chat_id,
       "👋 <b>OG Bot is online.</b>\n\nLink your OG profile from Settings → Connect Telegram to unlock the full assistant here.",
+      { reply_markup: BOTTOM_BAR_KEYBOARD },
     );
     return Response.json({ ok: true, unlinked_reply: true });
   }
