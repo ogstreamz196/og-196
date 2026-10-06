@@ -112,8 +112,8 @@ export function VipExpiryDialog({
         d.setMonth(d.getMonth() + Number(months));
         expires = d.toISOString();
       } else if (mode === "custom") {
-        if (!custom) throw new Error("Pick a date");
-        const d = new Date(`${custom}T23:59:59`);
+        const d = parseTypedDate(custom);
+        if (!d) throw new Error("Type the date as DD/MM/YYYY");
         if (d.getTime() <= Date.now()) throw new Error("Date must be in the future");
         expires = d.toISOString();
       }
