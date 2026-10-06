@@ -186,12 +186,16 @@ export function VipExpiryDialog({
           </label>
           <label className="flex items-center gap-3 rounded-lg border border-border p-3">
             <RadioGroupItem value="custom" />
-            <span className="text-sm font-medium">Custom date</span>
+            <span className="text-sm font-medium shrink-0">Custom date</span>
             <Input
-              type="date"
-              className="ml-auto h-8 w-40"
-              min={toDateInput(new Date(Date.now() + 86_400_000))}
+              type="text"
+              inputMode="numeric"
+              autoComplete="off"
+              placeholder="DD/MM/YYYY"
+              maxLength={10}
+              className="ml-auto h-8 w-36 text-center"
               value={custom}
+              onFocus={() => setMode("custom")}
               onChange={(e) => {
                 setCustom(e.target.value);
                 setMode("custom");
