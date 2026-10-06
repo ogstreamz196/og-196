@@ -60,45 +60,36 @@ function keyed(
 }
 
 /**
- * Free-tier fallbacks, tried in order only after the premium providers fail.
- * Keyed tiers are skipped when their secret is missing; Pollinations needs no key.
+ * Free tiers — answer ordinary chat first. Keyed tiers are skipped when their
+ * secret is missing. Gemini (paid) is reserved for pro questions, media, or
+ * when every free tier fails.
  */
 export function freeFallbackTargets(): AiChatTarget[] {
   const list = [
-    keyed(
-      "GROQ_API_KEY",
-      "groq",
-      "https://api.groq.com/openai/v1/chat/completions",
-      "llama-3.3-70b-versatile",
-    ),
-    keyed(
-      "CEREBRAS_API_KEY",
-      "cerebras",
-      "https://api.cerebras.ai/v1/chat/completions",
-      "llama-3.3-70b",
-    ),
-    keyed(
-      "MISTRAL_API_KEY",
-      "mistral",
-      "https://api.mistral.ai/v1/chat/completions",
-      "mistral-small-latest",
-    ),
+    keyed("GROQ_API_KEY", "groq", "https://api.groq.com/openai/v1/chat/completions", "qwen/qwen3.8-27b"),
+    keyed("GROQ_API_KEY", "groq", "https://api.groq.com/openai/v1/chat/completions", "openai/gpt-oss-120b"),
+    keyed("POLLINATIONS_API_KEY", "pollinations", "https://gen.pollinations.ai/v1/chat/completions", "openai-fast"),
     keyed(
       "OPENROUTER_API_KEY",
       "openrouter",
       "https://openrouter.ai/api/v1/chat/completions",
-      "meta-llama/llama-3.3-70b-instruct:free",
+      "nvidia/nemotron-3.5-lightning:free",
       { "HTTP-Referer": "https://ogbot.co.uk", "X-Title": "OG BOT" },
     ),
-    {
-      url: "https://text.pollinations.ai/openai",
-      headers: { "Content-Type": "application/json" },
-      model: "openai",
-      provider: "pollinations" as const,
-      free: true,
-    },
   ];
   return list.filter((t): t is AiChatTarget => t !== null);
+}
+
+type ProMsg = { role: string; content: unknown };
+/** Heuristic: does this conversation need a "pro" (paid Gemini) answer? */
+export function needsProAnswer(body: Record<string, unknown>): boolean {
+  const messages = Array.isArray(body.messages) ? (body.messages as ProMsg[]) : [];
+  const last = [...messages].reverse().find((m) => m.role === "user");
+  const text = typeof last?.content === "string" ? last.content : "";
+  if (text.length > 1200) return true;
+  return /\b(analy[sz]e|in detail|step[- ]by[- ]step|explain (?:how|why)|write (?:me )?(?:code|a script|an essay|a report|a contract)|debug|legal|contract|medical|diagnos|tax|business plan|compare .* (?:vs|versus|and)|pros and cons|calculate|maths?|equation|translate this)\b/i.test(
+    text,
+  );
 }
 
 function stableBucket(value: string): number {
@@ -151,27 +142,6 @@ function shouldFallThrough(status: number): boolean {
   return status === 429 || status === 402 || status === 401 || status === 403 || status >= 500;
 }
 
-export type AiRoutingMode = "paid_first" | "free_first";
-let routingCache: { mode: AiRoutingMode; at: number } | null = null;
-
-/** Boss-controlled order (app_settings.ai_routing_mode). Cached 30s; defaults to paid_first. */
-export async function getAiRoutingMode(): Promise<AiRoutingMode> {
-  if (routingCache && Date.now() - routingCache.at < 30_000) return routingCache.mode;
-  let mode: AiRoutingMode = "paid_first";
-  try {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data } = await supabaseAdmin
-      .from("app_settings")
-      .select("value")
-      .eq("key", "ai_routing_mode")
-      .maybeSingle();
-    if (data?.value === "free_first") mode = "free_first";
-  } catch (e) {
-    console.warn("ai_routing_mode read failed", e);
-  }
-  routingCache = { mode, at: Date.now() };
-  return mode;
-}
 
 function hasMedia(body: Record<string, unknown>): boolean {
   const messages = Array.isArray(body.messages) ? (body.messages as Msg[]) : [];
