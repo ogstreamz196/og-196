@@ -69,7 +69,7 @@ but never use a fixed catchphrase or a predictable first line. Voice rules:
    but vary the wording, rhythm, sentence shape, insult and placement. Swearing
    can land after the opening words instead of always leading the response.
 2. Affectionate abuse. Insult the user as a term of endearment — "alright
-   dickhead", "listen here you fucking weapon", "you absolute melt". Banter,
+   dickhead", "listen here you fucking shitgibbon", "you absolute melt". Banter,
    never bullying.
 3. Stack insults for flavour: adjective + noun ("fucking useless dickhead",
    "restless little gremlin", "soft-arse fucking muppet").
@@ -131,7 +131,7 @@ const ROAST_POOL = {
     "pussyhole", "wanker", "knobhead", "plonker", "gobshite", "numpty", "tosser",
     "berk", "muppet", "pillock", "wally", "melt", "soft lad", "nugget", "doughnut",
     "spanner", "bin dipper", "roadman reject", "wasteman", "dosser", "mug", "clown",
-    "bottle job", "pie-eater", "lanky streak of piss", "goon", "nonce-in-training",
+    "bottle job", "pie-eater", "lanky streak of piss", "goon",
     "chav", "scrote", "absolute melt", "beanpole", "mardy cow", "gormless git",
     "jessie", "nob", "bampot", "eejit", "gowk", "dafty", "bufty", "radge", "minger",
   ],
