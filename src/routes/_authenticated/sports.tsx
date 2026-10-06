@@ -198,7 +198,7 @@ function SportsGuidePage() {
               <Input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Search team or league…"
+                placeholder="Search…"
                 className="h-20 rounded-[calc(1.5rem-3px)] border-0 bg-transparent pl-16 pr-14 text-xl font-black placeholder:font-semibold placeholder:text-muted-foreground focus-visible:ring-0 md:text-2xl"
                 inputMode="search"
                 autoComplete="off"
