@@ -512,23 +512,13 @@ async function runChatAI(
     return;
   }
 
-  const { data: profile } = await admin
-    .from("profiles")
-    .select("display_name, email, coin_balance")
-    .eq("id", profileId)
-    .maybeSingle();
-  if (!profile) {
-    await reply(chat_id, "Profile not found.");
-    return;
-  }
-
-  const isVip = roles.includes("vip") || roles.includes("admin") || roles.includes("dev");
-  const isAdminUser = roles.includes("admin") || roles.includes("dev");
-
-  // Chatting with the bot is free — coins are only spent on images/music.
-
-  // Pull persona overrides + foul preference
-  const [prefRes, siteRes, historyRes] = await Promise.all([
+  // Show "typing…" straight away, then load everything in parallel.
+  void tg("sendChatAction", { chat_id, action: "typing" }).catch(() => {});
+  const vp = await import("@/lib/vip-promo.server");
+  const { loadUserDossier } = await import("@/lib/og-user-dossier.server");
+  const { buildSportsGuideContext } = await import("@/lib/sports-guide-context.server");
+  const [profileRes, prefRes, siteRes, historyRes, dossier, promo, sportsBlock] = await Promise.all([
+    admin.from("profiles").select("display_name, email, coin_balance").eq("id", profileId).maybeSingle(),
     admin.from("user_preferences").select("foul_mouth").eq("user_id", profileId).maybeSingle(),
     admin
       .from("site_content")
@@ -540,7 +530,23 @@ async function runChatAI(
       .eq("user_id", profileId)
       .order("created_at", { ascending: false })
       .limit(20),
+    loadUserDossier(admin, profileId).catch(() => null),
+    vp.detectPromoIntent(userText)
+      ? vp.getOrCreateVipPromo(admin, profileId, { isPaidVip: roles.includes("vip") }).catch(() => null)
+      : Promise.resolve(null),
+    buildSportsGuideContext(admin, profileId, userText).catch((e) => {
+      console.warn("[telegram] sports guide context failed", e);
+      return "";
+    }),
   ]);
+  const profile = profileRes.data;
+  if (!profile) {
+    await reply(chat_id, "Profile not found.");
+    return;
+  }
+
+  const isVip = roles.includes("vip") || roles.includes("admin") || roles.includes("dev");
+  const isAdminUser = roles.includes("admin") || roles.includes("dev");
 
   const personaMap = new Map<string, string>(
     (siteRes.data ?? []).map((r: { key: string; value: string }) => [r.key, r.value]),
@@ -556,22 +562,8 @@ async function runChatAI(
     page_context: "telegram",
   };
 
-  const { loadUserDossier } = await import("@/lib/og-user-dossier.server");
-  const dossier = await loadUserDossier(admin, profileId).catch(() => null);
-
-  const vp = await import("@/lib/vip-promo.server");
-  const promo = vp.detectPromoIntent(userText)
-    ? await vp.getOrCreateVipPromo(admin, profileId, { isPaidVip: roles.includes("vip") })
-    : null;
   const promoNote = promo ? vp.promoPromptNote(promo) : "";
-  let sportsNote = "";
-  try {
-    const { buildSportsGuideContext } = await import("@/lib/sports-guide-context.server");
-    const block = await buildSportsGuideContext(admin, profileId, userText);
-    if (block) sportsNote = `${block}\n\n`;
-  } catch (e) {
-    console.warn("[telegram] sports guide context failed", e);
-  }
+  const sportsNote = sportsBlock ? `${sportsBlock}\n\n` : "";
 
   const system =
     sportsNote +
@@ -597,16 +589,12 @@ async function runChatAI(
       content: m.content,
     }));
 
-  // Save user message
-  await admin.from("og_messages").insert({
-    user_id: profileId,
-    role: "user",
-    content: userText,
-  });
+  // Save user message without holding up the reply.
+  void admin.from("og_messages").insert({ user_id: profileId, role: "user", content: userText }).then(() => {});
 
   try {
     let currentUserText = userText;
-    if (needsLiveResearch(userText)) {
+    if (!sportsNote && needsLiveResearch(userText)) {
       const research = await getLiveResearchContext(userText).catch(() => null);
       if (research) {
         currentUserText = `CURRENT WEB SOURCES:\n${research}\n\nUSER QUESTION:\n${userText}\n\nCite source URLs for current claims.`;
