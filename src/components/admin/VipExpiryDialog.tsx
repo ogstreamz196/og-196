@@ -197,7 +197,17 @@ export function VipExpiryDialog({
               value={custom}
               onFocus={() => setMode("custom")}
               onChange={(e) => {
-                setCustom(e.target.value);
+                const raw = e.target.value;
+                const deleting = raw.length < custom.length;
+                if (deleting || /[^\d/]/.test(raw) || raw.includes("-")) {
+                  setCustom(raw);
+                } else {
+                  const d = raw.replace(/\D/g, "").slice(0, 8);
+                  let out = d.slice(0, 2);
+                  if (d.length >= 2) out += "/" + d.slice(2, 4);
+                  if (d.length >= 4) out += "/" + d.slice(4);
+                  setCustom(out);
+                }
                 setMode("custom");
               }}
             />
