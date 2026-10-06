@@ -191,7 +191,7 @@ function SportsGuidePage() {
               Match <span className="text-coin">Centre</span>
             </h1>
             <p className="mt-1 truncate text-xs font-semibold text-foreground/85">
-              {fixtureTotal} fixtures · {listings.length} guides · auto-sync on
+              {fixtureTotal} fixtures · {listings.length} guides
             </p>
           </div>
         </div>
@@ -204,7 +204,7 @@ function SportsGuidePage() {
                 <Input
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
-                  placeholder="Search team, fighter, channel…"
+                  placeholder="Search teams…"
                   className="h-16 rounded-[calc(1rem-2px)] border-0 bg-transparent pl-12 pr-11 text-lg font-black placeholder:text-sm placeholder:font-semibold placeholder:text-muted-foreground focus-visible:ring-0 sm:text-xl"
                   inputMode="search"
                   autoComplete="off"
