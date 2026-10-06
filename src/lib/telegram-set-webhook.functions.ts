@@ -105,6 +105,7 @@ export const setTelegramWebhook = createServerFn({ method: "POST" })
       { command: "balance", description: "Your OG coin balance" },
       { command: "library", description: "Open your song library" },
       { command: "vip", description: "Your VIP status and expiry" },
+      { command: "vault", description: "Your OG Vault access ID" },
       { command: "sports", description: "Open the Sports Guide" },
       { command: "buy", description: "Top up OG coins" },
       { command: "me", description: "Your profile" },

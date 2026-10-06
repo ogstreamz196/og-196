@@ -166,7 +166,8 @@ const USER_KEYBOARD = {
   keyboard: [
     [{ text: "💰 Balance" }, { text: "🎧 Library" }],
     [{ text: "👑 VIP Status" }, { text: "⚽ Sports Guide" }],
-    [{ text: "🛒 Buy Coins" }, { text: "❓ Help" }],
+    [{ text: "🛒 Buy Coins" }, { text: "🔐 Vault ID" }],
+    [{ text: "❓ Help" }],
     [{ text: "🧹 Clear chat" }, { text: "🌐 OGBOT.CO.UK" }],
   ],
   resize_keyboard: true,
@@ -177,7 +178,8 @@ const BOSS_KEYBOARD = {
   keyboard: [
     [{ text: "📊 Stats" }, { text: "👥 Users" }],
     [{ text: "💰 Balance" }, { text: "👑 VIP Status" }],
-    [{ text: "⚽ Sports Guide" }, { text: "❓ Help" }],
+    [{ text: "⚽ Sports Guide" }, { text: "🔐 Vault ID" }],
+    [{ text: "❓ Help" }],
     [{ text: "🧹 Clear chat" }, { text: "🌐 OGBOT.CO.UK" }],
   ],
   resize_keyboard: true,
@@ -822,6 +824,7 @@ async function handleTelegramUpdate(
       "❓ Help": "/help",
 "⚽ Sports Guide": "/sports",
       "🧹 Clear chat": "/clear",
+      "🔐 Vault ID": "/vault",
       ...(isBoss ? { "📊 Stats": "/stats", "👥 Users": "/users" } : {}),
     };
     if (buttonMap[trimmed]) trimmed = buttonMap[trimmed];
@@ -937,6 +940,44 @@ async function handleTelegramUpdate(
         reply_markup: keyboard,
       });
       return Response.json({ ok: true, me: true });
+    }
+    if (/^\/vault\b/i.test(trimmed)) {
+      const [{ data: purchase }, { data: prof }, { data: creds }] = await Promise.all([
+        admin.from("vip_pass_purchases").select("id").eq("user_id", linkedProfile.id).maybeSingle(),
+        admin.from("profiles").select("vip_trial_ends_at").eq("id", linkedProfile.id).maybeSingle(),
+        admin
+          .from("vip_pass_credentials")
+          .select("username,password")
+          .eq("active", true)
+          .order("created_at", { ascending: true }),
+      ]);
+      const trialEnds = (prof as { vip_trial_ends_at?: string | null } | null)?.vip_trial_ends_at;
+      const vipFree =
+        isBoss ||
+        roles.includes("vip") ||
+        (!!trialEnds && new Date(trialEnds).getTime() > Date.now());
+      const owned = !!purchase || vipFree;
+      let body: string;
+      if (!owned) {
+        body =
+          `🔐 <b>OG Vault Access Pass</b>\n\nYou don't have the Vault pass yet. Grab it in the Store or go VIP to get it free.`;
+      } else if (!creds?.length) {
+        body = `🔐 <b>OG Vault Access Pass</b>\n\nYou own it ✅ — no access IDs are available right now, check back soon.`;
+      } else {
+        const cred = creds[Math.floor(Date.now() / (2 * 60 * 60 * 1000)) % creds.length];
+        const esc = (v: string) => v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        body =
+          `🔐 <b>Your OG Vault Access</b>\n\n` +
+          `🆔 ID: <code>${esc(cred.username)}</code>\n` +
+          `🔑 PIN: <code>${esc(cred.password)}</code>\n\n` +
+          `Tap to copy. Keep it private.`;
+      }
+      await reply(chat_id, body, {
+        reply_markup: {
+          inline_keyboard: [[{ text: "🛒 Open Store", url: "https://ogbot.co.uk/buy-coins" }]],
+        },
+      });
+      return Response.json({ ok: true, vault: true });
     }
     if (/^\/vip\b/i.test(trimmed)) {
       const [{ data: p }, { data: sub }, { data: vipRow }] = await Promise.all([
