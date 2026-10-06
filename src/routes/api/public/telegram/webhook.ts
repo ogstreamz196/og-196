@@ -167,6 +167,7 @@ const USER_KEYBOARD = {
     [{ text: "💰 Balance" }, { text: "🎧 Library" }],
     [{ text: "👑 VIP Status" }, { text: "⚽ Sports Guide" }],
     [{ text: "🛒 Buy Coins" }, { text: "❓ Help" }],
+    [{ text: "🧹 Clear chat" }, { text: "🌐 OGBOT.CO.UK" }],
   ],
   resize_keyboard: true,
   is_persistent: true,
@@ -177,7 +178,15 @@ const BOSS_KEYBOARD = {
     [{ text: "📊 Stats" }, { text: "👥 Users" }],
     [{ text: "💰 Balance" }, { text: "👑 VIP Status" }],
     [{ text: "⚽ Sports Guide" }, { text: "❓ Help" }],
+    [{ text: "🧹 Clear chat" }, { text: "🌐 OGBOT.CO.UK" }],
   ],
+  resize_keyboard: true,
+  is_persistent: true,
+};
+
+// Bottom-bar buttons for users who haven't linked their account yet.
+const BOTTOM_BAR_KEYBOARD = {
+  keyboard: [[{ text: "🧹 Clear chat" }, { text: "🌐 OGBOT.CO.UK" }]],
   resize_keyboard: true,
   is_persistent: true,
 };
