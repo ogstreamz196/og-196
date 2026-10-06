@@ -22,10 +22,6 @@ import { checkDeviceAccountAllowed } from "@/lib/device-limit.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
-import partyCoverAsset from "@/assets/album-party-anthem.jpg.asset.json";
-import heartbreakCoverAsset from "@/assets/album-heartbreak.jpg.asset.json";
-import drillCoverAsset from "@/assets/album-drill.jpg.asset.json";
-import afrobeatsCoverAsset from "@/assets/album-afrobeats.jpg.asset.json";
 import { WelcomeBackdrop } from "@/components/layout/WelcomeBackdrop";
 import { BackgroundMusicHeaderControl } from "@/components/PersistentBackgroundMusic";
 
@@ -84,32 +80,6 @@ function useIsNativeApp() {
   return native;
 }
 
-const albumCovers = [
-  {
-    title: "Party anthem",
-    prompt: "Make it loud, funny and ready for the group chat.",
-    style: "Pop · Dance",
-    image: partyCoverAsset.url,
-  },
-  {
-    title: "Heartbreak hook",
-    prompt: "Turn the messy message into a chorus people feel.",
-    style: "R&B · Ballad",
-    image: heartbreakCoverAsset.url,
-  },
-  {
-    title: "Street energy",
-    prompt: "Give it a cold intro, sharp bars and heavy bass.",
-    style: "Rap · Drill",
-    image: drillCoverAsset.url,
-  },
-  {
-    title: "Summer bounce",
-    prompt: "Sunny, catchy and made for the speakers.",
-    style: "Afrobeats · Vibes",
-    image: afrobeatsCoverAsset.url,
-  },
-];
 
 const PENDING_REF_KEY = "og_pending_ref";
 
@@ -657,7 +627,6 @@ function WelcomePage() {
         <WelcomeBackdrop />
         <TopNav />
         <Hero />
-        <StyleShowcase />
         <Superpowers />
         <HowItWorks />
         <AlbumCoverShowcase />
@@ -755,7 +724,7 @@ function Hero() {
             🔥 Start creating free
           </a>
           <a
-            href="#styles"
+            href="#studio"
             className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border border-border bg-card/70 px-7 text-base font-bold text-foreground backdrop-blur transition hover:border-primary/60"
           >
             <Music2 className="h-5 w-5" /> See what it makes
@@ -876,47 +845,6 @@ function AlbumCoverShowcase() {
   );
 }
 
-function StyleShowcase() {
-  return (
-    <section id="styles" className="relative scroll-mt-24 border-t border-border/40">
-      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-8 sm:py-16">
-        <p className="text-center text-xs font-black uppercase tracking-[0.25em] text-primary">
-          🎧 Hear the heat
-        </p>
-        <h2 className="font-display mt-3 text-balance text-center text-3xl font-black tracking-[-0.03em] sm:text-5xl">
-          One idea. Any vibe. Cover art included.
-        </h2>
-        <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
-          {albumCovers.map((c) => (
-            <a
-              key={c.title}
-              href="#sign-in"
-              className="group overflow-hidden rounded-2xl border border-border/60 bg-card/80 shadow-card transition hover:-translate-y-1 hover:border-primary/60"
-            >
-              <div className="relative aspect-square overflow-hidden">
-                <img
-                  src={c.image}
-                  alt={`${c.title} album cover`}
-                  loading="lazy"
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <span className="absolute left-2 top-2 rounded-full bg-background/80 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-foreground backdrop-blur">
-                  {c.style}
-                </span>
-              </div>
-              <div className="p-3 sm:p-4">
-                <h3 className="font-display text-base font-black sm:text-lg">{c.title}</h3>
-                <p className="mt-1 line-clamp-2 text-xs text-muted-foreground sm:text-sm">
-                  “{c.prompt}”
-                </p>
-              </div>
-            </a>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 
 function Superpowers() {
   const items = [

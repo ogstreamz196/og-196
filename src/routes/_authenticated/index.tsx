@@ -306,7 +306,7 @@ function DashboardHome() {
       {/* Primary CTAs — MusicHub + OG Bot at the top */}
 
       <section className="space-y-3">
-        <div className="grid grid-cols-2 items-stretch gap-3 sm:gap-5">
+        <div className="grid grid-cols-3 items-stretch gap-3 sm:gap-5">
           <PrimaryCard
             to="/library"
             image={musicHubHero}
@@ -327,24 +327,17 @@ function DashboardHome() {
             cta="Open Messenger"
             variant="accent"
           />
-        </div>
-        <Link
-          to="/sports"
-          preload="intent"
-          className="group flex items-center gap-3 overflow-hidden rounded-3xl border-2 border-primary/30 bg-card/70 p-3 shadow-card transition-all hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-glow"
-        >
-          <img
-            src={sportsGuideLogo.url}
-            alt="OG Sports Guide"
-            className="h-16 w-16 shrink-0 rounded-2xl border border-primary/30 object-cover sm:h-20 sm:w-20"
+          <PrimaryCard
+            to="/sports"
+            image={sportsGuideLogo.url}
+            imageAlt="OG Sports Guide"
+            eyebrow="Live fixtures"
+            title="Sports Guide"
+            body="Matches, fights & TV listings"
+            cta="Open Sports Guide"
+            variant="cinema"
           />
-          <div className="min-w-0 flex-1">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Live fixtures & events</p>
-            <p className="font-display text-lg font-black uppercase leading-tight">Sports Guide</p>
-            <p className="truncate text-xs text-muted-foreground">Daily matches, fight cards & TV listings</p>
-          </div>
-          <ArrowRight className="h-5 w-5 shrink-0 text-primary transition-transform group-hover:translate-x-1" />
-        </Link>
+        </div>
       </section>
 
       {/* Ask OG Bot CTA removed per request */}
@@ -641,7 +634,7 @@ function PrimaryCard({
   wide = false,
   hazard = false,
 }: {
-  to: "/library" | "/messenger";
+  to: "/library" | "/messenger" | "/sports";
   image: string;
   imageAlt: string;
   eyebrow: string;
