@@ -46,7 +46,32 @@ export const Route = createFileRoute("/api/public/sports-guide-reminders")({
           console.error("[sports-guide] delete sweep failed", e);
           return 0;
         });
-        return Response.json({ ok: true, sent, removed });
+        // Self-destruct due OG Bot Telegram messages (Vault 1h, others ~48h).
+        let expired = 0;
+        try {
+          const { data: dueMsgs } = await supabaseAdmin
+            .from("telegram_ephemeral_messages" as never)
+            .select("id, chat_id, message_id")
+            .lte("delete_at", new Date().toISOString())
+            .limit(200);
+          const rows = (dueMsgs ?? []) as unknown as { id: string; chat_id: number; message_id: number }[];
+          const botToken = process.env.OG_BOT_TOKEN;
+          for (const m of rows) {
+            if (botToken) {
+              await fetch(`https://api.telegram.org/bot${botToken}/deleteMessage`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ chat_id: m.chat_id, message_id: m.message_id }),
+              }).catch(() => null);
+            }
+            // Drop the row either way — already-cleared or too-old messages can't be deleted.
+            await supabaseAdmin.from("telegram_ephemeral_messages" as never).delete().eq("id", m.id);
+            expired++;
+          }
+        } catch (e) {
+          console.error("[tg] ephemeral sweep failed", e);
+        }
+        return Response.json({ ok: true, sent, removed, expired });
       },
     },
   },

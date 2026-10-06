@@ -712,11 +712,12 @@ async function runChatAI(
     // Telegram caps messages at ~4096 chars
     const chunks = replyText.match(/[\s\S]{1,3800}/g) ?? [replyText];
     for (const c of chunks) {
-      await tg("sendMessage", {
+      const res = await tg("sendMessage", {
         chat_id,
         text: c,
         disable_web_page_preview: true,
       });
+      await scheduleDelete(chat_id, res, DEFAULT_TTL_MS);
     }
   } catch (err) {
     await reply(chat_id, `❌ ${(err as Error).message}`);
