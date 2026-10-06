@@ -1045,7 +1045,7 @@ async function handleTelegramUpdate(
     if (typeof text === "string" && /^\/start\b/i.test(text.trim())) {
       await reply(
         chat_id,
-        "🔥 <b>OG Bot is alive.</b>\n\nYou opened me without your private link token, so I can't connect this Telegram chat to your OG profile yet.\n\nGo to OG Streamz → Settings → <b>Connect Telegram</b>, tap your personal link, then hit Start again.",
+        `${INTRO_TEXT}\n\n🔗 First, link your account: ogbot.co.uk → Settings → <b>Connect Telegram</b>.`,
       );
       return Response.json({ ok: true, missing_token: true });
     }
@@ -1176,6 +1176,7 @@ async function handleTelegramUpdate(
   await reply(chat_id, greeting, {
     reply_markup: isBoss ? BOSS_KEYBOARD : USER_KEYBOARD,
   });
+  await sendIntro(chat_id);
 
   await admin
     .from("og_messages")
