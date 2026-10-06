@@ -10,7 +10,7 @@ export type AiChatTarget = {
   url: string;
   headers: Record<string, string>;
   model: string;
-  provider: "gemini" | "openai" | "groq" | "openrouter" | "cerebras" | "mistral" | "pollinations";
+  provider: "gemini" | "openai" | "groq" | "openrouter" | "pollinations";
   /** Free fallback tiers get text-only messages and no provider-specific params. */
   free?: boolean;
 };
@@ -197,26 +197,43 @@ export async function fetchAiChat(
         method: "POST",
         headers: target.headers,
         body: JSON.stringify({ ...(target.free ? freeBody(body) : body), model: target.model }),
-        signal: AbortSignal.timeout(45_000),
+        signal: AbortSignal.timeout(target.free ? 15_000 : 45_000),
       });
     } catch (e) {
-      console.warn(`AI ${target.provider} network error`, e);
+      console.warn(`AI ${target.provider}/${target.model} network error`, e);
       continue;
     }
-    const fallThrough = target.free ? !response.ok : shouldFallThrough(response.status);
+    let fallThrough = target.free ? !response.ok : shouldFallThrough(response.status);
+    // Free tiers sometimes return 200 with an empty/refused body — treat as a failure
+    // so the next free provider gets a go instead of the user seeing "…".
+    if (!fallThrough && target.free && !body.stream && index < targets.length - 1) {
+      try {
+        const text = await response.clone().text();
+        const j = JSON.parse(text) as { choices?: { message?: { content?: string } }[] };
+        if (!(j.choices?.[0]?.message?.content ?? "").trim()) fallThrough = true;
+      } catch {
+        fallThrough = true;
+      }
+    }
     if (!fallThrough || index === targets.length - 1) {
       // Chat responses are streamed back to the caller, so token counts aren't
       // available here — log the call itself (provider + model) instead.
       logAiUsage({ feature: "chat", provider: target.provider, model: target.model });
       return { response, provider: target.provider };
     }
-    console.warn(`AI ${target.provider} returned ${response.status}, falling back`);
+    console.warn(`AI ${target.provider}/${target.model} returned ${response.status}, falling back`);
+    // Don't hammer the same provider: skip its other models after a 429.
+    if (response.status === 429) {
+      for (let j = index + 1; j < targets.length; j += 1) {
+        if (targets[j].provider === target.provider && targets[j].free) targets.splice(j--, 1);
+      }
+    }
     last = { response, provider: target.provider };
     await new Promise((resolve) => setTimeout(resolve, 250 + Math.floor(Math.random() * 200)));
   }
 
   if (last) return last;
-  throw new Error("AI not configured");
+  throw new Error("All AI providers are busy — try again in a moment.");
 }
 
 export function needsLiveResearch(text: string): boolean {
