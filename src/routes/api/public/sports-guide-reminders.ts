@@ -41,7 +41,12 @@ export const Route = createFileRoute("/api/public/sports-guide-reminders")({
           );
           if (okSend) sent++;
         }
-        return Response.json({ ok: true, sent });
+        const { sweepDeletedSportsGuidePosts } = await import("@/lib/sports-guide.server");
+        const removed = await sweepDeletedSportsGuidePosts().catch((e) => {
+          console.error("[sports-guide] delete sweep failed", e);
+          return 0;
+        });
+        return Response.json({ ok: true, sent, removed });
       },
     },
   },
