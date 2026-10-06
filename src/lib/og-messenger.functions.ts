@@ -182,7 +182,9 @@ export const chatOgBot = createServerFn({ method: "POST" })
     } catch (e) {
       console.warn("sports guide context failed", e);
     }
-    const system = baseSystem + intensityNote + promoNote + sportsNote;
+    const cp = await import("@/lib/og-catchphrases.server");
+    const phrases = await cp.pickCatchphrases(supabaseAdmin as never, context.userId, cp.toneFor(data.mode, foulMouth));
+    const system = baseSystem + intensityNote + promoNote + sportsNote + cp.catchphraseNote(phrases);
 
     // 1b. Learn fresh insults from the latest user message (fire-and-forget upsert).
     let newlyLearned: string[] = [];

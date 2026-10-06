@@ -212,6 +212,65 @@ export type Database = {
         }
         Relationships: []
       }
+      bot_catchphrase_seen: {
+        Row: {
+          phrase_id: string
+          seen_at: string
+          user_id: string
+        }
+        Insert: {
+          phrase_id: string
+          seen_at?: string
+          user_id: string
+        }
+        Update: {
+          phrase_id?: string
+          seen_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bot_catchphrase_seen_phrase_id_fkey"
+            columns: ["phrase_id"]
+            isOneToOne: false
+            referencedRelation: "bot_catchphrases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bot_catchphrases: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          id: string
+          kind: string
+          phrase: string
+          source: string
+          times_used: number
+          tone: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          kind: string
+          phrase: string
+          source?: string
+          times_used?: number
+          tone: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          kind?: string
+          phrase?: string
+          source?: string
+          times_used?: number
+          tone?: string
+        }
+        Relationships: []
+      }
       bot_tokens: {
         Row: {
           allowed_domain: string | null
@@ -1995,6 +2054,10 @@ export type Database = {
         Args: { _earned_tenths: number; _user_id: string }
         Returns: Json
       }
+      add_catchphrases: {
+        Args: { p_kind: string; p_phrases: string[]; p_tone: string }
+        Returns: number
+      }
       admin_delete_lexicon_phrase: {
         Args: { p_phrase: string }
         Returns: boolean
@@ -2269,6 +2332,10 @@ export type Database = {
         Returns: undefined
       }
       payout_battle_reward: { Args: { _user_id: string }; Returns: Json }
+      pick_catchphrases: {
+        Args: { p_tone: string; p_user: string }
+        Returns: Json
+      }
       purchase_bot_token: {
         Args: { p_allowed_domain?: string }
         Returns: {

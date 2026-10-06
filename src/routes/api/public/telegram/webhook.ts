@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createHash, timingSafeEqual } from "crypto";
 import { buildSystemPrompt, detectSongIntent } from "@/lib/og-persona.server";
+import { pickCatchphrases, catchphraseNote, toneFor } from "@/lib/og-catchphrases.server";
 import type { UserContextSummary } from "@/lib/og-persona-public";
 import { SPORTS_GUIDE_CHAT_ID, detectSport, detectEventTime } from "@/lib/sports-guide-parse";
 
@@ -580,7 +581,7 @@ async function runChatAI(
     user: userCtx,
     songIntent: detectSongIntent(userText),
     dossier,
-  });
+  }) + catchphraseNote(await pickCatchphrases(admin as never, profileId, toneFor("og", foulMouth)));
 
   const history = ((historyRes.data ?? []) as { role: string; content: string }[])
     .reverse()
