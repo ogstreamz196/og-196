@@ -724,7 +724,7 @@ function Hero() {
             🔥 Start creating free
           </a>
           <a
-            href="#styles"
+            href="#studio"
             className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border border-border bg-card/70 px-7 text-base font-bold text-foreground backdrop-blur transition hover:border-primary/60"
           >
             <Music2 className="h-5 w-5" /> See what it makes
@@ -845,47 +845,6 @@ function AlbumCoverShowcase() {
   );
 }
 
-function StyleShowcase() {
-  return (
-    <section id="styles" className="relative scroll-mt-24 border-t border-border/40">
-      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-8 sm:py-16">
-        <p className="text-center text-xs font-black uppercase tracking-[0.25em] text-primary">
-          🎧 Hear the heat
-        </p>
-        <h2 className="font-display mt-3 text-balance text-center text-3xl font-black tracking-[-0.03em] sm:text-5xl">
-          One idea. Any vibe. Cover art included.
-        </h2>
-        <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
-          {albumCovers.map((c) => (
-            <a
-              key={c.title}
-              href="#sign-in"
-              className="group overflow-hidden rounded-2xl border border-border/60 bg-card/80 shadow-card transition hover:-translate-y-1 hover:border-primary/60"
-            >
-              <div className="relative aspect-square overflow-hidden">
-                <img
-                  src={c.image}
-                  alt={`${c.title} album cover`}
-                  loading="lazy"
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <span className="absolute left-2 top-2 rounded-full bg-background/80 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-foreground backdrop-blur">
-                  {c.style}
-                </span>
-              </div>
-              <div className="p-3 sm:p-4">
-                <h3 className="font-display text-base font-black sm:text-lg">{c.title}</h3>
-                <p className="mt-1 line-clamp-2 text-xs text-muted-foreground sm:text-sm">
-                  “{c.prompt}”
-                </p>
-              </div>
-            </a>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 
 function Superpowers() {
   const items = [
