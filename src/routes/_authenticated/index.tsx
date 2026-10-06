@@ -44,7 +44,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { useRole } from "@/hooks/use-role";
 import { useRecentSongs, type RecentSong } from "@/hooks/use-recent-songs";
 import { useAdaptiveOverlay } from "@/hooks/use-adaptive-overlay";
-import ogLogo from "@/assets/ogstreamz-logo.jpg.asset.json";
+import welcomeLogo from "@/assets/og-streamz-presentz-ogbot.png.asset.json";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -248,12 +248,12 @@ function DashboardHome() {
             </p>
             <div className="mt-4 flex flex-col items-center gap-4 sm:mt-5 sm:gap-7">
               <DodgyLogo
-                src={ogLogo.url}
-                alt="OG Streamz"
-                size={340}
+                src={welcomeLogo.url}
+                alt="OG Streamz Presentz OG Bot"
+                size={420}
                 maxDrift={80}
                 dodgeRadius={160}
-                imageClassName="rounded-3xl ring-1 ring-white/10 shadow-glow w-[min(86vw,340px)] sm:w-[420px] h-auto"
+                imageClassName="rounded-3xl ring-1 ring-white/10 shadow-glow w-[min(92vw,420px)] sm:w-[520px] h-auto"
                 className="mx-auto"
               />
 

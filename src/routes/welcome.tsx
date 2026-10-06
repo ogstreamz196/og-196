@@ -323,7 +323,7 @@ function AuthButtons({ size = "lg" }: { size?: "lg" | "xl" }) {
           <p className="font-display text-sm font-black uppercase tracking-[0.3em] text-foreground sm:text-base">
             OG Streamz Presentz
           </p>
-          <OgBotLogo className="mx-auto mt-3 h-36 w-36 rounded-3xl shadow-glow sm:h-44 sm:w-44" />
+          <OgBotLogo className="mx-auto mt-3 h-44 w-44 rounded-3xl shadow-glow sm:h-56 sm:w-56" />
           <h2 className="mt-3 text-lg font-semibold text-foreground sm:text-xl">
             {native ? "Create your account" : "Sign in to your account"}
           </h2>
