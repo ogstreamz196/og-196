@@ -145,16 +145,13 @@ async function reply(chat_id: number, text: string, extra?: Record<string, unkno
   });
 }
 
-// Short first-time intro with a single Clear chat button.
 const INTRO_TEXT =
   `🔥 <b>Yo, I'm OG Bot.</b>\n\n` +
   `Ask me anything — just chat, need advice, what time is the game… or just plain insult me.\n\n` +
   `Go on, fire away 👇`;
 
 async function sendIntro(chat_id: number) {
-  await reply(chat_id, INTRO_TEXT, {
-    reply_markup: { inline_keyboard: [[{ text: "🧹 Clear chat", callback_data: "clearchat" }]] },
-  });
+  await reply(chat_id, INTRO_TEXT);
 }
 
 // Deletes up to the last 100 messages (bots may delete private-chat messages <48h old).
