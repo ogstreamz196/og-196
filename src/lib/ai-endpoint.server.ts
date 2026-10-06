@@ -181,12 +181,12 @@ export async function fetchAiChat(
   body: Record<string, unknown>,
   affinity = "default",
 ): Promise<{ response: Response; provider: AiChatTarget["provider"] }> {
-  const mode = await getAiRoutingMode();
-  // Images/voice always need a premium (vision) model first.
-  const targets =
-    mode === "free_first" && !hasMedia(body)
-      ? [...freeFallbackTargets(), ...aiChatTargets(affinity)]
-      : [...aiChatTargets(affinity), ...freeFallbackTargets()];
+  // Free AIs answer ordinary chat; paid Gemini goes first only for media or
+  // pro-level questions, and is otherwise the fallback when free tiers fail.
+  const pro = hasMedia(body) || needsProAnswer(body);
+  const targets = pro
+    ? [...aiChatTargets(affinity), ...freeFallbackTargets()]
+    : [...freeFallbackTargets(), ...aiChatTargets(affinity)];
   let last: { response: Response; provider: AiChatTarget["provider"] } | null = null;
 
   for (let index = 0; index < targets.length; index += 1) {
@@ -203,7 +203,8 @@ export async function fetchAiChat(
       console.warn(`AI ${target.provider} network error`, e);
       continue;
     }
-    if (!shouldFallThrough(response.status) || index === targets.length - 1) {
+    const fallThrough = target.free ? !response.ok : shouldFallThrough(response.status);
+    if (!fallThrough || index === targets.length - 1) {
       // Chat responses are streamed back to the caller, so token counts aren't
       // available here — log the call itself (provider + model) instead.
       logAiUsage({ feature: "chat", provider: target.provider, model: target.model });
