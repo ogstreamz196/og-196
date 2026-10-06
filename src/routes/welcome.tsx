@@ -22,10 +22,6 @@ import { checkDeviceAccountAllowed } from "@/lib/device-limit.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ogBotAsset from "@/assets/ogbot.png.asset.json";
-import partyCoverAsset from "@/assets/album-party-anthem.jpg.asset.json";
-import heartbreakCoverAsset from "@/assets/album-heartbreak.jpg.asset.json";
-import drillCoverAsset from "@/assets/album-drill.jpg.asset.json";
-import afrobeatsCoverAsset from "@/assets/album-afrobeats.jpg.asset.json";
 import { WelcomeBackdrop } from "@/components/layout/WelcomeBackdrop";
 import { BackgroundMusicHeaderControl } from "@/components/PersistentBackgroundMusic";
 
@@ -84,32 +80,6 @@ function useIsNativeApp() {
   return native;
 }
 
-const albumCovers = [
-  {
-    title: "Party anthem",
-    prompt: "Make it loud, funny and ready for the group chat.",
-    style: "Pop · Dance",
-    image: partyCoverAsset.url,
-  },
-  {
-    title: "Heartbreak hook",
-    prompt: "Turn the messy message into a chorus people feel.",
-    style: "R&B · Ballad",
-    image: heartbreakCoverAsset.url,
-  },
-  {
-    title: "Street energy",
-    prompt: "Give it a cold intro, sharp bars and heavy bass.",
-    style: "Rap · Drill",
-    image: drillCoverAsset.url,
-  },
-  {
-    title: "Summer bounce",
-    prompt: "Sunny, catchy and made for the speakers.",
-    style: "Afrobeats · Vibes",
-    image: afrobeatsCoverAsset.url,
-  },
-];
 
 const PENDING_REF_KEY = "og_pending_ref";
 
@@ -657,7 +627,6 @@ function WelcomePage() {
         <WelcomeBackdrop />
         <TopNav />
         <Hero />
-        <StyleShowcase />
         <Superpowers />
         <HowItWorks />
         <AlbumCoverShowcase />
