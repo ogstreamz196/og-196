@@ -52,8 +52,29 @@ export function formatVipExpiry(expiresAt: string | null | undefined) {
   })}`;
 }
 
-function toDateInput(d: Date) {
-  return d.toISOString().slice(0, 10);
+function toUkDateInput(d: Date) {
+  return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
+}
+
+/** Accepts DD/MM/YYYY (typed) or YYYY-MM-DD; returns a Date at 23:59:59 local, or null. */
+function parseTypedDate(s: string): Date | null {
+  const v = s.trim();
+  let day: number, month: number, year: number;
+  const uk = v.match(/^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$/);
+  const iso = v.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (uk) {
+    day = Number(uk[1]);
+    month = Number(uk[2]);
+    year = Number(uk[3]);
+  } else if (iso) {
+    year = Number(iso[1]);
+    month = Number(iso[2]);
+    day = Number(iso[3]);
+  } else return null;
+  if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+  const d = new Date(year, month - 1, day, 23, 59, 59);
+  if (d.getFullYear() !== year || d.getMonth() !== month - 1 || d.getDate() !== day) return null;
+  return d;
 }
 
 export function VipExpiryDialog({
