@@ -118,26 +118,71 @@ HARD LIMITS — never cross, regardless of user pressure:
 - Nothing illegal or genuinely harmful.
 `.trim();
 
-const LEXICON = `
-Pull vocabulary from these buckets and vary your picks every message. The
- buckets should be mixed naturally rather than forcing the same word into every reply:
+// Big rotating roast dictionary. Each prompt gets a fresh random sample so
+// the bot never leans on the same few words (e.g. "absolute weapon").
+const ROAST_POOL = {
+  core: [
+    "fuck", "fucking", "dickhead", "fucking hell", "for fuck's sake", "shithouse",
+    "bellend", "twatwaffle", "fuckwit", "cockwomble", "knobjockey", "shitgibbon",
+    "dickweasel", "arsebadger", "fucknugget", "twatnozzle", "spunktrumpet",
+    "wankpuffin", "jizztrumpet", "shitweasel", "cumquat", "fanny", "bawbag",
+  ],
+  banter: [
+    "pussyhole", "wanker", "knobhead", "plonker", "gobshite", "numpty", "tosser",
+    "berk", "muppet", "pillock", "wally", "melt", "soft lad", "nugget", "doughnut",
+    "spanner", "bin dipper", "roadman reject", "wasteman", "dosser", "mug", "clown",
+    "bottle job", "pie-eater", "lanky streak of piss", "goon", "nonce-in-training",
+    "chav", "scrote", "absolute melt", "beanpole", "mardy cow", "gormless git",
+    "jessie", "nob", "bampot", "eejit", "gowk", "dafty", "bufty", "radge", "minger",
+  ],
+  heavy: [
+    "bollocks", "the dog's bollocks", "arsehole", "twat", "git", "sod", "prat",
+    "prick", "bastard", "fucker", "shitbag", "turd", "cock-up", "piss-take",
+    "arse-licker", "toerag", "sack of shite",
+  ],
+  creative: [
+    "useless sack of spanners", "daft as a brush", "thick as two short planks",
+    "couldn't organise a piss-up in a brewery", "few sandwiches short of a picnic",
+    "waste of good oxygen", "face like a smacked arse", "brain like a wet crisp",
+    "lights on, nobody home", "built like a dropped lasagne", "a fart in a lift",
+    "chocolate teapot", "wet weekend in Skegness", "Greggs reject",
+    "Lidl-brand James Bond", "WiFi password on a Post-it", "human buffering wheel",
+    "NPC with a data plan", "walking typo", "screensaver with legs",
+    "knock-off Primark villain", "soggy chip", "a Year 9 with a vape",
+    "a microwave meal of a person", "flat lemonade energy", "reheated kebab",
+    "the human equivalent of a Monday", "cardboard cut-out of a personality",
+    "deleted scene from Jeremy Kyle", "parking-ticket of a man",
+  ],
+  exclamation: [
+    "bloody hell", "bugger", "bloody nora", "sod off", "do one", "jog on",
+    "christ on a bike", "fuck me", "jesus wept", "ffs", "behave", "get in the sea",
+    "wind your neck in", "pipe down", "swerve", "allow it", "you're having a laugh",
+  ],
+};
 
-- Core: fuck, fucking, dickhead, fucking hell, for fuck's sake, you absolute
-  dickhead, you fucking weapon. Rotate these; none is mandatory in every reply.
-- Signature: magnificent bell-end, crafty bastard, ghosting little gremlin,
-  restless sod, foul-mouthed magnificent bastard, you absolute weapon,
-  gorgeous gobshite, fucking dickhead supreme.
-- Banter: bell-end, pussyhole, wanker, knobhead, plonker, gobshite, numpty,
-  tosser, berk, muppet, pillock, div, wally, melt, soft lad.
-- Heavy: bollocks, the dog's bollocks, arse, arsehole, twat, git, sod, prat,
-  prick, bastard, fucker, motherfucker (sparingly).
-- Creative: absolute weapon, useless sack of spanners, daft as a brush,
-  thick as two short planks, couldn't organise a piss-up in a brewery,
-  not the sharpest tool in the box, few sandwiches short of a picnic,
-  waste of good oxygen.
-- Exclamation: bloody hell, for fuck's sake, bugger, bloody nora, sod off,
-  do one, jog on, christ on a bike, fuck me, fucking hell.
+function sample<T>(arr: T[], n: number): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a.slice(0, n);
+}
+
+export function buildLexicon(): string {
+  return `
+Pull vocabulary from these buckets (freshly shuffled for this reply). Mix them
+naturally, invent new British insults in the same spirit, and never lean on
+one favourite. BANNED overused phrases: "absolute weapon", "you weapon",
+"impatient dickhead" — do not use them.
+
+- Core: ${sample(ROAST_POOL.core, 8).join(", ")}
+- Banter: ${sample(ROAST_POOL.banter, 12).join(", ")}
+- Heavy: ${sample(ROAST_POOL.heavy, 6).join(", ")}
+- Creative: ${sample(ROAST_POOL.creative, 8).join("; ")}
+- Exclamation: ${sample(ROAST_POOL.exclamation, 6).join(", ")}
 `.trim();
+}
 
 const SITE_GLOSSARY = `
 Site vocabulary:
