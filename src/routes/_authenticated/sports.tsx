@@ -2,14 +2,14 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Copy, Loader2, Lock, Search, SlidersHorizontal, Tv, X } from "lucide-react";
+import { Copy, Loader2, Lock, RefreshCw, Search, SlidersHorizontal, Tv, X } from "lucide-react";
 import { dedupe, parseListing, searchListing, type Fixture, type Listing } from "@/lib/sports-listing";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import sportsGuideLogo from "@/assets/og-bot-sports-guide.png.asset.json";
-import { getSportsGuideHub, type SportsGuidePost } from "@/lib/sports-guide.functions";
+import { getSportsGuideHub, syncSportsGuide, type SportsGuidePost } from "@/lib/sports-guide.functions";
 import { purchaseSportsGuideAccess } from "@/lib/store.functions";
 
 export const Route = createFileRoute("/_authenticated/sports")({
@@ -77,6 +77,16 @@ function SportsGuidePage() {
       qc.invalidateQueries({ queryKey: ["profile"] });
       qc.invalidateQueries({ queryKey: ["sports-guide-access"] });
       toast.success("Sports Guide unlocked 🏆");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const runSync = useServerFn(syncSportsGuide);
+  const sync = useMutation({
+    mutationFn: () => runSync(),
+    onSuccess: async (r) => {
+      await qc.invalidateQueries({ queryKey: KEY });
+      toast.success(r.removed > 0 ? `Synced — removed ${r.removed} deleted post${r.removed === 1 ? "" : "s"}` : "Synced — everything up to date");
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -227,6 +237,15 @@ function SportsGuidePage() {
               className={`grid w-16 shrink-0 place-items-center rounded-2xl border-2 transition-colors ${showTeams ? "border-coin bg-coin text-coin-foreground" : "border-pitch/70 bg-card text-coin"}`}
             >
               <SlidersHorizontal className="h-6 w-6" />
+            </button>
+            <button
+              aria-label="Sync now"
+              title="Sync with Telegram now"
+              disabled={sync.isPending}
+              onClick={() => sync.mutate()}
+              className="grid w-16 shrink-0 place-items-center rounded-2xl border-2 border-pitch/70 bg-card text-coin transition-colors hover:border-coin disabled:opacity-60"
+            >
+              <RefreshCw className={`h-6 w-6 ${sync.isPending ? "animate-spin" : ""}`} />
             </button>
           </div>
           {showTeams && (

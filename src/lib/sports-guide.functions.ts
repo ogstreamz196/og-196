@@ -53,6 +53,17 @@ export const getSportsGuideHub = createServerFn({ method: "GET" })
     };
   });
 
+export const syncSportsGuide = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { data: owned } = await supabase.rpc("has_sports_guide_access", { _user: userId });
+    if (!owned) throw new Error("Unlock Sports Guide first");
+    const { sweepDeletedSportsGuidePosts } = await import("./sports-guide.server");
+    const removed = await sweepDeletedSportsGuidePosts();
+    return { removed };
+  });
+
 export const toggleSportsGuideReminder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) => z.object({ postId: z.string().uuid(), leadMinutes: z.number().int().min(5).max(120) }).parse(d))
