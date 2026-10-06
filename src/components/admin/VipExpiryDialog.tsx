@@ -100,7 +100,7 @@ export function VipExpiryDialog({
     if (isVip && !currentExpiry) setMode("lifetime");
     else if (isVip && currentExpiry) {
       setMode("custom");
-      setCustom(toDateInput(new Date(currentExpiry)));
+      setCustom(toUkDateInput(new Date(currentExpiry)));
     } else setMode("months");
   }, [open, isVip, currentExpiry]);
 
