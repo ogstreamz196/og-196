@@ -580,16 +580,25 @@ export const getBattleLeaderboard = createServerFn({ method: "GET" })
     };
   });
 
+/** New users never see Battle Zone history from before they joined. */
+async function joinedAt(admin: any, userId: string): Promise<string | null> {
+  const { data } = await admin.auth.admin.getUserById(userId);
+  return data?.user?.created_at ?? null;
+}
+
 /** Initial fetch of the latest N messages, oldest-first. */
 export const listCommunityMessages = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async () => {
+  .handler(async ({ context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data, error } = await supabaseAdmin
+    const since = await joinedAt(supabaseAdmin, context.userId);
+    let q = supabaseAdmin
       .from("community_messages")
       .select("id, user_id, role, content, display_name, created_at")
       .order("created_at", { ascending: false })
       .limit(100);
+    if (since) q = q.gte("created_at", since);
+    const { data, error } = await q;
     if (error) throw new Error(error.message);
     return { messages: ((data ?? []) as CommunityMessage[]).reverse() };
   });
@@ -604,8 +613,9 @@ export const listOlderCommunityMessages = createServerFn({ method: "POST" })
     const limit = Math.min(Math.max(Number(data?.limit ?? 50), 1), 100);
     return { before, beforeId, limit };
   })
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const since = await joinedAt(supabaseAdmin, context.userId);
     // Composite cursor on (created_at, id) avoids dropping/duplicating rows
     // that share the exact same created_at timestamp.
     const query = supabaseAdmin
@@ -614,6 +624,7 @@ export const listOlderCommunityMessages = createServerFn({ method: "POST" })
       .order("created_at", { ascending: false })
       .order("id", { ascending: false })
       .limit(data.limit);
+    if (since) query.gte("created_at", since);
     const { data: rows, error } = data.beforeId
       ? await query.or(
           `created_at.lt.${data.before},and(created_at.eq.${data.before},id.lt.${data.beforeId})`,

@@ -351,7 +351,7 @@ export function buildSystemPrompt(opts: BuildPromptOpts): string {
     SITE_GLOSSARY,
     opts.songIntent ? SONGWRITING_PLAYBOOK : null,
     RESEARCH_NOTE,
-    opts.mode === "og" && opts.foulMouth ? LEXICON : null,
+    opts.mode === "og" && opts.foulMouth ? buildLexicon() : null,
     languageBlock,
     learnedBlock,
     opts.bossScript ? `Boss override — script:\n${opts.bossScript}` : null,
