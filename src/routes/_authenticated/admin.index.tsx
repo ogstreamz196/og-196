@@ -33,7 +33,6 @@ import { BossAuditLog } from "@/components/admin/BossAuditLog";
 import { BossNav } from "@/components/admin/BossNav";
 import { HardwiredCapabilities } from "@/components/admin/HardwiredCapabilities";
 import { AppToggles } from "@/components/admin/AppToggles";
-import { AiRoutingPanel } from "@/components/admin/AiRoutingPanel";
 import { GeminiUsagePanel } from "@/components/admin/GeminiUsagePanel";
 import { OgBotPing } from "@/components/admin/OgBotPing";
 import { TelegramWebhookStatus } from "@/components/admin/TelegramWebhookStatus";
@@ -238,7 +237,6 @@ function AdminPanel() {
                       subtitle="Check OG Bot is reachable"
                       open
                     >
-                      <AiRoutingPanel />
                       <GeminiUsagePanel />
                       <OgBotPing />
                     </Panel>
