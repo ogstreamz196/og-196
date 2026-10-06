@@ -49,12 +49,18 @@ export async function learnedSlangBlock(admin: Admin): Promise<string> {
     const { data } = await admin
       .from("battle_lexicon")
       .select("word, uses")
-      .gte("uses", 6)
+      .gte("uses", 3)
       .order("last_seen", { ascending: false })
-      .limit(40);
-    const words = ((data ?? []) as { word: string }[])
+      .limit(300);
+    // Random sample of the growing vocabulary so every battle feels fresh.
+    const pool = ((data ?? []) as { word: string }[])
       .map((r) => r.word)
-      .filter((w) => !BLOCK.test(w));
+      .filter((w) => !BLOCK.test(w) && !/weapon/.test(w));
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    const words = pool.slice(0, 30);
     if (!words.length) return "";
     return `\nSTREET SLANG LEARNED FROM THE BATTLE ZONE (players use these — weave a couple in naturally when they fit, never slurs): ${words.join(", ")}.`;
   } catch {
