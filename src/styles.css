@@ -61,6 +61,8 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --color-coin: var(--coin);
   --color-coin-foreground: var(--coin-foreground);
+  --color-pitch: var(--pitch);
+  --color-pitch-foreground: var(--pitch-foreground);
 }
 
 .store-clean {
@@ -75,6 +77,8 @@
 
 :root {
   --radius: 0.875rem;
+  --pitch: oklch(0.62 0.19 145);
+  --pitch-foreground: oklch(0.98 0.01 145);
 
   /* Deep midnight navy — base (translucent so the brand wallpaper shows through) */
   --background: oklch(0.1 0.04 265 / 0);
