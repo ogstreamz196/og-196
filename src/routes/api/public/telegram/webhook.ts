@@ -820,10 +820,20 @@ async function handleTelegramUpdate(
       "👤 My Profile": "/me",
       "👑 VIP Status": "/vip",
       "❓ Help": "/help",
-      "⚽ Sports Guide": "/sports",
+"⚽ Sports Guide": "/sports",
+      "🧹 Clear chat": "/clear",
       ...(isBoss ? { "📊 Stats": "/stats", "👥 Users": "/users" } : {}),
     };
     if (buttonMap[trimmed]) trimmed = buttonMap[trimmed];
+
+    if (trimmed === "🌐 OGBOT.CO.UK") {
+      await reply(chat_id, "🌐 <b>OG BOT on the web</b>", {
+        reply_markup: {
+          inline_keyboard: [[{ text: "Open OGBOT.CO.UK", url: "https://ogbot.co.uk" }]],
+        },
+      });
+      return Response.json({ ok: true, site: true });
+    }
 
     if (/^\/start\b/i.test(trimmed)) {
       await sendIntro(chat_id);
