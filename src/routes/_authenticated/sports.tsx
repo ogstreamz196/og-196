@@ -187,18 +187,18 @@ function SportsGuidePage() {
             <h1 className="mt-1 font-display text-4xl font-black uppercase italic leading-none tracking-tight drop-shadow">
               Match <span className="text-coin">Centre</span>
             </h1>
-            <p className="mt-1 text-xs font-semibold text-foreground/85">⚽ 🥊 🏎️ 🏈 Every fixture & channel, live</p>
+            <p className="mt-1 text-xs font-semibold text-foreground/85">Every fixture & channel, live</p>
           </div>
         </div>
 
         <div className="relative px-4 pb-4">
           <div className="rounded-3xl bg-gradient-to-r from-coin via-pitch to-coin p-[3px] shadow-glow">
-            <div className="relative rounded-[calc(1.5rem-3px)] bg-background/95">
+            <div className="relative rounded-[calc(1.5rem-3px)] bg-card">
               <Search className="pointer-events-none absolute left-5 top-1/2 h-8 w-8 -translate-y-1/2 text-coin" />
               <Input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Search any team, fighter, league…"
+                placeholder="Search team or league…"
                 className="h-20 rounded-[calc(1.5rem-3px)] border-0 bg-transparent pl-16 pr-14 text-xl font-black placeholder:font-semibold placeholder:text-muted-foreground focus-visible:ring-0 md:text-2xl"
                 inputMode="search"
                 autoComplete="off"
@@ -216,7 +216,7 @@ function SportsGuidePage() {
           </div>
           {words.length > 0 ? (
             <p className="mt-3 px-1 text-sm font-black uppercase tracking-wider text-coin">
-              🎯 {matchCount} {matchCount === 1 ? "match" : "matches"} for “{dq.trim()}”
+              {matchCount} {matchCount === 1 ? "match" : "matches"} for “{dq.trim()}”
             </p>
           ) : (
             <div className="-mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
