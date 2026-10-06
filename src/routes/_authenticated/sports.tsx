@@ -238,6 +238,15 @@ function SportsGuidePage() {
             >
               <SlidersHorizontal className="h-6 w-6" />
             </button>
+            <button
+              aria-label="Sync now"
+              title="Sync with Telegram now"
+              disabled={sync.isPending}
+              onClick={() => sync.mutate()}
+              className="grid w-16 shrink-0 place-items-center rounded-2xl border-2 border-pitch/70 bg-card text-coin transition-colors hover:border-coin disabled:opacity-60"
+            >
+              <RefreshCw className={`h-6 w-6 ${sync.isPending ? "animate-spin" : ""}`} />
+            </button>
           </div>
           {showTeams && (
             <div className="mt-3 max-h-64 overflow-y-auto rounded-2xl border border-border bg-background/90 p-2">
