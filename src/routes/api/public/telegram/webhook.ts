@@ -941,7 +941,11 @@ async function handleTelegramUpdate(
       });
       return Response.json({ ok: true, me: true });
     }
-    if (/^\/vault\b/i.test(trimmed)) {
+    if (
+      /^\/vault\b/i.test(trimmed) ||
+      (/\bvault\b/i.test(trimmed) &&
+        /\b(pin|id|code|login|password|pass|access|username|details)\b/i.test(trimmed))
+    ) {
       const [{ data: purchase }, { data: prof }, { data: creds }] = await Promise.all([
         admin.from("vip_pass_purchases").select("id").eq("user_id", linkedProfile.id).maybeSingle(),
         admin.from("profiles").select("vip_trial_ends_at").eq("id", linkedProfile.id).maybeSingle(),
