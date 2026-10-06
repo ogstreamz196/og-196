@@ -580,10 +580,17 @@ export const getBattleLeaderboard = createServerFn({ method: "GET" })
     };
   });
 
-/** New users never see Battle Zone history from before they joined. */
+/** New users only see Battle Zone history from their first roast onwards. */
 async function joinedAt(admin: any, userId: string): Promise<string | null> {
-  const { data } = await admin.auth.admin.getUserById(userId);
-  return data?.user?.created_at ?? null;
+  const { data } = await admin
+    .from("community_messages")
+    .select("created_at")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  // No roasts yet → far-future cutoff so they see no history at all.
+  return data?.created_at ?? new Date(Date.now() + 60_000).toISOString();
 }
 
 /** Initial fetch of the latest N messages, oldest-first. */
