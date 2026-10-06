@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Copy, Loader2, Lock, Radio, Search, Tv, X } from "lucide-react";
+import { Copy, Loader2, Lock, Search, SlidersHorizontal, Tv, X } from "lucide-react";
 import { dedupe, parseListing, searchListing, type Fixture, type Listing } from "@/lib/sports-listing";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
