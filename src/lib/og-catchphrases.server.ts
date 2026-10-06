@@ -18,8 +18,9 @@ const TONE_BRIEF: Record<CatchTone, string> = {
   safe: "friendly, polite and clean",
 };
 
-async function generateBatch(kind: "opener" | "closer", tone: CatchTone): Promise<string[]> {
-  const prompt = `Write 12 brand-new, varied ${kind === "opener" ? "OPENING lines (how a reply starts)" : "SIGN-OFF lines (how a reply ends)"} for OG Bot, a UK music & chat bot. Style: ${TONE_BRIEF[tone]}. Each under 10 words, all different structures, no numbering, no quotes, never "here we go you impatient dickhead". Output one per line, nothing else.`;
+type Kind = "opener" | "closer" | "roast";
+async function generateBatch(kind: Kind, tone: CatchTone): Promise<string[]> {
+  const prompt = `Write 12 brand-new, varied ${kind === "opener" ? "OPENING lines (how a reply starts)" : kind === "closer" ? "SIGN-OFF lines (how a reply ends)" : "ROASTS / one-liner insults aimed at the user (affectionate mate-banter, original, funny, British)"} for OG Bot, a UK music & chat bot. Style: ${TONE_BRIEF[tone]}. Each under ${kind === "roast" ? 18 : 10} words, all different structures, no numbering, no quotes, never "here we go you impatient dickhead". Output one per line, nothing else.`;
   for (const t of [...freeFallbackTargets(), ...aiChatTargets("catchphrases")]) {
     try {
       const res = await fetch(t.url, {
@@ -42,7 +43,7 @@ async function generateBatch(kind: "opener" | "closer", tone: CatchTone): Promis
   return [];
 }
 
-function refill(admin: Admin, kind: "opener" | "closer", tone: CatchTone) {
+function refill(admin: Admin, kind: Kind, tone: CatchTone) {
   const key = `${kind}:${tone}`;
   if (refilling.has(key)) return;
   refilling.add(key);
@@ -58,29 +59,39 @@ function refill(admin: Admin, kind: "opener" | "closer", tone: CatchTone) {
   })();
 }
 
+type Picked = { opener: string | null; closer: string | null; roasts?: string[] };
+
 export async function pickCatchphrases(
   admin: Admin,
   userId: string,
   tone: CatchTone,
-): Promise<{ opener: string | null; closer: string | null }> {
+): Promise<Picked> {
   try {
-    const { data, error } = await admin.rpc("pick_catchphrases", { p_user: userId, p_tone: tone });
-    if (error || !data) return { opener: null, closer: null };
+    const [{ data, error }, roastRes] = await Promise.all([
+      admin.rpc("pick_catchphrases", { p_user: userId, p_tone: tone }),
+      admin.rpc("pick_roasts", { p_user: userId, p_tone: tone, p_n: 2 }),
+    ]);
+    const r = (roastRes.data ?? null) as { roasts?: string[]; left?: number } | null;
+    const roasts = Array.isArray(r?.roasts) ? r!.roasts.filter(Boolean) : [];
+    if (r && (r.left ?? 0) <= LOW_WATER) refill(admin, "roast", tone);
+    if (error || !data) return { opener: null, closer: null, roasts };
     const d = data as { opener: string | null; closer: string | null; openers_left: number; closers_left: number };
     if ((d.openers_left ?? 0) <= LOW_WATER) refill(admin, "opener", tone);
     if ((d.closers_left ?? 0) <= LOW_WATER) refill(admin, "closer", tone);
-    return { opener: d.opener, closer: d.closer };
+    return { opener: d.opener, closer: d.closer, roasts };
   } catch {
-    return { opener: null, closer: null };
+    return { opener: null, closer: null, roasts: [] };
   }
 }
 
 /** Prompt note telling the model to use the picked lines instead of inventing its own. */
-export function catchphraseNote(p: { opener: string | null; closer: string | null }): string {
-  if (!p.opener && !p.closer) return "";
+export function catchphraseNote(p: Picked): string {
+  const roasts = p.roasts ?? [];
+  if (!p.opener && !p.closer && !roasts.length) return "";
   const parts = ["\n\nBANTER INSPIRATION (optional — riff on these in your own words, don't paste them verbatim, don't force them as a fixed opener/closer):"];
   if (p.opener) parts.push(`- "${p.opener}"`);
   if (p.closer) parts.push(`- "${p.closer}"`);
+  for (const r of roasts) parts.push(`- roast: "${r}"`);
   parts.push("- Spread the piss-taking naturally through the whole reply. Skip entirely if the user is upset or serious.");
   return parts.join("\n");
 }
