@@ -76,7 +76,8 @@ export function CommunityRoom() {
   const { foulMouth } = useFoulMouth();
   const { isDev, isAdmin } = useRole();
   const canClear = isDev || isAdmin;
-  // Report / Block are app-store safety tools — shown in the phone apps only.
+  // Report / Block are app-store safety tools — always visible so store
+  // reviewers (who test in a browser) can see them.
   const [nativeApp, setNativeApp] = useState(false);
   useEffect(() => setNativeApp(Capacitor.isNativePlatform()), []);
   const blocksFn = useServerFn(listMyCommunityBlocks);
@@ -664,7 +665,7 @@ export function CommunityRoom() {
                             {m.content}
                           </p>
                         </div>
-                        {nativeApp && !mine && !isBot && m.user_id && (
+                        {!mine && !isBot && m.user_id && (
                           <DropdownMenu>
                             <DropdownMenuTrigger
                               aria-label="Message options"
