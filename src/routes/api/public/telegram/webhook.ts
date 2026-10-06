@@ -135,23 +135,52 @@ async function handleCallbackQuery(cq: {
   return Response.json({ ok: true });
 }
 
-async function reply(chat_id: number, text: string, extra?: Record<string, unknown>) {
-  await tg("sendMessage", {
+// Bot replies self-destruct: default ~48h (Telegram's bot delete window),
+// Vault credentials after 1h. Pass ttlMs: 0 to keep forever (welcome intro).
+const DEFAULT_TTL_MS = 47 * 60 * 60 * 1000;
+export const VAULT_TTL_MS = 60 * 60 * 1000;
+
+async function scheduleDelete(chat_id: number, payload: unknown, ttlMs: number) {
+  const mid = (payload as { result?: { message_id?: number } } | null)?.result?.message_id;
+  if (!mid || ttlMs <= 0) return;
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("telegram_ephemeral_messages" as never).upsert(
+      { chat_id, message_id: mid, delete_at: new Date(Date.now() + ttlMs).toISOString() } as never,
+      { onConflict: "chat_id,message_id" },
+    );
+  } catch (e) {
+    console.error("[tg] schedule delete failed", e);
+  }
+}
+
+async function reply(
+  chat_id: number,
+  text: string,
+  extra?: Record<string, unknown>,
+  ttlMs: number = DEFAULT_TTL_MS,
+) {
+  const res = await tg("sendMessage", {
     chat_id,
     text,
     parse_mode: "HTML",
     disable_web_page_preview: true,
     ...(extra ?? {}),
   });
+  await scheduleDelete(chat_id, res, ttlMs);
 }
 
 const INTRO_TEXT =
   `🔥 <b>Yo, I'm OG Bot.</b>\n\n` +
-  `Ask me anything — just chat, need advice, what time is the game… or just plain insult me.\n\n` +
+  `Here's what I do:\n` +
+  `💬 Chat about anything or get advice\n` +
+  `⚽ What time's the game? Ask me\n` +
+  `🎵 Make your own tracks on ogbot.co.uk\n` +
+  `🔥 Or just plain insult me\n\n` +
   `Go on, fire away 👇`;
 
 async function sendIntro(chat_id: number) {
-  await reply(chat_id, INTRO_TEXT);
+  await reply(chat_id, INTRO_TEXT, undefined, 0);
 }
 
 // Deletes up to the last 100 messages (bots may delete private-chat messages <48h old).
@@ -683,11 +712,12 @@ async function runChatAI(
     // Telegram caps messages at ~4096 chars
     const chunks = replyText.match(/[\s\S]{1,3800}/g) ?? [replyText];
     for (const c of chunks) {
-      await tg("sendMessage", {
+      const res = await tg("sendMessage", {
         chat_id,
         text: c,
         disable_web_page_preview: true,
       });
+      await scheduleDelete(chat_id, res, DEFAULT_TTL_MS);
     }
   } catch (err) {
     await reply(chat_id, `❌ ${(err as Error).message}`);
@@ -974,13 +1004,18 @@ async function handleTelegramUpdate(
           `🔐 <b>Your OG Vault Access</b>\n\n` +
           `🆔 ID: <code>${esc(cred.username)}</code>\n` +
           `🔑 PIN: <code>${esc(cred.password)}</code>\n\n` +
-          `Tap to copy. Keep it private.`;
+          `Tap to copy. Keep it private.\n\n⏳ <i>For your security, this message self-destructs in 1 hour.</i>`;
       }
-      await reply(chat_id, body, {
-        reply_markup: {
-          inline_keyboard: [[{ text: "🛒 Open Store", url: "https://ogbot.co.uk/buy-coins" }]],
+      await reply(
+        chat_id,
+        body,
+        {
+          reply_markup: {
+            inline_keyboard: [[{ text: "🛒 Open Store", url: "https://ogbot.co.uk/buy-coins" }]],
+          },
         },
-      });
+        owned && creds?.length ? VAULT_TTL_MS : undefined,
+      );
       return Response.json({ ok: true, vault: true });
     }
     if (/^\/vip\b/i.test(trimmed)) {
@@ -1127,6 +1162,7 @@ async function handleTelegramUpdate(
         chat_id,
         `${INTRO_TEXT}\n\n🔗 First, link your account: ogbot.co.uk → Settings → <b>Connect Telegram</b>.`,
         { reply_markup: BOTTOM_BAR_KEYBOARD },
+        0,
       );
       return Response.json({ ok: true, missing_token: true });
     }

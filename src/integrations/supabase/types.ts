@@ -1594,6 +1594,30 @@ export type Database = {
           },
         ]
       }
+      telegram_ephemeral_messages: {
+        Row: {
+          chat_id: number
+          created_at: string
+          delete_at: string
+          id: string
+          message_id: number
+        }
+        Insert: {
+          chat_id: number
+          created_at?: string
+          delete_at: string
+          id?: string
+          message_id: number
+        }
+        Update: {
+          chat_id?: number
+          created_at?: string
+          delete_at?: string
+          id?: string
+          message_id?: number
+        }
+        Relationships: []
+      }
       telegram_processed_updates: {
         Row: {
           chat_id: number | null
