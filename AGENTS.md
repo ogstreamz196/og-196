@@ -12,6 +12,8 @@
 
 ## AI providers
 
+- Validate English lyric profanity density and variety against the selected level before accepting any provider output; use one shared validator so fallback and rewrite paths cannot silently soften Savage or dirty Clean.
+
 - Ordinary text chat goes to keyed free tiers first (Groq, Pollinations, OpenRouter), with paid Gemini/OpenAI first only for media or heuristic "pro" questions and otherwise as fallback when free tiers fail, to save paid credits; there is no Boss toggle. Use `PERPLEXITY_API_KEY` only for live web facts and never use Lovable AI for end-user inference.
 - Lyrics run on Gemini first (primary key, then backup key across several models, skipping busy/retired ones), with OpenAI as the final text fallback so a Google outage never blocks songs; audio transcription stays on Gemini for its media handling.
 - `GEMINI_BACKUP_API_KEY` is the owner's paid emergency key: use it only for lyrics and image edits, after the primary key fails (401/403/404/429/5xx) — never for ordinary chat, because it costs real money.
@@ -38,5 +40,7 @@
 - Sports Guide posts are mirrored from the Telegram sports group by the existing bot webhook into a database table and read only by owners of the Sports Guide store item, so the in-app page is the paid product rather than a Telegram invite.
 
 ## Bot catchphrases
+
+- Mount the browser installation banner before the route outlet and gate its event listener on Capacitor native/standalone detection; keep it in page flow so it cannot cover Android or web navigation.
 
 - Telegram and web/in-app OG Bot replies take openers/closers from the shared service-only catchphrase bank with per-user unseen rotation and background free-tier refills, so greeting banter costs no premium tokens; Battle Zone stays freshly generated each message.
