@@ -681,6 +681,7 @@ async function runChatAI(
         ],
       },
       profileId,
+      { foulMouth },
     );
 
     if (!res.ok) {

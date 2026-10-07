@@ -453,14 +453,22 @@ Deno.serve(async (req) => {
     // lyrics first; Gemini then OpenAI are only fallbacks.
     const callFree = async (contents: unknown[]): Promise<Gen> => {
       const or = { "HTTP-Referer": "https://ogbot.co.uk", "X-Title": "OG BOT" };
-      const tiers: Array<[string, string, string, Record<string, string>]> = [
-        ["GROQ_API_KEY", "https://api.groq.com/openai/v1/chat/completions", "openai/gpt-oss-120b", {}],
-        ["GROQ_BACKUP_API_KEY", "https://api.groq.com/openai/v1/chat/completions", "openai/gpt-oss-120b", {}],
-        ["OPENROUTER_API_KEY", "https://openrouter.ai/api/v1/chat/completions", "nvidia/nemotron-3.5-lightning:free", or],
-        ["OPENROUTER_BACKUP_API_KEY", "https://openrouter.ai/api/v1/chat/completions", "nvidia/nemotron-3.5-lightning:free", or],
-        ["POLLINATIONS_API_KEY", "https://gen.pollinations.ai/v1/chat/completions", "openai-fast", {}],
-        ["POLLINATIONS_BACKUP_API_KEY", "https://gen.pollinations.ai/v1/chat/completions", "openai-fast", {}],
-      ];
+      const foulModel = "nvidia/nemotron-3-super-120b-a12b:free";
+      // Foul Mouth ON: Groq/Pollinations failed the live swearing test, so only
+      // the OpenRouter model that swears back is tried before Gemini.
+      const tiers: Array<[string, string, string, Record<string, string>]> = foulMouth
+        ? [
+            ["OPENROUTER_API_KEY", "https://openrouter.ai/api/v1/chat/completions", foulModel, or],
+            ["OPENROUTER_BACKUP_API_KEY", "https://openrouter.ai/api/v1/chat/completions", foulModel, or],
+          ]
+        : [
+            ["GROQ_API_KEY", "https://api.groq.com/openai/v1/chat/completions", "openai/gpt-oss-120b", {}],
+            ["GROQ_BACKUP_API_KEY", "https://api.groq.com/openai/v1/chat/completions", "openai/gpt-oss-120b", {}],
+            ["OPENROUTER_API_KEY", "https://openrouter.ai/api/v1/chat/completions", foulModel, or],
+            ["OPENROUTER_BACKUP_API_KEY", "https://openrouter.ai/api/v1/chat/completions", foulModel, or],
+            ["POLLINATIONS_API_KEY", "https://gen.pollinations.ai/v1/chat/completions", "openai-fast", {}],
+            ["POLLINATIONS_BACKUP_API_KEY", "https://gen.pollinations.ai/v1/chat/completions", "openai-fast", {}],
+          ];
       const messages = [
         { role: "system", content: systemPrompt },
         ...(contents as Array<{ role: string; parts: Array<{ text?: string }> }>).map((c) => ({

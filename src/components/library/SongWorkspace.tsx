@@ -180,6 +180,18 @@ function setBriefLanguage(brief: string, language: string): string {
   return brief.trim() ? `${brief.trim()}\n${line}` : line;
 }
 
+// The wizard saves the user's original idea inside the prompt as "— Idea: …"
+// (the dash stops the language matcher from swallowing it).
+const IDEA_RE = /\n?— Idea:\s*([\s\S]*?)(?=\nLanguage:|$)/;
+function getIdea(brief: string): string {
+  return (brief.match(IDEA_RE)?.[1] ?? "").trim();
+}
+function setIdea(brief: string, idea: string): string {
+  const base = brief.replace(IDEA_RE, "").trimEnd();
+  const clean = idea.trim();
+  return clean ? `${base}\n— Idea: ${clean}` : base;
+}
+
 interface Props {
   song: WorkspaceSong;
   onSaved?: () => void;
@@ -487,6 +499,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
           foulMouth: isNasheed ? false : foulMouth,
           foulIntensity: displayedFoulIntensity,
           language: languageValue,
+          personalDetails: getIdea(nextBriefValue) || undefined,
         },
       });
 
@@ -540,7 +553,12 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
         setSaving(false);
       }
     }
-    if (!hasLyrics || languageChanged) {
+    // Changing the idea, styles, voice or language rewrites the lyrics so the
+    // new track really reflects the edit — unless the user hand-edited lyrics.
+    const lyricsHandEdited = lyrics !== (song.lyrics ?? "");
+    const ideaChanged = getIdea(nextBriefValue) !== getIdea(song.prompt ?? "");
+    const styleChanged = savedStyleValue !== (song.style ?? "");
+    if (!hasLyrics || languageChanged || ((ideaChanged || styleChanged) && !lyricsHandEdited)) {
       await generateLyrics();
     } else {
       await cookCurrentLyrics();
@@ -780,6 +798,24 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
             </CollapsibleTrigger>
             <CollapsibleContent>
               <CardContent className="space-y-4">
+                {/* Original idea from the wizard — editable, rewrites lyrics on Cook now */}
+                <div className="space-y-2">
+                  <Label htmlFor="song-idea">
+                    Your idea{" "}
+                    <span className="text-xs font-normal text-muted-foreground">
+                      (change it and Cook now writes fresh lyrics)
+                    </span>
+                  </Label>
+                  <Textarea
+                    id="song-idea"
+                    value={getIdea(brief)}
+                    onChange={(e) => setBrief((b) => setIdea(b, e.target.value))}
+                    placeholder="What's the song about? Names, stories, inside jokes…"
+                    rows={3}
+                    maxLength={500}
+                    disabled={!isOwner}
+                  />
+                </div>
 
                 {/* Styles — stack as many as you like */}
                 <div className="space-y-2">
@@ -1078,7 +1114,9 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                   <Play className="h-4 w-4 shrink-0 text-primary" />Preview
                 </span>
                 <span className="mt-0.5 block truncate text-xs text-muted-foreground">
-                  {isReady && ownsFull
+                  {cooking
+                    ? "Cooking your new version…"
+                    : isReady && ownsFull
                     ? "Full track ready"
                     : isReady
                     ? `Free ${settings?.sample_seconds ?? 60}s sample ready`
@@ -1289,9 +1327,13 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
         </TabsContent>
 
         <TabsContent value="takes" className="mt-0">
-        <VariationsCard
-          variations={variations}
-        />
+        {cooking ? (
+          <p className="rounded-lg border border-border bg-card/40 p-4 text-sm text-muted-foreground">
+            Your old takes are hidden while OG Bot cooks the new version.
+          </p>
+        ) : (
+          <VariationsCard variations={variations} />
+        )}
         </TabsContent>
       </Tabs>
 

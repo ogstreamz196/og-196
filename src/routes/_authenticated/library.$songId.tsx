@@ -28,6 +28,7 @@ import { PublishToggle } from "@/components/library/PublishToggle";
 import { UnlockConfirmDialog } from "@/components/library/UnlockConfirmDialog";
 import { OwnerUnlockDialog } from "@/components/library/OwnerUnlockDialog";
 import { useProfile } from "@/hooks/use-profile";
+import { useSessionRunState } from "@/hooks/use-session-run-state";
 import { ensureFullUrlAllowed } from "@/lib/ensure-full-url-allowed";
 
 export const Route = createFileRoute("/_authenticated/library/$songId")({
@@ -71,6 +72,9 @@ function SongDetailPage() {
     refetchIntervalInBackground: true,
   });
 
+  // Shared with SongWorkspace: true while an edit is re-cooking this track.
+  const [cookingEdit] = useSessionRunState<boolean>(`edit-cook:${songId}`, false, true);
+
   // Realtime subscription scoped to this single row.
   useEffect(() => {
     const channel = supabase
@@ -103,7 +107,16 @@ function SongDetailPage() {
           </div>
         ) : (
           <>
-            <PlayerCard song={data} onRefresh={refetch} />
+            {cookingEdit ? (
+              <div className="rounded-2xl border border-primary/40 bg-card/60 p-6 text-center">
+                <p className="text-lg font-semibold">OG Bot is cooking your new version 🔥</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  The old track is hidden until the new one is ready.
+                </p>
+              </div>
+            ) : (
+              <PlayerCard song={data} onRefresh={refetch} />
+            )}
             <OwnerPublishToggle song={data} onChanged={refetch} />
             <SongWorkspace song={data} onSaved={refetch} onRefresh={refetch} />
           </>

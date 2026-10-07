@@ -350,6 +350,7 @@ export const postCommunityMessage = createServerFn({ method: "POST" })
             ],
           },
           context.userId,
+          { foulMouth: !!useFoul },
         );
         if (res.ok) {
           const json = (await res.json().catch(() => ({}))) as {

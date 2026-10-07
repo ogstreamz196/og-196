@@ -494,7 +494,9 @@ function LibraryPage() {
         .insert({
           user_id: user.id,
           title: title.trim() || null,
-          prompt: promptText || title.trim() || "Untitled",
+          prompt:
+            (promptText || title.trim() || "Untitled") +
+            (personalDetails.trim() ? `\n— Idea: ${personalDetails.trim()}` : ""),
           style: style || null,
           lyrics,
           status: "draft",
@@ -832,7 +834,9 @@ function LibraryPage() {
         .insert({
           user_id: user.id,
           title: songTitle || null,
-          prompt: promptText || songTitle || "Untitled",
+          // Keep the user's original idea so the edit screen can show and change it.
+          prompt:
+            (promptText || songTitle || "Untitled") + (songDetails ? `\n— Idea: ${songDetails}` : ""),
           style: style || null,
           lyrics: nextLyrics,
           status: "draft",
