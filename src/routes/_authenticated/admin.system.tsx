@@ -1,5 +1,6 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
-import { Activity, KeyRound, Webhook, Map, Bug } from "lucide-react";
+import { Activity, KeyRound, Webhook, Map, Bug, AlertTriangle } from "lucide-react";
+import { GenerationFailures } from "@/components/admin/GenerationFailures";
 import { useRole } from "@/hooks/use-role";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { BossNav } from "@/components/admin/BossNav";
@@ -16,6 +17,7 @@ export const Route = createFileRoute("/_authenticated/admin/system")({
 
 const TABS = [
   { value: "health", label: "Health", Icon: Activity, Panel: ApiHealthPage },
+  { value: "failures", label: "Track failures", Icon: AlertTriangle, Panel: GenerationFailures },
   { value: "keys", label: "API keys", Icon: KeyRound, Panel: AdminApiKeysPage },
   { value: "webhooks", label: "Webhooks", Icon: Webhook, Panel: WebhooksAdminPage },
   { value: "routes", label: "Route map", Icon: Map, Panel: RouteMapPage },
