@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
   if (pre) return pre;
 
   try {
-    if (!["GEMINI_API_KEY", "OPENAI_API_KEY", "GROQ_API_KEY", "GROQ_BACKUP_API_KEY", "POLLINATIONS_API_KEY", "POLLINATIONS_BACKUP_API_KEY", "OPENROUTER_API_KEY", "OPENROUTER_BACKUP_API_KEY"].some((name) => Deno.env.get(name)))
+    if (!["GEMINI_API_KEY", "GROQ_API_KEY", "GROQ_BACKUP_API_KEY", "POLLINATIONS_API_KEY", "POLLINATIONS_BACKUP_API_KEY", "OPENROUTER_API_KEY", "OPENROUTER_BACKUP_API_KEY"].some((name) => Deno.env.get(name)))
       return jsonResponse({ error: "No lyrics writer is configured" }, 500);
 
     const auth = await requireUser(req);
@@ -568,9 +568,7 @@ Deno.serve(async (req) => {
       console.warn("Free lyrics tiers failed — falling back to Gemini", f.status);
       const g = await generateGemini(contents);
       if (g.ok && g.text) return g;
-      console.warn("Gemini lyrics unavailable — falling back to OpenAI", g.status);
-      const o = await callOpenAI(contents);
-      return o.ok ? o : g;
+      return g;
     };
 
     const generateGemini = async (contents: unknown[]): Promise<Gen> => {

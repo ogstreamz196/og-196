@@ -67,5 +67,5 @@ export async function editImage(prompt: string, dataUrl: string) {
       if (!retryable(e)) throw e;
     }
   }
-  return await editWithOpenAI(prompt, mime, b64);
+  throw new ImageEditError("Image editing is busy right now — try again shortly.", 503);
 }

@@ -75,14 +75,6 @@ export function needsProAnswer(body: Record<string, unknown>): boolean {
   );
 }
 
-function stableBucket(value: string): number {
-  let hash = 2166136261;
-  for (let i = 0; i < value.length; i += 1) {
-    hash ^= value.charCodeAt(i);
-    hash = Math.imul(hash, 16777619);
-  }
-  return hash >>> 0;
-}
 
 // OpenAI removed from the system by owner request — Gemini is the only paid tier.
 export function aiChatTargets(_affinity = "default"): AiChatTarget[] {
