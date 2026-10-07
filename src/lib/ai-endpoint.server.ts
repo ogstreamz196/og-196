@@ -47,30 +47,37 @@ function keyed(
   };
 }
 
+const OR_HEADERS = { "HTTP-Referer": "https://ogbot.co.uk", "X-Title": "OG BOT" };
+const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
+const POLL_URL = "https://gen.pollinations.ai/v1/chat/completions";
+const OR_URL = "https://openrouter.ai/api/v1/chat/completions";
+/** Passed the live Foul Mouth test (swears back reliably and fast). */
+export const FOUL_CAPABLE_FREE_MODEL = "nvidia/nemotron-3-super-120b-a12b:free";
+
 /**
  * Free tiers — answer ordinary chat first. Keyed tiers are skipped when their
  * secret is missing. Gemini (paid) is reserved for pro questions, media, or
  * when every free tier fails.
+ *
+ * Foul Mouth ON: Groq and Pollinations stay too polite in live tests, so only
+ * the OpenRouter model that actually swears is used, then Gemini.
  */
-export function freeFallbackTargets(): AiChatTarget[] {
-  const list = [
-    keyed("GROQ_API_KEY", "groq", "https://api.groq.com/openai/v1/chat/completions", "qwen/qwen3.8-27b"),
-    keyed("GROQ_API_KEY", "groq", "https://api.groq.com/openai/v1/chat/completions", "openai/gpt-oss-120b"),
-    // Second Groq account — separate rate-limit budget, used when the first is busy.
-    keyed("GROQ_BACKUP_API_KEY", "groq-backup", "https://api.groq.com/openai/v1/chat/completions", "qwen/qwen3.8-27b"),
-    keyed("GROQ_BACKUP_API_KEY", "groq-backup", "https://api.groq.com/openai/v1/chat/completions", "openai/gpt-oss-120b"),
-    keyed("POLLINATIONS_API_KEY", "pollinations", "https://gen.pollinations.ai/v1/chat/completions", "openai-fast"),
-    keyed("POLLINATIONS_BACKUP_API_KEY", "pollinations", "https://gen.pollinations.ai/v1/chat/completions", "openai-fast"),
-    ...["OPENROUTER_API_KEY", "OPENROUTER_BACKUP_API_KEY"].map((env) =>
-      keyed(
-        env,
-        "openrouter",
-        "https://openrouter.ai/api/v1/chat/completions",
-        "nvidia/nemotron-3.5-lightning:free",
-        { "HTTP-Referer": "https://ogbot.co.uk", "X-Title": "OG BOT" },
-      ),
-    ),
-  ];
+export function freeFallbackTargets(foulMouth = false): AiChatTarget[] {
+  const openrouter = ["OPENROUTER_API_KEY", "OPENROUTER_BACKUP_API_KEY"].map((env) =>
+    keyed(env, "openrouter", OR_URL, FOUL_CAPABLE_FREE_MODEL, OR_HEADERS),
+  );
+  const list = foulMouth
+    ? openrouter
+    : [
+        keyed("GROQ_API_KEY", "groq", GROQ_URL, "qwen/qwen3.8-27b"),
+        keyed("GROQ_API_KEY", "groq", GROQ_URL, "openai/gpt-oss-120b"),
+        // Second Groq account — separate rate-limit budget.
+        keyed("GROQ_BACKUP_API_KEY", "groq-backup", GROQ_URL, "qwen/qwen3.8-27b"),
+        keyed("GROQ_BACKUP_API_KEY", "groq-backup", GROQ_URL, "openai/gpt-oss-120b"),
+        keyed("POLLINATIONS_API_KEY", "pollinations", POLL_URL, "openai-fast"),
+        keyed("POLLINATIONS_BACKUP_API_KEY", "pollinations", POLL_URL, "openai-fast"),
+        ...openrouter,
+      ];
   return list.filter((t): t is AiChatTarget => t !== null);
 }
 
@@ -164,13 +171,16 @@ export function logAiUsage(entry: {
 export async function fetchAiChat(
   body: Record<string, unknown>,
   affinity = "default",
+  opts: { foulMouth?: boolean } = {},
 ): Promise<{ response: Response; provider: AiChatTarget["provider"] }> {
   // Free AIs answer ordinary chat; paid Gemini goes first only for media or
   // pro-level questions, and is otherwise the fallback when free tiers fail.
+  // Foul Mouth ON only uses free models that passed the live swearing test.
+  const free = freeFallbackTargets(!!opts.foulMouth);
   const pro = hasMedia(body) || needsProAnswer(body);
   const targets = pro
-    ? [...aiChatTargets(affinity), ...freeFallbackTargets()]
-    : [...freeFallbackTargets(), ...aiChatTargets(affinity)];
+    ? [...aiChatTargets(affinity), ...free]
+    : [...free, ...aiChatTargets(affinity)];
   let last: { response: Response; provider: AiChatTarget["provider"] } | null = null;
 
   for (let index = 0; index < targets.length; index += 1) {
