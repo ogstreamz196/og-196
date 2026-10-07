@@ -104,38 +104,6 @@ async function checkGemini(): Promise<Partial_> {
   }
 }
 
-async function checkOpenAi(): Promise<Partial_> {
-  const key = process.env["OPENAI_API_KEY"];
-  if (!key) return missing("OPENAI_API_KEY");
-  try {
-    const { result, latencyMs } = await timed(() =>
-      fetch("https://api.openai.com/v1/models", { headers: { Authorization: `Bearer ${key}` } }),
-    );
-    if (result.status === 401 || result.status === 403) {
-      return {
-        status: "invalid",
-        detail: `ChatGPT rejected the key (HTTP ${result.status}).`,
-        fix: "Create a fresh OpenAI API key and update OPENAI_API_KEY in Secrets.",
-        latencyMs,
-      };
-    }
-    if (!result.ok) {
-      return {
-        status: "unreachable",
-        detail: `ChatGPT API returned HTTP ${result.status}.`,
-        fix: "Retry shortly, then check OpenAI billing and service status.",
-        latencyMs,
-      };
-    }
-    return { status: "ok", detail: "Key valid · workload sharing ready.", latencyMs };
-  } catch (e) {
-    return {
-      status: "unreachable",
-      detail: `Could not reach ChatGPT: ${e instanceof Error ? e.message : "network error"}`,
-      fix: "Retry shortly — the OpenAI API may be unavailable.",
-    };
-  }
-}
 
 async function checkSuno(): Promise<Partial_> {
   const key = process.env["SUNO_API_KEY"];
@@ -354,13 +322,6 @@ const SPECS: Spec[] = [
     group: "AI providers",
     required: true,
     run: checkGemini,
-  },
-  {
-    key: "openai",
-    label: "OPENAI_API_KEY (shared chat workload)",
-    group: "AI providers",
-    required: true,
-    run: checkOpenAi,
   },
   {
     key: "suno",

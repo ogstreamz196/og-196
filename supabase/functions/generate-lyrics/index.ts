@@ -448,54 +448,6 @@ Deno.serve(async (req) => {
       return last;
     };
 
-    // Last resort: OpenAI writes the lyrics when every Gemini route fails,
-    // so a Google outage or blocked key never stops a song.
-    const callOpenAI = async (contents: unknown[]): Promise<Gen> => {
-      const key = Deno.env.get("OPENAI_API_KEY") ?? "";
-      if (!key) return { ok: false, status: 503, text: "", detail: "No OpenAI key" };
-      const messages = [
-        { role: "system", content: systemPrompt },
-        ...(contents as Array<{ role: string; parts: Array<{ text?: string }> }>).map((c) => ({
-          role: c.role === "model" ? "assistant" : "user",
-          content: c.parts.map((p) => p.text ?? "").join("\n"),
-        })),
-      ];
-      for (const model of ["gpt-4.1", "gpt-4o-mini"]) {
-        const r = await timedFetch(
-          "https://api.openai.com/v1/chat/completions",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
-            body: JSON.stringify({ model, messages, temperature: 0.9 }),
-          },
-          40_000,
-        );
-        if (r.ok) {
-          const j = await r.json();
-          const text = (j?.choices?.[0]?.message?.content ?? "").trim();
-          if (text && !outputIssue(text)) {
-            const u = j?.usage ?? {};
-            logAiUsage({
-              feature: "lyrics",
-              provider: "openai",
-              model,
-              promptTokens: u.prompt_tokens ?? 0,
-              completionTokens: u.completion_tokens ?? 0,
-              totalTokens: u.total_tokens ?? 0,
-            });
-            return { ok: true, status: 200, text };
-          }
-        } else {
-          console.error(
-            "OpenAI lyrics fallback failed",
-            model,
-            r.status,
-            (await r.text()).slice(0, 200),
-          );
-        }
-      }
-      return { ok: false, status: 502, text: "", detail: "OpenAI fallback failed" };
-    };
 
     // Owner rule: free keys (Groq ×2, Pollinations ×2, OpenRouter ×2) write
     // lyrics first; Gemini then OpenAI are only fallbacks.
