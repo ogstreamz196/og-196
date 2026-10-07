@@ -13,6 +13,7 @@
 ## AI providers
 
 - Validate English lyric profanity density and variety against the selected level before accepting any provider output; use one shared validator so fallback and rewrite paths cannot silently soften Savage or dirty Clean.
+- Preserve submitted music lyrics on provider moderation rejection and return the rejection without automatic word substitutions; the selected explicit level must not silently become a radio edit.
 
 - Ordinary text chat goes to keyed free tiers first (Groq, Pollinations, OpenRouter), with paid Gemini/OpenAI first only for media or heuristic "pro" questions and otherwise as fallback when free tiers fail, to save paid credits; there is no Boss toggle. Use `PERPLEXITY_API_KEY` only for live web facts and never use Lovable AI for end-user inference.
 - Lyrics run on Gemini first (primary key, then backup key across several models, skipping busy/retired ones), with OpenAI as the final text fallback so a Google outage never blocks songs; audio transcription stays on Gemini for its media handling.

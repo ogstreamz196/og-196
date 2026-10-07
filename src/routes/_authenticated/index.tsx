@@ -74,6 +74,8 @@ export const Route = createFileRoute("/_authenticated/")({
         content: "Generate AI songs, chat with OG Bot, and run your creator economy.",
       },
       { property: "og:url", content: "https://ogbot.co.uk/" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [{ rel: "canonical", href: "https://ogbot.co.uk/" }],
   }),
