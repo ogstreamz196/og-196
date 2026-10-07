@@ -41,12 +41,12 @@ export const Route = createFileRoute("/_authenticated/referrals")({
       { title: "Earn Dashboard | OG BOT" },
       {
         name: "description",
-        content: "Track referral earnings, Global releases, and listening activity in OG BOT.",
+        content: "Track referral earnings, Community releases, and listening activity in OG BOT.",
       },
       { property: "og:title", content: "Earn Dashboard | OG BOT" },
       {
         property: "og:description",
-        content: "Track referral earnings, Global releases, and listening activity in OG BOT.",
+        content: "Track referral earnings, Community releases, and listening activity in OG BOT.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -511,7 +511,7 @@ function ReferralsPage() {
             icon={<Radio className="h-4 w-4" />}
             label="Your tracks"
             value={publishedQ.isLoading ? "—" : (publishedQ.data ?? 0).toLocaleString()}
-            sub="Live in Global"
+            sub="Live in Community"
             unit=""
           />
         </section>
