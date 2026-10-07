@@ -516,6 +516,36 @@ export type Database = {
         }
         Relationships: []
       }
+      ledgerly_settings: {
+        Row: {
+          api_key: string | null
+          enabled: boolean
+          id: number
+          last_error: string | null
+          last_test_at: string | null
+          last_test_ok: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          api_key?: string | null
+          enabled?: boolean
+          id?: number
+          last_error?: string | null
+          last_test_at?: string | null
+          last_test_ok?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          api_key?: string | null
+          enabled?: boolean
+          id?: number
+          last_error?: string | null
+          last_test_at?: string | null
+          last_test_ok?: boolean | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       og_bot_remote_tokens: {
         Row: {
           created_at: string
