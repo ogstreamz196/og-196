@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
-export type LibraryFilterMode = "all" | "unlocked" | "styles";
+export type LibraryFilterMode = "all" | "unlocked" | "locked" | "styles";
 
 function CountBadge({ count, active }: { count: number; active: boolean }) {
   return (
@@ -27,6 +27,8 @@ export function LibraryFilters({
   onStyleChange,
   allCount,
   unlockedCount,
+  lockedCount,
+  hideAll = false,
 }: {
   mode: LibraryFilterMode;
   onModeChange: (mode: LibraryFilterMode) => void;
@@ -36,6 +38,9 @@ export function LibraryFilters({
   /** Item counts shown as badges next to All / Unlocked. */
   allCount?: number;
   unlockedCount?: number;
+  lockedCount?: number;
+  /** Community separates full and locked tracks instead of showing a combined All tab. */
+  hideAll?: boolean;
 }) {
   const rootRef = useRef<HTMLDivElement | null>(null);
   // Always show the list from its first track after switching filters.
@@ -56,17 +61,21 @@ export function LibraryFilters({
       <span className="shrink-0 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
         Show
       </span>
-      <Button
-        type="button"
-        variant={mode === "all" ? "default" : "ghost"}
-        size="sm"
-        aria-pressed={mode === "all"}
-        onClick={() => changeMode("all")}
-        className="h-8 shrink-0 rounded-full px-3 text-xs"
-      >
-        All
-        {typeof allCount === "number" && <CountBadge count={allCount} active={mode === "all"} />}
-      </Button>
+      {!hideAll && (
+        <Button
+          type="button"
+          variant={mode === "all" ? "default" : "ghost"}
+          size="sm"
+          aria-pressed={mode === "all"}
+          onClick={() => changeMode("all")}
+          className="h-8 shrink-0 rounded-full px-3 text-xs"
+        >
+          All
+          {typeof allCount === "number" && (
+            <CountBadge count={allCount} active={mode === "all"} />
+          )}
+        </Button>
+      )}
       <Button
         type="button"
         variant={mode === "unlocked" ? "default" : "ghost"}
@@ -81,6 +90,22 @@ export function LibraryFilters({
           <CountBadge count={unlockedCount} active={mode === "unlocked"} />
         )}
       </Button>
+      {hideAll && (
+        <Button
+          type="button"
+          variant={mode === "locked" ? "default" : "ghost"}
+          size="sm"
+          aria-pressed={mode === "locked"}
+          onClick={() => changeMode("locked")}
+          className="h-8 shrink-0 rounded-full px-3 text-xs"
+          title="Tracks that still need unlocking"
+        >
+          Locked
+          {typeof lockedCount === "number" && (
+            <CountBadge count={lockedCount} active={mode === "locked"} />
+          )}
+        </Button>
+      )}
       <Popover>
         <PopoverTrigger asChild>
           <Button
