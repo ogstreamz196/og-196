@@ -502,12 +502,12 @@ Deno.serve(async (req) => {
     const callFree = async (contents: unknown[]): Promise<Gen> => {
       const or = { "HTTP-Referer": "https://ogbot.co.uk", "X-Title": "OG BOT" };
       const tiers: Array<[string, string, string, Record<string, string>]> = [
-        ["GROQ_API_KEY", "https://api.groq.com/openai/v1/chat/completions", "llama-3.3-70b-versatile", {}],
-        ["GROQ_BACKUP_API_KEY", "https://api.groq.com/openai/v1/chat/completions", "llama-3.3-70b-versatile", {}],
-        ["POLLINATIONS_API_KEY", "https://gen.pollinations.ai/v1/chat/completions", "openai-fast", {}],
-        ["POLLINATIONS_BACKUP_API_KEY", "https://gen.pollinations.ai/v1/chat/completions", "openai-fast", {}],
+        ["GROQ_API_KEY", "https://api.groq.com/openai/v1/chat/completions", "openai/gpt-oss-120b", {}],
+        ["GROQ_BACKUP_API_KEY", "https://api.groq.com/openai/v1/chat/completions", "openai/gpt-oss-120b", {}],
         ["OPENROUTER_API_KEY", "https://openrouter.ai/api/v1/chat/completions", "nvidia/nemotron-3.5-lightning:free", or],
         ["OPENROUTER_BACKUP_API_KEY", "https://openrouter.ai/api/v1/chat/completions", "nvidia/nemotron-3.5-lightning:free", or],
+        ["POLLINATIONS_API_KEY", "https://gen.pollinations.ai/v1/chat/completions", "openai-fast", {}],
+        ["POLLINATIONS_BACKUP_API_KEY", "https://gen.pollinations.ai/v1/chat/completions", "openai-fast", {}],
       ];
       const messages = [
         { role: "system", content: systemPrompt },
@@ -517,9 +517,13 @@ Deno.serve(async (req) => {
         })),
       ];
       let last: Gen = { ok: false, status: 503, text: "", detail: "No free key" };
+      // A provider that times out is skipped for its backup key too, so one
+      // slow provider cannot burn the whole time budget.
+      const slow = new Set<string>();
       for (const [env, url, model, extra] of tiers) {
         const key = Deno.env.get(env);
-        if (!key) continue;
+        const provider = env.split("_")[0];
+        if (!key || slow.has(provider)) continue;
         const r = await timedFetch(
           url,
           {
@@ -527,7 +531,7 @@ Deno.serve(async (req) => {
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}`, ...extra },
             body: JSON.stringify({ model, messages, temperature: 0.9 }),
           },
-          30_000,
+          25_000,
           // Keep time for Gemini if every free key fails.
           50_000,
         );
@@ -551,6 +555,7 @@ Deno.serve(async (req) => {
           console.warn("Free lyrics rejected by intensity check", env, last.detail);
         } else {
           last = { ok: false, status: r.status, text: "", detail: (await r.text()).slice(0, 200) };
+          if (r.status === 504) slow.add(provider);
           console.error("Free lyrics tier failed", env, r.status);
         }
       }
