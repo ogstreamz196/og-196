@@ -499,6 +499,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
           foulMouth: isNasheed ? false : foulMouth,
           foulIntensity: displayedFoulIntensity,
           language: languageValue,
+          personalDetails: getIdea(nextBriefValue) || undefined,
         },
       });
 
@@ -552,7 +553,12 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
         setSaving(false);
       }
     }
-    if (!hasLyrics || languageChanged) {
+    // Changing the idea, styles, voice or language rewrites the lyrics so the
+    // new track really reflects the edit — unless the user hand-edited lyrics.
+    const lyricsHandEdited = lyrics !== (song.lyrics ?? "");
+    const ideaChanged = getIdea(nextBriefValue) !== getIdea(song.prompt ?? "");
+    const styleChanged = savedStyleValue !== (song.style ?? "");
+    if (!hasLyrics || languageChanged || ((ideaChanged || styleChanged) && !lyricsHandEdited)) {
       await generateLyrics();
     } else {
       await cookCurrentLyrics();
@@ -792,6 +798,24 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
             </CollapsibleTrigger>
             <CollapsibleContent>
               <CardContent className="space-y-4">
+                {/* Original idea from the wizard — editable, rewrites lyrics on Cook now */}
+                <div className="space-y-2">
+                  <Label htmlFor="song-idea">
+                    Your idea{" "}
+                    <span className="text-xs font-normal text-muted-foreground">
+                      (change it and Cook now writes fresh lyrics)
+                    </span>
+                  </Label>
+                  <Textarea
+                    id="song-idea"
+                    value={getIdea(brief)}
+                    onChange={(e) => setBrief((b) => setIdea(b, e.target.value))}
+                    placeholder="What's the song about? Names, stories, inside jokes…"
+                    rows={3}
+                    maxLength={500}
+                    disabled={!isOwner}
+                  />
+                </div>
 
                 {/* Styles — stack as many as you like */}
                 <div className="space-y-2">
