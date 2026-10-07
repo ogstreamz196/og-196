@@ -521,7 +521,9 @@ export type Database = {
           api_key: string | null
           enabled: boolean
           id: number
+          key_name: string | null
           last_error: string | null
+          last_sync_at: string | null
           last_test_at: string | null
           last_test_ok: boolean | null
           updated_at: string
@@ -530,7 +532,9 @@ export type Database = {
           api_key?: string | null
           enabled?: boolean
           id?: number
+          key_name?: string | null
           last_error?: string | null
+          last_sync_at?: string | null
           last_test_at?: string | null
           last_test_ok?: boolean | null
           updated_at?: string
@@ -539,7 +543,9 @@ export type Database = {
           api_key?: string | null
           enabled?: boolean
           id?: number
+          key_name?: string | null
           last_error?: string | null
+          last_sync_at?: string | null
           last_test_at?: string | null
           last_test_ok?: boolean | null
           updated_at?: string
