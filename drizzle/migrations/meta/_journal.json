@@ -15,6 +15,13 @@
       "when": 1791399456432,
       "tag": "0001_ledgerly_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791402192927,
+      "tag": "0002_ledgerly_status_fields",
+      "breakpoints": true
     }
   ]
 }

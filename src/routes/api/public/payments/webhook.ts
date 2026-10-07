@@ -380,6 +380,17 @@ async function upsertRefundRow(opts: {
   if (error) log("error", "refund upsert failed", { refundId: opts.refundId, err: error.message });
   else log("info", "refund upserted", { refundId: opts.refundId, status: opts.status, userId });
 
+  if (opts.env === "live" && opts.status === "succeeded" && opts.amount > 0) {
+    const { sendSaleToLedgerly } = await import("@/lib/ledgerly.server");
+    await sendSaleToLedgerly({
+      amount: -(opts.amount / 100),
+      description: "Refund",
+      reference: String(opts.paymentIntentId ?? opts.chargeId ?? opts.refundId),
+      externalId: `refund_${opts.refundId}`,
+    });
+  }
+
+
   // Clawback coins for successful refunds of coin-pack purchases. VIP
   // subscription refunds are handled by subscription.deleted (role revoke).
   if (opts.status === "succeeded" && sessionId) {
