@@ -309,6 +309,8 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
         qc.invalidateQueries({ queryKey: ["profile"] }),
         qc.invalidateQueries({ queryKey: ["song", song.id] }),
         qc.invalidateQueries({ queryKey: ["songs"] }),
+        qc.invalidateQueries({ queryKey: ["library"] }),
+        qc.invalidateQueries({ queryKey: ["recent-songs"] }),
       ]);
       onRefresh();
     } catch (e) {
@@ -374,6 +376,8 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
         qc.invalidateQueries({ queryKey: ["profile"] }),
         qc.invalidateQueries({ queryKey: ["song", song.id] }),
         qc.invalidateQueries({ queryKey: ["songs"] }),
+        qc.invalidateQueries({ queryKey: ["library"] }),
+        qc.invalidateQueries({ queryKey: ["recent-songs"] }),
       ]);
       onRefresh();
     } catch (e) {

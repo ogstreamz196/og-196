@@ -113,6 +113,8 @@ function CommunityTrackRowImpl({
         qc.invalidateQueries({ queryKey: ["profile"] }),
         qc.invalidateQueries({ queryKey: ["recent-songs"] }),
         qc.invalidateQueries({ queryKey: ["songs"] }),
+        qc.invalidateQueries({ queryKey: ["library"] }),
+        qc.invalidateQueries({ queryKey: ["recent-songs"] }),
       ]);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Unlock failed");
