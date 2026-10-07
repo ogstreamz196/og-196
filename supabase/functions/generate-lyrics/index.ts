@@ -371,7 +371,7 @@ Deno.serve(async (req) => {
         },
         40_000,
         // Always leave OpenAI enough time to rescue the song if Gemini hangs.
-        55_000,
+        25_000,
       );
 
     const extractText = (data: unknown) =>
