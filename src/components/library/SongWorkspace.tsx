@@ -180,15 +180,16 @@ function setBriefLanguage(brief: string, language: string): string {
   return brief.trim() ? `${brief.trim()}\n${line}` : line;
 }
 
-// The wizard saves the user's original idea inside the prompt as "Idea: …".
-const IDEA_RE = /\n?Idea:\s*([\s\S]*?)(?=\nLanguage:|$)/;
+// The wizard saves the user's original idea inside the prompt as "— Idea: …"
+// (the dash stops the language matcher from swallowing it).
+const IDEA_RE = /\n?— Idea:\s*([\s\S]*?)(?=\nLanguage:|$)/;
 function getIdea(brief: string): string {
   return (brief.match(IDEA_RE)?.[1] ?? "").trim();
 }
 function setIdea(brief: string, idea: string): string {
   const base = brief.replace(IDEA_RE, "").trimEnd();
   const clean = idea.trim();
-  return clean ? `${base}\nIdea: ${clean}` : base;
+  return clean ? `${base}\n— Idea: ${clean}` : base;
 }
 
 interface Props {

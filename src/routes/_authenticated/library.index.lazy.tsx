@@ -496,7 +496,7 @@ function LibraryPage() {
           title: title.trim() || null,
           prompt:
             (promptText || title.trim() || "Untitled") +
-            (personalDetails.trim() ? `\nIdea: ${personalDetails.trim()}` : ""),
+            (personalDetails.trim() ? `\n— Idea: ${personalDetails.trim()}` : ""),
           style: style || null,
           lyrics,
           status: "draft",
@@ -836,7 +836,7 @@ function LibraryPage() {
           title: songTitle || null,
           // Keep the user's original idea so the edit screen can show and change it.
           prompt:
-            (promptText || songTitle || "Untitled") + (songDetails ? `\nIdea: ${songDetails}` : ""),
+            (promptText || songTitle || "Untitled") + (songDetails ? `\n— Idea: ${songDetails}` : ""),
           style: style || null,
           lyrics: nextLyrics,
           status: "draft",
