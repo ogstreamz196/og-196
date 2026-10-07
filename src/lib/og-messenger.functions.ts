@@ -275,6 +275,10 @@ export const chatOgBot = createServerFn({ method: "POST" })
         choices?: { message?: { content?: string } }[];
       };
       let reply = (json.choices?.[0]?.message?.content ?? "").trim() || "…";
+      if (data.mode === "og" && foulMouth && (!data.language || /^english$/i.test(data.language))) {
+        const { ensureFoulFlavour } = await import("@/lib/og-persona.server");
+        reply = ensureFoulFlavour(reply);
+      }
       if (promo) {
         const { ensureCodeInReply } = await import("@/lib/vip-promo.server");
         reply = ensureCodeInReply(reply, promo);
