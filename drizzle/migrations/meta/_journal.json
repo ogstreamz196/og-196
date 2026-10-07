@@ -29,6 +29,13 @@
       "when": 1791413920781,
       "tag": "0003_free_second_take_unlock",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791415554000,
+      "tag": "0004_community_includes_own_tracks",
+      "breakpoints": true
     }
   ]
 }

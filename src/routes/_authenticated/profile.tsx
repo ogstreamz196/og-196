@@ -86,7 +86,7 @@ function txLabel(type: string, ref: string | null): string {
   if (t.includes("vip")) return "VIP";
   if (t.includes("sports")) return "OG Sports Guide";
   if (t.includes("vault")) return "OG Vault pass";
-  if (t.includes("download") || t.includes("community")) return "Global track download";
+  if (t.includes("download") || t.includes("community")) return "Community track download";
   if (t.includes("mint") || t.includes("admin") || t.includes("boss"))
     return "Adjustment by OG team";
   return type.replace(/_/g, " ");

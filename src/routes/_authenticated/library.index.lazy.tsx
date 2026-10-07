@@ -1108,7 +1108,9 @@ function LibraryPage() {
         prompt: "",
         ...s,
         artistUnlocked: !!s.unlocked,
-        unlocked: unlockedIds.has(String(s.id)),
+        // Your own Community tracks follow your own unlock state.
+        unlocked:
+          unlockedIds.has(String(s.id)) || (s.user_id === user?.id && !!s.unlocked),
       })) as unknown as Song[];
     },
     getNextPageParam: (lastPage, allPages) =>

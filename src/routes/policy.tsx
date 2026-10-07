@@ -186,7 +186,7 @@ function PolicyPage() {
               server-side role checks, never by anything stored in your browser.
             </p>
             <p>
-              Your controls: sign out at any time, keep tracks private or publish them to the global
+              Your controls: sign out at any time, keep tracks private or publish them to the community
               player (your choice per track), connect or disconnect Telegram, and adjust
               explicit-content and foul-language settings in the creation wizard. You are
               responsible for keeping your sign-in provider account secure.
