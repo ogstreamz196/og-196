@@ -36,13 +36,6 @@
       "when": 1791415554000,
       "tag": "0004_community_includes_own_tracks",
       "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1791416000000,
-      "tag": "0005_song_original_idea",
-      "breakpoints": true
     }
   ]
 }
