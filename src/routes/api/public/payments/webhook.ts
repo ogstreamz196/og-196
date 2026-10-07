@@ -591,6 +591,37 @@ export async function handleEvent(
       else if (bundleId?.startsWith("store:")) await fulfilStoreItemCheckout(session, env);
       else if (isVipBundle(bundleId)) await grantVipFromCheckout(session, env);
       else await creditCoinsForSession(session, env);
+      if (env === "live" && (session?.payment_status ?? "paid") === "paid") {
+        const amount = Number(session?.amount_total ?? 0) / 100;
+        if (amount > 0) {
+          const item =
+            kind === "track_unlock" ? "Track unlock"
+            : bundleId?.startsWith("store:") ? `Store item ${bundleId.slice(6)}`
+            : isVipBundle(bundleId) ? "VIP subscription"
+            : (findCoinPackByBundleId(bundleId ?? "") as { label?: string } | undefined)?.label ?? bundleId ?? "Digital Purchase";
+          const { syncSaleToLedgerly } = await import("@/lib/ledgerly.server");
+          await syncSaleToLedgerly({
+            amount,
+            description: `Sale: ${item || "Digital Purchase"}`,
+            reference: String(session?.payment_intent ?? session?.id),
+            externalId: String(session?.id ?? event.id),
+          });
+        }
+      }
+      break;
+    }
+    case "invoice.paid": {
+      // VIP renewals (first invoice is already covered by checkout.session.completed)
+      const inv = event.data.object;
+      if (env === "live" && inv?.billing_reason === "subscription_cycle" && Number(inv?.amount_paid) > 0) {
+        const { syncSaleToLedgerly } = await import("@/lib/ledgerly.server");
+        await syncSaleToLedgerly({
+          amount: Number(inv.amount_paid) / 100,
+          description: "Sale: VIP subscription renewal",
+          reference: String(inv.number ?? inv.id),
+          externalId: String(inv.id),
+        });
+      }
       break;
     }
     case "customer.subscription.created":

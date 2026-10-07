@@ -1,6 +1,7 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
-import { Activity, KeyRound, Webhook, Map, Bug, AlertTriangle } from "lucide-react";
+import { Activity, KeyRound, Webhook, Map, Bug, AlertTriangle, BookOpenCheck } from "lucide-react";
 import { GenerationFailures } from "@/components/admin/GenerationFailures";
+import { LedgerlyPanel } from "@/components/admin/LedgerlyPanel";
 import { useRole } from "@/hooks/use-role";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { BossNav } from "@/components/admin/BossNav";
@@ -20,6 +21,7 @@ const TABS = [
   { value: "failures", label: "Track failures", Icon: AlertTriangle, Panel: GenerationFailures },
   { value: "keys", label: "API keys", Icon: KeyRound, Panel: AdminApiKeysPage },
   { value: "webhooks", label: "Webhooks", Icon: Webhook, Panel: WebhooksAdminPage },
+  { value: "ledgerly", label: "Ledgerly", Icon: BookOpenCheck, Panel: LedgerlyPanel },
   { value: "routes", label: "Route map", Icon: Map, Panel: RouteMapPage },
   { value: "debug", label: "Lyric debug", Icon: Bug, Panel: DebugContextPage },
 ] as const;
