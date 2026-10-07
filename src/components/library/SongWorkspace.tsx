@@ -1,3 +1,5 @@
+import { useServerFn } from "@tanstack/react-start";
+import { purchaseOwnerTrack } from "@/lib/track-unlock.functions";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSessionRunState } from "@/hooks/use-session-run-state";
 import { Link, useNavigate } from "@tanstack/react-router";
@@ -655,17 +657,12 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const { isVip: isVipUser, isBoss } = useRole();
   // Boss accounts play and download everything, so treat them as owners.
   const ownsFull = !!song.unlocked || !!isBoss;
+  const buyOwnerTrack = useServerFn(purchaseOwnerTrack);
   async function performUnlock() {
     setUnlocking(true);
     try {
       if (!ownsFull) {
-        const { data, error } = await supabase.functions.invoke("unlock-full-song", {
-          body: { song_id: song.id },
-        });
-        if (error) {
-          toast.error(invokeError(error, "Could not unlock"));
-          return;
-        }
+        const data = await buyOwnerTrack({ data: { songId: song.id } });
         if (!data?.already) toast.success(`Unlocked + Take 2 free · -${data?.cost ?? unlockCost} coins`);
         void queryClient.invalidateQueries({ queryKey: ["library"] });
         void queryClient.invalidateQueries({ queryKey: ["recent-songs"] });

@@ -1,3 +1,5 @@
+import { useServerFn } from "@tanstack/react-start";
+import { purchaseOwnerTrack } from "@/lib/track-unlock.functions";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -284,19 +286,11 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
   }
 
   /** Owner padlock: unlock the full master, optionally bundling the hidden take. */
+  const buyOwnerTrack = useServerFn(purchaseOwnerTrack);
   async function ownerUnlock() {
     setDownloading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("unlock-full-song", {
-        body: { song_id: song.id },
-      });
-      if (error) {
-        throw new Error(
-          (error as { context?: { error?: string } })?.context?.error ||
-            error.message ||
-            "Could not unlock track",
-        );
-      }
+      const data = await buyOwnerTrack({ data: { songId: song.id } });
       if (!data?.already) {
         toast.success(
           `Full track unlocked + Take 2 free · -${data?.cost ?? fullUnlockCost} coins`,

@@ -1,3 +1,5 @@
+import { useServerFn } from "@tanstack/react-start";
+import { purchaseOwnerTrack } from "@/lib/track-unlock.functions";
 import { memo, useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
@@ -96,19 +98,11 @@ function CommunityTrackRowImpl({
   const fullUnlockCost = settings?.coins_per_full_unlock ?? 5;
 
   /** Owner padlock: unlock the full master, optionally bundling the hidden take. */
+  const buyOwnerTrack = useServerFn(purchaseOwnerTrack);
   async function ownerUnlock() {
     setBusy(true);
     try {
-      const { data, error } = await supabase.functions.invoke("unlock-full-song", {
-        body: { song_id: song.id },
-      });
-      if (error) {
-        throw new Error(
-          (error as { context?: { error?: string } })?.context?.error ||
-            error.message ||
-            "Could not unlock track",
-        );
-      }
+      const data = await buyOwnerTrack({ data: { songId: song.id } });
       if (!data?.already) {
         toast.success(
           `Full track unlocked + Take 2 free · -${data?.cost ?? fullUnlockCost} coins`,
