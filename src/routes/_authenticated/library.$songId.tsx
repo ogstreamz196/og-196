@@ -32,6 +32,14 @@ import { ensureFullUrlAllowed } from "@/lib/ensure-full-url-allowed";
 
 export const Route = createFileRoute("/_authenticated/library/$songId")({
   component: SongDetailPage,
+  head: () => ({ meta: [
+    { title: "Track Studio · OG BOT" },
+    { name: "description", content: "Listen, edit and unlock your OG BOT track with a free second take." },
+    { property: "og:title", content: "Track Studio · OG BOT" },
+    { property: "og:description", content: "Your OG BOT music workspace — two tracks for the price of one." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
+  ] }),
 });
 
 type FullSong = Song & { unlocked?: boolean | null; is_public?: boolean | null };

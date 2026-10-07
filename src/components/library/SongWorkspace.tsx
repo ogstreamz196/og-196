@@ -209,8 +209,6 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const lyricsCost = settings?.coins_per_lyrics_generation ?? 0;
   const previewCost = settings?.coins_per_generation ?? 0;
   const fullUnlockCost = settings?.coins_per_full_unlock ?? 5;
-  const remakeCost =
-    Number((settings as { coins_per_remake?: number } | undefined)?.coins_per_remake) || 2;
   const unlockCost = fullUnlockCost;
   const balance = profile?.coin_balance ?? 0;
   const isOwner = !!profile?.id && song.user_id === profile.id;
@@ -311,7 +309,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   );
   const languageChanged = languageValue !== detectLanguages(song.prompt).join(" + ");
 
-  const { variations, busyVariation, variationCost, revealOne } = useVariations({
+  const { variations } = useVariations({
     songId: song.id,
     songStatus: song.status,
     balance,
@@ -1293,10 +1291,6 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
         <TabsContent value="takes" className="mt-0">
         <VariationsCard
           variations={variations}
-          variationCost={variationCost}
-          busyVariation={busyVariation}
-          balance={balance}
-          onRevealOne={revealOne}
         />
         </TabsContent>
       </Tabs>

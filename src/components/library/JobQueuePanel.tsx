@@ -1,3 +1,4 @@
+import { purchaseOwnerTrack } from "@/lib/track-unlock.functions";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ensureFullUrlAllowed } from "@/lib/ensure-full-url-allowed";
 import { Link } from "@tanstack/react-router";
@@ -496,16 +497,14 @@ function JobDetailsDrawer({
     }
   }
 
+  const buyOwnerTrack = useServerFn(purchaseOwnerTrack);
   async function handleUnlock() {
     if (!song) return;
     setUnlocking(true);
     try {
-      const { error } = await supabase.functions.invoke("unlock-full-song", {
-        body: { song_id: song.id },
-      });
-      if (error) throw new Error(invokeError(error, "Unlock failed"));
+      const result = await buyOwnerTrack({ data: { songId: song.id } });
       setUnlocked(true);
-      toast.success(`Unlocked · -${unlockCost} coins`);
+      toast.success(`Unlocked + Take 2 free · -${result.cost} coins`);
       refetchProfile?.();
       const { data: full } = await supabase.functions.invoke("song-url", {
         body: { song_id: song.id, mode: "full" },
