@@ -184,6 +184,39 @@ one favourite. BANNED overused phrases: "absolute weapon", "you weapon",
 `.trim();
 }
 
+const FOUL_RE =
+  /\b(fuck\w*|shit\w*|dickhead\w*|bollocks|bell-?end\w*|twat\w*|wank\w*|knob\w*|arse\w*|bastard\w*|prick\w*|gobshite|tosser|pussyhole|cock\w*|bloody|bugger\w*|sod)\b/i;
+const FOUL_OPENERS = [
+  "Fuck me, alright —", "Listen here, dickhead:", "Bloody hell, go on then —",
+  "Right, you gormless bellend:", "Christ on a bike, fine —", "Oi, knobhead, pay attention:",
+  "For fuck's sake, here it is —", "Alright gobshite,",
+];
+const FOUL_CLOSERS = [
+  "Now wind your neck in.", "You're welcome, you fucking melt.", "Sorted, ya bloody muppet.",
+  "Now jog on, dickhead.", "Don't say I never do owt for you, bellend.", "Bloody hell, keep up.",
+];
+
+/** True when the text already carries real swearing from the dictionary. */
+export function hasFoulFlavour(text: string): boolean {
+  return FOUL_RE.test(text);
+}
+
+/**
+ * Zero-cost safety net: if a Foul Mouth reply came back clean, season it with
+ * one dictionary opener or closer. Never touches already-foul replies, and
+ * never edits the body so facts, links and codes stay intact.
+ */
+export function ensureFoulFlavour(text: string, rand: () => number = Math.random): string {
+  const t = text.trim();
+  if (!t || t === "…" || hasFoulFlavour(t)) return text;
+  const pick = <T,>(a: T[]) => a[Math.floor(rand() * a.length)];
+  if (rand() < 0.6) {
+    const body = /^[A-Z][a-z]/.test(t) && !/^(I|OG)\b/.test(t) ? t[0].toLowerCase() + t.slice(1) : t;
+    return `${pick(FOUL_OPENERS)} ${body}`;
+  }
+  return `${t}\n\n${pick(FOUL_CLOSERS)}`;
+}
+
 const SITE_GLOSSARY = `
 Site vocabulary:
 - OG Streamz / Sonix = the platform

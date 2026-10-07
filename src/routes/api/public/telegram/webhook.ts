@@ -702,6 +702,10 @@ async function runChatAI(
       choices?: { message?: { content?: string } }[];
     };
     let replyText = (json.choices?.[0]?.message?.content ?? "").trim() || "…";
+    if (foulMouth) {
+      const { ensureFoulFlavour } = await import("@/lib/og-persona.server");
+      replyText = ensureFoulFlavour(replyText);
+    }
     if (promo) replyText = vp.ensureCodeInReply(replyText, promo).replace(/\*\*/g, "");
 
     await admin.from("og_messages").insert({
