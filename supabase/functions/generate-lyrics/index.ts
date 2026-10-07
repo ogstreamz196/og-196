@@ -346,8 +346,8 @@ Deno.serve(async (req) => {
     // timeout and we stop trying new models once the budget is nearly spent.
     const startedAt = Date.now();
     const BUDGET_MS = 130_000;
-    const timedFetch = async (url: string, init: RequestInit, capMs: number) => {
-      const left = BUDGET_MS - (Date.now() - startedAt);
+    const timedFetch = async (url: string, init: RequestInit, capMs: number, reserveMs = 0) => {
+      const left = BUDGET_MS - (Date.now() - startedAt) - reserveMs;
       if (left < 8_000) return new Response("Out of time", { status: 504 });
       try {
         return await fetch(url, { ...init, signal: AbortSignal.timeout(Math.min(capMs, left)) });
@@ -369,7 +369,9 @@ Deno.serve(async (req) => {
             generationConfig: { temperature: 0.9, maxOutputTokens: 8192 },
           }),
         },
-        45_000,
+        40_000,
+        // Always leave OpenAI enough time to rescue the song if Gemini hangs.
+        55_000,
       );
 
     const extractText = (data: unknown) =>
