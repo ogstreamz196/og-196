@@ -1114,7 +1114,9 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                   <Play className="h-4 w-4 shrink-0 text-primary" />Preview
                 </span>
                 <span className="mt-0.5 block truncate text-xs text-muted-foreground">
-                  {isReady && ownsFull
+                  {cooking
+                    ? "Cooking your new version…"
+                    : isReady && ownsFull
                     ? "Full track ready"
                     : isReady
                     ? `Free ${settings?.sample_seconds ?? 60}s sample ready`
@@ -1325,9 +1327,13 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
         </TabsContent>
 
         <TabsContent value="takes" className="mt-0">
-        <VariationsCard
-          variations={variations}
-        />
+        {cooking ? (
+          <p className="rounded-lg border border-border bg-card/40 p-4 text-sm text-muted-foreground">
+            Your old takes are hidden while OG Bot cooks the new version.
+          </p>
+        ) : (
+          <VariationsCard variations={variations} />
+        )}
         </TabsContent>
       </Tabs>
 
