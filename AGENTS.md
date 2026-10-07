@@ -4,6 +4,8 @@
 
 ## Coin integrity
 
+- Owner track purchases use an authenticated server function and service-only atomic purchase RPC; database entitlement triggers reveal bonus siblings on payment or late insertion, preventing duplicate charges and browser-dependent grants.
+
 - Issue welcome and Battle rewards only through service-only atomic database functions because retries, concurrency, and client calls must not duplicate coins.
 - Assign yearly VIP IDs through the service-only database function as `OG` plus the uppercase username, and synchronize the ID when that username changes.
 - Keep browser OAuth return separate from Android App Links and use a prebuilt, package-targeted intent anchor on the return page; Chrome requires a direct tap, and the installed APK must already handle /app-return.
