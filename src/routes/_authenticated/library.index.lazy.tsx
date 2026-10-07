@@ -815,6 +815,7 @@ function LibraryPage() {
       setLyrics(nextLyrics);
 
       advanceStage("saving");
+      attemptStage = "saving";
       if (override?.titlePromise) {
         const named = (await override.titlePromise).trim();
         if (stale()) return;
@@ -860,6 +861,9 @@ function LibraryPage() {
       }
 
       advanceStage("submitting");
+      attemptSongId = row.id;
+      attemptStage = "submitting";
+      void updateAttempt(attemptId, { song_id: row.id, title: songTitle || null, stage: "submitting" });
       const { data: genData, error: genErr } = await supabase.functions.invoke("suno-generate", {
         body: {
           song_id: row.id,
@@ -883,12 +887,28 @@ function LibraryPage() {
       // Stay on the page: a realtime subscription on this row drives the
       // status indicator until the track is ready (or fails).
       advanceStage("rendering");
+      void updateAttempt(attemptId, { stage: "rendering", status: "succeeded" });
       setTrackedSongId(row.id);
       library.refetch();
       toast.success("OG Bot is creating your track — no credits charged");
     } catch (e) {
-      if (stale()) return;
       const msg = e instanceof Error ? e.message : "Something went wrong";
+      void updateAttempt(attemptId, {
+        status: "failed",
+        stage: attemptStage,
+        song_id: attemptSongId,
+        error_message: msg.slice(0, 1000),
+        context: { error: describeError(e), stale: stale() },
+      });
+      // Keep the saved draft visible with its reason so Retry works from the library.
+      if (attemptSongId) {
+        void supabase
+          .from("songs")
+          .update({ status: "failed", error_message: msg.slice(0, 500) } as never)
+          .eq("id", attemptSongId)
+          .eq("status", "draft");
+      }
+      if (stale()) return;
       setPipeline((p) => ({ ...p, stage: "error", error: msg }));
       toast.error(msg);
     } finally {
