@@ -1,3 +1,4 @@
+import { startAttempt, updateAttempt, describeError } from "@/lib/generation-attempts";
 import { createLazyFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
@@ -767,6 +768,24 @@ function LibraryPage() {
     setPipeline({ stage: "lyrics", startedAt, stageStartedAt: startedAt, durations: {} });
     setPipelineNow(startedAt);
 
+    // Stage the job in the database before any provider call so a failure
+    // anywhere below always leaves a traceable record.
+    let attemptStage = "lyrics";
+    let attemptSongId: string | null = null;
+    const attemptId = await startAttempt(user.id, {
+      title: songTitle || null,
+      stage: attemptStage,
+      context: {
+        language: songLanguage,
+        style: songStyle,
+        vocal: songVocal,
+        vocals_only: vocalsOnly,
+        has_beat: !!beatPath,
+        target_sec: overrideTargetSec,
+        foul_intensity: trackFoulIntensity,
+      },
+    });
+
     try {
       const description = songStyle;
       const combinedExtra = extraContext.trim();
@@ -797,6 +816,7 @@ function LibraryPage() {
       setLyrics(nextLyrics);
 
       advanceStage("saving");
+      attemptStage = "saving";
       if (override?.titlePromise) {
         const named = (await override.titlePromise).trim();
         if (stale()) return;
@@ -842,6 +862,9 @@ function LibraryPage() {
       }
 
       advanceStage("submitting");
+      attemptSongId = row.id;
+      attemptStage = "submitting";
+      void updateAttempt(attemptId, { song_id: row.id, title: songTitle || null, stage: "submitting" });
       const { data: genData, error: genErr } = await supabase.functions.invoke("suno-generate", {
         body: {
           song_id: row.id,
@@ -865,12 +888,28 @@ function LibraryPage() {
       // Stay on the page: a realtime subscription on this row drives the
       // status indicator until the track is ready (or fails).
       advanceStage("rendering");
+      void updateAttempt(attemptId, { stage: "rendering", status: "succeeded" });
       setTrackedSongId(row.id);
       library.refetch();
       toast.success("OG Bot is creating your track — no credits charged");
     } catch (e) {
-      if (stale()) return;
       const msg = e instanceof Error ? e.message : "Something went wrong";
+      void updateAttempt(attemptId, {
+        status: "failed",
+        stage: attemptStage,
+        song_id: attemptSongId,
+        error_message: msg.slice(0, 1000),
+        context: { error: describeError(e), stale: stale() },
+      });
+      // Keep the saved draft visible with its reason so Retry works from the library.
+      if (attemptSongId) {
+        void supabase
+          .from("songs")
+          .update({ status: "failed", error_message: msg.slice(0, 500) } as never)
+          .eq("id", attemptSongId)
+          .eq("status", "draft");
+      }
+      if (stale()) return;
       setPipeline((p) => ({ ...p, stage: "error", error: msg }));
       toast.error(msg);
     } finally {
