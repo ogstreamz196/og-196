@@ -192,7 +192,7 @@ const FOUL_OPENERS = [
   "For fuck's sake, here it is —", "Alright gobshite,",
 ];
 const FOUL_CLOSERS = [
-  "Now wind your neck in.", "You're welcome, you absolute melt.", "Sorted, ya muppet.",
+  "Now wind your neck in.", "You're welcome, you fucking melt.", "Sorted, ya bloody muppet.",
   "Now jog on, dickhead.", "Don't say I never do owt for you, bellend.", "Bloody hell, keep up.",
 ];
 
