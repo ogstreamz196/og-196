@@ -17,29 +17,6 @@ export type AiChatTarget = {
 
 const GEMINI_OPENAI_URL =
   "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
-const OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions";
-
-function geminiTarget(): AiChatTarget | null {
-  const gemini = process.env.GEMINI_API_KEY;
-  if (!gemini) return null;
-  return {
-    url: GEMINI_OPENAI_URL,
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${gemini}` },
-    model: process.env.GEMINI_MODEL || "gemini-3.8-flash",
-    provider: "gemini",
-  };
-}
-
-function openAiTarget(): AiChatTarget | null {
-  const openai = process.env.OPENAI_API_KEY;
-  if (!openai) return null;
-  return {
-    url: OPENAI_CHAT_URL,
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${openai}` },
-    model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
-    provider: "openai",
-  };
-}
 
 function keyed(
   envKey: string,
@@ -107,12 +84,10 @@ function stableBucket(value: string): number {
   return hash >>> 0;
 }
 
-export function aiChatTargets(affinity = "default"): AiChatTarget[] {
+// OpenAI removed from the system by owner request — Gemini is the only paid tier.
+export function aiChatTargets(_affinity = "default"): AiChatTarget[] {
   const gemini = geminiTarget();
-  const openai = openAiTarget();
-  const available = [gemini, openai].filter((target): target is AiChatTarget => target !== null);
-  if (available.length < 2) return available;
-  return stableBucket(affinity) % 2 === 0 ? available : [available[1], available[0]];
+  return gemini ? [gemini] : [];
 }
 
 /** Backwards-compatible primary target for diagnostics and simple probes. */
