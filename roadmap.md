@@ -43,6 +43,9 @@
 
 ## Generation reliability (Oct 2026)
 
+- [ ] Move web installation prompt to the top with Install now; exclude native Android
+- [ ] Enforce lyric slider levels, especially Savage, and verify targeted tests
+
 - [x] Automatically recover or retry failed track generations in the background without charging coins
 - [x] Verify retry scheduling, terminal failures, and clean app build
 
