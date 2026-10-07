@@ -767,6 +767,24 @@ function LibraryPage() {
     setPipeline({ stage: "lyrics", startedAt, stageStartedAt: startedAt, durations: {} });
     setPipelineNow(startedAt);
 
+    // Stage the job in the database before any provider call so a failure
+    // anywhere below always leaves a traceable record.
+    let attemptStage = "lyrics";
+    let attemptSongId: string | null = null;
+    const attemptId = await startAttempt(user.id, {
+      title: songTitle || null,
+      stage: attemptStage,
+      context: {
+        language: songLanguage,
+        style: songStyle,
+        vocal: songVocal,
+        vocals_only: vocalsOnly,
+        has_beat: !!beatPath,
+        target_sec: overrideTargetSec,
+        foul_intensity: trackFoulIntensity,
+      },
+    });
+
     try {
       const description = songStyle;
       const combinedExtra = extraContext.trim();
