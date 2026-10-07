@@ -240,6 +240,8 @@ export async function materialiseClips(
           portal_id: parentSong.portal_id ?? null,
           is_variation: true,
           revealed: false,
+          foul_mouth: parentSong.foul_mouth ?? false,
+          foul_intensity: parentSong.foul_intensity ?? 0,
         })
         .select("id")
         .single();
