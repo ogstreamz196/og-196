@@ -85,7 +85,7 @@ export function BossKpiStrip() {
   );
 }
 
-const PULSE_KEYS = ["gemini", "openai", "suno", "perplexity", "og_bot_token"] as const;
+const PULSE_KEYS = ["gemini", "suno", "perplexity", "og_bot_token"] as const;
 const PULSE_LABELS: Record<string, string> = {
   gemini: "Gemini",
   openai: "OpenAI",

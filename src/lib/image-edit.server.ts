@@ -47,29 +47,6 @@ async function editWithGemini(prompt: string, mime: string, b64: string, backup 
   return { mime: part.inlineData.mimeType || "image/png", b64: part.inlineData.data };
 }
 
-async function editWithOpenAI(prompt: string, mime: string, b64: string) {
-  const key = process.env["OPENAI_API_KEY"];
-  if (!key) throw new ImageEditError("OpenAI not configured", 503);
-  const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
-  const form = new FormData();
-  form.append("model", process.env["OPENAI_IMAGE_MODEL"] || "gpt-image-1");
-  form.append("prompt", prompt);
-  form.append("image", new Blob([bytes], { type: mime }), `input.${mime.split("/")[1] || "png"}`);
-  const res = await fetch("https://api.openai.com/v1/images/edits", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${key}` },
-    body: form,
-  });
-  if (!res.ok) {
-    const t = await res.text().catch(() => "");
-    console.error("openai image edit", res.status, t.slice(0, 300));
-    throw new ImageEditError(t, res.status);
-  }
-  const json = (await res.json()) as { data?: { b64_json?: string }[] };
-  const out = json.data?.[0]?.b64_json;
-  if (!out) throw new ImageEditError("No image returned (refused).", 422);
-  return { mime: "image/png", b64: out };
-}
 
 export async function editImage(prompt: string, dataUrl: string) {
   const { mime, b64 } = parseDataUrl(dataUrl);
@@ -90,5 +67,5 @@ export async function editImage(prompt: string, dataUrl: string) {
       if (!retryable(e)) throw e;
     }
   }
-  return await editWithOpenAI(prompt, mime, b64);
+  throw new ImageEditError("Image editing is busy right now — try again shortly.", 503);
 }
