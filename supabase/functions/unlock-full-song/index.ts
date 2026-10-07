@@ -18,7 +18,7 @@ Deno.serve(async (req) => {
     if (auth.error) return auth.error;
     const { user } = auth;
 
-    const { song_id, bundle_both } = await req.json().catch(() => ({}));
+    const { song_id } = await req.json().catch(() => ({}));
     if (!song_id) return jsonResponse({ error: "Missing song_id" }, 400);
 
     const admin = adminClient();
@@ -105,93 +105,19 @@ Deno.serve(async (req) => {
     }
 
     // ─── Owner unlock path (HQ download of own song) ────────────────────
-    if (song.unlocked && !bundle_both) return jsonResponse({ ok: true, already: true });
-
-    const { data: settingRows } = await admin
-      .from("app_settings")
-      .select("key, value")
-      .in("key", ["coins_per_full_unlock", "coins_per_remake"]);
-    const settings = new Map(
-      (settingRows ?? []).map((r: { key: string; value: unknown }) => [r.key, r.value]),
-    );
-    const unlockCost =
-      typeof settings.get("coins_per_full_unlock") === "number"
-        ? (settings.get("coins_per_full_unlock") as number)
-        : 5;
-    const remakeRaw = Number(settings.get("coins_per_remake"));
-    const remakeCost = Number.isFinite(remakeRaw) && remakeRaw >= 1 ? Math.round(remakeRaw) : 2;
-
-    // Optional second take: the paired clip from the same generation. It counts
-    // whether or not it was already revealed — only "still locked" matters.
-    let sibling: { id: string } | null = null;
-    if (bundle_both && song.suno_task_id) {
-      const { data: sibs } = await admin
-        .from("songs")
-        .select("id")
-        .eq("suno_task_id", song.suno_task_id)
-        .eq("user_id", user.id)
-        .eq("unlocked", false)
-        .neq("id", song_id)
-        .limit(1);
-      sibling = (sibs ?? [])[0] ?? null;
-    }
-
-    const alreadyUnlocked = !!song.unlocked;
-    // Second takes (variations) unlock at the cheaper remake price, not the full price.
-    const ownCost = song.is_variation ? remakeCost : unlockCost;
-    const cost = (alreadyUnlocked ? 0 : ownCost) + (sibling ? remakeCost : 0);
-    if (cost === 0) return jsonResponse({ ok: true, already: true });
-
-    // Claim the sibling unlock atomically before charging so retries can't double up.
-    if (sibling) {
-      const { data: claimed } = await admin
-        .from("songs")
-        .update({ unlocked: true, revealed: true })
-        .eq("id", sibling.id)
-        .eq("user_id", user.id)
-        .eq("unlocked", false)
-        .select("id");
-      if (!claimed || claimed.length === 0) sibling = null;
-    }
-
-    const reference = `unlock:${song_id}${sibling ? `+take2:${sibling.id}` : ""}`;
-    const { data: balance, error: dErr } = await admin.rpc("deduct_coins", {
+    // Compatibility for older clients: one atomic charge includes Take 2 free.
+    const { data, error } = await admin.rpc("purchase_owner_track", {
       p_user: user.id,
-      p_amount: (alreadyUnlocked ? 0 : unlockCost) + (sibling ? remakeCost : 0),
-      p_reference: reference,
+      p_song: song_id,
     });
-    if (dErr) {
-      if (sibling) {
-        await admin.from("songs").update({ unlocked: false }).eq("id", sibling.id);
-      }
-      return jsonResponse({ error: "Insufficient coins", code: "insufficient_coins" }, 402);
+    if (error) {
+      const insufficient = /insufficient_coins/i.test(error.message);
+      return jsonResponse({
+        error: insufficient ? "Insufficient coins" : "Could not unlock track",
+        code: insufficient ? "insufficient_coins" : "unlock_failed",
+      }, insufficient ? 402 : 409);
     }
-
-    const ids = alreadyUnlocked ? [] : [song_id];
-    if (sibling) ids.push(sibling.id);
-    if (ids.length > 0) {
-      const { error: uErr } = await admin.from("songs").update({ unlocked: true }).in("id", ids);
-      if (uErr) return jsonResponse({ error: uErr.message }, 500);
-      for (const id of ids) {
-        const { error: lErr } = await admin.from("unlocked_songs").insert({
-          user_id: user.id,
-          song_id: id,
-          source: "coins",
-          cost_coins: id === song_id ? ownCost : remakeCost,
-          reference: `unlock:${id}`,
-        });
-        if (lErr && !String(lErr.message).includes("duplicate")) {
-          return jsonResponse({ error: lErr.message }, 500);
-        }
-      }
-    }
-
-    return jsonResponse({
-      ok: true,
-      coin_balance: balance,
-      cost,
-      second_take: sibling?.id ?? null,
-    });
+    return jsonResponse(data);
   } catch (e) {
     return jsonResponse({ error: (e as Error).message }, 500);
   }
