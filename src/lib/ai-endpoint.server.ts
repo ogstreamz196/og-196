@@ -10,7 +10,7 @@ export type AiChatTarget = {
   url: string;
   headers: Record<string, string>;
   model: string;
-  provider: "gemini" | "openai" | "groq" | "openrouter" | "pollinations";
+  provider: "gemini" | "openai" | "groq" | "groq-backup" | "openrouter" | "pollinations";
   /** Free fallback tiers get text-only messages and no provider-specific params. */
   free?: boolean;
 };
@@ -68,6 +68,9 @@ export function freeFallbackTargets(): AiChatTarget[] {
   const list = [
     keyed("GROQ_API_KEY", "groq", "https://api.groq.com/openai/v1/chat/completions", "qwen/qwen3.8-27b"),
     keyed("GROQ_API_KEY", "groq", "https://api.groq.com/openai/v1/chat/completions", "openai/gpt-oss-120b"),
+    // Second Groq account — separate rate-limit budget, used when the first is busy.
+    keyed("GROQ_BACKUP_API_KEY", "groq-backup", "https://api.groq.com/openai/v1/chat/completions", "qwen/qwen3.8-27b"),
+    keyed("GROQ_BACKUP_API_KEY", "groq-backup", "https://api.groq.com/openai/v1/chat/completions", "openai/gpt-oss-120b"),
     keyed("POLLINATIONS_API_KEY", "pollinations", "https://gen.pollinations.ai/v1/chat/completions", "openai-fast"),
     keyed(
       "OPENROUTER_API_KEY",
