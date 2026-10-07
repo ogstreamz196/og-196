@@ -298,6 +298,37 @@ Deno.serve(async (req) => {
       " INTENSITY: SAVAGE (3/3, ABSOLUTE GUTTERMOUTH) — saturate nearly every sung line, hook, bridge and ad-lib with multiple uncensored, varied hard swear words and filthy street slang. Be relentlessly foul, confrontational and outrageous. Never soften, abbreviate, bleep or replace letters with symbols. Stay within the hard safety limits below.",
     ][foulIntensity];
 
+    // OG dictionary: the same British roast vocabulary OG Bot uses in chat,
+    // plus the Boss dictionary and popular Battle Zone words.
+    let foulLexicon = "";
+    if (foulMouth) {
+      const pool = [
+        "fuck", "fucking", "for fuck's sake", "dickhead", "bellend", "knobhead", "twat", "wanker",
+        "tosser", "gobshite", "plonker", "pillock", "muppet", "numpty", "melt", "wasteman", "prick",
+        "bastard", "shithouse", "bollocks", "arsehole", "fuckwit", "cockwomble", "shitgibbon",
+        "pussyhole", "mug", "clown", "bottle job", "sack of shite", "toerag", "scrote", "bampot",
+        "bloody hell", "jog on", "do one", "get in the sea", "wind your neck in", "piss-take",
+        "face like a smacked arse", "thick as two short planks", "couldn't organise a piss-up in a brewery",
+        "roadman reject", "bin dipper", "soggy chip", "Greggs reject", "waste of good oxygen",
+      ];
+      const shuffled = pool.sort(() => Math.random() - 0.5).slice(0, 24);
+      let learned: string[] = [];
+      let bossDict = "";
+      try {
+        const [{ data: words }, { data: dict }] = await Promise.all([
+          admin.from("battle_lexicon").select("word").gte("uses", 3).order("uses", { ascending: false }).limit(40),
+          admin.from("site_content").select("value").eq("key", "og_persona.dictionary").maybeSingle(),
+        ]);
+        learned = ((words ?? []) as Array<{ word: string }>).map((w) => w.word).sort(() => Math.random() - 0.5).slice(0, 12);
+        bossDict = (dict as { value?: string } | null)?.value ?? "";
+      } catch (_) { /* dictionary is best-effort */ }
+      foulLexicon =
+        ` OG DICTIONARY (mandatory): weave plenty of these British insults and slang into the lyrics, varied across sections, never the same one twice in a row: ${shuffled.join(", ")}.` +
+        (learned.length ? ` Popular Battle Zone slang to include too: ${learned.join(", ")}.` : "") +
+        (bossDict ? ` Platform slang: ${bossDict}` : "") +
+        ` This is a consenting adult explicit track — the 18+ rating was chosen by the user, so never clean it up.`;
+    }
+
     const systemPrompt = foulMouth
       ? `You are a foul-mouthed, no-holds-barred songwriter writing EXPLICIT adult song lyrics in ${languagesLabel}. ` +
         (isEnglish
@@ -305,6 +336,7 @@ Deno.serve(async (req) => {
           : `Lean ALL the way into raw, gritty, street-level ${languagesLabel}: use authentic native profanity, curse words, and savage slang from each of those languages itself (do NOT just translate English swears literally — use the equivalents real native speakers would actually shout). Drop them liberally throughout EVERY verse and chorus — at least a few per section. `) +
         `Use unfiltered attitude, savage punchlines, and trash-talk energy from the very first line. Make it sound like a parental-advisory hip-hop / punk track, NOT a radio edit. ` +
         `Do NOT self-censor, do NOT use asterisks or bleeps, and do NOT add disclaimers. Avoid slurs, sexual content involving minors, and direct incitement to real-world violence — everything else is fair game.` +
+        foulLexicon +
         intensityRule +
         ` The INTENSITY DIAL overrides the general "liberally" guidance above — follow the dial exactly.` +
         structureRule +
@@ -464,8 +496,8 @@ Deno.serve(async (req) => {
     const callFree = async (contents: unknown[]): Promise<Gen> => {
       const or = { "HTTP-Referer": "https://ogbot.co.uk", "X-Title": "OG BOT" };
       const tiers: Array<[string, string, string, Record<string, string>]> = [
-        ["GROQ_API_KEY", "https://api.groq.com/openai/v1/chat/completions", "openai/gpt-oss-120b", {}],
-        ["GROQ_BACKUP_API_KEY", "https://api.groq.com/openai/v1/chat/completions", "openai/gpt-oss-120b", {}],
+        ["GROQ_API_KEY", "https://api.groq.com/openai/v1/chat/completions", "llama-3.3-70b-versatile", {}],
+        ["GROQ_BACKUP_API_KEY", "https://api.groq.com/openai/v1/chat/completions", "llama-3.3-70b-versatile", {}],
         ["POLLINATIONS_API_KEY", "https://gen.pollinations.ai/v1/chat/completions", "openai-fast", {}],
         ["POLLINATIONS_BACKUP_API_KEY", "https://gen.pollinations.ai/v1/chat/completions", "openai-fast", {}],
         ["OPENROUTER_API_KEY", "https://openrouter.ai/api/v1/chat/completions", "nvidia/nemotron-3.5-lightning:free", or],
