@@ -477,6 +477,45 @@ export type Database = {
         }
         Relationships: []
       }
+      generation_attempts: {
+        Row: {
+          context: Json
+          created_at: string
+          error_message: string | null
+          id: string
+          song_id: string | null
+          stage: string
+          status: string
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          context?: Json
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          song_id?: string | null
+          stage?: string
+          status?: string
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          context?: Json
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          song_id?: string | null
+          stage?: string
+          status?: string
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       og_bot_remote_tokens: {
         Row: {
           created_at: string
