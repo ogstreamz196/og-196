@@ -349,7 +349,7 @@ function LibraryPage() {
   const [yoursSearch, setYoursSearch] = useState("");
   const [communitySearch, setCommunitySearch] = useState("");
   const [yoursFilter, setYoursFilter] = useState<LibraryFilterMode>("all");
-  const [communityFilter, setCommunityFilter] = useState<LibraryFilterMode>("all");
+  const [communityFilter, setCommunityFilter] = useState<LibraryFilterMode>("unlocked");
   const [yoursStyle, setYoursStyle] = useState<string | null>(null);
   const [communityStyle, setCommunityStyle] = useState<string | null>(null);
 
@@ -1953,6 +1953,10 @@ function LibraryPage() {
               unlockedCount={
                 communityTracks.filter((s) => !!s.unlocked || !!s.artistUnlocked).length
               }
+              lockedCount={
+                communityTracks.filter((s) => !s.unlocked && !s.artistUnlocked).length
+              }
+              hideAll
             />
             {communityTracks.length > 3 && (
               <div className="relative">
@@ -2007,6 +2011,7 @@ function LibraryPage() {
                   const matchesMode =
                     communityFilter === "all" ||
                     (communityFilter === "unlocked" && (!!s.unlocked || !!s.artistUnlocked)) ||
+                    (communityFilter === "locked" && !s.unlocked && !s.artistUnlocked) ||
                     (communityFilter === "styles" &&
                       !!communityStyle &&
                       (s.style || "").toLowerCase().includes(communityStyle.toLowerCase()));
