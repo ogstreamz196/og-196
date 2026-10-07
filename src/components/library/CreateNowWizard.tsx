@@ -11,7 +11,6 @@ import {
   Mic2,
   Music4,
   Sparkles,
-  Swords,
   X,
 } from "lucide-react";
 
@@ -74,8 +73,6 @@ export type WizardResult = {
   /** Exact per-track lyric rating selected in this wizard run. */
   foulMouth: boolean;
   foulIntensity: number;
-  /** User paid-in for the alternate take, revealed automatically when ready. */
-  wantSecondVersion: boolean;
   /** AI-suggested title still resolving in the background (blank-title runs). */
   titlePromise?: Promise<string>;
 };
@@ -147,21 +144,12 @@ export function CreateNowWizard({
   onComplete,
   initialDraft,
   submitLabel = "Create my song",
-  balance = 0,
-  secondVersionCost = 2,
-  onBuyCoins,
-  onEarnCoins,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   onComplete: (result: WizardResult, draft: WizardDraft) => void;
   initialDraft?: WizardDraft;
   submitLabel?: string;
-  /** Current coin balance, used by the extra-version offer. */
-  balance?: number;
-  secondVersionCost?: number;
-  onBuyCoins?: () => void;
-  onEarnCoins?: () => void;
 }) {
   const [step, setStep] = useState(1);
   const { isVip } = useRole();
@@ -187,7 +175,6 @@ export function CreateNowWizard({
   const [beatName, setBeatName] = useState("");
   const [uploadingBeat, setUploadingBeat] = useState(false);
   const [confirmClose, setConfirmClose] = useState(false);
-  const [offerOpen, setOfferOpen] = useState(false);
 
   const wizardScrollRef = useRef<HTMLDivElement | null>(null);
   const [naming, setNaming] = useState(false);
@@ -316,13 +303,11 @@ export function CreateNowWizard({
       setStep((s) => s + 1);
       return;
     }
-    // Last step: offer the cheap extra version before anything is created.
-    setOfferOpen(true);
+    await finish();
   }
 
-  async function finish(wantSecondVersion: boolean) {
+  async function finish() {
     if (naming) return;
-    setOfferOpen(false);
 
     // Blank title? Close instantly with a safe default and let the AI name it
     // in the background — the song only needs its title after lyrics finish.
@@ -356,7 +341,6 @@ export function CreateNowWizard({
         isPublic,
         foulMouth: !isNasheed && intensity > 0,
         foulIntensity: isNasheed ? 0 : intensity,
-        wantSecondVersion,
       },
       {
         title: finalTitle,
@@ -1078,67 +1062,7 @@ export function CreateNowWizard({
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={offerOpen} onOpenChange={setOfferOpen}>
-        <AlertDialogContent className="w-[calc(100vw-2rem)] max-w-md overflow-hidden">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-primary" />
-              Want a second version too?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {balance >= secondVersionCost
-                ? `For ${secondVersionCost} coins OG Bot cuts an extra version of this track — a different vocal take, flow and mix. It lands in your library right next to the first one.`
-                : `An extra version costs ${secondVersionCost} coins and you have ${balance}. Top up or win coins in Battle Zone, or carry on with one track for free.`}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex-col gap-2 sm:flex-col">
-            {balance >= secondVersionCost ? (
-              <Button
-                type="button"
-                onClick={() => void finish(true)}
-                className="h-auto min-h-12 w-full gap-2 whitespace-normal bg-gradient-brand py-2 text-center font-black uppercase tracking-wide text-primary-foreground shadow-glow"
-              >
-                <Coins className="h-4 w-4" />
-                Yes — add 2nd version · {secondVersionCost} coins
-              </Button>
-            ) : (
-              <>
-                <Button
-                  type="button"
-                  onClick={() => {
-                    setOfferOpen(false);
-                    onBuyCoins?.();
-                  }}
-                  className="h-auto min-h-12 w-full gap-2 whitespace-normal bg-gradient-brand py-2 text-center font-black uppercase tracking-wide text-primary-foreground shadow-glow"
-                >
-                  <Coins className="h-4 w-4" />
-                  Buy coins
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setOfferOpen(false);
-                    onEarnCoins?.();
-                  }}
-                  className="min-h-12 w-full gap-2 font-black uppercase tracking-wide"
-                >
-                  <Swords className="h-4 w-4" />
-                  Earn in Battle Zone
-                </Button>
-              </>
-            )}
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => void finish(false)}
-              className="min-h-11 w-full font-bold"
-            >
-              No thanks — just 1 track (free)
-            </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+
     </Dialog>
   );
 }

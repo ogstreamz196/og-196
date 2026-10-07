@@ -63,7 +63,6 @@ import {
   type Category,
   type Selections,
 } from "@/lib/library-utils";
-import { clearSecondTake, markSecondTakeWanted, pendingSecondTakes } from "@/lib/second-take";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { Disc3, Flame } from "lucide-react";
@@ -158,12 +157,7 @@ function LibraryPage() {
   const [autoUnlockPrompt, setAutoUnlockPrompt] = useState(false);
   // download cost is configured via settings.coins_per_full_unlock when needed
   const balance = profile?.coin_balance ?? 0;
-  const secondVersionCost = Math.max(
-    1,
-    Math.round(
-      Number((settings as { coins_per_remake?: number } | undefined)?.coins_per_remake) || 2,
-    ),
-  );
+
 
   const firstName = useMemo(() => {
     if (dev.isDev) return "Developer";
@@ -594,8 +588,6 @@ function LibraryPage() {
     null,
     true,
   );
-  // Set when the user accepted the paid second version in the wizard.
-  const wantSecondTakeRef = useRef(false);
 
   const [freshTrack, setFreshTrack] = useState<Song | null>(null);
   // Finished-track player popup: takes over from the wizard/cooking popup.
@@ -856,10 +848,7 @@ function LibraryPage() {
         .single();
       if (stale()) return;
       if (insertErr || !row?.id) throw new Error(insertErr?.message || "Couldn't save song");
-      if (wantSecondTakeRef.current) {
-        markSecondTakeWanted(row.id);
-        wantSecondTakeRef.current = false;
-      }
+
 
       advanceStage("submitting");
       attemptSongId = row.id;
@@ -990,50 +979,6 @@ function LibraryPage() {
       return (data ?? []) as Song[];
     },
   });
-
-  // Paid-in second version: as soon as the track lands, unlock its alternate
-  // take (coins are only taken at this point, by the atomic backend function).
-  useEffect(() => {
-    const pending = pendingSecondTakes();
-    if (!pending.length) return;
-    const ready = (library.data ?? []).filter(
-      (s) => pending.includes(s.id) && s.status === "completed",
-    );
-    if (!ready.length) return;
-    void (async () => {
-      for (const song of ready) {
-        clearSecondTake(song.id);
-        const { data: parent } = await supabase
-          .from("songs")
-          .select("suno_task_id")
-          .eq("id", song.id)
-          .maybeSingle();
-        const taskId = (parent as { suno_task_id?: string | null } | null)?.suno_task_id;
-        if (!taskId) continue;
-        const { data: siblings } = await supabase
-          .from("songs")
-          .select("id")
-          .eq("suno_task_id", taskId)
-          .eq("is_variation", true)
-          .eq("revealed", false)
-          .neq("id", song.id)
-          .limit(1);
-        const sibling = (siblings ?? [])[0] as { id: string } | undefined;
-        if (!sibling) continue;
-        const { error } = await supabase.functions.invoke("reveal-variation", {
-          body: { song_id: sibling.id },
-        });
-        if (error) {
-          toast.error("Couldn't add the second version — your coins weren't taken");
-          continue;
-        }
-        toast.success("Second version added to your library");
-        void library.refetch();
-        void refetchProfile?.();
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [library.data]);
 
   // After an unlock, start the full (not sample) version of that track.
   useEffect(() => {
@@ -1536,12 +1481,7 @@ function LibraryPage() {
         onOpenChange={setWizardOpen}
         initialDraft={wizardDraft}
         submitLabel="Create now"
-        balance={balance}
-        secondVersionCost={secondVersionCost}
-        onBuyCoins={() => void navigate({ to: "/buy-coins" })}
-        onEarnCoins={() => void navigate({ to: "/community" })}
         onComplete={(v, draft) => {
-          wantSecondTakeRef.current = !!v.wantSecondVersion;
 
           setWizardDraft(draft);
           setTitle(v.title);

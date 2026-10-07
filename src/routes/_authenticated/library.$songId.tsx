@@ -146,8 +146,6 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
   const [unlockDialogOpen, setUnlockDialogOpen] = useState(false);
   const [ownerUnlockOpen, setOwnerUnlockOpen] = useState(false);
   const fullUnlockCost = settings?.coins_per_full_unlock ?? 5;
-  const secondTakeCost =
-    Number((settings as { coins_per_remake?: number } | undefined)?.coins_per_remake) || 2;
   const { data: profile } = useProfile();
   const balance = profile?.coin_balance ?? 0;
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -286,11 +284,11 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
   }
 
   /** Owner padlock: unlock the full master, optionally bundling the hidden take. */
-  async function ownerUnlock(bundleBoth: boolean) {
+  async function ownerUnlock() {
     setDownloading(true);
     try {
       const { data, error } = await supabase.functions.invoke("unlock-full-song", {
-        body: { song_id: song.id, bundle_both: bundleBoth },
+        body: { song_id: song.id },
       });
       if (error) {
         throw new Error(
@@ -301,9 +299,7 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
       }
       if (!data?.already) {
         toast.success(
-          bundleBoth && data?.second_take
-            ? `Both versions unlocked · -${data?.cost ?? fullUnlockCost + secondTakeCost} coins`
-            : `Full track unlocked · -${data?.cost ?? fullUnlockCost} coins`,
+          `Full track unlocked + Take 2 free · -${data?.cost ?? fullUnlockCost} coins`,
         );
       }
       setOwnerUnlockOpen(false);
@@ -565,9 +561,8 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
           songTitle={song.title}
           balance={balance}
           singleCost={fullUnlockCost}
-          secondTakeCost={secondTakeCost}
           busy={downloading}
-          onConfirm={(bundle) => void ownerUnlock(bundle)}
+          onConfirm={() => void ownerUnlock()}
         />
       )}
     </article>

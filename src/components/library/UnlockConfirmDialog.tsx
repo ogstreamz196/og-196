@@ -38,6 +38,7 @@ type Props = {
   songTitle?: string | null;
   /** Enables the "pay by card" option for this track. */
   songId?: string;
+  includesSecondTake?: boolean;
 };
 
 export function UnlockConfirmDialog({
@@ -50,6 +51,7 @@ export function UnlockConfirmDialog({
   balance,
   songTitle,
   songId,
+  includesSecondTake = false,
 }: Props) {
   const [payByCard, setPayByCard] = useState(false);
   const [starting, setStarting] = useState(false);
@@ -100,6 +102,13 @@ export function UnlockConfirmDialog({
               : "choose how you'd like to pay for the full studio version."}
           </DialogDescription>
         </DialogHeader>
+
+        {includesSecondTake && (
+          <div className="border-l-4 border-primary bg-primary/10 px-4 py-3">
+            <p className="text-base font-bold text-foreground">2 tracks for the price of 1</p>
+            <p className="mt-1 text-sm text-muted-foreground">Unlock this track and get Take 2 free in your library. No extra coins or card payment.</p>
+          </div>
+        )}
 
         {payByCard ? (
           <div className="space-y-3">
@@ -224,7 +233,7 @@ export function UnlockConfirmDialog({
             {/* Insufficient coins note */}
             {!canAfford && (
               <p className="text-center text-xs text-destructive">
-                Not enough coins — pay {CARD_PRICE_LABEL} by card, or top up in the Store.
+                {cardAvailable ? `Not enough coins — pay ${CARD_PRICE_LABEL} by card, or top up in the Store.` : "Not enough coins — top up in the Store."}
               </p>
             )}
 

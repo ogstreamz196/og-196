@@ -94,15 +94,13 @@ function CommunityTrackRowImpl({
   const [busy, setBusy] = useState(false);
   const { data: settings } = useSettings();
   const fullUnlockCost = settings?.coins_per_full_unlock ?? 5;
-  const secondTakeCost =
-    Number((settings as { coins_per_remake?: number } | undefined)?.coins_per_remake) || 2;
 
   /** Owner padlock: unlock the full master, optionally bundling the hidden take. */
-  async function ownerUnlock(bundleBoth: boolean) {
+  async function ownerUnlock() {
     setBusy(true);
     try {
       const { data, error } = await supabase.functions.invoke("unlock-full-song", {
-        body: { song_id: song.id, bundle_both: bundleBoth },
+        body: { song_id: song.id },
       });
       if (error) {
         throw new Error(
@@ -113,9 +111,7 @@ function CommunityTrackRowImpl({
       }
       if (!data?.already) {
         toast.success(
-          bundleBoth && data?.second_take
-            ? `Both versions unlocked · -${data?.cost ?? fullUnlockCost + secondTakeCost} coins`
-            : `Full track unlocked · -${data?.cost ?? fullUnlockCost} coins`,
+          `Full track unlocked + Take 2 free · -${data?.cost ?? fullUnlockCost} coins`,
         );
       }
       setOwnerUnlockOpen(false);
@@ -470,9 +466,8 @@ function CommunityTrackRowImpl({
           songTitle={song.title}
           balance={balance}
           singleCost={fullUnlockCost}
-          secondTakeCost={secondTakeCost}
           busy={busy}
-          onConfirm={(bundle) => void ownerUnlock(bundle)}
+          onConfirm={() => void ownerUnlock()}
         />
       )}
     </li>

@@ -209,8 +209,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const fullUnlockCost = settings?.coins_per_full_unlock ?? 5;
   const remakeCost =
     Number((settings as { coins_per_remake?: number } | undefined)?.coins_per_remake) || 2;
-  // Second takes (variations) unlock at the cheaper remake price.
-  const unlockCost = song.is_variation ? remakeCost : fullUnlockCost;
+  const unlockCost = fullUnlockCost;
   const balance = profile?.coin_balance ?? 0;
   const isOwner = !!profile?.id && song.user_id === profile.id;
   // Re-cooking a finished track is an edit: 2 coins, charged once on submit.
@@ -649,10 +648,6 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       await performUnlock();
       return;
     }
-    if (balance < unlockCost) {
-      setTopUp({ needed: unlockCost, reason: "unlock the HQ version" });
-      return;
-    }
     setUnlockDialogOpen(true);
   }
 
@@ -671,7 +666,10 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
           toast.error(invokeError(error, "Could not unlock"));
           return;
         }
-        if (!data?.already) toast.success(`Unlocked · -${data?.cost ?? unlockCost} coins`);
+        if (!data?.already) toast.success(`Unlocked + Take 2 free · -${data?.cost ?? unlockCost} coins`);
+        void queryClient.invalidateQueries({ queryKey: ["library"] });
+        void queryClient.invalidateQueries({ queryKey: ["recent-songs"] });
+        void queryClient.invalidateQueries({ queryKey: ["variations"] });
         refreshCoinBalance();
         onSaved?.();
       }
@@ -1264,7 +1262,6 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                   onClick={unlockFull}
                   disabled={!!(
                     unlocking ||
-                    (!ownsFull && balance < unlockCost) ||
                     (ownsFull && (!isReady || !song.audio_path))
                   )}
                   variant={ownsFull ? "default" : "outline"}
@@ -1317,6 +1314,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
         balance={balance}
         songTitle={song.title ?? title}
         songId={song.id}
+        includesSecondTake={isOwner}
       />
 
       <QuickTopUpSheet
