@@ -342,16 +342,35 @@ Deno.serve(async (req) => {
 
     type Gen = { ok: boolean; status: number; text: string; detail?: string };
 
+    // Hard budget: the server kills requests at ~150s, so every AI call gets a
+    // timeout and we stop trying new models once the budget is nearly spent.
+    const startedAt = Date.now();
+    const BUDGET_MS = 130_000;
+    const timedFetch = async (url: string, init: RequestInit, capMs: number) => {
+      const left = BUDGET_MS - (Date.now() - startedAt);
+      if (left < 8_000) return new Response("Out of time", { status: 504 });
+      try {
+        return await fetch(url, { ...init, signal: AbortSignal.timeout(Math.min(capMs, left)) });
+      } catch (e) {
+        console.error("AI call timed out/failed", (e as Error).message);
+        return new Response("Timed out", { status: 504 });
+      }
+    };
+
     const postTo = (model: string, contents: unknown[], key = GEMINI_API_KEY) =>
-      fetch(modelUrl(model, key), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          systemInstruction: { role: "system", parts: [{ text: systemPrompt }] },
-          contents,
-          generationConfig: { temperature: 0.9, maxOutputTokens: 8192 },
-        }),
-      });
+      timedFetch(
+        modelUrl(model, key),
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            systemInstruction: { role: "system", parts: [{ text: systemPrompt }] },
+            contents,
+            generationConfig: { temperature: 0.9, maxOutputTokens: 8192 },
+          }),
+        },
+        45_000,
+      );
 
     const extractText = (data: unknown) =>
       (
@@ -402,11 +421,15 @@ Deno.serve(async (req) => {
         })),
       ];
       for (const model of ["gpt-4.1", "gpt-4o-mini"]) {
-        const r = await fetch("https://api.openai.com/v1/chat/completions", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
-          body: JSON.stringify({ model, messages, temperature: 0.9 }),
-        });
+        const r = await timedFetch(
+          "https://api.openai.com/v1/chat/completions",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+            body: JSON.stringify({ model, messages, temperature: 0.9 }),
+          },
+          40_000,
+        );
         if (r.ok) {
           const j = await r.json();
           const text = (j?.choices?.[0]?.message?.content ?? "").trim();
