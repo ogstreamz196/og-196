@@ -459,7 +459,68 @@ Deno.serve(async (req) => {
       return { ok: false, status: 502, text: "", detail: "OpenAI fallback failed" };
     };
 
+    // Owner rule: free keys (Groq ×2, Pollinations ×2, OpenRouter ×2) write
+    // lyrics first; Gemini then OpenAI are only fallbacks.
+    const callFree = async (contents: unknown[]): Promise<Gen> => {
+      const or = { "HTTP-Referer": "https://ogbot.co.uk", "X-Title": "OG BOT" };
+      const tiers: Array<[string, string, string, Record<string, string>]> = [
+        ["GROQ_API_KEY", "https://api.groq.com/openai/v1/chat/completions", "openai/gpt-oss-120b", {}],
+        ["GROQ_BACKUP_API_KEY", "https://api.groq.com/openai/v1/chat/completions", "openai/gpt-oss-120b", {}],
+        ["POLLINATIONS_API_KEY", "https://gen.pollinations.ai/v1/chat/completions", "openai-fast", {}],
+        ["POLLINATIONS_BACKUP_API_KEY", "https://gen.pollinations.ai/v1/chat/completions", "openai-fast", {}],
+        ["OPENROUTER_API_KEY", "https://openrouter.ai/api/v1/chat/completions", "nvidia/nemotron-3.5-lightning:free", or],
+        ["OPENROUTER_BACKUP_API_KEY", "https://openrouter.ai/api/v1/chat/completions", "nvidia/nemotron-3.5-lightning:free", or],
+      ];
+      const messages = [
+        { role: "system", content: systemPrompt },
+        ...(contents as Array<{ role: string; parts: Array<{ text?: string }> }>).map((c) => ({
+          role: c.role === "model" ? "assistant" : "user",
+          content: c.parts.map((p) => p.text ?? "").join("\n"),
+        })),
+      ];
+      let last: Gen = { ok: false, status: 503, text: "", detail: "No free key" };
+      for (const [env, url, model, extra] of tiers) {
+        const key = Deno.env.get(env);
+        if (!key) continue;
+        const r = await timedFetch(
+          url,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}`, ...extra },
+            body: JSON.stringify({ model, messages, temperature: 0.9 }),
+          },
+          30_000,
+          // Keep time for Gemini if every free key fails.
+          50_000,
+        );
+        if (r.ok) {
+          const j = await r.json().catch(() => null);
+          const text = (j?.choices?.[0]?.message?.content ?? "").trim();
+          if (text.length > 200) {
+            const u = j?.usage ?? {};
+            logAiUsage({
+              feature: "lyrics",
+              provider: env.toLowerCase().replace("_api_key", ""),
+              model,
+              promptTokens: u.prompt_tokens ?? 0,
+              completionTokens: u.completion_tokens ?? 0,
+              totalTokens: u.total_tokens ?? 0,
+            });
+            return { ok: true, status: 200, text };
+          }
+          last = { ok: false, status: 502, text: "", detail: "Empty free reply" };
+        } else {
+          last = { ok: false, status: r.status, text: "", detail: (await r.text()).slice(0, 200) };
+          console.error("Free lyrics tier failed", env, r.status);
+        }
+      }
+      return last;
+    };
+
     const generate = async (contents: unknown[]): Promise<Gen> => {
+      const f = await callFree(contents);
+      if (f.ok && f.text) return f;
+      console.warn("Free lyrics tiers failed — falling back to Gemini", f.status);
       const g = await generateGemini(contents);
       if (g.ok && g.text) return g;
       console.warn("Gemini lyrics unavailable — falling back to OpenAI", g.status);
