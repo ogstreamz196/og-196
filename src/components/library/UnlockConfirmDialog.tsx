@@ -38,6 +38,7 @@ type Props = {
   songTitle?: string | null;
   /** Enables the "pay by card" option for this track. */
   songId?: string;
+  includesSecondTake?: boolean;
 };
 
 export function UnlockConfirmDialog({
@@ -50,6 +51,7 @@ export function UnlockConfirmDialog({
   balance,
   songTitle,
   songId,
+  includesSecondTake = false,
 }: Props) {
   const [payByCard, setPayByCard] = useState(false);
   const [starting, setStarting] = useState(false);
@@ -100,6 +102,13 @@ export function UnlockConfirmDialog({
               : "choose how you'd like to pay for the full studio version."}
           </DialogDescription>
         </DialogHeader>
+
+        {includesSecondTake && (
+          <div className="border-l-4 border-primary bg-primary/10 px-4 py-3">
+            <p className="text-base font-bold text-foreground">2 tracks for the price of 1</p>
+            <p className="mt-1 text-sm text-muted-foreground">Unlock this track and get Take 2 free in your library. No extra coins or card payment.</p>
+          </div>
+        )}
 
         {payByCard ? (
           <div className="space-y-3">
@@ -176,11 +185,12 @@ export function UnlockConfirmDialog({
             {/* Payment options — side by side */}
             <div className="grid grid-cols-2 gap-3">
               {/* Pay with Coins */}
-              <button
+               <Button
+                 variant="outline"
                 type="button"
                 onClick={onConfirm}
                 disabled={busy || !canAfford}
-                className="group relative flex flex-col items-center gap-2 rounded-2xl border-2 border-primary/30 bg-primary/5 p-4 text-center transition hover:border-primary hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-40"
+                 className="group relative h-auto min-h-40 flex-col gap-2 rounded-lg border-2 border-primary/30 bg-primary/5 p-4 text-center transition hover:border-primary hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <div className="grid h-11 w-11 place-items-center rounded-full bg-primary/15">
                   <Coins className="h-5 w-5 text-primary" />
@@ -197,14 +207,15 @@ export function UnlockConfirmDialog({
                 ) : (
                   <Download className="h-4 w-4 text-muted-foreground transition group-hover:text-primary" />
                 )}
-              </button>
+               </Button>
 
               {/* Pay by Card */}
-              <button
+               <Button
+                 variant="outline"
                 type="button"
                 onClick={() => setPayByCard(true)}
                 disabled={busy || !cardAvailable}
-                className="group relative flex flex-col items-center gap-2 rounded-2xl border-2 border-foreground/15 bg-card p-4 text-center transition hover:border-foreground/30 hover:bg-muted/50 disabled:cursor-not-allowed disabled:opacity-40"
+                 className="group relative h-auto min-h-40 flex-col gap-2 rounded-lg border-2 border-foreground/15 bg-card p-4 text-center transition hover:border-foreground/30 hover:bg-muted/50 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <div className="grid h-11 w-11 place-items-center rounded-full bg-foreground/10">
                   <CreditCard className="h-5 w-5 text-foreground" />
@@ -218,13 +229,13 @@ export function UnlockConfirmDialog({
                     Unavailable
                   </span>
                 )}
-              </button>
+               </Button>
             </div>
 
             {/* Insufficient coins note */}
             {!canAfford && (
               <p className="text-center text-xs text-destructive">
-                Not enough coins — pay {CARD_PRICE_LABEL} by card, or top up in the Store.
+                {cardAvailable ? `Not enough coins — pay ${CARD_PRICE_LABEL} by card, or top up in the Store.` : "Not enough coins — top up in the Store."}
               </p>
             )}
 

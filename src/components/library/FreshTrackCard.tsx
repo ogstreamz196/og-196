@@ -1,3 +1,5 @@
+import { purchaseOwnerTrack } from "@/lib/track-unlock.functions";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
@@ -140,27 +142,18 @@ export function FreshTrackCard({
     }
   }
 
+  const buyOwnerTrack = useServerFn(purchaseOwnerTrack);
   async function confirmUnlock() {
     setBusy(true);
     try {
-      const { data: unlockData, error: unlockErr } = await supabase.functions.invoke(
-        "unlock-full-song",
-        { body: { song_id: song.id } },
-      );
-      if (unlockErr) {
-        throw new Error(
-          (unlockErr as { context?: { error?: string } })?.context?.error ||
-            unlockErr.message ||
-            "Could not unlock track",
-        );
-      }
+      const unlockData = await buyOwnerTrack({ data: { songId: song.id } });
       setUnlocked(true);
       audioRef.current?.pause();
       requestFullTrackPlay(song.id);
       await qc.invalidateQueries({ queryKey: ["profile"] });
       await qc.invalidateQueries({ queryKey: ["library"] });
       if (!unlockData?.already) {
-        toast.success(`Full track unlocked · -${unlockData?.cost ?? unlockCost} coins`);
+        toast.success(`Full track unlocked + Take 2 free · -${unlockData?.cost ?? unlockCost} coins`);
       }
       const { data, error } = await supabase.functions.invoke("song-url", {
         body: { song_id: song.id, mode: "full", purpose: "download", filename: `${title}.mp3` },
@@ -330,6 +323,7 @@ export function FreshTrackCard({
         balance={balance}
         songTitle={title}
         songId={song.id}
+        includesSecondTake
       />
     </section>
   );

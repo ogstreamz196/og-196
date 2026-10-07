@@ -1,3 +1,5 @@
+import { useServerFn } from "@tanstack/react-start";
+import { purchaseOwnerTrack } from "@/lib/track-unlock.functions";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -30,6 +32,14 @@ import { ensureFullUrlAllowed } from "@/lib/ensure-full-url-allowed";
 
 export const Route = createFileRoute("/_authenticated/library/$songId")({
   component: SongDetailPage,
+  head: () => ({ meta: [
+    { title: "Track Studio · OG BOT" },
+    { name: "description", content: "Listen, edit and unlock your OG BOT track with a free second take." },
+    { property: "og:title", content: "Track Studio · OG BOT" },
+    { property: "og:description", content: "Your OG BOT music workspace — two tracks for the price of one." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
+  ] }),
 });
 
 type FullSong = Song & { unlocked?: boolean | null; is_public?: boolean | null };
@@ -146,8 +156,6 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
   const [unlockDialogOpen, setUnlockDialogOpen] = useState(false);
   const [ownerUnlockOpen, setOwnerUnlockOpen] = useState(false);
   const fullUnlockCost = settings?.coins_per_full_unlock ?? 5;
-  const secondTakeCost =
-    Number((settings as { coins_per_remake?: number } | undefined)?.coins_per_remake) || 2;
   const { data: profile } = useProfile();
   const balance = profile?.coin_balance ?? 0;
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -286,24 +294,14 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
   }
 
   /** Owner padlock: unlock the full master, optionally bundling the hidden take. */
-  async function ownerUnlock(bundleBoth: boolean) {
+  const buyOwnerTrack = useServerFn(purchaseOwnerTrack);
+  async function ownerUnlock() {
     setDownloading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("unlock-full-song", {
-        body: { song_id: song.id, bundle_both: bundleBoth },
-      });
-      if (error) {
-        throw new Error(
-          (error as { context?: { error?: string } })?.context?.error ||
-            error.message ||
-            "Could not unlock track",
-        );
-      }
+      const data = await buyOwnerTrack({ data: { songId: song.id } });
       if (!data?.already) {
         toast.success(
-          bundleBoth && data?.second_take
-            ? `Both versions unlocked · -${data?.cost ?? fullUnlockCost + secondTakeCost} coins`
-            : `Full track unlocked · -${data?.cost ?? fullUnlockCost} coins`,
+          `Full track unlocked + Take 2 free · -${data?.cost ?? fullUnlockCost} coins`,
         );
       }
       setOwnerUnlockOpen(false);
@@ -311,6 +309,8 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
         qc.invalidateQueries({ queryKey: ["profile"] }),
         qc.invalidateQueries({ queryKey: ["song", song.id] }),
         qc.invalidateQueries({ queryKey: ["songs"] }),
+        qc.invalidateQueries({ queryKey: ["library"] }),
+        qc.invalidateQueries({ queryKey: ["recent-songs"] }),
       ]);
       onRefresh();
     } catch (e) {
@@ -376,6 +376,8 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
         qc.invalidateQueries({ queryKey: ["profile"] }),
         qc.invalidateQueries({ queryKey: ["song", song.id] }),
         qc.invalidateQueries({ queryKey: ["songs"] }),
+        qc.invalidateQueries({ queryKey: ["library"] }),
+        qc.invalidateQueries({ queryKey: ["recent-songs"] }),
       ]);
       onRefresh();
     } catch (e) {
@@ -565,9 +567,8 @@ function PlayerCard({ song, onRefresh }: { song: FullSong; onRefresh: () => void
           songTitle={song.title}
           balance={balance}
           singleCost={fullUnlockCost}
-          secondTakeCost={secondTakeCost}
           busy={downloading}
-          onConfirm={(bundle) => void ownerUnlock(bundle)}
+          onConfirm={() => void ownerUnlock()}
         />
       )}
     </article>

@@ -1,3 +1,5 @@
+import { useServerFn } from "@tanstack/react-start";
+import { purchaseOwnerTrack } from "@/lib/track-unlock.functions";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSessionRunState } from "@/hooks/use-session-run-state";
 import { Link, useNavigate } from "@tanstack/react-router";
@@ -207,10 +209,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const lyricsCost = settings?.coins_per_lyrics_generation ?? 0;
   const previewCost = settings?.coins_per_generation ?? 0;
   const fullUnlockCost = settings?.coins_per_full_unlock ?? 5;
-  const remakeCost =
-    Number((settings as { coins_per_remake?: number } | undefined)?.coins_per_remake) || 2;
-  // Second takes (variations) unlock at the cheaper remake price.
-  const unlockCost = song.is_variation ? remakeCost : fullUnlockCost;
+  const unlockCost = fullUnlockCost;
   const balance = profile?.coin_balance ?? 0;
   const isOwner = !!profile?.id && song.user_id === profile.id;
   // Re-cooking a finished track is an edit: 2 coins, charged once on submit.
@@ -310,7 +309,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   );
   const languageChanged = languageValue !== detectLanguages(song.prompt).join(" + ");
 
-  const { variations, busyVariation, variationCost, revealOne } = useVariations({
+  const { variations } = useVariations({
     songId: song.id,
     songStatus: song.status,
     balance,
@@ -649,10 +648,6 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
       await performUnlock();
       return;
     }
-    if (balance < unlockCost) {
-      setTopUp({ needed: unlockCost, reason: "unlock the HQ version" });
-      return;
-    }
     setUnlockDialogOpen(true);
   }
 
@@ -660,18 +655,16 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
   const { isVip: isVipUser, isBoss } = useRole();
   // Boss accounts play and download everything, so treat them as owners.
   const ownsFull = !!song.unlocked || !!isBoss;
+  const buyOwnerTrack = useServerFn(purchaseOwnerTrack);
   async function performUnlock() {
     setUnlocking(true);
     try {
       if (!ownsFull) {
-        const { data, error } = await supabase.functions.invoke("unlock-full-song", {
-          body: { song_id: song.id },
-        });
-        if (error) {
-          toast.error(invokeError(error, "Could not unlock"));
-          return;
-        }
-        if (!data?.already) toast.success(`Unlocked · -${data?.cost ?? unlockCost} coins`);
+        const data = await buyOwnerTrack({ data: { songId: song.id } });
+        if (!data?.already) toast.success(`Unlocked + Take 2 free · -${data?.cost ?? unlockCost} coins`);
+        void queryClient.invalidateQueries({ queryKey: ["library"] });
+        void queryClient.invalidateQueries({ queryKey: ["recent-songs"] });
+        void queryClient.invalidateQueries({ queryKey: ["variations"] });
         refreshCoinBalance();
         onSaved?.();
       }
@@ -1264,7 +1257,6 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
                   onClick={unlockFull}
                   disabled={!!(
                     unlocking ||
-                    (!ownsFull && balance < unlockCost) ||
                     (ownsFull && (!isReady || !song.audio_path))
                   )}
                   variant={ownsFull ? "default" : "outline"}
@@ -1299,10 +1291,6 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
         <TabsContent value="takes" className="mt-0">
         <VariationsCard
           variations={variations}
-          variationCost={variationCost}
-          busyVariation={busyVariation}
-          balance={balance}
-          onRevealOne={revealOne}
         />
         </TabsContent>
       </Tabs>
@@ -1317,6 +1305,7 @@ export function SongWorkspace({ song, onSaved, onRefresh }: Props) {
         balance={balance}
         songTitle={song.title ?? title}
         songId={song.id}
+        includesSecondTake={isOwner}
       />
 
       <QuickTopUpSheet

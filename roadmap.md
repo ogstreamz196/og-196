@@ -43,6 +43,9 @@
 
 ## Generation reliability (Oct 2026)
 
+- [x] Remove one/two-track choice; include Take 2 free when first track is paid/unlocked
+- [x] Show two tracks for the price of one on coin/card payment selection and verify both paths
+
 - [x] Move web installation prompt to the top with Install now; exclude native Android
 - [x] Enforce lyric slider levels, especially Savage, and verify targeted tests
 

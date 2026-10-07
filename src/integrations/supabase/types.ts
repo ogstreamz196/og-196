@@ -2446,6 +2446,10 @@ export type Database = {
           token_string: string
         }[]
       }
+      purchase_owner_track: {
+        Args: { p_song: string; p_user: string }
+        Returns: Json
+      }
       purchase_sports_guide_access: { Args: never; Returns: Json }
       purchase_sports_guide_access_for_user: {
         Args: { p_user: string }
@@ -2535,6 +2539,7 @@ export type Database = {
         Returns: string
       }
       start_vip_trial_once: { Args: never; Returns: Json }
+      sync_owner_track_bonus: { Args: { p_song: string }; Returns: undefined }
       unrevoke_og_bot_token: {
         Args: { admin_notes?: string; target_user_id: string }
         Returns: boolean

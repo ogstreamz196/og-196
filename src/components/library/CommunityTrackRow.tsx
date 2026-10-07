@@ -1,3 +1,5 @@
+import { useServerFn } from "@tanstack/react-start";
+import { purchaseOwnerTrack } from "@/lib/track-unlock.functions";
 import { memo, useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
@@ -94,28 +96,16 @@ function CommunityTrackRowImpl({
   const [busy, setBusy] = useState(false);
   const { data: settings } = useSettings();
   const fullUnlockCost = settings?.coins_per_full_unlock ?? 5;
-  const secondTakeCost =
-    Number((settings as { coins_per_remake?: number } | undefined)?.coins_per_remake) || 2;
 
   /** Owner padlock: unlock the full master, optionally bundling the hidden take. */
-  async function ownerUnlock(bundleBoth: boolean) {
+  const buyOwnerTrack = useServerFn(purchaseOwnerTrack);
+  async function ownerUnlock() {
     setBusy(true);
     try {
-      const { data, error } = await supabase.functions.invoke("unlock-full-song", {
-        body: { song_id: song.id, bundle_both: bundleBoth },
-      });
-      if (error) {
-        throw new Error(
-          (error as { context?: { error?: string } })?.context?.error ||
-            error.message ||
-            "Could not unlock track",
-        );
-      }
+      const data = await buyOwnerTrack({ data: { songId: song.id } });
       if (!data?.already) {
         toast.success(
-          bundleBoth && data?.second_take
-            ? `Both versions unlocked · -${data?.cost ?? fullUnlockCost + secondTakeCost} coins`
-            : `Full track unlocked · -${data?.cost ?? fullUnlockCost} coins`,
+          `Full track unlocked + Take 2 free · -${data?.cost ?? fullUnlockCost} coins`,
         );
       }
       setOwnerUnlockOpen(false);
@@ -123,6 +113,8 @@ function CommunityTrackRowImpl({
         qc.invalidateQueries({ queryKey: ["profile"] }),
         qc.invalidateQueries({ queryKey: ["recent-songs"] }),
         qc.invalidateQueries({ queryKey: ["songs"] }),
+        qc.invalidateQueries({ queryKey: ["library"] }),
+        qc.invalidateQueries({ queryKey: ["recent-songs"] }),
       ]);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Unlock failed");
@@ -470,9 +462,8 @@ function CommunityTrackRowImpl({
           songTitle={song.title}
           balance={balance}
           singleCost={fullUnlockCost}
-          secondTakeCost={secondTakeCost}
           busy={busy}
-          onConfirm={(bundle) => void ownerUnlock(bundle)}
+          onConfirm={() => void ownerUnlock()}
         />
       )}
     </li>
