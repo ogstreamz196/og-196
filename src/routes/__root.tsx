@@ -342,8 +342,8 @@ function RootComponent() {
           <TrackUnlockReturnHandler />
           <UserActivityArchiver />
           <NativeAppLinkBridge />
-          <Outlet />
           <InstallAppPrompt />
+          <Outlet />
           <TrackReadyNotifier />
           <Toaster position="top-center" offset={72} />
         </RevenueCatBridge>

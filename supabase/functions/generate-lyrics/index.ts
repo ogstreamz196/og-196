@@ -5,6 +5,7 @@ import { handlePreflight, jsonResponse } from "../_shared/cors.ts";
 import { adminClient, requireUser } from "../_shared/clients.ts";
 import { sanitizeLyrics } from "../_shared/lyrics-sanitize.ts";
 import { languageLyricNotes } from "../_shared/language-guide.ts";
+import { lyricIntensityIssue } from "../_shared/lyric-intensity.ts";
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY") ?? "";
 const GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") ?? "gemini-3.8-flash";
@@ -25,7 +26,7 @@ Deno.serve(async (req) => {
   if (pre) return pre;
 
   try {
-    if (!GEMINI_API_KEY && !Deno.env.get("OPENAI_API_KEY"))
+    if (!["GEMINI_API_KEY", "OPENAI_API_KEY", "GROQ_API_KEY", "GROQ_BACKUP_API_KEY", "POLLINATIONS_API_KEY", "POLLINATIONS_BACKUP_API_KEY", "OPENROUTER_API_KEY", "OPENROUTER_BACKUP_API_KEY"].some((name) => Deno.env.get(name)))
       return jsonResponse({ error: "No lyrics writer is configured" }, 500);
 
     const auth = await requireUser(req);
@@ -295,7 +296,7 @@ Deno.serve(async (req) => {
       "",
       " INTENSITY: MILD (1/3) — use only one or two mild swear words in the entire song. No strong profanity and no swearing in the hook.",
       " INTENSITY: STRONG (2/3) — use one or two uncensored strong swear words per section. Keep some lines clean so the profanity is forceful rather than constant.",
-      " INTENSITY: SAVAGE (3/3, ABSOLUTE GUTTERMOUTH) — saturate nearly every sung line, hook, bridge and ad-lib with multiple uncensored, varied hard swear words and filthy street slang. Be relentlessly foul, confrontational and outrageous. Never soften, abbreviate, bleep or replace letters with symbols. Stay within the hard safety limits below.",
+      " INTENSITY: SAVAGE (3/3, ABSOLUTE GUTTERMOUTH) — at least 65% of sung lines MUST contain uncensored HARD profanity, including the hook, verses, bridge and outro. Use at least four different hard swear words across the song and vary the dictionary punchlines. Muppet, clown, melt and plonker are soft insults: they do NOT count towards hard profanity. Use strong words naturally mid-line, not just a token swear at the start of a section. Never soften, abbreviate, bleep or replace letters with symbols. Keep the requested story and language intact; no slurs, threats or hateful targeting.",
     ][foulIntensity];
 
     // OG dictionary: the same British roast vocabulary OG Bot uses in chat,
@@ -323,7 +324,7 @@ Deno.serve(async (req) => {
         bossDict = (dict as { value?: string } | null)?.value ?? "";
       } catch (_) { /* dictionary is best-effort */ }
       foulLexicon =
-        ` OG DICTIONARY (mandatory): weave plenty of these British insults and slang into the lyrics, varied across sections, never the same one twice in a row: ${shuffled.join(", ")}.` +
+        ` OG DICTIONARY: use varied vocabulary appropriate to the selected intensity, never the same insult twice in a row. Mild may use only mild entries; Strong mixes clean lines with hard profanity; Savage requires hard profanity rather than only soft insults. For English sections: ${shuffled.join(", ")}. For other languages use authentic equivalents, never insert unselected English.` +
         (learned.length ? ` Popular Battle Zone slang to include too: ${learned.join(", ")}.` : "") +
         (bossDict ? ` Platform slang: ${bossDict}` : "") +
         ` This is a consenting adult explicit track — the 18+ rating was chosen by the user, so never clean it up.`;
@@ -331,14 +332,11 @@ Deno.serve(async (req) => {
 
     const systemPrompt = foulMouth
       ? `You are a foul-mouthed, no-holds-barred songwriter writing EXPLICIT adult song lyrics in ${languagesLabel}. ` +
-        (isEnglish
-          ? `Lean ALL the way into raw, gritty, street-level English: drop "fuck", "fucking", "shit", "dickhead", "bastard", "bitch", "asshole" and similar profanity liberally throughout EVERY verse and chorus — at least a few per section. `
-          : `Lean ALL the way into raw, gritty, street-level ${languagesLabel}: use authentic native profanity, curse words, and savage slang from each of those languages itself (do NOT just translate English swears literally — use the equivalents real native speakers would actually shout). Drop them liberally throughout EVERY verse and chorus — at least a few per section. `) +
-        `Use unfiltered attitude, savage punchlines, and trash-talk energy from the very first line. Make it sound like a parental-advisory hip-hop / punk track, NOT a radio edit. ` +
+        `Write natural street-level ${languagesLabel} with the exact selected intensity below. Match the selected musical styles, not automatically rap or punk. Native-language profanity must be authentic rather than literal English translations. ` +
         `Do NOT self-censor, do NOT use asterisks or bleeps, and do NOT add disclaimers. Avoid slurs, sexual content involving minors, and direct incitement to real-world violence — everything else is fair game.` +
         foulLexicon +
         intensityRule +
-        ` The INTENSITY DIAL overrides the general "liberally" guidance above — follow the dial exactly.` +
+        ` The INTENSITY DIAL overrides all dictionary and brief suggestions — follow it exactly.` +
         structureRule +
         bilingualRule +
         ` Target ${aimLow}–${aimHigh} words (never fewer than ${minWords}, never more than ${aimHigh}). Output ONLY the lyrics, no explanations.`
@@ -373,6 +371,8 @@ Deno.serve(async (req) => {
     await updateProgress(40, "Writing verses…");
 
     type Gen = { ok: boolean; status: number; text: string; detail?: string };
+    const effectiveIntensity = foulMouth ? foulIntensity : 0;
+    const outputIssue = (text: string) => lyricIntensityIssue(sanitizeLyrics(text), effectiveIntensity, isEnglish);
 
     // Hard budget: the server kills requests at ~150s, so every AI call gets a
     // timeout and we stop trying new models once the budget is nearly spent.
@@ -431,7 +431,13 @@ Deno.serve(async (req) => {
             model: GEMINI_MODELS[i],
             ...geminiUsage(data),
           });
-          return { ok: true, status: 200, text: extractText(data) };
+          const text = extractText(data);
+          const issue = outputIssue(text);
+          if (!text || issue) {
+            last = { ok: false, status: 422, text: "", detail: issue ?? "Empty lyrics" };
+            continue;
+          }
+          return { ok: true, status: 200, text };
         }
         const detail = await res.text();
         last = { ok: false, status: res.status, text: "", detail };
@@ -467,7 +473,7 @@ Deno.serve(async (req) => {
         if (r.ok) {
           const j = await r.json();
           const text = (j?.choices?.[0]?.message?.content ?? "").trim();
-          if (text) {
+          if (text && !outputIssue(text)) {
             const u = j?.usage ?? {};
             logAiUsage({
               feature: "lyrics",
@@ -528,7 +534,8 @@ Deno.serve(async (req) => {
         if (r.ok) {
           const j = await r.json().catch(() => null);
           const text = (j?.choices?.[0]?.message?.content ?? "").trim();
-          if (text.length > 200) {
+          const issue = outputIssue(text);
+          if (text.length > 200 && !issue) {
             const u = j?.usage ?? {};
             logAiUsage({
               feature: "lyrics",
@@ -540,7 +547,8 @@ Deno.serve(async (req) => {
             });
             return { ok: true, status: 200, text };
           }
-          last = { ok: false, status: 502, text: "", detail: "Empty free reply" };
+          last = { ok: false, status: 422, text: "", detail: issue ?? "Empty free reply" };
+          console.warn("Free lyrics rejected by intensity check", env, last.detail);
         } else {
           last = { ok: false, status: r.status, text: "", detail: (await r.text()).slice(0, 200) };
           console.error("Free lyrics tier failed", env, r.status);
@@ -586,7 +594,13 @@ Deno.serve(async (req) => {
             model: backupModels[i],
             ...geminiUsage(data),
           });
-          return { ok: true, status: 200, text: extractText(data) };
+          const text = extractText(data);
+          const issue = outputIssue(text);
+          if (!text || issue) {
+            lastFail = { ok: false, status: 422, text: "", detail: issue ?? "Empty lyrics" };
+            continue;
+          }
+          return { ok: true, status: 200, text };
         }
         lastFail = { ok: false, status: r.status, text: "", detail: await r.text() };
         if (![404, 429].includes(r.status) && r.status < 500) return lastFail;
@@ -694,6 +708,11 @@ Deno.serve(async (req) => {
     }
 
     lyrics = sanitizeLyrics(lyrics);
+    const finalIntensityIssue = outputIssue(lyrics);
+    if (finalIntensityIssue) {
+      await updateProgress(0, "");
+      return jsonResponse({ error: "The lyrics writer did not match your selected intensity. Please try again.", code: "lyric_intensity_mismatch" }, 422);
+    }
     const words = wordCount(lyrics);
     const estimatedSec = Math.max(targetSec, Math.round((words / WORDS_PER_MIN) * 60));
 

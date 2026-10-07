@@ -12,7 +12,6 @@ import { languageVoiceHint } from "../_shared/language-guide.ts";
 import {
   isModerationRejection,
   MODERATION_MESSAGE,
-  softenForModeration,
 } from "../_shared/moderation-safe.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -461,8 +460,8 @@ Deno.serve(async (req) => {
             : withSignatureHint(effectivePrompt),
           MAX_PROMPT_CHARS,
         ) ?? effectivePrompt);
-    // Submit to Suno. If the engine's moderation blocks the explicit lyrics we
-    // soften the strongest words once and resubmit, instead of burning the job.
+    // Preserve the artist's lyrics exactly. A moderation rejection is shown
+    // honestly; never silently create a radio edit of an explicit track.
     const submit = async (
       lyricsText: string | null,
       promptText: string | null,
@@ -504,16 +503,12 @@ Deno.serve(async (req) => {
       });
     };
 
-    let attemptLyrics = signedLyrics;
-    let attemptPrompt = signedPrompt;
-    let attemptStyle = style;
-    let softened = false;
     let taskId: string | null = null;
 
-    for (let attempt = 0; attempt < 2; attempt++) {
+    for (let attempt = 0; attempt < 1; attempt++) {
       let sunoRes: Response;
       try {
-        sunoRes = await submit(attemptLyrics, attemptPrompt, attemptStyle);
+        sunoRes = await submit(signedLyrics, signedPrompt, style);
       } catch (_e) {
         await refund(admin, user.id, songId, "Suno API unreachable", coinCost);
         return json({
@@ -538,14 +533,6 @@ Deno.serve(async (req) => {
       if (sunoRes.ok && codeNum === 200 && taskId) break;
 
       console.error("Suno rejected task", codeNum, reason);
-
-      if (!softened && isModerationRejection(reason)) {
-        softened = true;
-        attemptLyrics = softenForModeration(attemptLyrics);
-        attemptPrompt = softenForModeration(attemptPrompt);
-        attemptStyle = softenForModeration(attemptStyle);
-        continue;
-      }
 
       const friendly = isModerationRejection(reason) ? MODERATION_MESSAGE : reason;
       await refund(admin, user.id, songId, friendly, coinCost);
