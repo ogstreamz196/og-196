@@ -72,12 +72,15 @@ export function freeFallbackTargets(): AiChatTarget[] {
     keyed("GROQ_BACKUP_API_KEY", "groq-backup", "https://api.groq.com/openai/v1/chat/completions", "qwen/qwen3.8-27b"),
     keyed("GROQ_BACKUP_API_KEY", "groq-backup", "https://api.groq.com/openai/v1/chat/completions", "openai/gpt-oss-120b"),
     keyed("POLLINATIONS_API_KEY", "pollinations", "https://gen.pollinations.ai/v1/chat/completions", "openai-fast"),
-    keyed(
-      "OPENROUTER_API_KEY",
-      "openrouter",
-      "https://openrouter.ai/api/v1/chat/completions",
-      "nvidia/nemotron-3.5-lightning:free",
-      { "HTTP-Referer": "https://ogbot.co.uk", "X-Title": "OG BOT" },
+    keyed("POLLINATIONS_BACKUP_API_KEY", "pollinations", "https://gen.pollinations.ai/v1/chat/completions", "openai-fast"),
+    ...["OPENROUTER_API_KEY", "OPENROUTER_BACKUP_API_KEY"].map((env) =>
+      keyed(
+        env,
+        "openrouter",
+        "https://openrouter.ai/api/v1/chat/completions",
+        "nvidia/nemotron-3.5-lightning:free",
+        { "HTTP-Referer": "https://ogbot.co.uk", "X-Title": "OG BOT" },
+      ),
     ),
   ];
   return list.filter((t): t is AiChatTarget => t !== null);
