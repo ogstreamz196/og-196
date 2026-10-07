@@ -18,6 +18,17 @@ export type AiChatTarget = {
 const GEMINI_OPENAI_URL =
   "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
 
+function geminiTarget(): AiChatTarget | null {
+  const gemini = process.env.GEMINI_API_KEY;
+  if (!gemini) return null;
+  return {
+    url: GEMINI_OPENAI_URL,
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${gemini}` },
+    model: process.env.GEMINI_MODEL || "gemini-3.8-flash",
+    provider: "gemini",
+  };
+}
+
 function keyed(
   envKey: string,
   provider: AiChatTarget["provider"],
