@@ -257,6 +257,7 @@ export const chatOgBot = createServerFn({ method: "POST" })
           ],
         },
         context.userId,
+        { foulMouth: data.mode === "og" && !!foulMouth },
       );
 
       if (!res.ok) {
