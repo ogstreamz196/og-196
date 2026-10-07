@@ -17,8 +17,8 @@
 - Validate English lyric profanity density and variety against the selected level before accepting any provider output; use one shared validator so fallback and rewrite paths cannot silently soften Savage or dirty Clean.
 - Preserve submitted music lyrics on provider moderation rejection and return the rejection without automatic word substitutions; the selected explicit level must not silently become a radio edit.
 
-- Ordinary text chat goes to keyed free tiers first (Groq, Pollinations, OpenRouter), with paid Gemini/OpenAI first only for media or heuristic "pro" questions and otherwise as fallback when free tiers fail, to save paid credits; there is no Boss toggle. Use `PERPLEXITY_API_KEY` only for live web facts and never use Lovable AI for end-user inference.
-- Lyrics run on Gemini first (primary key, then backup key across several models, skipping busy/retired ones), with OpenAI as the final text fallback so a Google outage never blocks songs; audio transcription stays on Gemini for its media handling.
+- Ordinary text chat goes to keyed free tiers first (Groq, Pollinations, OpenRouter), with paid Gemini first only for media or heuristic "pro" questions and otherwise as fallback when free tiers fail, to save paid credits; there is no Boss toggle. Use `PERPLEXITY_API_KEY` only for live web facts and never use Lovable AI for end-user inference.
+- Lyrics run on free keys first, then Gemini (primary key, then backup key across several models); OpenAI is not used anywhere, because the owner removed it.
 - `GEMINI_BACKUP_API_KEY` is the owner's paid emergency key: use it only for lyrics and image edits, after the primary key fails (401/403/404/429/5xx) — never for ordinary chat, because it costs real money.
 - Battle Zone learns slang via the service-only `learn_battle_words` function (words only, no user ids, slur blocklist) and feeds popular words into the foul prompt.
 
@@ -36,7 +36,7 @@
 
 ## Chat image edits
 
-- Private-chat image edits charge through the service-only consume_chat_image_edit function (one free slot per rolling window, then coins) and refund on failure, so retries cannot double-charge; edits use Gemini image first, OpenAI fallback only on 429/5xx.
+- Private-chat image edits charge through the service-only consume_chat_image_edit function (one free slot per rolling window, then coins) and refund on failure, so retries cannot double-charge; edits use Gemini image first, then the Gemini backup key only.
 
 ## Sports Guide
 
