@@ -10,7 +10,7 @@ export type AiChatTarget = {
   url: string;
   headers: Record<string, string>;
   model: string;
-  provider: "gemini" | "openai" | "groq" | "openrouter" | "pollinations";
+  provider: "gemini" | "openai" | "groq" | "groq-backup" | "openrouter" | "pollinations";
   /** Free fallback tiers get text-only messages and no provider-specific params. */
   free?: boolean;
 };
