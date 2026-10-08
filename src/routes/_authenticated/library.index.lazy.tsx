@@ -2,6 +2,8 @@ import { startAttempt, updateAttempt, describeError } from "@/lib/generation-att
 import { createLazyFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+
+const WIZARD_DRAFT_KEY = "ogbot.wizardDraft.v1";
 import { useSessionRunState } from "@/hooks/use-session-run-state";
 
 /** Falling ember config for the hazard CREATE button — staggered so the shower looks random. */
@@ -910,6 +912,11 @@ function LibraryPage() {
       setTrackedSongId(row.id);
       library.refetch();
       toast.success("OG Bot is creating your track — no credits charged");
+      try {
+        window.localStorage.removeItem(WIZARD_DRAFT_KEY);
+      } catch {
+        /* storage unavailable */
+      }
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Something went wrong";
       void updateAttempt(attemptId, {
