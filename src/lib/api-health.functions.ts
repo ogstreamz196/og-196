@@ -424,6 +424,15 @@ const SPECS: Spec[] = [
     run: () => checkChatKey("OPENROUTER_BACKUP_API_KEY", "https://openrouter.ai/api/v1/chat/completions", FOUL_MODEL, OR_HDR) },
   { key: "gemini", label: "Gemini (main, paid)", secret: "GEMINI_API_KEY", help: "aistudio.google.com/apikey", group: "AI chat & lyrics", required: true, run: checkGemini },
   { key: "gemini_backup", label: "Gemini emergency backup (lyrics & image edits)", secret: "GEMINI_BACKUP_API_KEY", help: "aistudio.google.com/apikey", group: "AI chat & lyrics", required: false, run: checkGeminiBackup },
+  ...["GEMINI_FREE_API_KEY", "GEMINI_FREE_BACKUP_API_KEY", "GEMINI_FREE_3_API_KEY", "GEMINI_FREE_4_API_KEY"].map((secret, i) => ({
+    key: `gemini_free_${i + 1}`, label: `Gemini free key ${i + 1} (lyrics)`, secret, help: "aistudio.google.com/apikey", group: "AI chat & lyrics" as HealthGroup, required: false,
+    run: async (): Promise<Partial_> => {
+      const k = process.env[secret];
+      if (!k) return missing(secret);
+      const { result, latencyMs } = await timed(() => fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${k}`));
+      return result.ok ? { status: "ok", detail: "Key accepted by Google.", latencyMs } : { status: "invalid", detail: `Google rejected the key (HTTP ${result.status}).`, latencyMs };
+    },
+  })),
   { key: "groq", label: "Groq (Foul Mouth off only)", secret: "GROQ_API_KEY", help: "console.groq.com/keys", group: "AI chat & lyrics", required: false,
     run: () => checkChatKey("GROQ_API_KEY", "https://api.groq.com/openai/v1/chat/completions", "openai/gpt-oss-120b") },
   { key: "groq_backup", label: "Groq backup", secret: "GROQ_BACKUP_API_KEY", help: "console.groq.com/keys", group: "AI chat & lyrics", required: false,

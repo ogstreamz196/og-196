@@ -547,7 +547,7 @@ Deno.serve(async (req) => {
 
     // Owner's free Google AI Studio keys: tried before any paid Gemini key.
     const callFreeGemini = async (contents: unknown[]): Promise<Gen | null> => {
-      for (const env of ["GEMINI_FREE_API_KEY", "GEMINI_FREE_BACKUP_API_KEY", "GEMINI_FREE_3_API_KEY"]) {
+      for (const env of ["GEMINI_FREE_API_KEY", "GEMINI_FREE_BACKUP_API_KEY", "GEMINI_FREE_3_API_KEY", "GEMINI_FREE_4_API_KEY"]) {
         const key = Deno.env.get(env);
         if (!key) continue;
         for (const model of ["gemini-flash-latest", "gemini-flash-lite-latest"]) {
