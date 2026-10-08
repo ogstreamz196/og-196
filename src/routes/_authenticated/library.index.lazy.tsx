@@ -845,11 +845,55 @@ function LibraryPage() {
         targetDurationSec: overrideTargetSec,
         vocalsOnly,
       };
+      // Save the job on the server first: if this phone sleeps or loses signal,
+      // the background worker finishes the song from these exact answers.
+      const earlyStyle = [songStyle, songVocal, ...vocalsOnlyTags].filter(Boolean).join(", ");
+      const earlyPrompt =
+        ([songTitle, songSubject ? `For: ${songSubject}` : null, earlyStyle ? `Style: ${earlyStyle}` : null, songLanguage ? `Language: ${songLanguage}` : null]
+          .filter(Boolean)
+          .join(" — ") || songTitle || "Untitled") + (songDetails ? `\n— Idea: ${songDetails}` : "");
+      const sunoBase = {
+        prompt: earlyPrompt,
+        title: songTitle || null,
+        style: songStyle || null,
+        language: songLanguage || null,
+        vocal: songVocal || null,
+        vocals_only: vocalsOnly,
+        beat_path: beatPath || null,
+        target_duration_sec: overrideTargetSec,
+      };
+      const { data: staged, error: stageErr } = await supabase
+        .from("songs")
+        .insert({
+          user_id: user.id,
+          title: songTitle || null,
+          prompt: earlyPrompt,
+          style: earlyStyle || null,
+          status: "draft",
+          vocals_only: vocalsOnly,
+          beat_path: beatPath || null,
+          target_duration_sec: overrideTargetSec,
+          extra_context: extraContext.trim() || null,
+          is_public: override?.isPublic ?? true,
+          foul_mouth: trackFoulMouth,
+          foul_intensity: trackFoulIntensity,
+          orchestration: { lyrics: lyricBody, suno: sunoBase },
+          orchestration_due_at: new Date(Date.now() + 4 * 60_000).toISOString(),
+        } as never)
+        .select("id")
+        .single();
+      if (stale()) return;
+      if (stageErr || !staged?.id) throw new Error(stageErr?.message || "Couldn't save song");
+      const stagedId = (staged as { id: string }).id;
+      attemptSongId = stagedId;
+      void updateAttempt(attemptId, { song_id: stagedId });
       // Busy AI or a dropped connection: retry automatically before showing an error.
       let lyricData: { lyrics?: string; estimated_duration_label?: string } | null = null;
       let lyricErr: unknown = null;
       for (let attempt = 0; attempt < 3; attempt++) {
-        const r = await supabase.functions.invoke("generate-lyrics", { body: lyricBody });
+        const r = await supabase.functions.invoke("generate-lyrics", {
+          body: { ...lyricBody, song_id: stagedId },
+        });
         if (stale()) return;
         lyricData = r.data;
         lyricErr = r.error;
