@@ -58,7 +58,7 @@ export function LedgerlyPanel() {
             Create a key in Ledgerly → More → Connect sites, paste it here, then press Test Connection.
           </p>
           <label className="flex items-center justify-between gap-3">
-            <span className="text-sm font-semibold">Enable Ledgerly Sync</span>
+            <span className="text-sm font-semibold">Ledgerly sync — turn on to send sales</span>
             <Switch checked={enabled} onCheckedChange={setEnabled} />
           </label>
           <div>

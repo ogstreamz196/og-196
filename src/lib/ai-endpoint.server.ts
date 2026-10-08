@@ -1,8 +1,8 @@
 /**
  * Central AI routing for the app.
  *
- * Ordinary text/vision work is shared between the Boss's Gemini and OpenAI
- * accounts. A provider can take over once after a retryable 429/5xx response.
+ * Free keyed tiers answer ordinary text first; the Boss's Gemini account is
+ * the paid tier. A provider can take over once after a retryable 429/5xx response.
  * Lovable AI is never used as a fallback.
  */
 
