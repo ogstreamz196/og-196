@@ -51,6 +51,5 @@
 - OG Bot prompts get a Boss-only or non-Boss permission block from buildSystemPrompt; only admin/boss roles may discuss Boss Controls.
 
 - Lyrics: free Google AI Studio keys (GEMINI_FREE_API_KEY, GEMINI_FREE_BACKUP_API_KEY, GEMINI_FREE_3_API_KEY) run after Groq/Pollinations/OpenRouter and before paid Gemini keys, because the owner wants to save paid credits.
-- Song creation stages a draft row with an `orchestration` payload before any AI call; the 5-minute suno-retry worker resumes orphaned drafts server-side (scheduler token + owner id accepted by generate-lyrics/suno-generate), because a sleeping phone must not kill a job.
-- generate-lyrics falls back to the zero-network built-in songwriter (_shared/fallback-lyrics.ts) when every AI key fails, so lyrics never hard-fail.
-- Edge functions record failing AI key names/status only in ai_key_failures; the worker sends Boss a throttled Telegram warning.
+- Creation stages a draft row with an `orchestration` payload first; the suno-retry worker resumes orphaned drafts server-side, so a sleeping phone can't kill a job.
+- generate-lyrics uses the offline songwriter (_shared/fallback-lyrics.ts) when all AI keys fail; key failures (name/status only) go to ai_key_failures for throttled Boss Telegram alerts.
