@@ -861,7 +861,8 @@ function LibraryPage() {
       const { data: genData, error: genErr } = await supabase.functions.invoke("suno-generate", {
         body: {
           song_id: row.id,
-          prompt: promptText,
+          prompt:
+            (promptText || songTitle || "Untitled") + (songDetails ? `\n— Idea: ${songDetails}` : ""),
           lyrics: nextLyrics,
           title: songTitle || null,
           style: songStyle || null,
