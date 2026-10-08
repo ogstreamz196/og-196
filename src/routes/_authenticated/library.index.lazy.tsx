@@ -805,6 +805,13 @@ function LibraryPage() {
     // anywhere below always leaves a traceable record.
     let attemptStage = "lyrics";
     let attemptSongId: string | null = null;
+    let savedDraft: WizardDraft | null = null;
+    try {
+      const raw = window.localStorage.getItem(WIZARD_DRAFT_KEY);
+      savedDraft = raw ? (JSON.parse(raw) as WizardDraft) : null;
+    } catch {
+      savedDraft = null;
+    }
     const attemptId = await startAttempt(user.id, {
       title: songTitle || null,
       stage: attemptStage,
@@ -816,6 +823,8 @@ function LibraryPage() {
         has_beat: !!beatPath,
         target_sec: overrideTargetSec,
         foul_intensity: trackFoulIntensity,
+        // The user's raw wizard answers, so any retry or device can restore them.
+        draft: savedDraft,
       },
     });
 
@@ -943,7 +952,7 @@ function LibraryPage() {
         stage: attemptStage,
         song_id: attemptSongId,
         error_message: msg.slice(0, 1000),
-        context: { error: describeError(e), stale: stale() },
+        context: { error: describeError(e), stale: stale(), draft: savedDraft },
       });
       // Keep the saved draft visible with its reason so Retry works from the library.
       if (attemptSongId) {
