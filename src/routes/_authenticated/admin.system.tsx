@@ -1,13 +1,11 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
-import { Activity, KeyRound, Webhook, Map, Bug, AlertTriangle, BookOpenCheck } from "lucide-react";
+import { KeyRound, Webhook, Map, Bug, AlertTriangle } from "lucide-react";
 import { GenerationFailures } from "@/components/admin/GenerationFailures";
-import { LedgerlyPanel } from "@/components/admin/LedgerlyPanel";
+import { ApiHub } from "@/components/admin/ApiHub";
 import { useRole } from "@/hooks/use-role";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { BossNav } from "@/components/admin/BossNav";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ApiHealthPage } from "./admin.health";
-import { AdminApiKeysPage } from "./admin.api-keys";
 import { WebhooksAdminPage } from "./admin.webhooks";
 import { RouteMapPage } from "./admin.route-map";
 import { DebugContextPage } from "./admin.debug-context";
@@ -17,11 +15,9 @@ export const Route = createFileRoute("/_authenticated/admin/system")({
 });
 
 const TABS = [
-  { value: "health", label: "Health", Icon: Activity, Panel: ApiHealthPage },
+  { value: "apis", label: "API & Integrations", Icon: KeyRound, Panel: ApiHub },
   { value: "failures", label: "Track failures", Icon: AlertTriangle, Panel: GenerationFailures },
-  { value: "keys", label: "API keys", Icon: KeyRound, Panel: AdminApiKeysPage },
   { value: "webhooks", label: "Webhooks", Icon: Webhook, Panel: WebhooksAdminPage },
-  { value: "ledgerly", label: "Ledgerly", Icon: BookOpenCheck, Panel: LedgerlyPanel },
   { value: "routes", label: "Route map", Icon: Map, Panel: RouteMapPage },
   { value: "debug", label: "Lyric debug", Icon: Bug, Panel: DebugContextPage },
 ] as const;
@@ -46,10 +42,10 @@ function AdminSystemHub() {
       <header className="mb-5 border-b border-border/60 pb-4">
         <h1 className="font-display text-2xl font-black">System</h1>
         <p className="text-sm text-muted-foreground">
-          Health, keys, webhooks, routes and lyric debug — one page.
+          Every API key with live ping tests, plus webhooks, routes and lyric debug.
         </p>
       </header>
-      <Tabs defaultValue="health" className="w-full">
+      <Tabs defaultValue="apis" className="w-full">
         <TabsList className="mb-5 flex h-auto w-full flex-wrap justify-start gap-4 rounded-none border-0 border-b border-border/60 bg-transparent p-0">
           {TABS.map(({ value, label, Icon }) => (
             <TabsTrigger

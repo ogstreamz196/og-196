@@ -690,7 +690,7 @@ async function runChatAI(
       } else if (res.status === 402) {
         await reply(
           chat_id,
-          `💳 ${provider === "gemini" ? "Gemini" : "ChatGPT"} account quota is exhausted.`,
+          `💳 AI quota is exhausted (${provider}).`,
         );
       } else {
         await reply(chat_id, `OG Bot couldn't respond right now (HTTP ${res.status}).`);
