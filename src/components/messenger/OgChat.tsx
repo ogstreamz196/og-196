@@ -436,7 +436,6 @@ export function OgChat({
 
   function clearChat() {
     setMessages([]);
-    setLastUpload(null);
     selfSyncRef.current = true;
     window.dispatchEvent(new Event(SYNC_EVENT));
     toast.message("Chat cleared");

@@ -394,6 +394,7 @@ export function buildSystemPrompt(opts: BuildPromptOpts): string {
   const parts = [
     base,
     SITE_GLOSSARY,
+    opts.user.is_admin ? BOSS_NOTE : BOSS_ONLY_NOTE,
     opts.songIntent ? SONGWRITING_PLAYBOOK : null,
     RESEARCH_NOTE,
     opts.mode === "og" && opts.foulMouth ? buildLexicon() : null,
