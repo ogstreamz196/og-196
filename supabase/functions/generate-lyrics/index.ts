@@ -400,7 +400,12 @@ Deno.serve(async (req) => {
           body: JSON.stringify({
             systemInstruction: { role: "system", parts: [{ text: systemPrompt }] },
             contents,
-            generationConfig: { temperature: 0.9, maxOutputTokens: 8192 },
+            generationConfig: {
+              temperature: 0.9,
+              maxOutputTokens: 8192,
+              // Thinking made Gemini blow past its 30s window on long lyrics.
+              thinkingConfig: { thinkingBudget: 0 },
+            },
           }),
         },
         30_000,
@@ -493,14 +498,26 @@ Deno.serve(async (req) => {
           {
             method: "POST",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}`, ...extra },
-            body: JSON.stringify({ model, messages, temperature: 0.9 }),
+            // Lyrics need no deep thinking: long reasoning used up the whole
+            // reply and came back blank, so keep it short.
+            body: JSON.stringify({
+              model,
+              messages,
+              temperature: 0.9,
+              max_tokens: 6000,
+              ...(env.startsWith("GROQ") ? { reasoning_effort: "low" } : {}),
+              ...(env.startsWith("OPENROUTER") ? { reasoning: { effort: "low" } } : {}),
+            }),
           },
-          15_000,
+          35_000,
           // Keep time for both Gemini keys if every free key fails.
           90_000,
         );
         if (r.ok) {
-          const j = await r.json().catch(() => null);
+          const j = await r.json().catch((e) => {
+            console.error("Free reply body failed", env, (e as Error).message);
+            return null;
+          });
           const text = (j?.choices?.[0]?.message?.content ?? "").trim();
           const issue = outputIssue(text);
           if (text.length > 200 && !issue) {
@@ -516,7 +533,7 @@ Deno.serve(async (req) => {
             return { ok: true, status: 200, text };
           }
           last = { ok: false, status: 422, text: "", detail: issue ?? "Empty free reply" };
-          console.warn("Free lyrics rejected by intensity check", env, last.detail);
+          console.warn("Free lyrics reply unusable", env, text.length, JSON.stringify(j).slice(0, 400), systemPrompt.length, messages.map((m) => m.content.length).join(","));
           // Empty replies repeat on the provider's backup key — don't wait twice.
           if (!text) slow.add(provider);
         } else {
