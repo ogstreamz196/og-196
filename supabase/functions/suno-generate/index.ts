@@ -336,10 +336,21 @@ Deno.serve(async (req) => {
     // Create or reuse the song row now that the charge has succeeded.
     let song: { id: string } | null = null;
     if (existing) {
+      // Never erase the user's saved "— Idea:" from the wizard.
+      const { data: prev } = await admin
+        .from("songs")
+        .select("prompt")
+        .eq("id", existing.id)
+        .maybeSingle();
+      const prevPrompt = ((prev as { prompt?: string | null } | null)?.prompt ?? "") as string;
+      const keepPrompt =
+        prevPrompt.includes("— Idea:") && !effectivePrompt.includes("— Idea:")
+          ? prevPrompt
+          : effectivePrompt;
       const { data: upd, error: updErr } = await admin
         .from("songs")
         .update({
-          prompt: effectivePrompt,
+          prompt: keepPrompt,
           style,
           lyrics: effectiveLyrics,
           title,
