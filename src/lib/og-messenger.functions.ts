@@ -131,7 +131,7 @@ export const chatOgBot = createServerFn({ method: "POST" })
       display_name: profile.display_name,
       email: profile.email,
       coin_balance: profile.coin_balance ?? 0,
-      is_admin: roles.includes("admin"),
+      is_admin: roles.includes("admin") || roles.includes("boss"),
       is_vip: roles.includes("vip"),
       page_context: data.pageContext || undefined,
     };

@@ -812,7 +812,7 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
           console.error("[telegram] handler error", err);
           await reply(
             chat_id,
-            "⚠️ OG Bot hit an internal error handling that update. Boss has been notified.",
+            "🛠️ My wires got crossed on that one, fam — not your fault. Give it a sec and send it again.",
           ).catch(() => undefined);
           return Response.json(
             { ok: false, error: (err as Error)?.message ?? "handler_error" },
