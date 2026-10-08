@@ -545,13 +545,35 @@ Deno.serve(async (req) => {
       return last;
     };
 
+    // Owner's free Google AI Studio keys: tried before any paid Gemini key.
+    const callFreeGemini = async (contents: unknown[]): Promise<Gen | null> => {
+      for (const env of ["GEMINI_FREE_API_KEY", "GEMINI_FREE_BACKUP_API_KEY"]) {
+        const key = Deno.env.get(env);
+        if (!key) continue;
+        for (const model of ["gemini-flash-latest", "gemini-flash-lite-latest"]) {
+          const r = await postTo(model, contents, key, 50_000);
+          if (!r.ok) {
+            console.error("Free Gemini failed", env, model, r.status);
+            continue;
+          }
+          const data = await r.json().catch(() => null);
+          const text = extractText(data);
+          if (text.length > 200) {
+            logAiUsage({ feature: "lyrics", provider: env.toLowerCase().replace("_api_key", ""), model, ...geminiUsage(data) });
+            return { ok: true, status: 200, text };
+          }
+        }
+      }
+      return null;
+    };
+
     const generate = async (contents: unknown[]): Promise<Gen> => {
       const f = await callFree(contents);
       if (f.ok && f.text) return f;
-      console.warn("Free lyrics tiers failed — falling back to Gemini", f.status);
-      const g = await generateGemini(contents);
-      if (g.ok && g.text) return g;
-      return g;
+      console.warn("Free lyrics tiers failed — trying free Gemini keys", f.status);
+      const fg = await callFreeGemini(contents);
+      if (fg) return fg;
+      return await generateGemini(contents);
     };
 
     const generateGemini = async (contents: unknown[]): Promise<Gen> => {
