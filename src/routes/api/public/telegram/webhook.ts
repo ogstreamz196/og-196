@@ -617,7 +617,7 @@ async function runChatAI(
   }
 
   const isVip = roles.includes("vip") || roles.includes("admin") || roles.includes("dev");
-  const isAdminUser = roles.includes("admin") || roles.includes("dev");
+  const isAdminUser = roles.includes("admin") || roles.includes("boss");
 
   const personaMap = new Map<string, string>(
     (siteRes.data ?? []).map((r: { key: string; value: string }) => [r.key, r.value]),
