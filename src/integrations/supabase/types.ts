@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_key_failures: {
+        Row: {
+          alerted_at: string | null
+          created_at: string
+          id: number
+          key_name: string
+          status: number
+        }
+        Insert: {
+          alerted_at?: string | null
+          created_at?: string
+          id?: never
+          key_name: string
+          status: number
+        }
+        Update: {
+          alerted_at?: string | null
+          created_at?: string
+          id?: never
+          key_name?: string
+          status?: number
+        }
+        Relationships: []
+      }
       ai_usage_log: {
         Row: {
           completion_tokens: number
@@ -1176,6 +1200,9 @@ export type Database = {
           lyrics_stage: string | null
           lyrics_started_at: string | null
           next_retry_at: string | null
+          orchestration: Json | null
+          orchestration_attempts: number
+          orchestration_due_at: string | null
           portal_id: string | null
           prompt: string
           retry_count: number
@@ -1229,6 +1256,9 @@ export type Database = {
           lyrics_stage?: string | null
           lyrics_started_at?: string | null
           next_retry_at?: string | null
+          orchestration?: Json | null
+          orchestration_attempts?: number
+          orchestration_due_at?: string | null
           portal_id?: string | null
           prompt: string
           retry_count?: number
@@ -1282,6 +1312,9 @@ export type Database = {
           lyrics_stage?: string | null
           lyrics_started_at?: string | null
           next_retry_at?: string | null
+          orchestration?: Json | null
+          orchestration_attempts?: number
+          orchestration_due_at?: string | null
           portal_id?: string | null
           prompt?: string
           retry_count?: number
@@ -2228,6 +2261,71 @@ export type Database = {
       }
       check_generation_capacity: { Args: { p_user: string }; Returns: Json }
       claim_daily_drop: { Args: never; Returns: Json }
+      claim_due_orchestrations: {
+        Args: { p_limit?: number }
+        Returns: {
+          audio_path: string | null
+          beat_path: string | null
+          completed_at: string | null
+          cover_url: string | null
+          created_at: string
+          drive_archived_at: string | null
+          drive_audio_id: string | null
+          drive_audio_link: string | null
+          drive_lyrics_id: string | null
+          drive_lyrics_link: string | null
+          duration_seconds: number | null
+          error_message: string | null
+          extra_context: string | null
+          failure_class: string | null
+          foul_intensity: number
+          foul_mouth: boolean
+          generation_started_at: string | null
+          id: string
+          is_public: boolean
+          is_variation: boolean
+          last_auto_retry_at: string | null
+          lyric_video_error: string | null
+          lyric_video_full_path: string | null
+          lyric_video_preview_path: string | null
+          lyric_video_progress: number
+          lyric_video_rendered_at: string | null
+          lyric_video_stage: string | null
+          lyric_video_status: string
+          lyric_video_unlocked: boolean
+          lyrics: string | null
+          lyrics_progress: number | null
+          lyrics_stage: string | null
+          lyrics_started_at: string | null
+          next_retry_at: string | null
+          orchestration: Json | null
+          orchestration_attempts: number
+          orchestration_due_at: string | null
+          portal_id: string | null
+          prompt: string
+          retry_count: number
+          retry_payload: Json | null
+          revealed: boolean
+          sample_path: string | null
+          status: string
+          stream_audio_url: string | null
+          style: string | null
+          suno_clip_id: string | null
+          suno_task_id: string | null
+          target_duration_sec: number | null
+          title: string | null
+          unlocked: boolean
+          updated_at: string
+          user_id: string
+          vocals_only: boolean
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "songs"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       claim_due_song_retries: {
         Args: { p_limit?: number }
         Returns: {
@@ -2265,6 +2363,9 @@ export type Database = {
           lyrics_stage: string | null
           lyrics_started_at: string | null
           next_retry_at: string | null
+          orchestration: Json | null
+          orchestration_attempts: number
+          orchestration_due_at: string | null
           portal_id: string | null
           prompt: string
           retry_count: number
