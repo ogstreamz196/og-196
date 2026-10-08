@@ -371,8 +371,10 @@ Deno.serve(async (req) => {
     await updateProgress(40, "Writing verses…");
 
     type Gen = { ok: boolean; status: number; text: string; detail?: string };
-    const effectiveIntensity = foulMouth ? foulIntensity : 0;
-    const outputIssue = (text: string) => lyricIntensityIssue(sanitizeLyrics(text), effectiveIntensity, isEnglish);
+    // Owner rule: the dictionary + intensity live in the prompt only. Replies
+    // are never rejected for swear density — only empty replies are retried.
+    void lyricIntensityIssue;
+    const outputIssue = (_text: string): string | null => null;
 
     // Hard budget: the server kills requests at ~150s, so every AI call gets a
     // timeout and we stop trying new models once the budget is nearly spent.
