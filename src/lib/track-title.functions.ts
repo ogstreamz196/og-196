@@ -66,7 +66,7 @@ export function fallbackTitle(subjectName: string, description: string): string 
   const name = firstName(subjectName);
   if (words.length === 1 && name) return cleanTitle(`${name}'s ${words[0]}`);
   if (words.length === 1) return cleanTitle(words[0]!);
-  if (name) return cleanTitle(`All About ${name}`);
+  if (name) return cleanTitle(`${name} Runs It`);
   return "Late Night Energy";
 }
 
@@ -98,11 +98,10 @@ export const suggestTrackTitle = createServerFn({ method: "POST" })
       const system = [
         "You name songs like a real artist naming a single. Return ONE title only.",
         "Rules:",
-        "- 1 to 4 words, max 32 characters, Title Case.",
-        "- Pull it from the strongest image, feeling, phrase or inside joke in the story — something that could be the hook.",
-        "- It should sound natural and human, like a song on a streaming chart, not a dedication label.",
-        "- You MAY use the first name only if it genuinely sounds good (e.g. 'Sweet Aaliyah'). Never use a surname or full name. Most titles should not need a name at all.",
-        "- Never use the formats 'Name — X', 'Song for Name', 'Ode to Name', or 'The Name Song'.",
+        "- 1 to 4 words, max 28 characters, Title Case. Short and punchy.",
+        "- Build it from the strongest image, feeling, phrase or inside joke in the story — something that could be the hook.",
+        "- If a first name is given, weave it in naturally when it sounds good (e.g. 'Maya Runs It', 'Leo's Late Shift'). Never use a surname.",
+        "- NEVER use 'All About', 'Song for', 'Ode to', 'Tribute to', 'The Name Song' or 'Name — X'.",
         "- Match the genre's vibe (drill: blunt and gritty; pop: catchy; nasheed: reverent).",
         "- No quotes, no emojis, no hashtags, no explanation.",
         "- Do not use the words 'song', 'track', 'anthem' or 'untitled'.",

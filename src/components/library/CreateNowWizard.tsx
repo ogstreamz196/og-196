@@ -51,7 +51,7 @@ import {
 } from "@/hooks/use-foul-mouth";
 import { Slider } from "@/components/ui/slider";
 import { useServerFn } from "@tanstack/react-start";
-import { suggestTrackTitle } from "@/lib/track-title.functions";
+import { suggestTrackTitle, fallbackTitle as localFallbackTitle } from "@/lib/track-title.functions";
 
 export type WizardResult = {
   title: string;
@@ -312,7 +312,7 @@ export function CreateNowWizard({
     // Blank title? Close instantly with a safe default and let the AI name it
     // in the background — the song only needs its title after lyrics finish.
     const typedTitle = title.trim();
-    const fallbackTitle = `All About ${subjectName.trim().split(/\s+/)[0] || "You"}`;
+    const fallbackTitle = localFallbackTitle(subjectName, description);
     const finalTitle = typedTitle || fallbackTitle;
     const titlePromise: Promise<string> | undefined = typedTitle
       ? undefined
