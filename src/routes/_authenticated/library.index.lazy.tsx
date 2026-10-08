@@ -189,11 +189,30 @@ function LibraryPage() {
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem(WIZARD_DRAFT_KEY);
-      if (raw) setWizardDraftState({ ...EMPTY_DRAFT, ...JSON.parse(raw) });
+      if (raw) {
+        setWizardDraftState({ ...EMPTY_DRAFT, ...JSON.parse(raw) });
+        return;
+      }
     } catch {
       /* ignore corrupt draft */
     }
-  }, []);
+    // New device or cleared storage: recover the answers saved with the
+    // user's latest failed attempt in the backend.
+    if (!user?.id) return;
+    void (async () => {
+      const { data } = await supabase
+        .from("generation_attempts" as never)
+        .select("status, context")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      const row = data as { status?: string; context?: { draft?: WizardDraft } } | null;
+      if (row?.status !== "succeeded" && row?.context?.draft) {
+        setWizardDraftState({ ...EMPTY_DRAFT, ...row.context.draft });
+      }
+    })();
+  }, [user?.id]);
 
   // Home "Create now" thumbnail lands here with #create — open the wizard.
   useEffect(() => {
@@ -786,6 +805,13 @@ function LibraryPage() {
     // anywhere below always leaves a traceable record.
     let attemptStage = "lyrics";
     let attemptSongId: string | null = null;
+    let savedDraft: WizardDraft | null = null;
+    try {
+      const raw = window.localStorage.getItem(WIZARD_DRAFT_KEY);
+      savedDraft = raw ? (JSON.parse(raw) as WizardDraft) : null;
+    } catch {
+      savedDraft = null;
+    }
     const attemptId = await startAttempt(user.id, {
       title: songTitle || null,
       stage: attemptStage,
@@ -797,6 +823,8 @@ function LibraryPage() {
         has_beat: !!beatPath,
         target_sec: overrideTargetSec,
         foul_intensity: trackFoulIntensity,
+        // The user's raw wizard answers, so any retry or device can restore them.
+        draft: savedDraft,
       },
     });
 
@@ -924,7 +952,7 @@ function LibraryPage() {
         stage: attemptStage,
         song_id: attemptSongId,
         error_message: msg.slice(0, 1000),
-        context: { error: describeError(e), stale: stale() },
+        context: { error: describeError(e), stale: stale(), draft: savedDraft },
       });
       // Keep the saved draft visible with its reason so Retry works from the library.
       if (attemptSongId) {
