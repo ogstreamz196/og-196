@@ -129,12 +129,18 @@ async function resubmit(song: RetrySong, apiKey: string, serviceRole: string, ba
     .eq("id", song.id);
 }
 
-export async function retryDueSongs() {
+export async function retryDueSongs(retryToken = "") {
   const apiKey = process.env["SUNO_API_KEY"];
   const serviceRole = process.env["SUPABASE_SERVICE_ROLE_KEY"];
   const backendUrl = process.env["SUPABASE_URL"];
   if (!apiKey || !serviceRole || !backendUrl) throw new Error("Music recovery is not configured");
 
+  const orch = await import("./song-orchestrator.server");
+  await orch.queueStuckSongs().catch((e) => console.error("stuck sweep failed", e));
+  const resumed = retryToken
+    ? await orch.resumeOrphanedSongs(retryToken).catch((e) => (console.error("resume failed", e), 0))
+    : 0;
+  const alerts = await orch.alertKeyFailures().catch((e) => (console.error("key alert failed", e), 0));
   const { data, error } = await (supabaseAdmin as any).rpc("claim_due_song_retries", {
     p_limit: 3,
   });
@@ -157,7 +163,7 @@ export async function retryDueSongs() {
     }
   }
   const backfilled = await backfillMissingFullTracks();
-  return { processed: results.length, backfilled };
+  return { processed: results.length, backfilled, resumed, alerts };
 }
 
 /**

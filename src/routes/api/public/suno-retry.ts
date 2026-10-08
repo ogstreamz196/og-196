@@ -15,7 +15,7 @@ export const Route = createFileRoute("/api/public/suno-retry")({
         }
         const { retryDueSongs } = await import("@/lib/suno-auto-retry.server");
         try {
-          return Response.json({ ok: true, ...(await retryDueSongs()) });
+          return Response.json({ ok: true, ...(await retryDueSongs(token)) });
         } catch (error) {
           console.error("Automatic music recovery failed", error);
           return Response.json({ ok: false }, { status: 500 });
