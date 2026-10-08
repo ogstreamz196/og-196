@@ -617,7 +617,7 @@ async function runChatAI(
   }
 
   const isVip = roles.includes("vip") || roles.includes("admin") || roles.includes("dev");
-  const isAdminUser = roles.includes("admin") || roles.includes("dev");
+  const isAdminUser = roles.includes("admin") || roles.includes("boss");
 
   const personaMap = new Map<string, string>(
     (siteRes.data ?? []).map((r: { key: string; value: string }) => [r.key, r.value]),
@@ -812,7 +812,7 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
           console.error("[telegram] handler error", err);
           await reply(
             chat_id,
-            "⚠️ OG Bot hit an internal error handling that update. Boss has been notified.",
+            "🛠️ My wires got crossed on that one, fam — not your fault. Give it a sec and send it again.",
           ).catch(() => undefined);
           return Response.json(
             { ok: false, error: (err as Error)?.message ?? "handler_error" },

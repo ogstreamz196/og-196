@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
 import { chatOgBot, type OgChatMessage } from "@/lib/og-messenger.functions";
-import { editChatImage, getImageEditStatus } from "@/lib/og-image-edit.functions";
+import { ogErrorMessage } from "@/lib/og-error-message";
 import { transcribeOgAudio } from "@/lib/og-transcribe.functions";
 import { postCommunityMessage } from "@/lib/community.functions";
 import { QUICK_STARTS } from "@/lib/og-persona-public";
@@ -191,57 +191,7 @@ export function OgChat({
 
   // Attachment + mic state
   const [attachment, setAttachment] = useState<{ dataUrl: string; name: string } | null>(null);
-  const [editMode, setEditMode] = useState(false);
-  // Conversation image memory: the photo the user last attached this session
-  // (kept in memory only) — later edits reuse it without re-attaching.
-  const [lastUpload, setLastUpload] = useState<string | null>(null);
-  const [memoryOff, setMemoryOff] = useState(false);
-  const [noCoinsOpen, setNoCoinsOpen] = useState(false);
   const [vipPromoOpen, setVipPromoOpen] = useState(false);
-  const fetchEditStatus = useServerFn(getImageEditStatus);
-  const runImageEdit = useServerFn(editChatImage);
-  const editStatus = useQuery({
-    queryKey: ["image-edit-status", user?.id],
-    queryFn: () => fetchEditStatus(),
-    enabled: !!user && !!attachment,
-    refetchInterval: 60_000,
-  });
-  const imageEdit = useMutation({
-    mutationFn: (args: { prompt: string; imageDataUrl?: string; imageUrl?: string }) =>
-      runImageEdit({ data: args }),
-    onSuccess: (res) => {
-      if (!res.ok) {
-        setMessages((cur) => [
-          ...cur,
-          {
-            role: "assistant",
-            content: "⚠️ You've used your free image for now — you need 1 coin for another edit.",
-          },
-        ]);
-        setNoCoinsOpen(true);
-        return;
-      }
-      const note = res.free
-        ? "Free edit used — next free one in 4 hours."
-        : "Edit done · -1 coin.";
-      setMemoryOff(false);
-      setMessages((cur) => [
-        ...cur,
-        {
-          role: "assistant",
-          content: `Here's your edit 🔥\n\n![Edited image](${res.url})\n\n[⬇ Download image](${res.url})\n\n_${note}_`,
-        },
-      ]);
-      selfSyncRef.current = true;
-      window.dispatchEvent(new Event(SYNC_EVENT));
-      qc.invalidateQueries({ queryKey: ["profile"] });
-      qc.invalidateQueries({ queryKey: ["image-edit-status"] });
-    },
-    onError: (err: Error) => {
-      setMessages((cur) => [...cur, { role: "assistant", content: `⚠️ ${err.message}` }]);
-      qc.invalidateQueries({ queryKey: ["image-edit-status"] });
-    },
-  });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [recording, setRecording] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
@@ -417,7 +367,7 @@ export function OgChat({
       setTimeout(() => inputRef.current?.focus(), 0);
     },
     onError: (err: Error) => {
-      setMessages((cur) => [...cur, { role: "assistant", content: `⚠️ ${err.message}` }]);
+      setMessages((cur) => [...cur, { role: "assistant", content: ogErrorMessage(err) }]);
       qc.invalidateQueries({ queryKey: ["profile"] });
     },
   });
@@ -434,17 +384,6 @@ export function OgChat({
     return () => clearTimeout(t);
   }, [m.isPending, showSkeleton]);
 
-  // Latest image in the conversation: newest bot edit, else the last upload.
-  const memoryImage = useMemo(() => {
-    if (memoryOff) return null;
-    for (let i = messages.length - 1; i >= 0; i--) {
-      const msg = messages[i];
-      if (msg.role !== "assistant") continue;
-      const hit = /!\[[^\]]*\]\((https:\/\/[^)\s]+)\)/.exec(msg.content);
-      if (hit) return hit[1];
-    }
-    return lastUpload;
-  }, [messages, lastUpload, memoryOff]);
 
   function sendText(text: string, opts?: { forcePrivate?: boolean }) {
     const t = text.trim();
@@ -484,44 +423,7 @@ export function OgChat({
       return;
     }
 
-    const EDIT_INTENT =
-      /\b(edit|change|turn (it|this|me|him|her|them)|make (it|this|me|him|her|them)|add|remove|replace|swap|put|convert|transform|restyle|style|cartoon|anime|pixar|sketch|paint|draw|colou?ri[sz]e|background|filter|enhance|upscale|blur|brighten|darken|into a|as a|look like|now make|bigger|smaller|give (him|her|them|it))\b/i;
-    const wantsEdit = !!att && (editMode || EDIT_INTENT.test(t));
-    if (att && wantsEdit) {
-      if (imageEdit.isPending) return;
-      if (!t) return toast.error('Type how you want the image changed, e.g. "make it anime".');
-      setMessages((cur) => [...cur, { role: "user", content: `🎨 Edit image: ${t}` }]);
-      setInput("");
-      setAttachment(null);
-      setEditMode(false);
-      setLastUpload(att.dataUrl);
-      setMemoryOff(false);
-      imageEdit.mutate({ prompt: t, imageDataUrl: att.dataUrl });
-      return;
-    }
-
-    // Follow-up edit on the latest image in this conversation — no re-attach.
-    // While the "Editing your last image" chip is visible, messages edit it —
-    // except plain questions ("what did you do?"), which go to normal chat.
-    const isQuestion =
-      /\?\s*$/.test(t) ||
-      /^(what|why|how|who|when|where|which|did|do|does|is|are|was|were|have|has|whats|wat|wot|wtf|huh)\b/i.test(
-        t,
-      );
-    const plainQuestion = isQuestion && !EDIT_INTENT.test(t);
-    if (!att && memoryImage && !memoryOff && t && !plainQuestion) {
-      if (imageEdit.isPending) return;
-      setMessages((cur) => [...cur, { role: "user", content: `🎨 Edit image: ${t}` }]);
-      setInput("");
-      imageEdit.mutate(
-        memoryImage.startsWith("data:")
-          ? { prompt: t, imageDataUrl: memoryImage }
-          : { prompt: t, imageUrl: memoryImage },
-      );
-      return;
-    }
-
-    // private — free, no coin check
+    // private — free, no coin check. Images are read and discussed, never edited.
     const visibleText = t || (att ? `📎 ${att.name}` : "");
     const next = [...messages, { role: "user" as const, content: visibleText }];
     setMessages(next);
@@ -529,16 +431,11 @@ export function OgChat({
     window.dispatchEvent(new Event(SYNC_EVENT));
     setInput("");
     setAttachment(null);
-    if (att) {
-      setLastUpload(att.dataUrl);
-      setMemoryOff(false);
-    }
     m.mutate({ history: next, attachmentDataUrl: att?.dataUrl });
   }
 
   function clearChat() {
     setMessages([]);
-    setLastUpload(null);
     selfSyncRef.current = true;
     window.dispatchEvent(new Event(SYNC_EVENT));
     toast.message("Chat cleared");
@@ -574,8 +471,6 @@ export function OgChat({
       r.readAsDataURL(file);
     });
     setAttachment({ dataUrl, name: file.name });
-    // Most people attach a photo to change it — default to the image editor.
-    setEditMode(true);
   }
 
   async function startRecording() {
@@ -976,111 +871,22 @@ export function OgChat({
         style={{ touchAction: "manipulation" }}
         className="sticky bottom-0 z-40 border-t border-border/80 bg-card/95 px-2 pb-[max(0.4rem,env(safe-area-inset-bottom))] pt-1.5 shadow-lg backdrop-blur supports-[backdrop-filter]:bg-card/75 sm:px-3 sm:py-2"
       >
-        {imageEdit.isPending && (
-          <div className="mb-2 flex items-center gap-2 rounded-xl border border-primary/40 bg-primary/10 p-2 text-xs font-semibold text-primary">
-            <Loader2 className="h-4 w-4 animate-spin" /> OG Bot is editing your image…
-          </div>
-        )}
-        {noCoinsOpen && (
-          <div className="mb-2 flex flex-wrap items-center gap-2 rounded-xl border border-border bg-muted/40 p-2 text-xs">
-            <span className="flex-1">Out of coins for image edits.</span>
-            <Link
-              to="/store"
-              className="rounded-md bg-primary px-2 py-1 font-bold text-primary-foreground"
-            >
-              Buy coins
-            </Link>
-            <Link
-              to="/messenger"
-              search={{ live: 1 } as never}
-              className="rounded-md border border-border px-2 py-1 font-bold"
-            >
-              Earn in Battle Zone
-            </Link>
-            <button
-              type="button"
-              onClick={() => setNoCoinsOpen(false)}
-              aria-label="Close"
-              className="p-1"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        )}
-        {!attachment && memoryImage && (
-          <div
-            data-testid="ogchat-image-memory"
-            className="mb-1.5 flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/10 px-2 py-1"
-          >
-            <img src={memoryImage} alt="" className="h-7 w-7 rounded object-cover" />
-            <span className="min-w-0 flex-1 truncate text-[11px] text-foreground">
-              Editing your last image — just type the next change
-            </span>
-            <button
-              type="button"
-              onClick={() => setMemoryOff(true)}
-              className="rounded p-1 text-muted-foreground hover:text-foreground"
-              aria-label="Stop editing this image"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
-          </div>
-        )}
         {attachment && (
-          <div className="mb-2 space-y-2 rounded-xl border border-border bg-muted/40 p-2">
+          <div className="mb-2 rounded-xl border border-border bg-muted/40 p-2">
             <div className="flex items-center gap-2">
               <img src={attachment.dataUrl} alt="" className="h-10 w-10 rounded-md object-cover" />
               <span className="flex-1 truncate text-xs text-muted-foreground">
-                {attachment.name}
+                {attachment.name} · ask OG Bot anything about it
               </span>
               <button
                 type="button"
-                onClick={() => {
-                  setAttachment(null);
-                  setEditMode(false);
-                }}
+                onClick={() => setAttachment(null)}
                 className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
                 aria-label="Remove attachment"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setEditMode(false)}
-                aria-pressed={!editMode}
-                className={cn(
-                  "flex-1 rounded-lg border px-2 py-1.5 text-xs font-bold",
-                  !editMode
-                    ? "border-primary bg-primary/15 text-foreground"
-                    : "border-border text-muted-foreground",
-                )}
-              >
-                💬 Ask about it
-              </button>
-              <button
-                type="button"
-                onClick={() => setEditMode(true)}
-                aria-pressed={editMode}
-                className={cn(
-                  "flex-1 rounded-lg border px-2 py-1.5 text-xs font-bold",
-                  editMode
-                    ? "border-primary bg-primary/15 text-foreground"
-                    : "border-border text-muted-foreground",
-                )}
-              >
-                🎨 Edit image ·{" "}
-                {editStatus.data?.freeAvailable !== false
-                  ? "Free"
-                  : `1 coin (free in ${Math.max(1, Math.ceil((editStatus.data.nextFreeAt - Date.now()) / 60000))}m)`}
-              </button>
-            </div>
-            {editMode && (
-              <p className="text-[11px] text-muted-foreground">
-                Type what to change, e.g. "make it an anime poster" or "add neon lights".
-              </p>
-            )}
           </div>
         )}
         <input
@@ -1151,8 +957,8 @@ export function OgChat({
                   ? "Listening… tap mic to stop"
                   : isOut
                     ? "Out of coins — top up to chat"
-                    : !attachment && memoryImage
-                      ? "Describe the change…"
+                    : attachment
+                      ? "Ask about this image…"
                       : "Message OG Bot…"
             }
             disabled={m.isPending || isOut || !user || transcribing}
@@ -1164,42 +970,16 @@ export function OgChat({
             style={{ touchAction: "manipulation" }}
             className="min-h-10 max-h-32 flex-1 resize-none overflow-y-auto bg-transparent px-2 py-2.5 text-base leading-5 placeholder:text-muted-foreground/70 focus:outline-none disabled:cursor-not-allowed sm:px-2.5 sm:text-[15px]"
           />
-          {attachment && editMode ? (
-            <button
-              type="submit"
-              disabled={imageEdit.isPending || !input.trim() || !user}
-              aria-label="Edit image"
-              title={!input.trim() ? "Type what to change first" : "Edit image"}
-              data-testid="og-loner-send"
-              className="mb-1 flex h-11 shrink-0 items-center gap-1 rounded-full bg-gradient-brand px-3 text-xs font-bold text-primary-foreground shadow-[0_8px_22px_-6px_hsl(var(--primary)/0.6)] ring-1 ring-primary/40 transition hover:scale-105 active:scale-95 disabled:bg-muted disabled:text-muted-foreground disabled:shadow-none disabled:ring-0"
-            >
-              {imageEdit.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <>
-                  🎨 Edit
-                  <span className="opacity-80">
-                    · {editStatus.data?.freeAvailable !== false ? "Free" : "2🪙"}
-                  </span>
-                </>
-              )}
-            </button>
-          ) : (
-            <button
-              type="submit"
-              disabled={m.isPending || (!input.trim() && !attachment) || isOut || !user}
-              aria-label="Send message"
-              title="Send"
-              data-testid="og-loner-send"
-              className="mb-1 grid h-11 w-11 shrink-0 place-items-center rounded-full bg-gradient-brand text-primary-foreground shadow-[0_8px_22px_-6px_hsl(var(--primary)/0.6)] ring-1 ring-primary/40 transition hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 disabled:bg-muted disabled:text-muted-foreground disabled:shadow-none disabled:ring-0"
-            >
-              {m.isPending ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <Send className="h-5 w-5" />
-              )}
-            </button>
-          )}
+          <button
+            type="submit"
+            disabled={m.isPending || (!input.trim() && !attachment) || isOut || !user}
+            aria-label="Send message"
+            title="Send"
+            data-testid="og-loner-send"
+            className="mb-1 grid h-11 w-11 shrink-0 place-items-center rounded-full bg-gradient-brand text-primary-foreground shadow-[0_8px_22px_-6px_hsl(var(--primary)/0.6)] ring-1 ring-primary/40 transition hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 disabled:bg-muted disabled:text-muted-foreground disabled:shadow-none disabled:ring-0"
+          >
+            {m.isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+          </button>
         </div>
         <p
           className="mt-1 flex items-center justify-between gap-2 px-1 text-[10px] font-medium text-muted-foreground/80 sm:mt-2.5 sm:flex-wrap sm:justify-start sm:px-2 sm:text-xs"
