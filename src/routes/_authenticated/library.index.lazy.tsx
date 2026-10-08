@@ -2,6 +2,8 @@ import { startAttempt, updateAttempt, describeError } from "@/lib/generation-att
 import { createLazyFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+
+const WIZARD_DRAFT_KEY = "ogbot.wizardDraft.v1";
 import { useSessionRunState } from "@/hooks/use-session-run-state";
 
 /** Falling ember config for the hazard CREATE button — staggered so the shower looks random. */
@@ -173,7 +175,25 @@ function LibraryPage() {
   });
   // Last raw wizard answers — kept so a retry (or reopening the wizard after a
   // failure) never loses what the user already typed.
-  const [wizardDraft, setWizardDraft] = useState<WizardDraft>(EMPTY_DRAFT);
+  const [wizardDraft, setWizardDraftState] = useState<WizardDraft>(EMPTY_DRAFT);
+  // Saved on this device the moment Create is pressed, so a lost connection
+  // or failed attempt never makes the user retype their story.
+  const setWizardDraft = useCallback((d: WizardDraft) => {
+    setWizardDraftState(d);
+    try {
+      window.localStorage.setItem(WIZARD_DRAFT_KEY, JSON.stringify(d));
+    } catch {
+      /* storage unavailable */
+    }
+  }, []);
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(WIZARD_DRAFT_KEY);
+      if (raw) setWizardDraftState({ ...EMPTY_DRAFT, ...JSON.parse(raw) });
+    } catch {
+      /* ignore corrupt draft */
+    }
+  }, []);
 
   // Home "Create now" thumbnail lands here with #create — open the wizard.
   useEffect(() => {
@@ -783,25 +803,31 @@ function LibraryPage() {
     try {
       const description = songStyle;
       const combinedExtra = extraContext.trim();
-      const { data: lyricData, error: lyricErr } = await supabase.functions.invoke(
-        "generate-lyrics",
-        {
-          body: {
-            songName: songTitle,
-            description,
-            styleTags: songStyleTags,
-            language: songLanguage,
-            vocal: songVocal,
-            foulMouth: trackFoulMouth,
-            foulIntensity: trackFoulIntensity,
-            personalDetails: songDetails || undefined,
-            extraContext: combinedExtra || undefined,
-            subjectName: songSubject || undefined,
-            targetDurationSec: overrideTargetSec,
-            vocalsOnly,
-          },
-        },
-      );
+      const lyricBody = {
+        songName: songTitle,
+        description,
+        styleTags: songStyleTags,
+        language: songLanguage,
+        vocal: songVocal,
+        foulMouth: trackFoulMouth,
+        foulIntensity: trackFoulIntensity,
+        personalDetails: songDetails || undefined,
+        extraContext: combinedExtra || undefined,
+        subjectName: songSubject || undefined,
+        targetDurationSec: overrideTargetSec,
+        vocalsOnly,
+      };
+      // Busy AI or a dropped connection: retry automatically before showing an error.
+      let lyricData: { lyrics?: string; estimated_duration_label?: string } | null = null;
+      let lyricErr: unknown = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const r = await supabase.functions.invoke("generate-lyrics", { body: lyricBody });
+        if (stale()) return;
+        lyricData = r.data;
+        lyricErr = r.error;
+        if (!lyricErr && lyricData?.lyrics) break;
+        if (attempt < 2) await new Promise((res) => setTimeout(res, 3000 * (attempt + 1)));
+      }
       if (stale()) return;
       if (lyricErr) throw new Error(invokeError(lyricErr, "Lyrics generation failed"));
       setActualDurationLabel((lyricData?.estimated_duration_label ?? null) as string | null);
@@ -886,6 +912,11 @@ function LibraryPage() {
       setTrackedSongId(row.id);
       library.refetch();
       toast.success("OG Bot is creating your track — no credits charged");
+      try {
+        window.localStorage.removeItem(WIZARD_DRAFT_KEY);
+      } catch {
+        /* storage unavailable */
+      }
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Something went wrong";
       void updateAttempt(attemptId, {
