@@ -389,7 +389,7 @@ Deno.serve(async (req) => {
       }
     };
 
-    const postTo = (model: string, contents: unknown[], key = GEMINI_API_KEY) =>
+    const postTo = (model: string, contents: unknown[], key = GEMINI_API_KEY, reserveMs = 45_000) =>
       timedFetch(
         modelUrl(model, key),
         {
@@ -401,9 +401,9 @@ Deno.serve(async (req) => {
             generationConfig: { temperature: 0.9, maxOutputTokens: 8192 },
           }),
         },
-        40_000,
-        // Always leave OpenAI enough time to rescue the song if Gemini hangs.
-        25_000,
+        30_000,
+        // Primary calls leave time for the backup key to rescue the song.
+        reserveMs,
       );
 
     const extractText = (data: unknown) =>
@@ -442,6 +442,8 @@ Deno.serve(async (req) => {
         const detail = await res.text();
         last = { ok: false, status: res.status, text: "", detail };
         if (![404, 429].includes(res.status) && res.status < 500) return last;
+        // A hang means Gemini is overloaded — hand over to the backup key now.
+        if (res.status === 504) return last;
         console.error("Gemini transient error", GEMINI_MODELS[i], res.status);
         await new Promise((r) => setTimeout(r, 1200 * (i + 1)));
       }
@@ -491,9 +493,9 @@ Deno.serve(async (req) => {
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}`, ...extra },
             body: JSON.stringify({ model, messages, temperature: 0.9 }),
           },
-          25_000,
-          // Keep time for Gemini if every free key fails.
-          50_000,
+          15_000,
+          // Keep time for both Gemini keys if every free key fails.
+          90_000,
         );
         if (r.ok) {
           const j = await r.json().catch(() => null);
@@ -513,6 +515,8 @@ Deno.serve(async (req) => {
           }
           last = { ok: false, status: 422, text: "", detail: issue ?? "Empty free reply" };
           console.warn("Free lyrics rejected by intensity check", env, last.detail);
+          // Empty replies repeat on the provider's backup key — don't wait twice.
+          if (!text) slow.add(provider);
         } else {
           last = { ok: false, status: r.status, text: "", detail: (await r.text()).slice(0, 200) };
           if (r.status === 504) slow.add(provider);
@@ -548,7 +552,7 @@ Deno.serve(async (req) => {
       );
       let lastFail: Gen = { ok: false, status: 503, text: "", detail: "No response" };
       for (let i = 0; i < backupModels.length; i++) {
-        const r = await postTo(backupModels[i], contents, GEMINI_BACKUP_API_KEY);
+        const r = await postTo(backupModels[i], contents, GEMINI_BACKUP_API_KEY, 0);
         if (r.ok) {
           const data = await r.json();
           logAiUsage({
