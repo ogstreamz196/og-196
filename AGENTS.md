@@ -49,3 +49,5 @@
 - Telegram and web/in-app OG Bot replies take openers/closers from the shared service-only catchphrase bank with per-user unseen rotation and background free-tier refills, so greeting banter costs no premium tokens; Battle Zone stays freshly generated each message.
 - OG Bot chat reads/discusses images only (no image editing); chat errors go through src/lib/og-error-message.ts so users never see raw codes.
 - OG Bot prompts get a Boss-only or non-Boss permission block from buildSystemPrompt; only admin/boss roles may discuss Boss Controls.
+
+- Lyrics: free Google AI Studio keys (GEMINI_FREE_API_KEY, GEMINI_FREE_BACKUP_API_KEY) run after Groq/Pollinations/OpenRouter and before paid Gemini keys, because the owner wants to save paid credits.
