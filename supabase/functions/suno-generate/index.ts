@@ -6,6 +6,10 @@
 // - Inserts a 'pending' songs row; suno-callback fills it in + adds extra rows for sibling clips
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { requireUserOrService } from "../_shared/clients.ts";
+import { watchKeyFailures } from "../_shared/key-failures.ts";
+
+watchKeyFailures();
 import { injectSignature, withSignatureHint } from "../_shared/track-signature.ts";
 import { sanitizeLyrics } from "../_shared/lyrics-sanitize.ts";
 import { languageVoiceHint } from "../_shared/language-guide.ts";
@@ -88,14 +92,9 @@ Deno.serve(async (req) => {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) return json({ error: "Missing auth" }, 401);
 
-    const anonKey = Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ?? Deno.env.get("SUPABASE_ANON_KEY")!;
-    const supabaseUser = createClient(SUPABASE_URL, anonKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
-    const {
-      data: { user },
-    } = await supabaseUser.auth.getUser();
-    if (!user) return json({ error: "Unauthorized" }, 401);
+    const auth = await requireUserOrService(req);
+    if (auth.error) return auth.error;
+    const user = auth.user;
 
     const body = await req.json();
     const prompt = (body.prompt ?? "").toString().trim();

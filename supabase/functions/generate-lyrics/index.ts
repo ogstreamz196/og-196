@@ -659,7 +659,7 @@ Deno.serve(async (req) => {
         opening,
       );
     };
-    if (lyrics && hasBannedOpening(lyrics)) {
+    if (!usedFallback && lyrics && hasBannedOpening(lyrics)) {
       await updateProgress(84, "Refreshing the opening…");
       const revised = await generate([
         { role: "user", parts: [{ text: userPrompt }] },
@@ -675,7 +675,7 @@ Deno.serve(async (req) => {
       ]);
       if (revised.ok && revised.text && !hasBannedOpening(revised.text)) lyrics = revised.text;
     }
-    for (let attempt = 0; attempt < 2 && lyrics && wordCount(lyrics) < minWords; attempt++) {
+    for (let attempt = 0; !usedFallback && attempt < 2 && lyrics && wordCount(lyrics) < minWords; attempt++) {
       await updateProgress(88, "Extending to full length…");
       try {
         const topUp = await generate([
@@ -703,7 +703,7 @@ Deno.serve(async (req) => {
 
     // Rewrites often come back no longer than the draft. If still short, ask
     // only for the missing sections and append them so length is guaranteed.
-    for (let attempt = 0; attempt < 2 && lyrics && wordCount(lyrics) < minWords; attempt++) {
+    for (let attempt = 0; !usedFallback && attempt < 2 && lyrics && wordCount(lyrics) < minWords; attempt++) {
       const missing = minWords - wordCount(lyrics);
       try {
         const more = await generate([
@@ -728,7 +728,7 @@ Deno.serve(async (req) => {
 
     lyrics = sanitizeLyrics(lyrics);
     const finalIntensityIssue = outputIssue(lyrics);
-    if (finalIntensityIssue) {
+    if (finalIntensityIssue && !usedFallback) {
       await updateProgress(0, "");
       return jsonResponse({ error: "The lyrics writer did not match your selected intensity. Please try again.", code: "lyric_intensity_mismatch" }, 422);
     }
