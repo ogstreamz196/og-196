@@ -2,7 +2,11 @@
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { geminiUsage, logAiUsage } from "../_shared/ai-usage.ts";
 import { handlePreflight, jsonResponse } from "../_shared/cors.ts";
-import { adminClient, requireUser } from "../_shared/clients.ts";
+import { adminClient, requireUserOrService } from "../_shared/clients.ts";
+import { fallbackLyrics } from "../_shared/fallback-lyrics.ts";
+import { watchKeyFailures } from "../_shared/key-failures.ts";
+
+watchKeyFailures();
 import { sanitizeLyrics } from "../_shared/lyrics-sanitize.ts";
 import { languageLyricNotes } from "../_shared/language-guide.ts";
 import { lyricIntensityIssue } from "../_shared/lyric-intensity.ts";
@@ -29,7 +33,7 @@ Deno.serve(async (req) => {
     if (!["GEMINI_API_KEY", "GROQ_API_KEY", "GROQ_BACKUP_API_KEY", "POLLINATIONS_API_KEY", "POLLINATIONS_BACKUP_API_KEY", "OPENROUTER_API_KEY", "OPENROUTER_BACKUP_API_KEY"].some((name) => Deno.env.get(name)))
       return jsonResponse({ error: "No lyrics writer is configured" }, 500);
 
-    const auth = await requireUser(req);
+    const auth = await requireUserOrService(req);
     if (auth.error) return auth.error;
     const { user } = auth;
 
@@ -622,20 +626,25 @@ Deno.serve(async (req) => {
 
     const res = await generate([{ role: "user", parts: [{ text: userPrompt }] }]);
 
-    if (!res.ok) {
-      // Creation is free, so there is no balance movement to reverse.
-      await updateProgress(0, "");
-
-      if (res.status === 429)
-        return jsonResponse({ error: "AI is busy right now — try again shortly" }, 429);
-      const txt = res.detail ?? "";
-      console.error("Lyrics model error", res.status, txt);
-      return jsonResponse({ error: "Lyrics generation failed", detail: txt.slice(0, 500) }, 502);
+    // Every AI writer down: use the built-in songwriter so the user still gets
+    // a song instead of an error. No further AI calls this run.
+    const usedFallback = !res.ok;
+    if (usedFallback) {
+      console.error("All lyrics writers failed — using built-in songwriter", res.status, (res.detail ?? "").slice(0, 300));
     }
-
     await updateProgress(80, "Polishing bars…");
 
-    let lyrics = res.text;
+    let lyrics = usedFallback
+      ? fallbackLyrics({
+          title: songName,
+          subject: subjectName,
+          story: [personalDetails, description, extraContext].filter(Boolean).join(". "),
+          styles: styleTags,
+          foulMouth,
+          foulIntensity,
+          minLines,
+        })
+      : res.text;
 
     // Quality guard: repair a banned generic opening, then enforce the minimum
     // target while preserving every requested style, language and vocal role.
@@ -650,7 +659,7 @@ Deno.serve(async (req) => {
         opening,
       );
     };
-    if (lyrics && hasBannedOpening(lyrics)) {
+    if (!usedFallback && lyrics && hasBannedOpening(lyrics)) {
       await updateProgress(84, "Refreshing the opening…");
       const revised = await generate([
         { role: "user", parts: [{ text: userPrompt }] },
@@ -666,7 +675,7 @@ Deno.serve(async (req) => {
       ]);
       if (revised.ok && revised.text && !hasBannedOpening(revised.text)) lyrics = revised.text;
     }
-    for (let attempt = 0; attempt < 2 && lyrics && wordCount(lyrics) < minWords; attempt++) {
+    for (let attempt = 0; !usedFallback && attempt < 2 && lyrics && wordCount(lyrics) < minWords; attempt++) {
       await updateProgress(88, "Extending to full length…");
       try {
         const topUp = await generate([
@@ -694,7 +703,7 @@ Deno.serve(async (req) => {
 
     // Rewrites often come back no longer than the draft. If still short, ask
     // only for the missing sections and append them so length is guaranteed.
-    for (let attempt = 0; attempt < 2 && lyrics && wordCount(lyrics) < minWords; attempt++) {
+    for (let attempt = 0; !usedFallback && attempt < 2 && lyrics && wordCount(lyrics) < minWords; attempt++) {
       const missing = minWords - wordCount(lyrics);
       try {
         const more = await generate([
@@ -719,7 +728,7 @@ Deno.serve(async (req) => {
 
     lyrics = sanitizeLyrics(lyrics);
     const finalIntensityIssue = outputIssue(lyrics);
-    if (finalIntensityIssue) {
+    if (finalIntensityIssue && !usedFallback) {
       await updateProgress(0, "");
       return jsonResponse({ error: "The lyrics writer did not match your selected intensity. Please try again.", code: "lyric_intensity_mismatch" }, 422);
     }
