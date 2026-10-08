@@ -400,7 +400,12 @@ Deno.serve(async (req) => {
           body: JSON.stringify({
             systemInstruction: { role: "system", parts: [{ text: systemPrompt }] },
             contents,
-            generationConfig: { temperature: 0.9, maxOutputTokens: 8192 },
+            generationConfig: {
+              temperature: 0.9,
+              maxOutputTokens: 8192,
+              // Thinking made Gemini blow past its 30s window on long lyrics.
+              thinkingConfig: { thinkingBudget: 0 },
+            },
           }),
         },
         30_000,
@@ -493,7 +498,16 @@ Deno.serve(async (req) => {
           {
             method: "POST",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}`, ...extra },
-            body: JSON.stringify({ model, messages, temperature: 0.9 }),
+            // Lyrics need no deep thinking: long reasoning used up the whole
+            // reply and came back blank, so keep it short.
+            body: JSON.stringify({
+              model,
+              messages,
+              temperature: 0.9,
+              max_tokens: 6000,
+              ...(env.startsWith("GROQ") ? { reasoning_effort: "low" } : {}),
+              ...(env.startsWith("OPENROUTER") ? { reasoning: { effort: "low" } } : {}),
+            }),
           },
           35_000,
           // Keep time for both Gemini keys if every free key fails.
