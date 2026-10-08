@@ -404,7 +404,8 @@ Deno.serve(async (req) => {
               temperature: 0.9,
               maxOutputTokens: 8192,
               // Thinking made Gemini blow past its 30s window on long lyrics.
-              thinkingConfig: { thinkingBudget: 0 },
+              // Lite models reject thinkingConfig with 400, so omit it there.
+              ...(model.includes("lite") ? {} : { thinkingConfig: { thinkingBudget: 0 } }),
             },
           }),
         },
@@ -509,9 +510,9 @@ Deno.serve(async (req) => {
               ...(env.startsWith("OPENROUTER") ? { reasoning: { effort: "low" } } : {}),
             }),
           },
-          35_000,
-          // Keep time for both Gemini keys if every free key fails.
-          90_000,
+          20_000,
+          // Keep time for the free Gemini keys if every free key fails.
+          70_000,
         );
         if (r.ok) {
           const j = await r.json().catch((e) => {
@@ -550,8 +551,9 @@ Deno.serve(async (req) => {
       for (const env of ["GEMINI_FREE_API_KEY", "GEMINI_FREE_BACKUP_API_KEY", "GEMINI_FREE_3_API_KEY", "GEMINI_FREE_4_API_KEY"]) {
         const key = Deno.env.get(env);
         if (!key) continue;
-        for (const model of ["gemini-flash-latest", "gemini-flash-lite-latest"]) {
-          const r = await postTo(model, contents, key, 50_000);
+        // Lite first: fast and rarely overloaded; Flash as the second try.
+        for (const model of ["gemini-flash-lite-latest", "gemini-flash-latest"]) {
+          const r = await postTo(model, contents, key, 15_000);
           if (!r.ok) {
             console.error("Free Gemini failed", env, model, r.status);
             continue;
