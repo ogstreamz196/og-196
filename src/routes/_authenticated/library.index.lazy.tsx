@@ -189,11 +189,30 @@ function LibraryPage() {
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem(WIZARD_DRAFT_KEY);
-      if (raw) setWizardDraftState({ ...EMPTY_DRAFT, ...JSON.parse(raw) });
+      if (raw) {
+        setWizardDraftState({ ...EMPTY_DRAFT, ...JSON.parse(raw) });
+        return;
+      }
     } catch {
       /* ignore corrupt draft */
     }
-  }, []);
+    // New device or cleared storage: recover the answers saved with the
+    // user's latest failed attempt in the backend.
+    if (!user?.id) return;
+    void (async () => {
+      const { data } = await supabase
+        .from("generation_attempts" as never)
+        .select("status, context")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      const row = data as { status?: string; context?: { draft?: WizardDraft } } | null;
+      if (row?.status !== "succeeded" && row?.context?.draft) {
+        setWizardDraftState({ ...EMPTY_DRAFT, ...row.context.draft });
+      }
+    })();
+  }, [user?.id]);
 
   // Home "Create now" thumbnail lands here with #create — open the wizard.
   useEffect(() => {
