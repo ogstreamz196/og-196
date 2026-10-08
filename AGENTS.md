@@ -36,7 +36,7 @@
 
 ## Chat image edits
 
-- Private-chat image edits charge through the service-only consume_chat_image_edit function (one free slot per rolling window, then coins) and refund on failure, so retries cannot double-charge; edits use Gemini image first, then the Gemini backup key only.
+- Private-chat image editing was removed; OG Bot only reads and discusses images.
 
 ## Sports Guide
 
@@ -47,3 +47,5 @@
 - Mount the browser installation banner before the route outlet and gate its event listener on Capacitor native/standalone detection; keep it in page flow so it cannot cover Android or web navigation.
 
 - Telegram and web/in-app OG Bot replies take openers/closers from the shared service-only catchphrase bank with per-user unseen rotation and background free-tier refills, so greeting banter costs no premium tokens; Battle Zone stays freshly generated each message.
+- OG Bot chat reads/discusses images only (no image editing); chat errors go through src/lib/og-error-message.ts so users never see raw codes.
+- OG Bot prompts get a Boss-only or non-Boss permission block from buildSystemPrompt; only admin/boss roles may discuss Boss Controls.
