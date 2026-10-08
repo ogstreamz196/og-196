@@ -495,12 +495,15 @@ Deno.serve(async (req) => {
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}`, ...extra },
             body: JSON.stringify({ model, messages, temperature: 0.9 }),
           },
-          15_000,
+          35_000,
           // Keep time for both Gemini keys if every free key fails.
           90_000,
         );
         if (r.ok) {
-          const j = await r.json().catch(() => null);
+          const j = await r.json().catch((e) => {
+            console.error("Free reply body failed", env, (e as Error).message);
+            return null;
+          });
           const text = (j?.choices?.[0]?.message?.content ?? "").trim();
           const issue = outputIssue(text);
           if (text.length > 200 && !issue) {
@@ -516,7 +519,7 @@ Deno.serve(async (req) => {
             return { ok: true, status: 200, text };
           }
           last = { ok: false, status: 422, text: "", detail: issue ?? "Empty free reply" };
-          console.warn("Free lyrics rejected by intensity check", env, last.detail);
+          console.warn("Free lyrics reply unusable", env, text.length, JSON.stringify(j).slice(0, 400), systemPrompt.length, messages.map((m) => m.content.length).join(","));
           // Empty replies repeat on the provider's backup key — don't wait twice.
           if (!text) slow.add(provider);
         } else {
