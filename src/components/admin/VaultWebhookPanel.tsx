@@ -66,7 +66,7 @@ export function VaultWebhookPanel() {
   const prompt = useMemo(() => buildVaultReceiverPrompt(origin || "https://ogbot.co.uk"), [origin]);
   const d = s.data;
   const status = d?.lastTestOk ? "Connected" : "Waiting for other app";
-  const badge = status === "Connected" ? "bg-primary/15 text-primary" : status === "Error" ? "bg-destructive/15 text-destructive" : "bg-muted text-muted-foreground";
+  const badge = status === "Connected" ? "bg-primary/15 text-primary"  : "bg-muted text-muted-foreground";
 
   return (
     <div className="space-y-4">
