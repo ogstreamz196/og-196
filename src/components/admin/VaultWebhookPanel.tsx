@@ -168,7 +168,7 @@ export function VaultWebhookPanel() {
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                Paste this into the other project. It builds the receiving address — copy that address back into the box above, then press Test ping. It always uses this site's current address, so moving workspace or domain won't break it.
+                1. Copy the secret above. 2. Paste this prompt into the other project and give it the secret when asked. 3. It adds an OG Vault API card in its Boss Controls → VIP users section showing its receiving address — paste that into the box above, Save, then Test ping. Both sides then show Verified. Moving either app to another workspace or domain won't break it.
               </p>
               <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded bg-background/60 p-2 text-[11px] leading-relaxed">{prompt}</pre>
             </div>
