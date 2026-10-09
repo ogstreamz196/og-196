@@ -2046,6 +2046,42 @@ export type Database = {
         }
         Relationships: []
       }
+      vault_webhook_settings: {
+        Row: {
+          enabled: boolean
+          id: number
+          last_error: string | null
+          last_sent_at: string | null
+          last_test_at: string | null
+          last_test_ok: boolean | null
+          secret: string | null
+          target_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          enabled?: boolean
+          id?: number
+          last_error?: string | null
+          last_sent_at?: string | null
+          last_test_at?: string | null
+          last_test_ok?: boolean | null
+          secret?: string | null
+          target_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          enabled?: boolean
+          id?: number
+          last_error?: string | null
+          last_sent_at?: string | null
+          last_test_at?: string | null
+          last_test_ok?: boolean | null
+          secret?: string | null
+          target_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       vip_acknowledgements: {
         Row: {
           acknowledged_at: string | null
@@ -2452,6 +2488,7 @@ export type Database = {
       gen_og_referral_code: { Args: never; Returns: string }
       get_my_referrer: { Args: never; Returns: Json }
       get_referral_summary: { Args: never; Returns: Json }
+      grant_vault_pass: { Args: { p_user: string }; Returns: boolean }
       grant_welcome_bonus: {
         Args: { _eligible: boolean; _user_id: string }
         Returns: Json

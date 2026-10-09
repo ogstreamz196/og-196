@@ -578,6 +578,11 @@ async function fulfilStoreItemCheckout(session: any, env: StripeEnv) {
     }
   }
 
+  if (perk === "vault_pass") {
+    const { error } = await (supabase as any).rpc("grant_vault_pass", { p_user: userId });
+    if (error) log("error", "vault pass grant failed", { err: error.message });
+  }
+
   log("info", "store item fulfilled", { itemId, userId, coinReward, perk });
   await creditPaymentReferral(
     userId,

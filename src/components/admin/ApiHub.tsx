@@ -14,6 +14,7 @@ import {
   type HealthReport,
 } from "@/lib/api-health.functions";
 import { LedgerlyPanel } from "./LedgerlyPanel";
+import { VaultWebhookPanel } from "./VaultWebhookPanel";
 
 const GROUPS: HealthGroup[] = ["AI chat & lyrics", "Music", "Payments", "Telegram", "Google", "Bot hosting", "Core"];
 
@@ -126,7 +127,7 @@ export function ApiHub() {
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {items.map((c) => <KeyCard key={c.key} check={c} onPinged={onPinged} />)}
               </div>
-              {g === "Payments" && <LedgerlyPanel />}
+              {g === "Payments" && (<><LedgerlyPanel /><VaultWebhookPanel /></>)}
             </section>
           );
         })}
