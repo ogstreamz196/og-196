@@ -1,28 +1,30 @@
-/** Copy-paste prompt for the owner's second Lovable project. Built from the live origin so it never goes stale. */
+/** Ledgerly-style prompt for the other Lovable project. Built from the live origin, never hard-coded. */
 export function buildVaultReceiverPrompt(origin: string) {
-  return `Add an OG Vault login receiver to this app, managed from Boss Controls.
+  const base = `${origin.replace(/\/$/, "")}/api/public/v1/vault`;
+  return `Add an "OG Vault Pass Sync" integration to this app's Boss Controls, inside the VIP users section.
 
-My main app (${origin}) creates the API secret and sends a webhook whenever I add, change or remove an OG Vault login. This app must only accept logins that the webhook has marked active.
+1. Admin card "OG Vault Pass Sync" (Boss/admin only)
+- "Enable OG Vault Sync" toggle, OFF by default. Nothing is called while it's off or no key is saved.
+- "OG Vault API Key" password field (placeholder "ogv_..."). Store it server-side only (secure settings table). Never send the full key to the browser; show it masked, e.g. "ogv_••••••••abcd". Allow replace/remove.
+- "Test Connection" button -> backend calls:
+  GET ${base}/ping
+  Header: Authorization: Bearer <KEY>
+  - 200 { ok: true, key_name, active_credentials } -> show "Connected to OG BOT Vault (N active logins)"
+  - 401 -> "Invalid or revoked API key"
+- Status badge (Not configured / Connected / Error), last successful sync time, last error.
+- "Sync now" button and a read-only list of synced logins (username, active, note).
 
-1. Database: create a table vault_credentials (username text unique, password text, note text, active boolean default true, updated_at timestamptz). RLS on, no public read access; only server code touches it. Also store the last verified ping time.
+2. Server-side sync (server only, never browser code)
+- GET ${base}/credentials  (Authorization: Bearer <KEY>)
+  Response: { ok: true, credentials: [{ username, password, note, active, created_at }] }
+- Save into a vault_credentials table (username unique case-insensitive, password, note, active, synced_at). RLS on, no public read.
+- Upsert by username; mark rows missing from the response as inactive.
+- Run on "Sync now" and automatically every 15 minutes. 6-second timeout, non-blocking: a failure must never break this app — log it and save the last error for the admin card.
 
-2. Secret: ask me for a secret named OG_VAULT_WEBHOOK_SECRET using the secure secret form. I'll paste it from my main app (Boss Controls → API & Integrations → OG Vault webhook → Copy). Never hard-code it or show it back in full.
+3. Login check
+- When a user enters a Vault username + PIN, accept only if an active synced row matches. For a live check you can call:
+  POST ${base}/verify  (Authorization: Bearer <KEY>, JSON { "username": "...", "pin": "..." })
+  Response: { ok: true, valid: true|false }
 
-3. Webhook route: create a public server route at /api/public/og-vault that accepts POST JSON:
-   { "event": "vault_credential.created" | "vault_credential.updated" | "vault_credential.deleted" | "vault.ping", "timestamp": number, "data": { "id", "username", "password", "note", "active" } }
-   Verify every request before doing anything:
-   - Header "Authorization: Bearer <secret>" must equal OG_VAULT_WEBHOOK_SECRET, AND
-   - Header "X-OG-Signature: sha256=<hex>" must equal HMAC-SHA256 of the exact raw body using OG_VAULT_WEBHOOK_SECRET (constant-time compare).
-   - Reject with 401 if either check fails; reject if timestamp is more than 5 minutes old.
-   Then: created/updated → upsert by username (case-insensitive); deleted → set active=false for that username; vault.ping → save the verified time and reply {"ok":true,"verified":true}. Always reply 200 {"ok":true} within 5 seconds.
-
-4. Boss Controls → VIP users section: add an "OG Vault API" settings card, visible only to admin/boss roles (check the role on the server). Show:
-   - Status badge: Verified (last ping received) / Waiting for test ping / Secret missing.
-   - The full receiving address of /api/public/og-vault on the current domain (built from the live site address, never hard-coded) with a Copy button.
-   - Whether OG_VAULT_WEBHOOK_SECRET is set (never its value), plus a note to replace it via chat if I make a new secret in the main app.
-   - A list of synced logins: username, active on/off, last updated.
-
-5. Login check: where users sign in with their OG Vault ID and PIN, only let them in if a row with that username and password exists and active = true.
-
-6. When done, tell me the receiving address so I can paste it into my main app and press Test ping. Don't hard-code my main app's address or any project IDs anywhere — the shared secret is the only link between the two apps, so moving either app to another workspace or domain won't break it.`;
+4. Don't break any existing logic. Add a help note: "Copy the key from OG BOT → Boss Controls → API & Integrations → OG Vault API, paste it here, then press Test Connection."`;
 }
