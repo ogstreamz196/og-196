@@ -655,6 +655,8 @@ function LibraryPage() {
     return () => window.clearInterval(id);
   }, [pipeline.stage, pipeline.stageStartedAt]);
 
+  const pipelineStageRef = useRef<PipelineStage>("idle");
+  pipelineStageRef.current = pipeline.stage;
   const advanceStage = (next: PipelineStage) => {
     setPipeline((p) => {
       const now = Date.now();
@@ -1223,7 +1225,7 @@ function LibraryPage() {
         return;
       }
       if (row.status === "processing" || row.status === "pending") {
-        setPipeline((p) => (p.stage === "rendering" || p.stage === "idle" ? p : { ...p, stage: "rendering", stageStartedAt: Date.now() }));
+        if (pipelineStageRef.current !== "rendering" && pipelineStageRef.current !== "idle") advanceStage("rendering");
         return;
       }
       if (row.status === "completed") {
@@ -1560,7 +1562,7 @@ function LibraryPage() {
         onOpenChange={(o) => setCooking((c) => ({ ...c, open: o }))}
         title={cooking.title}
         etaMinutes={5}
-        safeToLeave={pipeline.stage !== "lyrics" && pipeline.stage !== "saving"}
+        safeToLeave
       />
 
       {/* Creation happens entirely inside the Create now wizard — no inline form. */}
