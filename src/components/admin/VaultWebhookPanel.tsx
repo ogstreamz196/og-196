@@ -64,9 +64,6 @@ export function VaultWebhookPanel() {
 
   const [showKey, setShowKey] = useState(false);
   const prompt = useMemo(() => buildVaultReceiverPrompt(origin || "https://ogbot.co.uk"), [origin]);
-  const fullPrompt = s.data?.secret
-    ? `${prompt}\n\nThe OG_VAULT_WEBHOOK_SECRET value to save in the secure secret form is:\n${s.data.secret}`
-    : prompt;
   const d = s.data;
   const status = d?.lastTestOk ? "Connected" : "Waiting for other app";
   const badge = status === "Connected" ? "bg-primary/15 text-primary" : status === "Error" ? "bg-destructive/15 text-destructive" : "bg-muted text-muted-foreground";
