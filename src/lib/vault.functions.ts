@@ -91,7 +91,16 @@ export const getVaultWebhookSettings = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const db = await assertBoss(context);
-    const { data } = await db.from("vault_webhook_settings").select("*").eq("id", 1).maybeSingle();
+    let { data } = await db.from("vault_webhook_settings").select("*").eq("id", 1).maybeSingle();
+    if (!data?.secret) {
+      // Create the API key straight away so Boss can copy it before anything else is set up.
+      const { data: made } = await db
+        .from("vault_webhook_settings")
+        .upsert({ id: 1, secret: randomSecret() }, { onConflict: "id" })
+        .select("*")
+        .single();
+      data = made ?? data;
+    }
     return {
       enabled: !!data?.enabled,
       targetUrl: data?.target_url ?? "",
