@@ -18,7 +18,8 @@ export const runQueuedSong = createServerFn({ method: "POST" })
       .eq("user_id", context.userId)
       .maybeSingle();
     if (!own) return { ok: false, error: "Song not found" };
-    const auth = (context as { token?: string }).token;
+    const { getRequest } = await import("@tanstack/react-start/server");
+    const auth = getRequest()?.headers.get("authorization")?.replace("Bearer ", "");
     const { orchestrateSong } = await import("./song-orchestrator.server");
     return orchestrateSong(data.songId, auth ? { Authorization: `Bearer ${auth}` } : null);
   });
