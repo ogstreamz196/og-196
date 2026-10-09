@@ -169,14 +169,19 @@ export function StoreItemCard({
       {/* footer */}
       <div className="mt-auto flex flex-col gap-3 pt-4 min-[400px]:grid min-[400px]:grid-cols-[minmax(0,1fr)_auto] min-[400px]:items-end">
         <div className="min-w-0 font-mono text-lg font-bold leading-tight text-foreground sm:text-xl">
-          {isVipPass && vipPass?.vipFree ? (
+          {isVipPass && vipPass?.trial ? (
             <>
-              <span className="mr-2 text-sm text-muted-foreground line-through">
-                {item.coin_price !== null
-                  ? `${item.coin_price} OG Coins`
-                  : formatPrice(item.price_cents, item.currency)}
+              <span className="block text-coin">FREE trial 👑</span>
+              <span className="block text-xs font-semibold text-muted-foreground">
+                {trialDaysLeft(vipPass.trialEndsAt)} · then £10 or 50 OG Coins
               </span>
-              <span className="block text-coin">FREE · limited time 👑</span>
+            </>
+          ) : isVipPass && !ownsVipPass ? (
+            <>
+              {item.coin_price ?? 50} OG Coins
+              <span className="block text-xs font-semibold text-muted-foreground">
+                or {formatPrice(item.price_cents, item.currency)} by card
+              </span>
             </>
           ) : item.coin_price !== null ? (
             `${item.coin_price} OG Coins`

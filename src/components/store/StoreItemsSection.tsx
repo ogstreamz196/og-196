@@ -94,6 +94,10 @@ export function StoreItemsSection() {
       vipPass.mutate();
       return;
     }
+    startCheckout(itemId);
+  };
+
+  const startCheckout = (itemId: string) => {
     if (!arePaymentsEnabled() || Capacitor.isNativePlatform()) {
       toast.info("This item isn't available in the app yet.");
       return;
@@ -113,6 +117,7 @@ export function StoreItemsSection() {
       key={item.id}
       item={item}
       onBuy={buy}
+      onBuyCash={item.slug === "og-vip-pass" ? startCheckout : undefined}
       buying={
         (item.slug === "og-sports-guide-access" && sportsGuide.isPending) ||
         (item.slug === "og-vip-pass" && vipPass.isPending) ||
