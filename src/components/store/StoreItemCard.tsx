@@ -50,6 +50,12 @@ const RARITY: Record<
   },
 };
 
+function trialDaysLeft(endsAt?: string | null) {
+  if (!endsAt) return "Trial active";
+  const days = Math.max(0, Math.ceil((new Date(endsAt).getTime() - Date.now()) / 86_400_000));
+  return days === 1 ? "1 day left" : `${days} days left`;
+}
+
 function formatPrice(cents: number, currency: string) {
   try {
     return new Intl.NumberFormat(undefined, {
@@ -64,6 +70,7 @@ function formatPrice(cents: number, currency: string) {
 export function StoreItemCard({
   item,
   onBuy,
+  onBuyCash,
   buying,
   sportsGuideState,
   sportsGuideInviteUrl,
@@ -71,12 +78,15 @@ export function StoreItemCard({
 }: {
   item: StoreItem;
   onBuy: (id: string) => void;
+  onBuyCash?: (id: string) => void;
   buying?: boolean;
   sportsGuideState?: "unowned" | "owned" | "invite_sent" | "joined" | "revoked";
   sportsGuideInviteUrl?: string;
   vipPass?: {
     owned: boolean;
     vipFree?: boolean;
+    trial?: boolean;
+    trialEndsAt?: string | null;
     username: string | null;
     password: string | null;
     available: number;
@@ -94,6 +104,7 @@ export function StoreItemCard({
     : item.image_url?.replace(/^http:\/\//i, "https://");
   const isVipPass = item.slug === "og-vip-pass";
   const ownsVipPass = isVipPass && !!vipPass?.owned;
+  const vaultKept = ownsVipPass && !vipPass?.trial;
   const vipSoldOut = isVipPass && !ownsVipPass && (vipPass?.available ?? 0) === 0;
 
   const soldOut = stockSoldOut || vipSoldOut;
@@ -198,19 +209,19 @@ export function StoreItemCard({
             }
             onBuy(item.id);
           }}
-          disabled={(soldOut && !ownsVipPass) || buying || ownsVipPass}
+          disabled={(soldOut && !ownsVipPass) || buying || vaultKept}
           className="w-full bg-gradient-brand font-bold uppercase tracking-wider min-[400px]:w-auto"
         >
           {buying ? (
             <Loader2 className="mr-1 h-4 w-4 animate-spin" />
           ) : ownsSportsGuide ? (
             <ExternalLink className="mr-1 h-4 w-4" />
-          ) : ownsVipPass ? (
+          ) : vaultKept ? (
             <Check className="mr-1 h-4 w-4" />
           ) : (
             <Coins className="mr-1 h-4 w-4" />
           )}
-          {ownsVipPass
+          {vaultKept
             ? "Unlocked"
             : soldOut
               ? "Sold out"
@@ -218,8 +229,21 @@ export function StoreItemCard({
                 ? "…"
                 : ownsSportsGuide
                   ? "Open Sports Guide"
-                  : "Buy"}
+                  : isVipPass
+                    ? "50 coins"
+                    : "Buy"}
         </Button>
+        {onBuyCash && !vaultKept && !soldOut && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => onBuyCash(item.id)}
+            disabled={buying}
+            className="w-full font-bold uppercase tracking-wider min-[400px]:col-span-2"
+          >
+            Pay {formatPrice(item.price_cents, item.currency)} by card
+          </Button>
+        )}
       </div>
       {ownsVipPass && vipPass?.username ? (
         <div className="mt-3 space-y-2 rounded-lg border border-primary/30 bg-primary/10 p-3">
