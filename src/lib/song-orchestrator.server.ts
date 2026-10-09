@@ -4,53 +4,113 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
  * Finishes songs whose phone dropped off mid-creation: writes the lyrics and
  * hands them to the music engine on the server, using the exact saved answers.
  */
-export async function resumeOrphanedSongs(retryToken: string): Promise<number> {
+type Plan = { lyrics?: Record<string, unknown>; suno?: Record<string, unknown>; stage?: string };
+
+async function setStage(db: any, id: string, plan: Plan, stage: string) {
+  await db.from("songs").update({ orchestration: { ...plan, stage } }).eq("id", id);
+}
+
+/**
+ * Runs one staged song on the server: lyrics, then the music engine, writing
+ * the current stage into the row so the cooking screen can follow along.
+ * `userAuth` = the owner's own bearer; otherwise the cron retry token is used.
+ */
+export async function orchestrateSong(
+  songId: string,
+  userAuth: Record<string, string> | null,
+  retryToken = "",
+): Promise<{ ok: boolean; error?: string }> {
   const backendUrl = process.env["SUPABASE_URL"];
   const anon = process.env["SUPABASE_PUBLISHABLE_KEY"];
-  if (!backendUrl || !anon) return 0;
+  if (!backendUrl || !anon) return { ok: false, error: "Backend not configured" };
+  const db = supabaseAdmin as any;
+  const { data: song } = await db
+    .from("songs")
+    .select("id, user_id, lyrics, status, orchestration")
+    .eq("id", songId)
+    .maybeSingle();
+  if (!song?.orchestration) return { ok: true };
+  if (song.status !== "draft") return { ok: true };
+  const plan = song.orchestration as Plan;
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    apikey: anon,
+    ...(userAuth ?? {
+      Authorization: `Bearer ${anon}`,
+      "x-ogbot-retry-token": retryToken,
+      "x-og-user-id": String(song.user_id),
+    }),
+  };
+  // Keep the background worker off this song while we're working on it.
+  await db
+    .from("songs")
+    .update({ orchestration_due_at: new Date(Date.now() + 6 * 60_000).toISOString(), error_message: null })
+    .eq("id", songId);
+  try {
+    let lyrics = typeof song.lyrics === "string" && song.lyrics.trim() ? song.lyrics : "";
+    if (!lyrics) {
+      await setStage(db, songId, plan, "lyrics");
+      let last = "";
+      for (let attempt = 0; attempt < 2 && !lyrics; attempt++) {
+        const r = await fetch(`${backendUrl}/functions/v1/generate-lyrics`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ ...(plan.lyrics ?? {}), song_id: songId }),
+          signal: AbortSignal.timeout(150_000),
+        });
+        const body = (await r.json().catch(() => ({}))) as { lyrics?: string };
+        if (r.ok && body.lyrics) lyrics = body.lyrics;
+        else last = `lyrics ${r.status}`;
+      }
+      if (!lyrics) throw new Error(last || "lyrics failed");
+      await db.from("songs").update({ lyrics }).eq("id", songId);
+    }
+    await setStage(db, songId, plan, "submitting");
+    // Pick up any title change the app made while lyrics were cooking.
+    const { data: fresh } = await db.from("songs").select("title, prompt").eq("id", songId).maybeSingle();
+    const g = await fetch(`${backendUrl}/functions/v1/suno-generate`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        ...(plan.suno ?? {}),
+        title: fresh?.title ?? plan.suno?.title ?? null,
+        prompt: fresh?.prompt ?? plan.suno?.prompt,
+        song_id: songId,
+        lyrics,
+      }),
+      signal: AbortSignal.timeout(60_000),
+    });
+    const gb = (await g.json().catch(() => ({}))) as { accepted?: boolean; error?: string };
+    if (!g.ok && g.status !== 409) throw new Error(`music ${g.status}`);
+    if (gb.accepted === false) throw new Error(gb.error || "music busy");
+    await db.from("songs").update({ orchestration: null, error_message: null }).eq("id", songId);
+    return { ok: true };
+  } catch (e) {
+    const msg = (e as Error).message;
+    console.error("Song orchestration failed", songId, msg);
+    await db
+      .from("songs")
+      .update({
+        orchestration: { ...plan, stage: "retrying" },
+        orchestration_due_at: new Date(Date.now() + 60_000).toISOString(),
+        error_message: "Finishing in the background — no need to retype anything.",
+      })
+      .eq("id", songId);
+    return { ok: false, error: msg };
+  }
+}
+
+/**
+ * Finishes songs whose phone dropped off mid-creation, using the exact saved answers.
+ */
+export async function resumeOrphanedSongs(retryToken: string): Promise<number> {
   const db = supabaseAdmin as any;
   const { data, error } = await db.rpc("claim_due_orchestrations", { p_limit: 2 });
   if (error) throw new Error(error.message);
   let resumed = 0;
   for (const song of (data ?? []) as Array<Record<string, any>>) {
-    const plan = (song.orchestration ?? {}) as { lyrics?: Record<string, unknown>; suno?: Record<string, unknown> };
-    const headers = {
-      "Content-Type": "application/json",
-      apikey: anon,
-      Authorization: `Bearer ${anon}`,
-      "x-ogbot-retry-token": retryToken,
-      "x-og-user-id": String(song.user_id),
-    };
-    try {
-      let lyrics = typeof song.lyrics === "string" && song.lyrics.trim() ? song.lyrics : "";
-      if (!lyrics) {
-        const r = await fetch(`${backendUrl}/functions/v1/generate-lyrics`, {
-          method: "POST",
-          headers,
-          body: JSON.stringify({ ...(plan.lyrics ?? {}), song_id: song.id }),
-          signal: AbortSignal.timeout(150_000),
-        });
-        const body = (await r.json().catch(() => ({}))) as { lyrics?: string };
-        if (!r.ok || !body.lyrics) throw new Error(`lyrics ${r.status}`);
-        lyrics = body.lyrics;
-        await db.from("songs").update({ lyrics }).eq("id", song.id);
-      }
-      const g = await fetch(`${backendUrl}/functions/v1/suno-generate`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ ...(plan.suno ?? {}), song_id: song.id, lyrics }),
-        signal: AbortSignal.timeout(60_000),
-      });
-      if (!g.ok && g.status !== 409) throw new Error(`music ${g.status}`);
-      await db.from("songs").update({ orchestration: null, error_message: null }).eq("id", song.id);
-      resumed++;
-    } catch (e) {
-      console.error("Background song resume failed", song.id, (e as Error).message);
-      await db
-        .from("songs")
-        .update({ orchestration_due_at: new Date(Date.now() + 5 * 60_000).toISOString() })
-        .eq("id", song.id);
-    }
+    const r = await orchestrateSong(String(song.id), null, retryToken);
+    if (r.ok) resumed++;
   }
   return resumed;
 }
