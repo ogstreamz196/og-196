@@ -62,7 +62,11 @@ export function VaultWebhookPanel() {
     finally { setBusy(null); refresh(); }
   };
 
+  const [showKey, setShowKey] = useState(false);
   const prompt = useMemo(() => buildVaultReceiverPrompt(origin || "https://ogbot.co.uk"), [origin]);
+  const fullPrompt = s.data?.secret
+    ? `${prompt}\n\nThe OG_VAULT_WEBHOOK_SECRET value to save in the secure secret form is:\n${s.data.secret}`
+    : prompt;
   const d = s.data;
   const status = !d?.targetUrl ? "Not set up" : d.lastTestOk === false || d.lastError ? "Error" : d.lastTestOk ? "Connected" : "Not tested";
   const badge = status === "Connected" ? "bg-primary/15 text-primary" : status === "Error" ? "bg-destructive/15 text-destructive" : "bg-muted text-muted-foreground";
@@ -128,11 +132,13 @@ export function VaultWebhookPanel() {
               <Input placeholder="https://your-other-app.com/api/public/og-vault" value={url} onChange={(e) => setUrl(e.target.value)} />
             </div>
             {d?.secret && (
-              <div>
-                <label className="mb-1 block text-xs text-muted-foreground">Shared secret — paste into your other app when it asks for OG_VAULT_WEBHOOK_SECRET</label>
+              <div className="space-y-1.5 rounded-md border border-primary/40 bg-primary/5 p-3">
+                <p className="text-sm font-bold">Your OG Vault API key</p>
+                <p className="text-xs text-muted-foreground">Made by this app. It's already inside the copied prompt — your other app saves it as OG_VAULT_WEBHOOK_SECRET.</p>
                 <div className="flex gap-2">
-                  <Input readOnly type="password" value={d.secret} className="font-mono" />
-                  <Button size="sm" variant="outline" className="gap-1.5" onClick={() => copy(d.secret, "Secret")}>
+                  <Input readOnly type={showKey ? "text" : "password"} value={d.secret} className="font-mono text-xs" />
+                  <Button size="sm" variant="ghost" onClick={() => setShowKey((v) => !v)}>{showKey ? "Hide" : "Show"}</Button>
+                  <Button size="sm" variant="outline" className="gap-1.5" onClick={() => copy(d.secret, "API key")}>
                     <Copy className="h-4 w-4" />Copy
                   </Button>
                 </div>
