@@ -615,7 +615,8 @@ function LibraryPage() {
   // Lyrics are written and the track saved from this page, so warn before
   // closing during those first seconds or the track would be lost.
   useEffect(() => {
-    if (pipeline.stage !== "lyrics" && pipeline.stage !== "saving") return;
+    // The server queue now owns the job, so leaving the page is always safe.
+    return;
     const warn = (e: BeforeUnloadEvent) => {
       e.preventDefault();
       e.returnValue = "";
@@ -1219,7 +1220,8 @@ function LibraryPage() {
       if (cancelled) return;
       const orch = (row as unknown as { orchestration?: { stage?: string } | null }).orchestration;
       if (row.status === "draft") {
-        if (row.lyrics) setLyrics(row.lyrics);
+        const ly = (row as unknown as { lyrics?: string | null }).lyrics;
+        if (ly) setLyrics(ly);
         const st = orch?.stage;
         if (st === "submitting") advanceStage("submitting");
         return;
