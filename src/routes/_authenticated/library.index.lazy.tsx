@@ -1,3 +1,4 @@
+import { runQueuedSong } from "@/lib/song-queue.functions";
 import { startAttempt, updateAttempt, describeError } from "@/lib/generation-attempts";
 import { createLazyFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
@@ -887,96 +888,30 @@ function LibraryPage() {
       const stagedId = (staged as { id: string }).id;
       attemptSongId = stagedId;
       void updateAttempt(attemptId, { song_id: stagedId });
-      // Busy AI or a dropped connection: retry automatically before showing an error.
-      let lyricData: { lyrics?: string; estimated_duration_label?: string } | null = null;
-      let lyricErr: unknown = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        const r = await supabase.functions.invoke("generate-lyrics", {
-          body: { ...lyricBody, song_id: stagedId },
-        });
-        if (stale()) return;
-        lyricData = r.data;
-        lyricErr = r.error;
-        if (!lyricErr && lyricData?.lyrics) break;
-        if (attempt < 2) await new Promise((res) => setTimeout(res, 3000 * (attempt + 1)));
-      }
-      if (stale()) return;
-      if (lyricErr) throw new Error(invokeError(lyricErr, "Lyrics generation failed"));
-      setActualDurationLabel((lyricData?.estimated_duration_label ?? null) as string | null);
-      const nextLyrics = (lyricData?.lyrics ?? "").toString();
-      if (!nextLyrics) throw new Error("No lyrics returned");
-      setLyrics(nextLyrics);
-
-      advanceStage("saving");
-      attemptStage = "saving";
-      if (override?.titlePromise) {
-        const named = (await override.titlePromise).trim();
-        if (stale()) return;
-        if (named) {
-          songTitle = named;
-          setTitle(named);
-        }
-      }
-      const style = [songStyle, songVocal, ...vocalsOnlyTags].filter(Boolean).join(", ");
-      const promptText = [
-        songTitle,
-        songSubject ? `For: ${songSubject}` : null,
-        style ? `Style: ${style}` : null,
-        songLanguage ? `Language: ${songLanguage}` : null,
-      ]
-        .filter(Boolean)
-        .join(" — ");
-
-      const finalPrompt =
-        (promptText || songTitle || "Untitled") + (songDetails ? `\n— Idea: ${songDetails}` : "");
-      const { error: insertErr } = await supabase
-        .from("songs")
-        .update({
-          title: songTitle || null,
-          // Keep the user's original idea so the edit screen can show and change it.
-          prompt: finalPrompt,
-          style: style || null,
-          lyrics: nextLyrics,
-          orchestration: { lyrics: lyricBody, suno: { ...sunoBase, prompt: finalPrompt, title: songTitle || null } },
-        } as never)
-        .eq("id", stagedId);
-      if (stale()) return;
-      if (insertErr) throw new Error(insertErr.message || "Couldn't save song");
-      const row = { id: stagedId };
-
-
-      advanceStage("submitting");
-      attemptSongId = row.id;
-      attemptStage = "submitting";
-      void updateAttempt(attemptId, { song_id: row.id, title: songTitle || null, stage: "submitting" });
-      const { data: genData, error: genErr } = await supabase.functions.invoke("suno-generate", {
-        body: {
-          song_id: row.id,
-          prompt:
-            (promptText || songTitle || "Untitled") + (songDetails ? `\n— Idea: ${songDetails}` : ""),
-          lyrics: nextLyrics,
-          title: songTitle || null,
-          style: songStyle || null,
-          language: songLanguage || null,
-          vocal: songVocal || null,
-          vocals_only: vocalsOnly,
-          beat_path: beatPath || null,
-          target_duration_sec: overrideTargetSec,
-        },
+      // Hand the whole job to the server queue. The phone just watches the
+      // row; closing the app or losing signal can't stop the song now.
+      void runQueuedSong({ data: { songId: stagedId } }).catch(() => {
+        /* background worker resumes it from the saved plan */
       });
-      if (stale()) return;
-      if (genErr) throw new Error(invokeError(genErr, "Could not start generation"));
-      if (genData?.accepted === false) {
-        throw new Error(genData.error || "Your current generations need to finish first");
+      setTrackedSongId(stagedId);
+      if (override?.titlePromise) {
+        void override.titlePromise.then((named) => {
+          const t = named.trim();
+          if (!t) return;
+          setTitle(t);
+          const fp =
+            [t, songSubject ? `For: ${songSubject}` : null, earlyStyle ? `Style: ${earlyStyle}` : null, songLanguage ? `Language: ${songLanguage}` : null]
+              .filter(Boolean)
+              .join(" — ") + (songDetails ? `\n— Idea: ${songDetails}` : "");
+          void supabase.from("songs").update({ title: t, prompt: fp } as never).eq("id", stagedId).eq("status", "draft");
+        });
       }
-
+      const row = { id: stagedId };
       // Stay on the page: a realtime subscription on this row drives the
       // status indicator until the track is ready (or fails).
-      advanceStage("rendering");
-      void updateAttempt(attemptId, { stage: "rendering", status: "succeeded" });
-      setTrackedSongId(row.id);
+      void updateAttempt(attemptId, { stage: "queued", status: "succeeded", song_id: row.id });
       library.refetch();
-      toast.success("OG Bot is creating your track — no credits charged");
+      toast.success("OG Bot is cooking your track — you can close the app, it'll be in your Library");
       try {
         window.localStorage.removeItem(WIZARD_DRAFT_KEY);
       } catch {
@@ -1280,6 +1215,17 @@ function LibraryPage() {
 
     const settle = (row: Song) => {
       if (cancelled) return;
+      const orch = (row as unknown as { orchestration?: { stage?: string } | null }).orchestration;
+      if (row.status === "draft") {
+        if (row.lyrics) setLyrics(row.lyrics);
+        const st = orch?.stage;
+        if (st === "submitting") advanceStage("submitting");
+        return;
+      }
+      if (row.status === "processing" || row.status === "pending") {
+        setPipeline((p) => (p.stage === "rendering" || p.stage === "idle" ? p : { ...p, stage: "rendering", stageStartedAt: Date.now() }));
+        return;
+      }
       if (row.status === "completed") {
         setFreshTrack(row);
         setAutoUnlockPrompt(false);
