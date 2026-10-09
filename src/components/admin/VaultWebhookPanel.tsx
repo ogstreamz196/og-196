@@ -169,12 +169,12 @@ export function VaultWebhookPanel() {
             <div className="space-y-2 rounded-md border border-primary/30 bg-primary/5 p-3">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-sm font-bold">Prompt for your other Lovable project</p>
-                <Button size="sm" className="gap-1.5" onClick={() => copy(prompt, "Prompt")}>
+                <Button size="sm" className="gap-1.5" onClick={() => copy(fullPrompt, "Prompt")}>
                   <Copy className="h-4 w-4" />Copy prompt
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                1. Copy the secret above. 2. Paste this prompt into the other project and give it the secret when asked. 3. It adds an OG Vault API card in its Boss Controls → VIP users section showing its receiving address — paste that into the box above, Save, then Test ping. Both sides then show Verified. Moving either app to another workspace or domain won't break it.
+                1. Copy prompt (your API key is included). 2. Paste it into the other project and save the key when it asks. 3. It adds an OG Vault API card in its Boss Controls → VIP users section showing its receiving address — paste that into the box above, Save, then Test ping. Both sides then show Verified. Moving either app to another workspace or domain won't break it.
               </p>
               <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded bg-background/60 p-2 text-[11px] leading-relaxed">{prompt}</pre>
             </div>
