@@ -76,6 +76,9 @@ import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/publi
 import { Route as ApiPublicTelegramWebhookRouteImport } from './routes/api/public/telegram/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
+import { Route as ApiPublicV1VaultCredentialsRouteImport } from './routes/api/public/v1/vault/credentials'
+import { Route as ApiPublicV1VaultPingRouteImport } from './routes/api/public/v1/vault/ping'
+import { Route as ApiPublicV1VaultVerifyRouteImport } from './routes/api/public/v1/vault/verify'
 
 const AuthenticatedLibraryIndexLazyRouteImport = createFileRoute(
   '/_authenticated/library/',
@@ -437,6 +440,22 @@ const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
   path: '/lovable/email/auth/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicV1VaultCredentialsRoute =
+  ApiPublicV1VaultCredentialsRouteImport.update({
+    id: '/api/public/v1/vault/credentials',
+    path: '/api/public/v1/vault/credentials',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicV1VaultPingRoute = ApiPublicV1VaultPingRouteImport.update({
+  id: '/api/public/v1/vault/ping',
+  path: '/api/public/v1/vault/ping',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicV1VaultVerifyRoute = ApiPublicV1VaultVerifyRouteImport.update({
+  id: '/api/public/v1/vault/verify',
+  path: '/api/public/v1/vault/verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -504,6 +523,9 @@ export interface FileRoutesByFullPath {
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
+  '/api/public/v1/vault/credentials': typeof ApiPublicV1VaultCredentialsRoute
+  '/api/public/v1/vault/ping': typeof ApiPublicV1VaultPingRoute
+  '/api/public/v1/vault/verify': typeof ApiPublicV1VaultVerifyRoute
 }
 export interface FileRoutesByTo {
   '/app-return': typeof AppReturnRoute
@@ -571,6 +593,9 @@ export interface FileRoutesByTo {
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
+  '/api/public/v1/vault/credentials': typeof ApiPublicV1VaultCredentialsRoute
+  '/api/public/v1/vault/ping': typeof ApiPublicV1VaultPingRoute
+  '/api/public/v1/vault/verify': typeof ApiPublicV1VaultVerifyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -640,6 +665,9 @@ export interface FileRoutesById {
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
+  '/api/public/v1/vault/credentials': typeof ApiPublicV1VaultCredentialsRoute
+  '/api/public/v1/vault/ping': typeof ApiPublicV1VaultPingRoute
+  '/api/public/v1/vault/verify': typeof ApiPublicV1VaultVerifyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -709,6 +737,9 @@ export interface FileRouteTypes {
     | '/api/public/telegram/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
+    | '/api/public/v1/vault/credentials'
+    | '/api/public/v1/vault/ping'
+    | '/api/public/v1/vault/verify'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/app-return'
@@ -776,6 +807,9 @@ export interface FileRouteTypes {
     | '/api/public/telegram/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
+    | '/api/public/v1/vault/credentials'
+    | '/api/public/v1/vault/ping'
+    | '/api/public/v1/vault/verify'
   id:
     | '__root__'
     | '/_authenticated'
@@ -844,6 +878,9 @@ export interface FileRouteTypes {
     | '/api/public/telegram/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
+    | '/api/public/v1/vault/credentials'
+    | '/api/public/v1/vault/ping'
+    | '/api/public/v1/vault/verify'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -880,6 +917,9 @@ export interface RootRouteChildren {
   ApiPublicTelegramWebhookRoute: typeof ApiPublicTelegramWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
+  ApiPublicV1VaultCredentialsRoute: typeof ApiPublicV1VaultCredentialsRoute
+  ApiPublicV1VaultPingRoute: typeof ApiPublicV1VaultPingRoute
+  ApiPublicV1VaultVerifyRoute: typeof ApiPublicV1VaultVerifyRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1346,6 +1386,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/v1/vault/credentials': {
+      id: '/api/public/v1/vault/credentials'
+      path: '/api/public/v1/vault/credentials'
+      fullPath: '/api/public/v1/vault/credentials'
+      preLoaderRoute: typeof ApiPublicV1VaultCredentialsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/v1/vault/ping': {
+      id: '/api/public/v1/vault/ping'
+      path: '/api/public/v1/vault/ping'
+      fullPath: '/api/public/v1/vault/ping'
+      preLoaderRoute: typeof ApiPublicV1VaultPingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/v1/vault/verify': {
+      id: '/api/public/v1/vault/verify'
+      path: '/api/public/v1/vault/verify'
+      fullPath: '/api/public/v1/vault/verify'
+      preLoaderRoute: typeof ApiPublicV1VaultVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1471,6 +1532,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicTelegramWebhookRoute: ApiPublicTelegramWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
+  ApiPublicV1VaultCredentialsRoute: ApiPublicV1VaultCredentialsRoute,
+  ApiPublicV1VaultPingRoute: ApiPublicV1VaultPingRoute,
+  ApiPublicV1VaultVerifyRoute: ApiPublicV1VaultVerifyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

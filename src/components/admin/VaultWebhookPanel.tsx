@@ -64,12 +64,9 @@ export function VaultWebhookPanel() {
 
   const [showKey, setShowKey] = useState(false);
   const prompt = useMemo(() => buildVaultReceiverPrompt(origin || "https://ogbot.co.uk"), [origin]);
-  const fullPrompt = s.data?.secret
-    ? `${prompt}\n\nThe OG_VAULT_WEBHOOK_SECRET value to save in the secure secret form is:\n${s.data.secret}`
-    : prompt;
   const d = s.data;
-  const status = !d?.targetUrl ? "Not set up" : d.lastTestOk === false || d.lastError ? "Error" : d.lastTestOk ? "Connected" : "Not tested";
-  const badge = status === "Connected" ? "bg-primary/15 text-primary" : status === "Error" ? "bg-destructive/15 text-destructive" : "bg-muted text-muted-foreground";
+  const status = d?.lastTestOk ? "Connected" : "Waiting for other app";
+  const badge = status === "Connected" ? "bg-primary/15 text-primary"  : "bg-muted text-muted-foreground";
 
   return (
     <div className="space-y-4">
@@ -117,24 +114,15 @@ export function VaultWebhookPanel() {
 
       <AdminSection
         icon={<Webhook className="h-5 w-5 text-primary" />}
-        title="OG Vault webhook"
-        subtitle="Sends Vault logins to your other app so it knows which ones to accept."
+        title="OG Vault API"
+        subtitle="Your other app connects here with this key — same as Ledgerly. No address to type."
         action={<span className={`rounded-full px-2.5 py-1 text-xs font-bold ${badge}`}>{status}</span>}
       >
         {s.isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : (
           <div className="space-y-4">
-            <label className="flex items-center justify-between gap-3">
-              <span className="text-sm font-semibold">Send changes to my other app</span>
-              <Switch checked={enabled} onCheckedChange={setEnabled} />
-            </label>
-            <div>
-              <label className="mb-1 block text-xs text-muted-foreground">Your other app's receiving address</label>
-              <Input placeholder="https://your-other-app.com/api/public/og-vault" value={url} onChange={(e) => setUrl(e.target.value)} />
-            </div>
             {d?.secret && (
               <div className="space-y-1.5 rounded-md border border-primary/40 bg-primary/5 p-3">
                 <p className="text-sm font-bold">Your OG Vault API key</p>
-                <p className="text-xs text-muted-foreground">Made by this app. It's already inside the copied prompt — your other app saves it as OG_VAULT_WEBHOOK_SECRET.</p>
                 <div className="flex gap-2">
                   <Input readOnly type={showKey ? "text" : "password"} value={d.secret} className="font-mono text-xs" />
                   <Button size="sm" variant="ghost" onClick={() => setShowKey((v) => !v)}>{showKey ? "Hide" : "Show"}</Button>
@@ -144,37 +132,29 @@ export function VaultWebhookPanel() {
                 </div>
               </div>
             )}
-            <div className="grid gap-1 text-xs">
-              <div><span className="text-muted-foreground">Last test: </span>{fmt(d?.lastTestAt ?? null)}</div>
-              <div><span className="text-muted-foreground">Last change sent: </span>{fmt(d?.lastSentAt ?? null)}</div>
-            </div>
-            {d?.lastError && <p className="rounded-md border border-destructive/40 p-2 text-xs text-destructive">Last problem: {d.lastError}</p>}
+            <div className="text-xs"><span className="text-muted-foreground">Last connection from your other app: </span>{fmt(d?.lastTestAt ?? null)}</div>
             <div className="flex flex-wrap gap-2">
-              <Button size="sm" disabled={!!busy} onClick={() => run("save", async () => { await saveSettings({ data: { enabled, targetUrl: url } }); toast.success("Webhook saved"); })}>
-                {busy === "save" && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}Save
+              <Button size="sm" variant="outline" disabled={!!busy || !d?.secret} onClick={() => run("ping", async () => {
+                const r = await fetch(`${origin}/api/public/v1/vault/ping`, { headers: { Authorization: `Bearer ${d!.secret}` } });
+                const j = await r.json().catch(() => ({}));
+                r.ok ? toast.success(`API working · ${j.active_credentials ?? 0} active logins`) : toast.error(j.error ?? `Ping failed (${r.status})`);
+              })}>
+                {busy === "ping" && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}Ping test
               </Button>
-              <Button size="sm" variant="outline" disabled={!!busy || !d?.targetUrl} onClick={() => run("test", async () => { const r = await test(); r.ok ? toast.success(r.message) : toast.error(r.message); })}>
-                {busy === "test" && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}Test ping
+              <Button size="sm" variant="ghost" disabled={!!busy} onClick={() => run("regen", async () => { await saveSettings({ data: { enabled: false, targetUrl: "", regenerateSecret: true } }); toast.success("New key made — paste it into your other app"); })}>
+                New key
               </Button>
-              <Button size="sm" variant="outline" disabled={!!busy || !d?.targetUrl} onClick={() => run("resync", async () => { const r = await resync(); r.ok ? toast.success(r.message) : toast.error(r.message); })}>
-                {busy === "resync" && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}Send all logins
-              </Button>
-              {d?.secret && (
-                <Button size="sm" variant="ghost" disabled={!!busy} onClick={() => run("regen", async () => { await saveSettings({ data: { enabled, targetUrl: url, regenerateSecret: true } }); toast.success("New secret made — update your other app"); })}>
-                  New secret
-                </Button>
-              )}
             </div>
 
             <div className="space-y-2 rounded-md border border-primary/30 bg-primary/5 p-3">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-sm font-bold">Prompt for your other Lovable project</p>
-                <Button size="sm" className="gap-1.5" onClick={() => copy(fullPrompt, "Prompt")}>
+                <Button size="sm" className="gap-1.5" onClick={() => copy(prompt, "Prompt")}>
                   <Copy className="h-4 w-4" />Copy prompt
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                1. Copy prompt (your API key is included). 2. Paste it into the other project and save the key when it asks. 3. It adds an OG Vault API card in its Boss Controls → VIP users section showing its receiving address — paste that into the box above, Save, then Test ping. Both sides then show Verified. Moving either app to another workspace or domain won't break it.
+                1. Copy prompt and paste it into your other project. 2. Copy the API key above and paste it into its new OG Vault card (Boss Controls → VIP users). 3. Press Test Connection there — this card turns Connected.
               </p>
               <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded bg-background/60 p-2 text-[11px] leading-relaxed">{prompt}</pre>
             </div>
