@@ -10,13 +10,13 @@ export const getVipPassStatus = createServerFn({ method: "GET" })
       .select("credential_id")
       .eq("user_id", context.userId)
       .maybeSingle();
-    // VIP members (paid or free trial) get the Vault pass free for a limited time.
-    const [{ data: vipRole }, { data: prof }] = await Promise.all([
+    // The Vault is independent of VIP: bought (£10 / 50 coins), the 15-day signup trial, or Boss/admin.
+    const [{ data: staff }, { data: prof }] = await Promise.all([
       supabaseAdmin
         .from("user_roles")
         .select("role")
         .eq("user_id", context.userId)
-        .in("role", ["vip", "admin"])
+        .in("role", ["boss", "admin"])
         .limit(1),
       supabaseAdmin
         .from("profiles")
@@ -24,9 +24,9 @@ export const getVipPassStatus = createServerFn({ method: "GET" })
         .eq("id", context.userId)
         .maybeSingle(),
     ]);
-    const trialEnds = (prof as { vip_trial_ends_at?: string | null } | null)?.vip_trial_ends_at;
-    const vipFree =
-      (vipRole?.length ?? 0) > 0 || (!!trialEnds && new Date(trialEnds).getTime() > Date.now());
+    const trialEnds = (prof as { vip_trial_ends_at?: string | null } | null)?.vip_trial_ends_at ?? null;
+    const onTrial = !!trialEnds && new Date(trialEnds).getTime() > Date.now();
+    const isStaff = (staff?.length ?? 0) > 0;
     let username: string | null = null;
     let password: string | null = null;
     const { data: creds } = await supabaseAdmin
@@ -35,16 +35,24 @@ export const getVipPassStatus = createServerFn({ method: "GET" })
       .eq("active", true)
       .order("created_at", { ascending: true });
     const available = creds?.length ?? 0;
-    const owned = !!purchase || vipFree;
+    const owned = !!purchase || onTrial || isStaff;
     if (owned && creds && creds.length > 0) {
-      // Rotate the shown login every 2 hours; everyone sees the same one
-      // in the same window, including the same user on repeat views.
       const windowIndex = Math.floor(Date.now() / (2 * 60 * 60 * 1000));
       const cred = creds[windowIndex % creds.length];
       username = cred.username;
       password = cred.password;
     }
-    return { owned, vipFree: vipFree && !purchase, username, password, available };
+    return {
+      owned,
+      purchased: !!purchase,
+      trial: onTrial && !purchase && !isStaff,
+      trialEndsAt: onTrial ? trialEnds : null,
+      // kept for older callers: true while the free trial is what unlocks it
+      vipFree: onTrial && !purchase && !isStaff,
+      username,
+      password,
+      available,
+    };
   });
 
 export const purchaseVipPass = createServerFn({ method: "POST" })
