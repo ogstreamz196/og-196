@@ -2230,6 +2230,7 @@ export type Database = {
         Args: { p_phrase: string }
         Returns: boolean
       }
+      admin_has_vault_pass: { Args: { p_user: string }; Returns: boolean }
       admin_list_lexicon: {
         Args: never
         Returns: {

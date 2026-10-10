@@ -57,6 +57,13 @@
       "when": 1791658470993,
       "tag": "0007_admin_vault_pass_toggle",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791658487166,
+      "tag": "0008_admin_has_vault_pass",
+      "breakpoints": true
     }
   ]
 }
