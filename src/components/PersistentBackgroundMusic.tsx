@@ -13,6 +13,7 @@ const POSITION_KEY = "og:background-music-position";
 const TRACK_KEY = "og:background-music-track";
 const TOGGLE_EVENT = "og:background-music-toggle";
 const NEXT_EVENT = "og:background-music-next";
+const ENTER_BATTLE_EVENT = "og:background-music-enter-battle";
 const STATUS_EVENT = "og:background-music-status";
 const STATUS_REQUEST_EVENT = "og:background-music-status-request";
 const BACKGROUND_VOLUME = 0.5;
@@ -192,14 +193,26 @@ export function PersistentBackgroundMusic() {
     const saveTimer = window.setInterval(savePosition, 5_000);
     setReady(true);
 
+    // The soundtrack never auto-plays on load. It starts only when the user
+    // steps into the OG Battle Zone (ENTER_BATTLE_EVENT) or taps the header
+    // play controls.
+    let unlockAttached = false;
     let removeUnlockListeners = () => undefined;
-    if (enabledRef.current) {
+    const enterBattle = () => {
+      if (!enabledRef.current || unlockAttached) return;
+      const otherMediaPlaying = Array.from(
+        document.querySelectorAll<HTMLMediaElement>(
+          "audio:not([data-background-music]), video",
+        ),
+      ).some((media) => !media.paused && !media.ended);
+      if (otherMediaPlaying) return;
       void start().then((started) => {
-        if (started) return;
-
+        if (started) {
+          removeUnlockListeners();
+          return;
+        }
         // iOS and most mobile browsers require one genuine interaction before
-        // starting audible media. The persistent control remains available if
-        // the visitor declines or the browser still blocks playback.
+        // starting audible media. Wait for the first tap or key press.
         const unlock = (event: Event) => {
           if (!enabledRef.current) return;
           if (
@@ -208,29 +221,27 @@ export function PersistentBackgroundMusic() {
           ) {
             return;
           }
-          const otherMediaPlaying = Array.from(
-            document.querySelectorAll<HTMLMediaElement>(
-              "audio:not([data-background-music]), video",
-            ),
-          ).some((media) => !media.paused && !media.ended);
-          if (otherMediaPlaying) return;
           void start().then((unlocked) => {
             if (unlocked) removeUnlockListeners();
           });
         };
+        unlockAttached = true;
         document.addEventListener("pointerup", unlock, { passive: true });
         document.addEventListener("keydown", unlock);
         removeUnlockListeners = () => {
+          unlockAttached = false;
           document.removeEventListener("pointerup", unlock);
           document.removeEventListener("keydown", unlock);
         };
       });
-    }
+    };
+    window.addEventListener(ENTER_BATTLE_EVENT, enterBattle);
 
     return () => {
       savePosition();
       stopFade();
       removeUnlockListeners();
+      window.removeEventListener(ENTER_BATTLE_EVENT, enterBattle);
       window.clearInterval(saveTimer);
       window.removeEventListener("pagehide", savePosition);
       audio.removeEventListener("play", onPlay);
