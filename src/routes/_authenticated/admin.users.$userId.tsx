@@ -23,6 +23,7 @@ import {
   AlertTriangle,
   Clock,
   Trash2,
+  KeyRound,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { maskDevIdentity } from "@/lib/dev-identity";
@@ -117,6 +118,16 @@ function UserSettingsPage() {
         .eq("user_id", userId);
       if (error) throw error;
       return (data ?? []).map((r) => r.role as string);
+    },
+  });
+
+  const vaultQ = useQuery({
+    queryKey: ["admin-user-vault", userId],
+    enabled: isAdmin,
+    queryFn: async (): Promise<boolean> => {
+      const { data, error } = await supabase.rpc("admin_has_vault_pass", { p_user: userId });
+      if (error) throw error;
+      return !!data;
     },
   });
 
@@ -376,6 +387,12 @@ function UserSettingsPage() {
             rpc="set_vip_admin"
             paramKey="make_vip"
             vipExpiry
+          />
+
+          <VaultToggleRow
+            userId={profile.id}
+            checked={vaultQ.data ?? false}
+            loading={vaultQ.isLoading}
           />
 
           <RoleToggleRow
