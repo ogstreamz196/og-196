@@ -23,6 +23,7 @@ import {
   AlertTriangle,
   Clock,
   Trash2,
+  KeyRound,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { maskDevIdentity } from "@/lib/dev-identity";
@@ -117,6 +118,16 @@ function UserSettingsPage() {
         .eq("user_id", userId);
       if (error) throw error;
       return (data ?? []).map((r) => r.role as string);
+    },
+  });
+
+  const vaultQ = useQuery({
+    queryKey: ["admin-user-vault", userId],
+    enabled: isAdmin,
+    queryFn: async (): Promise<boolean> => {
+      const { data, error } = await supabase.rpc("admin_has_vault_pass", { p_user: userId });
+      if (error) throw error;
+      return !!data;
     },
   });
 
@@ -376,6 +387,12 @@ function UserSettingsPage() {
             rpc="set_vip_admin"
             paramKey="make_vip"
             vipExpiry
+          />
+
+          <VaultToggleRow
+            userId={profile.id}
+            checked={vaultQ.data ?? false}
+            loading={vaultQ.isLoading}
           />
 
           <RoleToggleRow
@@ -800,6 +817,66 @@ function InfoCard({ icon, label, value }: { icon: React.ReactNode; label: string
         {icon} {label}
       </div>
       <div className="mt-2 truncate text-base font-semibold">{value}</div>
+    </div>
+  );
+}
+
+function VaultToggleRow({
+  userId,
+  checked,
+  loading,
+}: {
+  userId: string;
+  checked: boolean;
+  loading: boolean;
+}) {
+  const qc = useQueryClient();
+  const mut = useMutation({
+    mutationFn: async (next: boolean) => {
+      const { error } = await supabase.rpc("set_vault_pass_admin", {
+        target_user_id: userId,
+        grant_access: next,
+        admin_notes: "settings_page_toggle",
+      });
+      if (error) throw new Error(error.message);
+      return next;
+    },
+    onSuccess: (next) => {
+      toast.success(`Vault access ${next ? "granted" : "revoked"}`);
+      qc.invalidateQueries({ queryKey: ["admin-user-vault", userId] });
+      qc.invalidateQueries({ queryKey: ["admin-user-audit", userId] });
+    },
+    onError: (e: Error) => {
+      const m = e.message.toLowerCase();
+      if (m.includes("no active vault credentials"))
+        toast.error("No active Vault logins in the pool — add one in Boss Controls first.");
+      else if (m.includes("not authorized")) toast.error("Not allowed.");
+      else toast.error(e.message);
+    },
+  });
+
+  return (
+    <div className="flex items-center justify-between rounded-xl border border-border bg-background/40 p-4">
+      <div className="flex items-center gap-3">
+        <KeyRound className="h-5 w-5 text-emerald-500" />
+        <div>
+          <Label className="text-sm font-medium">OG Vault access</Label>
+          <p className="text-xs text-muted-foreground">
+            Grants the Vault pass for free — independent of VIP.
+          </p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        {(mut.isPending || loading) && (
+          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+        )}
+        <Switch
+          checked={checked}
+          disabled={mut.isPending || loading}
+          onCheckedChange={(v) => mut.mutate(v)}
+          aria-label="Toggle OG Vault access"
+        />
+      </div>
     </div>
   );
 }

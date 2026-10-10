@@ -2230,6 +2230,7 @@ export type Database = {
         Args: { p_phrase: string }
         Returns: boolean
       }
+      admin_has_vault_pass: { Args: { p_user: string }; Returns: boolean }
       admin_list_lexicon: {
         Args: never
         Returns: {
@@ -2659,6 +2660,14 @@ export type Database = {
       set_site_content: {
         Args: { p_key: string; p_value: string }
         Returns: string
+      }
+      set_vault_pass_admin: {
+        Args: {
+          admin_notes?: string
+          grant_access: boolean
+          target_user_id: string
+        }
+        Returns: boolean
       }
       set_vip_admin: {
         Args: {
