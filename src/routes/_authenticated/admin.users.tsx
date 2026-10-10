@@ -852,6 +852,65 @@ function VipQuickToggle({ userId, checked }: { userId: string; checked: boolean 
   );
 }
 
+function VaultQuickToggle({ userId }: { userId: string }) {
+  const qc = useQueryClient();
+  const vaultQ = useQuery({
+    queryKey: ["admin-user-vault", userId],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("admin_has_vault_pass", { p_user: userId });
+      if (error) throw new Error(error.message);
+      return Boolean(data);
+    },
+  });
+  const checked = vaultQ.data ?? false;
+  const mut = useMutation({
+    mutationFn: async (next: boolean) => {
+      const { error } = await supabase.rpc("set_vault_pass_admin", {
+        target_user_id: userId,
+        grant_access: next,
+        admin_notes: "users_list_quick_toggle",
+      });
+      if (error) throw new Error(error.message);
+      return next;
+    },
+    onSuccess: (next) => {
+      toast.success(next ? "Vault access granted" : "Vault access revoked");
+      qc.invalidateQueries({ queryKey: ["admin-user-vault", userId] });
+    },
+    onError: (e: Error) => {
+      const m = e.message.toLowerCase();
+      if (m.includes("no active vault credentials")) {
+        toast.error("No active Vault logins in the pool — add one in Boss Controls first.");
+      } else {
+        toast.error(e.message);
+      }
+    },
+  });
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <label className="flex h-9 shrink-0 cursor-pointer items-center gap-2 rounded-md border border-border bg-background/40 px-2.5 text-sm">
+          <KeyRound className={`h-4 w-4 ${checked ? "text-amber-500" : "text-muted-foreground"}`} />
+          <span
+            className={`whitespace-nowrap ${checked ? "text-amber-400" : "text-muted-foreground"}`}
+          >
+            Vault
+          </span>
+          <Switch
+            checked={checked}
+            disabled={mut.isPending || vaultQ.isLoading}
+            onCheckedChange={(v) => mut.mutate(v)}
+            aria-label="Toggle OG Vault access"
+          />
+        </label>
+      </TooltipTrigger>
+      <TooltipContent>
+        {checked ? "Revoke OG Vault access" : "Grant OG Vault access (free, independent of VIP)"}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
 function CoinsPopover({ userId, balance }: { userId: string; balance: number }) {
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState("");
