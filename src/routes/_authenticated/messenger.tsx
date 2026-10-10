@@ -74,6 +74,12 @@ function MessengerPage() {
   const isCommunity = mode === "community";
   const [pendingMode, setPendingMode] = useState<MessengerMode | null>(null);
 
+  // Stepping into the OG Battle Zone is what starts the background soundtrack.
+  useEffect(() => {
+    if (!isReady || !isCommunity) return;
+    window.dispatchEvent(new Event("og:background-music-enter-battle"));
+  }, [isReady, isCommunity]);
+
   function handleGreetChoice(next: MessengerMode) {
     markGreeted(uid);
     if (next !== mode) {

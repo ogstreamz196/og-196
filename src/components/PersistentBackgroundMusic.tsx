@@ -153,7 +153,8 @@ export function PersistentBackgroundMusic() {
 
     const storedEnabled = window.localStorage.getItem(ENABLED_KEY);
     // Native Android/iOS apps never auto-play on launch; the header Play button
-    // still works. The website keeps auto-play unless the visitor paused it.
+    // still works. The website no longer auto-plays either — the soundtrack
+    // starts when the visitor steps into the OG Battle Zone or taps Play.
     const isNativeApp = Boolean(
       (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor
         ?.isNativePlatform?.(),
