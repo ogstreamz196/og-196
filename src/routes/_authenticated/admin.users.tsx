@@ -23,6 +23,7 @@ import {
   X,
   Send,
   Trash2,
+  KeyRound,
 } from "lucide-react";
 import { deleteUserAccount } from "@/lib/admin-delete-account.functions";
 import { ConfirmAction } from "@/components/admin/ConfirmAction";
@@ -766,6 +767,7 @@ function MobileUserCard({
 
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
         <VipQuickToggle userId={user.id} checked={isVip} />
+        <VaultQuickToggle userId={user.id} />
         <div className="flex items-center gap-1">
           {pro?.telegram_chat_id && <TelegramMessageButton user={user} />}
           <CoinsPopover userId={user.id} balance={user.coin_balance ?? 0} />
