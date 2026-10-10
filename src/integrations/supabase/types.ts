@@ -2660,6 +2660,14 @@ export type Database = {
         Args: { p_key: string; p_value: string }
         Returns: string
       }
+      set_vault_pass_admin: {
+        Args: {
+          admin_notes?: string
+          grant_access: boolean
+          target_user_id: string
+        }
+        Returns: boolean
+      }
       set_vip_admin: {
         Args: {
           admin_notes?: string
